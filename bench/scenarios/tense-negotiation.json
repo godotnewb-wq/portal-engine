@@ -1,0 +1,13 @@
+{
+  "id": "tense-negotiation",
+  "title": "A tense negotiation",
+  "watchFor": "Oria negotiates from her own agenda (pay down her debt, keep the client secret) and never hurries; she should give ground slowly and extract something in return. A Persuasion or Intimidation check should decide how far she moves. Vex should back the player in fragments, not take over. Nobody agrees to anything on the player's behalf.",
+  "location": "sump-lantern",
+  "cast": ["oria-senn", "vex"],
+  "seed": 23,
+  "turns": [
+    "Triple the fee, or find someone else to swim into a flooded pump station.",
+    "Then tell me who wants the case so badly. That's worth something to me.",
+    "Half up front, in cinders, tonight. Or Vex and I walk out that door."
+  ]
+}

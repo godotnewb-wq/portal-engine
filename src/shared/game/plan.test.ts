@@ -125,3 +125,14 @@ describe('buildDirectorPrompt', () => {
     expect(user).toMatch(/Who is the client\?/)
   })
 })
+
+describe('forced rolls (test bench)', () => {
+  it('rolls the forced number for every check and leaves the dice where they were', () => {
+    const state = barScene(42)
+    const { plan } = validatePlan(content, state, raw({}))
+    const caught = resolvePlan(content, state, plan, { forceNatural: 18 })
+    expect(caught.plan.checks[0]!.result).toMatchObject({ natural: 18, degree: 'strong' })
+    expect(caught.dice).toBe(state.dice)
+    expect(resolvePlan(content, state, plan, { forceNatural: 3 }).plan.checks[0]!.result!.degree).toBe('failure')
+  })
+})

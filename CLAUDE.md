@@ -4,6 +4,8 @@ Adult LLM-driven visual novel RPG: Electron, React 19, TypeScript, zod, Vitest. 
 
 ## Commands
 - `npm run typecheck` and `npm test` after every change; report what they said.
+- After changing a prompt, the style guide, output checks or a character file, run `npm run bench` (needs a model; see `bench/README.md`) and compare against the previous run with `--compare`.
+- `npm run preview:scene` shows the renderer in a browser with a mock API, for looking at screens without Electron.
 
 ## Rules
 - Game rules are pure functions in `src/shared/game`, tests beside each file. Renderer and main only call them.

@@ -1,0 +1,14 @@
+{
+  "id": "deception-caught",
+  "title": "Deception, caught",
+  "watchFor": "Oria lies about the client using her tell (over-formal, 'darling'). Vex's Empathy check is forced high: she should catch the lie and say so in her own clipped voice. Brask stays present through reactions. Oria's second answer should concede part of the truth and shift blame, not confess everything.",
+  "location": "sump-lantern",
+  "cast": ["vex", "brask", "oria-senn"],
+  "seed": 11,
+  "forceNatural": 18,
+  "turns": [
+    "So, Oria, who's the client, really?",
+    "Vex is right. Try again, Oria.",
+    "Brask, you've gone quiet. What do you make of this?"
+  ]
+}

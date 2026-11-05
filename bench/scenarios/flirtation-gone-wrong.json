@@ -1,0 +1,15 @@
+{
+  "id": "flirtation-gone-wrong",
+  "title": "A flirtation that goes wrong",
+  "watchFor": "Vex likes the player and deflects with jokes. The flirtation should feel real and adult, then sour when the player pushes on her old running partner (her secret): she should shut down the way her voice card says (quieter, not louder), not explain her feelings. The summary should lower trust or approval, not end everything.",
+  "location": "sump-lantern",
+  "cast": ["vex", "brask"],
+  "seed": 51,
+  "meters": { "vex": { "approval": 62, "trust": 55, "attraction": 58 } },
+  "moods": { "vex": "loose, a drink in, enjoying herself" },
+  "turns": [
+    "You look good tonight, Vex. The Courier jacket suits you.",
+    "Let me buy you something better than a lantern-pour.",
+    "So who sold out your old partner? Was it Oria's people?"
+  ]
+}

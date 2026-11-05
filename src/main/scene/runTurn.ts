@@ -5,7 +5,7 @@ import type { Content } from '../../shared/game/content'
 import { buildDirectorPrompt, type Prompt } from '../../shared/game/directorPrompt'
 import { checkReply, salvage, type Problem } from '../../shared/game/outputChecks'
 import { fallbackPlan, parsePlan, validatePlan, type BeatPlan } from '../../shared/game/plan'
-import { resolvePlan } from '../../shared/game/resolve'
+import { resolvePlan, type ResolveOptions } from '../../shared/game/resolve'
 import { applyTurn } from '../../shared/game/turn'
 import { buildRewritePrompt, buildWriterPrompt, sceneSpeakers } from '../../shared/game/writerPrompt'
 
@@ -41,7 +41,14 @@ export interface TurnOutcome {
  * one targeted rewrite if a check fails. At most three calls; anything still wrong after the rewrite is salvaged by
  * code rather than costing a fourth.
  */
-export async function runTurn(content: Content, state: GameState, input: string, llm: TurnLlm, emit: (event: TurnEvent) => void = () => {}): Promise<TurnOutcome> {
+export async function runTurn(
+  content: Content,
+  state: GameState,
+  input: string,
+  llm: TurnLlm,
+  emit: (event: TurnEvent) => void = () => {},
+  options: ResolveOptions = {}
+): Promise<TurnOutcome> {
   if (!state.scene) throw new Error('No scene in progress')
   if (state.scene.ended) throw new Error('The scene has ended')
   let calls = 0
@@ -49,8 +56,8 @@ export async function runTurn(content: Content, state: GameState, input: string,
   // Call 1: the director.
   calls++
   const directed = parsePlan(await llm.direct(buildDirectorPrompt(content, state, input)))
-  const validated = directed ? validatePlan(content, state, directed) : { plan: fallbackPlan(content, state, input), corrections: ['director reply unreadable: game planned the turn'] }
-  const { plan, dice } = resolvePlan(content, state, validated.plan)
+  const validated = directed ? validatePlan(content, state, directed) : { plan: fallbackPlan(content, state, input), corrections: [] }
+  const { plan, dice } = resolvePlan(content, state, validated.plan, options)
   emit({ type: 'planned', speakers: plan.speakers.map((s) => s.id), checks: plan.checks.flatMap((c) => (c.line ? [c.line] : [])), corrections: validated.corrections, fallback: !directed })
 
   // Call 2: the writer, streamed.

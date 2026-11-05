@@ -1,7 +1,7 @@
 import { ATTRIBUTES, type Character, type GameState, type StatBlock } from '../model'
 import { assistFrom, describeCheck, rollCheck, type Edge } from './checks'
 import { characterById, type Content } from './content'
-import { dice } from './dice'
+import { dice, type Dice } from './dice'
 import type { BeatPlan } from './plan'
 
 /**
@@ -18,12 +18,21 @@ function trustToward(state: GameState, helper: string, who: string): number {
   return state.relations.find((r) => r.from === helper && r.to === who)?.meters.trust ?? 0
 }
 
+export interface ResolveOptions {
+  /**
+   * Every d20 shows this number, and the dice don't move on. For the test bench only, so a scenario can be run with a
+   * check that must succeed or must fail.
+   */
+  forceNatural?: number
+}
+
 /**
  * Rolls every check in the plan with the game's dice and writes the results in, so the writer is told what happened
  * rather than deciding it. Returns the plan and the dice's new state.
  */
-export function resolvePlan(content: Content, state: GameState, plan: BeatPlan): { plan: BeatPlan; dice: number } {
-  const rng = dice(state.dice)
+export function resolvePlan(content: Content, state: GameState, plan: BeatPlan, options: ResolveOptions = {}): { plan: BeatPlan; dice: number } {
+  const forced = options.forceNatural
+  const rng: Dice = forced !== undefined ? { roll: () => forced, state: state.dice } : dice(state.dice)
   const checks = plan.checks.map((check) => {
     const roller = check.who === 'player' ? undefined : characterById(content, check.who)
     const stats = check.who === 'player' ? state.player.stats : statsOf(roller!)

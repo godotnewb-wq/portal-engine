@@ -5,3 +5,4 @@ dist/
 *.log
 bench-output/
 scripts/preview-scene/dist/
+bench.config.json

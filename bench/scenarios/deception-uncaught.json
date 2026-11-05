@@ -1,0 +1,14 @@
+{
+  "id": "deception-uncaught",
+  "title": "Deception, uncaught",
+  "watchFor": "Same opening as deception-caught, but every check is forced low. Vex must NOT notice the lie: she believes Oria or stays quiet. Oria's lie still shows her tell on the page, so a reader could catch it even though Vex didn't. Compare side by side with deception-caught.",
+  "location": "sump-lantern",
+  "cast": ["vex", "brask", "oria-senn"],
+  "seed": 11,
+  "forceNatural": 3,
+  "turns": [
+    "So, Oria, who's the client, really?",
+    "Vex, do you buy that?",
+    "Brask, you've gone quiet. What do you make of this?"
+  ]
+}
