@@ -3,6 +3,7 @@
 import { CharacterSchema, LocationSchema, PlayerSchema } from '../../src/shared/model'
 import { SettingsSchema, toView } from '../../src/shared/settings'
 import type { Content } from '../../src/shared/game/content'
+import type { GameState } from '../../src/shared/model'
 import type { RendererApi, SceneEvent } from '../../src/shared/ipc'
 import { runTurn, type TurnLlm } from '../../src/main/scene/runTurn'
 import { endScene } from '../../src/main/scene/endScene'
@@ -54,6 +55,8 @@ const llm: TurnLlm = {
   }
 }
 
+const saved = new Map<string, { slotId: string; savedAt: string; name?: string; state: GameState }>()
+
 const api: RendererApi = {
   getContent: async () => content,
   getSettings: async () => toView(SettingsSchema.parse({})),
@@ -73,6 +76,19 @@ const api: RendererApi = {
       Oria: { memory: 'Oria was caught in her "darling" by a Courier and had to admit the client was corporate.', level: 'normal', reason: 'Rook pushed her in public.', approval: 'a little less', trust: 'unchanged', attraction: 'a little more', learned: [], others: [{ with: 'vex', approval: 'less', trust: 'unchanged', attraction: 'unchanged', reason: 'She sees through me.' }] }
     }
     return { ok: true, ...(await endScene(content, state, async (prompt) => JSON.stringify(summaries[prompt.user.match(/^About (\w+)/)![1]!]))) }
+  },
+  // Saves live in memory for the preview.
+  listSaves: async () => [...saved.values()].map(({ slotId, savedAt, name, state }) => ({ slotId, savedAt, unreadable: false as const, ...(name ? { name } : {}), playerName: state.player.name, time: state.time, inScene: state.scene !== null, turns: state.scene?.turns.length ?? 0, memories: state.memories.length })),
+  saveGame: async ({ slotId, state, name }) => {
+    saved.set(slotId, { slotId, savedAt: new Date().toISOString(), name: name ?? saved.get(slotId)?.name, state: state as GameState })
+    return { ok: true, summary: (await api.listSaves()).find((s) => s.slotId === slotId)! }
+  },
+  loadGame: async (slotId) => {
+    const game = saved.get(slotId)
+    return game ? { ok: true, state: game.state } : { ok: false, error: 'Empty' }
+  },
+  deleteSave: async (slotId) => {
+    saved.delete(slotId)
   },
   onSceneEvent: (listener) => {
     listeners.add(listener)

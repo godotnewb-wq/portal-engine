@@ -1,6 +1,6 @@
 import { app, BrowserWindow, dialog, ipcMain, safeStorage } from 'electron'
 import { join } from 'node:path'
-import { IPC, type SceneEndResponse, type SceneEvent, type SceneTurnResponse, type TestConnectionResult } from '../shared/ipc'
+import { IPC, type LoadResponse, type SaveResponse, type SceneEndResponse, type SceneEvent, type SceneTurnResponse, type TestConnectionResult } from '../shared/ipc'
 import { GameStateSchema } from '../shared/model'
 import { ListModelsRequestSchema, SettingsUpdateSchema, isConfigured, toView, LLM_PROFILE_IDS, type LlmProfileId } from '../shared/settings'
 import type { Content } from '../shared/game/content'
@@ -9,7 +9,10 @@ import { loadContent } from './content/load'
 import { endScene } from './scene/endScene'
 import { summaryLlm, turnLlm } from './scene/llm'
 import { runTurn } from './scene/runTurn'
+import { SaveStore } from './saves/store'
 import { SettingsStore, type KeyCipher } from './settings/store'
+import { SaveRequestSchema, SlotIdSchema } from '../shared/saves'
+import { stateProblems } from '../shared/game/state'
 
 /** Where content lives: beside the app when packaged, the repository's `content/` when run from source. */
 function contentDir(): string {
@@ -125,6 +128,28 @@ app.whenReady().then(() => {
       turning = false
     }
   })
+
+  const saves = new SaveStore(join(app.getPath('userData'), 'saves'))
+  ipcMain.handle(IPC.listSaves, () => saves.list())
+  ipcMain.handle(IPC.saveGame, (_event, request: unknown): SaveResponse => {
+    try {
+      const { slotId, state, name } = SaveRequestSchema.parse(request)
+      return { ok: true, summary: saves.save(slotId, state, new Date(), name) }
+    } catch (error) {
+      return { ok: false, error: (error as Error).message }
+    }
+  })
+  ipcMain.handle(IPC.loadGame, (_event, slotId: unknown): LoadResponse => {
+    try {
+      const state = saves.load(SlotIdSchema.parse(slotId))
+      const problems = stateProblems(content, state)
+      if (problems.length > 0) return { ok: false, error: `This save doesn't fit the current content: ${problems.join('; ')}` }
+      return { ok: true, state }
+    } catch (error) {
+      return { ok: false, error: (error as Error).message }
+    }
+  })
+  ipcMain.handle(IPC.deleteSave, (_event, slotId: unknown) => saves.delete(SlotIdSchema.parse(slotId)))
 
   createWindow()
   app.on('activate', () => {

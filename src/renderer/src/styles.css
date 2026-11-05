@@ -105,3 +105,16 @@ input, select { background: var(--bg); color: var(--text); border: 1px solid var
 .other-meter { color: var(--muted); }
 .learned p { margin: 0.2rem 0 0; font-size: 0.85rem; color: #e0b04a; }
 .report-error { margin: 0; font-size: 0.75rem; color: var(--hot); }
+
+/* Saves */
+.saves { max-width: 52rem; margin: 0 auto; }
+.save-name { max-width: 26rem; margin-bottom: 1rem; }
+.slots { display: flex; flex-direction: column; gap: 0.5rem; margin-bottom: 1rem; }
+.slot { display: flex; align-items: center; justify-content: space-between; gap: 1rem; padding: 0.7rem 0.9rem; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+.slot.empty { opacity: 0.6; }
+.slot.unreadable { border-color: var(--hot); }
+.slot-text { display: flex; flex-direction: column; gap: 0.15rem; min-width: 0; }
+.slot-title { font-weight: 600; }
+.slot-title small { margin-left: 0.5rem; color: var(--muted); font-weight: 400; }
+.slot-detail { color: var(--muted); font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.slot-actions { display: flex; gap: 0.4rem; flex-shrink: 0; }

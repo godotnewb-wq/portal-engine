@@ -37,12 +37,3 @@ export const GameStateSchema = z.object({
   scene: SceneSchema.nullable().default(null)
 })
 export type GameState = z.infer<typeof GameStateSchema>
-
-export const SAVE_VERSION = 1
-export const SaveFileSchema = z.object({
-  version: z.literal(SAVE_VERSION),
-  savedAt: z.string(),
-  name: z.string().optional(),
-  state: GameStateSchema
-})
-export type SaveFile = z.infer<typeof SaveFileSchema>
