@@ -13,6 +13,7 @@ Status: **Milestone 1 in progress** — one scene playable end to end (a Low Tur
 | `npm run typecheck` | `tsc --noEmit` over everything |
 | `npm test` | `vitest run` |
 | `npm run build` | Production build into `out/` |
+| `npm run preview:scene` | The scene screen in a browser with a mock API and a scripted turn (no Electron, no LLM) |
 
 ## Layout
 
