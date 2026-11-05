@@ -36,6 +36,9 @@ export function startScene(content: Content, state: GameState, locationId: strin
     summary: '',
     moods: Object.fromEntries(characters.map((c) => [c.id, c.mood])),
     comfort: Object.fromEntries(characters.map((c) => [c.id, 3])),
+    expressions: Object.fromEntries(characters.map((c) => [c.id, 'neutral'])),
+    departed: [],
+    ended: false,
     nsfw: false,
     baseline: Object.fromEntries(cast.map((id) => [id, state.meters[id]!]))
   }

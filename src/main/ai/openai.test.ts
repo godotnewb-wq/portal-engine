@@ -99,3 +99,18 @@ describe('listModels', () => {
     expect(await listModels(profile, fakeFetch(200, ['x']).impl)).toEqual(['x'])
   })
 })
+
+describe('response_format', () => {
+  it('asks again without it when the endpoint turns it down', async () => {
+    const bodies: Record<string, unknown>[] = []
+    const impl = (async (_url: string, init: RequestInit) => {
+      const body = JSON.parse(init.body as string)
+      bodies.push(body)
+      return body.response_format
+        ? new Response('{"error":"response_format is not supported"}', { status: 400 })
+        : new Response(JSON.stringify({ choices: [{ message: { content: '{}' } }] }), { status: 200 })
+    }) as typeof fetch
+    expect(await chatCompletion(profile, { ...input, json: true }, impl)).toBe('{}')
+    expect(bodies.map((b) => 'response_format' in b)).toEqual([true, false])
+  })
+})

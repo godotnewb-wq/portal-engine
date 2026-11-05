@@ -180,6 +180,8 @@ export async function chatCompletion(
   // Grows as tools are called: the model's requests and their results are appended.
   const messages: unknown[] = [{ role: 'system', content: systemOf(profile, input) }, ...input.messages]
   let tools = input.tools && input.tools.length > 0 ? input.tools : undefined
+  // Not every endpoint takes response_format; one that turns it down is asked again without it.
+  let asked = input
 
   const request = (): Promise<AssistantMessage> => inTurn(url, profile.maxConcurrent, input.signal, send)
   async function send(): Promise<AssistantMessage> {
@@ -188,7 +190,7 @@ export async function chatCompletion(
       response = await fetchImpl(url, {
         method: 'POST',
         headers: headersOf(profile),
-        body: requestBody(profile, input, messages, tools ? {
+        body: requestBody(profile, asked, messages, tools ? {
           tools: tools.map((tool) => ({ type: 'function', function: { name: tool.name, description: tool.description, parameters: tool.parameters } }))
         } : {}),
         signal: signalOf(profile, input)
@@ -202,6 +204,10 @@ export async function chatCompletion(
       // Not every endpoint or model accepts tools. Carry on without them rather than fail.
       if (!(error instanceof RefusalError) && tools && response.status < 500 && /tool|function/i.test(error.message)) {
         tools = undefined
+        return send()
+      }
+      if (!(error instanceof RefusalError) && asked.json && response.status < 500 && /response_format|json/i.test(error.message)) {
+        asked = { ...asked, json: false }
         return send()
       }
       throw error

@@ -1,10 +1,13 @@
 import { app, BrowserWindow, dialog, ipcMain, safeStorage } from 'electron'
 import { join } from 'node:path'
-import { IPC, type TestConnectionResult } from '../shared/ipc'
+import { IPC, type SceneEvent, type SceneTurnResponse, type TestConnectionResult } from '../shared/ipc'
+import { GameStateSchema } from '../shared/model'
 import { ListModelsRequestSchema, SettingsUpdateSchema, isConfigured, toView, LLM_PROFILE_IDS, type LlmProfileId } from '../shared/settings'
 import type { Content } from '../shared/game/content'
 import { chatCompletion, listModels } from './ai/openai'
 import { loadContent } from './content/load'
+import { turnLlm } from './scene/llm'
+import { runTurn } from './scene/runTurn'
 import { SettingsStore, type KeyCipher } from './settings/store'
 
 /** Where content lives: beside the app when packaged, the repository's `content/` when run from source. */
@@ -77,6 +80,35 @@ app.whenReady().then(() => {
       return { ok: true, detail: reply }
     } catch (error) {
       return { ok: false, detail: (error as Error).message }
+    }
+  })
+
+  // One turn at a time: a second request while one runs would be answered from a stale state.
+  let turning = false
+  ipcMain.handle(IPC.sceneTurn, async (event, request: unknown): Promise<SceneTurnResponse> => {
+    if (turning) return { ok: false, error: 'A turn is already running.' }
+    turning = true
+    try {
+      const { state: raw, input } = request as { state: unknown; input: unknown }
+      const state = GameStateSchema.parse(raw)
+      if (typeof input !== 'string' || input.trim().length === 0) return { ok: false, error: 'Say or do something first.' }
+      const send = (sceneEvent: SceneEvent) => {
+        if (!event.sender.isDestroyed()) event.sender.send(IPC.sceneEvent, sceneEvent)
+      }
+      const outcome = await runTurn(content, state, input.trim(), turnLlm(settings.get(), state.scene?.nsfw ?? false), send)
+      return {
+        ok: true,
+        state: outcome.state,
+        beats: outcome.beats,
+        checks: outcome.plan.checks.flatMap((c) => (c.line ? [c.line] : [])),
+        calls: outcome.calls,
+        corrections: outcome.corrections,
+        rewrite: outcome.problems.map((p) => p.fix)
+      }
+    } catch (error) {
+      return { ok: false, error: (error as Error).message }
+    } finally {
+      turning = false
     }
   })
 

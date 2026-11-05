@@ -29,7 +29,9 @@ export const TurnSchema = z.object({
   beats: z.array(BeatSchema),
   checks: z.array(RolledCheckSchema).default([]),
   /** Who had a speaking slot, for rotating focus. */
-  speakers: z.array(z.string()).default([])
+  speakers: z.array(z.string()).default([]),
+  /** Location details the director used, so the next turns pick fresh ones. */
+  texture: z.array(z.string()).default([])
 })
 export type Turn = z.infer<typeof TurnSchema>
 
@@ -47,6 +49,12 @@ export const SceneSchema = z.object({
   moods: z.record(z.string(), z.string()).default({}),
   /** Each character's comfort, 1 (wants out) to 5 (at ease). */
   comfort: z.record(z.string(), z.number().int().min(1).max(5)).default({}),
+  /** Each character's sprite expression as it stands now. */
+  expressions: z.record(z.string(), z.string()).default({}),
+  /** Characters who were here and left; they still witness the scene for summaries. */
+  departed: z.array(IdSchema).default([]),
+  /** The writer asked to close the scene. */
+  ended: z.boolean().default(false),
   nsfw: z.boolean().default(false),
   /** Meters at the start of the scene, to show what changed at its end. */
   baseline: z.record(z.string(), MetersSchema).default({})
