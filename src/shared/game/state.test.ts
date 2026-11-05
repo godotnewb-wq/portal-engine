@@ -1,0 +1,32 @@
+import { join } from 'node:path'
+import { describe, expect, it } from 'vitest'
+import { loadContent } from '../../main/content/load'
+import { GameStateSchema } from '../model'
+import { createInitialState, startScene } from './state'
+
+const content = loadContent(join(__dirname, '../../../content/default'))
+
+describe('createInitialState', () => {
+  it('starts with every character’s meters and relations, and a valid state', () => {
+    const state = createInitialState(content, 1234)
+    expect(state.meters['vex']).toEqual({ approval: 55, trust: 60, attraction: 35 })
+    expect(state.relations).toContainEqual(expect.objectContaining({ from: 'brask', to: 'vex', label: 'friends' }))
+    expect(GameStateSchema.parse(state)).toEqual(state)
+  })
+})
+
+describe('startScene', () => {
+  it('opens the bar scene with the cast’s moods, the walk-ons and a meter baseline', () => {
+    const state = startScene(content, createInitialState(content, 1), 'sump-lantern', ['vex', 'brask', 'oria-senn'])
+    expect(state.scene?.walkOns).toEqual(['bartender'])
+    expect(state.scene?.moods['brask']).toMatch(/anxious/)
+    expect(state.scene?.baseline['oria-senn']).toEqual(state.meters['oria-senn'])
+    expect(GameStateSchema.parse(state)).toEqual(state)
+  })
+
+  it('refuses an unknown character or place', () => {
+    const state = createInitialState(content, 1)
+    expect(() => startScene(content, state, 'nowhere', [])).toThrow(/nowhere/)
+    expect(() => startScene(content, state, 'sump-lantern', ['ghost'])).toThrow(/ghost/)
+  })
+})

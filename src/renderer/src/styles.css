@@ -1,0 +1,39 @@
+:root {
+  --bg: #0d0b12;
+  --panel: #17131f;
+  --line: #2c2438;
+  --text: #e9e3f2;
+  --muted: #9a8fab;
+  --neon: #3ef2c2;
+  --hot: #ff4f9a;
+  font-family: system-ui, -apple-system, 'Segoe UI', sans-serif;
+  color: var(--text);
+  background: var(--bg);
+}
+
+* { box-sizing: border-box; }
+body { margin: 0; }
+h1 { margin: 0 0 1rem; font-weight: 600; letter-spacing: 0.02em; }
+
+.screen { min-height: 100vh; padding: 2rem; }
+.title { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 0.75rem; }
+.logo { font-size: 3.5rem; color: var(--neon); text-shadow: 0 0 18px rgba(62, 242, 194, 0.45); }
+.tagline { color: var(--muted); margin: 0 0 1.5rem; }
+.menu { display: flex; flex-direction: column; gap: 0.6rem; width: 14rem; }
+.foot { position: fixed; bottom: 1rem; color: var(--muted); font-size: 0.8rem; }
+
+.btn { border: 1px solid var(--line); background: var(--panel); color: var(--text); border-radius: 6px; cursor: pointer; font: inherit; }
+.btn-md { padding: 0.55rem 1rem; }
+.btn-sm { padding: 0.3rem 0.65rem; font-size: 0.85rem; }
+.btn-primary { border-color: var(--neon); color: var(--neon); }
+.btn-ghost { background: transparent; }
+.btn:hover:not(:disabled) { border-color: var(--hot); }
+.btn:disabled { opacity: 0.45; cursor: default; }
+
+.settings .profiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(26rem, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+.profile { border: 1px solid var(--line); border-radius: 8px; background: var(--panel); display: flex; flex-direction: column; gap: 0.6rem; padding: 1rem; }
+.profile legend { padding: 0 0.4rem; color: var(--neon); cursor: help; }
+label { display: flex; flex-direction: column; gap: 0.25rem; font-size: 0.8rem; color: var(--muted); flex: 1; }
+input, select { background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 4px; padding: 0.4rem 0.5rem; font: inherit; font-size: 0.9rem; }
+.row { display: flex; gap: 0.6rem; align-items: end; }
+.status { color: var(--muted); font-size: 0.8rem; align-self: center; overflow: hidden; text-overflow: ellipsis; }

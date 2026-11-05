@@ -1,0 +1,43 @@
+import type { GameState, Relation, Scene } from '../model'
+import { characterById, locationById, type Content } from './content'
+
+/** A new game: the test player, everyone's starting feelings, the dice seeded. */
+export function createInitialState(content: Content, seed: number): GameState {
+  const relations: Relation[] = content.characters.flatMap((c) =>
+    c.relations.map((r) => ({ from: c.id, to: r.to, label: r.label, meters: r.meters }))
+  )
+  return {
+    player: content.player,
+    // Evening of the first day: 20:00.
+    time: 20 * 60,
+    dice: seed >>> 0,
+    meters: Object.fromEntries(content.characters.map((c) => [c.id, c.meters])),
+    relations,
+    memories: [],
+    facts: {},
+    scene: null
+  }
+}
+
+/** Opens a scene at a location with the given cast; moods and comfort start from the characters' files. */
+export function startScene(content: Content, state: GameState, locationId: string, cast: string[]): GameState {
+  const location = locationById(content, locationId)
+  if (!location) throw new Error(`Unknown location "${locationId}"`)
+  const characters = cast.map((id) => {
+    const c = characterById(content, id)
+    if (!c) throw new Error(`Unknown character "${id}"`)
+    return c
+  })
+  const scene: Scene = {
+    locationId,
+    cast,
+    walkOns: location.walkOns.map((w) => w.id),
+    turns: [],
+    summary: '',
+    moods: Object.fromEntries(characters.map((c) => [c.id, c.mood])),
+    comfort: Object.fromEntries(characters.map((c) => [c.id, 3])),
+    nsfw: false,
+    baseline: Object.fromEntries(cast.map((id) => [id, state.meters[id]!]))
+  }
+  return { ...state, scene }
+}

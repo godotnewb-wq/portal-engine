@@ -1,0 +1,12 @@
+{
+  "name": "Rook",
+  "species": "human",
+  "pronouns": "they/them",
+  "appearance": "adult human, mid-twenties, wiry, close-cropped dark hair, a thin scar through one eyebrow, long weatherproof coat over a patched work vest",
+  "background": "A Low Turns odd-jobber who has done a little of everything for a little money; knows Vex and Brask from a dozen jobs.",
+  "stats": {
+    "level": 1,
+    "attributes": { "might": 10, "agility": 14, "vigor": 12, "intellect": 12, "insight": 13, "presence": 14 },
+    "skills": { "streetwise": 2, "persuasion": 1, "perception": 1, "deception": 1, "finesse": 1, "empathy": 1 }
+  }
+}

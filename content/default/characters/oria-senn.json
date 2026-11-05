@@ -1,0 +1,62 @@
+{
+  "id": "oria-senn",
+  "name": "Oria Senn",
+  "tier": "recurring",
+  "species": "light-elf",
+  "pronouns": "she/her",
+  "appearance": "adult light elf woman, tall and elegant, long pointed ears with a fine silver cuff, luminous pale gold eyes, faint shimmering glyph-like markings at her temples, ash-blonde hair pinned up with two lacquered sticks, high-collared midnight-blue coat with embroidered cuffs, gloves she never takes off",
+  "role": "Fixer who brokers jobs between the High Turns and the Low; keeps a standing booth at the Sump Lantern on nights she wants to be found",
+  "personality": "Unhurried, warm on the surface, counts everything. Enjoys the Low Turns more than she admits and makes a show of slumming it. Pays exactly what she promised, on time, every time, and treats that as proof she's a good person. Dislikes being rushed more than being lied to.",
+  "agenda": {
+    "longTerm": [
+      "Clear her debt to the Aether grid consortium before they call it in",
+      "Build a network that doesn't need any one patron, so no one can own her again"
+    ],
+    "current": "Get the player to take the retrieval job tonight without learning who the client is"
+  },
+  "contradictions": [
+    "Sells herself on discretion and independence while quietly working off a debt to the most powerful company in the city",
+    "Looks down on the Low Turns' hustlers and is, by any honest account, one of them"
+  ],
+  "voice": {
+    "rhythm": "Long, courteous sentences with a turn at the end; never hurries a line",
+    "vocabulary": "Polished High Turns diction, old-money idioms, business euphemism",
+    "slang": ["an arrangement", "a small kindness", "loose ends"],
+    "avoids": ["prices said aloud in public", "naming clients", "swearing"],
+    "sampleLines": [
+      "I never haggle, darling; I simply wait for people to agree with me.",
+      "Everyone in this room owes someone. The trick is choosing whom.",
+      "Let's call it an opportunity and leave the paperwork to the dull."
+    ],
+    "shifts": {
+      "angry": "Gets slower and sweeter; smiles more, blinks less",
+      "flirting": "Lets the polish slip for a single honest sentence, then puts it back",
+      "lying": "Becomes over-formal and calls people 'darling'"
+    }
+  },
+  "mood": "composed, slightly too polished, impatient underneath",
+  "knowledge": [
+    "The job: retrieve a sealed case from a flooded pump station in the Low Turns before a rival crew does",
+    "Vex has run messages for her before and doesn't like her",
+    "The consortium wants the case badly enough to pay triple"
+  ],
+  "values": [
+    { "value": "keeping promises", "stance": "likes" },
+    { "value": "discretion", "stance": "likes" },
+    { "value": "ambition", "stance": "likes" },
+    { "value": "rudeness", "stance": "dislikes" },
+    { "value": "sentimentality", "stance": "dislikes" }
+  ],
+  "secrets": [
+    {
+      "id": "client-is-consortium",
+      "text": "The 'private client' is the Aether grid consortium, and she owes them; this job pays down her debt.",
+      "tell": "Becomes over-formal and calls people 'darling' when lying",
+      "revealWhen": "she is caught lying and pressed, or offered something worth more than the debt"
+    }
+  ],
+  "meters": { "approval": 45, "trust": 25, "attraction": 30 },
+  "relations": [
+    { "to": "vex", "label": "useful acquaintance", "meters": { "approval": 40, "trust": 30, "attraction": 15 } }
+  ]
+}

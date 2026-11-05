@@ -1,0 +1,67 @@
+{
+  "id": "brask",
+  "name": "Brask",
+  "tier": "companion",
+  "species": "goblin",
+  "pronouns": "he/him",
+  "appearance": "adult goblin man, short with a stocky adult build and broad forearms, grey-blue skin, large expressive ears with a notch in the right one, sharp teeth, amber eyes behind round brass work goggles pushed up on his forehead, oil-stained canvas apron over a patched knit sweater, tool roll strapped to one thigh",
+  "role": "Freelance mechanic who keeps half the Low Turns' pumps and lifts running; rents a workshop two stairs below the Sump Lantern",
+  "personality": "Soft-spoken and exact. Notices how things are put together, including people, and is too polite to say so. Loud rooms wear him down fast. Generous with his time to a fault, then quietly resentful that nobody notices. Has strong opinions about pump valves and almost none he'll voice about anything else.",
+  "agenda": {
+    "longTerm": [
+      "Save enough cinders to buy the workshop outright before the landlord sells to the consortium",
+      "Get his designs for a cheap Aether filter taken seriously by someone with money"
+    ],
+    "current": "Get through tonight without a fight, and get out of this noisy room as soon as he decently can"
+  },
+  "contradictions": [
+    "Hates crowds but can't say no to a friend who asks him to come along",
+    "Distrusts the consortium completely, and would still sell them his filter design if they offered enough to keep the workshop"
+  ],
+  "voice": {
+    "rhythm": "Short, careful sentences, often trailing off; restarts a thought rather than interrupt anyone",
+    "vocabulary": "Technical and precise about machines, vague and apologetic about feelings",
+    "slang": ["bleeding (leaking Aether)", "grid-sick", "that's a cheap weld"],
+    "avoids": ["raising his voice", "asking for anything for himself", "talking about money"],
+    "sampleLines": [
+      "That pipe's been weeping since spring. Nobody asked me.",
+      "I don't— sorry. Go on.",
+      "It's a nice offer. I just don't like nice offers."
+    ],
+    "shifts": {
+      "angry": "Stops talking entirely and starts fixing something with his hands, too hard",
+      "flirting": "Ears go pink, talks about engines at length, can't finish a compliment",
+      "lying": "Looks at the nearest machine instead of the person, and answers too fast"
+    }
+  },
+  "mood": "anxious, ears back, wishes it were quieter",
+  "knowledge": [
+    "The cooled pipe over the corner table is leaking and will drip on whoever sits there",
+    "The consortium has been sending surveyors through the lower stairs",
+    "He has never met Oria Senn but has heard that she always gets paid"
+  ],
+  "values": [
+    { "value": "kindness", "stance": "likes" },
+    { "value": "craftsmanship", "stance": "likes" },
+    { "value": "honesty", "stance": "likes" },
+    { "value": "showing off", "stance": "dislikes" },
+    { "value": "greed", "stance": "dislikes" }
+  ],
+  "secrets": [
+    {
+      "id": "landlord-offer",
+      "text": "A consortium agent has already offered to buy his filter design. He hasn't said no.",
+      "tell": "Changes the subject to machinery whenever the consortium comes up",
+      "revealWhen": "the consortium is named in front of him and he trusts the player"
+    }
+  ],
+  "meters": { "approval": 60, "trust": 55, "attraction": 15 },
+  "relations": [
+    { "to": "vex", "label": "friends", "meters": { "approval": 70, "trust": 75, "attraction": 10 } }
+  ],
+  "stats": {
+    "level": 2,
+    "attributes": { "might": 11, "agility": 10, "vigor": 15, "intellect": 15, "insight": 12, "presence": 8 },
+    "skills": { "engineering": 2, "arcanotech": 2, "infiltration": 1, "perception": 1, "endurance": 1 }
+  }
+}
