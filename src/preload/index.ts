@@ -8,6 +8,7 @@ const api: RendererApi = {
   listModels: (request) => ipcRenderer.invoke(IPC.listModels, request),
   testConnection: (profileId) => ipcRenderer.invoke(IPC.testConnection, profileId),
   sceneTurn: (request) => ipcRenderer.invoke(IPC.sceneTurn, request),
+  sceneEnd: (state) => ipcRenderer.invoke(IPC.sceneEnd, state),
   onSceneEvent: (listener) => {
     const heard = (_event: unknown, sceneEvent: SceneEvent) => listener(sceneEvent)
     ipcRenderer.on(IPC.sceneEvent, heard)

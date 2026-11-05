@@ -79,3 +79,29 @@ input, select { background: var(--bg); color: var(--text); border: 1px solid var
 
 .say { display: flex; gap: 0.5rem; }
 .say input { flex: 1; padding: 0.6rem 0.8rem; font-size: 1rem; }
+
+/* Summary */
+.summary { max-width: 72rem; margin: 0 auto; }
+.reports { display: grid; grid-template-columns: repeat(auto-fit, minmax(20rem, 1fr)); gap: 1rem; margin-bottom: 1.2rem; }
+.report { border: 1px solid var(--line); border-radius: 10px; background: var(--panel); padding: 1rem 1.1rem; display: flex; flex-direction: column; gap: 0.6rem; }
+.report header { display: flex; align-items: center; justify-content: space-between; }
+.report h2 { margin: 0; font-size: 1.2rem; color: var(--neon); }
+.level { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; padding: 0.1rem 0.5rem; border-radius: 999px; border: 1px solid var(--line); color: var(--muted); }
+.level.core { border-color: var(--hot); color: var(--hot); }
+.memory { margin: 0; line-height: 1.5; }
+.reason { margin: 0; color: var(--muted); font-size: 0.85rem; font-style: italic; }
+.meters-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 0.2rem; }
+.meter { display: grid; grid-template-columns: 5.5rem 1fr 2rem 2.5rem; align-items: center; gap: 0.5rem; font-size: 0.82rem; }
+.meter-track { position: relative; height: 0.45rem; background: var(--bg); border-radius: 999px; }
+.meter-fill { height: 100%; border-radius: 999px; background: var(--neon); opacity: 0.75; }
+.meter-was { position: absolute; top: -0.2rem; width: 2px; height: 0.85rem; background: var(--text); opacity: 0.6; }
+.meter-value { text-align: right; }
+.delta { color: var(--muted); font-size: 0.78rem; }
+.delta.up { color: var(--neon); }
+.delta.down { color: var(--hot); }
+.others { display: flex; flex-direction: column; gap: 0.3rem; font-size: 0.8rem; border-top: 1px solid var(--line); padding-top: 0.5rem; }
+.other { display: flex; flex-wrap: wrap; gap: 0.6rem; }
+.other em { color: var(--muted); }
+.other-meter { color: var(--muted); }
+.learned p { margin: 0.2rem 0 0; font-size: 0.85rem; color: #e0b04a; }
+.report-error { margin: 0; font-size: 0.75rem; color: var(--hot); }

@@ -2,6 +2,7 @@ import type { Character, GameState, Meters, Turn } from '../model'
 import { DIFFICULTY_DC, SKILLS } from '../model/rules'
 import { characterById, locationById, type Content } from './content'
 import { MAX_CHECKS, MAX_SPEAKERS, presentCast, silence } from './plan'
+import { recall } from './memory'
 import { CORE_LORE } from './style'
 
 export interface Prompt {
@@ -60,6 +61,8 @@ function sheet(content: Content, state: GameState, c: Character, present: string
     ...c.secrets.map((s) => `Secret [${s.id}]: ${s.text} Tell: ${s.tell}.${s.revealWhen ? ` Would reveal when: ${s.revealWhen}.` : ''}`),
     `Lying tell: ${c.voice.shifts.lying}`,
     meters && `Toward the player: ${meterWords(meters)}`,
+    recall(state, c).length > 0 && `Remembers: ${recall(state, c).map((m) => `(${m.level}) ${m.text}`).join(' ')}`,
+    (state.facts[c.id] ?? []).length > 0 && `The player already knows: ${state.facts[c.id]!.join(' ')}`,
     relations.length > 0 && `Toward others here: ${relations.join('; ')}`
   ]
     .filter(Boolean)

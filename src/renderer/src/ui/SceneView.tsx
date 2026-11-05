@@ -11,7 +11,10 @@ interface Props {
   content: Content
   state: GameState
   onState: (next: GameState) => void
-  onLeave: () => void
+  /** Ends the scene: summaries run and the summary screen follows. */
+  onEnd: () => void
+  /** Why ending the scene failed, if it did. */
+  endError: string
 }
 
 const COMFORT_WORD = ['', 'wants out', 'uneasy', 'all right', 'comfortable', 'at ease']
@@ -21,7 +24,7 @@ const COMFORT_WORD = ['', 'wants out', 'uneasy', 'all right', 'comfortable', 'at
  * beats can be read as they arrive. A click, Space, Enter or → turns to the next beat; ← or the wheel turned up goes
  * back through the scene, which changes nothing.
  */
-export function SceneView({ content, state, onState, onLeave }: Props) {
+export function SceneView({ content, state, onState, onEnd, endError }: Props) {
   const scene = state.scene!
   const location = locationById(content, scene.locationId)!
   const history = useMemo(() => sceneHistory(content, state), [content, state])
@@ -131,8 +134,8 @@ export function SceneView({ content, state, onState, onLeave }: Props) {
         <span className="district">{location.district}</span>
         <span className="spacer" />
         {status && <span className="status">{status}</span>}
-        <Button size="sm" variant="ghost" onClick={onLeave} disabled={busy}>
-          Leave
+        <Button size="sm" variant={scene.ended ? 'primary' : 'ghost'} onClick={onEnd} disabled={busy} title="End the scene; everyone writes what they take from it">
+          End scene
         </Button>
       </header>
 
@@ -181,7 +184,7 @@ export function SceneView({ content, state, onState, onLeave }: Props) {
           </div>
         </div>
 
-        {error && <div className="error">{error}</div>}
+        {(error || endError) && <div className="error">{error || endError}</div>}
 
         <form className="say" onSubmit={submit}>
           <input

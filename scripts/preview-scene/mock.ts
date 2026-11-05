@@ -5,6 +5,7 @@ import { SettingsSchema, toView } from '../../src/shared/settings'
 import type { Content } from '../../src/shared/game/content'
 import type { RendererApi, SceneEvent } from '../../src/shared/ipc'
 import { runTurn, type TurnLlm } from '../../src/main/scene/runTurn'
+import { endScene } from '../../src/main/scene/endScene'
 import vex from '../../content/default/characters/vex.json'
 import brask from '../../content/default/characters/brask.json'
 import oria from '../../content/default/characters/oria-senn.json'
@@ -62,6 +63,16 @@ const api: RendererApi = {
   sceneTurn: async ({ state, input }) => {
     const outcome = await runTurn(content, state, input, llm, emit)
     return { ok: true, state: outcome.state, beats: outcome.beats, checks: outcome.plan.checks.flatMap((c) => (c.line ? [c.line] : [])), calls: outcome.calls, corrections: outcome.corrections, rewrite: outcome.problems.map((p) => p.fix) }
+  },
+  sceneEnd: async (state) => {
+    await wait(600)
+    // Keyed by the first name each summary prompt opens with ("About Vex …").
+    const summaries: Record<string, object> = {
+      Vex: { memory: 'Vex caught Oria lying about the client and called it out in front of Rook, who backed her.', level: 'normal', reason: 'Rook trusted her read over Oria\'s polish.', approval: 'more', trust: 'a little more', attraction: 'a little more', others: [{ with: 'oria-senn', approval: 'less', trust: 'a little less', attraction: 'unchanged', reason: 'Same old Oria.' }] },
+      Brask: { memory: 'Brask sat through a loud night at the Sump Lantern while Oria lied and Vex called it; nobody asked him anything.', level: 'fleeting', reason: 'Too loud, and nobody noticed he wanted to go.', approval: 'unchanged', trust: 'unchanged', attraction: 'unchanged' },
+      Oria: { memory: 'Oria was caught in her "darling" by a Courier and had to admit the client was corporate.', level: 'normal', reason: 'Rook pushed her in public.', approval: 'a little less', trust: 'unchanged', attraction: 'a little more', learned: [], others: [{ with: 'vex', approval: 'less', trust: 'unchanged', attraction: 'unchanged', reason: 'She sees through me.' }] }
+    }
+    return { ok: true, ...(await endScene(content, state, async (prompt) => JSON.stringify(summaries[prompt.user.match(/^About (\w+)/)![1]!]))) }
   },
   onSceneEvent: (listener) => {
     listeners.add(listener)

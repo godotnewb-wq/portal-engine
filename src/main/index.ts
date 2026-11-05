@@ -1,12 +1,13 @@
 import { app, BrowserWindow, dialog, ipcMain, safeStorage } from 'electron'
 import { join } from 'node:path'
-import { IPC, type SceneEvent, type SceneTurnResponse, type TestConnectionResult } from '../shared/ipc'
+import { IPC, type SceneEndResponse, type SceneEvent, type SceneTurnResponse, type TestConnectionResult } from '../shared/ipc'
 import { GameStateSchema } from '../shared/model'
 import { ListModelsRequestSchema, SettingsUpdateSchema, isConfigured, toView, LLM_PROFILE_IDS, type LlmProfileId } from '../shared/settings'
 import type { Content } from '../shared/game/content'
 import { chatCompletion, listModels } from './ai/openai'
 import { loadContent } from './content/load'
-import { turnLlm } from './scene/llm'
+import { endScene } from './scene/endScene'
+import { summaryLlm, turnLlm } from './scene/llm'
 import { runTurn } from './scene/runTurn'
 import { SettingsStore, type KeyCipher } from './settings/store'
 
@@ -105,6 +106,19 @@ app.whenReady().then(() => {
         corrections: outcome.corrections,
         rewrite: outcome.problems.map((p) => p.fix)
       }
+    } catch (error) {
+      return { ok: false, error: (error as Error).message }
+    } finally {
+      turning = false
+    }
+  })
+
+  ipcMain.handle(IPC.sceneEnd, async (_event, raw: unknown): Promise<SceneEndResponse> => {
+    if (turning) return { ok: false, error: 'A turn is still running.' }
+    turning = true
+    try {
+      const state = GameStateSchema.parse(raw)
+      return { ok: true, ...(await endScene(content, state, summaryLlm(settings.get(), state.scene?.nsfw ?? false))) }
     } catch (error) {
       return { ok: false, error: (error as Error).message }
     } finally {

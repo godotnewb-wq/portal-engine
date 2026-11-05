@@ -20,5 +20,8 @@ Adapted so far:
 | `src/shared/game/seed.ts` | `src/shared/game/seed.ts` |
 | `src/shared/settings.ts` | `src/shared/settings.ts` (profiles per role) |
 | `src/main/settings/store.ts` | `src/main/settings/store.ts` |
+| `src/shared/game/names.ts` | `src/shared/game/scene.ts` (`plainName`, `namesHer`) |
+| `src/shared/game/memory.ts` | `src/shared/game/memory.ts` (`selectMemories`) |
+| `src/shared/game/summary.ts` | `src/shared/game/memory.ts` (scene-change word scale and values, summary parsing approach) |
 
 Original art, writing and content of Neonpunk Nights may be licensed separately.

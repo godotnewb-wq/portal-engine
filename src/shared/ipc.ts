@@ -1,4 +1,5 @@
 import type { Content } from './game/content'
+import type { WitnessReport } from './game/summary'
 import type { Beat, GameState } from './model'
 import type { ListModelsRequest, ListModelsResponse, LlmProfileId, SettingsUpdate, SettingsView } from './settings'
 
@@ -10,7 +11,8 @@ export const IPC = {
   listModels: 'settings:list-models',
   testConnection: 'settings:test',
   sceneTurn: 'scene:turn',
-  sceneEvent: 'scene:event'
+  sceneEvent: 'scene:event',
+  sceneEnd: 'scene:end'
 } as const
 
 export interface TestConnectionResult {
@@ -44,6 +46,9 @@ export type SceneEvent =
   | { type: 'delta'; text: string }
   | { type: 'restart'; reason: 'fallback-profile' | 'rewrite'; problems?: string[] }
 
+/** The scene's close: the new state (scene cleared) and what each witness took from it. */
+export type SceneEndResponse = { ok: true; state: GameState; reports: WitnessReport[] } | { ok: false; error: string }
+
 /** What the preload script exposes to the renderer as `window.api`. */
 export interface RendererApi {
   getContent(): Promise<Content>
@@ -52,6 +57,8 @@ export interface RendererApi {
   listModels(request: ListModelsRequest): Promise<ListModelsResponse>
   testConnection(profileId: LlmProfileId): Promise<TestConnectionResult>
   sceneTurn(request: SceneTurnRequest): Promise<SceneTurnResponse>
+  /** Runs the end-of-scene summaries, one per witness, in parallel. */
+  sceneEnd(state: GameState): Promise<SceneEndResponse>
   /** Listens for a running turn's events; returns a function that stops listening. */
   onSceneEvent(listener: (event: SceneEvent) => void): () => void
 }
