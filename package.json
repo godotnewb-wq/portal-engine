@@ -12,8 +12,8 @@
     "start": "electron-vite preview",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
-    "preview:scene": "vite --config scripts/preview-scene/vite.config.ts",
-    "bench": "jiti scripts/bench.ts"
+    "preview:scene": "vite --config tools/preview-scene/vite.config.ts",
+    "bench": "tsx tools/bench/cli.ts"
   },
   "dependencies": {
     "react": "^19.3.0",
@@ -28,6 +28,7 @@
     "electron": "^44.5.1",
     "electron-vite": "^5.0.0",
     "jiti": "^2.7.0",
+    "tsx": "^4.23.15",
     "typescript": "^7.0.2",
     "vite": "^7.3.6",
     "vitest": "^5.0.3"
