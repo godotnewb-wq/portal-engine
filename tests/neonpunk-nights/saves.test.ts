@@ -15,7 +15,7 @@ const tempDir = () => join(mkdtempSync(join(tmpdir(), 'npn-saves-')), 'saves')
 /** A game with a finished scene behind it: memories, moved meters, a new relation, a learned secret. */
 function playedGame() {
   const state = barScene(4)
-  state.scene!.turns.push({ player: 'Hi.', beats: [{ kind: 'narration', text: 'The pipe drips.' }], checks: [], speakers: [], texture: [] })
+  state.scene!.turns.push({ id: 't1', player: 'Hi.', beats: [{ kind: 'narration', text: 'The pipe drips.' }], checks: [], speakers: [], texture: [] })
   return applySummaries(content, state, [
     {
       id: 'oria-senn',
@@ -51,7 +51,7 @@ describe('SaveStore', () => {
   it('round-trips a scene still in progress, dice included, so play resumes mid-scene', () => {
     const store = new SaveStore(tempDir(), PACK)
     const state = barScene(77)
-    state.scene!.turns.push({ player: 'Hi.', beats: [{ kind: 'dialogue', speaker: 'vex', text: 'Hey.' }], checks: [], speakers: ['vex'], texture: [] })
+    state.scene!.turns.push({ id: 't1', player: 'Hi.', beats: [{ kind: 'dialogue', speaker: 'vex', text: 'Hey.' }], checks: [], speakers: ['vex'], texture: [] })
     state.scene!.comfort['brask'] = 2
     store.save('auto', state)
     expect(store.load('auto')).toEqual(state)

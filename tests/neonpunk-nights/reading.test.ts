@@ -11,7 +11,7 @@ describe('reading the scene', () => {
 
   it('puts each turn’s beats after the opening, marking the line each turn answers', () => {
     const state = barScene()
-    state.scene!.turns.push({ player: 'Hi.', beats: [{ kind: 'dialogue', speaker: 'vex', text: 'Hey.' }, { kind: 'narration', text: 'Brask nods.' }], checks: [], speakers: ['vex'], texture: [] })
+    state.scene!.turns.push({ id: 't1', player: 'Hi.', beats: [{ kind: 'dialogue', speaker: 'vex', text: 'Hey.' }, { kind: 'narration', text: 'Brask nods.' }], checks: [], speakers: ['vex'], texture: [] })
     const history = sceneHistory(content, state)
     expect(history.map((h) => h.turn)).toEqual([-1, -1, 0, 0])
     expect(history[2]).toMatchObject({ said: 'Hi.' })

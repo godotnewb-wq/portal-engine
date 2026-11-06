@@ -25,6 +25,10 @@ export const RolledCheckSchema = z.object({
 export type RolledCheck = z.infer<typeof RolledCheckSchema>
 
 export const TurnSchema = z.object({
+  /** Unique within its scene's game, so a turn read back after loading a save can still be flagged in the logs. */
+  id: z.string().min(1),
+  /** The log session that recorded this turn, when it was logged: flags on it name that session. */
+  log: z.string().optional(),
   player: z.string(),
   beats: z.array(BeatSchema),
   checks: z.array(RolledCheckSchema).default([]),
@@ -37,6 +41,8 @@ export type Turn = z.infer<typeof TurnSchema>
 
 /** A scene in progress. Prompts are rebuilt from this every turn, never from a growing chat log. */
 export const SceneSchema = z.object({
+  /** Names the scene in logs; turn ids start from it. */
+  id: z.string().min(1),
   locationId: IdSchema,
   /** Persistent characters present. */
   cast: z.array(IdSchema),

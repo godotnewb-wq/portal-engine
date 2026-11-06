@@ -9,7 +9,7 @@ const R = fixture.ruleset
 /** The yard scene after one turn. */
 function played(): GameState {
   const state = yardScene(2)
-  state.scene!.turns.push({ player: 'Tobin?', beats: [{ kind: 'dialogue', speaker: 'tobin', text: 'I could not say.' }], checks: [], speakers: ['tobin'], texture: [] })
+  state.scene!.turns.push({ id: 't1', player: 'Tobin?', beats: [{ kind: 'dialogue', speaker: 'tobin', text: 'I could not say.' }], checks: [], speakers: ['tobin'], texture: [] })
   return state
 }
 
@@ -57,5 +57,25 @@ describe('summaries in the pack’s meters and words', () => {
     })
     expect(reports.find((r) => r.id === 'mara')!.after).toEqual({ warmth: 13, bond: 8 })
     expect(reports.find((r) => r.id === 'tobin')).toMatchObject({ error: 'timeout', memory: 'Tobin spent time with Kit at The Guild Yard.' })
+  })
+})
+
+describe('the scene-end trace (milestone 2, A1)', () => {
+  it('records each witness: the call, what was read, and what changed; a failed call is kept with its error', async () => {
+    const state = played()
+    const end = await endScene(fixture, state, async (prompt) => {
+      if (prompt.user.startsWith('About Tobin')) throw new Error('timed out')
+      return { text: JSON.stringify({ memory: 'Mara saw through him.', level: 'normal', warmth: 'warmer', bond: 'same' }), meta: { model: 'judge' } }
+    })
+    const { trace } = end
+    expect(trace.sceneId).toBe(state.scene!.id)
+    expect(trace.calls.map((c) => [c.id, c.role, c.meta?.model ?? c.error])).toEqual([
+      [`${state.scene!.id}:summary:mara`, 'summary', 'judge'],
+      [`${state.scene!.id}:summary:tobin`, 'summary', 'timed out']
+    ])
+    const mara = trace.witnesses.find((w) => w.id === 'mara')!
+    expect(mara.summary).toMatchObject({ memory: 'Mara saw through him.', delta: { warmth: 3, bond: 0 } })
+    expect(mara.report).toMatchObject({ before: { warmth: 10, bond: 8 }, after: { warmth: 13, bond: 8 } })
+    expect(trace.witnesses.find((w) => w.id === 'tobin')).toMatchObject({ error: 'timed out', summary: { level: 'fleeting' } })
   })
 })

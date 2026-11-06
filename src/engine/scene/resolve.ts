@@ -3,7 +3,7 @@ import { type Character } from '@engine/characters'
 import { type GameState } from '@engine/state'
 import { characterById, type Pack } from '@engine/pack'
 import { dice, type Dice } from '@engine/core'
-import type { BeatPlan } from './plan'
+import type { BeatPlan, PlannedCheck } from './plan'
 
 /**
  * Someone without a stat block (a recurring NPC, until tier templates exist) rolls as an average adult: every
@@ -44,15 +44,18 @@ export function resolvePlan(content: Pack, state: GameState, plan: BeatPlan, opt
     const stats = check.who === 'player' ? state.player.stats : statsOf(r, roller!)
     const edges: Edge[] = check.edge ? [check.edge] : []
     let bonus = 0
+    let assisted: PlannedCheck['assisted']
     if (check.assist) {
       const helper = characterById(content, check.assist)!
-      const help = assistFrom(r, { stats: statsOf(r, helper), meter: assistMeter(r, state, helper.id, check.who) }, check.skill)
+      const meter = assistMeter(r, state, helper.id, check.who)
+      const help = assistFrom(r, { stats: statsOf(r, helper), meter }, check.skill)
       bonus += help.bonus
       edges.push(help.edge)
+      assisted = { by: helper.id, bonus: help.bonus, edge: help.edge, meter }
     }
     const result = rollCheck(r, stats, { skill: check.skill, difficulty: check.difficulty, edges, bonus }, rng)
     const name = check.who === 'player' ? state.player.name : roller!.name.split(' ')[0]!
-    return { ...check, result, line: describeCheck(r, name, result) }
+    return { ...check, result, line: describeCheck(r, name, result), ...(assisted && { assisted }) }
   })
   return { plan: { ...plan, checks }, dice: rng.state }
 }

@@ -10,6 +10,7 @@ function playedScene(): GameState {
   const state = barScene(2)
   const scene = state.scene!
   scene.turns.push({
+    id: 't1',
     player: 'So, Oria, who is the client, really?',
     beats: [
       { kind: 'dialogue', speaker: 'oria-senn', text: 'A private collector, darling.' },

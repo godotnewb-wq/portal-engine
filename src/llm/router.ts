@@ -11,6 +11,8 @@ export interface RoutedReply {
   reply: string
   /** Which profile produced the reply. */
   profileId: LlmProfileId
+  /** Why the role's own profile declined, when another profile wrote the reply. */
+  declined?: string
 }
 
 // What a model thought to itself before answering is not the answer: a refusal is looked for in what comes after it.
@@ -40,7 +42,7 @@ async function routed(settings: Settings, role: LlmRole, nsfw: boolean, run: (id
   if (first === 'nsfw' || !isConfigured(settings.nsfw)) throw new Error(`The LLM declined to write this (${tried.declined}).`)
   const second = await attempt(() => run('nsfw'))
   if ('declined' in second) throw new Error(`Both LLMs declined: ${tried.declined}; ${second.declined}.`)
-  return { reply: second.reply, profileId: 'nsfw' }
+  return { reply: second.reply, profileId: 'nsfw', declined: tried.declined }
 }
 
 export function complete(

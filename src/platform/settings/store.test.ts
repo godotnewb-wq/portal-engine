@@ -20,8 +20,8 @@ describe('SettingsStore', () => {
   it('encrypts keys at rest, keeps a saved key when none is sent, and reads it back', () => {
     const path = pathIn()
     const store = new SettingsStore(path, cipher)
-    store.update({ director: { ...blank(), model: 'fast', apiKey: 'sk-d' }, writer: blank(), summary: blank(), nsfw: blank() })
-    store.update({ director: { ...blank(), model: 'faster' }, writer: blank(), summary: blank(), nsfw: blank() })
+    store.update({ director: { ...blank(), model: 'fast', apiKey: 'sk-d' }, writer: blank(), summary: blank(), scorer: blank(), nsfw: blank() })
+    store.update({ director: { ...blank(), model: 'faster' }, writer: blank(), summary: blank(), scorer: blank(), nsfw: blank() })
     expect(readFileSync(path, 'utf8')).toContain('enc:sk-d')
     const again = new SettingsStore(path, cipher).get()
     expect(again.director).toMatchObject({ model: 'faster', apiKey: 'sk-d' })
@@ -34,7 +34,7 @@ describe('pack folders', () => {
   it('keeps the extra pack folders across restarts, without blanks or repeats, beside the profiles', () => {
     const path = pathIn()
     const store = new SettingsStore(path, cipher)
-    store.update({ director: { ...blank(), model: 'fast', apiKey: 'sk-d' }, writer: blank(), summary: blank(), nsfw: blank() })
+    store.update({ director: { ...blank(), model: 'fast', apiKey: 'sk-d' }, writer: blank(), summary: blank(), scorer: blank(), nsfw: blank() })
     expect(store.setPackFolders(['D:\\RPG\\packs', ' ', 'D:\\RPG\\packs', '/home/me/packs'])).toEqual(['D:\\RPG\\packs', '/home/me/packs'])
     const again = new SettingsStore(path, cipher)
     expect(again.getPackFolders()).toEqual(['D:\\RPG\\packs', '/home/me/packs'])

@@ -24,6 +24,25 @@ export interface CompletionInput {
   tools?: LlmTool[]
   /** Stops the call when the player gives up on it. It then fails with this signal's reason. */
   signal?: AbortSignal
+  /** Told what happened on the way to a reply that the reply itself doesn't show: tokens used, a retry without JSON mode. */
+  onInfo?: (info: CallInfo) => void
+}
+
+/** What a call reports beyond its text, for the game's logs. */
+export interface CallInfo {
+  /** Tokens, when the provider reports them. */
+  usage?: { input?: number; output?: number }
+  /** The endpoint turned down `response_format`, so the call was sent again without it. */
+  jsonRetried?: boolean
+}
+
+type Usage = { prompt_tokens?: unknown; completion_tokens?: unknown }
+const usageOf = (usage: Usage | undefined): CallInfo['usage'] | undefined => {
+  if (!usage) return undefined
+  const n = (x: unknown) => (typeof x === 'number' ? x : undefined)
+  const input = n(usage.prompt_tokens)
+  const output = n(usage.completion_tokens)
+  return input === undefined && output === undefined ? undefined : { ...(input !== undefined && { input }), ...(output !== undefined && { output }) }
 }
 
 /** A function the model can call mid-reply. Its result goes back to the model, which then answers. */
@@ -208,12 +227,15 @@ export async function chatCompletion(
       }
       if (!(error instanceof RefusalError) && asked.json && response.status < 500 && /response_format|json/i.test(error.message)) {
         asked = { ...asked, json: false }
+        input.onInfo?.({ jsonRetried: true })
         return send()
       }
       throw error
     }
 
-    const data = (await response.json()) as { choices?: { finish_reason?: unknown; native_finish_reason?: unknown; message?: AssistantMessage }[] }
+    const data = (await response.json()) as { choices?: { finish_reason?: unknown; native_finish_reason?: unknown; message?: AssistantMessage }[]; usage?: Usage }
+    const usage = usageOf(data.usage)
+    if (usage) input.onInfo?.({ usage })
     const choice = data.choices?.[0]
     const finishes = [choice?.finish_reason, choice?.native_finish_reason].filter((reason): reason is string => typeof reason === 'string').map((reason) => reason.toLowerCase())
     const stopped = finishes.find((reason) => REFUSAL_FINISHES.includes(reason))
@@ -309,12 +331,15 @@ export async function streamCompletion(
     const handle = (line: string): void => {
       const data = line.replace(/^data:\s?/, '').trim()
       if (!line.startsWith('data:') || data === '' || data === '[DONE]') return
-      let chunk: { choices?: { delta?: { content?: unknown; refusal?: unknown }; finish_reason?: unknown }[] }
+      let chunk: { choices?: { delta?: { content?: unknown; refusal?: unknown }; finish_reason?: unknown }[]; usage?: Usage }
       try {
         chunk = JSON.parse(data)
       } catch {
         return
       }
+      // Some providers send usage in the last chunk without being asked; asking (stream_options) breaks others.
+      const usage = usageOf(chunk.usage ?? undefined)
+      if (usage) input.onInfo?.({ usage })
       const choice = chunk.choices?.[0]
       const finish = typeof choice?.finish_reason === 'string' ? choice.finish_reason.toLowerCase() : undefined
       if (finish && REFUSAL_FINISHES.includes(finish)) throw new RefusalError(`the reply was stopped (${finish})`)

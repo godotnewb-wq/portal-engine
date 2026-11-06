@@ -24,7 +24,7 @@ export function sceneSpeakers(content: Pack, state: GameState): Speaker[] {
   return [...cast, ...walkOns, player]
 }
 
-const FORMAT = `Output format, nothing else:
+export const WRITER_FORMAT = `Output format, nothing else:
 - One beat per line. A narration beat: "NARRATION: …". A dialogue beat: "Name: …" (the character's first name), their spoken words with at most a brief action.
 - ${BEATS.target} beats, each under ${BEATS.targetWords} words.
 - Only the planned speakers get dialogue beats. Others appear only as their planned reactions, inside narration. A planned walk-on line may be a dialogue beat under the walk-on's name.
@@ -71,7 +71,7 @@ export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPla
     STYLE_GUIDE,
     content.tone && `Tone:\n${content.tone}`,
     ADULTS_ONLY,
-    FORMAT,
+    WRITER_FORMAT,
     `The player is ${state.player.name} (${state.player.pronouns}), addressed as "you". Setting: ${location.name}, ${location.district}, ${content.setting.name}.`,
     ...speakers.map((c) => voiceCard(firstName(c.name), c.voice))
   ]

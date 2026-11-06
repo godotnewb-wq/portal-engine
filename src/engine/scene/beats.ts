@@ -25,6 +25,8 @@ export interface Tags {
 
 export interface ParsedReply {
   beats: Beat[]
+  /** For each beat, its line in the raw reply (1-based), so a logged beat can be traced to what the model wrote. */
+  lines: number[]
   tags: Tags
   /** Speaker names written on dialogue lines that match no one here. */
   unknownSpeakers: string[]
@@ -83,36 +85,43 @@ export function parseReply(reply: string, speakers: Speaker[]): ParsedReply {
   const tags: Tags = { expressions: {}, comfort: {}, moods: {}, leaves: [], ended: false }
   const droppedTags: string[] = []
   const unknownSpeakers: string[] = []
-  const withoutThinking = reply.replace(/<think(?:ing)?>[\s\S]*?<\/think(?:ing)?>/gi, '')
+  // Thinking is blanked rather than cut, keeping its newlines, so line numbers still match the raw reply.
+  const withoutThinking = reply.replace(/<think(?:ing)?>[\s\S]*?<\/think(?:ing)?>/gi, (m) => m.replace(/[^\n]/g, ''))
   for (const m of withoutThinking.matchAll(TAG)) parseTag(m[1]!, speakers, tags, droppedTags)
 
   const beats: Beat[] = []
-  for (const line of withoutThinking.replace(TAG, '').split(/\r?\n/)) {
+  const lines: number[] = []
+  const push = (beat: Beat, n: number) => {
+    beats.push(beat)
+    lines.push(n)
+  }
+  for (const [i, line] of withoutThinking.replace(TAG, '').split(/\r?\n/).entries()) {
+    const n = i + 1
     if (line.trim().length === 0 || /^\s*(?:```|---+)\s*$/.test(line)) continue
     const m = line.match(LINE)
     const label = m?.[1]?.trim()
     if (m && label && NARRATOR_NAMES.includes(plainName(label))) {
       const text = clean(m[2]!)
-      if (text) beats.push({ kind: 'narration', text })
+      if (text) push({ kind: 'narration', text }, n)
       continue
     }
     if (m && label) {
       const s = who(label, speakers)
       const text = clean(m[2]!)
       if (!text) continue
-      if (s) beats.push({ kind: 'dialogue', speaker: s.id, text })
+      if (s) push({ kind: 'dialogue', speaker: s.id, text }, n)
       else {
         // A colon inside ordinary narration ("One rule: never ask.") is not a speaker; only a short, name-like label is.
         if (/^[\p{Lu}][\p{L}' .-]{0,30}$/u.test(label) && label.split(/\s+/).length <= 3) {
           unknownSpeakers.push(label)
-          beats.push({ kind: 'dialogue', speaker: label, text })
-        } else beats.push({ kind: 'narration', text: clean(line) })
+          push({ kind: 'dialogue', speaker: label, text }, n)
+        } else push({ kind: 'narration', text: clean(line) }, n)
       }
       continue
     }
-    beats.push({ kind: 'narration', text: clean(line) })
+    push({ kind: 'narration', text: clean(line) }, n)
   }
-  return { beats, tags, unknownSpeakers: [...new Set(unknownSpeakers)], droppedTags }
+  return { beats, lines, tags, unknownSpeakers: [...new Set(unknownSpeakers)], droppedTags }
 }
 
 /** While a reply streams in, only lines that have ended are beats; the last one may still be growing. */

@@ -6,6 +6,7 @@ const LABEL: Record<LlmProfileId, { name: string; hint: string }> = {
   director: { name: 'Director', hint: 'Plans each turn as JSON. A fast, cheap model. Falls back to the Writer if unset.' },
   writer: { name: 'Scene writer', hint: 'Writes the beats, streamed. Your strongest creative model.' },
   summary: { name: 'Summaries', hint: 'Writes memories after a scene. Falls back to the Writer if unset.' },
+  scorer: { name: 'Scorer', hint: 'Rates logged turns after play, never during a turn. Falls back to Summaries, then the Writer, if unset.' },
   nsfw: { name: 'NSFW fallback', hint: 'Takes over any role whose model declines.' }
 }
 

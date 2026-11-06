@@ -10,6 +10,8 @@ export const MINUTES_PER_TURN = 3
 export const SUMMARY_CHARS = 2000
 
 export interface TurnWritten {
+  id: string
+  log?: string
   input: string
   plan: BeatPlan
   beats: Beat[]
@@ -37,6 +39,8 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
   const only = <T>(record: Record<string, T>) => Object.fromEntries(Object.entries(record).filter(([id]) => present.has(id)))
 
   const turn: Turn = {
+    id: written.id,
+    ...(written.log && { log: written.log }),
     player: written.input,
     beats: written.beats,
     checks: rolledChecks(written.plan),

@@ -5,9 +5,10 @@ import { z } from 'zod'
 
 /**
  * The jobs an LLM does. `director` plans each turn (fast, JSON), `writer` writes the beats (strong, streamed),
- * `summary` writes memories after a scene (low temperature), `nsfw` takes over any of them when its own declines.
+ * `summary` writes memories after a scene (low temperature), `scorer` rates logged turns after play (never during a
+ * turn), `nsfw` takes over any of them when its own declines.
  */
-export const LLM_PROFILE_IDS = ['director', 'writer', 'summary', 'nsfw'] as const
+export const LLM_PROFILE_IDS = ['director', 'writer', 'summary', 'scorer', 'nsfw'] as const
 export type LlmProfileId = (typeof LLM_PROFILE_IDS)[number]
 export type LlmRole = Exclude<LlmProfileId, 'nsfw'>
 
@@ -60,6 +61,7 @@ const ROLE_DEFAULTS: Record<LlmProfileId, Partial<LlmProfile>> = {
   director: { temperature: 0.3, maxTokens: 1200 },
   writer: { temperature: 0.9, maxTokens: 1200 },
   summary: { temperature: 0.2, maxTokens: 800 },
+  scorer: { temperature: 0.2, maxTokens: 1500 },
   nsfw: { temperature: 0.9, maxTokens: 1200 }
 }
 
@@ -67,6 +69,7 @@ export const SettingsSchema = z.object({
   director: LlmProfileSchema.prefault(ROLE_DEFAULTS.director),
   writer: LlmProfileSchema.prefault(ROLE_DEFAULTS.writer),
   summary: LlmProfileSchema.prefault(ROLE_DEFAULTS.summary),
+  scorer: LlmProfileSchema.prefault(ROLE_DEFAULTS.scorer),
   nsfw: LlmProfileSchema.prefault(ROLE_DEFAULTS.nsfw)
 })
 export type Settings = z.infer<typeof SettingsSchema>
@@ -85,6 +88,7 @@ export const SettingsUpdateSchema = z.object({
   director: LlmProfileUpdateSchema,
   writer: LlmProfileUpdateSchema,
   summary: LlmProfileUpdateSchema,
+  scorer: LlmProfileUpdateSchema,
   nsfw: LlmProfileUpdateSchema
 })
 export type SettingsUpdate = z.infer<typeof SettingsUpdateSchema>
@@ -109,6 +113,7 @@ export function toView(settings: Settings): SettingsView {
     director: view(settings.director),
     writer: view(settings.writer),
     summary: view(settings.summary),
+    scorer: view(settings.scorer),
     nsfw: view(settings.nsfw)
   }
 }
@@ -119,8 +124,9 @@ export function isConfigured(profile: { baseUrl: string; model: string }): boole
 }
 
 /**
- * The profile a role is sent to. A role left unset borrows the writer's, so one endpoint is enough to play;
- * an NSFW scene goes to the NSFW profile first when it is set up.
+ * The profile a role is sent to. A role left unset borrows the writer's, so one endpoint is enough to play; the
+ * scorer, a judge like the summaries, borrows the summary profile first. An NSFW scene goes to the NSFW profile
+ * first when it is set up.
  */
 export function profileFor(
   settings: Record<LlmProfileId, { baseUrl: string; model: string }>,
@@ -129,5 +135,6 @@ export function profileFor(
 ): LlmProfileId {
   if (nsfw && isConfigured(settings.nsfw)) return 'nsfw'
   if (isConfigured(settings[role])) return role
+  if (role === 'scorer' && isConfigured(settings.summary)) return 'summary'
   return 'writer'
 }

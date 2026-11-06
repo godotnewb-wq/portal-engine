@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { CheckResult, Difficulty, Ruleset, Skill } from '@engine/rules'
+import type { CheckResult, Difficulty, Edge, Ruleset, Skill } from '@engine/rules'
 import type { GameState, Scene } from '@engine/state'
 import { characterById, locationById, type Pack } from '@engine/pack'
 
@@ -60,6 +60,8 @@ export interface PlannedCheck {
   edge?: 'advantage' | 'disadvantage'
   /** Filled in by the game once rolled. */
   result?: CheckResult
+  /** What the assist was worth, once rolled: a bonus, an edge, or nothing (no skill, or not enough of the assist meter). */
+  assisted?: { by: string; bonus: number; edge: Edge; meter: number }
   /** The line shown to the player, e.g. "Ada — Search 17 vs 15: success". */
   line?: string
 }

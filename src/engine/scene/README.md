@@ -8,7 +8,9 @@ One player turn, in at most three LLM calls (`runTurn`):
 4. **Code checks** (`checks.ts`): speaking or acting for the player, unplanned or unknown speakers, over-used phrases (the engine's and the pack's), beat length and count. Any hit means one rewrite; a rewrite that still fails is salvaged by code, never a fourth call.
 5. **Apply** (`turn.ts`): the turn goes into the state with moods, comfort, expressions and departures.
 
-**Public API** (`@engine/scene`): `runTurn`, `TurnLlm`, `TurnEvent`, `TurnOutcome`; the prompt builders, `parsePlan`, `validatePlan`, `resolvePlan`, `parseReply`, `checkReply`, `applyTurn`, `STYLE_GUIDE`, `OVERUSED_PHRASES`, `BEATS`.
+Every turn also returns a **turn trace** (`trace.ts`, milestone 2 A1): identity, the cast before and after, the director's full prompt and raw reply and how it was read, the plan after corrections, a breakdown of every check, the writer's and rewrite's prompts and replies with timings, the code findings and what salvage did, each beat with its source line and the plan item it carries out, the tags, and the cost. The engine builds it; the platform writes it (`@platform/logs`). A failed call throws a `TracedError` with the calls made so far.
+
+**Public API** (`@engine/scene`): `runTurn`, `TurnLlm`, `TurnEvent`, `TurnOutcome`, `TurnOptions` (turn id, log session, clock); `TurnTrace`, `BeatTrace`, `CheckTrace`, `CastSnapshot`, `planItems`; `promptSources` (the fixed texts the prompt version hashes); the prompt builders, `parsePlan`, `validatePlan`, `resolvePlan`, `parseReply`, `checkReply`, `applyTurn`, `STYLE_GUIDE`, `OVERUSED_PHRASES`, `BEATS`.
 
 The templates are engine code; every world word in them comes from the pack (primer, tone, setting name, skills, difficulty words, meters, phrases).
 

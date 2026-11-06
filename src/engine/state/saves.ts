@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { GameStateSchema } from './schema'
 
 /** Bump when the save format changes; older saves are then unreadable (no backwards compatibility before release). */
-export const SAVE_VERSION = 2
+export const SAVE_VERSION = 3
 
 /** The game's own slot: written after every turn and every scene's end, never by hand. */
 export const AUTO_SLOT_ID = 'auto'

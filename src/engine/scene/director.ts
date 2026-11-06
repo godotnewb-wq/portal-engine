@@ -15,7 +15,7 @@ export const RECENT_TURNS = 3
 export const meterWords = (r: Ruleset, m: Meters): string =>
   `${r.meters.list.map((x) => `${x.id} ${m[x.id] ?? r.meters.min}`).join(', ')} (${r.meters.min}–${r.meters.max})`
 
-const directorRules = (r: Ruleset): string => `You are the director of a visual-novel RPG scene. You do not write prose. You read the whole situation and return a short JSON beat plan for this turn; a separate writer turns it into prose.
+export const directorRules = (r: Ruleset): string => `You are the director of a visual-novel RPG scene. You do not write prose. You read the whole situation and return a short JSON beat plan for this turn; a separate writer turns it into prose.
 
 Return only a JSON object:
 {

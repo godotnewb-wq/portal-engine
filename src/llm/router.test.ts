@@ -27,7 +27,7 @@ describe('complete', () => {
       if (profile.model === 'strong') throw new RefusalError('content_filter')
       return 'ok'
     })
-    expect(reply).toEqual({ reply: 'ok', profileId: 'nsfw' })
+    expect(reply).toEqual({ reply: 'ok', profileId: 'nsfw', declined: 'The LLM declined: content_filter' })
     expect(used).toEqual(['strong', 'open'])
   })
 

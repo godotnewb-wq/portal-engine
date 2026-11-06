@@ -20,8 +20,11 @@ export function createInitialState(content: Pack, seed: number): GameState {
   }
 }
 
-/** Opens a scene at a location with the given cast; moods and comfort start from the characters' files. */
-export function startScene(content: Pack, state: GameState, locationId: string, cast: string[]): GameState {
+/**
+ * Opens a scene at a location with the given cast; moods and comfort start from the characters' files. `id` names the
+ * scene in logs; the app passes a unique one, and the default (from the game clock) is enough for tests and the bench.
+ */
+export function startScene(content: Pack, state: GameState, locationId: string, cast: string[], id = `scene-${state.time}`): GameState {
   const location = locationById(content, locationId)
   if (!location) throw new Error(`Unknown location "${locationId}"`)
   const characters = cast.map((id) => {
@@ -30,6 +33,7 @@ export function startScene(content: Pack, state: GameState, locationId: string, 
     return c
   })
   const scene: Scene = {
+    id,
     locationId,
     cast,
     walkOns: location.walkOns.map((w) => w.id),

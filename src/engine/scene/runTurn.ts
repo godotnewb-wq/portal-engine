@@ -2,17 +2,22 @@ import type { Beat, GameState } from '@engine/state'
 import { parseReply, type ParsedReply } from './beats'
 import type { Pack } from '@engine/pack'
 import { buildDirectorPrompt } from './director'
-import { type Prompt } from '@engine/core'
-import { checkReply, salvage, type Problem } from './checks'
+import { traced, TracedError, type CallTrace, type LlmReply, type Prompt } from '@engine/core'
+import { checkReply, droppedBeats, salvaged, type Problem } from './checks'
 import { fallbackPlan, parsePlan, validatePlan, type BeatPlan } from './plan'
 import { resolvePlan, type ResolveOptions } from './resolve'
+import { castSnapshot, checkTraces, planItems, type BeatTrace, type TurnTrace } from './trace'
 import { applyTurn } from './turn'
 import { buildRewritePrompt, buildWriterPrompt, sceneSpeakers } from './writer'
 
-/** The LLM calls a turn may make. `write` streams; it is used for the scene writer and its one rewrite. */
+/**
+ * The LLM calls a turn may make. `write` streams; it is used for the scene writer and its one rewrite. Either may
+ * return the text alone, or the text with what the platform knows about the call (profile, model, tokens), which
+ * goes into the turn trace.
+ */
 export interface TurnLlm {
-  direct(prompt: Prompt): Promise<string>
-  write(prompt: Prompt, onDelta: (text: string) => void, onRestart: () => void): Promise<string>
+  direct(prompt: Prompt): Promise<LlmReply>
+  write(prompt: Prompt, onDelta: (text: string) => void, onRestart: () => void): Promise<LlmReply>
 }
 
 /**
@@ -37,12 +42,23 @@ export interface TurnOutcome {
   remaining: Problem[]
   /** The director's reply could not be read and the game planned the turn itself. */
   fallback: boolean
+  /** Everything the turn did, for the logs. */
+  trace: TurnTrace
+}
+
+export interface TurnOptions extends ResolveOptions {
+  /** The turn's id; by default the scene's id and the turn's number. The app passes one unique across sessions. */
+  turnId?: string
+  /** The log session recording this turn, kept on the turn so flags made after a reload can name it. */
+  log?: string
+  /** The clock, in milliseconds; injected so tests can fix timings. */
+  now?: () => number
 }
 
 /**
  * One player turn (narrator-scene-engine §3): director → game resolves mechanics → streamed writer → code checks →
  * one targeted rewrite if a check fails. At most three calls; anything still wrong after the rewrite is salvaged by
- * code rather than costing a fourth.
+ * code rather than costing a fourth. A failed call throws a `TracedError` carrying the calls made so far.
  */
 export async function runTurn(
   content: Pack,
@@ -50,41 +66,105 @@ export async function runTurn(
   input: string,
   llm: TurnLlm,
   emit: (event: TurnEvent) => void = () => {},
-  options: ResolveOptions = {}
+  options: TurnOptions = {}
 ): Promise<TurnOutcome> {
-  if (!state.scene) throw new Error('No scene in progress')
-  if (state.scene.ended) throw new Error('The scene has ended')
-  let calls = 0
+  const scene = state.scene
+  if (!scene) throw new Error('No scene in progress')
+  if (scene.ended) throw new Error('The scene has ended')
+  const now = options.now ?? Date.now
+  const started = now()
+  const turnId = options.turnId ?? `${scene.id}-${scene.turns.length + 1}`
+  const calls: CallTrace[] = []
+  const call = (role: CallTrace['role'], prompt: Prompt, run: Parameters<typeof traced>[4]) =>
+    traced(calls, { id: `${turnId}:${role}`, role, turnId, sceneId: scene.id }, prompt, now, run)
 
-  // Call 1: the director.
-  calls++
-  const directed = parsePlan(await llm.direct(buildDirectorPrompt(content, state, input)))
-  const validated = directed ? validatePlan(content, state, directed) : { plan: fallbackPlan(content, state, input), corrections: [] }
-  const { plan, dice } = resolvePlan(content, state, validated.plan, options)
-  emit({ type: 'planned', speakers: plan.speakers.map((s) => s.id), checks: plan.checks.flatMap((c) => (c.line ? [c.line] : [])), corrections: validated.corrections, fallback: !directed })
+  try {
+    // Call 1: the director.
+    const directorPrompt = buildDirectorPrompt(content, state, input)
+    const directorReply = await call('director', directorPrompt, () => llm.direct(directorPrompt))
+    const directed = parsePlan(directorReply)
+    const validated = directed ? validatePlan(content, state, directed) : { plan: fallbackPlan(content, state, input), corrections: [] }
+    const { plan, dice } = resolvePlan(content, state, validated.plan, options)
+    emit({ type: 'planned', speakers: plan.speakers.map((s) => s.id), checks: plan.checks.flatMap((c) => (c.line ? [c.line] : [])), corrections: validated.corrections, fallback: !directed })
 
-  // Call 2: the writer, streamed.
-  const speakers = sceneSpeakers(content, state)
-  const writerPrompt = buildWriterPrompt(content, state, plan, input)
-  const onDelta = (text: string) => emit({ type: 'delta', text })
-  const onRestart = () => emit({ type: 'restart', reason: 'fallback-profile' })
-  calls++
-  const draft = await llm.write(writerPrompt, onDelta, onRestart)
-  let parsed: ParsedReply = parseReply(draft, speakers)
-  const problems = checkReply(parsed, plan, speakers, input, content.phrases)
-  let remaining: Problem[] = []
-  let beats = parsed.beats
+    // Call 2: the writer, streamed.
+    const speakers = sceneSpeakers(content, state)
+    const writerPrompt = buildWriterPrompt(content, state, plan, input)
+    const stream = (role: 'writer' | 'rewrite', prompt: Prompt) =>
+      call(role, prompt, (hooks) =>
+        llm.write(
+          prompt,
+          (text) => {
+            hooks.first()
+            emit({ type: 'delta', text })
+          },
+          () => {
+            hooks.restart()
+            emit({ type: 'restart', reason: 'fallback-profile' })
+          }
+        )
+      )
+    const draft = await stream('writer', writerPrompt)
+    let parsed: ParsedReply = parseReply(draft, speakers)
+    const problems = checkReply(parsed, plan, speakers, input, content.phrases)
+    let remaining: Problem[] = []
+    let kept = parsed.beats.map((_, i) => i)
 
-  // Call 3, only if a check failed: one rewrite told exactly what to fix.
-  if (problems.length > 0) {
-    emit({ type: 'restart', reason: 'rewrite', problems: problems.map((p) => p.fix) })
-    calls++
-    const rewrite = await llm.write(buildRewritePrompt(writerPrompt, draft, problems.map((p) => p.fix)), onDelta, onRestart)
-    parsed = parseReply(rewrite, speakers)
-    remaining = checkReply(parsed, plan, speakers, input, content.phrases)
-    beats = remaining.length > 0 ? salvage(parsed.beats, remaining) : parsed.beats
+    // Call 3, only if a check failed: one rewrite told exactly what to fix.
+    if (problems.length > 0) {
+      emit({ type: 'restart', reason: 'rewrite', problems: problems.map((p) => p.fix) })
+      const rewrite = await stream('rewrite', buildRewritePrompt(writerPrompt, draft, problems.map((p) => p.fix)))
+      parsed = parseReply(rewrite, speakers)
+      remaining = checkReply(parsed, plan, speakers, input, content.phrases)
+      kept = remaining.length > 0 ? salvaged(parsed.beats.length, remaining) : parsed.beats.map((_, i) => i)
+    }
+    const beats = kept.map((i) => parsed.beats[i]!)
+
+    const next = applyTurn(content, state, { id: turnId, ...(options.log && { log: options.log }), input, plan, beats, tags: parsed.tags, dice })
+    const rewritten = problems.length > 0
+    const salvage = rewritten && remaining.length > 0
+    const dropped = salvage ? droppedBeats(remaining).filter((n) => n <= parsed.beats.length) : []
+    const beatTraces: BeatTrace[] = kept.map((i, n) => ({
+      index: n + 1,
+      beat: parsed.beats[i]!,
+      source: rewritten ? 'rewrite' : 'draft',
+      line: parsed.lines[i]!,
+      salvaged: salvage,
+      plan: planItems(content, plan, parsed.beats[i]!)
+    }))
+    const directorCall = calls.find((c) => c.role === 'director')!
+    const usage = calls.flatMap((c) => (c.meta?.usage ? [c.meta.usage] : []))
+    const trace: TurnTrace = {
+      turnId,
+      sceneId: scene.id,
+      turn: scene.turns.length + 1,
+      at: new Date(started).toISOString(),
+      input,
+      cast: { before: castSnapshot(state), after: castSnapshot(next) },
+      director: { callId: directorCall.id, read: !directed ? 'unreadable' : directorCall.meta?.jsonRetried ? 'json-retried' : 'json', plan, corrections: validated.corrections },
+      dice: { before: state.dice, after: dice },
+      checks: checkTraces(plan),
+      writer: { callId: `${turnId}:writer` },
+      findings: problems,
+      ...(rewritten && {
+        rewrite: {
+          callId: `${turnId}:rewrite`,
+          remaining,
+          ...(salvage && { salvage: { dropped, cut: parsed.beats.length - kept.length - dropped.length } })
+        }
+      }),
+      beats: beatTraces,
+      tags: { parsed: parsed.tags, dropped: parsed.droppedTags },
+      cost: {
+        calls: calls.length,
+        ms: now() - started,
+        ...(usage.length > 0 && { tokens: { input: usage.reduce((n, u) => n + (u.input ?? 0), 0), output: usage.reduce((n, u) => n + (u.output ?? 0), 0) } })
+      },
+      calls
+    }
+    return { state: next, beats, plan, calls: calls.length, corrections: validated.corrections, problems, remaining, fallback: !directed, trace }
+  } catch (error) {
+    if (error instanceof TracedError) throw error
+    throw new TracedError((error as Error).message, calls)
   }
-
-  const next = applyTurn(content, state, { input, plan, beats, tags: parsed.tags, dice })
-  return { state: next, beats, plan, calls, corrections: validated.corrections, problems, remaining, fallback: !directed }
 }
