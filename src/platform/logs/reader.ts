@@ -59,6 +59,15 @@ export function readSession(dir: string): SessionLog {
   }
 }
 
+/** Only a session's flags: what read-back needs from every session, without reading their prompts and replies. */
+export function readFlags(dir: string): FlagRecord[] {
+  const counter = { n: 0 }
+  return lines<unknown>(dir, FILES.flags, counter).flatMap((f) => {
+    const parsed = FlagRecordSchema.safeParse(f)
+    return parsed.success ? [parsed.data] : []
+  })
+}
+
 /** A call's full prompt, put back together from its sections. A section that went missing shows as a marker. */
 export function promptOf(log: SessionLog, call: CallRecord): Prompt {
   const text = (ids: string[]) => joinSections(ids.map((id) => log.prompts.get(id) ?? `[missing prompt section ${id}]`))

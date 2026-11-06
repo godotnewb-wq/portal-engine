@@ -14,7 +14,7 @@ Play and bench logs (milestone 2, A2): a folder per session, a file per concern,
   errors.jsonl   failed calls, unreadable replies, caught errors
 ```
 
-**Public API** (`@platform/logs`): `LogSession` (`open`, `resume`, `turn`, `sceneStart`, `sceneEnd`, `error`, `flag`, `score`, `close`), `readSession`, `findSessions`, `promptOf`, `callTrace`, `promptVersion`, the record types, `sections` / `joinSections`.
+**Public API** (`@platform/logs`): `LogSession` (`open`, `resume`, `turn`, `sceneStart`, `sceneEnd`, `error`, `flag`, `score`, `close`), `readSession`, `readFlags`, `findSessions`, `PlayLogs` (the app's session lifecycle, flags and turn details), `promptOf`, `callTrace`, `promptVersion`, the record types, `sections` / `joinSections`.
 
 Rules: lines are appended as they happen (crash-safe); nothing is ever deleted; API keys, headers and endpoint addresses never reach a file (`RoleModel` holds a profile, model and temperature only). Logs never go inside a pack folder.
 

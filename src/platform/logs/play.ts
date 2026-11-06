@@ -5,7 +5,7 @@ import type { Pack } from '@engine/pack'
 import type { SceneEndTrace } from '@engine/relationships'
 import { promptSources, type TurnTrace } from '@engine/scene'
 import { currentFlags, FlagSchema, type Flag, type FlagRecord, type ScoreRecord } from '@engine/review'
-import { findSessions, readSession, type SessionLog } from './reader'
+import { findSessions, readFlags, readSession } from './reader'
 import { promptVersion, type CallRecord, type SessionRecord, type TurnRecord } from './records'
 import { LogSession } from './writer'
 
@@ -156,7 +156,7 @@ export class PlayLogs {
   flagsFor(turns: { session: string; turnId: string }[]): FlagRecord[] {
     if (turns.length === 0) return []
     const wanted = new Set(turns.map((t) => `${t.session}/${t.turnId}`))
-    const all = this.sessions().flatMap((log) => log.flags)
+    const all = this.sessionDirs().flatMap(readFlags)
     return [...currentFlags(all).values()].filter((r) => wanted.has(`${r.turnSession}/${r.turnId}`))
   }
 
@@ -178,8 +178,8 @@ export class PlayLogs {
     }
   }
 
-  private sessions(): SessionLog[] {
+  private sessionDirs(): string[] {
     if (!existsSync(this.root) || readdirSync(this.root).length === 0) return []
-    return findSessions(this.root, 1).map(readSession)
+    return findSessions(this.root, 1)
   }
 }
