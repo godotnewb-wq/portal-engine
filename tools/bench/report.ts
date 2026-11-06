@@ -3,7 +3,8 @@ import type { WitnessReport } from '@engine/relationships'
 import type { Meters } from '@engine/characters'
 import type { Pack } from '@engine/pack'
 import type { TurnTrace } from '@engine/scene'
-import { callsOf, nameIn, type BenchRun, type ScenarioRun } from './run'
+import { callsOf, metricInputOf, nameIn, type BenchRun, type ScenarioRun } from './run'
+import { compareMetrics, metrics, renderMetrics } from '../logs/metrics'
 
 const beatLine = (content: Pack, run: ScenarioRun, beat: Beat): string =>
   beat.kind === 'narration' ? `*${beat.text}*` : `**${nameIn(content, run.location, beat.speaker)}:** ${beat.text}`
@@ -101,6 +102,10 @@ export function renderReport(content: Pack, bench: BenchRun): string {
     `|${STAT_HEADS.map(() => '---').join('|')}|`,
     ...bench.scenarios.map((run) => statRow(run, repeats)),
     '',
+    '## Metrics',
+    '',
+    renderMetrics(metrics(bench.scenarios.map(metricInputOf)), (id) => nameIn(content, bench.scenarios[0]?.location ?? '', id)),
+    '',
     ...bench.scenarios.map((run) => scenarioSection(content, run, repeats))
   ].join('\n')
 }
@@ -128,6 +133,9 @@ export function compareRuns(content: Pack, a: BenchRun, b: BenchRun): string {
     for (const ra of a.scenarios.filter((s) => s.id === id)) lines.push(`| A ${statRow(ra, repeats)}`)
     for (const rb of b.scenarios.filter((s) => s.id === id)) lines.push(`| B ${statRow(rb, repeats)}`)
   }
+  // Metrics over the scenarios both runs played, so a scenario only one of them ran doesn't skew the difference.
+  const shared = (run: BenchRun) => run.scenarios.filter((s) => a.scenarios.some((x) => x.id === s.id) && b.scenarios.some((x) => x.id === s.id))
+  lines.push('', '## Metrics (scenarios both ran)', '', compareMetrics(metrics(shared(a).map(metricInputOf)), metrics(shared(b).map(metricInputOf))))
   lines.push('')
   for (const id of ids) {
     const ra = a.scenarios.find((s) => s.id === id)

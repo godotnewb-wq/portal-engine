@@ -6,7 +6,7 @@ import { SettingsSchema, isConfigured, profileFor, type Settings } from '@llm'
  * safeStorage, which only the app can read. So the bench reads a `bench.config.json` (the same shape as the app's
  * settings, keys in plain text; git-ignored), or environment variables for a single endpoint:
  *   BENCH_BASE_URL, BENCH_API_KEY, BENCH_MODEL (the writer), and optionally BENCH_DIRECTOR_MODEL, BENCH_SUMMARY_MODEL,
- *   BENCH_NSFW_MODEL on the same endpoint.
+ *   BENCH_SCORER_MODEL, BENCH_NSFW_MODEL on the same endpoint.
  * The file wins where both are given.
  */
 export function benchSettings(configPath: string | undefined, env: Record<string, string | undefined>): Settings {
@@ -17,6 +17,7 @@ export function benchSettings(configPath: string | undefined, env: Record<string
     writer: model(env['BENCH_MODEL']),
     director: model(env['BENCH_DIRECTOR_MODEL']),
     summary: model(env['BENCH_SUMMARY_MODEL']),
+    scorer: model(env['BENCH_SCORER_MODEL']),
     nsfw: model(env['BENCH_NSFW_MODEL'])
   })
 }

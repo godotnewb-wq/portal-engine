@@ -5,6 +5,7 @@ import { firstName, TracedError, type CallTrace } from '@engine/core'
 import { endScene, type SceneEndTrace, type Summarize } from '@engine/relationships'
 import { promptSources, runTurn, type TurnLlm, type TurnTrace } from '@engine/scene'
 import { callTrace, LogSession, promptVersion, readSession, type SessionRecord } from '@platform/logs'
+import type { FlagRecord, ScoreRecord } from '@engine/review'
 import { scenarioProblems, scenarioState, type Scenario } from './scenario'
 
 export { mockLlm } from './mock'
@@ -30,6 +31,9 @@ export interface ScenarioRun {
   error?: string
   /** Calls made in the turn or scene end that failed, before the failure. */
   errorCalls?: CallTrace[]
+  /** Read back from the session folder: flags made on it and AI scores. */
+  flags?: FlagRecord[]
+  scores?: ScoreRecord[]
 }
 
 export interface BenchRun {
@@ -43,7 +47,7 @@ export interface BenchRun {
   startedAt: string
   /** Which models played each role, for reading results later. */
   models: Record<string, string>
-  options: { repeat: number; summaries: boolean }
+  options: { repeat: number; summaries: boolean; score?: boolean }
   scenarios: ScenarioRun[]
 }
 
@@ -155,6 +159,9 @@ export async function runBench(content: Pack, scenarios: Scenario[], llm: BenchL
   return bench
 }
 
+/** A scenario run as the metrics read it (milestone 2, B2). */
+export const metricInputOf = (run: ScenarioRun) => ({ session: run.session, turns: run.turns, calls: callsOf(run), flags: run.flags ?? [], scores: run.scores ?? [], errors: run.error ? [{ at: '', where: 'turn' as const, message: run.error }] : [] })
+
 /** Every call of a scenario run in order, turns first, then the scene end, then any that failed. */
 export const callsOf = (run: ScenarioRun): CallTrace[] => [...run.turns.flatMap((t) => t.calls), ...(run.sceneEnd?.calls ?? []), ...(run.errorCalls ?? [])]
 
@@ -194,7 +201,9 @@ export function readRun(dir: string): BenchRun {
       turns: log.turns.map((t) => ({ ...t, calls: calls(t.calls) })),
       ...(end && { sceneEnd: { ...end, calls: calls(end.calls) } }),
       ...(entry.error && { error: entry.error }),
-      ...(failed?.calls && { errorCalls: calls(failed.calls) })
+      ...(failed?.calls && { errorCalls: calls(failed.calls) }),
+      flags: log.flags,
+      scores: log.scores
     }
   })
   return { ...file, scenarios }

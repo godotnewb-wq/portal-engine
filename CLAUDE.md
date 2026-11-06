@@ -6,6 +6,7 @@ A game-agnostic engine for single-player LLM visual novel RPGs (Electron, React 
 - `npm run typecheck` and `npm test` after every change; report what they said.
 - After changing a prompt, the style guide, output checks or pack content, run `npm run bench` (needs a model; see `tools/bench/README.md`) and compare against the previous run with `--compare`. `npm run bench -- --mock` checks the harness without a model.
 - `npm run preview:scene` shows the screens in a browser with a mock API, without Electron.
+- `npm run logs -- <command>` reads play logs and bench runs: transcripts, flags, stats, blind tests, scenarios from logged turns, AI scoring (see `tools/logs/README.md`).
 
 ## Layout
 - `src/llm` → `src/engine/<system>` → `src/platform/<system>` → `src/app`: layers import downward only.

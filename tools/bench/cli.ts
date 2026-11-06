@@ -9,6 +9,8 @@
 //   npm run bench -- --mock                        no LLM: checks the harness, not the prose
 //   npm run bench -- --no-summaries                skip the end-of-scene summaries
 //   npm run bench -- --repeat 10                   play each scenario 10 times with different seeds
+//   npm run bench -- --score                       run the AI scorer on the run as it finishes
+//   npm run bench -- --scenario turn.json          also a scenario file from elsewhere (e.g. made by `npm run logs -- to-scenario`)
 //   npm run bench -- --compare bench-output/A bench-output/B   side by side, into bench-output/compare-….md
 //
 // Scenarios live in the pack's bench/ folder. Each run writes bench-output/<time>-<label>/: run.json (label, pack,
@@ -24,8 +26,9 @@ import { loadPack } from '@platform/packs'
 import { benchSettings, modelsOf } from './config'
 import { compareRuns, renderReport } from './report'
 import { mockLlm, readRun, runBench, writeRun, type BenchLlm } from './run'
-import { loadScenarios } from './scenario'
-import { summaryLlm, turnLlm } from '@platform/roles'
+import { scoreSession, type Scorer } from '../logs/score'
+import { loadScenarios, scenarioFile } from './scenario'
+import { scorerLlm, summaryLlm, turnLlm } from '@platform/roles'
 
 const root = resolve(__dirname, '../..')
 const args = process.argv.slice(2)
@@ -38,6 +41,8 @@ const stamp = () => new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
 /** A pack id in the repository's packs/ folder, or a path to any pack folder. */
 const packDir = (idOrPath: string): string => (existsSync(join(idOrPath, 'pack.json')) ? resolve(idOrPath) : join(root, 'packs', idOrPath))
 const outRoot = join(root, 'bench-output')
+/** With --mock, a scorer that gives every item a 3: proves the scoring path, not the judgment. */
+const mockScorer: Scorer = async (prompt) => JSON.stringify({ items: [...prompt.system.matchAll(/^(\d+)\. \[/gm)].map((m) => ({ id: Number(m[1]), score: 3, reason: 'mock' })), beats: [] })
 
 async function main(): Promise<void> {
   const compare = args.indexOf('--compare')
@@ -54,10 +59,13 @@ async function main(): Promise<void> {
 
   const dir = packDir(option('--pack') ?? 'neonpunk-nights')
   const content = loadPack(dir)
-  const valued = new Set(['--label', '--config', '--pack', '--repeat'])
+  const valued = new Set(['--label', '--config', '--pack', '--repeat', '--scenario'])
   const wanted = args.filter((arg, i) => !arg.startsWith('--') && !valued.has(args[i - 1] ?? ''))
-  const all = loadScenarios(join(dir, 'bench'))
-  const scenarios = wanted.length > 0 ? all.filter((s) => wanted.includes(s.id)) : all
+  const files = args.flatMap((arg, i) => (args[i - 1] === '--scenario' ? [arg] : []))
+  const extra = files.map((file) => scenarioFile(resolve(file)))
+  const all = [...loadScenarios(join(dir, 'bench')), ...extra]
+  // Scenario files given by path run on their own unless pack scenarios are named too.
+  const scenarios = wanted.length > 0 ? [...all.filter((s) => wanted.includes(s.id)), ...extra.filter((s) => !wanted.includes(s.id))] : extra.length > 0 ? extra : all
   const missing = wanted.filter((id) => !all.some((s) => s.id === id))
   if (missing.length > 0) throw new Error(`No such scenario: ${missing.join(', ')}. Known: ${all.map((s) => s.id).join(', ')}`)
   if (flag('--no-summaries')) for (const s of scenarios) s.summaries = false
@@ -68,23 +76,35 @@ async function main(): Promise<void> {
   let llm: BenchLlm
   let models: Record<string, string>
   let sessionModels = {}
+  let scorer: Scorer | undefined
   if (flag('--mock')) {
     llm = mockLlm()
     models = { all: 'mock' }
+    scorer = mockScorer
   } else {
     const settings = benchSettings(option('--config') ?? join(root, 'bench.config.json'), process.env)
     if (!isConfigured(settings.writer)) throw new Error('No model set up for the bench. Create bench.config.json (same shape as the app settings) or set BENCH_BASE_URL and BENCH_MODEL. Or run with --mock.')
     llm = { turn: turnLlm(settings, false), summarize: summaryLlm(settings, false) }
     models = modelsOf(settings)
-    sessionModels = roleModels(settings)
+    sessionModels = roleModels(settings, ['director', 'writer', 'summary', ...(flag('--score') ? (['scorer'] as const) : [])])
+    scorer = scorerLlm(settings)
   }
 
   const label = option('--label') ?? (flag('--mock') ? 'mock' : 'run')
   const out = join(outRoot, `${stamp()}-${label}`)
   mkdirSync(out, { recursive: true })
   const engine = (JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as { version: string }).version
-  const bench = await runBench(content, scenarios, llm, label, models, { repeat, out, engine, roleModels: sessionModels, log: (line) => console.log(line) })
+  let bench = await runBench(content, scenarios, llm, label, models, { repeat, out, engine, roleModels: sessionModels, log: (line) => console.log(line) })
+  bench.options.score = flag('--score')
   writeRun(out, bench)
+  if (flag('--score') && scorer) {
+    console.log('\nScoring…')
+    for (const run of bench.scenarios) {
+      const r = await scoreSession(content, join(out, run.session), scorer)
+      console.log(`  ${run.session}: scored ${r.scored}, failed ${r.failed}`)
+    }
+    bench = readRun(out)
+  }
   writeFileSync(join(out, 'report.md'), renderReport(content, bench))
   console.log(`\nReport: ${join(out, 'report.md')}`)
   if (bench.scenarios.some((s) => s.error)) process.exitCode = 1

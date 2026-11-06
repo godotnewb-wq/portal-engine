@@ -1,11 +1,12 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
-import { join } from 'node:path'
+import { basename, join } from 'node:path'
 import { z } from 'zod'
 import { IdSchema } from '@engine/core'
 import { MetersSchema } from '@engine/characters'
 import type { GameState } from '@engine/state'
 import type { Pack } from '@engine/pack'
-import { createInitialState, startScene } from '@engine/state'
+import { createInitialState, startScene, TurnSchema } from '@engine/state'
+import { MINUTES_PER_TURN, RECENT_TURNS, SUMMARY_CHARS, turnText } from '@engine/scene'
 
 /**
  * A fixed scene for the test bench (narrator-scene-engine §10): who is where, how they feel going in, and the lines
@@ -25,6 +26,13 @@ export const ScenarioSchema = z.object({
   meters: z.record(IdSchema, MetersSchema).default({}),
   /** Starting moods, overriding the character files. */
   moods: z.record(IdSchema, z.string()).default({}),
+  /** Starting comfort (1–5), overriding the default. */
+  comfort: z.record(IdSchema, z.number().int().min(1).max(5)).default({}),
+  /**
+   * Turns already played in the scene, verbatim: a scenario made from a logged turn (`npm run logs -- to-scenario`)
+   * opens on the scene as it stood, so the replayed turn sees the same history.
+   */
+  history: z.array(TurnSchema).default([]),
   turns: z.array(z.string().min(1)).min(1),
   /** Run the end-of-scene summaries too. */
   summaries: z.boolean().default(true)
@@ -36,11 +44,14 @@ export function loadScenarios(dir: string): Scenario[] {
   return readdirSync(dir)
     .filter((name) => name.endsWith('.json'))
     .sort()
-    .map((name) => {
-      const parsed = ScenarioSchema.safeParse(JSON.parse(readFileSync(join(dir, name), 'utf8')))
-      if (!parsed.success) throw new Error(`${name}: ${parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')}`)
-      return parsed.data
-    })
+    .map((name) => scenarioFile(join(dir, name)))
+}
+
+/** One scenario file, checked. */
+export function scenarioFile(path: string): Scenario {
+  const parsed = ScenarioSchema.safeParse(JSON.parse(readFileSync(path, 'utf8')))
+  if (!parsed.success) throw new Error(`${basename(path)}: ${parsed.error.issues.map((i) => `${i.path.join('.')}: ${i.message}`).join('; ')}`)
+  return parsed.data
 }
 
 /** Problems a scenario has against the content: unknown places or people. */
@@ -58,5 +69,16 @@ export function scenarioState(content: Pack, scenario: Scenario): GameState {
   const fresh = createInitialState(content, scenario.seed)
   const withMeters = { ...fresh, meters: { ...fresh.meters, ...scenario.meters } }
   const state = startScene(content, withMeters, scenario.location, scenario.cast)
-  return { ...state, scene: { ...state.scene!, moods: { ...state.scene!.moods, ...scenario.moods } } }
+  const turns = scenario.history
+  // The running summary holds what fell out of the prompts' window, as applyTurn builds it.
+  const summary = turns
+    .slice(0, Math.max(0, turns.length - RECENT_TURNS))
+    .map((t) => turnText(content, state.player.name, t))
+    .join('\n\n')
+    .slice(-SUMMARY_CHARS)
+  return {
+    ...state,
+    time: state.time + turns.length * MINUTES_PER_TURN,
+    scene: { ...state.scene!, turns, summary, moods: { ...state.scene!.moods, ...scenario.moods }, comfort: { ...state.scene!.comfort, ...scenario.comfort } }
+  }
 }

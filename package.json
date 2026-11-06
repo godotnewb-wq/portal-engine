@@ -14,7 +14,8 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "preview:scene": "vite --config tools/preview-scene/vite.config.ts",
-    "bench": "tsx tools/bench/cli.ts"
+    "bench": "tsx tools/bench/cli.ts",
+    "logs": "tsx tools/logs/cli.ts"
   },
   "dependencies": {
     "react": "^19.3.0",
