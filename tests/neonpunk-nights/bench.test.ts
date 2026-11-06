@@ -1,10 +1,13 @@
+import { mkdtempSync, readdirSync } from 'node:fs'
+import { tmpdir } from 'node:os'
 import { join } from 'node:path'
+import { readSession } from '@platform/logs'
 import { describe, expect, it } from 'vitest'
 import { content, PACK_DIR } from './support'
 import { SettingsSchema } from '@llm'
 import { benchSettings, modelsOf } from '../../tools/bench/config'
 import { compareRuns, renderReport, stats } from '../../tools/bench/report'
-import { mockLlm, runBench, runScenario, type BenchLlm } from '../../tools/bench/run'
+import { callsOf, mockLlm, readRun, runBench, runScenario, writeRun, type BenchLlm } from '../../tools/bench/run'
 import { loadScenarios, scenarioProblems, scenarioState, ScenarioSchema } from '../../tools/bench/scenario'
 
 const scenarios = loadScenarios(join(PACK_DIR, 'bench'))
@@ -30,13 +33,28 @@ describe('runBench (acceptance 9: the bench runs its scenarios)', () => {
     expect(bench.scenarios.map((s) => s.error)).toEqual(scenarios.map(() => undefined))
     for (const run of bench.scenarios) {
       expect(run.turns).toHaveLength(3)
-      expect(run.summaries.length).toBeGreaterThan(0)
+      expect(run.sceneEnd!.witnesses.length).toBeGreaterThan(0)
       expect(stats(run).calls).toBe(6)
     }
     const report = renderReport(content, bench)
     expect(report).toMatch(/^# Scene test bench — test/)
     expect(report).toMatch(/\| three-way-argument \| 3 \| 6 \|/)
     expect(report).toMatch(/Checks forced to a natural 18/)
+  })
+
+  it('writes the play-log layout, one session folder per scenario and repeat, and reads back to the same report', async () => {
+    const out = mkdtempSync(join(tmpdir(), 'bench-'))
+    const bench = await runBench(content, scenarios.slice(0, 2), mockLlm(), 'test', { all: 'mock' }, { out, repeat: 2 })
+    writeRun(out, bench)
+    expect(readdirSync(out).sort()).toEqual(['deception-caught-1', 'deception-caught-2', 'deception-uncaught-1', 'deception-uncaught-2', 'run.json'])
+    expect(bench.scenarios.map((s) => [s.id, s.repeat, s.seed])).toEqual([['deception-caught', 1, 11], ['deception-caught', 2, 12], ['deception-uncaught', 1, 11], ['deception-uncaught', 2, 12]])
+    const log = readSession(join(out, 'deception-caught-1'))
+    expect(log.session).toMatchObject({ kind: 'bench', bench: { scenario: 'deception-caught', repeat: 1, forceNatural: 18 }, endedAt: expect.any(String) })
+    expect(log.turns.map((t) => t.turnId)).toEqual(['deception-caught-1', 'deception-caught-2', 'deception-caught-3'])
+    expect(log.scenes.map((s) => s.type)).toEqual(['start', 'end'])
+    const back = readRun(out)
+    expect(renderReport(content, back)).toBe(renderReport(content, bench))
+    expect(back.scenarios[0]!.turns[0]!.calls[0]!.prompt).toEqual(bench.scenarios[0]!.turns[0]!.calls[0]!.prompt)
   })
 })
 
@@ -65,25 +83,26 @@ describe('runScenario', () => {
 
   it('records each call by role, with the prompt and raw reply, and names the rewrite', async () => {
     const run = await runScenario(content, { ...caught, turns: [caught.turns[0]!], summaries: false }, scripted())
-    expect(run.calls.map((c) => c.role)).toEqual(['director', 'writer', 'rewrite'])
-    expect(run.calls[0]!.user).toMatch(/who's the client/)
-    expect(run.calls[1]!.reply).toMatch(/Brask: "Can we go\?"/)
-    expect(run.calls[1]!.firstTextMs).toBeDefined()
-    expect(run.turns[0]!.rewrite).toEqual(['Beat 3: Brask was not planned to speak. Show them only through a reaction in narration.'])
+    const calls = callsOf(run)
+    expect(calls.map((c) => c.role)).toEqual(['director', 'writer', 'rewrite'])
+    expect(calls[0]!.prompt.user).toMatch(/who's the client/)
+    expect(calls[1]!.reply).toMatch(/Brask: "Can we go\?"/)
+    expect(calls[1]!.firstTextMs).toBeDefined()
+    expect(run.turns[0]!.findings.map((p) => p.fix)).toEqual(['Beat 3: Brask was not planned to speak. Show them only through a reaction in narration.'])
   })
 
   it('forces the scenario’s rolls', async () => {
     const run = await runScenario(content, { ...caught, turns: [caught.turns[0]!], summaries: false }, scripted())
-    expect(run.turns[0]!.checks).toEqual(['Vex — Empathy 21 vs 15: strong success'])
+    expect(run.turns[0]!.checks.map((c) => c.line)).toEqual(['Vex — Empathy 21 vs 15: strong success'])
     const missed = await runScenario(content, { ...caught, forceNatural: 3, turns: [caught.turns[0]!], summaries: false }, scripted())
-    expect(missed.turns[0]!.checks[0]).toMatch(/: failure$/)
+    expect(missed.turns[0]!.checks[0]!.line).toMatch(/: failure$/)
   })
 
   it('stops a scenario that doesn’t fit the content before calling anything', async () => {
     const bad = ScenarioSchema.parse({ id: 'bad', title: 'Bad', watchFor: '', location: 'nowhere', cast: ['ghost'], turns: ['Hi'] })
     const run = await runScenario(content, bad, mockLlm())
     expect(run.error).toBe('unknown location "nowhere"; unknown character "ghost"')
-    expect(run.calls).toEqual([])
+    expect(callsOf(run)).toEqual([])
   })
 
   it('records a failure mid-run and keeps what came before', async () => {
@@ -92,7 +111,7 @@ describe('runScenario', () => {
     const run = await runScenario(content, caught, failing)
     expect(run.turns).toHaveLength(1)
     expect(run.error).toBe('rate limited')
-    expect(run.calls.at(-1)).toMatchObject({ role: 'director', error: 'rate limited' })
+    expect(callsOf(run).at(-1)).toMatchObject({ role: 'director', error: 'rate limited' })
   })
 })
 

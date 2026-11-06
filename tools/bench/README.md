@@ -10,13 +10,15 @@ npm run bench -- --pack test-fixture            another pack: an id in packs/, o
 npm run bench -- deception-caught three-way-argument   only these
 npm run bench -- --label tighter-style-guide    name the run
 npm run bench -- --no-summaries                 skip end-of-scene summaries (cheaper)
+npm run bench -- --repeat 10                    play each scenario 10 times, seeds counting up from its own
 npm run bench -- --mock                         no LLM: checks the harness, not the prose
 npm run bench -- --compare bench-output/<run A> bench-output/<run B>
 ```
 
 Each run writes `bench-output/<time>-<label>/`:
 - `report.md`: numbers per scenario (calls, rewrites, salvaged turns, fallback plans, corrections, latency), then every turn's plan, rolls, beats and rewrite fixes, and each character's memory and meter changes.
-- `run.json`: everything, including every prompt and raw reply, for digging into why a turn went the way it did.
+- `run.json`: the run's label, pack and version, prompt version, models and options, and where each scenario's session is.
+- one session folder per scenario run (`<scenario>-<repeat>/`) in the play-log layout (`@platform/logs`): `session.json`, `turns.jsonl` (the turn traces), `calls.jsonl` and `prompts.jsonl` (every prompt in full and every raw reply), `scenes.jsonl`, `errors.jsonl`. `npm run logs` reads these the same way it reads play sessions.
 
 Runs record the pack's id and version. `--compare` writes `bench-output/compare-<time>.md`: both runs' numbers, then each shared scenario turn by turn with the beats in two columns.
 

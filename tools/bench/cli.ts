@@ -8,18 +8,22 @@
 //   npm run bench -- --label new-style-guide       name the run (its folder and report title)
 //   npm run bench -- --mock                        no LLM: checks the harness, not the prose
 //   npm run bench -- --no-summaries                skip the end-of-scene summaries
+//   npm run bench -- --repeat 10                   play each scenario 10 times with different seeds
 //   npm run bench -- --compare bench-output/A bench-output/B   side by side, into bench-output/compare-….md
 //
-// Scenarios live in the pack's bench/ folder. Each run writes bench-output/<time>-<label>/run.json (everything, prompts and raw replies included) and report.md.
+// Scenarios live in the pack's bench/ folder. Each run writes bench-output/<time>-<label>/: run.json (label, pack,
+// prompt version, models, options), report.md, and one session folder per scenario run in the play-log layout
+// (session.json, turns.jsonl, calls.jsonl, prompts.jsonl, …), so `npm run logs` reads bench runs and play alike.
 
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
+import { roleModels } from '@platform/logs'
 import { join, resolve } from 'node:path'
 import { isConfigured } from '@llm'
 import { existsSync } from 'node:fs'
 import { loadPack } from '@platform/packs'
 import { benchSettings, modelsOf } from './config'
 import { compareRuns, renderReport } from './report'
-import { mockLlm, runBench, type BenchLlm, type BenchRun } from './run'
+import { mockLlm, readRun, runBench, writeRun, type BenchLlm } from './run'
 import { loadScenarios } from './scenario'
 import { summaryLlm, turnLlm } from '@platform/roles'
 
@@ -40,8 +44,7 @@ async function main(): Promise<void> {
   if (compare >= 0) {
     const [a, b] = args.slice(compare + 1, compare + 3)
     if (!a || !b) throw new Error('--compare needs two run folders')
-    const read = (dir: string): BenchRun => JSON.parse(readFileSync(join(resolve(dir), 'run.json'), 'utf8'))
-    const [runA, runB] = [read(a), read(b)]
+    const [runA, runB] = [readRun(resolve(a)), readRun(resolve(b))]
     mkdirSync(outRoot, { recursive: true })
     const path = join(outRoot, `compare-${stamp()}.md`)
     writeFileSync(path, compareRuns(loadPack(packDir(runA.pack)), runA, runB))
@@ -51,7 +54,7 @@ async function main(): Promise<void> {
 
   const dir = packDir(option('--pack') ?? 'neonpunk-nights')
   const content = loadPack(dir)
-  const valued = new Set(['--label', '--config', '--pack'])
+  const valued = new Set(['--label', '--config', '--pack', '--repeat'])
   const wanted = args.filter((arg, i) => !arg.startsWith('--') && !valued.has(args[i - 1] ?? ''))
   const all = loadScenarios(join(dir, 'bench'))
   const scenarios = wanted.length > 0 ? all.filter((s) => wanted.includes(s.id)) : all
@@ -59,8 +62,12 @@ async function main(): Promise<void> {
   if (missing.length > 0) throw new Error(`No such scenario: ${missing.join(', ')}. Known: ${all.map((s) => s.id).join(', ')}`)
   if (flag('--no-summaries')) for (const s of scenarios) s.summaries = false
 
+  const repeat = Number(option('--repeat') ?? 1)
+  if (!Number.isInteger(repeat) || repeat < 1) throw new Error('--repeat needs a whole number of 1 or more')
+
   let llm: BenchLlm
   let models: Record<string, string>
+  let sessionModels = {}
   if (flag('--mock')) {
     llm = mockLlm()
     models = { all: 'mock' }
@@ -69,13 +76,15 @@ async function main(): Promise<void> {
     if (!isConfigured(settings.writer)) throw new Error('No model set up for the bench. Create bench.config.json (same shape as the app settings) or set BENCH_BASE_URL and BENCH_MODEL. Or run with --mock.')
     llm = { turn: turnLlm(settings, false), summarize: summaryLlm(settings, false) }
     models = modelsOf(settings)
+    sessionModels = roleModels(settings)
   }
 
   const label = option('--label') ?? (flag('--mock') ? 'mock' : 'run')
-  const bench = await runBench(content, scenarios, llm, label, models, (line) => console.log(line))
   const out = join(outRoot, `${stamp()}-${label}`)
   mkdirSync(out, { recursive: true })
-  writeFileSync(join(out, 'run.json'), JSON.stringify(bench, null, 2))
+  const engine = (JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as { version: string }).version
+  const bench = await runBench(content, scenarios, llm, label, models, { repeat, out, engine, roleModels: sessionModels, log: (line) => console.log(line) })
+  writeRun(out, bench)
   writeFileSync(join(out, 'report.md'), renderReport(content, bench))
   console.log(`\nReport: ${join(out, 'report.md')}`)
   if (bench.scenarios.some((s) => s.error)) process.exitCode = 1
