@@ -27,6 +27,7 @@ On Windows, if PowerShell refuses to run `npm` ("running scripts is disabled on 
 | `npm run build` | Production build into `out/` |
 | `npm run bench` | The scene test bench: a pack's scenarios through the real pipeline (`tools/bench/README.md`) |
 | `npm run preview:scene` | The screens in a browser with a mock API and scripted turns, no Electron or LLM |
+| `npm run logs` | Play logs and bench runs: transcripts, flags, stats, blind voice tests, scenarios from logged turns, AI scoring (`tools/logs/README.md`) |
 
 ## How it's organized
 
@@ -38,7 +39,7 @@ src/
   platform/    The only code touching disk: packs, saves, settings; roles wires LLM profiles to the engine.
   app/         Electron main, preload, React renderer. Shows state, forwards input.
 packs/         Game packs (data only)
-tools/         bench/, preview-scene/
+tools/         bench/, logs/, preview-scene/
 tests/         Pack tests (tests/<pack>/), the shared fixture, architecture checks
 ```
 
