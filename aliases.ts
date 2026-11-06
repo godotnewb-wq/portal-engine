@@ -5,5 +5,6 @@ export const aliases = {
   '@llm': resolve(__dirname, 'src/llm/index.ts'),
   '@engine': resolve(__dirname, 'src/engine'),
   '@platform': resolve(__dirname, 'src/platform'),
-  '@app': resolve(__dirname, 'src/app')
+  '@app': resolve(__dirname, 'src/app'),
+  '@tests': resolve(__dirname, 'tests')
 }

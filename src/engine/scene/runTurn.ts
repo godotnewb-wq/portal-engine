@@ -1,4 +1,3 @@
-import type { SceneEvent } from '@app/ipc'
 import type { Beat, GameState } from '@engine/state'
 import { parseReply, type ParsedReply } from './beats'
 import type { Pack } from '@engine/pack'
@@ -20,7 +19,10 @@ export interface TurnLlm {
  * What the renderer is told as the turn goes, so beats can show while the writer streams. A `restart` means what was
  * streamed so far is being replaced: by another profile, or by the rewrite.
  */
-export type TurnEvent = SceneEvent
+export type TurnEvent =
+  | { type: 'planned'; speakers: string[]; checks: string[]; corrections: string[]; fallback: boolean }
+  | { type: 'delta'; text: string }
+  | { type: 'restart'; reason: 'fallback-profile' | 'rewrite'; problems?: string[] }
 
 export interface TurnOutcome {
   state: GameState

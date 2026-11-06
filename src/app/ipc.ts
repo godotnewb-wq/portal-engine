@@ -1,4 +1,5 @@
 import type { Pack } from '@engine/pack'
+import type { TurnEvent } from '@engine/scene'
 import type { PackListing } from '@platform/packs'
 import type { WitnessReport } from '@engine/relationships'
 import type { SaveRequest, SaveSummary, SlotId } from '@engine/state'
@@ -51,11 +52,8 @@ export type SceneTurnResponse =
     }
   | { ok: false; error: string }
 
-/** Streamed while a turn runs (see TurnEvent in main/scene/runTurn.ts). */
-export type SceneEvent =
-  | { type: 'planned'; speakers: string[]; checks: string[]; corrections: string[]; fallback: boolean }
-  | { type: 'delta'; text: string }
-  | { type: 'restart'; reason: 'fallback-profile' | 'rewrite'; problems?: string[] }
+/** Streamed while a turn runs: the engine's turn events, passed through. */
+export type SceneEvent = TurnEvent
 
 /** The scene's close: the new state (scene cleared) and what each witness took from it. */
 export type SceneEndResponse = { ok: true; state: GameState; reports: WitnessReport[] } | { ok: false; error: string }

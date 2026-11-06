@@ -60,7 +60,7 @@ export interface PlannedCheck {
   edge?: 'advantage' | 'disadvantage'
   /** Filled in by the game once rolled. */
   result?: CheckResult
-  /** The line shown to the player, e.g. "Mara — Notice 17 vs 15: success". */
+  /** The line shown to the player, e.g. "Ada — Search 17 vs 15: success". */
   line?: string
 }
 

@@ -103,7 +103,7 @@ export function rollCheck(r: Ruleset, stats: StatBlock, request: CheckRequest, r
 
 const DEGREE_LABEL: Record<Degree, string> = { strong: 'strong success', success: 'success', cost: 'success at a cost', failure: 'failure' }
 
-/** How a check reads on screen, e.g. "Mara — Notice 17 vs 15: success", using the skill's name from the ruleset. */
+/** How a check reads on screen, e.g. "Ada — Search 17 vs 15: success", using the skill's name from the ruleset. */
 export function describeCheck(r: Ruleset, who: string, result: CheckResult): string {
   const skill = skillById(r, result.skill)?.name ?? result.skill
   const crit = result.critical === 'hit' ? ` (natural ${result.natural})` : result.critical === 'miss' ? ` (natural ${result.natural})` : ''
