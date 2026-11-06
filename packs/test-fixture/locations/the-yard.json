@@ -1,0 +1,10 @@
+{
+  "id": "the-yard",
+  "name": "The Guild Yard",
+  "tier": "lower",
+  "district": "east gate",
+  "description": "A muddy yard of crates and carts behind the Guild hall.",
+  "texture": { "sights": ["stacked crates", "a cart with a broken wheel"], "sounds": ["a gate creaking"], "smells": ["wet straw"] },
+  "walkOns": [{ "id": "clerk", "label": "the gate clerk", "name": "Pell", "species": "person", "look": "thin, ink on his cuffs", "manner": "bored", "role": "logs who comes in" }],
+  "extras": ["carters unloading"]
+}

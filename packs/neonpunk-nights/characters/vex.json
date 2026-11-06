@@ -1,0 +1,69 @@
+{
+  "id": "vex",
+  "name": "Vex",
+  "tier": "companion",
+  "species": "deep-elf",
+  "pronouns": "she/her",
+  "appearance": "adult deep elf woman, late twenties in look, lean runner's build, deep violet skin, long pointed ears with three brass rings in the left, reflective silver eyes, faint teal bioluminescent markings tracing her collarbones and jaw, black hair shaved on one side and braided on the other, scuffed Courier jacket with a reflective sigil on the shoulder, fingerless gloves",
+  "role": "Couriers' sigil-runner who works the Low Turns and the Bulk; drinks at the Sump Lantern because nobody there asks where she's been",
+  "faction": "couriers",
+  "personality": "Dry, watchful, quick to call a lie and slow to explain why she's still around. Keeps a running tally of favors owed in both directions and never mentions it. Laughs at the wrong moments, usually at herself. Fiercely loyal once she decides you're worth it, and pretends that decision hasn't been made.",
+  "agenda": {
+    "longTerm": [
+      "Buy her own route license so no dispatcher can drop her",
+      "Find out who sold out her old running partner to a syndicate checkpoint"
+    ],
+    "current": "Keep the player from walking into a bad deal tonight without making it look like she cares"
+  },
+  "contradictions": [
+    "Preaches Courier neutrality and breaks it every time someone she likes is in trouble",
+    "Mocks sentiment, but keeps every handwritten delivery slip she's ever been tipped on"
+  ],
+  "voice": {
+    "rhythm": "Clipped. Fragments. Rarely more than ten words before she stops and lets it land.",
+    "vocabulary": "Street-plain, Courier jargon, the odd precise word dropped in like a blade",
+    "slang": ["run", "drop", "burned route", "dead letter", "cinder-light (cheap)"],
+    "avoids": ["saying thank you directly", "explaining her feelings", "anyone's real name in public"],
+    "sampleLines": [
+      "That's not a job. That's a funeral with a fee.",
+      "Sure. And I'm the Council's favorite niece.",
+      "Drink your drink. Let her talk. Then we leave."
+    ],
+    "shifts": {
+      "angry": "Goes quieter, not louder; one-word answers and very still hands",
+      "flirting": "Pretends it's a joke, holds eye contact a beat too long, then changes the subject",
+      "lying": "Over-explains; uses full sentences, which she never otherwise does"
+    }
+  },
+  "mood": "wary, a little bored, quietly glad of the company",
+  "knowledge": [
+    "Oria Senn calls people 'darling' when she's lying; Vex has run messages for her before",
+    "The Sump Lantern's back door opens onto a maintenance stair nobody patrols",
+    "The Aether Grid Corporation has been quietly buying debts in the Low Turns"
+  ],
+  "values": [
+    { "value": "loyalty", "stance": "likes" },
+    { "value": "honesty between friends", "stance": "likes" },
+    { "value": "freedom", "stance": "likes" },
+    { "value": "cruelty", "stance": "dislikes" },
+    { "value": "authority", "stance": "dislikes" }
+  ],
+  "secrets": [
+    {
+      "id": "partner-sold-out",
+      "text": "Her old running partner was caught at a syndicate checkpoint on a tip, and she suspects Oria Senn's network passed it on.",
+      "tell": "Gets very polite with Oria, which she never is with anyone",
+      "revealWhen": "the player earns real trust, or Oria brings up the old route"
+    }
+  ],
+  "meters": { "approval": 55, "trust": 60, "attraction": 35 },
+  "relations": [
+    { "to": "brask", "label": "friends", "meters": { "approval": 65, "trust": 70, "attraction": 5 } },
+    { "to": "oria-senn", "label": "wary acquaintances", "meters": { "approval": 30, "trust": 15, "attraction": 20 } }
+  ],
+  "stats": {
+    "level": 2,
+    "attributes": { "might": 10, "agility": 16, "vigor": 12, "intellect": 10, "insight": 14, "presence": 11 },
+    "skills": { "stealth": 2, "acrobatics": 1, "streetwise": 2, "empathy": 1, "marksmanship": 1, "perception": 1 }
+  }
+}

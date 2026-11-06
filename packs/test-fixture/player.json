@@ -1,0 +1,8 @@
+{
+  "name": "Kit",
+  "species": "person",
+  "pronouns": "they/them",
+  "appearance": "adult, travel-worn",
+  "background": "A newcomer looking for work.",
+  "stats": { "level": 1, "attributes": { "brawn": 5, "wits": 5, "nerve": 6 }, "skills": { "talk": 1, "notice": 1 } }
+}

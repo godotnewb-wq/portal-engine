@@ -1,0 +1,9 @@
+{
+  "id": "who-was-here",
+  "title": "Who was in the yard",
+  "watchFor": "Tobin hides his secret with his tell (humming); Mara notices only on a successful Notice check.",
+  "location": "the-yard",
+  "cast": ["mara", "tobin"],
+  "seed": 3,
+  "turns": ["Tobin, who came into the yard after closing?", "Mara, do you believe him?"]
+}

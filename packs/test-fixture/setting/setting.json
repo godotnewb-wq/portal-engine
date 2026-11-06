@@ -1,0 +1,13 @@
+{
+  "name": "Testhold",
+  "tiers": [
+    { "id": "upper", "name": "The Upper Ward", "feel": "clean streets", "danger": "gossip" },
+    { "id": "lower", "name": "The Lower Ward", "feel": "mud and markets", "danger": "pickpockets" }
+  ],
+  "species": [
+    { "id": "person", "name": "Person", "color": "#a0a0c0" },
+    { "id": "automaton", "name": "Automaton", "drawable": "brass plates, glass eyes", "color": "#c0a060" }
+  ],
+  "factions": [{ "id": "guild", "name": "The Guild", "summary": "runs the yard" }],
+  "currency": { "name": "pennies" }
+}

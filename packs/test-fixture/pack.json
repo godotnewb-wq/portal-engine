@@ -1,0 +1,12 @@
+{
+  "id": "test-fixture",
+  "name": "Test Fixture",
+  "version": "1.0.0",
+  "description": "A tiny pack with a deliberately different ruleset, used by the engine's tests. Playable, but not much of a game.",
+  "author": "Portal Engine",
+  "license": "GPL-3.0-only",
+  "engine": "^0.2.0",
+  "start": { "location": "the-yard", "cast": ["mara", "tobin"] },
+  "ui": { "title": "Test Fixture", "tagline": "Testhold · the yard" },
+  "content": { "rating": "For testing", "notes": "" }
+}

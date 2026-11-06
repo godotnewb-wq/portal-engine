@@ -1,0 +1,21 @@
+{
+  "id": "tobin",
+  "name": "Tobin",
+  "tier": "recurring",
+  "species": "automaton",
+  "pronouns": "he/him",
+  "appearance": "adult-sized automaton, dented brass plates, one cracked glass eye",
+  "role": "Night porter in the yard",
+  "personality": "Slow, polite, literal; hums when nervous.",
+  "agenda": { "longTerm": ["Earn his own key to the gate"], "current": "Keep anyone from asking about last night" },
+  "contradictions": ["Never lies, and avoids every question"],
+  "voice": {
+    "rhythm": "Slow, formal",
+    "vocabulary": "Old-fashioned",
+    "sampleLines": ["I could not say, miss."],
+    "shifts": { "angry": "Goes silent", "flirting": "Polishes his plates", "lying": "Hums" }
+  },
+  "mood": "uneasy",
+  "secrets": [{ "id": "after-closing", "text": "Tobin let someone into the yard after closing.", "tell": "Hums" }],
+  "meters": { "warmth": 6, "bond": 3 }
+}

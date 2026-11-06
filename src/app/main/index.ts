@@ -1,0 +1,204 @@
+import { app, BrowserWindow, dialog, ipcMain, safeStorage, shell } from 'electron'
+import { mkdirSync } from 'node:fs'
+import { join } from 'node:path'
+import type { Pack } from '@engine/pack'
+import { endScene } from '@engine/relationships'
+import { runTurn } from '@engine/scene'
+import { GameStateSchema, SaveRequestSchema, SlotIdSchema, stateProblems } from '@engine/state'
+import { chatCompletion, isConfigured, listModels, ListModelsRequestSchema, LLM_PROFILE_IDS, SettingsUpdateSchema, toView, type LlmProfileId } from '@llm'
+import { discoverPacks, type PackListing, type PackSource } from '@platform/packs'
+import { summaryLlm, turnLlm } from '@platform/roles'
+import { SaveStore } from '@platform/saves'
+import { SettingsStore, type KeyCipher } from '@platform/settings'
+import {
+  IPC,
+  type ChoosePackResponse,
+  type LoadResponse,
+  type SaveResponse,
+  type SceneEndResponse,
+  type SceneEvent,
+  type SceneTurnResponse,
+  type TestConnectionResult
+} from '../ipc'
+
+/** Bundled packs: beside the app when packaged, the repository's `packs/` when run from source. */
+const bundledPacksDir = (): string => (app.isPackaged ? join(process.resourcesPath, 'packs') : join(app.getAppPath(), 'packs'))
+/** Packs the player installs: dropped into the app-data folder (architecture §9). */
+const userPacksDir = (): string => join(app.getPath('userData'), 'packs')
+/** Each pack's saves in a folder of their own. */
+const savesDir = (packId: string): string => join(app.getPath('userData'), 'saves', packId)
+
+function keyCipher(): KeyCipher | undefined {
+  if (!safeStorage.isEncryptionAvailable()) return undefined
+  return {
+    encrypt: (plain) => safeStorage.encryptString(plain).toString('base64'),
+    decrypt: (stored) => safeStorage.decryptString(Buffer.from(stored, 'base64'))
+  }
+}
+
+function createWindow(): void {
+  const win = new BrowserWindow({
+    width: 1280,
+    height: 800,
+    minWidth: 960,
+    minHeight: 600,
+    backgroundColor: '#0d0b12',
+    title: 'Portal Engine',
+    webPreferences: { preload: join(__dirname, '../preload/index.js'), sandbox: false, contextIsolation: true }
+  })
+  // electron-vite sets ELECTRON_RENDERER_URL when running the dev server.
+  const devUrl = process.env['ELECTRON_RENDERER_URL']
+  if (devUrl) win.loadURL(devUrl)
+  else win.loadFile(join(__dirname, '../renderer/index.html'))
+}
+
+const profileId = (value: unknown): LlmProfileId => {
+  if (!LLM_PROFILE_IDS.includes(value as LlmProfileId)) throw new Error(`Unknown profile "${String(value)}"`)
+  return value as LlmProfileId
+}
+
+app.whenReady().then(() => {
+  const settings = new SettingsStore(join(app.getPath('userData'), 'settings.json'), keyCipher())
+
+  // The packs found at the last scan, and the one being played. Everything a game does goes through `playing`.
+  let found: { listings: PackListing[]; packs: Map<string, Pack> } = { listings: [], packs: new Map() }
+  let playing: { pack: Pack; saves: SaveStore } | null = null
+  const sources = (): PackSource[] => [
+    { kind: 'bundled', dir: bundledPacksDir() },
+    { kind: 'user', dir: userPacksDir() },
+    ...settings.getPackFolders().map((dir): PackSource => ({ kind: 'extra', dir }))
+  ]
+  const current = (): { pack: Pack; saves: SaveStore } => {
+    if (!playing) throw new Error('No pack is chosen yet.')
+    return playing
+  }
+
+  ipcMain.handle(IPC.listPacks, () => {
+    found = discoverPacks(sources())
+    return found.listings
+  })
+  ipcMain.handle(IPC.choosePack, (_event, key: unknown): ChoosePackResponse => {
+    const pack = typeof key === 'string' ? found.packs.get(key) : undefined
+    if (!pack) {
+      const listing = found.listings.find((l) => l.key === key)
+      return { ok: false, error: listing ? `This pack can't be played: ${listing.problems.join('; ')}` : 'That pack is no longer there.' }
+    }
+    playing = { pack, saves: new SaveStore(savesDir(pack.manifest.id), { id: pack.manifest.id, version: pack.manifest.version }) }
+    return { ok: true, pack }
+  })
+  ipcMain.handle(IPC.openPacksFolder, async () => {
+    const dir = userPacksDir()
+    mkdirSync(dir, { recursive: true })
+    await shell.openPath(dir)
+    return dir
+  })
+  ipcMain.handle(IPC.getPackFolders, () => settings.getPackFolders())
+  ipcMain.handle(IPC.setPackFolders, (_event, folders: unknown) =>
+    settings.setPackFolders(Array.isArray(folders) ? folders.filter((f): f is string => typeof f === 'string') : [])
+  )
+  ipcMain.handle(IPC.chooseFolder, async () => {
+    const result = await dialog.showOpenDialog({ properties: ['openDirectory'] })
+    return result.canceled ? null : (result.filePaths[0] ?? null)
+  })
+
+  ipcMain.handle(IPC.getSettings, () => toView(settings.get()))
+  ipcMain.handle(IPC.saveSettings, (_event, update: unknown) => toView(settings.update(SettingsUpdateSchema.parse(update))))
+  ipcMain.handle(IPC.listModels, async (_event, request: unknown) => {
+    const { profileId: id, baseUrl, apiKey } = ListModelsRequestSchema.parse(request)
+    try {
+      return { models: await listModels({ baseUrl, apiKey: apiKey ?? settings.get()[id].apiKey }) }
+    } catch (error) {
+      return { models: [], error: (error as Error).message }
+    }
+  })
+  ipcMain.handle(IPC.testConnection, async (_event, id: unknown): Promise<TestConnectionResult> => {
+    const profile = settings.get()[profileId(id)]
+    if (!isConfigured(profile)) return { ok: false, detail: 'Set an endpoint and a model first.' }
+    try {
+      const reply = await chatCompletion(profile, {
+        system: 'Reply with one short sentence.',
+        messages: [{ role: 'user', content: 'Say hello.' }],
+        maxTokens: 60,
+        timeoutMs: 30_000
+      })
+      return { ok: true, detail: reply }
+    } catch (error) {
+      return { ok: false, detail: (error as Error).message }
+    }
+  })
+
+  // One turn at a time: a second request while one runs would be answered from a stale state.
+  let turning = false
+  ipcMain.handle(IPC.sceneTurn, async (event, request: unknown): Promise<SceneTurnResponse> => {
+    if (turning) return { ok: false, error: 'A turn is already running.' }
+    turning = true
+    try {
+      const { pack } = current()
+      const { state: raw, input } = request as { state: unknown; input: unknown }
+      const state = GameStateSchema.parse(raw)
+      if (typeof input !== 'string' || input.trim().length === 0) return { ok: false, error: 'Say or do something first.' }
+      const send = (sceneEvent: SceneEvent) => {
+        if (!event.sender.isDestroyed()) event.sender.send(IPC.sceneEvent, sceneEvent)
+      }
+      const outcome = await runTurn(pack, state, input.trim(), turnLlm(settings.get(), state.scene?.nsfw ?? false), send)
+      return {
+        ok: true,
+        state: outcome.state,
+        beats: outcome.beats,
+        checks: outcome.plan.checks.flatMap((c) => (c.line ? [c.line] : [])),
+        calls: outcome.calls,
+        corrections: outcome.corrections,
+        rewrite: outcome.problems.map((p) => p.fix)
+      }
+    } catch (error) {
+      return { ok: false, error: (error as Error).message }
+    } finally {
+      turning = false
+    }
+  })
+
+  ipcMain.handle(IPC.sceneEnd, async (_event, raw: unknown): Promise<SceneEndResponse> => {
+    if (turning) return { ok: false, error: 'A turn is still running.' }
+    turning = true
+    try {
+      const state = GameStateSchema.parse(raw)
+      return { ok: true, ...(await endScene(current().pack, state, summaryLlm(settings.get(), state.scene?.nsfw ?? false))) }
+    } catch (error) {
+      return { ok: false, error: (error as Error).message }
+    } finally {
+      turning = false
+    }
+  })
+
+  ipcMain.handle(IPC.listSaves, () => (playing ? playing.saves.list() : []))
+  ipcMain.handle(IPC.saveGame, (_event, request: unknown): SaveResponse => {
+    try {
+      const { slotId, state, name } = SaveRequestSchema.parse(request)
+      return { ok: true, summary: current().saves.save(slotId, state, new Date(), name) }
+    } catch (error) {
+      return { ok: false, error: (error as Error).message }
+    }
+  })
+  ipcMain.handle(IPC.loadGame, (_event, slotId: unknown): LoadResponse => {
+    try {
+      const { pack, saves } = current()
+      const state = saves.load(SlotIdSchema.parse(slotId))
+      // A save from another version of the pack loads only if it still fits the pack's content.
+      const problems = stateProblems(pack, state)
+      if (problems.length > 0) return { ok: false, error: `This save doesn't fit ${pack.manifest.name} ${pack.manifest.version}: ${problems.join('; ')}` }
+      return { ok: true, state }
+    } catch (error) {
+      return { ok: false, error: (error as Error).message }
+    }
+  })
+  ipcMain.handle(IPC.deleteSave, (_event, slotId: unknown) => current().saves.delete(SlotIdSchema.parse(slotId)))
+
+  createWindow()
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) createWindow()
+  })
+})
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') app.quit()
+})

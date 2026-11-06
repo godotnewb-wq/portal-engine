@@ -1,0 +1,30 @@
+{
+  "name": "Spire City",
+  "world": "Faeworld",
+  "tiers": [
+    { "id": "crown", "name": "The Crown", "feel": "the tower's top: governing families, high academies, Aether grid control rooms, the spaceport", "danger": "politics, security, assassination" },
+    { "id": "high-turns", "name": "The High Turns", "feel": "wealthy rings: corporate arcologies, galleries, Off-world House estates", "danger": "intrigue, surveillance, corporate violence" },
+    { "id": "bulk", "name": "The Bulk", "feel": "the working heart: markets, foundries, transit, most of the population", "danger": "crime, faction turf, ordinary trouble" },
+    { "id": "low-turns", "name": "The Low Turns", "feel": "old districts, overgrown machinery, Aether bleeding into everything; refugee communities", "danger": "gangs, wild magic, smugglers" },
+    { "id": "deepwell", "name": "The Deepwell", "feel": "the chasm where the Aether rises: half-ruined, raw and transforming", "danger": "monsters, wild magic, the unknown" }
+  ],
+  "species": [
+    { "id": "human", "name": "Human", "drawable": "", "color": "#8f8aa3" },
+    { "id": "light-elf", "name": "Light elf", "drawable": "long pointed ears, luminous pale or golden eyes, faint shimmering glyph-like markings, tall and elegant, pale to light bronze skin", "color": "#d8b55a" },
+    { "id": "deep-elf", "name": "Deep elf", "drawable": "long pointed ears, reflective eyes, faintly glowing bioluminescent markings, deep violet to midnight black skin", "color": "#3ec9c2" },
+    { "id": "goblin", "name": "Goblin", "drawable": "short but clearly adult in build and features, large expressive ears, sharp teeth, green to grey-blue skin", "color": "#7fbf5a" },
+    { "id": "golem", "name": "Golem", "drawable": "synthetic skin or panels, visible seams, rune-circuitry glowing beneath translucent panels, eyes with an inner rune-light, a glowing rune-core; always built in adult form", "color": "#c9773e" }
+  ],
+  "factions": [
+    { "id": "spire-council", "name": "The Spire Council", "summary": "the official government; real power sits in the Crown" },
+    { "id": "aether-grid-corporation", "name": "The Aether Grid Corporation", "summary": "controls the flow of Aether upward; partly owned by off-world money" },
+    { "id": "phoenix-academy", "name": "The Phoenix Academy", "summary": "Aether research and the center of the philosophical debate; rediscovering what was lost in the Burn" },
+    { "id": "animist-order", "name": "The Animist order", "summary": "guards the Aether's source; sees the grid as exploitation; peaceful to radical" },
+    { "id": "golem-rights-movement", "name": "The golem rights movement", "summary": "won golem personhood; now fights the leftover legal battles" },
+    { "id": "off-world-houses", "name": "The Off-world Houses", "summary": "galactic aristocratic families with business interests here" },
+    { "id": "refugee-networks", "name": "The refugee networks", "summary": "mutual-aid groups, and sometimes resistance cells" },
+    { "id": "low-turns-syndicates", "name": "The Low Turns syndicates", "summary": "raw Aether and artifact smuggling" },
+    { "id": "couriers", "name": "The Couriers", "summary": "neutral messengers and smugglers who work for anyone in any tier" }
+  ],
+  "currency": { "name": "cinders", "note": "metal coins digitally imprinted with credit values; credits are the galactic standard" }
+}

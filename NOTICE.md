@@ -1,6 +1,6 @@
 # Notices
 
-Neonpunk Nights is free software under the GNU General Public License, version 3 only (see `LICENSE`).
+Portal Engine is free software under the GNU General Public License, version 3 only (see `LICENSE`).
 
 ## Code adapted from Breedhaven University
 
@@ -13,17 +13,20 @@ Adapted so far:
 
 | This project | From Breedhaven |
 |---|---|
-| `src/main/ai/openai.ts` | `src/main/ai/openai.ts` (chat completions, model listing, refusal detection; streaming added) |
-| `src/main/ai/queue.ts` | `src/main/ai/queue.ts` |
-| `src/main/ai/router.ts` | `src/main/ai/router.ts` (generalised from main/nsfw to per-role profiles) |
-| `src/shared/game/refusal.ts` | `src/shared/game/refusal.ts` |
-| `src/shared/game/seed.ts` | `src/shared/game/seed.ts` |
-| `src/shared/settings.ts` | `src/shared/settings.ts` (profiles per role) |
-| `src/main/settings/store.ts` | `src/main/settings/store.ts` |
-| `src/main/saves/store.ts` | `src/main/saves/store.ts` |
-| `src/shared/saves.ts` | `src/shared/saves.ts` |
-| `src/shared/game/names.ts` | `src/shared/game/scene.ts` (`plainName`, `namesHer`) |
-| `src/shared/game/memory.ts` | `src/shared/game/memory.ts` (`selectMemories`) |
-| `src/shared/game/summary.ts` | `src/shared/game/memory.ts` (scene-change word scale and values, summary parsing approach) |
+| `src/llm/openai.ts` | `src/main/ai/openai.ts` (chat completions, model listing, refusal detection; streaming added) |
+| `src/llm/queue.ts` | `src/main/ai/queue.ts` |
+| `src/llm/router.ts` | `src/main/ai/router.ts` (generalised from main/nsfw to per-role profiles) |
+| `src/llm/refusal.ts` | `src/shared/game/refusal.ts` |
+| `src/llm/settings.ts` | `src/shared/settings.ts` (profiles per role) |
+| `src/engine/core/seed.ts` | `src/shared/game/seed.ts` |
+| `src/engine/core/names.ts` | `src/shared/game/scene.ts` (`plainName`, `namesHer`) |
+| `src/engine/memory/memory.ts` | `src/shared/game/memory.ts` (`selectMemories`) |
+| `src/engine/relationships/summary.ts` | `src/shared/game/memory.ts` (scene-change word scale and values, summary parsing approach) |
+| `src/engine/state/saves.ts` | `src/shared/saves.ts` |
+| `src/platform/saves/store.ts` | `src/main/saves/store.ts` |
+| `src/platform/settings/store.ts` | `src/main/settings/store.ts` |
 
-Original art, writing and content of Neonpunk Nights may be licensed separately.
+## Packs
+
+Game packs in `packs/` are data loaded by the engine; each states its own license in its `pack.json`.
+The Neonpunk Nights pack's writing and art may be licensed separately from the engine.
