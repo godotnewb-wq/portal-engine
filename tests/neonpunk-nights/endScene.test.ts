@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { barScene, content } from '../../../tests/support/bar'
-import { endScene } from './endScene'
+import { barScene, content } from './support'
+import { endScene } from '@engine/relationships'
 
 describe('endScene', () => {
   it('summarises every witness at once and applies the results', async () => {

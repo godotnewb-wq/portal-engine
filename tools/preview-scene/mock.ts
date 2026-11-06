@@ -1,24 +1,40 @@
+/// <reference types="vite/client" />
 // The renderer with a mock window.api: real content and the real turn pipeline, but a scripted director and writer
 // that stream with delays. Build with `npx vite build --config scripts/preview-scene/vite.config.ts`.
-import { CharacterSchema, PlayerSchema } from '@engine/characters'
-import { LocationSchema } from '@engine/world'
 import { SettingsSchema, toView } from '@llm'
-import type { Content } from '@engine/pack'
+import { buildPack, type Pack, type PackFiles } from '@engine/pack'
 import type { GameState } from '@engine/state'
 import type { RendererApi, SceneEvent } from '@app/ipc'
 import { runTurn, type TurnLlm } from '@engine/scene'
 import { endScene } from '@engine/relationships'
-import vex from '../../content/default/characters/vex.json'
-import brask from '../../content/default/characters/brask.json'
-import oria from '../../content/default/characters/oria-senn.json'
-import bar from '../../content/default/locations/sump-lantern.json'
-import player from '../../content/default/player.json'
+// Every pack in packs/, as Vite bundles them: JSON parsed, Markdown as text.
+const json = import.meta.glob('../../packs/*/**/*.json', { eager: true, import: 'default' }) as Record<string, unknown>
+const text = import.meta.glob('../../packs/*/**/*.md', { eager: true, import: 'default', query: '?raw' }) as Record<string, string>
 
-const content: Content = {
-  characters: [vex, brask, oria].map((c) => CharacterSchema.parse(c)),
-  locations: [LocationSchema.parse(bar)],
-  player: PlayerSchema.parse(player)
+/** One pack's files from the bundled globs, the same shape platform/packs reads from disk. */
+function packFiles(id: string): PackFiles {
+  const at = (path: string) => `../../packs/${id}/${path}`
+  const folder = (sub: string) =>
+    Object.entries(json)
+      .filter(([path]) => path.startsWith(at(`${sub}/`)))
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([path, data]) => ({ file: path.slice(at(`${sub}/`).length), data }))
+  return {
+    manifest: json[at('pack.json')],
+    ruleset: json[at('ruleset/ruleset.json')],
+    setting: json[at('setting/setting.json')],
+    primer: text[at('setting/primer.md')] ?? '',
+    tone: text[at('setting/tone.md')] ?? '',
+    phrases: json[at('setting/phrases.json')] ?? [],
+    player: json[at('player.json')],
+    characters: folder('characters'),
+    locations: folder('locations')
+  }
 }
+
+const built = buildPack(packFiles('neonpunk-nights'))
+if (!built.ok) throw new Error(built.problems.join('\n'))
+const content: Pack = built.pack
 
 const PLAN = JSON.stringify({
   speakers: [

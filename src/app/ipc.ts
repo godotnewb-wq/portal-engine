@@ -1,4 +1,4 @@
-import type { Content } from '@engine/pack'
+import type { Pack } from '@engine/pack'
 import type { WitnessReport } from '@engine/relationships'
 import type { SaveRequest, SaveSummary, SlotId } from '@engine/state'
 import type { Beat, GameState } from '@engine/state'
@@ -59,7 +59,7 @@ export type LoadResponse = { ok: true; state: GameState } | { ok: false; error: 
 
 /** What the preload script exposes to the renderer as `window.api`. */
 export interface RendererApi {
-  getContent(): Promise<Content>
+  getContent(): Promise<Pack>
   getSettings(): Promise<SettingsView>
   saveSettings(update: SettingsUpdate): Promise<SettingsView>
   listModels(request: ListModelsRequest): Promise<ListModelsResponse>

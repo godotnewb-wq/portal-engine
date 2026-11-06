@@ -2,8 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { GameStateSchema, type GameState } from '@engine/state'
 import { buildDirectorPrompt } from '@engine/scene'
 import { selectMemories } from '@engine/memory'
-import { applySummaries, bandOf, buildSummaryPrompt, parseSummary, plainSummary, transcript, witnesses } from './summary'
-import { barScene, content } from '../../../tests/support/bar'
+import { applySummaries, bandOf, buildSummaryPrompt, parseSummary, plainSummary, transcript, witnesses } from '@engine/relationships'
+import { barScene, content } from './support'
 
 /** The bar scene after the worked example's turn, with Brask having left. */
 function playedScene(): GameState {
@@ -39,7 +39,7 @@ describe('summary prompt', () => {
     const { system, user } = buildSummaryPrompt(content, playedScene(), 'oria-senn')
     expect(system).toMatch(/"much less", "less", "a little less", "unchanged"/)
     expect(system).toMatch(/Vex \[vex\]/)
-    expect(user).toMatch(/Secret \[client-is-consortium\]/)
+    expect(user).toMatch(/Secret \[client-is-grid-corporation\]/)
     expect(user).toMatch(/approval 45, trust 25, attraction 30/)
     expect(buildSummaryPrompt(content, playedScene(), 'brask').user).toMatch(/left before the scene was over/)
   })
@@ -47,22 +47,22 @@ describe('summary prompt', () => {
 
 describe('parseSummary', () => {
   it('maps the words to numbers through the config table', () => {
-    const s = parseSummary(JSON.stringify({
+    const s = parseSummary(content.ruleset, JSON.stringify({
       memory: 'Oria lied and Vex caught her.',
       level: 'Core',
       reason: 'Rook pressed her in public.',
       approval: 'a little less',
       trust: 'much_less',
       attraction: 'more',
-      learned: ['client-is-consortium'],
+      learned: ['client-is-grid-corporation'],
       others: [{ with: 'vex', approval: 'less', trust: 'unchanged', attraction: 'sideways', reason: 'She exposed me.' }]
     }))
-    expect(s).toMatchObject({ level: 'core', delta: { approval: -1, trust: -8, attraction: 4 }, learned: ['client-is-consortium'] })
+    expect(s).toMatchObject({ level: 'core', delta: { approval: -1, trust: -8, attraction: 4 }, learned: ['client-is-grid-corporation'] })
     expect(s.others).toEqual([{ with: 'vex', delta: { approval: -4, trust: 0, attraction: 0 }, reason: 'She exposed me.' }])
   })
 
   it('takes a reply that is not JSON as the memory alone, changing nothing', () => {
-    expect(parseSummary('Vex watched Oria squirm.')).toMatchObject({ memory: 'Vex watched Oria squirm.', delta: { approval: 0, trust: 0, attraction: 0 } })
+    expect(parseSummary(content.ruleset, 'Vex watched Oria squirm.')).toMatchObject({ memory: 'Vex watched Oria squirm.', delta: { approval: 0, trust: 0, attraction: 0 } })
   })
 })
 
@@ -77,7 +77,7 @@ describe('applySummaries', () => {
           level: 'normal',
           reason: 'Pressed in public.',
           delta: { approval: -4, trust: -1, attraction: 1 },
-          learned: ['client-is-consortium', 'made-up-secret'],
+          learned: ['client-is-grid-corporation', 'made-up-secret'],
           others: [{ with: 'Vex', delta: { approval: -8, trust: -4, attraction: 0 }, reason: 'She exposed me.' }]
         }
       },
@@ -104,7 +104,7 @@ describe('applySummaries', () => {
     const r = next.relations.find((x) => x.from === 'brask' && x.to === 'oria-senn')!
     expect(r.meters).toEqual({ approval: 42, trust: 32, attraction: 10 })
     expect(r.label).toBe('acquaintances')
-    expect(bandOf({ approval: 10, trust: 10, attraction: 0 })).toBe('enemies')
+    expect(bandOf(content.ruleset, { approval: 10, trust: 10, attraction: 0 })).toBe('enemies')
   })
 
   it('clamps meters to 0–100', () => {
@@ -123,10 +123,10 @@ describe('memories in later scenes', () => {
 
   it('reach the director, with the secrets the player already knows', () => {
     const state = playedScene()
-    const { state: after } = applySummaries(content, state, [{ id: 'oria-senn', summary: { ...plainSummary(content, state, 'oria-senn'), memory: 'Oria was caught lying.', learned: ['client-is-consortium'] } }])
+    const { state: after } = applySummaries(content, state, [{ id: 'oria-senn', summary: { ...plainSummary(content, state, 'oria-senn'), memory: 'Oria was caught lying.', learned: ['client-is-grid-corporation'] } }])
     const again = { ...after, scene: barScene(3).scene }
     const { system } = buildDirectorPrompt(content, again, 'Hello again.')
     expect(system).toMatch(/Remembers: \(fleeting\) Oria was caught lying\./)
-    expect(system).toMatch(/The player already knows: The 'private client' is the Aether grid consortium/)
+    expect(system).toMatch(/The player already knows: The 'private client' is the Aether Grid Corporation/)
   })
 })

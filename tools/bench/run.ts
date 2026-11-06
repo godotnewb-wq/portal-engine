@@ -1,5 +1,5 @@
 import type { Beat } from '@engine/state'
-import { characterById, locationById, type Content } from '@engine/pack'
+import { characterById, locationById, type Pack } from '@engine/pack'
 import type { Prompt } from '@engine/core'
 import { firstName } from '@engine/core'
 import type { WitnessReport } from '@engine/relationships'
@@ -52,6 +52,9 @@ export interface ScenarioRun {
 
 export interface BenchRun {
   label: string
+  /** The pack the scenarios came from, and its version. */
+  pack: string
+  packVersion: string
   startedAt: string
   /** Which models played each role, for reading results later. */
   models: Record<string, string>
@@ -95,7 +98,7 @@ function recording(llm: BenchLlm, calls: CallRecord[], turn: () => number | 'sum
 }
 
 /** Plays one scenario through the real pipeline: every turn, then the end-of-scene summaries. */
-export async function runScenario(content: Content, scenario: Scenario, llm: BenchLlm): Promise<ScenarioRun> {
+export async function runScenario(content: Pack, scenario: Scenario, llm: BenchLlm): Promise<ScenarioRun> {
   const run: ScenarioRun = { id: scenario.id, title: scenario.title, location: scenario.location, watchFor: scenario.watchFor, ...(scenario.forceNatural !== undefined && { forceNatural: scenario.forceNatural }), turns: [], summaries: [], calls: [] }
   const problems = scenarioProblems(content, scenario)
   if (problems.length > 0) return { ...run, error: problems.join('; ') }
@@ -135,8 +138,8 @@ export async function runScenario(content: Content, scenario: Scenario, llm: Ben
   return run
 }
 
-export async function runBench(content: Content, scenarios: Scenario[], llm: BenchLlm, label: string, models: Record<string, string>, log: (line: string) => void = () => {}): Promise<BenchRun> {
-  const bench: BenchRun = { label, startedAt: new Date().toISOString(), models, scenarios: [] }
+export async function runBench(content: Pack, scenarios: Scenario[], llm: BenchLlm, label: string, models: Record<string, string>, log: (line: string) => void = () => {}): Promise<BenchRun> {
+  const bench: BenchRun = { label, pack: content.manifest.id, packVersion: content.manifest.version, startedAt: new Date().toISOString(), models, scenarios: [] }
   // One at a time: providers often limit concurrent requests, and timings mean more without contention.
   for (const scenario of scenarios) {
     log(`▸ ${scenario.id}`)
@@ -170,7 +173,7 @@ export function mockLlm(): BenchLlm {
 }
 
 /** A display name for an id in a scenario's place: a character's first name, a walk-on's name, or the id. */
-export function nameIn(content: Content, location: string, id: string): string {
+export function nameIn(content: Pack, location: string, id: string): string {
   const c = characterById(content, id)
   if (c) return firstName(c.name)
   const w = locationById(content, location)?.walkOns.find((x) => x.id === id)

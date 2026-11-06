@@ -1,0 +1,86 @@
+{
+  "resolution": "d20-vs-dc",
+  "attributes": {
+    "list": [
+      { "id": "might", "name": "Might" },
+      { "id": "agility", "name": "Agility" },
+      { "id": "vigor", "name": "Vigor" },
+      { "id": "intellect", "name": "Intellect" },
+      { "id": "insight", "name": "Insight" },
+      { "id": "presence", "name": "Presence" }
+    ],
+    "min": 1,
+    "max": 20,
+    "average": 10,
+    "modifier": { "base": 10, "divisor": 2 }
+  },
+  "skills": [
+    { "id": "athletics", "name": "Athletics", "attribute": "might", "description": "climbing, jumping, swimming, forcing things" },
+    { "id": "melee", "name": "Melee", "attribute": "might", "description": "fighting at touch or reach" },
+    { "id": "acrobatics", "name": "Acrobatics", "attribute": "agility", "description": "balance, tumbling, slipping free" },
+    { "id": "stealth", "name": "Stealth", "attribute": "agility", "description": "moving and hiding unseen" },
+    { "id": "finesse", "name": "Finesse", "attribute": "agility", "description": "sleight of hand, picking pockets, delicate work" },
+    { "id": "marksmanship", "name": "Marksmanship", "attribute": "agility", "description": "anything thrown, shot or cast at range" },
+    { "id": "endurance", "name": "Endurance", "attribute": "vigor", "description": "holding out against strain, poison, drink" },
+    { "id": "arcanotech", "name": "Arcanotech", "attribute": "intellect", "description": "understanding and working Aether devices and wards" },
+    { "id": "engineering", "name": "Engineering", "attribute": "intellect", "description": "building, repairing, sabotaging machines" },
+    { "id": "infiltration", "name": "Infiltration", "attribute": "intellect", "description": "bypassing locks, wards and security systems" },
+    { "id": "investigation", "name": "Investigation", "attribute": "intellect", "description": "searching, piecing clues together, research" },
+    { "id": "medicine", "name": "Medicine", "attribute": "intellect", "description": "treating wounds, illness and poison" },
+    { "id": "perception", "name": "Perception", "attribute": "insight", "description": "noticing what's there to be noticed" },
+    { "id": "empathy", "name": "Empathy", "attribute": "insight", "description": "reading people: moods, motives, lies" },
+    { "id": "streetwise", "name": "Streetwise", "attribute": "insight", "description": "knowing the streets, who to ask, what's going on" },
+    { "id": "persuasion", "name": "Persuasion", "attribute": "presence", "description": "convincing honestly, bargaining" },
+    { "id": "deception", "name": "Deception", "attribute": "presence", "description": "lying, bluffing, disguise" },
+    { "id": "intimidation", "name": "Intimidation", "attribute": "presence", "description": "threats, pressure, fear" },
+    { "id": "performance", "name": "Performance", "attribute": "presence", "description": "entertaining, seducing an audience, putting on a show" }
+  ],
+  "ranks": {
+    "max": 5,
+    "capByLevel": [
+      { "upTo": 2, "cap": 2 },
+      { "upTo": 4, "cap": 3 },
+      { "upTo": 6, "cap": 4 },
+      { "upTo": 10, "cap": 5 }
+    ]
+  },
+  "levels": { "min": 1, "max": 10 },
+  "difficulties": [
+    { "word": "trivial", "dc": 5 },
+    { "word": "easy", "dc": 10 },
+    { "word": "moderate", "dc": 15 },
+    { "word": "hard", "dc": 20 },
+    { "word": "very hard", "dc": 25 },
+    { "word": "legendary", "dc": 30 }
+  ],
+  "degrees": { "strongMargin": 5, "costMargin": 4 },
+  "criticals": { "hit": 20, "miss": 1 },
+  "assists": { "meter": "trust", "minRank": 1, "bonusFrom": 40, "bonus": 2, "advantageFrom": 70 },
+  "meters": {
+    "list": [
+      { "id": "approval", "name": "Approval", "description": "regard and liking" },
+      { "id": "trust", "name": "Trust", "description": "whether they can rely on the other and be honest with them" },
+      { "id": "attraction", "name": "Attraction", "description": "wanting the other, which can rise while trust falls" }
+    ],
+    "min": 0,
+    "max": 100
+  },
+  "wordScale": [
+    { "word": "much less", "value": -8 },
+    { "word": "less", "value": -4 },
+    { "word": "a little less", "value": -1 },
+    { "word": "unchanged", "value": 0 },
+    { "word": "a little more", "value": 1 },
+    { "word": "more", "value": 4 },
+    { "word": "much more", "value": 8 }
+  ],
+  "relations": {
+    "start": { "approval": 50, "trust": 40, "attraction": 10 },
+    "bands": [
+      { "label": "enemies", "max": { "approval": 15, "trust": 20 } },
+      { "label": "rivals", "max": { "approval": 30 } },
+      { "label": "friends", "min": { "approval": 65, "trust": 60 } }
+    ],
+    "otherwise": "acquaintances"
+  }
+}

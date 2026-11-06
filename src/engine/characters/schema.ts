@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { IdSchema } from '@engine/core'
 import { StatBlockSchema } from '@engine/rules'
 
 /**
@@ -9,17 +10,11 @@ export const CHARACTER_TIERS = ['recurring', 'companion'] as const
 export const CharacterTierSchema = z.enum(CHARACTER_TIERS)
 export type CharacterTier = z.infer<typeof CharacterTierSchema>
 
-const id = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'ids are lower-case words joined by hyphens')
-export const IdSchema = id
+const id = IdSchema
 
-/** Approval, Trust and Attraction, 0–100 each. */
-export const MetersSchema = z.object({
-  approval: z.number().min(0).max(100),
-  trust: z.number().min(0).max(100),
-  attraction: z.number().min(0).max(100)
-})
+/** Relationship meters by the ruleset's meter ids (e.g. approval, trust, attraction); checked against it on load. */
+export const MetersSchema = z.record(z.string(), z.number())
 export type Meters = z.infer<typeof MetersSchema>
-export const METERS = ['approval', 'trust', 'attraction'] as const satisfies (keyof Meters)[]
 
 /** How a character talks, kept apart so the writer can be given only this beat's speakers (narrator-scene-engine §7). */
 export const VoiceCardSchema = z.object({

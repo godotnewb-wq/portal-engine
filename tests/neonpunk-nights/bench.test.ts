@@ -1,13 +1,13 @@
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { content } from '../../tests/support/bar'
+import { content, PACK_DIR } from './support'
 import { SettingsSchema } from '@llm'
-import { benchSettings, modelsOf } from './config'
-import { compareRuns, renderReport, stats } from './report'
-import { mockLlm, runBench, runScenario, type BenchLlm } from './run'
-import { loadScenarios, scenarioProblems, scenarioState, ScenarioSchema } from './scenario'
+import { benchSettings, modelsOf } from '../../tools/bench/config'
+import { compareRuns, renderReport, stats } from '../../tools/bench/report'
+import { mockLlm, runBench, runScenario, type BenchLlm } from '../../tools/bench/run'
+import { loadScenarios, scenarioProblems, scenarioState, ScenarioSchema } from '../../tools/bench/scenario'
 
-const scenarios = loadScenarios(join(__dirname, '../../bench/scenarios'))
+const scenarios = loadScenarios(join(PACK_DIR, 'bench'))
 
 describe('the shipped scenarios', () => {
   it('cover the plan’s cases and all fit the content', () => {

@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { barScene, content } from '../../../../../tests/support/bar'
-import { atEnd, awaitingBeat, canAdvance, nameplate, openingBeats, sceneHistory, streamingBeats } from './reading'
+import { barScene, content } from './support'
+import { atEnd, awaitingBeat, canAdvance, nameplate, openingBeats, sceneHistory, streamingBeats } from '@app/renderer/src/ui/reading'
 
 describe('reading the scene', () => {
   it('opens with the place and who is here', () => {

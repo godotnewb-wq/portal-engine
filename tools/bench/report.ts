@@ -1,13 +1,13 @@
 import type { Beat } from '@engine/state'
 import type { Meters } from '@engine/characters'
-import type { Content } from '@engine/pack'
+import type { Pack } from '@engine/pack'
 import { nameIn, type BenchRun, type ScenarioRun } from './run'
 
-const beatLine = (content: Content, run: ScenarioRun, beat: Beat): string =>
+const beatLine = (content: Pack, run: ScenarioRun, beat: Beat): string =>
   beat.kind === 'narration' ? `*${beat.text}*` : `**${nameIn(content, run.location, beat.speaker)}:** ${beat.text}`
 
 const delta = (before: Meters, after: Meters): string =>
-  (['approval', 'trust', 'attraction'] as const)
+  Object.keys(after)
     .map((k) => {
       const d = after[k] - before[k]
       return `${k} ${after[k]}${d === 0 ? '' : ` (${d > 0 ? '+' : ''}${d})`}`
@@ -40,7 +40,7 @@ function statRow(run: ScenarioRun): string {
   return `| ${run.id}${run.error ? ' ⚠' : ''} | ${s.turns} | ${s.calls} | ${s.rewrites} | ${s.salvaged} | ${s.fallbacks} | ${s.corrections} | ${s.beats} | ${s.turnMs} | ${s.firstTextMs} | ${s.directorMs} |`
 }
 
-function scenarioSection(content: Content, run: ScenarioRun): string {
+function scenarioSection(content: Pack, run: ScenarioRun): string {
   const name = (id: string) => nameIn(content, run.location, id)
   const lines = [`## ${run.title} (\`${run.id}\`)`, '', `> ${run.watchFor}`, '']
   if (run.forceNatural !== undefined) lines.push(`Checks forced to a natural ${run.forceNatural}.`, '')
@@ -75,11 +75,11 @@ function scenarioSection(content: Content, run: ScenarioRun): string {
 }
 
 /** A run as a readable report: the numbers first, then every scenario's turns, plans, beats and summaries. */
-export function renderReport(content: Content, bench: BenchRun): string {
+export function renderReport(content: Pack, bench: BenchRun): string {
   return [
     `# Scene test bench — ${bench.label}`,
     '',
-    `Run ${bench.startedAt}. Models: ${Object.entries(bench.models).map(([role, model]) => `${role} \`${model}\``).join(', ')}.`,
+    `Run ${bench.startedAt}, pack \`${bench.pack}\` ${bench.packVersion}. Models: ${Object.entries(bench.models).map(([role, model]) => `${role} \`${model}\``).join(', ')}.`,
     '',
     `| ${STAT_HEADS.join(' | ')} |`,
     `|${STAT_HEADS.map(() => '---').join('|')}|`,
@@ -96,7 +96,7 @@ const cell = (text: string) => text.replace(/\|/g, '\\|').replace(/\n/g, '<br>')
  * Two runs side by side (narrator-scene-engine §10): their numbers, then each scenario they share, turn by turn, with
  * the beats in two columns. A scenario only one of them ran is listed but not compared.
  */
-export function compareRuns(content: Content, a: BenchRun, b: BenchRun): string {
+export function compareRuns(content: Pack, a: BenchRun, b: BenchRun): string {
   const lines = [
     `# Bench comparison: ${a.label} vs ${b.label}`,
     '',

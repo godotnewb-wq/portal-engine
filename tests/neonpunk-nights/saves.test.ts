@@ -4,9 +4,9 @@ import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { applySummaries, plainSummary } from '@engine/relationships'
 import { createInitialState, stateProblems } from '@engine/state'
-import { barScene, content } from '../../../tests/support/bar'
+import { barScene, content } from './support'
 import { latestSave } from '@engine/state'
-import { SaveStore } from './store'
+import { SaveStore } from '@platform/saves'
 
 const tempDir = () => join(mkdtempSync(join(tmpdir(), 'npn-saves-')), 'saves')
 
@@ -22,7 +22,7 @@ function playedGame() {
         memory: 'Oria was caught lying.',
         level: 'core',
         delta: { approval: -4, trust: -8, attraction: 1 },
-        learned: ['client-is-consortium'],
+        learned: ['client-is-grid-corporation'],
         others: [{ with: 'brask', delta: { approval: 1, trust: 0, attraction: 0 }, reason: '' }]
       }
     }

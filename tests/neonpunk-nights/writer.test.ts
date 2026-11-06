@@ -1,10 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import { finishedPart, parseReply } from './beats'
-import { checkReply, salvage } from './checks'
-import { parsePlan, validatePlan } from './plan'
-import { resolvePlan } from './resolve'
-import { barScene, content } from '../../../tests/support/bar'
-import { buildRewritePrompt, buildWriterPrompt, sceneSpeakers } from './writer'
+import { finishedPart, parseReply } from '@engine/scene'
+import { checkReply, salvage } from '@engine/scene'
+import { parsePlan, validatePlan } from '@engine/scene'
+import { resolvePlan } from '@engine/scene'
+import { barScene, content } from './support'
+import { buildRewritePrompt, buildWriterPrompt, sceneSpeakers } from '@engine/scene'
 
 const state = barScene(5)
 const speakers = sceneSpeakers(content, state)

@@ -1,6 +1,10 @@
 import { describe, expect, it } from 'vitest'
-import type { StatBlock } from './schema'
-import { assistFrom, combineEdges, degreeOf, describeCheck, modifier, rankCap, rollCheck } from './checks'
+import type { StatBlock } from '@engine/rules'
+import { assistFrom, combineEdges, degreeOf, describeCheck, modifier, rankCap, rollCheck } from '@engine/rules'
+import { content } from './support'
+
+/** The Neonpunk Nights ruleset, as the pack ships it (core-rules.md). */
+const R = content.ruleset
 import { dice, type Dice } from '@engine/core'
 import { draws } from '@engine/core'
 
@@ -15,40 +19,40 @@ const vex: StatBlock = {
 
 describe('modifier', () => {
   it('is (score − 10) / 2 rounded down', () => {
-    expect([8, 9, 10, 11, 14, 15, 20].map(modifier)).toEqual([-1, -1, 0, 0, 2, 2, 5])
+    expect([8, 9, 10, 11, 14, 15, 20].map((x) => modifier(R, x))).toEqual([-1, -1, 0, 0, 2, 2, 5])
   })
 })
 
 describe('degreeOf', () => {
   it('reads the margin as the four degrees', () => {
-    expect(degreeOf(20, 15)).toBe('strong')
-    expect(degreeOf(15, 15)).toBe('success')
-    expect(degreeOf(11, 15)).toBe('cost')
-    expect(degreeOf(10, 15)).toBe('failure')
+    expect(degreeOf(R, 20, 15)).toBe('strong')
+    expect(degreeOf(R, 15, 15)).toBe('success')
+    expect(degreeOf(R, 11, 15)).toBe('cost')
+    expect(degreeOf(R, 10, 15)).toBe('failure')
   })
 })
 
 describe('rollCheck', () => {
   it('adds the skill’s attribute modifier and rank, and compares with the difficulty’s DC', () => {
-    const result = rollCheck(vex, { skill: 'empathy', difficulty: 'moderate' }, loaded(14))
+    const result = rollCheck(R, vex, { skill: 'empathy', difficulty: 'moderate' }, loaded(14))
     expect(result).toMatchObject({ attribute: 'insight', modifier: 2, rank: 1, total: 17, dc: 15, degree: 'success', critical: null })
-    expect(describeCheck('Vex', result)).toBe('Vex — Empathy 17 vs 15: success')
+    expect(describeCheck(R, 'Vex', result)).toBe('Vex — Empathy 17 vs 15: success')
   })
 
   it('keeps the better die with advantage and the worse with disadvantage', () => {
-    expect(rollCheck(vex, { skill: 'empathy', difficulty: 'easy', edges: ['advantage'] }, loaded(3, 12)).natural).toBe(12)
-    expect(rollCheck(vex, { skill: 'empathy', difficulty: 'easy', edges: ['disadvantage'] }, loaded(3, 12)).natural).toBe(3)
+    expect(rollCheck(R, vex, { skill: 'empathy', difficulty: 'easy', edges: ['advantage'] }, loaded(3, 12)).natural).toBe(12)
+    expect(rollCheck(R, vex, { skill: 'empathy', difficulty: 'easy', edges: ['disadvantage'] }, loaded(3, 12)).natural).toBe(3)
   })
 
   it('moves a natural 20 one step up and a natural 1 one step down', () => {
     // 20 + 3 = 23 vs 30 would be a failure; the natural 20 makes it a success at a cost.
-    expect(rollCheck(vex, { skill: 'empathy', difficulty: 'legendary' }, loaded(20)).degree).toBe('cost')
+    expect(rollCheck(R, vex, { skill: 'empathy', difficulty: 'legendary' }, loaded(20)).degree).toBe('cost')
     // 1 + 3 = 4 vs 5 would cost; the natural 1 makes it a failure.
-    expect(rollCheck(vex, { skill: 'empathy', difficulty: 'trivial' }, loaded(1)).degree).toBe('failure')
+    expect(rollCheck(R, vex, { skill: 'empathy', difficulty: 'trivial' }, loaded(1)).degree).toBe('failure')
   })
 
   it('uses another attribute when asked, and counts an untrained skill as rank 0', () => {
-    expect(rollCheck(vex, { skill: 'athletics', difficulty: 'easy', attribute: 'agility' }, loaded(10))).toMatchObject({ modifier: 3, rank: 0, total: 13 })
+    expect(rollCheck(R, vex, { skill: 'athletics', difficulty: 'easy', attribute: 'agility' }, loaded(10))).toMatchObject({ modifier: 3, rank: 0, total: 13 })
   })
 })
 
@@ -60,16 +64,16 @@ describe('edges and assists', () => {
   })
 
   it('gives help by trust only when the helper has the skill', () => {
-    expect(assistFrom({ stats: vex, trust: 90 }, 'medicine')).toEqual({ bonus: 0, edge: 'none' })
-    expect(assistFrom({ stats: vex, trust: 20 }, 'empathy')).toEqual({ bonus: 0, edge: 'none' })
-    expect(assistFrom({ stats: vex, trust: 50 }, 'empathy')).toEqual({ bonus: 2, edge: 'none' })
-    expect(assistFrom({ stats: vex, trust: 80 }, 'empathy')).toEqual({ bonus: 0, edge: 'advantage' })
+    expect(assistFrom(R, { stats: vex, meter: 90 }, 'medicine')).toEqual({ bonus: 0, edge: 'none' })
+    expect(assistFrom(R, { stats: vex, meter: 20 }, 'empathy')).toEqual({ bonus: 0, edge: 'none' })
+    expect(assistFrom(R, { stats: vex, meter: 50 }, 'empathy')).toEqual({ bonus: 2, edge: 'none' })
+    expect(assistFrom(R, { stats: vex, meter: 80 }, 'empathy')).toEqual({ bonus: 0, edge: 'advantage' })
   })
 })
 
 describe('rankCap', () => {
   it('rises with level to 5', () => {
-    expect([1, 2, 3, 5, 7, 10].map(rankCap)).toEqual([2, 2, 3, 4, 5, 5])
+    expect([1, 2, 3, 5, 7, 10].map((l) => rankCap(R, l))).toEqual([2, 2, 3, 4, 5, 5])
   })
 })
 

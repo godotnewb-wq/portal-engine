@@ -43,6 +43,7 @@ describe('chatCompletion', () => {
     expect(body.messages[0]).toEqual({ role: 'system', content: 'You direct scenes.\n\nBe brief.' })
     expect(body.response_format).toEqual({ type: 'json_object' })
     expect((calls[0]!.init.headers as Record<string, string>).Authorization).toBe('Bearer sk-1')
+    expect((calls[0]!.init.headers as Record<string, string>)['Content-Type']).toBe('application/json')
   })
 
   it('throws a RefusalError when a content filter stops the reply', async () => {

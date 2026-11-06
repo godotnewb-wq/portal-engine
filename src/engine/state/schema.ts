@@ -1,5 +1,6 @@
 import { z } from 'zod'
-import { IdSchema, MetersSchema } from '@engine/characters'
+import { IdSchema } from '@engine/core'
+import { MetersSchema } from '@engine/characters'
 import { PlayerSchema } from '@engine/characters'
 import { SceneSchema } from './scene'
 

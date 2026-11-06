@@ -2,15 +2,15 @@ import type { Character, VoiceCard } from '@engine/characters'
 import type { GameState } from '@engine/state'
 import type { Speaker } from './beats'
 import type { Degree } from '@engine/rules'
-import { characterById, locationById, type Content } from '@engine/pack'
+import { characterById, locationById, type Pack } from '@engine/pack'
 import { RECENT_TURNS, turnText } from './director'
 import { type Prompt } from '@engine/core'
 import { firstName } from '@engine/core'
 import { presentCast, type BeatPlan, type PlannedCheck } from './plan'
-import { BEATS, STYLE_GUIDE } from './style'
+import { ADULTS_ONLY, BEATS, STYLE_GUIDE } from './style'
 
 /** Everyone a beat or tag may name in this scene: the cast present, the walk-ons, and the player. */
-export function sceneSpeakers(content: Content, state: GameState): Speaker[] {
+export function sceneSpeakers(content: Pack, state: GameState): Speaker[] {
   const scene = state.scene!
   const location = locationById(content, scene.locationId)!
   const cast = presentCast(scene).map((id): Speaker => {
@@ -53,13 +53,13 @@ const OUTCOME: Record<Degree, (stakes: string) => string> = {
   failure: (s) => `FAILURE: this does not happen: ${s}`
 }
 
-function checkLine(content: Content, state: GameState, check: PlannedCheck): string {
+function checkLine(content: Pack, state: GameState, check: PlannedCheck): string {
   const who = check.who === 'player' ? state.player.name : firstName(characterById(content, check.who)!.name)
   return `- ${who}'s ${check.skill} check [${check.id}]: ${check.result ? OUTCOME[check.result.degree](check.stakes) : check.stakes}`
 }
 
 /** What the writer needs for one beat, and nothing more (narrator-scene-engine §5). */
-export function buildWriterPrompt(content: Content, state: GameState, plan: BeatPlan, input: string): Prompt {
+export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPlan, input: string): Prompt {
   const scene = state.scene!
   const location = locationById(content, scene.locationId)!
   const speakers = plan.speakers.map((s) => characterById(content, s.id)!) as Character[]
@@ -67,12 +67,16 @@ export function buildWriterPrompt(content: Content, state: GameState, plan: Beat
   const walkOn = (id: string) => location.walkOns.find((w) => w.id === id)!
 
   const system = [
-    'You write the prose of an adult visual-novel RPG scene from a director\'s plan.',
+    'You write the prose of a visual-novel RPG scene from a director\'s plan.',
     STYLE_GUIDE,
+    content.tone && `Tone:\n${content.tone}`,
+    ADULTS_ONLY,
     FORMAT,
-    `The player is ${state.player.name} (${state.player.pronouns}), addressed as "you". Setting: ${location.name}, ${location.district}, Spire City.`,
+    `The player is ${state.player.name} (${state.player.pronouns}), addressed as "you". Setting: ${location.name}, ${location.district}, ${content.setting.name}.`,
     ...speakers.map((c) => voiceCard(firstName(c.name), c.voice))
-  ].join('\n\n')
+  ]
+    .filter(Boolean)
+    .join('\n\n')
 
   const brief = [
     '# This beat',

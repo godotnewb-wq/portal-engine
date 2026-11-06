@@ -1,16 +1,19 @@
-/** What every scene prompt knows about the world. Kept short; codex entries come later. */
-export const CORE_LORE = `Spire City, on the backwater planet Faeworld, spirals around the Aether, the world's magic, which wells up from the chasm at its base (the Deepwell). Height is class: the Crown and High Turns get thin, refined, piped Aether and money; the Middle Turns work; the Low Turns are old, overgrown, raw with Aether, gangs and smugglers. Magic and tech are one craft (magitech). Currency: cinders. Peoples: humans, light elves (often old money), dark elves (often of the lower city), goblins (the city's scrappy, punk heart), golems (rune-core synthetics, persons by law), and off-worlders. Species are tendencies, never templates for an individual. The Aether grid consortium controls the flow of Aether upward. The Couriers carry anything for anyone. Tone: adult, gritty but not bleak, punk, with an undercurrent of desire. Everyone is an adult.`
-
-/** The writer's style guide (narrator-scene-engine §8): first in its prompt, so providers can cache it. */
+/**
+ * The writer's style guide (narrator-scene-engine §8), first in its prompt so providers can cache it. The pack's tone
+ * follows it; this part holds for every game.
+ */
 export const STYLE_GUIDE = `Style:
 - Second person: the player is "you". Present tense.
 - Concrete before abstract. One specific detail beats three adjectives.
 - Vary sentence rhythm. Show consequences, not labels for feelings. Subtext over stated emotion.
 - Each character sounds like their voice card and no one else.
-- Short visual-novel beats. Adult, punk, a little dangerous; desire as an undercurrent, never forced.`
+- Short visual-novel beats.`
+
+/** Said in every scene prompt, whatever the pack: the engine's adult-content guard, which packs can't turn off. */
+export const ADULTS_ONLY = 'Every character is an adult.'
 
 /**
- * Phrases LLM prose falls back on. A hit in the writer's output triggers the one rewrite (narrator-scene-engine §8).
+ * Phrases LLM prose falls back on, in any world; a pack adds its own. A hit in the writer's output triggers the one rewrite (narrator-scene-engine §8).
  * Matched case-insensitively as substrings.
  */
 export const OVERUSED_PHRASES = [

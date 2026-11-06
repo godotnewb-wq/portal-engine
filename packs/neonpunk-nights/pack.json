@@ -1,0 +1,12 @@
+{
+  "id": "neonpunk-nights",
+  "name": "Neonpunk Nights",
+  "version": "0.1.0",
+  "description": "An adult visual novel RPG in Spire City, a magicpunk city coiled around the source of the Aether on the backwater world of Faeworld.",
+  "author": "godotnewb",
+  "license": "All rights reserved (pack content); see the repository for the engine's GPL-3.0 license",
+  "engine": "^0.2.0",
+  "start": { "location": "sump-lantern", "cast": ["vex", "brask", "oria-senn"] },
+  "ui": { "title": "Neonpunk Nights", "tagline": "Spire City · the Low Turns", "cover": "cover.png" },
+  "content": { "rating": "Adults only", "notes": "Adult themes and an undercurrent of eroticism, between adult characters only." }
+}

@@ -1,6 +1,6 @@
 import type { Beat, GameState, RolledCheck, Turn } from '@engine/state'
 import type { Tags } from './beats'
-import type { Content } from '@engine/pack'
+import type { Pack } from '@engine/pack'
 import { RECENT_TURNS, turnText } from './director'
 import { presentCast, type BeatPlan } from './plan'
 
@@ -30,7 +30,7 @@ export function rolledChecks(plan: BeatPlan): RolledCheck[] {
  * Applies a finished turn to the state. Tags only touch characters who are present, a departure the plan didn't call
  * for still happens if the writer tagged it (people may walk out), but only the plan can end the scene.
  */
-export function applyTurn(content: Content, state: GameState, written: TurnWritten): GameState {
+export function applyTurn(content: Pack, state: GameState, written: TurnWritten): GameState {
   const scene = state.scene
   if (!scene) throw new Error('No scene in progress')
   const present = new Set(presentCast(scene))

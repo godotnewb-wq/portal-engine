@@ -40,8 +40,11 @@ function playerAllows(input: string, verb: string): boolean {
 
 const words = (text: string) => text.split(/\s+/).filter(Boolean).length
 
-/** Everything wrong with a reply that one rewrite should fix (narrator-scene-engine §3, code checks). */
-export function checkReply(parsed: ParsedReply, plan: BeatPlan, speakers: Speaker[], input: string): Problem[] {
+/**
+ * Everything wrong with a reply that one rewrite should fix (narrator-scene-engine §3, code checks). `phrases` are the
+ * pack's own over-used phrases, checked with the engine's.
+ */
+export function checkReply(parsed: ParsedReply, plan: BeatPlan, speakers: Speaker[], input: string, phrases: string[] = []): Problem[] {
   const problems: Problem[] = []
   const planned = new Set([...plan.speakers.map((s) => s.id), ...plan.walk_ons.map((w) => w.id)])
   const byId = new Map(speakers.map((s) => [s.id, s]))
@@ -69,7 +72,7 @@ export function checkReply(parsed: ParsedReply, plan: BeatPlan, speakers: Speake
     }
     if (words(text) > BEATS.maxWords) problems.push({ kind: 'beat-length', beat: n, fix: `Beat ${n} is ${words(text)} words. Keep each beat under ${BEATS.targetWords}.` })
     const lower = text.toLowerCase()
-    for (const phrase of [...OVERUSED_PHRASES, ...plan.avoid]) {
+    for (const phrase of [...OVERUSED_PHRASES, ...phrases, ...plan.avoid]) {
       if (phrase.trim().length >= 4 && lower.includes(phrase.toLowerCase())) {
         problems.push({ kind: 'overused-phrase', beat: n, fix: `Beat ${n} uses "${phrase}". Say it another, specific way.` })
       }

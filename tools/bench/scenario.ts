@@ -1,9 +1,10 @@
 import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { z } from 'zod'
-import { IdSchema, MetersSchema } from '@engine/characters'
+import { IdSchema } from '@engine/core'
+import { MetersSchema } from '@engine/characters'
 import type { GameState } from '@engine/state'
-import type { Content } from '@engine/pack'
+import type { Pack } from '@engine/pack'
 import { createInitialState, startScene } from '@engine/state'
 
 /**
@@ -43,7 +44,7 @@ export function loadScenarios(dir: string): Scenario[] {
 }
 
 /** Problems a scenario has against the content: unknown places or people. */
-export function scenarioProblems(content: Content, scenario: Scenario): string[] {
+export function scenarioProblems(content: Pack, scenario: Scenario): string[] {
   const problems: string[] = []
   if (!content.locations.some((l) => l.id === scenario.location)) problems.push(`unknown location "${scenario.location}"`)
   for (const id of [...scenario.cast, ...Object.keys(scenario.meters), ...Object.keys(scenario.moods)]) {
@@ -53,7 +54,7 @@ export function scenarioProblems(content: Content, scenario: Scenario): string[]
 }
 
 /** The game state a scenario opens on. */
-export function scenarioState(content: Content, scenario: Scenario): GameState {
+export function scenarioState(content: Pack, scenario: Scenario): GameState {
   const fresh = createInitialState(content, scenario.seed)
   const withMeters = { ...fresh, meters: { ...fresh.meters, ...scenario.meters } }
   const state = startScene(content, withMeters, scenario.location, scenario.cast)

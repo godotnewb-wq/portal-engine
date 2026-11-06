@@ -9,14 +9,14 @@
   "personality": "Soft-spoken and exact. Notices how things are put together, including people, and is too polite to say so. Loud rooms wear him down fast. Generous with his time to a fault, then quietly resentful that nobody notices. Has strong opinions about pump valves and almost none he'll voice about anything else.",
   "agenda": {
     "longTerm": [
-      "Save enough cinders to buy the workshop outright before the landlord sells to the consortium",
+      "Save enough cinders to buy the workshop outright before the landlord sells to the Aether Grid Corporation",
       "Get his designs for a cheap Aether filter taken seriously by someone with money"
     ],
     "current": "Get through tonight without a fight, and get out of this noisy room as soon as he decently can"
   },
   "contradictions": [
     "Hates crowds but can't say no to a friend who asks him to come along",
-    "Distrusts the consortium completely, and would still sell them his filter design if they offered enough to keep the workshop"
+    "Distrusts the Aether Grid Corporation completely, and would still sell them his filter design if they offered enough to keep the workshop"
   ],
   "voice": {
     "rhythm": "Short, careful sentences, often trailing off; restarts a thought rather than interrupt anyone",
@@ -37,7 +37,7 @@
   "mood": "anxious, ears back, wishes it were quieter",
   "knowledge": [
     "The cooled pipe over the corner table is leaking and will drip on whoever sits there",
-    "The consortium has been sending surveyors through the lower stairs",
+    "The Aether Grid Corporation has been sending surveyors through the lower stairs",
     "He has never met Oria Senn but has heard that she always gets paid"
   ],
   "values": [
@@ -50,9 +50,9 @@
   "secrets": [
     {
       "id": "landlord-offer",
-      "text": "A consortium agent has already offered to buy his filter design. He hasn't said no.",
-      "tell": "Changes the subject to machinery whenever the consortium comes up",
-      "revealWhen": "the consortium is named in front of him and he trusts the player"
+      "text": "A Grid Corporation agent has already offered to buy his filter design. He hasn't said no.",
+      "tell": "Changes the subject to machinery whenever the Grid Corporation comes up",
+      "revealWhen": "the Grid Corporation is named in front of him and he trusts the player"
     }
   ],
   "meters": { "approval": 60, "trust": 55, "attraction": 15 },

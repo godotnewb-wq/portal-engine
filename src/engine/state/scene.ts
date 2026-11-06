@@ -1,6 +1,6 @@
 import { z } from 'zod'
-import { IdSchema, MetersSchema } from '@engine/characters'
-import { DifficultySchema, SkillSchema } from '@engine/rules'
+import { IdSchema } from '@engine/core'
+import { MetersSchema } from '@engine/characters'
 
 /** One click of the VN text box: a line of narration, or one character's line (narrator-scene-engine §2). */
 export const BeatSchema = z.discriminatedUnion('kind', [
@@ -13,8 +13,8 @@ export type Beat = z.infer<typeof BeatSchema>
 export const RolledCheckSchema = z.object({
   id: z.string(),
   who: z.string(),
-  skill: SkillSchema,
-  difficulty: DifficultySchema,
+  skill: z.string(),
+  difficulty: z.string(),
   stakes: z.string(),
   natural: z.number().int(),
   total: z.number().int(),

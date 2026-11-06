@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import type { GameState } from '@engine/state'
-import type { Content } from '@engine/pack'
+import { locationById, type Pack } from '@engine/pack'
 import { seedFrom } from '@engine/core'
 import { createInitialState, startScene } from '@engine/state'
 import type { WitnessReport } from '@engine/relationships'
@@ -13,13 +13,10 @@ import { SummaryView } from './ui/SummaryView'
 
 type Screen = 'title' | 'settings' | 'scene' | 'ending' | 'summary' | 'save' | 'load'
 
-/** Milestone 1's one scene: the Sump Lantern, with everyone in it. */
-const OPENING = { locationId: 'sump-lantern', cast: ['vex', 'brask', 'oria-senn'] }
-
 /** Owns which screen is showing and the game state; main only runs turns and summaries on it, and keeps the saves. */
 export function App() {
   const [screen, setScreen] = useState<Screen>('title')
-  const [content, setContent] = useState<Content | null>(null)
+  const [content, setContent] = useState<Pack | null>(null)
   const [state, setState] = useState<GameState | null>(null)
   const [reports, setReports] = useState<WitnessReport[]>([])
   const [error, setError] = useState('')
@@ -46,7 +43,8 @@ export function App() {
 
   const enterScene = (game: GameState) => {
     if (!content) return
-    setState(startScene(content, game, OPENING.locationId, OPENING.cast))
+    const { location, cast } = content.manifest.start
+    setState(startScene(content, game, location, cast))
     setScreen('scene')
   }
   const newGame = () => content && enterScene(createInitialState(content, seedFrom(`${Date.now()}`)))
@@ -101,17 +99,19 @@ export function App() {
     )
   }
   if (screen === 'summary' && content && state) {
-    return <SummaryView content={content} reports={reports} onAgain={() => enterScene(state)} onTitle={() => setScreen('title')} />
+    const again = locationById(content, content.manifest.start.location)?.name ?? ''
+    return <SummaryView content={content} reports={reports} againLabel={`Back to ${again}`} onAgain={() => enterScene(state)} onTitle={() => setScreen('title')} />
   }
   if (screen === 'scene' && content && state?.scene) {
     return <SceneView content={content} state={state} onState={setState} onEnd={endScene} onSave={() => openSaves('save')} endError={error} />
   }
 
   const latest = latestSave(saves)
+  const startName = content ? (locationById(content, content.manifest.start.location)?.name ?? '') : ''
   return (
     <div className="screen title">
-      <h1 className="logo">Neonpunk Nights</h1>
-      <p className="tagline">Spire City · the Low Turns</p>
+      <h1 className="logo">{content?.manifest.ui.title ?? content?.manifest.name}</h1>
+      <p className="tagline">{content?.manifest.ui.tagline}</p>
       <div className="menu">
         {state?.scene && (
           <Button variant="primary" onClick={() => setScreen('scene')}>
@@ -125,7 +125,7 @@ export function App() {
         )}
         {state && !state.scene && (
           <Button variant="primary" onClick={() => enterScene(state)}>
-            Back to the Sump Lantern
+            Back to {startName}
           </Button>
         )}
         <Button onClick={newGame} disabled={!content}>

@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
-import { buildDirectorPrompt } from './director'
-import { fallbackPlan, parsePlan, silence, validatePlan, type RawPlan } from './plan'
-import { resolvePlan } from './resolve'
-import { barScene, content } from '../../../tests/support/bar'
+import { buildDirectorPrompt } from '@engine/scene'
+import { fallbackPlan, parsePlan, silence, validatePlan, type RawPlan } from '@engine/scene'
+import { resolvePlan } from '@engine/scene'
+import { barScene, content } from './support'
 
 /** The worked example's turn 1 plan (narrator-scene-engine §11). */
 const WORKED = JSON.stringify({
@@ -118,7 +118,7 @@ describe('focus and fallback', () => {
 describe('buildDirectorPrompt', () => {
   it('gives the director every present sheet, secrets included, and puts the player’s words last', () => {
     const { system, user } = buildDirectorPrompt(content, barScene(), 'Who is the client?')
-    expect(system).toMatch(/client-is-consortium/)
+    expect(system).toMatch(/client-is-grid-corporation/)
     expect(system).toMatch(/Oria Senn \[id: oria-senn\]/)
     expect(system).toMatch(/Dunmar/)
     expect(user.trim().endsWith('Return the JSON beat plan.')).toBe(true)

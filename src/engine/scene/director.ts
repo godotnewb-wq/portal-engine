@@ -1,18 +1,21 @@
 import type { Prompt } from '@engine/core'
 import type { Character, Meters } from '@engine/characters'
 import type { GameState, Turn } from '@engine/state'
-import { DIFFICULTY_DC, SKILLS } from '@engine/rules'
-import { characterById, locationById, type Content } from '@engine/pack'
+import type { Ruleset } from '@engine/rules'
+import { characterById, locationById, type Pack } from '@engine/pack'
 import { MAX_CHECKS, MAX_SPEAKERS, presentCast, silence } from './plan'
 import { recall } from '@engine/memory'
-import { CORE_LORE } from './style'
+import { ADULTS_ONLY } from './style'
+import { tierById } from '@engine/world'
 
 /** How many past turns go into prompts verbatim; older ones live in the running summary. */
 export const RECENT_TURNS = 3
 
-const meterWords = (m: Meters) => `approval ${m.approval}, trust ${m.trust}, attraction ${m.attraction} (0–100)`
+/** A character's meters as the prompts show them, e.g. "approval 55, trust 60, attraction 35 (0–100)". */
+export const meterWords = (r: Ruleset, m: Meters): string =>
+  `${r.meters.list.map((x) => `${x.id} ${m[x.id] ?? r.meters.min}`).join(', ')} (${r.meters.min}–${r.meters.max})`
 
-const DIRECTOR_RULES = `You are the director of an adult visual-novel RPG scene. You do not write prose. You read the whole situation and return a short JSON beat plan for this turn; a separate writer turns it into prose.
+const directorRules = (r: Ruleset): string => `You are the director of a visual-novel RPG scene. You do not write prose. You read the whole situation and return a short JSON beat plan for this turn; a separate writer turns it into prose.
 
 Return only a JSON object:
 {
@@ -31,7 +34,7 @@ Rules:
 - At most ${MAX_SPEAKERS} speakers. Pick: whoever the player addressed; anyone whose agenda is urgent; anyone whose comfort is low; whoever has been silent longest. Everyone else present gets a one-line reaction.
 - intent: what the speaker is trying to do this beat, from their own agenda, not just answering the player.
 - hiding/approach: only when a secret matters now; approach is lie / deflect / partial truth / tell, and name their tell when lying.
-- checks: only when the outcome is uncertain and matters (noticing a lie, persuading, sneaking). At most ${MAX_CHECKS}. who is "player" or a character id. skill is one of: ${SKILLS.join(', ')}. difficulty is one of: ${Object.keys(DIFFICULTY_DC).join(', ')}. stakes says what success means. A speaker whose line depends on a roll names it in depends_on_check. assist: a character present who helps.
+- checks: only when the outcome is uncertain and matters (noticing a lie, persuading, sneaking). At most ${MAX_CHECKS}. who is "player" or a character id. skill is one of: ${r.skills.map((x) => x.id).join(', ')}. difficulty is one of: ${r.difficulties.map((d) => d.word).join(', ')}. stakes says what success means. A speaker whose line depends on a roll names it in depends_on_check. assist: a character present who helps.
 - walk_ons: a line or action for a walk-on, voiced by the narrator.
 - texture: 2–3 specific details from the location card, preferring ones not used recently.
 - contrast: one line on how the speakers' voices differ.
@@ -39,12 +42,12 @@ Rules:
 - leaves: characters who walk out this beat. end_scene: true only when the scene has reached a natural close.
 - Never decide, say or do anything for the player.`
 
-function sheet(content: Content, state: GameState, c: Character, present: string[]): string {
+function sheet(content: Pack, state: GameState, c: Character, present: string[]): string {
   const scene = state.scene!
   const meters = state.meters[c.id]
   const relations = state.relations
     .filter((r) => r.from === c.id && present.includes(r.to))
-    .map((r) => `${characterById(content, r.to)?.name ?? r.to}: ${r.label} (${meterWords(r.meters)})`)
+    .map((r) => `${characterById(content, r.to)?.name ?? r.to}: ${r.label} (${meterWords(content.ruleset, r.meters)})`)
   return [
     `## ${c.name} [id: ${c.id}] — ${c.tier}, ${c.species}, ${c.pronouns}`,
     `Role: ${c.role}`,
@@ -56,7 +59,7 @@ function sheet(content: Content, state: GameState, c: Character, present: string
     c.values.length > 0 && `Values: ${c.values.map((v) => `${v.stance} ${v.value}`).join(', ')}`,
     ...c.secrets.map((s) => `Secret [${s.id}]: ${s.text} Tell: ${s.tell}.${s.revealWhen ? ` Would reveal when: ${s.revealWhen}.` : ''}`),
     `Lying tell: ${c.voice.shifts.lying}`,
-    meters && `Toward the player: ${meterWords(meters)}`,
+    meters && `Toward the player: ${meterWords(content.ruleset, meters)}`,
     recall(state, c).length > 0 && `Remembers: ${recall(state, c).map((m) => `(${m.level}) ${m.text}`).join(' ')}`,
     (state.facts[c.id] ?? []).length > 0 && `The player already knows: ${state.facts[c.id]!.join(' ')}`,
     relations.length > 0 && `Toward others here: ${relations.join('; ')}`
@@ -66,12 +69,12 @@ function sheet(content: Content, state: GameState, c: Character, present: string
 }
 
 /** A past turn as the prompts show it: what the player said and the beats written. */
-export function turnText(content: Content, playerName: string, turn: Turn): string {
+export function turnText(content: Pack, playerName: string, turn: Turn): string {
   const beats = turn.beats.map((b) => (b.kind === 'narration' ? b.text : `${characterById(content, b.speaker)?.name ?? b.speaker}: ${b.text}`))
   return [`${playerName}: ${turn.player}`, ...beats].join('\n')
 }
 
-export function buildDirectorPrompt(content: Content, state: GameState, input: string): Prompt {
+export function buildDirectorPrompt(content: Pack, state: GameState, input: string): Prompt {
   const scene = state.scene
   if (!scene) throw new Error('No scene in progress')
   const location = locationById(content, scene.locationId)!
@@ -81,9 +84,10 @@ export function buildDirectorPrompt(content: Content, state: GameState, input: s
   const player = state.player
 
   const system = [
-    DIRECTOR_RULES,
-    `# World\n${CORE_LORE}`,
-    `# Location: ${location.name} (${location.tier}, ${location.district})\n${location.description}\nSights: ${location.texture.sights.join('; ')}\nSounds: ${location.texture.sounds.join('; ')}\nSmells: ${location.texture.smells.join('; ')}${location.texture.slang.length ? `\nLocal slang: ${location.texture.slang.join('; ')}` : ''}${location.texture.current.length ? `\nLately: ${location.texture.current.join('; ')}` : ''}${location.extras.length ? `\nCrowd: ${location.extras.join('; ')}` : ''}`,
+    directorRules(content.ruleset),
+    `# World: ${content.setting.name}\n${content.primer}\n${ADULTS_ONLY}`,
+    content.tone && `# Tone\n${content.tone}`,
+    `# Location: ${location.name} (${tierById(content.setting, location.tier)?.name ?? location.tier}, ${location.district})\n${location.description}\nSights: ${location.texture.sights.join('; ')}\nSounds: ${location.texture.sounds.join('; ')}\nSmells: ${location.texture.smells.join('; ')}${location.texture.slang.length ? `\nLocal slang: ${location.texture.slang.join('; ')}` : ''}${location.texture.current.length ? `\nLately: ${location.texture.current.join('; ')}` : ''}${location.extras.length ? `\nCrowd: ${location.extras.join('; ')}` : ''}`,
     walkOns.length > 0 && `# Walk-ons\n${walkOns.map((w) => `- ${w.label}${w.name ? ` (${w.name})` : ''} [id: ${w.id}]: ${w.species}; ${w.look}; ${w.manner}; ${w.role}`).join('\n')}`,
     `# The player: ${player.name} (${player.species}, ${player.pronouns})\n${player.appearance}. ${player.background}`,
     `# Characters present\n${cast.map((c) => sheet(content, state, c, present)).join('\n\n')}`

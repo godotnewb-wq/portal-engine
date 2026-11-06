@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { GameStateSchema } from '@engine/state'
 import type { Prompt } from '@engine/core'
-import { barScene, content } from '../../../tests/support/bar'
-import { runTurn, type TurnEvent, type TurnLlm } from './runTurn'
+import { barScene, content } from './support'
+import { runTurn, type TurnEvent, type TurnLlm } from '@engine/scene'
 
 const PLAN = JSON.stringify({
   speakers: [

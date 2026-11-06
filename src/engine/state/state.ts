@@ -1,9 +1,9 @@
 import type { GameState, Relation } from './schema'
 import type { Scene } from './scene'
-import { characterById, locationById, type Content } from '@engine/pack'
+import { characterById, locationById, type Pack } from '@engine/pack'
 
 /** A new game: the test player, everyone's starting feelings, the dice seeded. */
-export function createInitialState(content: Content, seed: number): GameState {
+export function createInitialState(content: Pack, seed: number): GameState {
   const relations: Relation[] = content.characters.flatMap((c) =>
     c.relations.map((r) => ({ from: c.id, to: r.to, label: r.label, meters: r.meters }))
   )
@@ -21,7 +21,7 @@ export function createInitialState(content: Content, seed: number): GameState {
 }
 
 /** Opens a scene at a location with the given cast; moods and comfort start from the characters' files. */
-export function startScene(content: Content, state: GameState, locationId: string, cast: string[]): GameState {
+export function startScene(content: Pack, state: GameState, locationId: string, cast: string[]): GameState {
   const location = locationById(content, locationId)
   if (!location) throw new Error(`Unknown location "${locationId}"`)
   const characters = cast.map((id) => {
@@ -50,7 +50,7 @@ export function startScene(content: Content, state: GameState, locationId: strin
  * Whether a saved game still fits the content it is loaded with: every character, place and walk-on it names must
  * exist. Empty when it does. A save that doesn't fit is refused rather than patched (no backwards compatibility).
  */
-export function stateProblems(content: Content, state: GameState): string[] {
+export function stateProblems(content: Pack, state: GameState): string[] {
   const known = new Set(content.characters.map((c) => c.id))
   const problems: string[] = []
   const unknown = (what: string, id: string) => {

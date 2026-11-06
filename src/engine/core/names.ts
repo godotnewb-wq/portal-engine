@@ -1,7 +1,7 @@
 // Adapted from Breedhaven University, src/shared/game/scene.ts (plainName, namesHer) (GPL-3.0-only). See NOTICE.md.
 
 /**
- * A name as it is compared: without accents, in lower case. The LLM writes "Oria" for "Oria Senn" and drops accents
+ * A name as it is compared: without accents, in lower case. The LLM writes "Mara" for "Mara Voss" and drops accents
  * as often as not, and a name that is not recognised is a line that is not acted on.
  */
 export function plainName(name: string): string {

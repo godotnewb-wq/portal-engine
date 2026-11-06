@@ -1,8 +1,7 @@
 import { z } from 'zod'
-import { DIFFICULTIES, SKILLS, type Difficulty, type Skill } from '@engine/rules'
+import type { CheckResult, Difficulty, Ruleset, Skill } from '@engine/rules'
 import type { GameState, Scene } from '@engine/state'
-import { characterById, locationById, type Content } from '@engine/pack'
-import type { CheckResult } from '@engine/rules'
+import { characterById, locationById, type Pack } from '@engine/pack'
 
 /**
  * The director's beat plan (narrator-scene-engine §4), read leniently: a field the model leaves out or gets the wrong
@@ -61,7 +60,7 @@ export interface PlannedCheck {
   edge?: 'advantage' | 'disadvantage'
   /** Filled in by the game once rolled. */
   result?: CheckResult
-  /** The line shown to the player, e.g. "Vex — Empathy 17 vs 15: success". */
+  /** The line shown to the player, e.g. "Mara — Notice 17 vs 15: success". */
   line?: string
 }
 
@@ -90,21 +89,22 @@ export function parsePlan(reply: string): RawPlan | null {
 
 const normalize = (s: string) => s.trim().toLowerCase().replace(/[_-]+/g, ' ').replace(/\s+/g, ' ')
 
-export function skillNamed(written: string): Skill | undefined {
+/** A skill as the director wrote it, by id or by name. */
+export function skillNamed(r: Ruleset, written: string): Skill | undefined {
   const asked = normalize(written)
-  return SKILLS.find((s) => s === asked)
+  return r.skills.find((s) => normalize(s.id) === asked || normalize(s.name) === asked)?.id
 }
 
-export function difficultyNamed(written: string): Difficulty | undefined {
+export function difficultyNamed(r: Ruleset, written: string): Difficulty | undefined {
   const asked = normalize(written)
-  return DIFFICULTIES.find((d) => d === asked)
+  return r.difficulties.find((d) => normalize(d.word) === asked)?.word
 }
 
 /** Who is here now: the persistent cast minus anyone who left. */
 export const presentCast = (scene: Scene): string[] => scene.cast.filter((id) => !scene.departed.includes(id))
 
 /** Who is meant: an id, a full name or a first name, for someone present. */
-function presentId(content: Content, scene: Scene, written: string): string | undefined {
+function presentId(content: Pack, scene: Scene, written: string): string | undefined {
   const asked = normalize(written)
   return presentCast(scene).find((id) => {
     const c = characterById(content, id)
@@ -117,7 +117,7 @@ function presentId(content: Content, scene: Scene, written: string): string | un
  * checks with skills or difficulties that don't exist removed, texture capped. Returns what was changed and why,
  * so the test bench can show how often the director strays.
  */
-export function validatePlan(content: Content, state: GameState, raw: RawPlan): { plan: BeatPlan; corrections: string[] } {
+export function validatePlan(content: Pack, state: GameState, raw: RawPlan): { plan: BeatPlan; corrections: string[] } {
   const scene = state.scene
   if (!scene) throw new Error('No scene in progress')
   const corrections: string[] = []
@@ -143,8 +143,8 @@ export function validatePlan(content: Content, state: GameState, raw: RawPlan): 
   const checks: PlannedCheck[] = []
   for (const c of raw.checks) {
     const who = normalize(c.who) === 'player' || normalize(c.who) === normalize(state.player.name) ? 'player' : presentId(content, scene, c.who)
-    const skill = skillNamed(c.skill)
-    const difficulty = difficultyNamed(c.difficulty)
+    const skill = skillNamed(content.ruleset, c.skill)
+    const difficulty = difficultyNamed(content.ruleset, c.difficulty)
     if (!who) fix(`dropped check "${c.id}": "${c.who}" is not present`)
     else if (!skill) fix(`dropped check "${c.id}": no skill "${c.skill}"`)
     else if (!difficulty) fix(`dropped check "${c.id}": no difficulty "${c.difficulty}"`)
@@ -198,7 +198,7 @@ export function validatePlan(content: Content, state: GameState, raw: RawPlan): 
 }
 
 /** Location details not used in the last few turns, so description doesn't repeat. */
-export function freshTexture(content: Content, scene: Scene, count: number): string[] {
+export function freshTexture(content: Pack, scene: Scene, count: number): string[] {
   const location = locationById(content, scene.locationId)!
   const used = new Set(scene.turns.slice(-3).flatMap((t) => t.texture))
   const all = [...location.texture.sights, ...location.texture.sounds, ...location.texture.smells]
@@ -223,7 +223,7 @@ export function silence(scene: Scene): Record<string, number> {
  * The plan the game makes itself when the director's reply can't be read, so a bad reply costs no extra call:
  * whoever the player named speaks, else whoever has been silent longest; everyone else reacts.
  */
-export function fallbackPlan(content: Content, state: GameState, input: string): BeatPlan {
+export function fallbackPlan(content: Pack, state: GameState, input: string): BeatPlan {
   const scene = state.scene!
   const present = presentCast(scene)
   const quiet = silence(scene)

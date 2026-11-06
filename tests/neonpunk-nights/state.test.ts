@@ -1,10 +1,9 @@
-import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { loadContent } from '@platform/packs'
-import { GameStateSchema } from './schema'
-import { createInitialState, startScene } from './state'
+import { content } from './support'
+import { GameStateSchema } from '@engine/state'
+import { createInitialState, startScene } from '@engine/state'
 
-const content = loadContent(join(__dirname, '../../../content/default'))
+
 
 describe('createInitialState', () => {
   it('starts with every character’s meters and relations, and a valid state', () => {

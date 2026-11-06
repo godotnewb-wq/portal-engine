@@ -1,11 +1,12 @@
 import { join } from 'node:path'
-import { loadContent } from '@platform/packs'
+import { loadPack } from '@platform/packs'
 import type { GameState } from '@engine/state'
-import type { Content } from '@engine/pack'
+import type { Pack } from '@engine/pack'
 import { createInitialState, startScene } from '@engine/state'
 
-/** The shipped content, for tests. */
-export const content: Content = loadContent(join(__dirname, '../../content/default'))
+/** The Neonpunk Nights pack as shipped, for its tests. */
+export const PACK_DIR = join(__dirname, '../../packs/neonpunk-nights')
+export const content: Pack = loadPack(PACK_DIR)
 
 /** The milestone 1 bar scene, freshly opened, with a fixed seed. */
 export function barScene(seed = 1): GameState {

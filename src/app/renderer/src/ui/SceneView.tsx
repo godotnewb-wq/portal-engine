@@ -1,14 +1,15 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
 import type { GameState } from '@engine/state'
-import { characterById, locationById, type Content } from '@engine/pack'
+import { characterById, locationById, type Pack } from '@engine/pack'
 import { firstName } from '@engine/core'
 import { presentCast } from '@engine/scene'
+import { speciesById } from '@engine/world'
 import { Button } from './Button'
 import { atEnd, awaitingBeat, canAdvance, canGoBack, nameplate, sceneHistory, streamingBeats, type Reading, type ShownBeat } from './reading'
 import { SpriteStage } from './SpriteStage'
 
 interface Props {
-  content: Content
+  content: Pack
   state: GameState
   onState: (next: GameState) => void
   /** Ends the scene: summaries run and the summary screen follows. */
@@ -122,7 +123,11 @@ export function SceneView({ content, state, onState, onEnd, onSave, endError }: 
 
   // Whoever has the line on screen is lit on the stage.
   const speaker = shown && !waitingFirst && shown.beat.kind === 'dialogue' ? shown.beat.speaker : undefined
-  const figures = presentCast(scene).map((id) => ({ character: characterById(content, id)!, expression: scene.expressions[id] ?? 'neutral', speaking: speaker === id }))
+  const figures = presentCast(scene).map((id) => {
+    const character = characterById(content, id)!
+    const color = speciesById(content.setting, character.species)?.color
+    return { character, expression: scene.expressions[id] ?? 'neutral', speaking: speaker === id, ...(color && { color }) }
+  })
   const name = shown && !waitingFirst ? nameplate(content, state, shown.beat) : undefined
   const checks = shown && !waitingFirst && shown.turn >= 0 ? (scene.turns[shown.turn]?.checks.map((c) => c.line) ?? planned) : waitingFirst ? planned : []
   const uneasy = presentCast(scene).filter((id) => (scene.comfort[id] ?? 3) <= 2)

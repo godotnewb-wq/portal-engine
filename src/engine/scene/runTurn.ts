@@ -1,7 +1,7 @@
 import type { SceneEvent } from '@app/ipc'
 import type { Beat, GameState } from '@engine/state'
 import { parseReply, type ParsedReply } from './beats'
-import type { Content } from '@engine/pack'
+import type { Pack } from '@engine/pack'
 import { buildDirectorPrompt } from './director'
 import { type Prompt } from '@engine/core'
 import { checkReply, salvage, type Problem } from './checks'
@@ -43,7 +43,7 @@ export interface TurnOutcome {
  * code rather than costing a fourth.
  */
 export async function runTurn(
-  content: Content,
+  content: Pack,
   state: GameState,
   input: string,
   llm: TurnLlm,
@@ -69,7 +69,7 @@ export async function runTurn(
   calls++
   const draft = await llm.write(writerPrompt, onDelta, onRestart)
   let parsed: ParsedReply = parseReply(draft, speakers)
-  const problems = checkReply(parsed, plan, speakers, input)
+  const problems = checkReply(parsed, plan, speakers, input, content.phrases)
   let remaining: Problem[] = []
   let beats = parsed.beats
 
@@ -79,7 +79,7 @@ export async function runTurn(
     calls++
     const rewrite = await llm.write(buildRewritePrompt(writerPrompt, draft, problems.map((p) => p.fix)), onDelta, onRestart)
     parsed = parseReply(rewrite, speakers)
-    remaining = checkReply(parsed, plan, speakers, input)
+    remaining = checkReply(parsed, plan, speakers, input, content.phrases)
     beats = remaining.length > 0 ? salvage(parsed.beats, remaining) : parsed.beats
   }
 

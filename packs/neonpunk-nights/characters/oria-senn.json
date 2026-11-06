@@ -9,7 +9,7 @@
   "personality": "Unhurried, warm on the surface, counts everything. Enjoys the Low Turns more than she admits and makes a show of slumming it. Pays exactly what she promised, on time, every time, and treats that as proof she's a good person. Dislikes being rushed more than being lied to.",
   "agenda": {
     "longTerm": [
-      "Clear her debt to the Aether grid consortium before they call it in",
+      "Clear her debt to the Aether Grid Corporation before they call it in",
       "Build a network that doesn't need any one patron, so no one can own her again"
     ],
     "current": "Get the player to take the retrieval job tonight without learning who the client is"
@@ -38,7 +38,7 @@
   "knowledge": [
     "The job: retrieve a sealed case from a flooded pump station in the Low Turns before a rival crew does",
     "Vex has run messages for her before and doesn't like her",
-    "The consortium wants the case badly enough to pay triple"
+    "The Grid Corporation wants the case badly enough to pay triple"
   ],
   "values": [
     { "value": "keeping promises", "stance": "likes" },
@@ -49,8 +49,8 @@
   ],
   "secrets": [
     {
-      "id": "client-is-consortium",
-      "text": "The 'private client' is the Aether grid consortium, and she owes them; this job pays down her debt.",
+      "id": "client-is-grid-corporation",
+      "text": "The 'private client' is the Aether Grid Corporation, and she owes them; this job pays down her debt.",
       "tell": "Becomes over-formal and calls people 'darling' when lying",
       "revealWhen": "she is caught lying and pressed, or offered something worth more than the debt"
     }

@@ -3,9 +3,9 @@ import { join } from 'node:path'
 import { IPC, type LoadResponse, type SaveResponse, type SceneEndResponse, type SceneEvent, type SceneTurnResponse, type TestConnectionResult } from '../ipc'
 import { GameStateSchema } from '@engine/state'
 import { ListModelsRequestSchema, SettingsUpdateSchema, isConfigured, toView, LLM_PROFILE_IDS, type LlmProfileId } from '@llm'
-import type { Content } from '@engine/pack'
+import type { Pack } from '@engine/pack'
 import { chatCompletion, listModels } from '@llm'
-import { loadContent } from '@platform/packs'
+import { loadPack } from '@platform/packs'
 import { endScene } from '@engine/relationships'
 import { summaryLlm, turnLlm } from '@platform/roles'
 import { runTurn } from '@engine/scene'
@@ -14,10 +14,9 @@ import { SettingsStore, type KeyCipher } from '@platform/settings'
 import { SaveRequestSchema, SlotIdSchema } from '@engine/state'
 import { stateProblems } from '@engine/state'
 
-/** Where content lives: beside the app when packaged, the repository's `content/` when run from source. */
-function contentDir(): string {
-  const root = app.isPackaged ? join(process.resourcesPath, 'content') : join(app.getAppPath(), 'content')
-  return join(root, 'default')
+/** Where bundled packs live: beside the app when packaged, the repository's `packs/` when run from source. */
+function bundledPacksDir(): string {
+  return app.isPackaged ? join(process.resourcesPath, 'packs') : join(app.getAppPath(), 'packs')
 }
 
 function keyCipher(): KeyCipher | undefined {
@@ -50,9 +49,9 @@ const profileId = (value: unknown): LlmProfileId => {
 }
 
 app.whenReady().then(() => {
-  let content: Content
+  let content: Pack
   try {
-    content = loadContent(contentDir())
+    content = loadPack(join(bundledPacksDir(), 'neonpunk-nights'))
   } catch (error) {
     dialog.showErrorBox('The game content could not be loaded', (error as Error).message)
     app.quit()

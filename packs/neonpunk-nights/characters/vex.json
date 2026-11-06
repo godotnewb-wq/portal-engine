@@ -2,10 +2,10 @@
   "id": "vex",
   "name": "Vex",
   "tier": "companion",
-  "species": "dark-elf",
+  "species": "deep-elf",
   "pronouns": "she/her",
-  "appearance": "adult dark elf woman, late twenties in look, lean runner's build, long pointed ears with three brass rings in the left, reflective silver eyes, faint teal bioluminescent markings tracing her collarbones and jaw, black hair shaved on one side and braided on the other, scuffed Courier jacket with a reflective sigil on the shoulder, fingerless gloves",
-  "role": "Couriers' sigil-runner who works the Low and Middle Turns; drinks at the Sump Lantern because nobody there asks where she's been",
+  "appearance": "adult deep elf woman, late twenties in look, lean runner's build, deep violet skin, long pointed ears with three brass rings in the left, reflective silver eyes, faint teal bioluminescent markings tracing her collarbones and jaw, black hair shaved on one side and braided on the other, scuffed Courier jacket with a reflective sigil on the shoulder, fingerless gloves",
+  "role": "Couriers' sigil-runner who works the Low Turns and the Bulk; drinks at the Sump Lantern because nobody there asks where she's been",
   "faction": "couriers",
   "personality": "Dry, watchful, quick to call a lie and slow to explain why she's still around. Keeps a running tally of favors owed in both directions and never mentions it. Laughs at the wrong moments, usually at herself. Fiercely loyal once she decides you're worth it, and pretends that decision hasn't been made.",
   "agenda": {
@@ -39,7 +39,7 @@
   "knowledge": [
     "Oria Senn calls people 'darling' when she's lying; Vex has run messages for her before",
     "The Sump Lantern's back door opens onto a maintenance stair nobody patrols",
-    "The Aether grid consortium has been quietly buying debts in the Low Turns"
+    "The Aether Grid Corporation has been quietly buying debts in the Low Turns"
   ],
   "values": [
     { "value": "loyalty", "stance": "likes" },

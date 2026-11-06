@@ -1,9 +1,5 @@
 import { z } from 'zod'
-import { IdSchema } from '@engine/characters'
-
-/** The city's tiers, top to bottom (lore: Spire City). */
-export const CITY_TIERS = ['crown', 'high-turns', 'middle-turns', 'low-turns', 'deepwell'] as const
-export const CityTierSchema = z.enum(CITY_TIERS)
+import { IdSchema } from '@engine/core'
 
 /** A walk-on: one line of each, voiced by the narrator, never given a speaking slot (quests-relationships-npcs §5). */
 export const SceneCardSchema = z.object({
@@ -18,7 +14,7 @@ export const SceneCardSchema = z.object({
 export type SceneCard = z.infer<typeof SceneCardSchema>
 
 /**
- * Specific details the director picks 2–3 of per beat, so description is rooted in Spire City and not generic
+ * Specific details the director picks 2–3 of per beat, so description is rooted in the pack's world and not generic
  * fantasy (narrator-scene-engine §8).
  */
 export const TextureCardSchema = z.object({
@@ -34,7 +30,8 @@ export type TextureCard = z.infer<typeof TextureCardSchema>
 export const LocationSchema = z.object({
   id: IdSchema,
   name: z.string(),
-  tier: CityTierSchema,
+  /** One of the setting's tiers (or regions). */
+  tier: IdSchema,
   district: z.string(),
   description: z.string(),
   texture: TextureCardSchema,
