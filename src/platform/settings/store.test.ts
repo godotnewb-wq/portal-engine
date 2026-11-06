@@ -29,3 +29,15 @@ describe('SettingsStore', () => {
     expect('apiKey' in toView(again).director).toBe(false)
   })
 })
+
+describe('pack folders', () => {
+  it('keeps the extra pack folders across restarts, without blanks or repeats, beside the profiles', () => {
+    const path = pathIn()
+    const store = new SettingsStore(path, cipher)
+    store.update({ director: { ...blank(), model: 'fast', apiKey: 'sk-d' }, writer: blank(), summary: blank(), nsfw: blank() })
+    expect(store.setPackFolders(['D:\\RPG\\packs', ' ', 'D:\\RPG\\packs', '/home/me/packs'])).toEqual(['D:\\RPG\\packs', '/home/me/packs'])
+    const again = new SettingsStore(path, cipher)
+    expect(again.getPackFolders()).toEqual(['D:\\RPG\\packs', '/home/me/packs'])
+    expect(again.get().director).toMatchObject({ model: 'fast', apiKey: 'sk-d' })
+  })
+})

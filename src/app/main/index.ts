@@ -1,23 +1,32 @@
-import { app, BrowserWindow, dialog, ipcMain, safeStorage } from 'electron'
+import { app, BrowserWindow, dialog, ipcMain, safeStorage, shell } from 'electron'
+import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
-import { IPC, type LoadResponse, type SaveResponse, type SceneEndResponse, type SceneEvent, type SceneTurnResponse, type TestConnectionResult } from '../ipc'
-import { GameStateSchema } from '@engine/state'
-import { ListModelsRequestSchema, SettingsUpdateSchema, isConfigured, toView, LLM_PROFILE_IDS, type LlmProfileId } from '@llm'
 import type { Pack } from '@engine/pack'
-import { chatCompletion, listModels } from '@llm'
-import { loadPack } from '@platform/packs'
 import { endScene } from '@engine/relationships'
-import { summaryLlm, turnLlm } from '@platform/roles'
 import { runTurn } from '@engine/scene'
+import { GameStateSchema, SaveRequestSchema, SlotIdSchema, stateProblems } from '@engine/state'
+import { chatCompletion, isConfigured, listModels, ListModelsRequestSchema, LLM_PROFILE_IDS, SettingsUpdateSchema, toView, type LlmProfileId } from '@llm'
+import { discoverPacks, type PackListing, type PackSource } from '@platform/packs'
+import { summaryLlm, turnLlm } from '@platform/roles'
 import { SaveStore } from '@platform/saves'
 import { SettingsStore, type KeyCipher } from '@platform/settings'
-import { SaveRequestSchema, SlotIdSchema } from '@engine/state'
-import { stateProblems } from '@engine/state'
+import {
+  IPC,
+  type ChoosePackResponse,
+  type LoadResponse,
+  type SaveResponse,
+  type SceneEndResponse,
+  type SceneEvent,
+  type SceneTurnResponse,
+  type TestConnectionResult
+} from '../ipc'
 
-/** Where bundled packs live: beside the app when packaged, the repository's `packs/` when run from source. */
-function bundledPacksDir(): string {
-  return app.isPackaged ? join(process.resourcesPath, 'packs') : join(app.getAppPath(), 'packs')
-}
+/** Bundled packs: beside the app when packaged, the repository's `packs/` when run from source. */
+const bundledPacksDir = (): string => (app.isPackaged ? join(process.resourcesPath, 'packs') : join(app.getAppPath(), 'packs'))
+/** Packs the player installs: dropped into the app-data folder (architecture §9). */
+const userPacksDir = (): string => join(app.getPath('userData'), 'packs')
+/** Each pack's saves in a folder of their own. */
+const savesDir = (packId: string): string => join(app.getPath('userData'), 'saves', packId)
 
 function keyCipher(): KeyCipher | undefined {
   if (!safeStorage.isEncryptionAvailable()) return undefined
@@ -34,7 +43,7 @@ function createWindow(): void {
     minWidth: 960,
     minHeight: 600,
     backgroundColor: '#0d0b12',
-    title: 'Neonpunk Nights',
+    title: 'Portal Engine',
     webPreferences: { preload: join(__dirname, '../preload/index.js'), sandbox: false, contextIsolation: true }
   })
   // electron-vite sets ELECTRON_RENDERER_URL when running the dev server.
@@ -49,17 +58,49 @@ const profileId = (value: unknown): LlmProfileId => {
 }
 
 app.whenReady().then(() => {
-  let content: Pack
-  try {
-    content = loadPack(join(bundledPacksDir(), 'neonpunk-nights'))
-  } catch (error) {
-    dialog.showErrorBox('The game content could not be loaded', (error as Error).message)
-    app.quit()
-    return
-  }
   const settings = new SettingsStore(join(app.getPath('userData'), 'settings.json'), keyCipher())
 
-  ipcMain.handle(IPC.getContent, () => content)
+  // The packs found at the last scan, and the one being played. Everything a game does goes through `playing`.
+  let found: { listings: PackListing[]; packs: Map<string, Pack> } = { listings: [], packs: new Map() }
+  let playing: { pack: Pack; saves: SaveStore } | null = null
+  const sources = (): PackSource[] => [
+    { kind: 'bundled', dir: bundledPacksDir() },
+    { kind: 'user', dir: userPacksDir() },
+    ...settings.getPackFolders().map((dir): PackSource => ({ kind: 'extra', dir }))
+  ]
+  const current = (): { pack: Pack; saves: SaveStore } => {
+    if (!playing) throw new Error('No pack is chosen yet.')
+    return playing
+  }
+
+  ipcMain.handle(IPC.listPacks, () => {
+    found = discoverPacks(sources())
+    return found.listings
+  })
+  ipcMain.handle(IPC.choosePack, (_event, key: unknown): ChoosePackResponse => {
+    const pack = typeof key === 'string' ? found.packs.get(key) : undefined
+    if (!pack) {
+      const listing = found.listings.find((l) => l.key === key)
+      return { ok: false, error: listing ? `This pack can't be played: ${listing.problems.join('; ')}` : 'That pack is no longer there.' }
+    }
+    playing = { pack, saves: new SaveStore(savesDir(pack.manifest.id), { id: pack.manifest.id, version: pack.manifest.version }) }
+    return { ok: true, pack }
+  })
+  ipcMain.handle(IPC.openPacksFolder, async () => {
+    const dir = userPacksDir()
+    mkdirSync(dir, { recursive: true })
+    await shell.openPath(dir)
+    return dir
+  })
+  ipcMain.handle(IPC.getPackFolders, () => settings.getPackFolders())
+  ipcMain.handle(IPC.setPackFolders, (_event, folders: unknown) =>
+    settings.setPackFolders(Array.isArray(folders) ? folders.filter((f): f is string => typeof f === 'string') : [])
+  )
+  ipcMain.handle(IPC.chooseFolder, async () => {
+    const result = await dialog.showOpenDialog({ properties: ['openDirectory'] })
+    return result.canceled ? null : (result.filePaths[0] ?? null)
+  })
+
   ipcMain.handle(IPC.getSettings, () => toView(settings.get()))
   ipcMain.handle(IPC.saveSettings, (_event, update: unknown) => toView(settings.update(SettingsUpdateSchema.parse(update))))
   ipcMain.handle(IPC.listModels, async (_event, request: unknown) => {
@@ -76,7 +117,7 @@ app.whenReady().then(() => {
     try {
       const reply = await chatCompletion(profile, {
         system: 'Reply with one short sentence.',
-        messages: [{ role: 'user', content: 'Say hello to Spire City.' }],
+        messages: [{ role: 'user', content: 'Say hello.' }],
         maxTokens: 60,
         timeoutMs: 30_000
       })
@@ -92,13 +133,14 @@ app.whenReady().then(() => {
     if (turning) return { ok: false, error: 'A turn is already running.' }
     turning = true
     try {
+      const { pack } = current()
       const { state: raw, input } = request as { state: unknown; input: unknown }
       const state = GameStateSchema.parse(raw)
       if (typeof input !== 'string' || input.trim().length === 0) return { ok: false, error: 'Say or do something first.' }
       const send = (sceneEvent: SceneEvent) => {
         if (!event.sender.isDestroyed()) event.sender.send(IPC.sceneEvent, sceneEvent)
       }
-      const outcome = await runTurn(content, state, input.trim(), turnLlm(settings.get(), state.scene?.nsfw ?? false), send)
+      const outcome = await runTurn(pack, state, input.trim(), turnLlm(settings.get(), state.scene?.nsfw ?? false), send)
       return {
         ok: true,
         state: outcome.state,
@@ -120,7 +162,7 @@ app.whenReady().then(() => {
     turning = true
     try {
       const state = GameStateSchema.parse(raw)
-      return { ok: true, ...(await endScene(content, state, summaryLlm(settings.get(), state.scene?.nsfw ?? false))) }
+      return { ok: true, ...(await endScene(current().pack, state, summaryLlm(settings.get(), state.scene?.nsfw ?? false))) }
     } catch (error) {
       return { ok: false, error: (error as Error).message }
     } finally {
@@ -128,27 +170,28 @@ app.whenReady().then(() => {
     }
   })
 
-  const saves = new SaveStore(join(app.getPath('userData'), 'saves'))
-  ipcMain.handle(IPC.listSaves, () => saves.list())
+  ipcMain.handle(IPC.listSaves, () => (playing ? playing.saves.list() : []))
   ipcMain.handle(IPC.saveGame, (_event, request: unknown): SaveResponse => {
     try {
       const { slotId, state, name } = SaveRequestSchema.parse(request)
-      return { ok: true, summary: saves.save(slotId, state, new Date(), name) }
+      return { ok: true, summary: current().saves.save(slotId, state, new Date(), name) }
     } catch (error) {
       return { ok: false, error: (error as Error).message }
     }
   })
   ipcMain.handle(IPC.loadGame, (_event, slotId: unknown): LoadResponse => {
     try {
+      const { pack, saves } = current()
       const state = saves.load(SlotIdSchema.parse(slotId))
-      const problems = stateProblems(content, state)
-      if (problems.length > 0) return { ok: false, error: `This save doesn't fit the current content: ${problems.join('; ')}` }
+      // A save from another version of the pack loads only if it still fits the pack's content.
+      const problems = stateProblems(pack, state)
+      if (problems.length > 0) return { ok: false, error: `This save doesn't fit ${pack.manifest.name} ${pack.manifest.version}: ${problems.join('; ')}` }
       return { ok: true, state }
     } catch (error) {
       return { ok: false, error: (error as Error).message }
     }
   })
-  ipcMain.handle(IPC.deleteSave, (_event, slotId: unknown) => saves.delete(SlotIdSchema.parse(slotId)))
+  ipcMain.handle(IPC.deleteSave, (_event, slotId: unknown) => current().saves.delete(SlotIdSchema.parse(slotId)))
 
   createWindow()
   app.on('activate', () => {

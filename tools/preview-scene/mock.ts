@@ -3,6 +3,8 @@
 // that stream with delays. Build with `npx vite build --config scripts/preview-scene/vite.config.ts`.
 import { SettingsSchema, toView } from '@llm'
 import { buildPack, type Pack, type PackFiles } from '@engine/pack'
+import type { PackListing } from '@platform/packs'
+import { mockLlm } from '../bench/mock'
 import type { GameState } from '@engine/state'
 import type { RendererApi, SceneEvent } from '@app/ipc'
 import { runTurn, type TurnLlm } from '@engine/scene'
@@ -32,9 +34,21 @@ function packFiles(id: string): PackFiles {
   }
 }
 
-const built = buildPack(packFiles('neonpunk-nights'))
-if (!built.ok) throw new Error(built.problems.join('\n'))
-const content: Pack = built.pack
+const covers = import.meta.glob('../../packs/*/cover.png', { eager: true, import: 'default', query: '?url' }) as Record<string, string>
+
+// The packs the preview's picker lists: every bundled pack, and a deliberately broken copy of one so the picker's
+// "can't be played" state can be looked at.
+const ids = [...new Set(Object.keys(json).map((path) => path.split('/')[3]!))].sort()
+const brokenFiles = { ...packFiles('test-fixture'), player: { name: 'Nobody' }, manifest: { ...(json['../../packs/test-fixture/pack.json'] as object), id: 'broken-example', name: 'Broken Example' } }
+const found = [
+  ...ids.map((id) => ({ key: `packs/${id}`, built: buildPack(packFiles(id)), cover: covers[`../../packs/${id}/cover.png`] })),
+  { key: 'packs/broken-example', built: buildPack(brokenFiles), cover: undefined }
+]
+const listings: PackListing[] = found.map(({ key, built, cover }) => {
+  const manifest = built.ok ? built.pack.manifest : built.manifest
+  return { key, source: 'bundled', ...(manifest && { manifest }), ok: built.ok, problems: built.ok ? [] : built.problems, duplicate: false, ...(cover && { cover }) }
+})
+let content: Pack
 
 const PLAN = JSON.stringify({
   speakers: [
@@ -58,7 +72,8 @@ const wait = (ms: number) => new Promise((r) => setTimeout(r, ms))
 const listeners = new Set<(e: SceneEvent) => void>()
 const emit = (e: SceneEvent) => listeners.forEach((l) => l(e))
 
-const llm: TurnLlm = {
+// The scripted turn fits the Sump Lantern scene; any other pack gets the bench's generic mock.
+const scripted: TurnLlm = {
   async direct() {
     await wait(300)
     return PLAN
@@ -72,15 +87,15 @@ const llm: TurnLlm = {
   }
 }
 
-const saved = new Map<string, { slotId: string; savedAt: string; name?: string; state: GameState }>()
+const saved = new Map<string, { pack: string; slotId: string; savedAt: string; name?: string; state: GameState }>()
 
 const api: RendererApi = {
-  getContent: async () => content,
   getSettings: async () => toView(SettingsSchema.parse({})),
   saveSettings: async () => toView(SettingsSchema.parse({})),
   listModels: async () => ({ models: [] }),
   testConnection: async () => ({ ok: true, detail: 'mock' }),
   sceneTurn: async ({ state, input }) => {
+    const llm = content.manifest.id === 'neonpunk-nights' ? scripted : mockLlm().turn
     const outcome = await runTurn(content, state, input, llm, emit)
     return { ok: true, state: outcome.state, beats: outcome.beats, checks: outcome.plan.checks.flatMap((c) => (c.line ? [c.line] : [])), calls: outcome.calls, corrections: outcome.corrections, rewrite: outcome.problems.map((p) => p.fix) }
   },
@@ -92,20 +107,32 @@ const api: RendererApi = {
       Brask: { memory: 'Brask sat through a loud night at the Sump Lantern while Oria lied and Vex called it; nobody asked him anything.', level: 'fleeting', reason: 'Too loud, and nobody noticed he wanted to go.', approval: 'unchanged', trust: 'unchanged', attraction: 'unchanged' },
       Oria: { memory: 'Oria was caught in her "darling" by a Courier and had to admit the client was corporate.', level: 'normal', reason: 'Rook pushed her in public.', approval: 'a little less', trust: 'unchanged', attraction: 'a little more', learned: [], others: [{ with: 'vex', approval: 'less', trust: 'unchanged', attraction: 'unchanged', reason: 'She sees through me.' }] }
     }
-    return { ok: true, ...(await endScene(content, state, async (prompt) => JSON.stringify(summaries[prompt.user.match(/^About (\w+)/)![1]!]))) }
+    const summarize = content.manifest.id === 'neonpunk-nights' ? async (prompt: { user: string }) => JSON.stringify(summaries[prompt.user.match(/^About (\w+)/)![1]!]) : mockLlm().summarize
+    return { ok: true, ...(await endScene(content, state, summarize)) }
   },
-  // Saves live in memory for the preview.
-  listSaves: async () => [...saved.values()].map(({ slotId, savedAt, name, state }) => ({ slotId, savedAt, unreadable: false as const, ...(name ? { name } : {}), playerName: state.player.name, time: state.time, inScene: state.scene !== null, turns: state.scene?.turns.length ?? 0, memories: state.memories.length })),
+  listPacks: async () => listings,
+  choosePack: async (key) => {
+    const chosen = found.find((f) => f.key === key)
+    if (!chosen?.built.ok) return { ok: false, error: 'That pack can\'t be played.' }
+    content = chosen.built.pack
+    return { ok: true, pack: content }
+  },
+  openPacksFolder: async () => '(preview: no packs folder)',
+  getPackFolders: async () => [],
+  setPackFolders: async (folders) => folders,
+  chooseFolder: async () => null,
+  // Saves live in memory for the preview, per pack.
+  listSaves: async () => [...saved.values()].filter((x) => x.pack === content.manifest.id).map(({ slotId, savedAt, name, state }) => ({ slotId, savedAt, unreadable: false as const, ...(name ? { name } : {}), packVersion: content.manifest.version, playerName: state.player.name, time: state.time, inScene: state.scene !== null, turns: state.scene?.turns.length ?? 0, memories: state.memories.length })),
   saveGame: async ({ slotId, state, name }) => {
-    saved.set(slotId, { slotId, savedAt: new Date().toISOString(), name: name ?? saved.get(slotId)?.name, state: state as GameState })
+    saved.set(`${content.manifest.id}/${slotId}`, { pack: content.manifest.id, slotId, savedAt: new Date().toISOString(), name: name ?? saved.get(`${content.manifest.id}/${slotId}`)?.name, state: state as GameState })
     return { ok: true, summary: (await api.listSaves()).find((s) => s.slotId === slotId)! }
   },
   loadGame: async (slotId) => {
-    const game = saved.get(slotId)
+    const game = saved.get(`${content.manifest.id}/${slotId}`)
     return game ? { ok: true, state: game.state } : { ok: false, error: 'Empty' }
   },
   deleteSave: async (slotId) => {
-    saved.delete(slotId)
+    saved.delete(`${content.manifest.id}/${slotId}`)
   },
   onSceneEvent: (listener) => {
     listeners.add(listener)

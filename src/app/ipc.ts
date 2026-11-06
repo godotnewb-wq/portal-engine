@@ -1,4 +1,5 @@
 import type { Pack } from '@engine/pack'
+import type { PackListing } from '@platform/packs'
 import type { WitnessReport } from '@engine/relationships'
 import type { SaveRequest, SaveSummary, SlotId } from '@engine/state'
 import type { Beat, GameState } from '@engine/state'
@@ -6,7 +7,12 @@ import type { ListModelsRequest, ListModelsResponse, LlmProfileId, SettingsUpdat
 
 /** IPC channel names, shared by main and preload. */
 export const IPC = {
-  getContent: 'content:get',
+  listPacks: 'packs:list',
+  choosePack: 'packs:choose',
+  openPacksFolder: 'packs:open-folder',
+  getPackFolders: 'settings:pack-folders',
+  setPackFolders: 'settings:set-pack-folders',
+  chooseFolder: 'settings:choose-folder',
   getSettings: 'settings:get',
   saveSettings: 'settings:save',
   listModels: 'settings:list-models',
@@ -57,9 +63,20 @@ export type SceneEndResponse = { ok: true; state: GameState; reports: WitnessRep
 export type SaveResponse = { ok: true; summary: SaveSummary } | { ok: false; error: string }
 export type LoadResponse = { ok: true; state: GameState } | { ok: false; error: string }
 
+export type ChoosePackResponse = { ok: true; pack: Pack } | { ok: false; error: string }
+
 /** What the preload script exposes to the renderer as `window.api`. */
 export interface RendererApi {
-  getContent(): Promise<Pack>
+  /** Looks for packs again and lists every one found, sound or not (architecture §9). */
+  listPacks(): Promise<PackListing[]>
+  /** Plays the pack in that folder; saves and scenes then belong to it. */
+  choosePack(key: string): Promise<ChoosePackResponse>
+  /** Opens the user packs folder in the file manager, creating it if needed. Returns its path. */
+  openPacksFolder(): Promise<string>
+  getPackFolders(): Promise<string[]>
+  setPackFolders(folders: string[]): Promise<string[]>
+  /** Asks the player to pick a folder; null if they cancel. */
+  chooseFolder(): Promise<string | null>
   getSettings(): Promise<SettingsView>
   saveSettings(update: SettingsUpdate): Promise<SettingsView>
   listModels(request: ListModelsRequest): Promise<ListModelsResponse>

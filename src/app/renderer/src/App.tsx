@@ -6,30 +6,44 @@ import { createInitialState, startScene } from '@engine/state'
 import type { WitnessReport } from '@engine/relationships'
 import { AUTO_SLOT_ID, latestSave, type SaveSummary } from '@engine/state'
 import { Button } from './ui/Button'
+import { PackPicker } from './ui/PackPicker'
 import { SavesView } from './ui/SavesView'
 import { SceneView } from './ui/SceneView'
 import { Settings } from './ui/Settings'
 import { SummaryView } from './ui/SummaryView'
 
-type Screen = 'title' | 'settings' | 'scene' | 'ending' | 'summary' | 'save' | 'load'
+type Screen = 'picker' | 'title' | 'settings' | 'scene' | 'ending' | 'summary' | 'save' | 'load'
 
-/** Owns which screen is showing and the game state; main only runs turns and summaries on it, and keeps the saves. */
+/**
+ * Owns which screen is showing, the chosen pack and the game state; main only runs turns and summaries on it, and
+ * keeps the saves. The pack picker comes first, always (architecture §10).
+ */
 export function App() {
-  const [screen, setScreen] = useState<Screen>('title')
+  const [screen, setScreen] = useState<Screen>('picker')
   const [content, setContent] = useState<Pack | null>(null)
   const [state, setState] = useState<GameState | null>(null)
   const [reports, setReports] = useState<WitnessReport[]>([])
   const [error, setError] = useState('')
   const [saves, setSaves] = useState<SaveSummary[]>([])
-  // Where the save screen goes back to.
+  // Where the save and settings screens go back to.
   const [from, setFrom] = useState<Screen>('title')
 
   useEffect(() => {
-    window.api.getContent().then(setContent)
-  }, [])
-  useEffect(() => {
     if (screen === 'title') window.api.listSaves().then(setSaves)
   }, [screen])
+
+  /** A pack was picked: a fresh start in it, nothing carried over from another pack. */
+  const choose = (pack: Pack) => {
+    setContent(pack)
+    setState(null)
+    setError('')
+    setScreen('title')
+  }
+  const changePack = () => {
+    setContent(null)
+    setState(null)
+    setScreen('picker')
+  }
 
   // Autosave whenever the game changes: after each turn, a scene's end or a new scene. The first state after a load
   // is the save itself, so it isn't written back.
@@ -65,6 +79,10 @@ export function App() {
     setFrom(screen)
     setScreen(mode)
   }
+  const openSettings = () => {
+    setFrom(screen)
+    setScreen('settings')
+  }
 
   /** Closing a scene where nothing was said needs no summaries; otherwise every witness writes theirs. */
   const endScene = async () => {
@@ -87,7 +105,8 @@ export function App() {
     }
   }
 
-  if (screen === 'settings') return <Settings onClose={() => setScreen('title')} />
+  if (screen === 'settings') return <Settings onClose={() => setScreen(from)} />
+  if (screen === 'picker' || !content) return <PackPicker onChosen={choose} onSettings={openSettings} />
   if (screen === 'save' || screen === 'load') {
     return <SavesView mode={screen} state={state ?? undefined} onLoaded={resume} onClose={() => setScreen(from)} />
   }
@@ -107,11 +126,11 @@ export function App() {
   }
 
   const latest = latestSave(saves)
-  const startName = content ? (locationById(content, content.manifest.start.location)?.name ?? '') : ''
+  const startName = locationById(content, content.manifest.start.location)?.name ?? ''
   return (
     <div className="screen title">
-      <h1 className="logo">{content?.manifest.ui.title ?? content?.manifest.name}</h1>
-      <p className="tagline">{content?.manifest.ui.tagline}</p>
+      <h1 className="logo">{content.manifest.ui.title ?? content.manifest.name}</h1>
+      <p className="tagline">{content.manifest.ui.tagline}</p>
       <div className="menu">
         {state?.scene && (
           <Button variant="primary" onClick={() => setScreen('scene')}>
@@ -135,7 +154,10 @@ export function App() {
         <Button onClick={() => openSaves('load')} disabled={saves.length === 0}>
           Load game
         </Button>
-        <Button onClick={() => setScreen('settings')}>Settings</Button>
+        <Button onClick={openSettings}>Settings</Button>
+        <Button variant="ghost" onClick={changePack}>
+          Change game
+        </Button>
       </div>
       {error && <p className="error">{error}</p>}
     </div>

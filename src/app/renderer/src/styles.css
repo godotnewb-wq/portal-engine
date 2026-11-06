@@ -118,3 +118,22 @@ input, select { background: var(--bg); color: var(--text); border: 1px solid var
 .slot-title small { margin-left: 0.5rem; color: var(--muted); font-weight: 400; }
 .slot-detail { color: var(--muted); font-size: 0.8rem; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .slot-actions { display: flex; gap: 0.4rem; flex-shrink: 0; }
+
+/* Pack picker */
+.picker { max-width: 60rem; margin: 0 auto; display: flex; flex-direction: column; align-items: stretch; }
+.picker .logo, .picker .tagline { text-align: center; }
+.packs { display: flex; flex-direction: column; gap: 0.8rem; margin: 1rem 0; }
+.pack { display: grid; grid-template-columns: 9rem 1fr auto; gap: 1rem; align-items: center; padding: 0.9rem; border: 1px solid var(--line); border-radius: 10px; background: var(--panel); }
+.pack.broken { opacity: 0.6; border-color: var(--hot); }
+.pack-cover { width: 9rem; height: 5.4rem; border-radius: 6px; overflow: hidden; background: var(--bg); display: flex; align-items: center; justify-content: center; font-size: 2rem; color: var(--muted); }
+.pack-cover img { width: 100%; height: 100%; object-fit: cover; }
+.pack-text header { display: flex; align-items: baseline; gap: 0.6rem; }
+.pack-text h2 { margin: 0; font-size: 1.15rem; color: var(--neon); }
+.pack-text p { margin: 0.3rem 0 0; font-size: 0.88rem; color: #cfc7dc; }
+.pack-version, .pack-source { font-size: 0.75rem; color: var(--muted); }
+.pack-rating { color: #e0b04a !important; font-size: 0.78rem !important; }
+.pack-duplicate { color: #e0b04a !important; }
+.pack-problems { margin-top: 0.4rem; font-size: 0.8rem; color: var(--hot); }
+.pack-problems ul { margin: 0.3rem 0 0; padding-left: 1.2rem; }
+.pack-folders .folder { flex: 1; font-size: 0.82rem; overflow: hidden; text-overflow: ellipsis; }
+.settings .pack-folders { margin-bottom: 1rem; }

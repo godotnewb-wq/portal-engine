@@ -4,7 +4,7 @@ import { z } from 'zod'
 import { GameStateSchema } from './schema'
 
 /** Bump when the save format changes; older saves are then unreadable (no backwards compatibility before release). */
-export const SAVE_VERSION = 1
+export const SAVE_VERSION = 2
 
 /** The game's own slot: written after every turn and every scene's end, never by hand. */
 export const AUTO_SLOT_ID = 'auto'
@@ -18,9 +18,17 @@ export const SAVE_NAME_CHARS = 40
 /** A name the player gives a save: trimmed and capped. Empty for none. */
 export const SaveNameSchema = z.string().transform((name) => name.trim().slice(0, SAVE_NAME_CHARS))
 
+/**
+ * Which pack a save was played with. An object, so it can later list the pack overlays a playthrough used
+ * (architecture §12).
+ */
+export const SavePackSchema = z.object({ id: z.string(), version: z.string() })
+export type SavePack = z.infer<typeof SavePackSchema>
+
 /** Everything needed to resume, including a scene still in progress (it lives in the state). */
 export const SaveFileSchema = z.object({
   version: z.literal(SAVE_VERSION),
+  pack: SavePackSchema,
   /** Real-world time of the save, ISO 8601. */
   savedAt: z.string(),
   /** What the player called it. Left out, it goes by its slot. */
@@ -39,7 +47,7 @@ export type SaveRequest = z.input<typeof SaveRequestSchema>
 
 /** What the slot list shows. Unreadable saves are listed so they aren't overwritten unknowingly. */
 export type SaveSummary = { slotId: SlotId; savedAt: string } & (
-  | { unreadable: false; name?: string; playerName: string; time: number; inScene: boolean; turns: number; memories: number }
+  | { unreadable: false; name?: string; packVersion: string; playerName: string; time: number; inScene: boolean; turns: number; memories: number }
   | { unreadable: true }
 )
 

@@ -1,0 +1,26 @@
+{
+  "id": "mara",
+  "name": "Mara Quill",
+  "tier": "companion",
+  "species": "person",
+  "pronouns": "she/her",
+  "appearance": "adult woman, short dark hair, ink-stained fingers, a clerk's grey coat",
+  "role": "Guild tally-keeper who knows everyone in the yard",
+  "faction": "guild",
+  "personality": "Precise, wry, quietly kind; keeps lists of everything.",
+  "agenda": { "longTerm": ["Become the Guild's chief clerk"], "current": "Find out who keeps skimming the tallies" },
+  "contradictions": ["Values honesty, and keeps two sets of books"],
+  "voice": {
+    "rhythm": "Short, exact sentences",
+    "vocabulary": "Ledger words",
+    "sampleLines": ["That doesn't add up.", "Count it again."],
+    "shifts": { "angry": "Lists your mistakes", "flirting": "Rounds in your favor", "lying": "Gives exact numbers" }
+  },
+  "mood": "busy, curious",
+  "knowledge": ["Tobin was in the yard after closing"],
+  "values": [{ "value": "honesty", "stance": "likes" }],
+  "secrets": [{ "id": "two-books", "text": "Mara keeps a second set of tallies.", "tell": "Gives exact numbers" }],
+  "meters": { "warmth": 10, "bond": 8 },
+  "relations": [{ "to": "tobin", "label": "known", "meters": { "warmth": 9, "bond": 4 } }],
+  "stats": { "level": 2, "attributes": { "brawn": 3, "wits": 7, "nerve": 5 }, "skills": { "notice": 1, "talk": 1 } }
+}

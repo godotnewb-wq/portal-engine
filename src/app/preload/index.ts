@@ -2,7 +2,12 @@ import { contextBridge, ipcRenderer } from 'electron'
 import { IPC, type RendererApi, type SceneEvent } from '../ipc'
 
 const api: RendererApi = {
-  getContent: () => ipcRenderer.invoke(IPC.getContent),
+  listPacks: () => ipcRenderer.invoke(IPC.listPacks),
+  choosePack: (key) => ipcRenderer.invoke(IPC.choosePack, key),
+  openPacksFolder: () => ipcRenderer.invoke(IPC.openPacksFolder),
+  getPackFolders: () => ipcRenderer.invoke(IPC.getPackFolders),
+  setPackFolders: (folders) => ipcRenderer.invoke(IPC.setPackFolders, folders),
+  chooseFolder: () => ipcRenderer.invoke(IPC.chooseFolder),
   getSettings: () => ipcRenderer.invoke(IPC.getSettings),
   saveSettings: (update) => ipcRenderer.invoke(IPC.saveSettings, update),
   listModels: (request) => ipcRenderer.invoke(IPC.listModels, request),

@@ -57,6 +57,15 @@ export function stateProblems(content: Pack, state: GameState): string[] {
     if (!known.has(id)) problems.push(`${what} names unknown character "${id}"`)
   }
   for (const id of Object.keys(state.meters)) unknown('meters', id)
+  // Meters must be the ruleset's: a save from a pack version with other meters doesn't fit.
+  const meterIds = content.ruleset.meters.list.map((m) => m.id).sort().join(',')
+  const fits = (m: Record<string, number>) => Object.keys(m).sort().join(',') === meterIds
+  if (!Object.values(state.meters).every(fits) || !state.relations.every((r) => fits(r.meters))) {
+    problems.push(`its relationship meters aren't this pack's (${meterIds.replaceAll(',', ', ')})`)
+  }
+  for (const [skill] of Object.entries(state.player.stats.skills)) {
+    if (!content.ruleset.skills.some((s) => s.id === skill)) problems.push(`the player has unknown skill "${skill}"`)
+  }
   for (const r of state.relations) {
     unknown('a relation', r.from)
     unknown('a relation', r.to)

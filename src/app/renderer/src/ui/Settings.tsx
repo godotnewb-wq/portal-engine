@@ -84,6 +84,42 @@ function ProfileForm({ id, value, onChange }: { id: LlmProfileId; value: Draft; 
   )
 }
 
+/**
+ * Extra folders to look for packs in, for pack authors working outside the app-data folder (architecture §9). Each
+ * can be a folder of packs or one pack's own folder.
+ */
+function PackFolders() {
+  const [folders, setFolders] = useState<string[]>([])
+  useEffect(() => {
+    window.api.getPackFolders().then(setFolders)
+  }, [])
+  const save = async (next: string[]) => setFolders(await window.api.setPackFolders(next))
+  const add = async () => {
+    const folder = await window.api.chooseFolder()
+    if (folder) await save([...folders, folder])
+  }
+  return (
+    <fieldset className="profile pack-folders">
+      <legend title="Packs are also found in the app's own packs folder; add more places here.">Pack folders</legend>
+      {folders.length === 0 && <span className="status">None. Packs are found in the app's own packs folder.</span>}
+      {folders.map((f) => (
+        <div key={f} className="row">
+          <code className="folder">{f}</code>
+          <Button size="sm" variant="ghost" onClick={() => save(folders.filter((x) => x !== f))}>
+            Remove
+          </Button>
+        </div>
+      ))}
+      <div className="row">
+        <Button size="sm" onClick={add}>
+          Add folder…
+        </Button>
+        <span className="status">Changes show the next time packs are looked for.</span>
+      </div>
+    </fieldset>
+  )
+}
+
 export function Settings({ onClose }: { onClose: () => void }) {
   const [draft, setDraft] = useState<Record<LlmProfileId, Draft> | null>(null)
   const [saved, setSaved] = useState('')
@@ -114,6 +150,7 @@ export function Settings({ onClose }: { onClose: () => void }) {
           <ProfileForm key={id} id={id} value={draft[id]} onChange={(next) => (setSaved(''), setDraft({ ...draft, [id]: next }))} />
         ))}
       </div>
+      <PackFolders />
       <div className="row">
         <Button variant="primary" onClick={save}>
           Save

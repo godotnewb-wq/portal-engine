@@ -1,7 +1,8 @@
 {
-  "name": "neonpunk-nights",
-  "version": "0.1.0",
-  "description": "An LLM-integrated adult visual novel RPG set in Spire City",
+  "name": "portal-engine",
+  "productName": "Portal Engine",
+  "version": "0.2.0",
+  "description": "A game-agnostic engine for single-player LLM visual novel RPGs, run with game packs",
   "private": true,
   "license": "GPL-3.0-only",
   "main": "./out/main/index.js",

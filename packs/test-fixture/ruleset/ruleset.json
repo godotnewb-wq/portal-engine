@@ -1,0 +1,52 @@
+{
+  "resolution": "d20-vs-dc",
+  "attributes": {
+    "list": [
+      { "id": "brawn", "name": "Brawn" },
+      { "id": "wits", "name": "Wits" },
+      { "id": "nerve", "name": "Nerve" }
+    ],
+    "min": 1,
+    "max": 10,
+    "average": 4,
+    "modifier": { "base": 4, "divisor": 1 }
+  },
+  "skills": [
+    { "id": "fight", "name": "Fight", "attribute": "brawn", "description": "hitting and not being hit" },
+    { "id": "sneak", "name": "Sneak", "attribute": "wits", "description": "going unseen" },
+    { "id": "notice", "name": "Notice", "attribute": "wits", "description": "spotting things, and lies" },
+    { "id": "talk", "name": "Talk", "attribute": "nerve", "description": "persuading honestly" },
+    { "id": "bluff", "name": "Bluff", "attribute": "nerve", "description": "lying well" }
+  ],
+  "ranks": { "max": 3, "capByLevel": [{ "upTo": 3, "cap": 1 }, { "upTo": 5, "cap": 3 }] },
+  "levels": { "min": 1, "max": 5 },
+  "difficulties": [
+    { "word": "routine", "dc": 8 },
+    { "word": "tough", "dc": 13 },
+    { "word": "grim", "dc": 18 }
+  ],
+  "degrees": { "strongMargin": 4, "costMargin": 2 },
+  "criticals": { "hit": 20, "miss": 1 },
+  "assists": { "meter": "bond", "minRank": 1, "bonusFrom": 6, "bonus": 1, "advantageFrom": 12 },
+  "meters": {
+    "list": [
+      { "id": "warmth", "name": "Warmth", "description": "how much they like the other" },
+      { "id": "bond", "name": "Bond", "description": "how much they would do for the other" }
+    ],
+    "min": 0,
+    "max": 20
+  },
+  "wordScale": [
+    { "word": "colder", "value": -3 },
+    { "word": "same", "value": 0 },
+    { "word": "warmer", "value": 3 }
+  ],
+  "relations": {
+    "start": { "warmth": 8, "bond": 5 },
+    "bands": [
+      { "label": "foes", "max": { "warmth": 3 } },
+      { "label": "close", "min": { "warmth": 15, "bond": 12 } }
+    ],
+    "otherwise": "known"
+  }
+}
