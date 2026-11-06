@@ -30,6 +30,8 @@ export function App() {
 
   useEffect(() => {
     if (screen === 'title') window.api.listSaves().then(setSaves)
+    // A log session runs from starting or loading a game until the title screen (milestone 2, A2).
+    if (screen === 'title' || screen === 'picker') void window.api.endLog()
   }, [screen])
 
   /** A pack was picked: a fresh start in it, nothing carried over from another pack. */
@@ -55,15 +57,24 @@ export function App() {
     })
   }, [state])
 
+  /** Play starts: a log session begins, saying what it started from. */
+  const play = (from: string) => void window.api.beginLog(from)
+
   const enterScene = (game: GameState) => {
     if (!content) return
     const { location, cast } = content.manifest.start
-    setState(startScene(content, game, location, cast))
+    // A unique scene id, so turn ids never repeat across sessions or loads of the same save.
+    setState(startScene(content, game, location, cast, `scene-${crypto.randomUUID().slice(0, 8)}`))
     setScreen('scene')
   }
-  const newGame = () => content && enterScene(createInitialState(content, seedFrom(`${Date.now()}`)))
+  const newGame = () => {
+    if (!content) return
+    play('new game')
+    enterScene(createInitialState(content, seedFrom(`${Date.now()}`)))
+  }
 
-  const resume = (game: GameState) => {
+  const resume = (game: GameState, from = 'save') => {
+    play(from)
     loaded.current = game
     setState(game)
     setScreen(game.scene ? 'scene' : 'title')
@@ -72,7 +83,7 @@ export function App() {
     const latest = latestSave(saves)
     if (!latest) return
     const response = await window.api.loadGame(latest.slotId)
-    if (response.ok) resume(response.state)
+    if (response.ok) resume(response.state, `save ${latest.slotId}`)
     else setError(response.error)
   }
   const openSaves = (mode: 'save' | 'load') => {
@@ -108,7 +119,7 @@ export function App() {
   if (screen === 'settings') return <Settings onClose={() => setScreen(from)} />
   if (screen === 'picker' || !content) return <PackPicker onChosen={choose} onSettings={openSettings} />
   if (screen === 'save' || screen === 'load') {
-    return <SavesView mode={screen} state={state ?? undefined} onLoaded={resume} onClose={() => setScreen(from)} />
+    return <SavesView mode={screen} state={state ?? undefined} onLoaded={(game) => resume(game)} onClose={() => setScreen(from)} />
   }
   if (screen === 'ending') {
     return (
@@ -133,7 +144,7 @@ export function App() {
       <p className="tagline">{content.manifest.ui.tagline}</p>
       <div className="menu">
         {state?.scene && (
-          <Button variant="primary" onClick={() => setScreen('scene')}>
+          <Button variant="primary" onClick={() => (play('continue'), setScreen('scene'))}>
             Continue
           </Button>
         )}
@@ -143,7 +154,7 @@ export function App() {
           </Button>
         )}
         {state && !state.scene && (
-          <Button variant="primary" onClick={() => enterScene(state)}>
+          <Button variant="primary" onClick={() => (play('continue'), enterScene(state))}>
             Back to {startName}
           </Button>
         )}

@@ -18,6 +18,14 @@ const api: RendererApi = {
   saveGame: (request) => ipcRenderer.invoke(IPC.saveGame, request),
   loadGame: (slotId) => ipcRenderer.invoke(IPC.loadGame, slotId),
   deleteSave: (slotId) => ipcRenderer.invoke(IPC.deleteSave, slotId),
+  beginLog: (from) => ipcRenderer.invoke(IPC.beginLog, from),
+  endLog: () => ipcRenderer.invoke(IPC.endLog),
+  getLogging: () => ipcRenderer.invoke(IPC.getLogging),
+  setLogging: (on) => ipcRenderer.invoke(IPC.setLogging, on),
+  openLogsFolder: () => ipcRenderer.invoke(IPC.openLogsFolder),
+  flag: (input) => ipcRenderer.invoke(IPC.flag, input),
+  flagsFor: (turns) => ipcRenderer.invoke(IPC.flagsFor, turns),
+  turnDetails: (session, turnId) => ipcRenderer.invoke(IPC.turnDetails, session, turnId),
   onSceneEvent: (listener) => {
     const heard = (_event: unknown, sceneEvent: SceneEvent) => listener(sceneEvent)
     ipcRenderer.on(IPC.sceneEvent, heard)

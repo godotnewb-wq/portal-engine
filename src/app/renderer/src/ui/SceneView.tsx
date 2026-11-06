@@ -1,12 +1,16 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
-import type { GameState } from '@engine/state'
+import type { GameState, Turn } from '@engine/state'
+import { flagKey, type Flag, type FlagRecord } from '@engine/review'
+import type { TurnDetails as Details } from '@platform/logs'
 import { characterById, locationById, type Pack } from '@engine/pack'
 import { firstName } from '@engine/core'
 import { presentCast } from '@engine/scene'
 import { speciesById } from '@engine/world'
 import { Button } from './Button'
-import { atEnd, awaitingBeat, canAdvance, canGoBack, nameplate, sceneHistory, streamingBeats, type Reading, type ShownBeat } from './reading'
+import { atEnd, awaitingBeat, beatCounter, canAdvance, canGoBack, nameplate, sceneHistory, streamingBeats, type Reading, type ShownBeat } from './reading'
+import { FlagPanel } from './FlagPanel'
 import { SpriteStage } from './SpriteStage'
+import { TurnDetails } from './TurnDetails'
 
 interface Props {
   content: Pack
@@ -20,6 +24,15 @@ interface Props {
 }
 
 const COMFORT_WORD = ['', 'wants out', 'uneasy', 'all right', 'comfortable', 'at ease']
+
+/** What the flag panel is open on: a beat of a turn, or (no beat) the whole turn. */
+interface FlagTarget {
+  turn: Turn
+  beat?: number
+}
+
+/** The key a flag on a beat or turn is kept under, here and in the logs. */
+const keyOf = (turn: Turn, beat?: number) => flagKey({ turnSession: turn.log ?? '', turnId: turn.id, ...(beat !== undefined && { beat }) })
 
 /**
  * The scene: the stage, the text box read a beat at a time, and the player's line. A reply streams in and its
@@ -39,6 +52,10 @@ export function SceneView({ content, state, onState, onEnd, onSave, endError }: 
   const [status, setStatus] = useState('')
   const [error, setError] = useState('')
   const [input, setInput] = useState('')
+  const [flags, setFlags] = useState<Map<string, FlagRecord>>(new Map())
+  const [flagging, setFlagging] = useState<FlagTarget | null>(null)
+  const [detailsOpen, setDetailsOpen] = useState(false)
+  const [details, setDetails] = useState<Map<string, Details | null>>(new Map())
   const turnStart = useRef(0)
   const turned = useRef(0)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -60,7 +77,15 @@ export function SceneView({ content, state, onState, onEnd, onSave, endError }: 
     []
   )
 
-  const live: ShownBeat[] = busy ? streamingBeats(content, state, streamed).map((beat) => ({ beat, turn: scene.turns.length })) : []
+  // The flags standing on this scene's logged turns, from whichever session they were made in.
+  useEffect(() => {
+    const logged = scene.turns.flatMap((t) => (t.log ? [{ session: t.log, turnId: t.id }] : []))
+    if (logged.length === 0) return
+    window.api.flagsFor(logged).then((records) => setFlags(new Map(records.map((r) => [flagKey(r), r]))))
+    // Only on opening the scene; flags made here are added as they're saved.
+  }, [scene.id])
+
+  const live: ShownBeat[] = busy ? streamingBeats(content, state, streamed).map((beat, i) => ({ beat, turn: scene.turns.length, n: i + 1 })) : []
   const beats = [...history, ...live]
   const reading: Reading = { index, total: beats.length, streaming: busy }
   const shown = beats[Math.min(index, beats.length - 1)]
@@ -73,8 +98,56 @@ export function SceneView({ content, state, onState, onEnd, onSave, endError }: 
     if (canGoBack(reading)) setIndex(Math.min(index, beats.length - 1) - 1)
   }
 
+  // The turn on screen, once it is in the state (not while streaming): what Details and flags are about.
+  const shownTurn: Turn | undefined = shown && !busy && shown.turn >= 0 ? scene.turns[shown.turn] : undefined
+  const flaggable = !!shownTurn?.log
+  const openFlag = (wholeTurn: boolean) => {
+    if (!shownTurn?.log || !shown) return
+    setFlagging({ turn: shownTurn, ...(!wholeTurn && { beat: shown.n }) })
+  }
+
+  async function saveFlag(target: FlagTarget, flag: Flag | null) {
+    setFlagging(null)
+    const beat = target.beat !== undefined ? target.turn.beats[target.beat - 1] : undefined
+    const record = await window.api.flag({
+      turnSession: target.turn.log!,
+      turnId: target.turn.id,
+      ...(target.beat !== undefined && { beat: target.beat }),
+      ...(beat?.kind === 'dialogue' && { speaker: beat.speaker }),
+      ...(beat && { text: beat.text }),
+      flag
+    })
+    if (!record) return
+    setFlags((current) => {
+      const next = new Map(current)
+      if (record.flag) next.set(flagKey(record), record)
+      else next.delete(flagKey(record))
+      return next
+    })
+  }
+
+  // Details of the turn on screen: the fresh trace from this session, or read back from its log.
+  const detailsOf = shownTurn ? details.get(shownTurn.id) : undefined
+  useEffect(() => {
+    if (!detailsOpen || !shownTurn || details.has(shownTurn.id)) return
+    const turn = shownTurn
+    if (!turn.log) {
+      setDetails((d) => new Map(d).set(turn.id, null))
+      return
+    }
+    window.api.turnDetails(turn.log, turn.id).then((found) => setDetails((d) => new Map(d).set(turn.id, found)))
+  }, [detailsOpen, shownTurn, details])
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
+      if (flagging) return
+      // F flags only while reading: never from a text field, so it can't add an "f" to the player's line.
+      const inField = event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement
+      if (!inField && (event.key === 'f' || event.key === 'F') && !event.ctrlKey && !event.metaKey && !event.altKey && flaggable) {
+        event.preventDefault()
+        openFlag(event.shiftKey)
+        return
+      }
       const typing = event.target instanceof HTMLInputElement && event.target.value !== ''
       if (typing) return
       if (['ArrowRight', ' ', 'Enter'].includes(event.key) && canAdvance(reading)) {
@@ -111,6 +184,8 @@ export function SceneView({ content, state, onState, onEnd, onSave, endError }: 
     setBusy(false)
     setStreamed('')
     if (response.ok) {
+      const turn = response.state.scene?.turns.at(-1)
+      if (turn) setDetails((d) => new Map(d).set(turn.id, response.details))
       onState(response.state)
       if (response.rewrite.length === 0) setStatus('')
       else setStatus(`Revised: ${response.rewrite.length} fix${response.rewrite.length === 1 ? '' : 'es'}`)
@@ -132,6 +207,9 @@ export function SceneView({ content, state, onState, onEnd, onSave, endError }: 
   const checks = shown && !waitingFirst && shown.turn >= 0 ? (scene.turns[shown.turn]?.checks.map((c) => c.line) ?? planned) : waitingFirst ? planned : []
   const uneasy = presentCast(scene).filter((id) => (scene.comfort[id] ?? 3) <= 2)
   const reviewing = !busy && index < beats.length - 1
+  // A flagged beat shows its mark when read back, so it isn't flagged twice by accident.
+  const shownMark = shownTurn && shown ? flags.get(keyOf(shownTurn, shown.n))?.flag?.rating : undefined
+  const nameOf = (b: ShownBeat) => nameplate(content, state, b.beat)
 
   return (
     <div className="scene">
@@ -140,6 +218,9 @@ export function SceneView({ content, state, onState, onEnd, onSave, endError }: 
         <span className="district">{location.district}</span>
         <span className="spacer" />
         {status && <span className="status">{status}</span>}
+        <Button size="sm" variant={detailsOpen ? 'primary' : 'ghost'} onClick={() => setDetailsOpen(!detailsOpen)} title="The turn on screen: plan, rolls, checks, rewrite, timings, flags">
+          Details
+        </Button>
         <Button size="sm" variant="ghost" onClick={onSave} disabled={busy}>
           Save
         </Button>
@@ -148,7 +229,21 @@ export function SceneView({ content, state, onState, onEnd, onSave, endError }: 
         </Button>
       </header>
 
-      <SpriteStage figures={figures} />
+      <div className="stage-wrap">
+        <SpriteStage figures={figures} />
+        {detailsOpen && (
+          <TurnDetails
+            nameOf={(id) => nameplate(content, state, { kind: 'dialogue', speaker: id, text: '' }) ?? id}
+            details={detailsOf ?? null}
+            loading={!!shownTurn && detailsOf === undefined}
+            flags={shownTurn ? [...flags.values()].filter((f) => f.turnId === shownTurn.id && f.turnSession === shownTurn.log) : []}
+            flaggable={flaggable}
+            onFlagTurn={() => openFlag(true)}
+            onBeat={(n) => shown && setIndex(beats.findIndex((b) => b.turn === shown.turn && b.n === n))}
+            onClose={() => setDetailsOpen(false)}
+          />
+        )}
+      </div>
 
       <div className="lower">
         {(checks.length > 0 || uneasy.length > 0) && (
@@ -184,10 +279,31 @@ export function SceneView({ content, state, onState, onEnd, onSave, endError }: 
           ) : shown ? (
             <p className={shown.beat.kind === 'narration' ? 'beat narration' : 'beat dialogue'}>{shown.beat.text}</p>
           ) : null}
+          {flagging && (
+            <FlagPanel
+              title={flagging.beat !== undefined ? `beat ${flagging.beat}${shown && nameOf(shown) ? ` · ${nameOf(shown)}` : ''}` : `turn ${scene.turns.indexOf(flagging.turn) + 1}`}
+              {...(flags.get(keyOf(flagging.turn, flagging.beat))?.flag && { existing: flags.get(keyOf(flagging.turn, flagging.beat))!.flag! })}
+              onSave={(flag) => saveFlag(flagging, flag)}
+              onCancel={() => setFlagging(null)}
+            />
+          )}
           <div className="textbox-foot">
-            <span>
-              {Math.min(index, beats.length - 1) + 1} / {beats.length}
-            </span>
+            {shownMark && <span className={`flag-mark ${shownMark}`}>⚑ {shownMark}</span>}
+            {shown && !waitingFirst && <span>{beatCounter(shown)}</span>}
+            {shownTurn && (
+              <button
+                type="button"
+                className="flag-button"
+                disabled={!flaggable}
+                title={flaggable ? 'Flag this beat (F); Shift+F flags the turn' : 'This turn was not logged'}
+                onClick={(e) => {
+                  e.stopPropagation()
+                  openFlag(e.shiftKey)
+                }}
+              >
+                ⚑
+              </button>
+            )}
             {canAdvance(reading) && <span className="more">▸</span>}
             {awaitingBeat(reading) && !waitingFirst && <span className="more pulse">…</span>}
           </div>

@@ -2,8 +2,11 @@ import { app, BrowserWindow, dialog, ipcMain, safeStorage, shell } from 'electro
 import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Pack } from '@engine/pack'
+import { TracedError } from '@engine/core'
 import { endScene } from '@engine/relationships'
 import { runTurn } from '@engine/scene'
+import { FlagSchema } from '@engine/review'
+import { detailsOf, PlayLogs, roleModels, type FlagInput } from '@platform/logs'
 import { GameStateSchema, SaveRequestSchema, SlotIdSchema, stateProblems } from '@engine/state'
 import { chatCompletion, isConfigured, listModels, ListModelsRequestSchema, LLM_PROFILE_IDS, SettingsUpdateSchema, toView, type LlmProfileId } from '@llm'
 import { discoverPacks, type PackListing, type PackSource } from '@platform/packs'
@@ -27,6 +30,8 @@ const bundledPacksDir = (): string => (app.isPackaged ? join(process.resourcesPa
 const userPacksDir = (): string => join(app.getPath('userData'), 'packs')
 /** Each pack's saves in a folder of their own. */
 const savesDir = (packId: string): string => join(app.getPath('userData'), 'saves', packId)
+/** Play logs, a folder per pack: never inside the pack, which is read-only. */
+const logsRoot = (): string => join(app.getPath('userData'), 'logs')
 
 function keyCipher(): KeyCipher | undefined {
   if (!safeStorage.isEncryptionAvailable()) return undefined
@@ -52,6 +57,9 @@ function createWindow(): void {
   else win.loadFile(join(__dirname, '../renderer/index.html'))
 }
 
+/** Set once the app is ready: ends the open log session. */
+let closeLogs: (() => void) | undefined
+
 const profileId = (value: unknown): LlmProfileId => {
   if (!LLM_PROFILE_IDS.includes(value as LlmProfileId)) throw new Error(`Unknown profile "${String(value)}"`)
   return value as LlmProfileId
@@ -62,13 +70,13 @@ app.whenReady().then(() => {
 
   // The packs found at the last scan, and the one being played. Everything a game does goes through `playing`.
   let found: { listings: PackListing[]; packs: Map<string, Pack> } = { listings: [], packs: new Map() }
-  let playing: { pack: Pack; saves: SaveStore } | null = null
+  let playing: { pack: Pack; saves: SaveStore; logs: PlayLogs } | null = null
   const sources = (): PackSource[] => [
     { kind: 'bundled', dir: bundledPacksDir() },
     { kind: 'user', dir: userPacksDir() },
     ...settings.getPackFolders().map((dir): PackSource => ({ kind: 'extra', dir }))
   ]
-  const current = (): { pack: Pack; saves: SaveStore } => {
+  const current = (): { pack: Pack; saves: SaveStore; logs: PlayLogs } => {
     if (!playing) throw new Error('No pack is chosen yet.')
     return playing
   }
@@ -83,7 +91,9 @@ app.whenReady().then(() => {
       const listing = found.listings.find((l) => l.key === key)
       return { ok: false, error: listing ? `This pack can't be played: ${listing.problems.join('; ')}` : 'That pack is no longer there.' }
     }
-    playing = { pack, saves: new SaveStore(savesDir(pack.manifest.id), { id: pack.manifest.id, version: pack.manifest.version }) }
+    playing?.logs.end()
+    const logs = new PlayLogs(join(logsRoot(), pack.manifest.id), pack, () => ({ engine: app.getVersion(), models: roleModels(settings.get()) }), () => settings.getLogging())
+    playing = { pack, saves: new SaveStore(savesDir(pack.manifest.id), { id: pack.manifest.id, version: pack.manifest.version }), logs }
     return { ok: true, pack }
   })
   ipcMain.handle(IPC.openPacksFolder, async () => {
@@ -133,22 +143,33 @@ app.whenReady().then(() => {
     if (turning) return { ok: false, error: 'A turn is already running.' }
     turning = true
     try {
-      const { pack } = current()
+      const { pack, logs } = current()
       const { state: raw, input } = request as { state: unknown; input: unknown }
       const state = GameStateSchema.parse(raw)
       if (typeof input !== 'string' || input.trim().length === 0) return { ok: false, error: 'Say or do something first.' }
       const send = (sceneEvent: SceneEvent) => {
         if (!event.sender.isDestroyed()) event.sender.send(IPC.sceneEvent, sceneEvent)
       }
-      const outcome = await runTurn(pack, state, input.trim(), turnLlm(settings.get(), state.scene?.nsfw ?? false), send)
-      return {
-        ok: true,
-        state: outcome.state,
-        beats: outcome.beats,
-        checks: outcome.plan.checks.flatMap((c) => (c.line ? [c.line] : [])),
-        calls: outcome.calls,
-        corrections: outcome.corrections,
-        rewrite: outcome.problems.map((p) => p.fix)
+      const session = logs.sessionForTurn()
+      const scene = state.scene
+      // Scene ids are random and unique; the number makes the turn id read in order.
+      const turnId = scene ? `${scene.id}-${scene.turns.length + 1}` : undefined
+      try {
+        const outcome = await runTurn(pack, state, input.trim(), turnLlm(settings.get(), scene?.nsfw ?? false), send, { ...(turnId && { turnId }), ...(session && { log: session }) })
+        const details = logs.turn(outcome.trace, { location: scene!.locationId, cast: scene!.cast }) ?? detailsOf('', outcome.trace)
+        return {
+          ok: true,
+          state: outcome.state,
+          beats: outcome.beats,
+          checks: outcome.plan.checks.flatMap((c) => (c.line ? [c.line] : [])),
+          calls: outcome.calls,
+          corrections: outcome.corrections,
+          rewrite: outcome.problems.map((p) => p.fix),
+          details
+        }
+      } catch (error) {
+        logs.error('turn', (error as Error).message, { ...(turnId && { turnId }), ...(scene && { sceneId: scene.id }), ...(error instanceof TracedError && { calls: error.calls }) })
+        throw error
       }
     } catch (error) {
       return { ok: false, error: (error as Error).message }
@@ -161,8 +182,16 @@ app.whenReady().then(() => {
     if (turning) return { ok: false, error: 'A turn is still running.' }
     turning = true
     try {
+      const { pack, logs } = current()
       const state = GameStateSchema.parse(raw)
-      return { ok: true, ...(await endScene(current().pack, state, summaryLlm(settings.get(), state.scene?.nsfw ?? false))) }
+      try {
+        const { state: next, reports, trace } = await endScene(pack, state, summaryLlm(settings.get(), state.scene?.nsfw ?? false))
+        logs.sceneEnd(trace)
+        return { ok: true, state: next, reports }
+      } catch (error) {
+        logs.error('scene-end', (error as Error).message, { ...(state.scene && { sceneId: state.scene.id }), ...(error instanceof TracedError && { calls: error.calls }) })
+        throw error
+      }
     } catch (error) {
       return { ok: false, error: (error as Error).message }
     } finally {
@@ -193,10 +222,53 @@ app.whenReady().then(() => {
   })
   ipcMain.handle(IPC.deleteSave, (_event, slotId: unknown) => current().saves.delete(SlotIdSchema.parse(slotId)))
 
+  ipcMain.handle(IPC.beginLog, (_event, from: unknown) => current().logs.begin(typeof from === 'string' ? from.slice(0, 80) : 'unknown'))
+  ipcMain.handle(IPC.endLog, () => playing?.logs.end())
+  ipcMain.handle(IPC.getLogging, () => settings.getLogging())
+  ipcMain.handle(IPC.setLogging, (_event, on: unknown) => {
+    const enabled = settings.setLogging(on === true)
+    if (!enabled) playing?.logs.end()
+    return enabled
+  })
+  ipcMain.handle(IPC.openLogsFolder, async () => {
+    // Removing old logs is the player's call; this makes it easy.
+    const dir = playing ? playing.logs.dir : logsRoot()
+    mkdirSync(dir, { recursive: true })
+    await shell.openPath(dir)
+    return dir
+  })
+  ipcMain.handle(IPC.flag, (_event, raw: unknown) => {
+    const input = raw as Partial<FlagInput>
+    if (typeof input?.turnSession !== 'string' || typeof input.turnId !== 'string') throw new Error('A flag needs a logged turn.')
+    const beat = typeof input.beat === 'number' && Number.isInteger(input.beat) && input.beat > 0 ? input.beat : undefined
+    const flag = input.flag === null ? null : FlagSchema.parse(input.flag)
+    return current().logs.flag({
+      turnSession: input.turnSession,
+      turnId: input.turnId,
+      ...(beat !== undefined && { beat }),
+      ...(typeof input.speaker === 'string' && { speaker: input.speaker }),
+      ...(typeof input.text === 'string' && { text: input.text }),
+      flag
+    })
+  })
+  ipcMain.handle(IPC.flagsFor, (_event, turns: unknown) =>
+    current().logs.flagsFor(Array.isArray(turns) ? turns.filter((t): t is { session: string; turnId: string } => typeof t?.session === 'string' && typeof t?.turnId === 'string') : [])
+  )
+  ipcMain.handle(IPC.turnDetails, (_event, session: unknown, turnId: unknown) =>
+    typeof session === 'string' && typeof turnId === 'string' ? current().logs.details(session, turnId) : null
+  )
+
+  closeLogs = () => playing?.logs.end()
+
   createWindow()
   app.on('activate', () => {
     if (BrowserWindow.getAllWindows().length === 0) createWindow()
   })
+})
+
+app.on('before-quit', () => {
+  // Quitting ends the session; one that ends any other way is left without an end time, which marks it.
+  closeLogs?.()
 })
 
 app.on('window-all-closed', () => {

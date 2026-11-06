@@ -4,6 +4,8 @@ import type { PackListing } from '@platform/packs'
 import type { WitnessReport } from '@engine/relationships'
 import type { SaveRequest, SaveSummary, SlotId } from '@engine/state'
 import type { Beat, GameState } from '@engine/state'
+import type { FlagInput, TurnDetails } from '@platform/logs'
+import type { FlagRecord } from '@engine/review'
 import type { ListModelsRequest, ListModelsResponse, LlmProfileId, SettingsUpdate, SettingsView } from '@llm'
 
 /** IPC channel names, shared by main and preload. */
@@ -24,7 +26,15 @@ export const IPC = {
   listSaves: 'saves:list',
   saveGame: 'saves:save',
   loadGame: 'saves:load',
-  deleteSave: 'saves:delete'
+  deleteSave: 'saves:delete',
+  beginLog: 'logs:begin',
+  endLog: 'logs:end',
+  getLogging: 'logs:get-enabled',
+  setLogging: 'logs:set-enabled',
+  openLogsFolder: 'logs:open-folder',
+  flag: 'logs:flag',
+  flagsFor: 'logs:flags-for',
+  turnDetails: 'logs:turn-details'
 } as const
 
 export interface TestConnectionResult {
@@ -49,6 +59,8 @@ export type SceneTurnResponse =
       corrections: string[]
       /** Fixes asked of the rewrite, if there was one. */
       rewrite: string[]
+      /** The turn's trace for the Turn details panel; the session it was logged in, if logging is on. */
+      details: TurnDetails
     }
   | { ok: false; error: string }
 
@@ -87,6 +99,20 @@ export interface RendererApi {
   /** Loads a slot, refusing a save that no longer fits the content. */
   loadGame(slotId: SlotId): Promise<LoadResponse>
   deleteSave(slotId: SlotId): Promise<void>
+  /** A game was started or loaded: a log session begins (milestone 2, A2). Returns its id, or null with logging off. */
+  beginLog(from: string): Promise<string | null>
+  /** Back at the title screen: the session ends. */
+  endLog(): Promise<void>
+  getLogging(): Promise<boolean>
+  setLogging(on: boolean): Promise<boolean>
+  /** Opens this pack's logs folder (or all logs, before a pack is chosen); returns its path. */
+  openLogsFolder(): Promise<string>
+  /** Saves (or, with `flag: null`, clears) a flag on a beat or turn. */
+  flag(input: FlagInput): Promise<FlagRecord | null>
+  /** The flags standing on these logged turns. */
+  flagsFor(turns: { session: string; turnId: string }[]): Promise<FlagRecord[]>
+  /** A logged turn's details, read back from its session. */
+  turnDetails(session: string, turnId: string): Promise<TurnDetails | null>
   /** Listens for a running turn's events; returns a function that stops listening. */
   onSceneEvent(listener: (event: SceneEvent) => void): () => void
 }

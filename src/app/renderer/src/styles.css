@@ -137,3 +137,39 @@ input, select { background: var(--bg); color: var(--text); border: 1px solid var
 .pack-problems ul { margin: 0.3rem 0 0; padding-left: 1.2rem; }
 .pack-folders .folder { flex: 1; font-size: 0.82rem; overflow: hidden; text-overflow: ellipsis; }
 .settings .pack-folders { margin-bottom: 1rem; }
+
+/* Logs, flags and turn details (milestone 2) */
+.logging, .pack-folders { margin-bottom: 1rem; }
+label.check { flex-direction: row; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--text); }
+.stage-wrap { position: relative; display: flex; min-height: 0; }
+.stage-wrap .stage { flex: 1; }
+.turn-details { position: absolute; top: 0.6rem; right: 0.8rem; bottom: 0.6rem; width: min(30rem, 46vw); overflow-y: auto; z-index: 5; padding: 0.8rem 1rem; border: 1px solid var(--line); border-radius: 10px; background: rgba(23, 19, 31, 0.97); font-size: 0.82rem; }
+.turn-details header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.4rem; }
+.turn-details .spacer { flex: 1; }
+.turn-details h3 { margin: 0.8rem 0 0.3rem; font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--neon); }
+.turn-details h3 small { text-transform: none; letter-spacing: 0; color: var(--muted); }
+.turn-details ul, .turn-details ol { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.25rem; }
+.turn-details .muted { color: var(--muted); }
+.turn-details .warn { color: #e0b04a; }
+.turn-details .mono { font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace; font-size: 0.75rem; }
+.detail-beats li { cursor: pointer; }
+.detail-beats li:hover { color: var(--neon); }
+.detail-beats .who { color: var(--muted); }
+.flag-mark { font-size: 0.72rem; padding: 0 0.4rem; margin-left: 0.35rem; border-radius: 999px; border: 1px solid var(--line); }
+.flag-mark.good { border-color: var(--neon); color: var(--neon); }
+.flag-mark.meh { border-color: #e0b04a; color: #e0b04a; }
+.flag-mark.bad { border-color: var(--hot); color: var(--hot); }
+.flag-mark.ai { border-style: dashed; }
+.flag-button { background: none; border: none; color: var(--muted); cursor: pointer; font: inherit; padding: 0 0.2rem; }
+.flag-button:hover:not(:disabled) { color: var(--hot); }
+.flag-button:disabled { opacity: 0.35; cursor: default; }
+.flag-panel { position: absolute; left: 1rem; right: 1rem; bottom: calc(100% + 0.5rem); z-index: 6; display: flex; flex-direction: column; gap: 0.55rem; padding: 0.8rem 1rem; border: 1px solid var(--hot); border-radius: 10px; background: var(--panel); cursor: default; user-select: text; }
+.flag-head { display: flex; justify-content: space-between; font-weight: 600; }
+.flag-ratings, .flag-reasons { display: flex; flex-wrap: wrap; gap: 0.35rem; }
+.flag-rating, .flag-reason { border: 1px solid var(--line); background: var(--bg); color: var(--text); border-radius: 999px; padding: 0.2rem 0.65rem; cursor: pointer; font: inherit; font-size: 0.8rem; }
+.flag-rating kbd { font-size: 0.7rem; color: var(--muted); margin-right: 0.2rem; }
+.flag-rating.on.good { border-color: var(--neon); color: var(--neon); }
+.flag-rating.on.meh { border-color: #e0b04a; color: #e0b04a; }
+.flag-rating.on.bad { border-color: var(--hot); color: var(--hot); }
+.flag-reason.on { border-color: var(--neon); color: var(--neon); }
+.flag-note { width: 100%; }

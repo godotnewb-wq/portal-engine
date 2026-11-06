@@ -11,6 +11,9 @@ export interface ShownBeat {
   turn: number
   /** The player's line this beat answers, shown on the first beat of a turn when reading back. */
   said?: string
+  /** 1-based within its turn (or the opening), and how many beats that turn has; unknown while it streams. */
+  n: number
+  of?: number
 }
 
 /** The scene's opening narration: where you are and who is with you. Not stored; it is the same every time. */
@@ -28,10 +31,20 @@ export function openingBeats(content: Pack, state: GameState): Beat[] {
 /** Every beat of the scene so far, in order: the opening, then each turn's. */
 export function sceneHistory(content: Pack, state: GameState): ShownBeat[] {
   const scene = state.scene!
+  const opening = openingBeats(content, state)
   return [
-    ...openingBeats(content, state).map((beat) => ({ beat, turn: -1 })),
-    ...scene.turns.flatMap((t, turn) => t.beats.map((beat, i) => ({ beat, turn, ...(i === 0 && { said: t.player }) })))
+    ...opening.map((beat, i) => ({ beat, turn: -1, n: i + 1, of: opening.length })),
+    ...scene.turns.flatMap((t, turn) => t.beats.map((beat, i) => ({ beat, turn, n: i + 1, of: t.beats.length, ...(i === 0 && { said: t.player }) })))
   ]
+}
+
+/**
+ * The per-turn beat counter (milestone 2, A3): "beat 3 of 5" within the turn on screen, which says more than a count
+ * across the whole scene. While a turn streams its total isn't known yet.
+ */
+export function beatCounter(shown: ShownBeat): string {
+  if (shown.turn < 0) return `opening ${shown.n} of ${shown.of}`
+  return `turn ${shown.turn + 1} · beat ${shown.n} of ${shown.of ?? '…'}`
 }
 
 /** The beats of a reply still streaming in: only the lines that have finished. */

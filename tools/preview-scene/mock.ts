@@ -9,6 +9,8 @@ import type { GameState } from '@engine/state'
 import type { RendererApi, SceneEvent } from '@app/ipc'
 import { runTurn, type TurnLlm } from '@engine/scene'
 import { endScene } from '@engine/relationships'
+import { currentFlags, type FlagRecord } from '@engine/review'
+import type { TurnDetails } from '@platform/logs'
 // Every pack in packs/, as Vite bundles them: JSON parsed, Markdown as text.
 const json = import.meta.glob('../../packs/*/**/*.json', { eager: true, import: 'default' }) as Record<string, unknown>
 const text = import.meta.glob('../../packs/*/**/*.md', { eager: true, import: 'default', query: '?raw' }) as Record<string, string>
@@ -87,6 +89,12 @@ const scripted: TurnLlm = {
   }
 }
 
+// Logs live in memory for the preview: one session, its turns' details and its flags.
+const SESSION = 'preview'
+let logging = true
+const logged = new Map<string, TurnDetails>()
+const flagged: FlagRecord[] = []
+
 const saved = new Map<string, { pack: string; slotId: string; savedAt: string; name?: string; state: GameState }>()
 
 const api: RendererApi = {
@@ -96,8 +104,16 @@ const api: RendererApi = {
   testConnection: async () => ({ ok: true, detail: 'mock' }),
   sceneTurn: async ({ state, input }) => {
     const llm = content.manifest.id === 'neonpunk-nights' ? scripted : mockLlm().turn
-    const outcome = await runTurn(content, state, input, llm, emit)
-    return { ok: true, state: outcome.state, beats: outcome.beats, checks: outcome.plan.checks.flatMap((c) => (c.line ? [c.line] : [])), calls: outcome.calls, corrections: outcome.corrections, rewrite: outcome.problems.map((p) => p.fix) }
+    const outcome = await runTurn(content, state, input, llm, emit, logging ? { log: SESSION } : {})
+    const { calls, ...trace } = outcome.trace
+    const details: TurnDetails = {
+      session: logging ? SESSION : '',
+      turn: { ...trace, calls: calls.map((c) => c.id) },
+      calls: calls.map((c) => ({ id: c.id, role: c.role, ms: c.ms, ...(c.firstTextMs !== undefined && { firstTextMs: c.firstTextMs }), model: 'mock' })),
+      scores: []
+    }
+    if (logging) logged.set(trace.turnId, details)
+    return { ok: true, state: outcome.state, beats: outcome.beats, checks: outcome.plan.checks.flatMap((c) => (c.line ? [c.line] : [])), calls: outcome.calls, corrections: outcome.corrections, rewrite: outcome.problems.map((p) => p.fix), details }
   },
   sceneEnd: async (state) => {
     await wait(600)
@@ -108,7 +124,8 @@ const api: RendererApi = {
       Oria: { memory: 'Oria was caught in her "darling" by a Courier and had to admit the client was corporate.', level: 'normal', reason: 'Rook pushed her in public.', approval: 'a little less', trust: 'unchanged', attraction: 'a little more', learned: [], others: [{ with: 'vex', approval: 'less', trust: 'unchanged', attraction: 'unchanged', reason: 'She sees through me.' }] }
     }
     const summarize = content.manifest.id === 'neonpunk-nights' ? async (prompt: { user: string }) => JSON.stringify(summaries[prompt.user.match(/^About (\w+)/)![1]!]) : mockLlm().summarize
-    return { ok: true, ...(await endScene(content, state, summarize)) }
+    const { state: next, reports } = await endScene(content, state, summarize)
+    return { ok: true, state: next, reports }
   },
   listPacks: async () => listings,
   choosePack: async (key) => {
@@ -134,6 +151,18 @@ const api: RendererApi = {
   deleteSave: async (slotId) => {
     saved.delete(`${content.manifest.id}/${slotId}`)
   },
+  beginLog: async () => (logging ? SESSION : null),
+  endLog: async () => {},
+  getLogging: async () => logging,
+  setLogging: async (on) => (logging = on),
+  openLogsFolder: async () => '(preview: logs are in memory)',
+  flag: async (input) => {
+    const record: FlagRecord = { session: SESSION, ...input, at: new Date().toISOString() }
+    flagged.push(record)
+    return record
+  },
+  flagsFor: async (turns) => [...currentFlags(flagged).values()].filter((f) => turns.some((t) => t.session === f.turnSession && t.turnId === f.turnId)),
+  turnDetails: async (_session, turnId) => logged.get(turnId) ?? null,
   onSceneEvent: (listener) => {
     listeners.add(listener)
     return () => listeners.delete(listener)

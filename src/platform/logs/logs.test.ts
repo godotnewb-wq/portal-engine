@@ -6,7 +6,7 @@ import { SettingsSchema } from '@llm'
 import { runTurn, type TurnLlm } from '@engine/scene'
 import { endScene } from '@engine/relationships'
 import { fixture, yardScene } from '@tests/fixture'
-import { FILES, joinSections, LogSession, promptOf, readSession, roleModels, sections, findSessions } from '.'
+import { FILES, findSessions, joinSections, LogSession, PlayLogs, promptOf, readSession, roleModels, sections } from '.'
 
 const PLAN = JSON.stringify({ speakers: [{ id: 'mara', intent: 'Press him.', mood: 'sharp' }], reactions: [{ id: 'tobin', beat: 'looks at his boots' }] })
 const llm: TurnLlm = {
@@ -83,5 +83,50 @@ describe('LogSession (milestone 2, A2)', () => {
     const log = LogSession.open(root(), { ...info, models })
     log.close()
     expect(readFileSync(join(log.dir, FILES.session), 'utf8')).not.toMatch(/sk-|x\.example/)
+  })
+})
+
+describe('PlayLogs', () => {
+  const make = (on = true) => new PlayLogs(root(), fixture, () => ({ engine: '0.2.0', models: {} }), () => on)
+
+  it('logs turns into the open session, starting one if none was begun, and closes it on end', async () => {
+    const logs = make()
+    const id = logs.sessionForTurn()!
+    const outcome = await runTurn(fixture, yardScene(), 'Tobin?', llm, () => {}, { log: id })
+    const details = logs.turn(outcome.trace, { location: 'the-yard', cast: ['mara', 'tobin'] })!
+    expect(details).toMatchObject({ session: id, turn: { turnId: outcome.trace.turnId }, scores: [] })
+    expect(details.calls.map((c) => c.role)).toEqual(['director', 'writer'])
+    logs.end()
+    const read = readSession(join(logs.dir, id))
+    expect(read.session.from).toBe('unknown')
+    expect(read.session.endedAt).toBeDefined()
+    expect(read.scenes).toEqual([expect.objectContaining({ type: 'start', location: 'the-yard' })])
+    // Read back from disk, the details match.
+    expect(logs.details(id, outcome.trace.turnId)!.turn).toEqual(details.turn)
+  })
+
+  it('flags a turn from an earlier session in the current one, and finds it again; newer replaces older, a clear removes', async () => {
+    const logs = make()
+    const first = logs.begin('new game')!
+    const outcome = await runTurn(fixture, yardScene(), 'Tobin?', llm, () => {}, { log: first })
+    logs.turn(outcome.trace, { location: 'the-yard', cast: [] })
+    const second = logs.begin('slot1')!
+    expect(second).not.toBe(first)
+    const target = { turnSession: first, turnId: outcome.trace.turnId, beat: 2, speaker: 'mara', text: 'Well?' }
+    logs.flag({ ...target, flag: { rating: 'meh', reasons: [], note: '' } }, new Date('2026-11-05T20:00:00Z'))
+    logs.flag({ ...target, flag: { rating: 'bad', reasons: ['voice'], note: 'too polite' } }, new Date('2026-11-05T20:01:00Z'))
+    const flags = logs.flagsFor([{ session: first, turnId: outcome.trace.turnId }])
+    expect(flags).toEqual([expect.objectContaining({ session: second, turnSession: first, beat: 2, flag: { rating: 'bad', reasons: ['voice'], note: 'too polite' } })])
+    logs.flag({ ...target, flag: null }, new Date('2026-11-05T20:02:00Z'))
+    expect(logs.flagsFor([{ session: first, turnId: outcome.trace.turnId }])).toEqual([])
+  })
+
+  it('writes nothing with logging off', async () => {
+    const logs = make(false)
+    expect(logs.begin('new game')).toBeNull()
+    expect(logs.sessionForTurn()).toBeNull()
+    const outcome = await runTurn(fixture, yardScene(), 'Tobin?', llm)
+    expect(logs.turn(outcome.trace, { location: 'the-yard', cast: [] })).toBeNull()
+    expect(readdirSync(logs.dir)).toEqual([])
   })
 })

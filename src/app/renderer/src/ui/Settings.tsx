@@ -121,6 +121,31 @@ function PackFolders() {
   )
 }
 
+/** Play logs (milestone 2): on or off, and where they are. Nothing deletes them but the player. */
+function Logging() {
+  const [on, setOn] = useState<boolean | null>(null)
+  const [where, setWhere] = useState('')
+  useEffect(() => {
+    window.api.getLogging().then(setOn)
+  }, [])
+  if (on === null) return null
+  return (
+    <fieldset className="profile logging">
+      <legend title="Every turn's prompts, replies, rolls and checks, and your flags, written to a folder per session.">Logs</legend>
+      <label className="check">
+        <input type="checkbox" checked={on} onChange={async (e) => setOn(await window.api.setLogging(e.target.checked))} />
+        Log play sessions (needed for flagging beats)
+      </label>
+      <div className="row">
+        <Button size="sm" onClick={async () => setWhere(await window.api.openLogsFolder())}>
+          Open logs folder
+        </Button>
+        <span className="status">{where || 'Logs are never deleted automatically; remove old ones from the folder.'}</span>
+      </div>
+    </fieldset>
+  )
+}
+
 export function Settings({ onClose }: { onClose: () => void }) {
   const [draft, setDraft] = useState<Record<LlmProfileId, Draft> | null>(null)
   const [saved, setSaved] = useState('')
@@ -152,6 +177,7 @@ export function Settings({ onClose }: { onClose: () => void }) {
         ))}
       </div>
       <PackFolders />
+      <Logging />
       <div className="row">
         <Button variant="primary" onClick={save}>
           Save

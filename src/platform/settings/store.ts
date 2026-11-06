@@ -19,6 +19,8 @@ type StoredProfile = Omit<LlmProfile, 'apiKey'> & { apiKey: string; apiKeyEncryp
 export class SettingsStore {
   private settings: Settings
   private packFolders: string[] = []
+  /** Whether play is logged (milestone 2, A2). On until the game is public, so playtests always leave evidence. */
+  private logging = true
 
   constructor(
     private readonly path: string,
@@ -34,6 +36,16 @@ export class SettingsStore {
   /** Extra folders to look for packs in (architecture §9), for pack authors working outside the app-data folder. */
   getPackFolders(): string[] {
     return this.packFolders
+  }
+
+  getLogging(): boolean {
+    return this.logging
+  }
+
+  setLogging(on: boolean): boolean {
+    this.logging = on
+    this.write()
+    return this.logging
   }
 
   setPackFolders(folders: string[]): string[] {
@@ -59,6 +71,8 @@ export class SettingsStore {
       raw = JSON.parse(readFileSync(this.path, 'utf8'))
       const folders = (raw as { packFolders?: unknown }).packFolders
       if (Array.isArray(folders)) this.packFolders = folders.filter((f): f is string => typeof f === 'string')
+      const logging = (raw as { logging?: unknown }).logging
+      if (typeof logging === 'boolean') this.logging = logging
     } catch {
       // Missing or unreadable file: start from defaults.
       return SettingsSchema.parse({})
@@ -91,6 +105,6 @@ export class SettingsStore {
       stored[id] = { ...profile, apiKey: encrypt ? this.cipher!.encrypt(profile.apiKey) : profile.apiKey, apiKeyEncrypted: encrypt }
     }
     mkdirSync(dirname(this.path), { recursive: true })
-    writeFileSync(this.path, JSON.stringify({ ...stored, packFolders: this.packFolders }, null, 2))
+    writeFileSync(this.path, JSON.stringify({ ...stored, packFolders: this.packFolders, logging: this.logging }, null, 2))
   }
 }

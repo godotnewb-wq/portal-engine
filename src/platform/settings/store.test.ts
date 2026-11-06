@@ -41,3 +41,13 @@ describe('pack folders', () => {
     expect(again.get().director).toMatchObject({ model: 'fast', apiKey: 'sk-d' })
   })
 })
+
+describe('logging', () => {
+  it('is on by default and remembers being turned off', () => {
+    const path = pathIn()
+    const store = new SettingsStore(path, cipher)
+    expect(store.getLogging()).toBe(true)
+    store.setLogging(false)
+    expect(new SettingsStore(path, cipher).getLogging()).toBe(false)
+  })
+})
