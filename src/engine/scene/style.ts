@@ -7,6 +7,9 @@ export const STYLE_GUIDE = `Style:
 - Concrete before abstract. One specific detail beats three adjectives.
 - Vary sentence rhythm. Show consequences, not labels for feelings. Subtext over stated emotion.
 - Each character sounds like their voice card and no one else.
+- Every line of dialogue makes its speaker's planned point, clearly enough that the reader knows what was said and why. Nothing else: no remarks for their own sake, no musings, no invented sayings or riddles.
+- A line responds to what was just said. Don't repeat the last speaker's words back to them.
+- Subtext lives in what a character chooses to say or leave out, never in vague wording.
 - Short visual-novel beats.`
 
 /** Said in every scene prompt, whatever the pack: the engine's adult-content guard, which packs can't turn off. */

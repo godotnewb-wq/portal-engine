@@ -23,7 +23,7 @@ export function latestScores(scores: ScoreRecord[]): Map<string, ScoreRecord> {
 export function planSummary(turn: TurnRecord, nameOf: (id: string) => string): string {
   const p = turn.director.plan
   return [
-    ...p.speakers.map((s) => `${nameOf(s.id)}: ${s.intent}${s.hiding ? ` [hiding: ${s.approach ?? 'deflect'}]` : ''}`),
+    ...p.speakers.map((s) => `${nameOf(s.id)}: ${s.point ? `${s.point} — ` : ''}${s.intent}${s.hiding ? ` [hiding: ${s.approach ?? 'deflect'}]` : ''}`),
     ...p.reactions.map((r) => `${nameOf(r.id)} reacts`),
     turn.director.read === 'unreadable' ? 'game-planned (director unreadable)' : ''
   ]

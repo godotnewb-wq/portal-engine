@@ -13,8 +13,8 @@ import { buildWriterPrompt, sceneSpeakers } from './writer'
 /** A plan in the fixture's own vocabulary: skills by name, its difficulty words. */
 const PLAN = {
   speakers: [
-    { id: 'Tobin', intent: 'Avoid the question politely.', mood: 'uneasy', hiding: 'let someone in after closing', approach: 'deflect' },
-    { id: 'mara', intent: 'Catch him out if she can.', mood: 'sharp', depends_on_check: 'see' }
+    { id: 'Tobin', point: 'Says he locked up at the usual hour.', intent: 'Avoid the question politely.', mood: 'uneasy', hiding: 'let someone in after closing', approach: 'deflect' },
+    { id: 'mara', point: 'Asks why the gate was warm at midnight.', intent: 'Catch him out if she can.', mood: 'sharp', depends_on_check: 'see' }
   ],
   checks: [{ id: 'see', who: 'Mara', skill: 'Notice', difficulty: 'tough', stakes: 'notices Tobin humming', assist: 'tobin' }]
 }
@@ -59,6 +59,14 @@ describe('prompts take the pack’s slots', () => {
     const { system } = buildWriterPrompt(fixture, state, plan, 'Hello.')
     expect(system).toMatch(/Tone:\nPlain and brisk\./)
     expect(system).toMatch(/Setting: The Guild Yard, east gate, Testhold\./)
+  })
+
+  it('asks the director for each speaker’s point, gives it to the writer, and counts a speaker without one', () => {
+    expect(buildDirectorPrompt(fixture, state, 'Hello.').system).toMatch(/- point: the one thing this speaker's line gets across/)
+    const { plan } = validatePlan(fixture, state, parsePlan(JSON.stringify(PLAN))!)
+    expect(buildWriterPrompt(fixture, state, plan, 'Hello.').user).toMatch(/- Tobin speaks\.\n {2}Point \(what their line gets across\): Says he locked up at the usual hour\.\n {2}Intent: Avoid/)
+    const pointless = { speakers: [{ id: 'tobin', intent: 'Avoid the question.', mood: 'uneasy' }] }
+    expect(validatePlan(fixture, state, parsePlan(JSON.stringify(pointless))!).corrections).toEqual(['speaker "tobin" has no point'])
   })
 
   it('checks the writer’s prose against the pack’s own over-used phrases too', () => {

@@ -15,6 +15,8 @@ const list = <T extends z.ZodType>(item: T) => z.array(z.unknown()).catch([]).tr
 
 export const PlannedSpeakerSchema = z.object({
   id: z.string(),
+  /** What the line gets across, with its content (round 0 F2): the writer's job for this speaker. */
+  point: text.optional(),
   intent: text,
   mood: text,
   knows: text.optional(),
@@ -171,6 +173,9 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan): { p
       fix(`removed ${s.id}'s dependency on unknown check "${s.depends_on_check}"`)
       delete s.depends_on_check
     }
+    // Kept, since dropping a speaker the player addressed is worse, but counted: a line without a point is the
+    // filler round 0 found (F2).
+    if (!s.point?.trim()) fix(`speaker "${s.id}" has no point`)
   }
 
   const location = locationById(content, scene.locationId)!
@@ -235,7 +240,7 @@ export function fallbackPlan(content: Pack, state: GameState, input: string): Be
   })
   const speaker = named ?? [...present].sort((a, b) => quiet[b]! - quiet[a]!)[0]
   return {
-    speakers: speaker ? [{ id: speaker, intent: 'Answer what the player just said, in character, pursuing their own aims.', mood: scene.moods[speaker] ?? '' }] : [],
+    speakers: speaker ? [{ id: speaker, point: 'Answer what the player just said, directly.', intent: 'Answer what the player just said, in character, pursuing their own aims.', mood: scene.moods[speaker] ?? '' }] : [],
     reactions: present.filter((id) => id !== speaker).map((id) => ({ id, beat: 'reacts in keeping with their mood' })),
     checks: [],
     walk_ons: [],

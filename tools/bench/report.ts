@@ -60,7 +60,7 @@ function scenarioSection(content: Pack, run: ScenarioRun, repeats = false): stri
     lines.push(`### Turn ${i + 1}`, '', `**Player:** ${t.input}`, '')
     const p = t.director.plan
     const plan = [
-      ...p.speakers.map((s) => `- **${name(s.id)}** speaks: ${s.intent}${s.mood ? ` *(mood: ${s.mood})*` : ''}${s.hiding ? ` — hiding: ${s.hiding} (${s.approach ?? '?'})` : ''}`),
+      ...p.speakers.map((s) => `- **${name(s.id)}** speaks: ${s.point ? `${s.point} — ` : ''}${s.intent}${s.mood ? ` *(mood: ${s.mood})*` : ''}${s.hiding ? ` — hiding: ${s.hiding} (${s.approach ?? '?'})` : ''}`),
       ...p.reactions.map((r) => `- ${name(r.id)} reacts: ${r.beat}`),
       ...checkLines(t).map((c) => `- 🎲 ${c}`),
       p.texture.length > 0 ? `- Texture: ${p.texture.join('; ')}` : '',

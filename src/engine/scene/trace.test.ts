@@ -6,8 +6,8 @@ import { BEATS } from './style'
 
 const PLAN = JSON.stringify({
   speakers: [
-    { id: 'tobin', intent: 'Avoid the question.', mood: 'uneasy', hiding: 'let someone in after closing', approach: 'deflect' },
-    { id: 'mara', intent: 'Catch him out.', mood: 'sharp', depends_on_check: 'see' }
+    { id: 'tobin', point: 'Says he locked up at the usual hour.', intent: 'Avoid the question.', mood: 'uneasy', hiding: 'let someone in after closing', approach: 'deflect' },
+    { id: 'mara', point: 'Asks why the gate was warm at midnight.', intent: 'Catch him out.', mood: 'sharp', depends_on_check: 'see' }
   ],
   reactions: [],
   walk_ons: [{ id: 'clerk', line: 'stamps a ledger, loudly' }],

@@ -7,8 +7,8 @@ import { barScene, content } from './support'
 /** The worked example's turn 1 plan (narrator-scene-engine §11). */
 const WORKED = JSON.stringify({
   speakers: [
-    { id: 'oria', intent: "Deflect. Claim a 'private collector'.", mood: 'composed', hiding: 'client is the grid consortium', approach: 'lie; tell: over-formal' },
-    { id: 'vex', intent: 'Call out the evasion if she catches it.', mood: 'wary', depends_on_check: 'vex_empathy' }
+    { id: 'oria', point: 'Claims the client is a private collector.', intent: "Deflect. Claim a 'private collector'.", mood: 'composed', hiding: 'client is the grid consortium', approach: 'lie; tell: over-formal' },
+    { id: 'vex', point: 'Asks the collector\'s name.', intent: 'Call out the evasion if she catches it.', mood: 'wary', depends_on_check: 'vex_empathy' }
   ],
   reactions: [{ id: 'brask', beat: 'fidgets with his glass' }],
   checks: [{ id: 'vex_empathy', who: 'vex', skill: 'Empathy', difficulty: 'moderate', stakes: 'notices Oria is lying' }],

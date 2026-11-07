@@ -19,7 +19,7 @@ export const directorRules = (r: Ruleset): string => `You are the director of a 
 
 Return only a JSON object:
 {
-  "speakers": [{"id","intent","mood","knows","hiding","approach","depends_on_check"}],
+  "speakers": [{"id","point","intent","mood","knows","hiding","approach","depends_on_check"}],
   "reactions": [{"id","beat"}],
   "checks": [{"id","who","skill","difficulty","stakes","assist","edge","edge_reason"}],
   "walk_ons": [{"id","line"}],
@@ -32,10 +32,12 @@ Return only a JSON object:
 
 Rules:
 - At most ${MAX_SPEAKERS} speakers. Pick: whoever the player addressed; anyone whose agenda is urgent; anyone whose comfort is low; whoever has been silent longest. Everyone else present gets a one-line reaction.
+- point: the one thing this speaker's line gets across, in plain words and with its content: what they answer, ask, offer, refuse, demand, admit or warn ("names her price: nine each, half tonight"; "asks who else knows about the case"). It answers what was just said or moves their agenda forward, and adds something the scene didn't have. A stance ("needles her") or a mood is not a point. When lying or deflecting, the point is the specific lie or dodge.
+- Only plan someone to speak when they have a point. Never repeat a point already made in the last turns.
 - intent: what the speaker is trying to do this beat, from their own agenda, not just answering the player.
 - hiding/approach: only when a secret matters now; approach is lie / deflect / partial truth / tell, and name their tell when lying.
 - checks: only when the outcome is uncertain and matters (noticing a lie, persuading, sneaking). At most ${MAX_CHECKS}. who is "player" or a character id. skill is one of: ${r.skills.map((x) => x.id).join(', ')}. difficulty is one of: ${r.difficulties.map((d) => d.word).join(', ')}. stakes says what success means. A speaker whose line depends on a roll names it in depends_on_check. assist: a character present who helps.
-- walk_ons: a line or action for a walk-on, voiced by the narrator.
+- walk_ons: a line or action for a walk-on, voiced by the narrator. Only when the player speaks to them, or what they say or do bears on the conversation right now (their trade, a price, a warning that changes what happens next). Never a line for atmosphere; atmosphere belongs in texture.
 - texture: 2–3 specific details from the location card, preferring ones not used recently.
 - contrast: one line on how the speakers' voices differ.
 - avoid: phrases and details to steer clear of.

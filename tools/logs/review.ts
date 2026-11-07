@@ -21,7 +21,7 @@ function brief(turn: TurnRecord, items: string[], nameOf: (id: string) => string
       const [kind, id] = item.split(':') as [string, string]
       if (kind === 'speaker') {
         const s = p.speakers.find((x) => x.id === id)
-        return s ? `${nameOf(id)}'s brief: ${s.intent}${s.mood ? ` (mood: ${s.mood})` : ''}${s.hiding ? `; hiding ${s.hiding}, ${s.approach ?? 'deflect'}` : ''}` : ''
+        return s ? `${nameOf(id)}'s brief: ${s.intent}${s.point ? `; point: ${s.point}` : ''}${s.mood ? ` (mood: ${s.mood})` : ''}${s.hiding ? `; hiding ${s.hiding}, ${s.approach ?? 'deflect'}` : ''}` : ''
       }
       if (kind === 'reaction') return `${nameOf(id)}'s reaction: ${p.reactions.find((r) => r.id === id)?.beat ?? ''}`
       if (kind === 'walk-on') return `walk-on ${nameOf(id)}: ${p.walk_ons.find((w) => w.id === id)?.line ?? ''}`

@@ -69,7 +69,7 @@ function Body({ details, nameOf, flags, onBeat }: { details: Details; nameOf: (i
         <ul>
           {plan.speakers.map((s) => (
             <li key={s.id}>
-              <b>{nameOf(s.id)}</b> speaks: {s.intent}
+              <b>{nameOf(s.id)}</b> speaks: {s.point ? `${s.point} (${s.intent})` : s.intent}
               {s.mood && <i> — {s.mood}</i>}
               {s.hiding && <span className="muted"> · hiding {s.hiding} ({s.approach ?? 'deflect'})</span>}
             </li>

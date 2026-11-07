@@ -2,7 +2,7 @@
 
 One player turn, in at most three LLM calls (`runTurn`):
 
-1. **Director** (`director.ts`): reads everything about the scene and returns a JSON beat plan (`plan.ts`). The game checks it against the scene and the ruleset (`validatePlan`); an unreadable reply means the game plans the turn itself (`fallbackPlan`), at no extra call.
+1. **Director** (`director.ts`): reads everything about the scene and returns a JSON beat plan (`plan.ts`). The game checks it against the scene and the ruleset (`validatePlan`); an unreadable reply means the game plans the turn itself (`fallbackPlan`), at no extra call. Each speaker carries a `point`: what their line gets across, with its content (an answer, offer, refusal, the specific lie). The writer's job is to make that point; a speaker without one is kept but counted as a correction.
 2. **Game resolution** (`resolve.ts`): rolls the plan's checks with the seeded dice.
 3. **Writer** (`writer.ts`): sees only the plan, this beat's speakers' voice cards, the style guide and the pack's tone; streams one beat per line with hidden tags (`beats.ts`). A beat is speech or narration, never both: a dialogue beat holds only the quoted words, and a character's actions are narration beats that name them. A line that still mixes the two is split by code into beats in order (`ParsedReply.reshaped`, `TurnTrace.writer.reshaped`), with no rewrite.
 4. **Code checks** (`checks.ts`): speaking or acting for the player, unplanned or unknown speakers, over-used phrases (the engine's and the pack's), beat length and count. Any hit means one rewrite; a rewrite that still fails is salvaged by code, never a fourth call.

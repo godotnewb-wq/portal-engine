@@ -86,7 +86,9 @@ export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPla
     ...plan.speakers.map((s) => {
       const c = characterById(content, s.id)!
       return [
-        `- ${firstName(c.name)} speaks. Intent: ${s.intent}`,
+        `- ${firstName(c.name)} speaks.`,
+        s.point && `  Point (what their line gets across): ${s.point}`,
+        `  Intent: ${s.intent}`,
         s.mood && `  Mood: ${s.mood}`,
         s.knows && `  Knows: ${s.knows}`,
         s.hiding && `  Hiding: ${s.hiding}. Approach: ${s.approach ?? 'deflect'}.`,
