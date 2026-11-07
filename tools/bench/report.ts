@@ -2,7 +2,7 @@ import type { Beat } from '@engine/state'
 import type { WitnessReport } from '@engine/relationships'
 import type { Meters } from '@engine/characters'
 import type { Pack } from '@engine/pack'
-import type { TurnTrace } from '@engine/scene'
+import { lineText, planLines, type TurnTrace } from '@engine/scene'
 import { callsOf, metricInputOf, nameIn, type BenchRun, type ScenarioRun } from './run'
 import { compareMetrics, metrics, renderMetrics } from '../logs/metrics'
 
@@ -59,8 +59,10 @@ function scenarioSection(content: Pack, run: ScenarioRun, repeats = false): stri
   run.turns.forEach((t, i) => {
     lines.push(`### Turn ${i + 1}`, '', `**Player:** ${t.input}`, '')
     const p = t.director.plan
+    const exchange = planLines(p)
     const plan = [
-      ...p.speakers.map((s) => `- **${name(s.id)}** speaks: ${s.point ? `${s.point} — ` : ''}${s.intent}${s.mood ? ` *(mood: ${s.mood})*` : ''}${s.hiding ? ` — hiding: ${s.hiding} (${s.approach ?? '?'})` : ''}`),
+      ...exchange.map((_, i) => `- line ${lineText(exchange, i, name)}`),
+      ...p.speakers.map((s) => `- **${name(s.id)}** speaks: ${s.intent}${s.mood ? ` *(mood: ${s.mood})*` : ''}${s.hiding ? ` — hiding: ${s.hiding} (${s.approach ?? '?'})` : ''}`),
       ...p.reactions.map((r) => `- ${name(r.id)} reacts: ${r.beat}`),
       ...checkLines(t).map((c) => `- 🎲 ${c}`),
       p.texture.length > 0 ? `- Texture: ${p.texture.join('; ')}` : '',

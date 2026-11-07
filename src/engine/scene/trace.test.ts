@@ -70,8 +70,8 @@ describe('the turn trace (milestone 2, A1)', () => {
     const { trace } = await runTurn(fixture, yardScene(), 'Tobin?', scripted(PLAN, CLEAN), () => {}, { forceNatural: 11 })
     expect(trace.beats.map((b) => [b.index, b.source, b.line, b.plan])).toEqual([
       [1, 'draft', 1, ['walk-on:clerk']],
-      [2, 'draft', 3, ['speaker:tobin']],
-      [3, 'draft', 4, ['speaker:mara', 'check:see']]
+      [2, 'draft', 3, ['speaker:tobin', 'line:1']],
+      [3, 'draft', 4, ['speaker:mara', 'line:2', 'check:see']]
     ])
   })
 
@@ -85,7 +85,7 @@ describe('the turn trace (milestone 2, A1)', () => {
     expect(trace.rewrite!.remaining.map((p) => p.kind)).toContain('unknown-speaker')
     expect(beats).toHaveLength(BEATS.max)
     expect(trace.beats.every((b) => b.source === 'rewrite' && b.salvaged)).toBe(true)
-    expect(trace.beats[1]).toMatchObject({ index: 2, line: 3, plan: ['speaker:mara'] })
+    expect(trace.beats[1]).toMatchObject({ index: 2, line: 3, plan: ['speaker:mara', 'line:2'] })
     expect(trace.calls.map((c) => c.role)).toEqual(['director', 'writer', 'rewrite'])
   })
 

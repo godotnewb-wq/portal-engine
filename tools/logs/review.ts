@@ -1,5 +1,6 @@
 import type { Pack } from '@engine/pack'
 import { currentFlags, type FlagRecord, type Rating } from '@engine/review'
+import { lineText, planLines } from '@engine/scene'
 import type { SessionLog, TurnRecord } from '@platform/logs'
 import { namer, sceneLocation } from './load'
 import { latestScores } from './transcript'
@@ -21,7 +22,11 @@ function brief(turn: TurnRecord, items: string[], nameOf: (id: string) => string
       const [kind, id] = item.split(':') as [string, string]
       if (kind === 'speaker') {
         const s = p.speakers.find((x) => x.id === id)
-        return s ? `${nameOf(id)}'s brief: ${s.intent}${s.point ? `; point: ${s.point}` : ''}${s.mood ? ` (mood: ${s.mood})` : ''}${s.hiding ? `; hiding ${s.hiding}, ${s.approach ?? 'deflect'}` : ''}` : ''
+        return s ? `${nameOf(id)}'s brief: ${s.intent}${s.mood ? ` (mood: ${s.mood})` : ''}${s.hiding ? `; hiding ${s.hiding}, ${s.approach ?? 'deflect'}` : ''}` : ''
+      }
+      if (kind === 'line') {
+        const lines = planLines(p)
+        return lines[Number(id) - 1] ? `planned line ${lineText(lines, Number(id) - 1, nameOf)}` : ''
       }
       if (kind === 'reaction') return `${nameOf(id)}'s reaction: ${p.reactions.find((r) => r.id === id)?.beat ?? ''}`
       if (kind === 'walk-on') return `walk-on ${nameOf(id)}: ${p.walk_ons.find((w) => w.id === id)?.line ?? ''}`

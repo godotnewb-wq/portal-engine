@@ -9,7 +9,7 @@ import { compareRuns } from '../../tools/bench/report'
 import { mockLlm, readRun, runBench, writeRun, type BenchRun } from '../../tools/bench/run'
 import { loadScenarios, scenarioState, ScenarioSchema } from '../../tools/bench/scenario'
 import { flagsFor, metricInput } from '../../tools/logs/load'
-import { metrics, renderMetrics, repeatedPhrases } from '../../tools/logs/metrics'
+import { exchangeShape, metrics, renderMetrics, repeatedPhrases } from '../../tools/logs/metrics'
 import { blindTest, renderFlags } from '../../tools/logs/review'
 import { toScenario } from '../../tools/logs/scenario'
 import { scoreSession, type Scorer } from '../../tools/logs/score'
@@ -100,6 +100,13 @@ describe('npm run logs (milestone 2, A4)', () => {
     // Every turn of the mock opens on the same line: the repetition count catches it.
     expect(m.repetition.top[0]).toEqual(['the conduit buzzes overhead', 2])
     expect(renderMetrics(m)).toMatch(/\| beats flagged bad \| 17% \|/)
+  })
+
+  // Session 2026-11-06_2313_c313, turn 1: Oria, Oria, Vex, Vex with narration between; nobody answered anybody.
+  it('measures whether lines answer each other or come as speeches, narration aside', () => {
+    const turn = (...who: string[]) => ({ beats: who.map((w) => ({ beat: w === 'N' ? { kind: 'narration', text: '' } : { kind: 'dialogue', speaker: w, text: '' } })) }) as never
+    expect(exchangeShape([turn('N', 'oria', 'N', 'oria', 'N', 'vex', 'N', 'vex')])).toEqual({ answeredBackPerTurn: 0, sameSpeakerPerTurn: 2 })
+    expect(exchangeShape([turn('oria', 'vex', 'N', 'oria', 'vex'), turn('brask')])).toEqual({ answeredBackPerTurn: 1, sameSpeakerPerTurn: 0 })
   })
 
   it('counts a phrase repeated across turns of one scene once per extra turn, and not across scenes', () => {

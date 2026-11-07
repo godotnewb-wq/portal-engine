@@ -61,12 +61,42 @@ describe('prompts take the pack’s slots', () => {
     expect(system).toMatch(/Setting: The Guild Yard, east gate, Testhold\./)
   })
 
-  it('asks the director for each speaker’s point, gives it to the writer, and counts a speaker without one', () => {
-    expect(buildDirectorPrompt(fixture, state, 'Hello.').system).toMatch(/- point: the one thing this speaker's line gets across/)
+  it('reads a plan in the older form, a point per speaker, as one line each, and counts a line without a point', () => {
     const { plan } = validatePlan(fixture, state, parsePlan(JSON.stringify(PLAN))!)
-    expect(buildWriterPrompt(fixture, state, plan, 'Hello.').user).toMatch(/- Tobin speaks\.\n {2}Point \(what their line gets across\): Says he locked up at the usual hour\.\n {2}Intent: Avoid/)
+    expect(plan.exchange).toEqual([
+      { who: 'tobin', answers: 'player', point: 'Says he locked up at the usual hour.' },
+      { who: 'mara', answers: 'player', point: 'Asks why the gate was warm at midnight.' }
+    ])
     const pointless = { speakers: [{ id: 'tobin', intent: 'Avoid the question.', mood: 'uneasy' }] }
-    expect(validatePlan(fixture, state, parsePlan(JSON.stringify(pointless))!).corrections).toEqual(['speaker "tobin" has no point'])
+    expect(validatePlan(fixture, state, parsePlan(JSON.stringify(pointless))!).corrections).toEqual(['line 1 (tobin) has no point'])
+  })
+
+  // Round 0, session 2026-11-06_2313_c313: each speaker gave a speech aimed at the player; nobody answered anybody.
+  it('plans the turn as an exchange: lines in order, each answering the player or an earlier line', () => {
+    const exchange = [
+      { who: 'Tobin', answers: 'player', point: 'Says he locked up at the usual hour.' },
+      { who: 'Pell', answers: 'player', point: 'Not a speaker.' },
+      { who: 'mara', answers: 1, point: 'Asks why the gate was warm at midnight, then.' },
+      { who: 'tobin', answers: '3', point: 'Claims the forge was banked late.' },
+      { who: 'mara', answers: 9, point: 'Answers a line that does not exist.' },
+      { who: 'tobin', answers: 4, point: 'One line too many.' }
+    ]
+    const { plan, corrections } = validatePlan(fixture, state, parsePlan(JSON.stringify({ ...PLAN, exchange }))!)
+    expect(plan.exchange).toEqual([
+      { who: 'tobin', answers: 'player', point: 'Says he locked up at the usual hour.' },
+      { who: 'mara', answers: 1, point: 'Asks why the gate was warm at midnight, then.' },
+      { who: 'tobin', answers: 2, point: 'Claims the forge was banked late.' },
+      { who: 'mara', answers: 'player', point: 'Answers a line that does not exist.' }
+    ])
+    expect(corrections).toEqual(expect.arrayContaining([
+      'dropped line 2: "Pell" is not a speaker',
+      "line 5 answered line 9, which isn't an earlier line; it answers the player",
+      'dropped line 6: at most 4'
+    ]))
+    expect(buildDirectorPrompt(fixture, state, 'Hello.').system).toMatch(/"exchange": \[\{"who","answers","point"\}\]/)
+    const user = buildWriterPrompt(fixture, state, plan, 'Hello.').user
+    expect(user).toMatch(/# The exchange, in order \(what each line gets across\)\n1\. Tobin, answering the player: Says he locked up at the usual hour\.\n2\. Mara, answering line 1 \(Tobin\): Asks why[^\n]*\n3\. Tobin, answering line 2 \(Mara\): Claims the forge/)
+    expect(user).not.toMatch(/Point \(what their line gets across\)/)
   })
 
   it('checks the writer’s prose against the pack’s own over-used phrases too', () => {

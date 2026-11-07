@@ -130,7 +130,7 @@ export async function runTurn(
       source: rewritten ? 'rewrite' : 'draft',
       line: parsed.lines[i]!,
       salvaged: salvage,
-      plan: planItems(content, plan, parsed.beats[i]!)
+      plan: planItems(content, plan, parsed.beats[i]!, parsed.beats.slice(0, i))
     }))
     const directorCall = calls.find((c) => c.role === 'director')!
     const usage = calls.flatMap((c) => (c.meta?.usage ? [c.meta.usage] : []))

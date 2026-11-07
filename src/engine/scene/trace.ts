@@ -93,7 +93,7 @@ export interface BeatTrace {
   line: number
   /** The turn was salvaged and this beat survived it. */
   salvaged: boolean
-  /** Which parts of the plan it carries out: `speaker:<id>`, `reaction:<id>`, `walk-on:<id>`, `check:<id>`, or `narration`. */
+  /** Which parts of the plan it carries out: `speaker:<id>`, `line:<n>` (its exchange line), `reaction:<id>`, `walk-on:<id>`, `check:<id>`, or `narration`. */
   plan: string[]
 }
 
@@ -142,13 +142,17 @@ const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 /**
  * Which plan items a beat carries out. A line by a planned speaker is their brief (and the check their line depends
- * on); a walk-on's line is theirs; narration that names someone with a planned reaction is that reaction. Narration
+ * on), and their nth line in the turn is their nth line of the exchange, numbered as the writer saw it; a walk-on's line is theirs; narration that names someone with a planned reaction is that reaction. Narration
  * naming no one is plain narration. Names are matched as whole words, by id, full name or first name.
  */
-export function planItems(content: Pack, plan: BeatPlan, beat: Beat): string[] {
+export function planItems(content: Pack, plan: BeatPlan, beat: Beat, earlier: Beat[] = []): string[] {
   if (beat.kind === 'dialogue') {
     const speaker = plan.speakers.find((s) => s.id === beat.speaker)
-    if (speaker) return [`speaker:${speaker.id}`, ...(speaker.depends_on_check ? [`check:${speaker.depends_on_check}`] : [])]
+    if (speaker) {
+      const nth = earlier.filter((b) => b.kind === 'dialogue' && b.speaker === beat.speaker).length
+      const line = plan.exchange.map((l, i) => ({ ...l, n: i + 1 })).filter((l) => l.who === beat.speaker)[nth]
+      return [`speaker:${speaker.id}`, ...(line ? [`line:${line.n}`] : []), ...(speaker.depends_on_check ? [`check:${speaker.depends_on_check}`] : [])]
+    }
     if (plan.walk_ons.some((w) => w.id === beat.speaker)) return [`walk-on:${beat.speaker}`]
     return []
   }

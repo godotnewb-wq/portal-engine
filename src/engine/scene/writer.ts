@@ -31,6 +31,7 @@ export const WRITER_FORMAT = `Output format, nothing else:
 - Someone who speaks and acts gets separate beats, in the order it happens: dialogue, then narration, then dialogue.
 - ${BEATS.target} beats, each under ${BEATS.targetWords} words.
 - Only the planned speakers get dialogue beats. Others appear only as their planned reactions, inside narration. A planned walk-on line may be a dialogue beat under the walk-on's name.
+- Write the exchange's lines in order, one dialogue beat each, and no other lines from the speakers. Each line responds to the line it answers: to what was actually said there, not just to the topic.
 - Hidden tags at the end, one per line: [Name: EXPRESSION word] for each speaker; [Name: COMFORT 1-5 reason] when someone's comfort changes; [Name: MOOD words] when a mood shifts; [LEAVES: Name] for a planned departure; [END SCENE] only if the plan ends the scene.
 - Never write the player's words, choices, thoughts or actions beyond what their input stated.
 - Honor every check result exactly: a failed roll means it does not happen.`
@@ -81,13 +82,13 @@ export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPla
     .filter(Boolean)
     .join('\n\n')
 
+  const lineName = (n: number) => `line ${n} (${nameOf(plan.exchange[n - 1]!.who)})`
   const brief = [
     '# This beat',
     ...plan.speakers.map((s) => {
       const c = characterById(content, s.id)!
       return [
         `- ${firstName(c.name)} speaks.`,
-        s.point && `  Point (what their line gets across): ${s.point}`,
         `  Intent: ${s.intent}`,
         s.mood && `  Mood: ${s.mood}`,
         s.knows && `  Knows: ${s.knows}`,
@@ -98,6 +99,8 @@ export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPla
         .filter(Boolean)
         .join('\n')
     }),
+    plan.exchange.length > 0 && `# The exchange, in order (what each line gets across)\n${plan.exchange.map((l, i) => `${i + 1}. ${nameOf(l.who)}, answering ${l.answers === 'player' ? 'the player' : lineName(l.answers)}: ${l.point || 'answers what was said'}`).join('\n')}`,
+    '# Also in the beat',
     ...plan.reactions.map((r) => `- ${nameOf(r.id)} (no dialogue): ${r.beat}`),
     ...plan.walk_ons.map((w) => `- ${walkOn(w.id).name ?? walkOn(w.id).label} (${walkOn(w.id).label}; ${walkOn(w.id).manner}): ${w.line}`),
     plan.checks.length > 0 && `# Check results (decided; honor them)\n${plan.checks.map((c) => checkLine(content, state, c)).join('\n')}`,

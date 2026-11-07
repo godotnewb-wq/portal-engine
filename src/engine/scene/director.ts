@@ -3,7 +3,7 @@ import type { Character, Meters } from '@engine/characters'
 import type { GameState, Turn } from '@engine/state'
 import type { Ruleset } from '@engine/rules'
 import { characterById, locationById, type Pack } from '@engine/pack'
-import { MAX_CHECKS, MAX_SPEAKERS, QUIET_TURNS, presentCast, silence } from './plan'
+import { MAX_CHECKS, MAX_LINES, MAX_SPEAKERS, QUIET_TURNS, presentCast, silence } from './plan'
 import { recall } from '@engine/memory'
 import { ADULTS_ONLY } from './style'
 import { tierById } from '@engine/world'
@@ -19,7 +19,8 @@ export const directorRules = (r: Ruleset): string => `You are the director of a 
 
 Return only a JSON object:
 {
-  "speakers": [{"id","point","intent","mood","knows","hiding","approach","depends_on_check"}],
+  "speakers": [{"id","intent","mood","knows","hiding","approach","depends_on_check"}],
+  "exchange": [{"who","answers","point"}],
   "reactions": [{"id","beat"}],
   "checks": [{"id","who","skill","difficulty","stakes","assist","edge","edge_reason"}],
   "walk_ons": [{"id","line"}],
@@ -32,9 +33,14 @@ Return only a JSON object:
 
 Rules:
 - At most ${MAX_SPEAKERS} speakers. Pick: whoever the player addressed; anyone whose agenda is urgent; anyone whose comfort is low; whoever has been silent longest. Everyone else present gets a one-line reaction.
-- point: the one thing this speaker's line gets across, in plain words and with its content: what they answer, ask, offer, refuse, demand, admit or warn ("names her price: nine each, half tonight"; "asks who else knows about the case"). It answers what was just said or moves their agenda forward, and adds something the scene didn't have. A stance ("needles her") or a mood is not a point. When lying or deflecting, the point is the specific lie or dodge.
+- exchange: the turn's conversation, line by line in order, at most ${MAX_LINES} lines, each by one of the speakers. Plan it as a conversation, not separate speeches: each line answers the one before it or the player.
+  - who: the speaker's id.
+  - answers: "player", or the number of an earlier line (1 is the first). When the player spoke to someone, line 1 answers the player. A later line answers whoever just spoke when it can: a speaker replies to the last line, pushes back on it or takes it further.
+  - A speaker can have more than one line when someone answers them. Every line needs its own point.
+  - point: the one thing this line gets across, in plain words and with its content: what they answer, ask, offer, refuse, demand, admit or warn ("names her price: nine each, half tonight"; "asks who else knows about the case"). It adds something the conversation didn't have. A stance ("needles her") or a mood is not a point. When lying or deflecting, the point is the specific lie or dodge.
 - Only plan someone to speak when they have a point. Never repeat a point already made in the last turns.
-- intent: what the speaker is trying to do this beat, from their own agenda, not just answering the player.
+- A question asked in the last turns that nobody has answered gets an answer or a visible dodge this turn, from whoever it was asked of.
+- speakers: who has lines this turn, with their brief. intent: what the speaker is trying to do this beat, from their own agenda, not just answering the player.
 - hiding/approach: only when a secret matters now; approach is lie / deflect / partial truth / tell, and name their tell when lying.
 - checks: only when the outcome is uncertain and matters (noticing a lie, persuading, sneaking). At most ${MAX_CHECKS}. who is "player" or a character id. skill is one of: ${r.skills.map((x) => x.id).join(', ')}. difficulty is one of: ${r.difficulties.map((d) => d.word).join(', ')}. stakes says what success means. A speaker whose line depends on a roll names it in depends_on_check. assist: a character present who helps.
 - walk_ons: a line or action for a walk-on, voiced by the narrator. Only when the player speaks to them, or what they say or do bears on the conversation right now (their trade, a price, a warning that changes what happens next). Never a line for atmosphere; atmosphere belongs in texture.

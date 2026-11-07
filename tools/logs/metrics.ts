@@ -41,6 +41,16 @@ export function repeatedPhrases(turns: Omit<TurnTrace, 'calls'>[], n = 4): Map<s
 }
 
 /** The longest run of turns each character spent present without a speaking slot, per scene, worst case. */
+/** How the lines of each turn follow one another (round 0, session 2026-11-06_2313_c313). */
+export function exchangeShape(turns: Omit<TurnTrace, 'calls'>[]): { answeredBackPerTurn: number; sameSpeakerPerTurn: number } {
+  const shapes = turns.map((t) => {
+    const who = t.beats.flatMap((b) => (b.beat.kind === 'dialogue' ? [b.beat.speaker] : []))
+    const runs = who.filter((w, i) => i === 0 || who[i - 1] !== w)
+    return { back: runs.filter((w, i) => i >= 2 && runs[i - 2] === w).length, same: who.length - runs.length }
+  })
+  return { answeredBackPerTurn: avg(shapes.map((s) => s.back)), sameSpeakerPerTurn: avg(shapes.map((s) => s.same)) }
+}
+
 function longestSilence(turns: Omit<TurnTrace, 'calls'>[]): Record<string, number> {
   const worst: Record<string, number> = {}
   const run: Record<string, number> = {}
@@ -65,7 +75,11 @@ export interface Metrics {
   beats: number
   director: { unreadableRate: number; jsonRetried: number; correctionsPerTurn: number }
   writer: { rewriteRate: number; rewriteReasons: Record<string, number>; salvageRate: number; tagErrorsPerTurn: number; reshapedPerTurn: number; fallbackProfileRate: number }
-  cast: { speakingShare: Record<string, number>; longestSilence: Record<string, number>; dialogueWords: Record<string, number> }
+  /**
+   * `answeredBackPerTurn`: a speaker answered by someone who then gets answered in turn (A, B, A), the sign of a
+   * conversation rather than speeches; `sameSpeakerPerTurn`: a line followed by another from the same speaker.
+   */
+  cast: { speakingShare: Record<string, number>; longestSilence: Record<string, number>; dialogueWords: Record<string, number>; answeredBackPerTurn: number; sameSpeakerPerTurn: number }
   checks: { total: number; skills: Record<string, number>; difficulties: Record<string, number>; successRate: number }
   pacing: { beatsPerTurn: number; wordsPerBeat: number }
   repetition: { repeatedPerTurn: number; top: [string, number][] }
@@ -159,6 +173,7 @@ export function metrics(inputs: MetricInput[]): Metrics {
     cast: {
       speakingShare: Object.fromEntries(Object.entries(count(dialogue.map((b) => (b.beat as { speaker: string }).speaker))).map(([k, v]) => [k, share(v, dialogue.length)])),
       longestSilence: longestSilence(turns),
+      ...exchangeShape(turns),
       dialogueWords: dialogue.reduce<Record<string, number>>((m, b) => {
         const who = (b.beat as { speaker: string }).speaker
         m[who] = (m[who] ?? 0) + words(b.beat.text)
@@ -237,6 +252,8 @@ export function headline(m: Metrics): [string, number, 'lower' | 'higher' | 'inf
     ['fallback-profile rate', m.writer.fallbackProfileRate, 'lower'],
     ['check success rate', m.checks.successRate, 'info'],
     ['distinct skills', Object.keys(m.checks.skills).length, 'higher'],
+    ['answered back / turn', m.cast.answeredBackPerTurn, 'higher'],
+    ['same speaker twice / turn', m.cast.sameSpeakerPerTurn, 'lower'],
     ['beats / turn', m.pacing.beatsPerTurn, 'info'],
     ['words / beat', m.pacing.wordsPerBeat, 'info'],
     ['repeated phrases / turn', m.repetition.repeatedPerTurn, 'lower'],

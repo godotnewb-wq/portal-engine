@@ -1,6 +1,6 @@
 import type { FlagRecord } from '@engine/review'
 import { RUBRIC } from '@engine/review'
-import type { CheckTrace } from '@engine/scene'
+import { lineText, planLines, type CheckTrace } from '@engine/scene'
 import type { TurnDetails as Details } from '@platform/logs'
 import { Button } from './Button'
 
@@ -66,10 +66,15 @@ function Body({ details, nameOf, flags, onBeat }: { details: Details; nameOf: (i
     <div className="details-body">
       <section>
         <h3>Plan {t.director.read !== 'json' && <small>({t.director.read === 'unreadable' ? 'reply unreadable; the game planned it' : 'retried without JSON mode'})</small>}</h3>
+        <ol>
+          {planLines(plan).map((_, i, lines) => (
+            <li key={i}>{lineText(lines, i, nameOf).replace(/^\d+\. /, '')}</li>
+          ))}
+        </ol>
         <ul>
           {plan.speakers.map((s) => (
             <li key={s.id}>
-              <b>{nameOf(s.id)}</b> speaks: {s.point ? `${s.point} (${s.intent})` : s.intent}
+              <b>{nameOf(s.id)}</b> speaks: {s.intent}
               {s.mood && <i> — {s.mood}</i>}
               {s.hiding && <span className="muted"> · hiding {s.hiding} ({s.approach ?? 'deflect'})</span>}
             </li>

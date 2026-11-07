@@ -1,5 +1,6 @@
 import type { Pack } from '@engine/pack'
 import { currentFlags, flagKey, RUBRIC, type FlagRecord, type ScoreRecord } from '@engine/review'
+import { lineText, planLines } from '@engine/scene'
 import type { SessionLog, TurnRecord } from '@platform/logs'
 import { namer, sceneLocation } from './load'
 
@@ -19,11 +20,13 @@ export function latestScores(scores: ScoreRecord[]): Map<string, ScoreRecord> {
   return out
 }
 
-/** A short line for a turn's plan: who speaks and why, who reacts. */
+/** A short line for a turn's plan: the exchange line by line, who speaks and why, who reacts. */
 export function planSummary(turn: TurnRecord, nameOf: (id: string) => string): string {
   const p = turn.director.plan
+  const lines = planLines(p)
   return [
-    ...p.speakers.map((s) => `${nameOf(s.id)}: ${s.point ? `${s.point} — ` : ''}${s.intent}${s.hiding ? ` [hiding: ${s.approach ?? 'deflect'}]` : ''}`),
+    ...lines.map((_, i) => lineText(lines, i, nameOf)),
+    ...p.speakers.map((s) => `${nameOf(s.id)}: ${s.intent}${s.hiding ? ` [hiding: ${s.approach ?? 'deflect'}]` : ''}`),
     ...p.reactions.map((r) => `${nameOf(r.id)} reacts`),
     turn.director.read === 'unreadable' ? 'game-planned (director unreadable)' : ''
   ]

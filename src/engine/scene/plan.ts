@@ -15,7 +15,7 @@ const list = <T extends z.ZodType>(item: T) => z.array(z.unknown()).catch([]).tr
 
 export const PlannedSpeakerSchema = z.object({
   id: z.string(),
-  /** What the line gets across, with its content (round 0 F2): the writer's job for this speaker. */
+  /** The older one-line form: what their single line gets across. `exchange` replaces it; read when it's missing. */
   point: text.optional(),
   intent: text,
   mood: text,
@@ -38,8 +38,19 @@ export const PlannedCheckSchema = z.object({
   edge_reason: text.optional()
 })
 
+/**
+ * One line of the turn's conversation (round 0, session 2026-11-06_2313_c313): who says it, what it answers (the
+ * player, or an earlier line by its 1-based number) and its point, so each line builds on the one before.
+ */
+export const ExchangeLineSchema = z.object({
+  who: z.string(),
+  answers: z.union([z.number(), z.string()]).catch('player'),
+  point: text
+})
+
 export const RawPlanSchema = z.object({
   speakers: list(PlannedSpeakerSchema),
+  exchange: list(ExchangeLineSchema),
   reactions: list(z.object({ id: z.string(), beat: z.string() })),
   checks: list(PlannedCheckSchema),
   walk_ons: list(z.object({ id: z.string(), line: z.string() })),
@@ -68,17 +79,40 @@ export interface PlannedCheck {
   line?: string
 }
 
-export type BeatPlan = Omit<RawPlan, 'checks'> & { checks: PlannedCheck[] }
+/** A line after validation: `answers` is "player" or the 1-based number of an earlier line. */
+export interface ExchangeLine {
+  who: string
+  answers: 'player' | number
+  point: string
+}
+
+export type BeatPlan = Omit<RawPlan, 'checks' | 'exchange'> & { checks: PlannedCheck[]; exchange: ExchangeLine[] }
 
 /** At most two speakers a beat (narrator-scene-engine §6), and few enough checks to keep the turn quick. */
 export const MAX_SPEAKERS = 2
 export const MAX_CHECKS = 2
 export const MAX_TEXTURE = 3
+/** Lines in a turn's exchange: room for a reply and a reply to that, inside the beat budget (tune). */
+export const MAX_LINES = 4
 /**
  * After this many turns without a line, the director is shown what a character cares about (round 0 F3). A reminder
  * to look, never a quota: whether they speak stays the director's call (director-writer §6).
  */
 export const QUIET_TURNS = 2
+
+/**
+ * A plan's lines for showing, also for plans logged before the exchange existed (a point per speaker): read-outs
+ * read old sessions too.
+ */
+export function planLines(plan: Pick<BeatPlan, 'speakers'> & { exchange?: ExchangeLine[] }): ExchangeLine[] {
+  return plan.exchange ?? plan.speakers.flatMap((s) => (s.point ? [{ who: s.id, answers: 'player' as const, point: s.point }] : []))
+}
+
+/** "1. Ada → the player: …", for read-outs. */
+export const lineText = (lines: ExchangeLine[], i: number, nameOf: (id: string) => string): string => {
+  const l = lines[i]!
+  return `${i + 1}. ${nameOf(l.who)} → ${l.answers === 'player' ? 'the player' : `${l.answers}`}: ${l.point}`
+}
 
 /** Pulls the JSON object out of a reply that may wrap it in a code fence or a sentence. */
 export function parsePlan(reply: string): RawPlan | null {
@@ -178,10 +212,8 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan): { p
       fix(`removed ${s.id}'s dependency on unknown check "${s.depends_on_check}"`)
       delete s.depends_on_check
     }
-    // Kept, since dropping a speaker the player addressed is worse, but counted: a line without a point is the
-    // filler round 0 found (F2).
-    if (!s.point?.trim()) fix(`speaker "${s.id}" has no point`)
   }
+  const exchange = validateExchange(content, scene, raw, speakers, fix)
 
   const location = locationById(content, scene.locationId)!
   const walk_ons = raw.walk_ons.flatMap((w) => {
@@ -206,7 +238,42 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan): { p
     return id ? [id] : []
   })
 
-  return { plan: { ...raw, speakers, reactions, checks, walk_ons, texture, leaves }, corrections }
+  return { plan: { ...raw, speakers, exchange, reactions, checks, walk_ons, texture, leaves }, corrections }
+}
+
+/**
+ * The turn's lines in order. A line by someone who isn't a speaker is dropped, a reply to a dropped or later line
+ * answers the player instead, and the list is capped. A plan in the older form (a point per speaker, no exchange)
+ * becomes one line each, and a speaker left without a line gets one, so an imperfect reply never costs the turn.
+ */
+function validateExchange(content: Pack, scene: Scene, raw: RawPlan, speakers: BeatPlan['speakers'], fix: (why: string) => void): ExchangeLine[] {
+  const lines: ExchangeLine[] = []
+  // Raw line number → its number once dropped lines are gone, so replies keep pointing at the right line.
+  const renumbered = new Map<number, number>()
+  raw.exchange.forEach((l, i) => {
+    const id = presentId(content, scene, l.who)
+    if (!id || !speakers.some((s) => s.id === id)) return fix(`dropped line ${i + 1}: "${l.who}" is not a speaker`)
+    if (lines.length >= MAX_LINES) return fix(`dropped line ${i + 1}: at most ${MAX_LINES}`)
+    const asked = typeof l.answers === 'number' ? l.answers : /^\d+$/.test(l.answers.trim()) ? Number(l.answers) : undefined
+    let answers: ExchangeLine['answers'] = 'player'
+    if (asked !== undefined) {
+      const earlier = renumbered.get(asked)
+      if (earlier !== undefined && asked <= i) answers = earlier
+      else fix(`line ${i + 1} answered line ${asked}, which isn't an earlier line; it answers the player`)
+    }
+    lines.push({ who: id, answers, point: l.point })
+    renumbered.set(i + 1, lines.length)
+  })
+  for (const s of speakers) {
+    if (lines.some((l) => l.who === s.id)) continue
+    if (raw.exchange.length > 0) fix(`speaker "${s.id}" had no line; gave them one`)
+    if (lines.length < MAX_LINES) lines.push({ who: s.id, answers: 'player', point: s.point ?? '' })
+  }
+  // Counted, not dropped: a line without a point is the filler round 0 found (F2).
+  lines.forEach((l, i) => {
+    if (!l.point.trim()) fix(`line ${i + 1} (${l.who}) has no point`)
+  })
+  return lines
 }
 
 /** Location details not used in the last few turns, so description doesn't repeat. */
@@ -245,7 +312,8 @@ export function fallbackPlan(content: Pack, state: GameState, input: string): Be
   })
   const speaker = named ?? [...present].sort((a, b) => quiet[b]! - quiet[a]!)[0]
   return {
-    speakers: speaker ? [{ id: speaker, point: 'Answer what the player just said, directly.', intent: 'Answer what the player just said, in character, pursuing their own aims.', mood: scene.moods[speaker] ?? '' }] : [],
+    speakers: speaker ? [{ id: speaker, intent: 'Answer what the player just said, in character, pursuing their own aims.', mood: scene.moods[speaker] ?? '' }] : [],
+    exchange: speaker ? [{ who: speaker, answers: 'player', point: 'Answer what the player just said, directly.' }] : [],
     reactions: present.filter((id) => id !== speaker).map((id) => ({ id, beat: 'reacts in keeping with their mood' })),
     checks: [],
     walk_ons: [],
