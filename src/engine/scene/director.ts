@@ -3,7 +3,7 @@ import type { Character, Meters } from '@engine/characters'
 import type { GameState, Turn } from '@engine/state'
 import type { Ruleset } from '@engine/rules'
 import { characterById, locationById, type Pack } from '@engine/pack'
-import { MAX_CHECKS, MAX_SPEAKERS, presentCast, silence } from './plan'
+import { MAX_CHECKS, MAX_SPEAKERS, QUIET_TURNS, presentCast, silence } from './plan'
 import { recall } from '@engine/memory'
 import { ADULTS_ONLY } from './style'
 import { tierById } from '@engine/world'
@@ -42,6 +42,7 @@ Rules:
 - contrast: one line on how the speakers' voices differ.
 - avoid: phrases and details to steer clear of.
 - leaves: characters who walk out this beat. end_scene: true only when the scene has reached a natural close.
+- Quiet characters are listed each turn with what they care about. If what is being said touches their trade, aims or knowledge, they have a point: give them a slot. If nothing does, silence is fine.
 - Never decide, say or do anything for the player.`
 
 function sheet(content: Pack, state: GameState, c: Character, present: string[]): string {
@@ -99,11 +100,16 @@ export function buildDirectorPrompt(content: Pack, state: GameState, input: stri
 
   const quiet = silence(scene)
   const recent = scene.turns.slice(-RECENT_TURNS)
+  // What each quiet character cares about, pulled from their sheet so the director weighs it against this turn.
+  const quietOnes = cast
+    .filter((c) => quiet[c.id]! >= QUIET_TURNS)
+    .map((c) => [`- ${c.name} [id: ${c.id}], silent ${quiet[c.id]} turns. Trade: ${c.role}. Tonight: ${c.agenda.current}. Wants: ${c.agenda.longTerm.join('; ')}.`, c.knowledge.length > 0 && ` Knows: ${c.knowledge.join('; ')}.`].filter(Boolean).join(''))
   const usedTexture = [...new Set(scene.turns.slice(-3).flatMap((t) => t.texture))]
   const user = [
     scene.summary && `# Earlier in the scene\n${scene.summary}`,
     recent.length > 0 ? `# Last turns\n${recent.map((t) => turnText(content, player.name, t)).join('\n\n')}` : '# The scene opens now.',
     `# Turns since each last spoke\n${present.map((id) => `${id}: ${quiet[id]}`).join(', ')}`,
+    quietOnes.length > 0 && `# Quiet for a while: does anything on the table touch them?\n${quietOnes.join('\n')}`,
     usedTexture.length > 0 && `# Texture used recently\n${usedTexture.join('; ')}`,
     `# The player says or does\n${input}`,
     'Return the JSON beat plan.'

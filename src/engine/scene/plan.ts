@@ -74,6 +74,11 @@ export type BeatPlan = Omit<RawPlan, 'checks'> & { checks: PlannedCheck[] }
 export const MAX_SPEAKERS = 2
 export const MAX_CHECKS = 2
 export const MAX_TEXTURE = 3
+/**
+ * After this many turns without a line, the director is shown what a character cares about (round 0 F3). A reminder
+ * to look, never a quota: whether they speak stays the director's call (director-writer §6).
+ */
+export const QUIET_TURNS = 2
 
 /** Pulls the JSON object out of a reply that may wrap it in a code fence or a sentence. */
 export function parsePlan(reply: string): RawPlan | null {

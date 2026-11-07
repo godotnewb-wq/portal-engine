@@ -126,6 +126,26 @@ describe('buildDirectorPrompt', () => {
   })
 })
 
+describe('quiet characters (round 0 F3)', () => {
+  // Session 2026-11-06_1757_9630: Oria and Vex spoke every turn; Brask never did.
+  const played = (turns: number) => {
+    const state = barScene()
+    const turn = { player: 'Go on.', beats: [{ kind: 'dialogue', speaker: 'vex', text: 'Fine.' }], speakers: ['oria-senn', 'vex'], texture: [], checks: [] }
+    state.scene!.turns = Array.from({ length: turns }, () => structuredClone(turn)) as never
+    return state
+  }
+
+  it('shows the director what a character quiet for two turns cares about, and asks rather than orders', () => {
+    expect(buildDirectorPrompt(content, played(1), 'Why are we here?').user).not.toMatch(/# Quiet for a while/)
+    const { system, user } = buildDirectorPrompt(content, played(2), 'Why are we here?')
+    const section = user.split('# Quiet for a while: does anything on the table touch them?\n')[1]!.split('\n\n')[0]!
+    expect(section).toMatch(/^- Brask \[id: brask\], silent 2 turns\. Trade: Freelance mechanic who keeps half the Low Turns' pumps/)
+    expect(section).toMatch(/Tonight: Get through tonight without a fight/)
+    expect(section.split('\n')).toHaveLength(1)
+    expect(system).toMatch(/If nothing does, silence is fine\./)
+  })
+})
+
 describe('forced rolls (test bench)', () => {
   it('rolls the forced number for every check and leaves the dice where they were', () => {
     const state = barScene(42)
