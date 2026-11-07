@@ -2,6 +2,8 @@ import { describe, expect, it } from 'vitest'
 import { TracedError, type Prompt } from '@engine/core'
 import { fixture, yardScene } from '@tests/fixture'
 import { runTurn, type TurnLlm } from './runTurn'
+import { planItems } from './trace'
+import type { BeatPlan } from './plan'
 import { BEATS } from './style'
 
 const PLAN = JSON.stringify({
@@ -87,6 +89,25 @@ describe('the turn trace (milestone 2, A1)', () => {
     expect(trace.beats.every((b) => b.source === 'rewrite' && b.salvaged)).toBe(true)
     expect(trace.beats[1]).toMatchObject({ index: 2, line: 3, plan: ['speaker:mara', 'line:2'] })
     expect(trace.calls.map((c) => c.role)).toEqual(['director', 'writer', 'rewrite'])
+  })
+
+  // Session 2026-11-07_0039_e46a, t2b5: a silent reaction given words, which ended up in quotes inside narration.
+  it('sends speech in narration to the rewrite, and cuts the words but keeps the action if it is still there', async () => {
+    const speaking = `${CLEAN}\nNARRATION: Pell doesn't look up. "Gate's been warm all week, if anyone asked me."`
+    const { beats, trace } = await runTurn(fixture, yardScene(), 'Was the gate warm?', scripted(PLAN, speaking, speaking), () => {}, { now: clock() })
+    expect(trace.findings.map((p) => p.kind)).toEqual(['speech-in-narration'])
+    expect(trace.findings[0]!.fix).toMatch(/^Beat 4 puts spoken words in narration \("Gate's been warm all week, if anyone asked me\."\)\./)
+    expect(beats.at(-1)).toEqual({ kind: 'narration', text: "Pell doesn't look up." })
+    expect(trace.beats.at(-1)!.salvaged).toBe(true)
+  })
+
+  // Session 2026-11-07_0039_e46a: one planned line written as two beats was linked to the speaker's next line.
+  it('links a line written in parts, with only narration between, to one planned line', () => {
+    const plan = { speakers: [{ id: 'tobin' }, { id: 'mara' }], walk_ons: [], reactions: [], exchange: [{ who: 'tobin', answers: 'player', point: 'a' }, { who: 'mara', answers: 1, point: 'b' }, { who: 'tobin', answers: 2, point: 'c' }] } as unknown as BeatPlan
+    const said = (who: string) => ({ kind: 'dialogue' as const, speaker: who, text: '' })
+    const rain = { kind: 'narration' as const, text: 'Rain.' }
+    const beats = [said('tobin'), rain, said('tobin'), said('mara'), said('tobin'), said('tobin')]
+    expect(beats.map((b, i) => planItems(fixture, plan, b, beats.slice(0, i)).find((p) => p.startsWith('line:')))).toEqual(['line:1', undefined, 'line:1', 'line:2', 'line:3', 'line:3'])
   })
 
   it('says when the director reply was unreadable or needed a retry without JSON mode', async () => {

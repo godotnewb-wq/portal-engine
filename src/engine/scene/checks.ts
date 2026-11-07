@@ -3,7 +3,7 @@ import type { ParsedReply, Speaker } from './beats'
 import type { BeatPlan } from './plan'
 import { BEATS, OVERUSED_PHRASES } from './style'
 
-export type ProblemKind = 'player-voice' | 'player-action' | 'unplanned-speaker' | 'unknown-speaker' | 'overused-phrase' | 'beat-count' | 'beat-length'
+export type ProblemKind = 'player-voice' | 'player-action' | 'unplanned-speaker' | 'unknown-speaker' | 'speech-in-narration' | 'overused-phrase' | 'beat-count' | 'beat-length'
 
 export interface Problem {
   kind: ProblemKind
@@ -43,6 +43,22 @@ function playerAllows(input: string, verb: string): boolean {
 const words = (text: string) => text.split(/\s+/).filter(Boolean).length
 
 /**
+ * Words in quotes inside narration, three or more of them: someone speaking without a line of their own (session
+ * 2026-11-07_0039_e46a, t2b5). Fewer words is a word being pointed at (at the word "surveyors"), not speech.
+ */
+const SPOKEN = /["“]([^"”\n]+)["”]/g
+const spokenIn = (text: string): string | undefined => [...text.matchAll(SPOKEN)].find((m) => words(m[1]!) >= 3)?.[0]
+
+/** Narration with the spoken words taken out, for salvage: the action stays, the speech goes. */
+export function withoutSpeech(text: string): string {
+  return text
+    .replace(SPOKEN, (m, said: string) => (words(said) >= 3 ? '' : m))
+    .replace(/\s+([,.;:!?])/g, '$1')
+    .replace(/\s{2,}/g, ' ')
+    .trim()
+}
+
+/**
  * Everything wrong with a reply that one rewrite should fix (narrator-scene-engine §3, code checks). `phrases` are the
  * pack's own over-used phrases, checked with the engine's.
  */
@@ -63,6 +79,9 @@ export function checkReply(parsed: ParsedReply, plan: BeatPlan, speakers: Speake
     const text = beat.text
     // Only narration can act for the player: a character saying "you laugh" to them is just talk.
     const quoted = beat.kind === 'narration' ? text.match(PLAYER_QUOTED) : null
+    // Words put in the player's mouth are the graver problem, and its fix covers the speech too.
+    const spoken = beat.kind === 'narration' && !quoted ? spokenIn(text) : undefined
+    if (spoken) problems.push({ kind: 'speech-in-narration', beat: n, text: spoken, fix: `Beat ${n} puts spoken words in narration (${spoken}). Give them to a planned speaker as a dialogue beat, or cut them: reactions are silent.` })
     if (quoted) {
       problems.push({ kind: 'player-voice', beat: n, text: quoted[0], fix: `Beat ${n} puts words in the player's mouth. Remove them.` })
     } else if (beat.kind === 'narration') {
@@ -89,7 +108,8 @@ export function checkReply(parsed: ParsedReply, plan: BeatPlan, speakers: Speake
 
 /**
  * When the rewrite still fails, the game keeps what it can rather than spend a fourth call: beats that speak for the
- * player or come from someone not planned are dropped, and the turn is cut to the beat budget. Other problems (a
+ * player or come from someone not planned are dropped, spoken words are cut out of narration (`withoutSpeech`, in
+ * `runTurn`), and the turn is cut to the beat budget. Other problems (a
  * stale phrase, a long beat) are tolerated.
  */
 export function salvage(beats: Beat[], problems: Problem[]): Beat[] {

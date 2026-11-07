@@ -3,7 +3,7 @@ import { parseReply, type ParsedReply } from './beats'
 import type { Pack } from '@engine/pack'
 import { buildDirectorPrompt } from './director'
 import { traced, TracedError, type CallTrace, type LlmReply, type Prompt } from '@engine/core'
-import { checkReply, droppedBeats, salvaged, type Problem } from './checks'
+import { checkReply, droppedBeats, salvaged, withoutSpeech, type Problem } from './checks'
 import { fallbackPlan, parsePlan, validatePlan, type BeatPlan } from './plan'
 import { resolvePlan, type ResolveOptions } from './resolve'
 import { castSnapshot, checkTraces, planItems, type BeatTrace, type TurnTrace } from './trace'
@@ -117,6 +117,11 @@ export async function runTurn(
       parsed = parseReply(rewrite, speakers)
       remaining = checkReply(parsed, plan, speakers, input, content.phrases)
       kept = remaining.length > 0 ? salvaged(parsed.beats.length, remaining) : parsed.beats.map((_, i) => i)
+      const spoken = new Set(remaining.filter((p) => p.kind === 'speech-in-narration').map((p) => p.beat! - 1))
+      if (spoken.size > 0) {
+        parsed = { ...parsed, beats: parsed.beats.map((b, i) => (spoken.has(i) ? { ...b, text: withoutSpeech(b.text) } : b)) }
+        kept = kept.filter((i) => /\p{L}/u.test(parsed.beats[i]!.text))
+      }
     }
     const beats = kept.map((i) => parsed.beats[i]!)
 

@@ -38,8 +38,10 @@ Rules:
   - answers: "player", or the number of an earlier line (1 is the first). When the player spoke to someone, line 1 answers the player. A later line answers whoever just spoke when it can: a speaker replies to the last line, pushes back on it or takes it further.
   - A speaker can have more than one line when someone answers them. Every line needs its own point.
   - point: the one thing this line gets across, in plain words and with its content: what they answer, ask, offer, refuse, demand, admit or warn ("names her price: nine each, half tonight"; "asks who else knows about the case"). It adds one new thing the conversation didn't have; more waits for a later line. A stance ("needles her") or a mood is not a point. When lying or deflecting, the point is the specific lie or dodge.
-  - A point is a note for the writer, not the line: your own plain words, never quoted dialogue, sayings or a finished sentence for the character to say. The writer writes the line in the character's voice.
+  - A point is a note for the writer, not the line: your own plain words, never quoted dialogue, sayings or a finished sentence for the character to say. State the content flatly, with no wordplay or turns of phrase ("says it has to be tonight because the rival crew is close"). The writer writes the line in the character's voice.
+  - When a line brings up something the player hasn't heard this scene (a job, an object, a person, a place), the point says so: "first mention of the case: what it is".
   - A point refers only to what was actually said in the last turns, by whom it was said.
+- reactions: silent, one line each: a look, a gesture, a move. Never speech, muttering or "says that". Someone with something to say needs a line in the exchange, which makes them a speaker; if both speaker slots are taken, it waits for a later turn.
 - Only plan someone to speak when they have a point. Never repeat a point already made in the last turns.
 - A question asked in the last turns that nobody has answered gets an answer or a visible dodge this turn, from whoever it was asked of.
 - speakers: who has lines this turn, with their brief. intent: what the speaker is trying to do this beat, from their own agenda, not just answering the player.

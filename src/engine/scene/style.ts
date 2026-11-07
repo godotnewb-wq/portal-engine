@@ -14,6 +14,8 @@ export const STYLE_GUIDE = `Style:
 - What a character hides, their tell, and a check's stakes are notes for you: show them through what the character says and does. Never narrate the note itself.
 - Plain words. No made-up sayings or idioms; a comparison only when it makes something clearer. Narrate only what happens on the page.
 - When a line uses a place name or slang, the line makes its meaning clear.
+- The player knows only what has been said on screen this scene. The first time a job, object, person or place comes up, introduce it in a few words, the way the character would to someone hearing it first; after that it can be "the case". Characters don't explain to each other what they both know.
+- A note that describes something done, not said (stays silent, lets it sit, looks away), is written as narration, not as a line.
 - Short visual-novel beats.`
 
 /** Said in every scene prompt, whatever the pack: the engine's adult-content guard, which packs can't turn off. */

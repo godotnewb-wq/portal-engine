@@ -124,6 +124,12 @@ describe('checkReply', () => {
     expect(kinds(`${GOOD.replace('when she\'s lying', 'when she\'s lying. You laugh, but I mean it')}`)).toEqual([])
   })
 
+  // Session 2026-11-07_0039_e46a, t2b5 (flagged bad: "Action and Dialogue in the same beat").
+  it('catches spoken words in narration, but not a single word being pointed at', () => {
+    expect(kinds(`${GOOD}\nNARRATION: Brask doesn't look up from the pipe. "Flooded station means the whole lower stair's live with raw Aether."`)).toEqual(['speech-in-narration'])
+    expect(kinds(`${GOOD}\nNARRATION: At the word "surveyors", Brask turns his cup.`)).toEqual([])
+  })
+
   it('catches overused phrases, the director’s avoid list, long beats and a bad beat count', () => {
     expect(kinds(GOOD.replace('Water ticks', 'The air is thick. Water ticks'))).toEqual(['overused-phrase'])
     expect(kinds(GOOD.replace('A private collector, darling.', 'A private collector, darling, darling.'))).toEqual(['overused-phrase'])

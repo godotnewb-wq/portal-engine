@@ -30,7 +30,7 @@ export const WRITER_FORMAT = `Output format, nothing else:
 - A narration beat: "NARRATION: …". Everything that isn't spoken: actions, gestures, reactions, the room. A character's action names them: "NARRATION: Ada climbs onto the bar."
 - Someone who speaks and acts gets separate beats, in the order it happens: dialogue, then narration, then dialogue.
 - ${BEATS.target} beats, each under ${BEATS.targetWords} words.
-- Only the planned speakers get dialogue beats. Others appear only as their planned reactions, inside narration. A planned walk-on line may be a dialogue beat under the walk-on's name.
+- Only the planned speakers get dialogue beats. Others appear only as their planned reactions, inside narration, and reactions are silent: no quoted or reported speech from anyone without a line in the exchange. A planned walk-on line may be a dialogue beat under the walk-on's name.
 - Write the exchange's lines in order, one dialogue beat each, and no other lines from the speakers. Each line responds to the line it answers: to what was actually said there, not just to the topic.
 - Hidden tags at the end, one per line: [Name: EXPRESSION word] for each speaker; [Name: COMFORT 1-5 reason] when someone's comfort changes; [Name: MOOD words] when a mood shifts; [LEAVES: Name] for a planned departure; [END SCENE] only if the plan ends the scene.
 - Never write the player's words, choices, thoughts or actions beyond what their input stated.

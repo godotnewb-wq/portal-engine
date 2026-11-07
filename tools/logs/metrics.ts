@@ -72,7 +72,12 @@ export function exchangeShape(turns: Omit<TurnTrace, 'calls'>[]): { answeredBack
   const shapes = turns.map((t) => {
     const who = t.beats.flatMap((b) => (b.beat.kind === 'dialogue' ? [b.beat.speaker] : []))
     const runs = who.filter((w, i) => i === 0 || who[i - 1] !== w)
-    return { back: runs.filter((w, i) => i >= 2 && runs[i - 2] === w).length, same: who.length - runs.length }
+    // One planned line written as two beats, or line, action, line, is how a character talks, not a speech
+    // (session 2026-11-07_0039_e46a). So with an exchange, a speech is the plan giving one speaker two lines in a row;
+    // older plans, without one, are read from the beats.
+    const exchange = t.director?.plan?.exchange
+    const same = exchange ? exchange.filter((l, i) => i > 0 && exchange[i - 1]!.who === l.who).length : who.length - runs.length
+    return { back: runs.filter((w, i) => i >= 2 && runs[i - 2] === w).length, same }
   })
   return { answeredBackPerTurn: avg(shapes.map((s) => s.back)), sameSpeakerPerTurn: avg(shapes.map((s) => s.same)) }
 }

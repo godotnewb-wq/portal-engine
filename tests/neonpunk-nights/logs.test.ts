@@ -107,6 +107,10 @@ describe('npm run logs (milestone 2, A4)', () => {
     const turn = (...who: string[]) => ({ beats: who.map((w) => ({ beat: w === 'N' ? { kind: 'narration', text: '' } : { kind: 'dialogue', speaker: w, text: '' } })) }) as never
     expect(exchangeShape([turn('N', 'oria', 'N', 'oria', 'N', 'vex', 'N', 'vex')])).toEqual({ answeredBackPerTurn: 0, sameSpeakerPerTurn: 2 })
     expect(exchangeShape([turn('oria', 'vex', 'N', 'oria', 'vex'), turn('brask')])).toEqual({ answeredBackPerTurn: 1, sameSpeakerPerTurn: 0 })
+    // Session 2026-11-07_0039_e46a, t3: Brask's one planned line written as two beats is not a speech; two of his lines in a row are.
+    const planned = (exchange: string[], ...who: string[]) => ({ director: { plan: { exchange: exchange.map((w) => ({ who: w, answers: 'player', point: '' })) } }, beats: who.map((w) => ({ beat: { kind: 'dialogue', speaker: w, text: '' } })) }) as never
+    expect(exchangeShape([planned(['oria', 'brask', 'oria'], 'oria', 'brask', 'brask', 'oria')])).toEqual({ answeredBackPerTurn: 1, sameSpeakerPerTurn: 0 })
+    expect(exchangeShape([planned(['oria', 'oria'], 'oria', 'oria')])).toEqual({ answeredBackPerTurn: 0, sameSpeakerPerTurn: 1 })
   })
 
   // Session 2026-11-07_0013_714e, turn 3: Oria's line was her point, nearly word for word.

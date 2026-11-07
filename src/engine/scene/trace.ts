@@ -142,14 +142,17 @@ const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 /**
  * Which plan items a beat carries out. A line by a planned speaker is their brief (and the check their line depends
- * on), and their nth line in the turn is their nth line of the exchange, numbered as the writer saw it; a walk-on's line is theirs; narration that names someone with a planned reaction is that reaction. Narration
+ * on), and their nth line in the turn is their nth line of the exchange, numbered as the writer saw it (beats in a row by
+ * the same speaker, with only narration between, are one line written in parts); a walk-on's line is theirs; narration that names someone with a planned reaction is that reaction. Narration
  * naming no one is plain narration. Names are matched as whole words, by id, full name or first name.
  */
 export function planItems(content: Pack, plan: BeatPlan, beat: Beat, earlier: Beat[] = []): string[] {
   if (beat.kind === 'dialogue') {
     const speaker = plan.speakers.find((s) => s.id === beat.speaker)
     if (speaker) {
-      const nth = earlier.filter((b) => b.kind === 'dialogue' && b.speaker === beat.speaker).length
+      const said = earlier.flatMap((b) => (b.kind === 'dialogue' ? [b.speaker] : []))
+      const runs = said.filter((w, i) => w === beat.speaker && said[i - 1] !== w).length
+      const nth = said.at(-1) === beat.speaker ? runs - 1 : runs
       const line = plan.exchange.map((l, i) => ({ ...l, n: i + 1 })).filter((l) => l.who === beat.speaker)[nth]
       return [`speaker:${speaker.id}`, ...(line ? [`line:${line.n}`] : []), ...(speaker.depends_on_check ? [`check:${speaker.depends_on_check}`] : [])]
     }
