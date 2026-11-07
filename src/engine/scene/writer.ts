@@ -99,12 +99,12 @@ export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPla
         .filter(Boolean)
         .join('\n')
     }),
-    plan.exchange.length > 0 && `# The exchange, in order (what each line gets across)\n${plan.exchange.map((l, i) => `${i + 1}. ${nameOf(l.who)}, answering ${l.answers === 'player' ? 'the player' : lineName(l.answers)}: ${l.point || 'answers what was said'}`).join('\n')}`,
+    plan.exchange.length > 0 && `# The exchange, in order (what each line gets across: notes, not wording)\n${plan.exchange.map((l, i) => `${i + 1}. ${nameOf(l.who)}, answering ${l.answers === 'player' ? 'the player' : lineName(l.answers)}: ${l.point || 'answers what was said'}`).join('\n')}`,
     '# Also in the beat',
     ...plan.reactions.map((r) => `- ${nameOf(r.id)} (no dialogue): ${r.beat}`),
     ...plan.walk_ons.map((w) => `- ${walkOn(w.id).name ?? walkOn(w.id).label} (${walkOn(w.id).label}; ${walkOn(w.id).manner}): ${w.line}`),
     plan.checks.length > 0 && `# Check results (decided; honor them)\n${plan.checks.map((c) => checkLine(content, state, c)).join('\n')}`,
-    plan.texture.length > 0 && `# Texture to use\n${plan.texture.map((t) => `- ${t}`).join('\n')}`,
+    plan.texture.length > 0 && `# Texture to use (facts; show them plainly)\n${plan.texture.map((t) => `- ${t}`).join('\n')}`,
     plan.contrast && `# Voice contrast\n${plan.contrast}`,
     plan.avoid.length > 0 && `# Avoid\n${plan.avoid.join('; ')}`,
     plan.leaves.length > 0 && `# Leaving this beat\n${plan.leaves.map(nameOf).join(', ')}`,

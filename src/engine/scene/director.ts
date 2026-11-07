@@ -37,16 +37,19 @@ Rules:
   - who: the speaker's id.
   - answers: "player", or the number of an earlier line (1 is the first). When the player spoke to someone, line 1 answers the player. A later line answers whoever just spoke when it can: a speaker replies to the last line, pushes back on it or takes it further.
   - A speaker can have more than one line when someone answers them. Every line needs its own point.
-  - point: the one thing this line gets across, in plain words and with its content: what they answer, ask, offer, refuse, demand, admit or warn ("names her price: nine each, half tonight"; "asks who else knows about the case"). It adds something the conversation didn't have. A stance ("needles her") or a mood is not a point. When lying or deflecting, the point is the specific lie or dodge.
+  - point: the one thing this line gets across, in plain words and with its content: what they answer, ask, offer, refuse, demand, admit or warn ("names her price: nine each, half tonight"; "asks who else knows about the case"). It adds one new thing the conversation didn't have; more waits for a later line. A stance ("needles her") or a mood is not a point. When lying or deflecting, the point is the specific lie or dodge.
+  - A point is a note for the writer, not the line: your own plain words, never quoted dialogue, sayings or a finished sentence for the character to say. The writer writes the line in the character's voice.
+  - A point refers only to what was actually said in the last turns, by whom it was said.
 - Only plan someone to speak when they have a point. Never repeat a point already made in the last turns.
 - A question asked in the last turns that nobody has answered gets an answer or a visible dodge this turn, from whoever it was asked of.
 - speakers: who has lines this turn, with their brief. intent: what the speaker is trying to do this beat, from their own agenda, not just answering the player.
 - hiding/approach: only when a secret matters now; approach is lie / deflect / partial truth / tell, and name their tell when lying.
 - checks: only when the outcome is uncertain and matters (noticing a lie, persuading, sneaking). At most ${MAX_CHECKS}. who is "player" or a character id. skill is one of: ${r.skills.map((x) => x.id).join(', ')}. difficulty is one of: ${r.difficulties.map((d) => d.word).join(', ')}. stakes says what success means. A speaker whose line depends on a roll names it in depends_on_check. assist: a character present who helps.
 - walk_ons: a line or action for a walk-on, voiced by the narrator. Only when the player speaks to them, or what they say or do bears on the conversation right now (their trade, a price, a warning that changes what happens next). Never a line for atmosphere; atmosphere belongs in texture.
-- texture: 2–3 specific details from the location card, preferring ones not used recently.
+- texture: 2–3 details from the location card, as plain facts ("the conduit flickers"), preferring ones not used recently. No similes or description: the writer decides how to show them.
 - contrast: one line on how the speakers' voices differ.
 - avoid: phrases and details to steer clear of.
+- Every field is notes for the writer. Never write the prose or the dialogue yourself.
 - leaves: characters who walk out this beat. end_scene: true only when the scene has reached a natural close.
 - Quiet characters are listed each turn with what they care about. If what is being said touches their trade, aims or knowledge, they have a point: give them a slot. If nothing does, silence is fine.
 - Never decide, say or do anything for the player.`

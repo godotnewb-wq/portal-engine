@@ -1,5 +1,5 @@
 import type { CallTrace } from '@engine/core'
-import type { TurnTrace } from '@engine/scene'
+import { planLines, type TurnTrace } from '@engine/scene'
 import { currentFlags, RUBRIC, type FlagRecord, type ScoreRecord } from '@engine/review'
 import type { ErrorRecord } from '@platform/logs'
 
@@ -42,6 +42,32 @@ export function repeatedPhrases(turns: Omit<TurnTrace, 'calls'>[], n = 4): Map<s
 
 /** The longest run of turns each character spent present without a speaking slot, per scene, worst case. */
 /** How the lines of each turn follow one another (round 0, session 2026-11-06_2313_c313). */
+const trigrams = (text: string) => {
+  const w = text.toLowerCase().match(/[\p{L}\p{N}']+/gu) ?? []
+  return w.slice(2).map((_, i) => `${w[i]} ${w[i + 1]} ${w[i + 2]}`)
+}
+
+/**
+ * How much of each line's wording comes straight from its planned point (session 2026-11-07_0013_714e: half).
+ * A line is matched to its exchange line through the trace (`line:<n>`), or, in older logs, to its speaker's points.
+ */
+export function copiedFromPlan(turns: Omit<TurnTrace, 'calls'>[]): number {
+  const shares = turns.flatMap((t) => {
+    const lines = planLines(t.director.plan)
+    return t.beats.flatMap((b) => {
+      if (b.beat.kind !== 'dialogue') return []
+      const speaker = b.beat.speaker
+      const n = b.plan.find((p) => p.startsWith('line:'))
+      const point = n ? lines[Number(n.slice(5)) - 1]?.point ?? '' : lines.filter((l) => l.who === speaker).map((l) => l.point).join(' ')
+      const said = trigrams(b.beat.text)
+      if (!point || said.length === 0) return []
+      const planned = new Set(trigrams(point))
+      return [said.filter((g) => planned.has(g)).length / said.length]
+    })
+  })
+  return shares.length === 0 ? Number.NaN : avg(shares)
+}
+
 export function exchangeShape(turns: Omit<TurnTrace, 'calls'>[]): { answeredBackPerTurn: number; sameSpeakerPerTurn: number } {
   const shapes = turns.map((t) => {
     const who = t.beats.flatMap((b) => (b.beat.kind === 'dialogue' ? [b.beat.speaker] : []))
@@ -82,6 +108,8 @@ export interface Metrics {
   cast: { speakingShare: Record<string, number>; longestSilence: Record<string, number>; dialogueWords: Record<string, number>; answeredBackPerTurn: number; sameSpeakerPerTurn: number }
   checks: { total: number; skills: Record<string, number>; difficulties: Record<string, number>; successRate: number }
   pacing: { beatsPerTurn: number; wordsPerBeat: number }
+  /** Share of a line's three-word runs found in its planned point: the writer copying the director's notes. */
+  copiedFromPlan: number
   repetition: { repeatedPerTurn: number; top: [string, number][] }
   speed: { firstTextMs: number; turnMs: number; tokensPerTurn: number }
   flags: {
@@ -188,6 +216,7 @@ export function metrics(inputs: MetricInput[]): Metrics {
       successRate: checks.length === 0 ? Number.NaN : share(checks.filter((c) => c.degree !== 'failure').length, checks.length)
     },
     pacing: { beatsPerTurn: avg(turns.map((t) => t.beats.length)), wordsPerBeat: avg(beats.map((b) => words(b.beat.text))) },
+    copiedFromPlan: copiedFromPlan(turns),
     repetition: {
       repeatedPerTurn: share([...repeated.values()].reduce((a, b) => a + b, 0), turns.length),
       top: [...repeated.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 10)
@@ -254,6 +283,7 @@ export function headline(m: Metrics): [string, number, 'lower' | 'higher' | 'inf
     ['distinct skills', Object.keys(m.checks.skills).length, 'higher'],
     ['answered back / turn', m.cast.answeredBackPerTurn, 'higher'],
     ['same speaker twice / turn', m.cast.sameSpeakerPerTurn, 'lower'],
+    ['copied from plan rate', m.copiedFromPlan, 'lower'],
     ['beats / turn', m.pacing.beatsPerTurn, 'info'],
     ['words / beat', m.pacing.wordsPerBeat, 'info'],
     ['repeated phrases / turn', m.repetition.repeatedPerTurn, 'lower'],

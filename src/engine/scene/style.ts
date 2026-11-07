@@ -10,6 +10,10 @@ export const STYLE_GUIDE = `Style:
 - Every line of dialogue makes its speaker's planned point, clearly enough that the reader knows what was said and why. Nothing else: no remarks for their own sake, no musings, no invented sayings or riddles.
 - A line responds to what was just said. Don't repeat the last speaker's words back to them.
 - Subtext lives in what a character chooses to say or leave out, never in vague wording.
+- The plan is notes, not wording. Write every line fresh, the way that character says it, from their voice card. Never copy the plan's phrasing.
+- What a character hides, their tell, and a check's stakes are notes for you: show them through what the character says and does. Never narrate the note itself.
+- Plain words. No made-up sayings or idioms; a comparison only when it makes something clearer. Narrate only what happens on the page.
+- When a line uses a place name or slang, the line makes its meaning clear.
 - Short visual-novel beats.`
 
 /** Said in every scene prompt, whatever the pack: the engine's adult-content guard, which packs can't turn off. */

@@ -9,7 +9,7 @@ import { compareRuns } from '../../tools/bench/report'
 import { mockLlm, readRun, runBench, writeRun, type BenchRun } from '../../tools/bench/run'
 import { loadScenarios, scenarioState, ScenarioSchema } from '../../tools/bench/scenario'
 import { flagsFor, metricInput } from '../../tools/logs/load'
-import { exchangeShape, metrics, renderMetrics, repeatedPhrases } from '../../tools/logs/metrics'
+import { copiedFromPlan, exchangeShape, metrics, renderMetrics, repeatedPhrases } from '../../tools/logs/metrics'
 import { blindTest, renderFlags } from '../../tools/logs/review'
 import { toScenario } from '../../tools/logs/scenario'
 import { scoreSession, type Scorer } from '../../tools/logs/score'
@@ -107,6 +107,15 @@ describe('npm run logs (milestone 2, A4)', () => {
     const turn = (...who: string[]) => ({ beats: who.map((w) => ({ beat: w === 'N' ? { kind: 'narration', text: '' } : { kind: 'dialogue', speaker: w, text: '' } })) }) as never
     expect(exchangeShape([turn('N', 'oria', 'N', 'oria', 'N', 'vex', 'N', 'vex')])).toEqual({ answeredBackPerTurn: 0, sameSpeakerPerTurn: 2 })
     expect(exchangeShape([turn('oria', 'vex', 'N', 'oria', 'vex'), turn('brask')])).toEqual({ answeredBackPerTurn: 1, sameSpeakerPerTurn: 0 })
+  })
+
+  // Session 2026-11-07_0013_714e, turn 3: Oria's line was her point, nearly word for word.
+  it('measures how much of each line comes straight from its planned point', () => {
+    const point = 'Lays out the plan: down the maintenance stair behind the bar, a skiff through the flooded level.'
+    const turn = (text: string, plan: string[]) => ({ director: { plan: { speakers: [], exchange: [{ who: 'oria-senn', answers: 'player', point }] } }, beats: [{ beat: { kind: 'dialogue', speaker: 'oria-senn', text }, plan }] }) as never
+    expect(copiedFromPlan([turn('Down the maintenance stair behind the bar, a skiff through the flooded level.', ['speaker:oria-senn', 'line:1'])])).toBe(1)
+    expect(copiedFromPlan([turn('We take the back way down, darling, and a boat does the rest.', ['speaker:oria-senn', 'line:1'])])).toBe(0)
+    expect(copiedFromPlan([])).toBeNaN()
   })
 
   it('counts a phrase repeated across turns of one scene once per extra turn, and not across scenes', () => {

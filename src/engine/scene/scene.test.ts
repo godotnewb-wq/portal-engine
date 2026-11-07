@@ -95,8 +95,20 @@ describe('prompts take the pack’s slots', () => {
     ]))
     expect(buildDirectorPrompt(fixture, state, 'Hello.').system).toMatch(/"exchange": \[\{"who","answers","point"\}\]/)
     const user = buildWriterPrompt(fixture, state, plan, 'Hello.').user
-    expect(user).toMatch(/# The exchange, in order \(what each line gets across\)\n1\. Tobin, answering the player: Says he locked up at the usual hour\.\n2\. Mara, answering line 1 \(Tobin\): Asks why[^\n]*\n3\. Tobin, answering line 2 \(Mara\): Claims the forge/)
+    expect(user).toMatch(/# The exchange, in order \(what each line gets across: notes, not wording\)\n1\. Tobin, answering the player: Says he locked up at the usual hour\.\n2\. Mara, answering line 1 \(Tobin\): Asks why[^\n]*\n3\. Tobin, answering line 2 \(Mara\): Claims the forge/)
     expect(user).not.toMatch(/Point \(what their line gets across\)/)
+  })
+
+  // Session 2026-11-07_0013_714e: the director quoted the line in its point ("'private money, darling, and shy of
+  // lantern-light'") and the writer copied it.
+  it('counts a point that quotes dialogue, but not an apostrophe inside a word', () => {
+    const plan = (point: string) => ({ ...PLAN, exchange: [{ who: 'tobin', answers: 'player', point }] })
+    const corrections = (point: string) => validatePlan(fixture, state, parsePlan(JSON.stringify(plan(point)))!).corrections
+    expect(corrections("Says it's Pell's cart, and he'll vouch for it.")).not.toContain('line 1 (tobin) quotes dialogue in its point')
+    expect(corrections("Says the client is 'private money, darling' and won't say more.")).toContain('line 1 (tobin) quotes dialogue in its point')
+    expect(corrections('Says "locked up at the usual hour".')).toContain('line 1 (tobin) quotes dialogue in its point')
+    expect(buildDirectorPrompt(fixture, state, 'Hello.').system).toMatch(/A point is a note for the writer, not the line/)
+    expect(buildWriterPrompt(fixture, state, validatePlan(fixture, state, parsePlan(JSON.stringify(PLAN))!).plan, 'Hello.').system).toMatch(/The plan is notes, not wording\./)
   })
 
   it('checks the writer’s prose against the pack’s own over-used phrases too', () => {

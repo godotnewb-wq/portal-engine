@@ -241,6 +241,9 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan): { p
   return { plan: { ...raw, speakers, exchange, reactions, checks, walk_ons, texture, leaves }, corrections }
 }
 
+/** Words in quotes: double quotes, or single quotes around a phrase (an apostrophe inside a word doesn't count). */
+const QUOTED_WORDS = /["“”]|(?:^|[\s(—–-])'[^']+'(?=$|[\s.,;:!?)—–-])/
+
 /**
  * The turn's lines in order. A line by someone who isn't a speaker is dropped, a reply to a dropped or later line
  * answers the player instead, and the list is capped. A plan in the older form (a point per speaker, no exchange)
@@ -269,9 +272,11 @@ function validateExchange(content: Pack, scene: Scene, raw: RawPlan, speakers: B
     if (raw.exchange.length > 0) fix(`speaker "${s.id}" had no line; gave them one`)
     if (lines.length < MAX_LINES) lines.push({ who: s.id, answers: 'player', point: s.point ?? '' })
   }
-  // Counted, not dropped: a line without a point is the filler round 0 found (F2).
+  // Counted, not dropped: a line without a point is the filler round 0 found (F2), and a point with quoted words is
+  // the director writing the line itself, which the writer then copies (session 2026-11-07_0013_714e).
   lines.forEach((l, i) => {
     if (!l.point.trim()) fix(`line ${i + 1} (${l.who}) has no point`)
+    else if (QUOTED_WORDS.test(l.point)) fix(`line ${i + 1} (${l.who}) quotes dialogue in its point`)
   })
   return lines
 }
