@@ -1,0 +1,17 @@
+{
+  "id": "tram-small-talk",
+  "title": "The stalled tram: small talk",
+  "watchFor": "The player leads: friendly questions get friendly, direct answers in their own terms before anyone pushes an agenda. First mentions introduced (her job, the clinic, the shift change). No maxims in place of answers. No checks.",
+  "location": "coil-line-car-14",
+  "cast": [
+    "kesh",
+    "jun-halloway",
+    "teo-varrin"
+  ],
+  "seed": 43,
+  "turns": [
+    "I look at Jun. \"So what brings you out here?\"",
+    "\"What about you?\" I ask Kesh. \"What do you do?\"",
+    "I turn to Teo. \"And you? Long day?\""
+  ]
+}

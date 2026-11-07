@@ -33,7 +33,7 @@ describe('flags', () => {
 
 describe('the AI scorer', () => {
   it('asks only the rubric items that apply, with the pack’s material in its slots, and never sees flags', async () => {
-    const { trace } = await runTurn(fixture, yardScene(), 'Tobin, who came by?', llm, () => {}, { forceNatural: 15 })
+    const { trace } = await runTurn(fixture, yardScene(), 'Tobin, who came by?', llm, () => {}, { pipeline: 'lines', forceNatural: 15 })
     const asked = itemsFor(trace).map((i) => i.id)
     // A first turn: no focus rotation or repetition yet. It has a check and a secret, so 3, 5 and 9 apply.
     expect(asked).toEqual(RUBRIC.map((i) => i.id).filter((id) => id !== 2 && id !== 13))

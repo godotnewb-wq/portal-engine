@@ -1,0 +1,17 @@
+{
+  "id": "tram-stay-or-go",
+  "title": "The stalled tram: stay or go",
+  "watchFor": "Strangers who want different things, said in the open: Kesh keeps the doors sealed, Jun wants out before her shift, Teo could restart the car and shouldn't. Lines a newcomer can follow: complete sentences, the nurse saying she's a nurse, nobody using slang or past events the player hasn't heard. Each line answers the one before in meaning, not only topic. No character says what only another knows. No checks while the player is only asking.",
+  "location": "coil-line-car-14",
+  "cast": [
+    "kesh",
+    "jun-halloway",
+    "teo-varrin"
+  ],
+  "seed": 41,
+  "turns": [
+    "What's going on? Why'd we stop?",
+    "Kesh, can't you just open the doors?",
+    "Teo, you said you might be able to get us moving?"
+  ]
+}

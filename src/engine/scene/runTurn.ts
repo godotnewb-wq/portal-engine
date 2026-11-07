@@ -9,6 +9,9 @@ import { resolvePlan, type ResolveOptions } from './resolve'
 import { castSnapshot, checkTraces, planItems, type BeatTrace, type TurnTrace } from './trace'
 import { applyTurn } from './turn'
 import { buildRewritePrompt, buildWriterPrompt, sceneSpeakers } from './writer'
+import { buildDirector2Prompt } from './director2'
+import { parsePlan2, validatePlan2 } from './plan2'
+import { buildWriter2Prompt } from './writer2'
 
 /**
  * The LLM calls a turn may make. `write` streams; it is used for the scene writer and its one rewrite. Either may
@@ -53,7 +56,16 @@ export interface TurnOptions extends ResolveOptions {
   log?: string
   /** The clock, in milliseconds; injected so tests can fix timings. */
   now?: () => number
+  /**
+   * Which director and writer run: `situation` (the default since 2026-11-07: the director plans moves and facts, the
+   * writer writes the conversation; director-writer review, option B) or `lines` (the director plans each line's point;
+   * kept so the bench can compare the two).
+   */
+  pipeline?: Pipeline
 }
+
+export type Pipeline = 'situation' | 'lines'
+export const PIPELINES: Pipeline[] = ['situation', 'lines']
 
 /**
  * One player turn (narrator-scene-engine §3): director → game resolves mechanics → streamed writer → code checks →
@@ -80,16 +92,21 @@ export async function runTurn(
 
   try {
     // Call 1: the director.
-    const directorPrompt = buildDirectorPrompt(content, state, input)
+    const situation = (options.pipeline ?? 'situation') === 'situation'
+    const directorPrompt = situation ? buildDirector2Prompt(content, state, input) : buildDirectorPrompt(content, state, input)
     const directorReply = await call('director', directorPrompt, () => llm.direct(directorPrompt))
-    const directed = parsePlan(directorReply)
-    const validated = directed ? validatePlan(content, state, directed) : { plan: fallbackPlan(content, state, input), corrections: [] }
+    const directed = situation ? parsePlan2(directorReply) : parsePlan(directorReply)
+    const validated = directed
+      ? situation
+        ? validatePlan2(content, state, directed as NonNullable<ReturnType<typeof parsePlan2>>)
+        : validatePlan(content, state, directed as NonNullable<ReturnType<typeof parsePlan>>)
+      : { plan: fallbackPlan(content, state, input), corrections: [] }
     const { plan, dice } = resolvePlan(content, state, validated.plan, options)
     emit({ type: 'planned', speakers: plan.speakers.map((s) => s.id), checks: plan.checks.flatMap((c) => (c.line ? [c.line] : [])), corrections: validated.corrections, fallback: !directed })
 
     // Call 2: the writer, streamed.
     const speakers = sceneSpeakers(content, state)
-    const writerPrompt = buildWriterPrompt(content, state, plan, input)
+    const writerPrompt = situation ? buildWriter2Prompt(content, state, plan, input) : buildWriterPrompt(content, state, plan, input)
     const stream = (role: 'writer' | 'rewrite', prompt: Prompt) =>
       call(role, prompt, (hooks) =>
         llm.write(
@@ -146,7 +163,7 @@ export async function runTurn(
       at: new Date(started).toISOString(),
       input,
       cast: { before: castSnapshot(state), after: castSnapshot(next) },
-      director: { callId: directorCall.id, read: !directed ? 'unreadable' : directorCall.meta?.jsonRetried ? 'json-retried' : 'json', plan, corrections: validated.corrections },
+      director: { callId: directorCall.id, read: !directed ? 'unreadable' : directorCall.meta?.jsonRetried ? 'json-retried' : 'json', plan, corrections: validated.corrections, pipeline: situation ? 'situation' : 'lines' },
       dice: { before: state.dice, after: dice },
       checks: checkTraces(plan),
       writer: { callId: `${turnId}:writer`, ...(parsed.reshaped.length > 0 && { reshaped: parsed.reshaped }) },

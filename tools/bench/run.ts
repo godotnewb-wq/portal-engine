@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { characterById, locationById, type Pack } from '@engine/pack'
 import { firstName, TracedError, type CallTrace } from '@engine/core'
 import { endScene, type SceneEndTrace, type Summarize } from '@engine/relationships'
-import { promptSources, runTurn, type TurnLlm, type TurnTrace } from '@engine/scene'
+import { promptSources, runTurn, type Pipeline, type TurnLlm, type TurnTrace } from '@engine/scene'
 import { callTrace, LogSession, promptVersion, readSession, type SessionRecord } from '@platform/logs'
 import type { FlagRecord, ScoreRecord } from '@engine/review'
 import { scenarioProblems, scenarioState, type Scenario } from './scenario'
@@ -47,7 +47,7 @@ export interface BenchRun {
   startedAt: string
   /** Which models played each role, for reading results later. */
   models: Record<string, string>
-  options: { repeat: number; summaries: boolean; score?: boolean }
+  options: { repeat: number; summaries: boolean; score?: boolean; pipeline?: Pipeline }
   scenarios: ScenarioRun[]
 }
 
@@ -65,13 +65,15 @@ export interface BenchOptions {
   /** The models as `session.json` keeps them (no keys). */
   roleModels?: SessionRecord['models']
   log?: (line: string) => void
+  /** Which director and writer to run (`--pipeline`); the engine's default when unset. */
+  pipeline?: Pipeline
 }
 
 /** The seed of a repeat: the scenario's own for the first, then the next ones, so repeats roll differently. */
 export const repeatSeed = (scenario: Scenario, repeat: number): number => scenario.seed + repeat - 1
 
 /** Plays one scenario through the real pipeline: every turn, then the end-of-scene summaries. */
-export async function runScenario(content: Pack, scenario: Scenario, llm: BenchLlm, repeat = 1, session?: LogSession): Promise<ScenarioRun> {
+export async function runScenario(content: Pack, scenario: Scenario, llm: BenchLlm, repeat = 1, session?: LogSession, pipeline?: Pipeline): Promise<ScenarioRun> {
   const seed = repeatSeed(scenario, repeat)
   const run: ScenarioRun = {
     id: scenario.id,
@@ -91,7 +93,7 @@ export async function runScenario(content: Pack, scenario: Scenario, llm: BenchL
   let state = scenarioState(content, { ...scenario, seed })
   state = { ...state, scene: { ...state.scene!, id: scenario.id } }
   session?.sceneStart({ sceneId: scenario.id, location: scenario.location, cast: scenario.cast })
-  const options = scenario.forceNatural !== undefined ? { forceNatural: scenario.forceNatural } : {}
+  const options = { ...(scenario.forceNatural !== undefined && { forceNatural: scenario.forceNatural }), ...(pipeline && { pipeline }) }
   let where: 'turn' | 'scene-end' = 'turn'
   try {
     for (const input of scenario.turns) {
@@ -125,7 +127,7 @@ export async function runBench(content: Pack, scenarios: Scenario[], llm: BenchL
     engine: options.engine ?? '',
     startedAt: new Date().toISOString(),
     models,
-    options: { repeat, summaries: scenarios.some((s) => s.summaries) },
+    options: { repeat, summaries: scenarios.some((s) => s.summaries), ...(options.pipeline && { pipeline: options.pipeline }) },
     scenarios: []
   }
   const log = options.log ?? (() => {})
@@ -149,7 +151,7 @@ export async function runBench(content: Pack, scenarios: Scenario[], llm: BenchL
             `${scenario.id}-${n}`
           )
         : undefined
-      const run = await runScenario(content, scenario, llm, n, session)
+      const run = await runScenario(content, scenario, llm, n, session, options.pipeline)
       session?.close()
       const calls = callsOf(run).length
       log(run.error ? `  stopped: ${run.error}` : `  ${run.turns.length} turns, ${calls} calls, ${run.turns.filter((t) => t.rewrite).length} rewrites`)

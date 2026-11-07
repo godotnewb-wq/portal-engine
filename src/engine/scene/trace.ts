@@ -28,6 +28,8 @@ export interface TurnTrace {
     /** The plan after validation, with its checks rolled. */
     plan: BeatPlan
     corrections: string[]
+    /** Which director and writer ran (`TurnOptions.pipeline`); absent in turns logged before there was a choice. */
+    pipeline?: 'situation' | 'lines'
   }
   dice: { before: number; after: number }
   checks: CheckTrace[]

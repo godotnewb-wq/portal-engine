@@ -45,7 +45,9 @@ export function startScene(content: Pack, state: GameState, locationId: string, 
     departed: [],
     ended: false,
     nsfw: false,
-    baseline: Object.fromEntries(cast.map((id) => [id, state.meters[id]!]))
+    baseline: Object.fromEntries(cast.map((id) => [id, state.meters[id]!])),
+    told: [],
+    newFacts: []
   }
   return { ...state, scene }
 }

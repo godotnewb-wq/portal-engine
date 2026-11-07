@@ -1,0 +1,17 @@
+{
+  "id": "tram-attempt",
+  "title": "The stalled tram: the player tries something",
+  "watchFor": "Checks follow the player's actions: forcing the roof hatch (athletics), getting the cabin panel open with Teo (arcanotech or engineering), talking Kesh round (persuasion). Not empathy. The result shows as what you manage or fail to, and it changes the situation: a success moves things forward.",
+  "location": "coil-line-car-14",
+  "cast": [
+    "kesh",
+    "jun-halloway",
+    "teo-varrin"
+  ],
+  "seed": 47,
+  "turns": [
+    "I climb onto a seat and try to crank the roof hatch open.",
+    "Teo, show me the panel. I'll help you with the cold start.",
+    "Kesh, I know the book says wait. But Jun has patients. Let us try."
+  ]
+}

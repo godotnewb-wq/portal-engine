@@ -56,6 +56,16 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
   const dropped = turns.length > RECENT_TURNS ? turns[turns.length - RECENT_TURNS - 1] : undefined
   const summary = dropped ? `${scene.summary}\n\n${turnText(content, state.player.name, dropped)}`.trim().slice(-SUMMARY_CHARS) : scene.summary
 
+  // What was said on screen joins the scene's common ground: a fact is introduced the first time, and anyone present
+  // can repeat it after. Only moves whose speaker actually had a line count, in case the writer or salvage dropped one.
+  const voiced = new Set(written.beats.flatMap((b) => (b.kind === 'dialogue' ? [b.speaker] : [])))
+  const said = (written.plan.moves ?? []).filter((m) => voiced.has(m.who))
+  const told = [...new Set([...scene.told, ...said.flatMap((m) => m.says.flatMap((s) => (s.id ? [s.id] : [])))])]
+  const newFacts = [...scene.newFacts]
+  for (const m of said)
+    for (const s of m.says)
+      if (!s.id && !newFacts.some((f) => f.text === s.text)) newFacts.push({ id: `said.${newFacts.length + 1}`, text: s.text, by: m.who })
+
   return {
     ...state,
     time: state.time + MINUTES_PER_TURN,
@@ -68,7 +78,9 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
       comfort: { ...scene.comfort, ...comfort },
       expressions: { ...scene.expressions, ...only(written.tags.expressions) },
       departed: [...scene.departed, ...leaving],
-      ended: scene.ended || written.plan.end_scene
+      ended: scene.ended || written.plan.end_scene,
+      told,
+      newFacts
     }
   }
 }

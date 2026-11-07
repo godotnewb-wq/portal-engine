@@ -56,7 +56,8 @@ Rules:
 - Quiet characters are listed each turn with what they care about. If what is being said touches their trade, aims or knowledge, they have a point: give them a slot. If nothing does, silence is fine.
 - Never decide, say or do anything for the player.`
 
-function sheet(content: Pack, state: GameState, c: Character, present: string[]): string {
+/** A character as the director sees them. With `ids`, knowledge and secrets carry the fact ids moves refer to. */
+export function sheet(content: Pack, state: GameState, c: Character, present: string[], ids = false): string {
   const scene = state.scene!
   const meters = state.meters[c.id]
   const relations = state.relations
@@ -69,9 +70,9 @@ function sheet(content: Pack, state: GameState, c: Character, present: string[])
     `Agenda: ${c.agenda.longTerm.join('; ')}. Tonight: ${c.agenda.current}`,
     `Contradictions: ${c.contradictions.join('; ')}`,
     `Mood now: ${scene.moods[c.id] ?? c.mood}. Comfort ${scene.comfort[c.id] ?? 3}/5.`,
-    c.knowledge.length > 0 && `Knows: ${c.knowledge.join('; ')}`,
+    c.knowledge.length > 0 && (ids ? `Knows:\n${c.knowledge.map((k, i) => `- [${c.id}.k${i + 1}] ${k}`).join('\n')}` : `Knows: ${c.knowledge.join('; ')}`),
     c.values.length > 0 && `Values: ${c.values.map((v) => `${v.stance} ${v.value}`).join(', ')}`,
-    ...c.secrets.map((s) => `Secret [${s.id}]: ${s.text} Tell: ${s.tell}.${s.revealWhen ? ` Would reveal when: ${s.revealWhen}.` : ''}`),
+    ...c.secrets.map((s) => `Secret [${ids ? `${c.id}.` : ''}${s.id}]: ${s.text} Tell: ${s.tell}.${s.revealWhen ? ` Would reveal when: ${s.revealWhen}.` : ''}`),
     `Lying tell: ${c.voice.shifts.lying}`,
     meters && `Toward the player: ${meterWords(content.ruleset, meters)}`,
     recall(state, c).length > 0 && `Remembers: ${recall(state, c).map((m) => `(${m.level}) ${m.text}`).join(' ')}`,
@@ -82,9 +83,20 @@ function sheet(content: Pack, state: GameState, c: Character, present: string[])
     .join('\n')
 }
 
-/** A past turn as the prompts show it: what the player said and the beats written. */
+/** Who said a line, by the name the scene knows them by: a character's first name, a walk-on's name or label. */
+function speakerName(content: Pack, id: string): string {
+  const c = characterById(content, id)
+  if (c) return c.name.split(/\s+/)[0]!
+  const w = content.locations.flatMap((l) => l.walkOns).find((x) => x.id === id)
+  return w?.name ?? w?.label ?? id
+}
+
+/**
+ * A past turn as the prompts show it: what the player said and the beats written. Speech keeps its quotes and the
+ * name the writer uses, so it can't be read as narration (session 2026-11-06_1757_9630: walk-ons by id, full names where the writer uses first names).
+ */
 export function turnText(content: Pack, playerName: string, turn: Turn): string {
-  const beats = turn.beats.map((b) => (b.kind === 'narration' ? b.text : `${characterById(content, b.speaker)?.name ?? b.speaker}: ${b.text}`))
+  const beats = turn.beats.map((b) => (b.kind === 'narration' ? b.text : `${speakerName(content, b.speaker)}: "${b.text}"`))
   return [`${playerName}: ${turn.player}`, ...beats].join('\n')
 }
 

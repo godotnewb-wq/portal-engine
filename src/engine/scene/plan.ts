@@ -7,8 +7,8 @@ import { characterById, locationById, type Pack } from '@engine/pack'
  * The director's beat plan (narrator-scene-engine §4), read leniently: a field the model leaves out or gets the wrong
  * shape of becomes empty rather than failing the turn. `validatePlan` then checks it against the scene.
  */
-const text = z.string().catch('')
-const list = <T extends z.ZodType>(item: T) => z.array(z.unknown()).catch([]).transform((xs) => xs.flatMap((x) => {
+export const text = z.string().catch('')
+export const list = <T extends z.ZodType>(item: T) => z.array(z.unknown()).catch([]).transform((xs) => xs.flatMap((x) => {
   const parsed = item.safeParse(x)
   return parsed.success ? [parsed.data as z.infer<T>] : []
 }))
@@ -86,7 +86,32 @@ export interface ExchangeLine {
   point: string
 }
 
-export type BeatPlan = Omit<RawPlan, 'checks' | 'exchange'> & { checks: PlannedCheck[]; exchange: ExchangeLine[] }
+/** Something a move says: a fact by id, or something new the plan brought in. `unheard`: the player hasn't been told it. */
+export interface Said {
+  text: string
+  id?: string
+  unheard: boolean
+}
+
+/** A move after validation (director-writer review, option B): who, what it answers, what kind of move, and what it says. */
+export interface Move {
+  who: string
+  answers: 'player' | number
+  move: string
+  says: Said[]
+}
+
+/**
+ * The validated plan. `moves`, `player_action` and `change` come from the situation plan (`plan2.ts`); a plan from
+ * the older director has none of them, and `exchange` then carries the lines.
+ */
+export type BeatPlan = Omit<RawPlan, 'checks' | 'exchange'> & {
+  checks: PlannedCheck[]
+  exchange: ExchangeLine[]
+  moves?: Move[]
+  player_action?: { doing: string; uncertain: boolean }
+  change?: string
+}
 
 /** At most two speakers a beat (narrator-scene-engine §6), and few enough checks to keep the turn quick. */
 export const MAX_SPEAKERS = 2
@@ -147,7 +172,7 @@ export function difficultyNamed(r: Ruleset, written: string): Difficulty | undef
 export const presentCast = (scene: Scene): string[] => scene.cast.filter((id) => !scene.departed.includes(id))
 
 /** Who is meant: an id, a full name or a first name, for someone present. */
-function presentId(content: Pack, scene: Scene, written: string): string | undefined {
+export function presentId(content: Pack, scene: Scene, written: string): string | undefined {
   const asked = normalize(written)
   return presentCast(scene).find((id) => {
     const c = characterById(content, id)
@@ -160,7 +185,8 @@ function presentId(content: Pack, scene: Scene, written: string): string | undef
  * checks with skills or difficulties that don't exist removed, texture capped. Returns what was changed and why,
  * so the test bench can show how often the director strays.
  */
-export function validatePlan(content: Pack, state: GameState, raw: RawPlan): { plan: BeatPlan; corrections: string[] } {
+/** `exchange: false` leaves the lines to the caller (the situation plan validates its own moves). */
+export function validatePlan(content: Pack, state: GameState, raw: RawPlan, options: { exchange?: boolean } = {}): { plan: BeatPlan; corrections: string[] } {
   const scene = state.scene
   if (!scene) throw new Error('No scene in progress')
   const corrections: string[] = []
@@ -213,7 +239,7 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan): { p
       delete s.depends_on_check
     }
   }
-  const exchange = validateExchange(content, scene, raw, speakers, fix)
+  const exchange = options.exchange === false ? [] : validateExchange(content, scene, raw, speakers, fix)
 
   const location = locationById(content, scene.locationId)!
   const walk_ons = raw.walk_ons.flatMap((w) => {
@@ -242,7 +268,7 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan): { p
 }
 
 /** Words in quotes: double quotes, or single quotes around a phrase (an apostrophe inside a word doesn't count). */
-const QUOTED_WORDS = /["“”]|(?:^|[\s(—–-])'[^']+'(?=$|[\s.,;:!?)—–-])/
+export const QUOTED_WORDS = /["“”]|(?:^|[\s(—–-])'[^']+'(?=$|[\s.,;:!?)—–-])/
 
 /**
  * The turn's lines in order. A line by someone who isn't a speaker is dropped, a reply to a dropped or later line

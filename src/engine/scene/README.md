@@ -16,3 +16,16 @@ The templates are engine code; every world word in them comes from the pack (pri
 
 **Depends on:** core, rules, characters, world, pack, state, memory.
 **Design:** `claude/narrator-scene-engine.md`. **Tuning:** `BEATS`, `MAX_SPEAKERS`, `MAX_CHECKS` (code); the pack's tone, primer and phrases.
+
+## Two pipelines (since 2026-11-07)
+`runTurn` takes `pipeline`: **`situation`** (the default) or **`lines`** (the older one, kept so the bench can compare: `npm run bench -- --pipeline lines`). The turn trace records which ran (`director.pipeline`).
+
+**Situation** (`director2.ts`, `plan2.ts`, `facts.ts`, `writer2.ts`; `claude/director-writer-review.md`, option B): the director plans what is true, wanted and at stake, and writes no prose or dialogue.
+- `player_action` says what the player is doing and whether it is an uncertain attempt; a player check without one is dropped.
+- Each speaker has a `goal`, and `keeps` lists the ids of secrets they're holding back.
+- `moves` is the conversation in order: who, what it `answers`, a kind of move (answer, ask, push back, dodge, …), the ids of the facts it `uses`, and anything `new` it brings in (a price, a time).
+- `change` says what is different by the end of the turn. Texture is at most one detail.
+
+`facts.ts` gives every knowledge line and secret an id (`<character>.k<n>`, `<character>.<secret>`), the place's news `place.<n>`, and what has been said on screen `said.<n>`. A move may use only its speaker's facts, the place's, or what has been said (`canSay`); anything else is dropped from the move and counted. `applyTurn` adds what was said to the scene's `told` and `newFacts`, so the next turn marks a fact new to the player only the first time, and anyone present can repeat it after.
+
+The writer's prompt (`writer2.ts`) is a few principles and one example. It gets what the player has been told, the moves with their facts (each marked when new to the player), each speaker's goal, a secret's tell, the change and the check results. `exchange` is filled from the moves, so traces, read-outs and metrics work for both pipelines.

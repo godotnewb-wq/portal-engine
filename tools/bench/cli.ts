@@ -10,6 +10,7 @@
 //   npm run bench -- --no-summaries                skip the end-of-scene summaries
 //   npm run bench -- --repeat 10                   play each scenario 10 times with different seeds
 //   npm run bench -- --score                       run the AI scorer on the run as it finishes
+//   npm run bench -- --pipeline lines              run the older line-plan director and writer (default: situation)
 //   npm run bench -- --scenario turn.json          also a scenario file from elsewhere (e.g. made by `npm run logs -- to-scenario`)
 //   npm run bench -- --compare bench-output/A bench-output/B   side by side, into bench-output/compare-….md
 //
@@ -29,6 +30,7 @@ import { mockLlm, readRun, runBench, writeRun, type BenchLlm } from './run'
 import { scoreSession, type Scorer } from '../logs/score'
 import { loadScenarios, scenarioFile } from './scenario'
 import { scorerLlm, summaryLlm, turnLlm } from '@platform/roles'
+import { PIPELINES, type Pipeline } from '@engine/scene'
 
 const root = resolve(__dirname, '../..')
 const args = process.argv.slice(2)
@@ -59,7 +61,7 @@ async function main(): Promise<void> {
 
   const dir = packDir(option('--pack') ?? 'neonpunk-nights')
   const content = loadPack(dir)
-  const valued = new Set(['--label', '--config', '--pack', '--repeat', '--scenario'])
+  const valued = new Set(['--label', '--config', '--pack', '--repeat', '--scenario', '--pipeline'])
   const wanted = args.filter((arg, i) => !arg.startsWith('--') && !valued.has(args[i - 1] ?? ''))
   const files = args.flatMap((arg, i) => (args[i - 1] === '--scenario' ? [arg] : []))
   const extra = files.map((file) => scenarioFile(resolve(file)))
@@ -70,6 +72,8 @@ async function main(): Promise<void> {
   if (missing.length > 0) throw new Error(`No such scenario: ${missing.join(', ')}. Known: ${all.map((s) => s.id).join(', ')}`)
   if (flag('--no-summaries')) for (const s of scenarios) s.summaries = false
 
+  const pipeline = option('--pipeline') as Pipeline | undefined
+  if (pipeline && !PIPELINES.includes(pipeline)) throw new Error(`--pipeline is one of: ${PIPELINES.join(', ')}`)
   const repeat = Number(option('--repeat') ?? 1)
   if (!Number.isInteger(repeat) || repeat < 1) throw new Error('--repeat needs a whole number of 1 or more')
 
@@ -94,7 +98,7 @@ async function main(): Promise<void> {
   const out = join(outRoot, `${stamp()}-${label}`)
   mkdirSync(out, { recursive: true })
   const engine = (JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as { version: string }).version
-  let bench = await runBench(content, scenarios, llm, label, models, { repeat, out, engine, roleModels: sessionModels, log: (line) => console.log(line) })
+  let bench = await runBench(content, scenarios, llm, label, models, { repeat, out, engine, roleModels: sessionModels, log: (line) => console.log(line), ...(pipeline && { pipeline }) })
   bench.options.score = flag('--score')
   writeRun(out, bench)
   if (flag('--score') && scorer) {

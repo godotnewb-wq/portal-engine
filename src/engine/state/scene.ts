@@ -63,6 +63,10 @@ export const SceneSchema = z.object({
   ended: z.boolean().default(false),
   nsfw: z.boolean().default(false),
   /** Meters at the start of the scene, to show what changed at its end. */
-  baseline: z.record(z.string(), MetersSchema).default({})
+  baseline: z.record(z.string(), MetersSchema).default({}),
+  /** Facts said on screen this scene, by id (characters' knowledge and secrets, the place's news), so a fact is introduced the first time and anyone present can repeat it after. */
+  told: z.array(z.string()).default([]),
+  /** Facts the plan brought in that no sheet holds (a price, a count), once said: anyone present can use them. */
+  newFacts: z.array(z.object({ id: z.string(), text: z.string(), by: z.string() })).default([])
 })
 export type Scene = z.infer<typeof SceneSchema>

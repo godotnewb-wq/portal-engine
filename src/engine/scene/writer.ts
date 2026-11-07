@@ -36,7 +36,7 @@ export const WRITER_FORMAT = `Output format, nothing else:
 - Never write the player's words, choices, thoughts or actions beyond what their input stated.
 - Honor every check result exactly: a failed roll means it does not happen.`
 
-function voiceCard(name: string, v: VoiceCard): string {
+export function voiceCard(name: string, v: VoiceCard): string {
   return [
     `## ${name}'s voice`,
     `Rhythm: ${v.rhythm}`,
@@ -57,7 +57,7 @@ const OUTCOME: Record<Degree, (stakes: string) => string> = {
   failure: (s) => `FAILURE: this does not happen: ${s}`
 }
 
-function checkLine(content: Pack, state: GameState, check: PlannedCheck): string {
+export function checkLine(content: Pack, state: GameState, check: PlannedCheck): string {
   const who = check.who === 'player' ? state.player.name : firstName(characterById(content, check.who)!.name)
   return `- ${who}'s ${check.skill} check [${check.id}]: ${check.result ? OUTCOME[check.result.degree](check.stakes) : check.stakes}`
 }
