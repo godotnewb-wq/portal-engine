@@ -15,17 +15,20 @@ export function sceneSpeakers(content: Pack, state: GameState): Speaker[] {
   const location = locationById(content, scene.locationId)!
   const cast = presentCast(scene).map((id): Speaker => {
     const c = characterById(content, id)!
-    return { id, names: [c.id, c.name, firstName(c.name)], kind: 'cast' }
+    return { id, names: [c.id, c.name, firstName(c.name)], kind: 'cast', display: firstName(c.name) }
   })
   const walkOns = location.walkOns
     .filter((w) => scene.walkOns.includes(w.id))
-    .map((w): Speaker => ({ id: w.id, names: [w.id, w.label, w.label.replace(/^the\s+/i, ''), ...(w.name ? [w.name] : [])], kind: 'walk-on' }))
+    .map((w): Speaker => ({ id: w.id, names: [w.id, w.label, w.label.replace(/^the\s+/i, ''), ...(w.name ? [w.name] : [])], kind: 'walk-on', display: w.name ?? w.label }))
   const player: Speaker = { id: 'player', names: [state.player.name, 'you', 'player'], kind: 'player' }
   return [...cast, ...walkOns, player]
 }
 
 export const WRITER_FORMAT = `Output format, nothing else:
-- One beat per line. A narration beat: "NARRATION: …". A dialogue beat: "Name: …" (the character's first name), their spoken words with at most a brief action.
+- One beat per line. Each beat is either speech or narration, never both.
+- A dialogue beat: Name: "spoken words" (the character's first name). Only the words they say, in double quotes: no action, gesture or description.
+- A narration beat: "NARRATION: …". Everything that isn't spoken: actions, gestures, reactions, the room. A character's action names them: "NARRATION: Ada climbs onto the bar."
+- Someone who speaks and acts gets separate beats, in the order it happens: dialogue, then narration, then dialogue.
 - ${BEATS.target} beats, each under ${BEATS.targetWords} words.
 - Only the planned speakers get dialogue beats. Others appear only as their planned reactions, inside narration. A planned walk-on line may be a dialogue beat under the walk-on's name.
 - Hidden tags at the end, one per line: [Name: EXPRESSION word] for each speaker; [Name: COMFORT 1-5 reason] when someone's comfort changes; [Name: MOOD words] when a mood shifts; [LEAVES: Name] for a planned departure; [END SCENE] only if the plan ends the scene.

@@ -144,7 +144,7 @@ export async function runTurn(
       director: { callId: directorCall.id, read: !directed ? 'unreadable' : directorCall.meta?.jsonRetried ? 'json-retried' : 'json', plan, corrections: validated.corrections },
       dice: { before: state.dice, after: dice },
       checks: checkTraces(plan),
-      writer: { callId: `${turnId}:writer` },
+      writer: { callId: `${turnId}:writer`, ...(parsed.reshaped.length > 0 && { reshaped: parsed.reshaped }) },
       findings: problems,
       ...(rewritten && {
         rewrite: {

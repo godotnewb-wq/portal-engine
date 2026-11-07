@@ -64,7 +64,7 @@ export interface Metrics {
   turns: number
   beats: number
   director: { unreadableRate: number; jsonRetried: number; correctionsPerTurn: number }
-  writer: { rewriteRate: number; rewriteReasons: Record<string, number>; salvageRate: number; tagErrorsPerTurn: number; fallbackProfileRate: number }
+  writer: { rewriteRate: number; rewriteReasons: Record<string, number>; salvageRate: number; tagErrorsPerTurn: number; reshapedPerTurn: number; fallbackProfileRate: number }
   cast: { speakingShare: Record<string, number>; longestSilence: Record<string, number>; dialogueWords: Record<string, number> }
   checks: { total: number; skills: Record<string, number>; difficulties: Record<string, number>; successRate: number }
   pacing: { beatsPerTurn: number; wordsPerBeat: number }
@@ -153,6 +153,7 @@ export function metrics(inputs: MetricInput[]): Metrics {
       rewriteReasons: count(turns.flatMap((t) => [...new Set(t.findings.map((p) => p.kind))])),
       salvageRate: share(turns.filter((t) => t.rewrite?.salvage).length, turns.length),
       tagErrorsPerTurn: avg(turns.map((t) => t.tags.dropped.length)),
+      reshapedPerTurn: avg(turns.map((t) => t.writer.reshaped?.length ?? 0)),
       fallbackProfileRate: share(writerCalls.filter((c) => c.restarted || c.meta?.declined).length, writerCalls.length)
     },
     cast: {
@@ -232,6 +233,7 @@ export function headline(m: Metrics): [string, number, 'lower' | 'higher' | 'inf
     ['rewrite rate', m.writer.rewriteRate, 'lower'],
     ['salvage rate', m.writer.salvageRate, 'lower'],
     ['tag errors / turn', m.writer.tagErrorsPerTurn, 'lower'],
+    ['mixed lines split / turn', m.writer.reshapedPerTurn, 'lower'],
     ['fallback-profile rate', m.writer.fallbackProfileRate, 'lower'],
     ['check success rate', m.checks.successRate, 'info'],
     ['distinct skills', Object.keys(m.checks.skills).length, 'higher'],

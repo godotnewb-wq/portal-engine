@@ -13,6 +13,8 @@ export interface Speaker {
   id: string
   names: string[]
   kind: 'cast' | 'walk-on' | 'player'
+  /** How narration names them ("Ada", "the porter"); by default their second name. */
+  display?: string
 }
 
 export interface Tags {
@@ -32,6 +34,8 @@ export interface ParsedReply {
   unknownSpeakers: string[]
   /** Tags that didn't parse or named no one here; dropped. */
   droppedTags: string[]
+  /** Raw lines (1-based) where a dialogue line mixed speech and action and code split it into beats. */
+  reshaped: number[]
 }
 
 const TAG = /\[([^\]\n]*)\]/g
@@ -80,11 +84,74 @@ function parseTag(body: string, speakers: Speaker[], tags: Tags, dropped: string
   } else dropped.push(raw)
 }
 
+const QUOTED = /(["“])([^"”\n]*)(["”]|$)/g
+const PRONOUN_START = /^(?:He|She)\b/
+/** An unquoted line that opens like this is about the speaker, not said by them ("Ada: She sets three cups down"). */
+const ACTION_START = /^(?:He|She|They|His|Her|Their)\b/
+/** "she says," between two quoted parts is attribution, not an action worth its own beat. */
+const SPEECH_TAG = /^(?:\S+\s+){0,2}(?:says|said|adds|asks|replies|mutters|murmurs|whispers|continues|goes on)\b[^.!?]*$/i
+/** A capitalized word ending in -s followed by one of these is a verb missing its subject ("Wipes the slate"). */
+const OBJECT_WORDS = new Set(['the', 'a', 'an', 'his', 'her', 'their', 'its', 'my', 'your', 'at', 'to', 'toward', 'towards', 'into', 'onto', 'up', 'down', 'out', 'off', 'over', 'back', 'away', 'through', 'across', 'without'])
+const NOT_VERBS = new Set(['his', 'its', 'this', 'thus', 'yes', 'as', 'us', 'was', 'is', 'perhaps', 'always', 'sometimes', 'besides', 'unless', 'plus', 'towards', 'across'])
+
+const displayName = (s: Speaker) => s.display ?? s.names[1] ?? s.id
+
+/** Gives an action cut out of a dialogue line its subject, so the beat reads on its own: "wipes the slate" → "Ada wipes the slate". */
+function withSubject(action: string, s: Speaker): string {
+  const name = displayName(s)
+  const capital = name.charAt(0).toUpperCase() + name.slice(1)
+  if (PRONOUN_START.test(action)) return action.replace(PRONOUN_START, capital)
+  if (/^\p{Ll}/u.test(action)) return `${capital} ${action}`
+  const [first = '', second = ''] = action.split(/\s+/)
+  const lower = first.toLowerCase()
+  if (/^\p{Lu}\p{Ll}+s$/u.test(first) && !NOT_VERBS.has(lower) && OBJECT_WORDS.has(second.toLowerCase())) {
+    return `${capital} ${lower}${action.slice(first.length)}`
+  }
+  return action
+}
+
+/**
+ * One character's line as beats: what they say, and what they do, never both in one beat (milestone 2, round 0 F1).
+ * The writer is asked for that form; this keeps a line that mixes them readable without spending a rewrite on it.
+ */
+function dialogueBeats(raw: string, s: Speaker): Beat[] {
+  const text = raw.trim()
+  const quotes = [...text.matchAll(QUOTED)]
+  if (quotes.length === 0) {
+    const plain = clean(text)
+    if (!plain) return []
+    // The line pattern has already taken an opening asterisk, so a closing one is what's left of *an action*.
+    const emphasized = /^[*_]|[*_]$/.test(text)
+    const own = s.names.some((n) => plain.toLowerCase().startsWith(`${n.toLowerCase()} `))
+    if (emphasized || own || ACTION_START.test(plain)) return [{ kind: 'narration', text: withSubject(plain, s) }]
+    return [{ kind: 'dialogue', speaker: s.id, text: plain }]
+  }
+  const parts: Array<{ said: boolean; text: string }> = []
+  let at = 0
+  const between = (t: string) => {
+    const action = t.replace(/[*_]+/g, '').trim().replace(/^[,;:—–-]+\s*|\s*[,;:—–-]+$/g, '').trim()
+    if (!/\p{L}/u.test(action)) return
+    if (SPEECH_TAG.test(action) && action.split(/\s+/).length <= 6) return
+    parts.push({ said: false, text: withSubject(action, s) })
+  }
+  for (const q of quotes) {
+    between(text.slice(at, q.index))
+    const said = q[2]!.trim()
+    const last = parts.at(-1)
+    if (said && last?.said) last.text = `${last.text} ${said}`
+    else if (said) parts.push({ said: true, text: said })
+    at = q.index! + q[0].length
+  }
+  between(text.slice(at))
+  return parts.map((p): Beat => (p.said ? { kind: 'dialogue', speaker: s.id, text: p.text } : { kind: 'narration', text: p.text }))
+}
+
 /** Reads the writer's reply into beats and tags. Lenient: an unlabelled line is narration. */
 export function parseReply(reply: string, speakers: Speaker[]): ParsedReply {
   const tags: Tags = { expressions: {}, comfort: {}, moods: {}, leaves: [], ended: false }
   const droppedTags: string[] = []
   const unknownSpeakers: string[] = []
+  const reshaped: number[] = []
   // Thinking is blanked rather than cut, keeping its newlines, so line numbers still match the raw reply.
   const withoutThinking = reply.replace(/<think(?:ing)?>[\s\S]*?<\/think(?:ing)?>/gi, (m) => m.replace(/[^\n]/g, ''))
   for (const m of withoutThinking.matchAll(TAG)) parseTag(m[1]!, speakers, tags, droppedTags)
@@ -109,8 +176,11 @@ export function parseReply(reply: string, speakers: Speaker[]): ParsedReply {
       const s = who(label, speakers)
       const text = clean(m[2]!)
       if (!text) continue
-      if (s) push({ kind: 'dialogue', speaker: s.id, text }, n)
-      else {
+      if (s) {
+        const split = dialogueBeats(m[2]!, s)
+        if (split.length !== 1 || split[0]!.kind !== 'dialogue') reshaped.push(n)
+        for (const beat of split) push(beat, n)
+      } else {
         // A colon inside ordinary narration ("One rule: never ask.") is not a speaker; only a short, name-like label is.
         if (/^[\p{Lu}][\p{L}' .-]{0,30}$/u.test(label) && label.split(/\s+/).length <= 3) {
           unknownSpeakers.push(label)
@@ -121,7 +191,7 @@ export function parseReply(reply: string, speakers: Speaker[]): ParsedReply {
     }
     push({ kind: 'narration', text: clean(line) }, n)
   }
-  return { beats, lines, tags, unknownSpeakers: [...new Set(unknownSpeakers)], droppedTags }
+  return { beats, lines, tags, unknownSpeakers: [...new Set(unknownSpeakers)], droppedTags, reshaped }
 }
 
 /** While a reply streams in, only lines that have ended are beats; the last one may still be growing. */

@@ -2,6 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { TracedError, type Prompt } from '@engine/core'
 import { fixture, yardScene } from '@tests/fixture'
 import { runTurn, type TurnLlm } from './runTurn'
+import { BEATS } from './style'
 
 const PLAN = JSON.stringify({
   speakers: [
@@ -76,13 +77,13 @@ describe('the turn trace (milestone 2, A1)', () => {
 
   it('records the findings, the rewrite and what salvage dropped and cut', async () => {
     const unplanned = 'Tobin: "Usual hour."\nMara: "Humming."\nClerk: "Next!"'
-    // Still wrong after the rewrite: a line by no one in the scene (beat 2), then nine narration beats, two over the budget.
-    const stillWrong = ['Tobin: "Usual hour."', 'You say: "Fine."', 'Mara: "Humming."', ...Array.from({ length: 6 }, (_, i) => `NARRATION: Rain ${i + 1}.`)].join('\n')
+    // Still wrong after the rewrite: a line by no one in the scene (beat 2), then enough narration to go one beat over the budget once it is dropped.
+    const stillWrong = ['Tobin: "Usual hour."', 'You say: "Fine."', 'Mara: "Humming."', ...Array.from({ length: BEATS.max - 1 }, (_, i) => `NARRATION: Rain ${i + 1}.`)].join('\n')
     const { trace, beats } = await runTurn(fixture, yardScene(), 'Tobin?', scripted(JSON.stringify({ speakers: [{ id: 'tobin', intent: 'x', mood: '' }, { id: 'mara', intent: 'y', mood: '' }] }), unplanned, stillWrong), () => {}, { now: clock() })
     expect(trace.findings).toEqual([expect.objectContaining({ kind: 'unplanned-speaker', beat: 3, text: 'Next!' })])
     expect(trace.rewrite).toMatchObject({ callId: expect.stringMatching(/:rewrite$/), salvage: { dropped: [2], cut: 1 } })
     expect(trace.rewrite!.remaining.map((p) => p.kind)).toContain('unknown-speaker')
-    expect(beats).toHaveLength(7)
+    expect(beats).toHaveLength(BEATS.max)
     expect(trace.beats.every((b) => b.source === 'rewrite' && b.salvaged)).toBe(true)
     expect(trace.beats[1]).toMatchObject({ index: 2, line: 3, plan: ['speaker:mara'] })
     expect(trace.calls.map((c) => c.role)).toEqual(['director', 'writer', 'rewrite'])

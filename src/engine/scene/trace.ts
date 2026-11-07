@@ -31,7 +31,8 @@ export interface TurnTrace {
   }
   dice: { before: number; after: number }
   checks: CheckTrace[]
-  writer: { callId: string }
+  /** `reshaped`: lines of the shown reply where code split speech from action (round 0 F1). */
+  writer: { callId: string; reshaped?: number[] }
   /** What the code checks found in the draft; the rewrite was asked to fix these. */
   findings: Problem[]
   rewrite?: {

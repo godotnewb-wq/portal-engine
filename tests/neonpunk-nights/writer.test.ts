@@ -57,6 +57,38 @@ describe('parseReply', () => {
     expect(parsed.droppedTags).toEqual(['[Ghost: MOOD sad]'])
   })
 
+  // Lines from round 0 (session 2026-11-06_1718_808f) that mixed speech and action in one beat.
+  it('splits a line that mixes speech and action into beats, in order, naming whoever acts', () => {
+    const parsed = parseReply(
+      [
+        'Dunmar: Wipes the slate with his thumb, erasing nothing. "Surveyors on the lower stairs again. Drink up before the grid does."',
+        'Vex: "Say who\'s paying." She turns her cup a quarter turn. "Not what. Who."',
+        'Oria: "Because you\'re discreet," she says, "and the work wants doing before dawn."',
+        'Dunmar: He sets three cups down before anyone asks.',
+        'Vex: *scrambles up the wall*'
+      ].join('\n'),
+      speakers
+    )
+    expect(parsed.beats).toEqual([
+      { kind: 'narration', text: 'Dunmar wipes the slate with his thumb, erasing nothing.' },
+      { kind: 'dialogue', speaker: 'bartender', text: 'Surveyors on the lower stairs again. Drink up before the grid does.' },
+      { kind: 'dialogue', speaker: 'vex', text: "Say who's paying." },
+      { kind: 'narration', text: 'Vex turns her cup a quarter turn.' },
+      { kind: 'dialogue', speaker: 'vex', text: 'Not what. Who.' },
+      { kind: 'dialogue', speaker: 'oria-senn', text: "Because you're discreet, and the work wants doing before dawn." },
+      { kind: 'narration', text: 'Dunmar sets three cups down before anyone asks.' },
+      { kind: 'narration', text: 'Vex scrambles up the wall' }
+    ])
+    expect(parsed.lines).toEqual([1, 1, 2, 2, 2, 3, 4, 5])
+    expect(parsed.reshaped).toEqual([1, 2, 4, 5])
+  })
+
+  it('leaves speech alone, quoted or not', () => {
+    const parsed = parseReply('Vex: "\'Darling.\' She only says that when she\'s lying."\nVex: Let\'s go.\nOria: "Thanks, darling."', speakers)
+    expect(parsed.beats.every((b) => b.kind === 'dialogue')).toBe(true)
+    expect(parsed.reshaped).toEqual([])
+  })
+
   it('marks a name-like label nobody here answers to', () => {
     expect(parseReply('Marla: "Evening."', speakers).unknownSpeakers).toEqual(['Marla'])
   })
