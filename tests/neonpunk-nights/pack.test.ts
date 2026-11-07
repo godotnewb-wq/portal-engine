@@ -21,7 +21,7 @@ describe('the Neonpunk Nights pack', () => {
   })
 
   it('opens on the Sump Lantern with everyone, and carries its ruleset, setting, primer and tone', () => {
-    expect(content.manifest.start).toEqual({ location: 'sump-lantern', cast: ['vex', 'brask', 'oria-senn'] })
+    expect(content.manifest.start).toEqual({ location: 'coil-line-car-14', cast: ['kesh', 'jun-halloway', 'teo-varrin'] })
     expect(content.ruleset.skills).toHaveLength(19)
     expect(content.ruleset.difficulties.map((d) => d.dc)).toEqual([5, 10, 15, 20, 25, 30])
     expect(content.setting.tiers.map((t) => t.id)).toEqual(['crown', 'high-turns', 'bulk', 'low-turns', 'deepwell'])

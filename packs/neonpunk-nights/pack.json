@@ -6,7 +6,21 @@
   "author": "godotnewb",
   "license": "All rights reserved (pack content); see the repository for the engine's GPL-3.0 license",
   "engine": "^0.2.0",
-  "start": { "location": "sump-lantern", "cast": ["vex", "brask", "oria-senn"] },
-  "ui": { "title": "Neonpunk Nights", "tagline": "Spire City · the Low Turns", "cover": "cover.png" },
-  "content": { "rating": "Adults only", "notes": "Adult themes and an undercurrent of eroticism, between adult characters only." }
+  "start": {
+    "location": "coil-line-car-14",
+    "cast": [
+      "kesh",
+      "jun-halloway",
+      "teo-varrin"
+    ]
+  },
+  "ui": {
+    "title": "Neonpunk Nights",
+    "tagline": "Spire City · the Low Turns",
+    "cover": "cover.png"
+  },
+  "content": {
+    "rating": "Adults only",
+    "notes": "Adult themes and an undercurrent of eroticism, between adult characters only."
+  }
 }

@@ -1,0 +1,46 @@
+{
+  "id": "coil-line-car-14",
+  "name": "Coil Line car 14",
+  "tier": "bulk",
+  "district": "the Coil Line's mid-span, stalled between the foundry stop and the market stop",
+  "description": "A narrow tram car on the Coil Line, the transit loop that carries the Bulk's shift workers around the city's spiral. The grid dropped out two minutes ago and the car hangs stalled on its rail above the foundry district, emergency runes glowing amber, the doors sealed. A roof hatch, a conductor's cabin at the front, twelve seats, standing room. Line Control has said \"a short delay\" once.",
+  "texture": {
+    "sights": [
+      "emergency runes along the ceiling glowing a dull amber",
+      "the sealed doors, their Aether locks pulsing slowly",
+      "foundry chimneys below the rail, glowing through the windows",
+      "a roof hatch with a manual crank, painted over twice",
+      "the conductor's cabin door, propped open, its panel dark"
+    ],
+    "sounds": [
+      "the car creaking as it settles on the rail",
+      "the dead hum of the drive coil, ticking as it cools",
+      "the dispatch speaker crackling between silences"
+    ],
+    "smells": [
+      "hot metal and cooling coil grease",
+      "steamed buns from someone's bag",
+      "foundry smoke seeping through the door seals"
+    ],
+    "slang": [
+      "a dead span (a stretch of rail with no grid power)",
+      "coil-sick (dizzy from a drive coil's field)",
+      "riding the hatch (climbing out onto the roof)"
+    ],
+    "current": [
+      "The Coil Line has stalled three times this month",
+      "The Grid Corporation says the outages are maintenance; the foundries say it's rationing"
+    ]
+  },
+  "walkOns": [
+    {
+      "id": "line-control",
+      "label": "Line Control",
+      "species": "human",
+      "look": "an unseen voice on the car's dispatch speaker",
+      "manner": "tired, by the script, decent when it slips off it; speaks only with news that changes the situation: a time estimate, a warning, an order",
+      "role": "the Coil Line's dispatch, telling the car what it knows, which is usually not much"
+    }
+  ],
+  "extras": []
+}

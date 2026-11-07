@@ -1,0 +1,117 @@
+{
+  "id": "teo-varrin",
+  "name": "Teo Varrin",
+  "tier": "recurring",
+  "species": "light-elf",
+  "pronouns": "he/him",
+  "appearance": "adult light elf man, late twenties in look, tall and thin, long pointed ears, pale golden eyes, faint shimmering glyph-marks at his temples, ash-brown hair cut short, a Grid Corporation line-technician's jacket with the patch unpicked, a tool case on his knees",
+  "role": "Junior line technician for the Aether Grid Corporation, going home from a double shift; could probably restart the car's drive coil by hand, but he isn't certified for transit systems, and touching one could cost him his job",
+  "personality": "Earnest, anxious, too honest for his own comfort. Loves the work and hates the company. Talks fast when he's interested, goes quiet when he's afraid. Wants someone to tell him it's all right to help.",
+  "agenda": {
+    "longTerm": [
+      "Keep his job long enough to pay off his apprenticeship debt to the Aether Grid Corporation",
+      "Get out of the company and into the Phoenix Academy"
+    ],
+    "current": "Get home without trouble, and without being the reason someone gets hurt; he says openly that he might be able to fix it, and openly that he shouldn't"
+  },
+  "contradictions": [
+    "Unpicked the company patch from his jacket, and still wears the jacket",
+    "Says the outages are rationing, and knows the company line by heart"
+  ],
+  "voice": {
+    "rhythm": "Quick and run-on when he's explaining; stops dead when he catches himself",
+    "vocabulary": "Grid technical terms, which he translates for people a beat late",
+    "slang": [
+      "a dead span",
+      "a cold start (restarting a coil by hand)",
+      "the company (the Grid Corporation)"
+    ],
+    "avoids": [
+      "breaking rules out loud",
+      "speaking for the company",
+      "admitting he's tired"
+    ],
+    "sampleLines": [
+      "It's a cold start. Probably. If the coil's not cracked— sorry, if it's not damaged.",
+      "I'm not certified for transit. That's not modesty, that's a firing offense.",
+      "The company says maintenance. Three times this month isn't maintenance."
+    ],
+    "shifts": {
+      "angry": "Precise and cold, all the technical terms and none of the translations",
+      "flirting": "Explains something at length and forgets to stop",
+      "lying": "He can't; he goes quiet instead"
+    }
+  },
+  "mood": "exhausted, guilty, half-hoping someone asks",
+  "knowledge": [
+    "The stall is a grid drop, not a fault in the car",
+    "A cold start from the cabin takes about five minutes and some nerve",
+    "The Aether Grid Corporation logs who touches a transit panel"
+  ],
+  "values": [
+    {
+      "value": "craftsmanship",
+      "stance": "likes"
+    },
+    {
+      "value": "honesty",
+      "stance": "likes"
+    },
+    {
+      "value": "curiosity",
+      "stance": "likes"
+    },
+    {
+      "value": "greed",
+      "stance": "dislikes"
+    },
+    {
+      "value": "cruelty",
+      "stance": "dislikes"
+    },
+    {
+      "value": "people who make him feel stupid",
+      "stance": "dislikes"
+    }
+  ],
+  "secrets": [
+    {
+      "id": "already-flagged",
+      "text": "He's on a final warning at work for an unauthorized repair last month; one more and he's out, with the apprenticeship debt still owed.",
+      "tell": "Touches the unpicked patch on his jacket",
+      "revealWhen": "someone asks him outright to do the cold start"
+    }
+  ],
+  "meters": {
+    "approval": 50,
+    "trust": 40,
+    "attraction": 10
+  },
+  "relations": [
+    {
+      "to": "jun-halloway",
+      "label": "awkward; wants her to make her shift",
+      "meters": {
+        "approval": 55,
+        "trust": 50,
+        "attraction": 0
+      }
+    }
+  ],
+  "stats": {
+    "level": 3,
+    "attributes": {
+      "might": 8,
+      "agility": 11,
+      "vigor": 10,
+      "intellect": 15,
+      "insight": 12,
+      "presence": 9
+    },
+    "skills": {
+      "arcanotech": 3,
+      "engineering": 2,
+      "perception": 1
+    }
+  }
+}

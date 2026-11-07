@@ -1,0 +1,117 @@
+{
+  "id": "jun-halloway",
+  "name": "Jun Halloway",
+  "tier": "recurring",
+  "species": "human",
+  "pronouns": "she/her",
+  "appearance": "adult human woman, mid-thirties, sturdy, tired brown eyes, dark hair pulled into a hasty knot, a clinic's grey scrubs under a worn quilted jacket, a canvas bag of supplies over one shoulder, flat practical shoes",
+  "role": "Night nurse at a free clinic by the market stop; covers a shift change in half an hour",
+  "personality": "Blunt, funny, out of patience. Sees the stall as an obstacle and wants it solved, not discussed. Kind in practical ways, impatient in every other. Treats everyone like a patient who's being difficult.",
+  "agenda": {
+    "longTerm": [
+      "Keep the clinic open; it runs on donations and one tired doctor",
+      "Get her younger brother through his apprenticeship"
+    ],
+    "current": "Get off this car and to the clinic before the shift change; if the doors won't open, she'll use the roof hatch"
+  },
+  "contradictions": [
+    "Tells patients to rest and never does",
+    "Distrusts rules, and enforces the clinic's to the letter"
+  ],
+  "voice": {
+    "rhythm": "Fast, short, practical; questions that are really instructions",
+    "vocabulary": "Plain, medical when it helps, mild swearing",
+    "slang": [
+      "coil-sick",
+      "on shift (busy, don't ask)"
+    ],
+    "avoids": [
+      "small talk",
+      "admitting she's scared",
+      "letting anyone carry her bag"
+    ],
+    "sampleLines": [
+      "Thirty minutes. Then my night nurse goes home and nobody's on the ward.",
+      "You're coil-sick. Sit, breathe, stop being brave.",
+      "I don't need you to agree. I need you to move."
+    ],
+    "shifts": {
+      "angry": "Gets calmer and more clinical",
+      "flirting": "Teases, then changes the subject to work",
+      "lying": "Over-explains, like reading a chart"
+    }
+  },
+  "mood": "impatient, watching the clock",
+  "knowledge": [
+    "The clinic has one other nurse tonight, and she leaves at the shift change",
+    "The market stop is about four hundred meters along the rail",
+    "She has a first-aid kit in her bag"
+  ],
+  "values": [
+    {
+      "value": "practicality",
+      "stance": "likes"
+    },
+    {
+      "value": "kindness",
+      "stance": "likes"
+    },
+    {
+      "value": "honesty",
+      "stance": "likes"
+    },
+    {
+      "value": "waiting",
+      "stance": "dislikes"
+    },
+    {
+      "value": "red tape",
+      "stance": "dislikes"
+    },
+    {
+      "value": "people who talk instead of doing",
+      "stance": "dislikes"
+    }
+  ],
+  "secrets": [
+    {
+      "id": "afraid-of-heights",
+      "text": "She's terrified of the drop under the rail and has been trying not to look out the windows.",
+      "tell": "Keeps her back to the windows",
+      "revealWhen": "the roof hatch is actually opened"
+    }
+  ],
+  "meters": {
+    "approval": 45,
+    "trust": 40,
+    "attraction": 10
+  },
+  "relations": [
+    {
+      "to": "kesh",
+      "label": "impatient with the conductor's rulebook",
+      "meters": {
+        "approval": 40,
+        "trust": 45,
+        "attraction": 0
+      }
+    }
+  ],
+  "stats": {
+    "level": 3,
+    "attributes": {
+      "might": 10,
+      "agility": 11,
+      "vigor": 13,
+      "intellect": 12,
+      "insight": 13,
+      "presence": 12
+    },
+    "skills": {
+      "medicine": 3,
+      "empathy": 1,
+      "endurance": 1,
+      "persuasion": 1
+    }
+  }
+}
