@@ -27,17 +27,24 @@ function metaOf(settings: Settings, routed: RoutedReply, info: CallInfo): CallMe
   }
 }
 
-/** A JSON call through a role's profile, with its metadata. */
-async function judged(settings: Settings, role: LlmRole, nsfw: boolean, prompt: Prompt) {
+/**
+ * The fewest reply tokens a director plan gets, whatever its profile says. With three speakers a plan runs to about a
+ * thousand tokens, and a profile left at the old default cut a fifth of them off mid-JSON (bench 2026-11-08, `lines`).
+ */
+export const DIRECTOR_MIN_TOKENS = 2000
+
+/** A JSON call through a role's profile, with its metadata. `minTokens` raises the profile's reply limit if it is lower. */
+async function judged(settings: Settings, role: LlmRole, nsfw: boolean, prompt: Prompt, minTokens?: number) {
   const { info, onInfo } = collector()
-  const routed = await complete(settings, role, nsfw, { system: prompt.system, messages: [{ role: 'user', content: prompt.user }], json: true, onInfo })
+  const maxTokens = minTokens ? Math.max(settings[role].maxTokens, minTokens) : undefined
+  const routed = await complete(settings, role, nsfw, { system: prompt.system, messages: [{ role: 'user', content: prompt.user }], json: true, onInfo, ...(maxTokens && { maxTokens }) })
   return { text: routed.reply, meta: metaOf(settings, routed, info) }
 }
 
 /** The scene pipeline's calls through the configured profiles: the director asks for JSON, the writer streams. */
 export function turnLlm(settings: Settings, nsfw: boolean): TurnLlm {
   return {
-    direct: (prompt) => judged(settings, 'director', nsfw, prompt),
+    direct: (prompt) => judged(settings, 'director', nsfw, prompt, DIRECTOR_MIN_TOKENS),
     async write(prompt, onDelta, onRestart) {
       const { info, onInfo } = collector()
       const routed = await stream(settings, 'writer', nsfw, { system: prompt.system, messages: [{ role: 'user', content: prompt.user }], onInfo }, onDelta, onRestart)

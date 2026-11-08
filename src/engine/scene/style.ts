@@ -61,4 +61,4 @@ export const OVERUSED_PHRASES = [
  * The beat budget for a turn (narrator-scene-engine §2, tune). Speech and action are separate beats (milestone 2,
  * round 0 F1), so a turn needs more of them than when one beat could hold both.
  */
-export const BEATS = { min: 2, max: 10, target: '4–8', maxWords: 60, targetWords: 40 } as const
+export const BEATS = { min: 2, max: 12, target: '4–8', maxWords: 60, targetWords: 40 } as const

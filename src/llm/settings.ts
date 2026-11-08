@@ -58,7 +58,7 @@ export type LlmProfile = z.infer<typeof LlmProfileSchema>
 
 /** Starting temperatures per role: the director and summaries judge, the writer writes. */
 const ROLE_DEFAULTS: Record<LlmProfileId, Partial<LlmProfile>> = {
-  director: { temperature: 0.3, maxTokens: 1200 },
+  director: { temperature: 0.3, maxTokens: 2000 },
   writer: { temperature: 0.9, maxTokens: 1200 },
   summary: { temperature: 0.2, maxTokens: 800 },
   scorer: { temperature: 0.2, maxTokens: 1500 },
