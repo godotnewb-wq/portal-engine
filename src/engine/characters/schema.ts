@@ -63,6 +63,12 @@ export const CharacterSchema = z
     faction: z.string().optional(),
     /** Specific details, never an archetype label. */
     personality: z.string(),
+    /**
+     * How they are with others, in prose: with strangers and with people they know, what they notice, what they'd talk
+     * about anyway, small habits. The writer's main picture of the person, so goals and secrets don't stand in for one
+     * (claude/scene-system-redesign.md §7; the short form of milestone 4's portrait).
+     */
+    portrait: z.string(),
     agenda: z.object({ longTerm: z.array(z.string()).min(1), current: z.string() }),
     /** At least one internal tension. */
     contradictions: z.array(z.string()).min(1),

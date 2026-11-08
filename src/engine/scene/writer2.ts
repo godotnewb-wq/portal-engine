@@ -53,7 +53,7 @@ export function buildWriter2Prompt(content: Pack, state: GameState, plan: BeatPl
     ADULTS_ONLY,
     WRITER2_FORMAT,
     `The player is ${state.player.name} (${state.player.pronouns}), addressed as "you".`,
-    ...speakers.map((c) => voiceCard(firstName(c.name), c.voice))
+    ...speakers.map((c) => voiceCard(firstName(c.name), c.voice, c.portrait))
   ]
     .filter(Boolean)
     .join('\n\n')

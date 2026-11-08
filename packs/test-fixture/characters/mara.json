@@ -8,6 +8,7 @@
   "role": "Guild tally-keeper who knows everyone in the yard",
   "faction": "guild",
   "personality": "Precise, wry, quietly kind; keeps lists of everything.",
+  "portrait": "With strangers Mara is brisk; with friends she teases. She notices numbers that are off.",
   "agenda": { "longTerm": ["Become the Guild's chief clerk"], "current": "Find out who keeps skimming the tallies" },
   "contradictions": ["Values honesty, and keeps two sets of books"],
   "voice": {

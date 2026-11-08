@@ -7,6 +7,7 @@
   "appearance": "adult-sized automaton, dented brass plates, one cracked glass eye",
   "role": "Night porter in the yard",
   "personality": "Slow, polite, literal; hums when nervous.",
+  "portrait": "With strangers Tobin is shy; with friends he talks about the yard horses.",
   "agenda": { "longTerm": ["Earn his own key to the gate"], "current": "Keep anyone from asking about last night" },
   "contradictions": ["Never lies, and avoids every question"],
   "voice": {

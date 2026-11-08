@@ -36,12 +36,13 @@ export const WRITER_FORMAT = `Output format, nothing else:
 - Never write the player's words, choices, thoughts or actions beyond what their input stated.
 - Honor every check result exactly: a failed roll means it does not happen.`
 
-export function voiceCard(name: string, v: VoiceCard): string {
+/** A speaker as the writer sees them: the person first, then how they talk. */
+export function voiceCard(name: string, v: VoiceCard, portrait?: string): string {
   return [
-    `## ${name}'s voice`,
+    portrait ? `## ${name}\n${portrait}\n\n### ${name}'s voice` : `## ${name}'s voice`,
     `Rhythm: ${v.rhythm}`,
     `Vocabulary: ${v.vocabulary}`,
-    v.slang.length > 0 && `Slang: ${v.slang.join(', ')}`,
+    v.slang.length > 0 && `Words they might use, rarely: ${v.slang.join(', ')}`,
     v.avoids.length > 0 && `Avoids: ${v.avoids.join('; ')}`,
     `Sample lines: ${v.sampleLines.map((l) => `"${l}"`).join(' ')}`,
     `When angry: ${v.shifts.angry}. Flirting: ${v.shifts.flirting}. Lying: ${v.shifts.lying}.`
@@ -77,7 +78,7 @@ export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPla
     ADULTS_ONLY,
     WRITER_FORMAT,
     `The player is ${state.player.name} (${state.player.pronouns}), addressed as "you". Setting: ${location.name}, ${location.district}, ${content.setting.name}.`,
-    ...speakers.map((c) => voiceCard(firstName(c.name), c.voice))
+    ...speakers.map((c) => voiceCard(firstName(c.name), c.voice, c.portrait))
   ]
     .filter(Boolean)
     .join('\n\n')

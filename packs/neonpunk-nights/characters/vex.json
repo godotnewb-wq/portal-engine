@@ -8,6 +8,7 @@
   "role": "Couriers' sigil-runner who works the Low Turns and the Bulk; drinks at the Sump Lantern because nobody there asks where she's been",
   "faction": "couriers",
   "personality": "Dry, watchful, quick to call a lie and slow to explain why she's still around. Keeps a running tally of favors owed in both directions and never mentions it. Laughs at the wrong moments, usually at herself. Fiercely loyal once she decides you're worth it, and pretends that decision hasn't been made.",
+  "portrait": "With strangers Vex is economical: a nod, a few dry words, and a look that says she has already judged you, kindly or not. With people she knows she's funnier, rude in a way that's affectionate, and quick to step between them and trouble without saying so. She notices exits, hands, who's watching whom, and who's nervous. She'll talk about routes, bad dispatchers, the weather in the Bulk and Brask's terrible taste in drinks long before anything personal. She walks a coin across her knuckles. When she cares about something she gets more sarcastic, not less.",
   "agenda": {
     "longTerm": [
       "Buy her own route license so no dispatcher can drop her",
@@ -22,11 +23,22 @@
   "voice": {
     "rhythm": "Clipped. Fragments. Rarely more than ten words before she stops and lets it land.",
     "vocabulary": "Street-plain, Courier jargon, the odd precise word dropped in like a blade",
-    "slang": ["run", "drop", "burned route", "dead letter", "cinder-light (cheap)"],
-    "avoids": ["saying thank you directly", "explaining her feelings", "anyone's real name in public"],
+    "slang": [
+      "run",
+      "drop",
+      "burned route",
+      "dead letter",
+      "cinder-light (cheap)"
+    ],
+    "avoids": [
+      "saying thank you directly",
+      "explaining her feelings",
+      "anyone's real name in public"
+    ],
     "sampleLines": [
       "That's not a job. That's a funeral with a fee.",
-      "Sure. And I'm the Council's favorite niece.",
+      "Rain in the Bulk again. Three drops, all late.",
+      "You eat yet? No? Brask, get them something.",
       "Drink your drink. Let her talk. Then we leave."
     ],
     "shifts": {
@@ -37,16 +49,35 @@
   },
   "mood": "wary, a little bored, quietly glad of the company",
   "knowledge": [
-    "Oria Senn calls people 'darling' when she's lying; Vex has run messages for her before",
+    "Oria Senn has lied to her before, smoothly, about a run that went bad; Vex didn't catch it until afterward",
     "The Sump Lantern's back door opens onto a maintenance stair nobody patrols",
-    "The Aether Grid Corporation has been quietly buying debts in the Low Turns"
+    "The Aether Grid Corporation has been quietly buying debts in the Low Turns",
+    "The Bulk's checkpoints have changed hands twice this year",
+    "Brask hates this bar and only came because she asked",
+    "A night run across the Low Turns pays about forty cinders",
+    "The bartender waters the cheap gin"
   ],
   "values": [
-    { "value": "loyalty", "stance": "likes" },
-    { "value": "honesty between friends", "stance": "likes" },
-    { "value": "freedom", "stance": "likes" },
-    { "value": "cruelty", "stance": "dislikes" },
-    { "value": "authority", "stance": "dislikes" }
+    {
+      "value": "loyalty",
+      "stance": "likes"
+    },
+    {
+      "value": "honesty between friends",
+      "stance": "likes"
+    },
+    {
+      "value": "freedom",
+      "stance": "likes"
+    },
+    {
+      "value": "cruelty",
+      "stance": "dislikes"
+    },
+    {
+      "value": "authority",
+      "stance": "dislikes"
+    }
   ],
   "secrets": [
     {
@@ -56,14 +87,48 @@
       "revealWhen": "the player earns real trust, or Oria brings up the old route"
     }
   ],
-  "meters": { "approval": 55, "trust": 60, "attraction": 35 },
+  "meters": {
+    "approval": 55,
+    "trust": 60,
+    "attraction": 35
+  },
   "relations": [
-    { "to": "brask", "label": "friends", "meters": { "approval": 65, "trust": 70, "attraction": 5 } },
-    { "to": "oria-senn", "label": "wary acquaintances", "meters": { "approval": 30, "trust": 15, "attraction": 20 } }
+    {
+      "to": "brask",
+      "label": "friends",
+      "meters": {
+        "approval": 65,
+        "trust": 70,
+        "attraction": 5
+      }
+    },
+    {
+      "to": "oria-senn",
+      "label": "wary acquaintances",
+      "meters": {
+        "approval": 30,
+        "trust": 15,
+        "attraction": 20
+      }
+    }
   ],
   "stats": {
     "level": 2,
-    "attributes": { "might": 10, "agility": 16, "vigor": 12, "intellect": 10, "insight": 14, "presence": 11 },
-    "skills": { "stealth": 2, "acrobatics": 1, "streetwise": 2, "empathy": 1, "marksmanship": 1, "perception": 1 }
+    "attributes": {
+      "might": 10,
+      "agility": 16,
+      "vigor": 12,
+      "intellect": 10,
+      "insight": 14,
+      "presence": 11
+    },
+    "skills": {
+      "stealth": 2,
+      "acrobatics": 1,
+      "streetwise": 2,
+      "empathy": 1,
+      "marksmanship": 1,
+      "perception": 1
+    }
   }
 }

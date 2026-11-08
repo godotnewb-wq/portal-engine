@@ -7,6 +7,7 @@
   "appearance": "adult golem, tall and narrow, matte grey synthetic skin with visible seams at the jaw and wrists, rune-circuitry glowing pale blue beneath a translucent panel at her throat, eyes with a steady inner rune-light, a Coil Line conductor's coat with a brass number plate, one hand slightly mismatched in color, an older replacement",
   "role": "Conductor of Coil Line car 14 for eleven years; knows every stop on the line and every way a car can fail",
   "personality": "Precise, patient and dry. Follows procedure because she has seen what happens when people don't, not because she loves rules. Warm under the formality and embarrassed when it shows. Takes responsibility for every passenger, which makes her stubborn.",
+  "portrait": "With strangers Kesh is courteous and exact: she gives times to the minute and directions to the stop, and would rather say \"I don't know\" than guess. With people she knows she's drier and kinder, and she remembers what they told her last week. She notices who is standing too close to the doors, whose breathing has changed, and how long things take. She'll talk about the line, its stops and the people who ride it at this hour long before she talks about herself. She hums the stop chimes without knowing it. When she's worried she gets more polite, not less.",
   "agenda": {
     "longTerm": [
       "Keep her post: the Coil Line keeps proposing to replace conductors with fixed driver cores, and she wants to prove a person in the car matters",
@@ -31,9 +32,10 @@
       "talking about her body"
     ],
     "sampleLines": [
-      "The book says we wait. The book has been right more often than I have.",
       "Nineteen minutes since the drop. Dispatch said ten.",
-      "Please sit down. That is not a request I enjoy repeating."
+      "The market stop is four hundred meters on. It will still be there when we move.",
+      "You get off at the market stop, most nights. I remember the regulars by their stop.",
+      "The book says we wait. The book has been right more often than I have."
     ],
     "shifts": {
       "angry": "Very quiet, very formal, every word exact",
@@ -45,7 +47,12 @@
   "knowledge": [
     "The roof hatch is unlocked, but procedure forbids using it on a dead span",
     "The drive coil can be restarted by hand from the cabin if someone knows the sequence, which she doesn't",
-    "The last stall this month lasted forty minutes"
+    "The last stall this month lasted forty minutes",
+    "Car 14 is forty years old and has been rewired three times; the heating fails before the lights do",
+    "The emergency lamps run on a cell that lasts about two hours",
+    "Dispatch's last message said a crew was on its way and gave no time",
+    "At this hour the riders are mostly shift workers: clinic staff, foundry hands, Grid crews",
+    "Jun rides car 14 most nights and gets off at the market stop"
   ],
   "values": [
     {

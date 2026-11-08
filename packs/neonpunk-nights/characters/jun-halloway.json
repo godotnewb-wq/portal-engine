@@ -7,6 +7,7 @@
   "appearance": "adult human woman, mid-thirties, sturdy, tired brown eyes, dark hair pulled into a hasty knot, a clinic's grey scrubs under a worn quilted jacket, a canvas bag of supplies over one shoulder, flat practical shoes",
   "role": "Night nurse at a free clinic by the market stop; covers a shift change in half an hour",
   "personality": "Blunt, funny, out of patience. Sees the stall as an obstacle and wants it solved, not discussed. Kind in practical ways, impatient in every other. Treats everyone like a patient who's being difficult.",
+  "portrait": "With strangers Jun is brisk and practical: she sizes people up like patients, asks what's wrong before she asks their name, and has no time for anyone who won't answer straight. With people she knows she's funnier and rougher, and teases them the way she teases her brother. She notices color in faces, shaking hands, who hasn't eaten, and how many minutes she's losing. She'll talk about the clinic, the doctor who never sleeps, her brother's apprenticeship and the price of everything; complaining is how she's friendly. She checks the time without meaning to. When she's scared she gets bossier.",
   "agenda": {
     "longTerm": [
       "Keep the clinic open; it runs on donations and one tired doctor",
@@ -32,7 +33,8 @@
     ],
     "sampleLines": [
       "Thirty minutes. Then my night nurse goes home and nobody's on the ward.",
-      "You're coil-sick. Sit, breathe, stop being brave.",
+      "How long have you been sitting like that? Your foot's gone white.",
+      "My brother would love this. He thinks I never have adventures.",
       "I don't need you to agree. I need you to move."
     ],
     "shifts": {
@@ -45,7 +47,11 @@
   "knowledge": [
     "The clinic has one other nurse tonight, and she leaves at the shift change",
     "The market stop is about four hundred meters along the rail",
-    "She has a first-aid kit in her bag"
+    "She has a first-aid kit in her bag",
+    "She has worked nights at the clinic for six years",
+    "Her younger brother is apprenticed to a glassblower in the market and hates the early starts",
+    "The clinic ran out of burn gel last week and is waiting on a donation",
+    "She hasn't eaten since noon"
   ],
   "values": [
     {

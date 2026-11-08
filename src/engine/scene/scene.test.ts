@@ -79,24 +79,28 @@ describe('prompts take the pack’s slots', () => {
       { who: 'mara', answers: 1, point: 'Asks why the gate was warm at midnight, then.' },
       { who: 'tobin', answers: '3', point: 'Claims the forge was banked late.' },
       { who: 'mara', answers: 9, point: 'Answers a line that does not exist.' },
-      { who: 'tobin', answers: 4, point: 'One line too many.' }
+      { who: 'tobin', answers: 4, point: 'Admits the gate was warm.' },
+      { who: 'mara', answers: 5, point: 'One line too many.' }
     ]
     const { plan, corrections } = validatePlan(fixture, state, parsePlan(JSON.stringify({ ...PLAN, exchange }))!)
     expect(plan.exchange).toEqual([
       { who: 'tobin', answers: 'player', point: 'Says he locked up at the usual hour.' },
       { who: 'mara', answers: 1, point: 'Asks why the gate was warm at midnight, then.' },
       { who: 'tobin', answers: 2, point: 'Claims the forge was banked late.' },
-      { who: 'mara', answers: 'player', point: 'Answers a line that does not exist.' }
+      { who: 'mara', answers: 'player', point: 'Answers a line that does not exist.' },
+      { who: 'tobin', answers: 3, point: 'Admits the gate was warm.' }
     ])
     expect(corrections).toEqual(expect.arrayContaining([
       'dropped line 2: "Pell" is not a speaker',
       "line 5 answered line 9, which isn't an earlier line; it answers the player",
-      'dropped line 6: at most 4'
+      'dropped line 7: at most 5'
     ]))
     expect(buildDirectorPrompt(fixture, state, 'Hello.').system).toMatch(/"exchange": \[\{"who","answers","point"\}\]/)
     const user = buildWriterPrompt(fixture, state, plan, 'Hello.').user
     expect(user).toMatch(/# The exchange, in order \(what each line gets across: notes, not wording\)\n1\. Tobin, answering the player: Says he locked up at the usual hour\.\n2\. Mara, answering line 1 \(Tobin\): Asks why[^\n]*\n3\. Tobin, answering line 2 \(Mara\): Claims the forge/)
     expect(user).not.toMatch(/Point \(what their line gets across\)/)
+    // The writer sees the person before the voice, and slang as seasoning.
+    expect(buildWriterPrompt(fixture, state, plan, 'Hello.').system).toMatch(/## Tobin\nWith strangers Tobin is shy[^\n]*\n\n### Tobin's voice/)
   })
 
   // Session 2026-11-07_0013_714e: the director quoted the line in its point ("'private money, darling, and shy of

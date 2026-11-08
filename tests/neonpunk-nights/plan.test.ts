@@ -47,14 +47,14 @@ describe('validatePlan', () => {
     expect(corrections).toEqual([])
   })
 
-  it('caps speakers at two and drops anyone not present', () => {
+  it('takes up to three speakers and drops anyone not present', () => {
     const { plan, corrections } = validatePlan(content, state, raw({
       speakers: [{ id: 'vex', intent: '', mood: '' }, { id: 'brask', intent: '', mood: '' }, { id: 'oria', intent: '', mood: '' }, { id: 'ghost', intent: '', mood: '' }],
       reactions: [{ id: 'vex', beat: 'x' }, { id: 'oria', beat: 'smiles' }]
     }))
-    expect(plan.speakers.map((s) => s.id)).toEqual(['vex', 'brask'])
-    expect(plan.reactions.map((r) => r.id)).toEqual(['oria-senn'])
-    expect(corrections.join('\n')).toMatch(/at most 2[\s\S]*ghost/)
+    expect(plan.speakers.map((s) => s.id)).toEqual(['vex', 'brask', 'oria-senn'])
+    expect(plan.reactions).toEqual([])
+    expect(corrections.join('\n')).toMatch(/ghost/)
   })
 
   it('drops checks with unknown skills, difficulties or people, and the dependencies on them', () => {

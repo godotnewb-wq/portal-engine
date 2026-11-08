@@ -113,12 +113,15 @@ export type BeatPlan = Omit<RawPlan, 'checks' | 'exchange'> & {
   change?: string
 }
 
-/** At most two speakers a beat (narrator-scene-engine §6), and few enough checks to keep the turn quick. */
-export const MAX_SPEAKERS = 2
+/**
+ * At most three speakers a turn, so a group of three can all talk (play: with a cap of two, the third was always
+ * silent), and few enough checks to keep the turn quick.
+ */
+export const MAX_SPEAKERS = 3
 export const MAX_CHECKS = 2
 export const MAX_TEXTURE = 3
-/** Lines in a turn's exchange: room for a reply and a reply to that, inside the beat budget (tune). */
-export const MAX_LINES = 4
+/** Lines in a turn's exchange: one for each of three speakers and two replies, inside the beat budget (tune). */
+export const MAX_LINES = 5
 /**
  * After this many turns without a line, the director is shown what a character cares about (round 0 F3). A reminder
  * to look, never a quota: whether they speak stays the director's call (director-writer §6).

@@ -67,6 +67,7 @@ export function sheet(content: Pack, state: GameState, c: Character, present: st
     `## ${c.name} [id: ${c.id}] — ${c.tier}, ${c.species}, ${c.pronouns}`,
     `Role: ${c.role}`,
     `Personality: ${c.personality}`,
+    `With others: ${c.portrait}`,
     `Agenda: ${c.agenda.longTerm.join('; ')}. Tonight: ${c.agenda.current}`,
     `Contradictions: ${c.contradictions.join('; ')}`,
     `Mood now: ${scene.moods[c.id] ?? c.mood}. Comfort ${scene.comfort[c.id] ?? 3}/5.`,
