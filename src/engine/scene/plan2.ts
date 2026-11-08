@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import type { GameState } from '@engine/state'
-import type { Pack } from '@engine/pack'
+import { characterById, type Pack } from '@engine/pack'
 import { canSay, sceneFacts, toldPlayer } from './facts'
 import {
   MAX_LINES,
@@ -32,12 +32,13 @@ const RawMoveSchema = z.object({
   answers: z.union([z.number(), z.string()]).catch('player'),
   move: text,
   uses: list(z.string()),
-  new: list(z.string())
+  new: list(z.string()),
+  needs: z.string().optional().catch(undefined)
 })
 
 export const RawPlan2Schema = z.object({
   player_action: z.object({ doing: text, uncertain: z.boolean().catch(false) }).catch({ doing: '', uncertain: false }),
-  speakers: list(z.object({ id: z.string(), goal: text, mood: text, keeps: list(z.string()), approach: text.optional() })),
+  speakers: list(z.object({ id: z.string(), goal: text, mood: text, pressure: text, keeps: list(z.string()), touched: text, approach: text.optional() })),
   moves: list(RawMoveSchema),
   change: text,
   reactions: list(z.object({ id: z.string(), beat: z.string() })),
@@ -72,23 +73,56 @@ export function parsePlan2(reply: string): RawPlan2 | null {
 /** A move as one line for read-outs and the older parts of the pipeline: "push back: the doors stay sealed". */
 export const moveText = (m: Move): string => `${m.move}${m.says.length > 0 ? `: ${m.says.map((s) => s.text).join('; ')}` : ''}`
 
+/** Short words a trigger shares with anything; they don't show that something was touched. */
+const COMMON = new Set(['that', 'this', 'with', 'what', 'when', 'were', 'they', 'them', 'their', 'there', 'then', 'than', 'have', 'from', 'your', 'just', 'about', 'would', 'could', 'into', 'some', 'here', 'will', 'been', 'only', 'said', 'asks', 'says'])
+const triggerWords = (t: string) => [...new Set(t.toLowerCase().match(/\p{L}{4,}/gu) ?? [])].filter((w) => !COMMON.has(w))
+
+/** What was just said or done: the player's input and the last turn, where a trigger for a secret must be found. */
+function justSaid(state: GameState, input: string): string {
+  const last = state.scene!.turns.at(-1)
+  return [input, last?.player ?? '', ...(last?.beats.map((b) => b.text) ?? [])].join(' ').toLowerCase()
+}
+
 /**
  * Checks the situation plan against the scene. Shared fields (speakers, checks, reactions, walk-ons, departures) go
  * through `validatePlan`; then each move is checked: its speaker must be one of the turn's, a reply must answer an
  * earlier move, and every fact it uses must be one its speaker can say. A fact the speaker can't say is dropped from
  * the move and counted: that is a character saying what only someone else knows.
+ *
+ * Relevance (claude/scene-system-redesign.md §5): a secret is kept only when something just said touches it, named
+ * in `touched` and found in the player's words or the last turn, so a secret isn't in play every turn (round 0: 96–100%
+ * of speaker slots). An aim's pressure moves at most one step a turn. A move's facts are a pool it may draw on, so a
+ * move with none is fine.
  */
-export function validatePlan2(content: Pack, state: GameState, raw: RawPlan2): { plan: BeatPlan; corrections: string[] } {
+export function validatePlan2(content: Pack, state: GameState, raw: RawPlan2, input = ''): { plan: BeatPlan; corrections: string[] } {
   const scene = state.scene!
   const facts = new Map(sceneFacts(content, state).map((f) => [f.id, f]))
+  const words = content.ruleset.pressures
+  const ground = justSaid(state, input)
+  const early: string[] = []
   const shared: RawPlan = {
     speakers: raw.speakers.map((s) => {
-      const kept = s.keeps.map((id) => facts.get(id)).filter((f) => f !== undefined)
+      const who = presentId(content, scene, s.id) ?? s.id
+      const own = s.keeps.map((id) => facts.get(id.trim())).filter((f): f is NonNullable<typeof f> => f !== undefined && f.kind === 'secret' && f.owner === who)
+      if (own.length < s.keeps.length) early.push(`${who} keeps something that isn't one of their secrets`)
+      const grounded = triggerWords(s.touched).some((w) => ground.includes(w))
+      if (own.length > 0 && !grounded) early.push(`${who}'s secret isn't in play: ${s.touched.trim() ? `"${s.touched.trim()}" isn't in what was just said` : 'nothing named touches it'}`)
+      const kept = grounded ? own : []
+
+      const asked = words.findIndex((w) => w.toLowerCase() === s.pressure.trim().toLowerCase())
+      const before = scene.pressures[who]
+      let level = asked >= 0 ? asked : (before ?? 0)
+      if (asked < 0 && s.pressure.trim()) early.push(`${who}: no pressure word "${s.pressure.trim()}"`)
+      if (before !== undefined && Math.abs(level - before) > 1) {
+        level = before + Math.sign(level - before)
+        early.push(`${who}'s pressure moved one step, to ${words[level]}`)
+      }
       return {
         id: s.id,
         intent: s.goal,
         mood: s.mood,
-        ...(kept.length > 0 && { hiding: kept.map((f) => f.text).join(' '), approach: s.approach || 'deflect' })
+        pressure: words[level]!,
+        ...(kept.length > 0 && { hiding: kept.map((f) => f.text).join(' '), approach: s.approach || 'deflect', kept: kept.map((f) => f.id) })
       }
     }),
     exchange: [],
@@ -102,6 +136,7 @@ export function validatePlan2(content: Pack, state: GameState, raw: RawPlan2): {
     end_scene: raw.end_scene
   }
   const { plan, corrections } = validatePlan(content, state, shared, { exchange: false })
+  corrections.unshift(...early)
   const fix = (why: string) => corrections.push(why)
 
   // Talking and asking aren't in doubt; a roll for the player belongs to an attempt (round 0, F4).
@@ -135,11 +170,12 @@ export function validatePlan2(content: Pack, state: GameState, raw: RawPlan2): {
     }
     for (const t of m.new.map((x) => x.trim()).filter(Boolean)) {
       if (QUOTED_WORDS.test(t)) fix(`move ${n} quotes dialogue in what it says`)
-      const words = t.split(/\s+/)
-      says.push({ text: words.length > NEW_FACT_WORDS ? words.slice(0, NEW_FACT_WORDS).join(' ') : t, unheard: true })
+      const w = t.split(/\s+/)
+      says.push({ text: w.length > NEW_FACT_WORDS ? w.slice(0, NEW_FACT_WORDS).join(' ') : t, unheard: true })
     }
-    if (says.length === 0) fix(`move ${n} (${who}) says nothing`)
-    moves.push({ who, answers, move: m.move.trim().toLowerCase() || 'answer', says })
+    const needs = m.needs?.trim()
+    if (needs && !plan.checks.some((c) => c.id === needs)) fix(`move ${n} needs unknown check "${needs}"; it happens either way`)
+    moves.push({ who, answers, move: m.move.trim().toLowerCase() || 'answer', says, ...(needs && plan.checks.some((c) => c.id === needs) && { needs }) })
     renumbered.set(n, moves.length)
   })
   for (const id of speakers) if (!moves.some((m) => m.who === id)) fix(`speaker "${id}" had no move`)
@@ -149,4 +185,36 @@ export function validatePlan2(content: Pack, state: GameState, raw: RawPlan2): {
     plan: { ...plan, exchange, moves, player_action: raw.player_action, change: raw.change },
     corrections
   }
+}
+
+/**
+ * The plan once its checks are rolled. A move that needs a check happens only if the check succeeded (round 0,
+ * criterion 5: catching a lie takes the roll); replies to a dropped move answer what it answered. A kept secret's
+ * tell is given to the writer the first time in a scene, or again when someone else's check this turn succeeded
+ * (they were looking closely); otherwise the secret is kept without showing.
+ */
+export function settlePlan2(content: Pack, state: GameState, plan: BeatPlan): BeatPlan {
+  const scene = state.scene!
+  const passed = new Set(plan.checks.filter((c) => c.result && c.result.degree !== 'failure').map((c) => c.id))
+  let moves = plan.moves
+  if (moves && moves.some((m) => m.needs && !passed.has(m.needs))) {
+    const keep = moves.map((m) => !m.needs || passed.has(m.needs))
+    const number = new Map<number, number>()
+    moves.forEach((_, i) => keep[i] && number.set(i + 1, number.size + 1))
+    const target = (a: Move['answers']): Move['answers'] => {
+      while (a !== 'player' && !keep[a - 1]) a = moves![a - 1]!.answers
+      return a === 'player' ? 'player' : number.get(a)!
+    }
+    moves = moves.filter((_, i) => keep[i]).map((m) => ({ ...m, answers: target(m.answers) }))
+  }
+  const speakers = plan.speakers.map((s) => {
+    if (!s.kept?.length) return s
+    const secrets = s.kept
+    const watched = plan.checks.some((c) => c.who !== s.id && passed.has(c.id))
+    const first = secrets.some((id) => !scene.tells.includes(id))
+    const tells = (characterById(content, s.id)?.secrets ?? []).filter((x) => secrets.includes(`${s.id}.${x.id}`)).map((x) => x.tell)
+    return (first || watched) && tells.length > 0 ? { ...s, tell: tells.join('; ') } : s
+  })
+  const exchange = moves ? moves.map((m) => ({ who: m.who, answers: m.answers, point: moveText(m) })) : plan.exchange
+  return { ...plan, speakers, ...(moves && { moves }), exchange }
 }

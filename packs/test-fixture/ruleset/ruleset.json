@@ -48,5 +48,6 @@
       { "label": "close", "min": { "warmth": 15, "bond": 12 } }
     ],
     "otherwise": "known"
-  }
+  },
+  "pressures": ["idle", "keen", "driven"]
 }

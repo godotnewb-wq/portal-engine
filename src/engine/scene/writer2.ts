@@ -7,6 +7,7 @@ import { sceneFacts } from './facts'
 import type { BeatPlan, Move } from './plan'
 import { ADULTS_ONLY, BEATS } from './style'
 import { checkLine, voiceCard } from './writer'
+import { recentlyUsed } from './repeats'
 
 /**
  * How the conversation should read (director-writer review, option B). A few principles and one example in place of
@@ -16,7 +17,8 @@ import { checkLine, voiceCard } from './writer'
 export const WRITER2_STYLE = `How it should read:
 - People talk like people: complete, plain sentences that someone hearing them for the first time can follow.
 - Each line answers the line before it: what that person actually said and meant. A question gets an answer, or a dodge the reader can see, in its own terms.
-- Each line says what its move holds, in the speaker's own voice, and nothing more. What is marked new hasn't been said to the player yet: say what it is.
+- People are in the moment. Their aims and secrets show in what they choose, avoid or notice, rarely in what they say outright.
+- A move's facts are there to draw on if the line needs them, never to recite. A line can bring nothing new; what matters is that it answers. A fact marked new hasn't been said to the player yet: if it's used, say what it is.
 - Each character sounds like their voice card. The card wins over everything else.
 - Narration only for what happens: an action that matters, a reaction, at most one detail of the place. Show what can be seen; never write the plan's notes out as prose.
 - No sayings, maxims or riddles in place of an answer. A comparison only when it makes something clearer.
@@ -64,7 +66,23 @@ export function buildWriter2Prompt(content: Pack, state: GameState, plan: BeatPl
   const moves: Move[] = plan.moves ?? plan.exchange.map((l) => ({ who: l.who, answers: l.answers, move: 'answer', says: [{ text: l.point, unheard: false }] }))
   const answering = (m: Move) => (m.answers === 'player' ? 'the player' : `${m.answers} (${nameOf(moves[m.answers - 1]?.who ?? '')})`)
   const said = (m: Move) => m.says.map((s) => (s.unheard ? `${s.text} [new to the player]` : s.text)).join('; ')
-  const secrets = (id: string) => characterById(content, id)?.secrets ?? []
+  // An aim reaches the writer only when it presses (claude/scene-system-redesign.md §5.3): the weakest word keeps it out.
+  const words = content.ruleset.pressures
+  const aim = (id: string, pressure?: string) => {
+    const level = pressure ? words.indexOf(pressure) : 0
+    const goal = characterById(content, id)?.agenda.current
+    if (!goal || level <= 0) return ''
+    return level >= words.length - 1 ? ` Tonight's aim drives what they do: ${goal}.` : ` Tonight's aim is on their mind and may come up if it fits: ${goal}.`
+  }
+  const speakerLine = (s: BeatPlan['speakers'][number]) =>
+    [
+      `- ${nameOf(s.id)}: in this exchange, ${(s.intent || 'answer what was asked').replace(/[.\s]+$/, '')}. Mood: ${(s.mood || 'as before').replace(/[.\s]+$/, '')}.`,
+      aim(s.id, s.pressure),
+      s.hiding && ` Keeping to themselves: ${s.hiding} (${s.approach ?? 'deflect'}).${s.tell ? ` It shows only as: ${s.tell}.` : ' It doesn\'t show.'}`
+    ].join('')
+  const recent = Object.entries(recentlyUsed(content, scene)).map(([id, u]) =>
+    `- ${nameOf(id)}: ${[...u.slang.map((t) => `"${t}"`), ...u.gestures].join('; ')}`
+  )
 
   const user = [
     `# Where you are\n${location.name}. ${location.description}`,
@@ -73,20 +91,13 @@ export function buildWriter2Prompt(content: Pack, state: GameState, plan: BeatPl
     scene.turns.length > 0 && `# Last turns\n${scene.turns.slice(-RECENT_TURNS).map((t) => turnText(content, state.player.name, t)).join('\n\n')}`,
     `# The player says or does\n${input}`,
     plan.checks.some((c) => c.result) && `# Check results (decided; honor them)\n${plan.checks.filter((c) => c.result).map((c) => checkLine(content, state, c)).join('\n')}`,
-    plan.speakers.length > 0 &&
-      `# Who speaks\n${plan.speakers
-        .map((s) => {
-          const tells = s.hiding ? secrets(s.id).filter((x) => s.hiding!.includes(x.text)).map((x) => x.tell) : []
-          return [`- ${nameOf(s.id)}: wants this exchange to ${s.intent || 'answer what was asked'}. Mood: ${s.mood || 'as before'}.`, s.hiding && ` Keeping to themselves: ${s.hiding} (${s.approach ?? 'deflect'}).${tells.length > 0 ? ` It shows only as: ${tells.join('; ')}.` : ''}`]
-            .filter(Boolean)
-            .join('')
-        })
-        .join('\n')}`,
-    moves.length > 0 && `# The conversation, in order\n${moves.map((m, i) => `${i + 1}. ${nameOf(m.who)}, answering ${answering(m)}: ${m.move}: ${said(m)}`).join('\n')}`,
+    plan.speakers.length > 0 && `# Who speaks\n${plan.speakers.map(speakerLine).join('\n')}`,
+    moves.length > 0 && `# The conversation, in order\n${moves.map((m, i) => `${i + 1}. ${nameOf(m.who)}, answering ${answering(m)}: ${m.move}${m.says.length > 0 ? ` (may draw on: ${said(m)})` : ''}${m.needs ? ' (the check succeeded)' : ''}`).join('\n')}`,
     plan.change && `# By the end of the turn\n${plan.change}`,
     plan.reactions.length > 0 && `# Also present, silent\n${plan.reactions.map((r) => `- ${nameOf(r.id)}: ${r.beat}`).join('\n')}`,
     plan.walk_ons.length > 0 && `# Walk-ons\n${plan.walk_ons.map((w) => `- ${nameOf(w.id)}: ${w.line}`).join('\n')}`,
     plan.texture.length > 0 && `# A detail of the place, if it fits\n${plan.texture.join('\n')}`,
+    recent.length > 0 && `# Used in the last turns (don't repeat)\n${recent.join('\n')}`,
     plan.avoid.length > 0 && `# Avoid\n${plan.avoid.join('; ')}`,
     'Write the beats.'
   ]

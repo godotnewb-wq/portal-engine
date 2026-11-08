@@ -1,0 +1,15 @@
+{
+  "id": "warmth-gone-wrong",
+  "title": "Warmth that goes wrong",
+  "watchFor": "Vex likes the player and covers it with dry jokes; the first two turns should be easy, friendly talk about ordinary things (her night, the bar, Brask's drink), with no hint of her secret. It sours only when the player pushes on her old running partner: she should go quieter, not louder, and not explain her feelings. Watch that the secret stays out of turns 1 and 2. The summary should lower trust or approval, not end everything.",
+  "location": "sump-lantern",
+  "cast": ["vex", "brask"],
+  "seed": 51,
+  "meters": { "vex": { "approval": 62, "trust": 55, "attraction": 20 } },
+  "moods": { "vex": "loose, a drink in, enjoying herself" },
+  "turns": [
+    "Good to see you, Vex. How was the run tonight?",
+    "Let me buy you something better than a lantern-pour.",
+    "So who sold out your old partner? Was it Oria's people?"
+  ]
+}

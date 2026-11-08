@@ -30,4 +30,4 @@ Output goes to stdout unless `--out` names a file; nothing is written into the l
 
 **to-scenario** carries the scene as it stood: cast, moods, comfort, meters toward the player, the dice, and the scene's earlier turns. Memories from earlier scenes and relations between characters aren't in the logs, so the replay uses the pack's.
 
-**Metrics** (`metrics.ts`) are shared with the bench's report and `--compare`.
+**Metrics** (`metrics.ts`) are shared with the bench's report and `--compare`. Since redesign step 2 they include relevance: speakers per turn, live secret rate, slang and aim line rates (with per-speaker shares), and gestures repeated within a scene (from each turn's `usage`; older logs show a dash).

@@ -15,17 +15,21 @@ Every turn also returns a **turn trace** (`trace.ts`, milestone 2 A1): identity,
 The templates are engine code; every world word in them comes from the pack (primer, tone, setting name, skills, difficulty words, meters, phrases).
 
 **Depends on:** core, rules, characters, world, pack, state, memory.
-**Design:** `claude/narrator-scene-engine.md`. **Tuning:** `BEATS`, `MAX_SPEAKERS`, `MAX_CHECKS` (code); the pack's tone, primer and phrases.
+**Design:** `claude/director-writer.md`; the redesign in `claude/scene-system-redesign.md`. **Tuning:** `BEATS`, `MAX_SPEAKERS`, `MAX_CHECKS`, `RECENT_USE_TURNS`, `REPEAT_REWRITE` (code); the ruleset's `pressures`; the pack's tone, primer and phrases.
 
 ## Two pipelines (since 2026-11-07)
 `runTurn` takes `pipeline`: **`situation`** (the default) or **`lines`** (the older one, kept so the bench can compare: `npm run bench -- --pipeline lines`). The turn trace records which ran (`director.pipeline`).
 
 **Situation** (`director2.ts`, `plan2.ts`, `facts.ts`, `writer2.ts`; `claude/director-writer-review.md`, option B): the director plans what is true, wanted and at stake, and writes no prose or dialogue.
 - `player_action` says what the player is doing and whether it is an uncertain attempt; a player check without one is dropped.
-- Each speaker has a `goal`, and `keeps` lists the ids of secrets they're holding back.
-- `moves` is the conversation in order: who, what it `answers`, a kind of move (answer, ask, push back, dodge, …), the ids of the facts it `uses`, and anything `new` it brings in (a price, a time).
+- Each speaker has a `goal` (what they want in this exchange) and a `pressure`: one of the ruleset's pressure words for how hard their aim for the scene presses. It moves at most one step a turn (`scene.pressures`). The writer sees the aim only above the weakest word.
+- `keeps` lists the ids of the speaker's own secrets they're holding back, and `touched` the words that touched it. A secret is kept only if a word of `touched` is in the player's input or the last turn; otherwise it's dropped and counted, so secrets aren't in play every turn.
+- `moves` is the conversation in order: who, what it `answers`, a kind of move (answer, ask, push back, dodge, …), the ids of facts it may draw on (`uses`, a pool, not a script; a move may have none), anything `new` it brings in (a price, a time), and a check it `needs`.
+- `settlePlan2` runs after the checks are rolled: a move whose `needs` check failed is dropped (catching a lie takes the roll), and replies to it answer what it answered. A kept secret's tell goes to the writer the first time in a scene (`scene.tells`), or again when someone else's check that turn succeeded.
 - `change` says what is different by the end of the turn. Texture is at most one detail.
 
 `facts.ts` gives every knowledge line and secret an id (`<character>.k<n>`, `<character>.<secret>`), the place's news `place.<n>`, and what has been said on screen `said.<n>`. A move may use only its speaker's facts, the place's, or what has been said (`canSay`); anything else is dropped from the move and counted. `applyTurn` adds what was said to the scene's `told` and `newFacts`, so the next turn marks a fact new to the player only the first time, and anyone present can repeat it after.
 
-The writer's prompt (`writer2.ts`) is a few principles and one example. It gets what the player has been told, the moves with their facts (each marked when new to the player), each speaker's goal, a secret's tell, the change and the check results. `exchange` is filled from the moves, so traces, read-outs and metrics work for both pipelines.
+**Repetition tracker** (`repeats.ts`): each character's slang (from their voice card) and gestures (a verb after their name in narration) from the last `RECENT_USE_TURNS` turns go to the writer as "Used in the last turns (don't repeat)"; a draft that repeats `REPEAT_REWRITE` or more of them gets the rewrite (`repeated`). `usageOf` counts slang, aim words and gestures in each turn's beats for the trace (`usage`) and the metrics.
+
+The writer's prompt (`writer2.ts`) is a few principles and one example. It gets what the player has been told, the moves with the facts they may draw on (each marked when new to the player), each speaker's goal and mood, their aim when it presses, a kept secret and its tell when it shows, the change, the check results and what was used lately. `exchange` is filled from the moves, so traces, read-outs and metrics work for both pipelines.

@@ -60,4 +60,4 @@ Each pack keeps its own in `bench/*.json`:
 | `turns` | The player's lines, in order. |
 | `summaries` | Run end-of-scene summaries (default true). |
 
-Neonpunk Nights ships `deception-caught` and `deception-uncaught` (same opening, rolls forced high and low; compare them), `tense-negotiation`, `three-way-argument` and `flirtation-gone-wrong`. The test fixture ships `who-was-here`.
+Neonpunk Nights ships `deception-caught` and `deception-uncaught` (same opening, rolls forced high and low; compare them), `tense-negotiation`, `three-way-argument`, `warmth-gone-wrong`, and three tram scenes (`tram-stay-or-go`, `tram-small-talk`, `tram-attempt`). The test fixture ships `who-was-here`.

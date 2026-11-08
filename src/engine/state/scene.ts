@@ -67,6 +67,10 @@ export const SceneSchema = z.object({
   /** Facts said on screen this scene, by id (characters' knowledge and secrets, the place's news), so a fact is introduced the first time and anyone present can repeat it after. */
   told: z.array(z.string()).default([]),
   /** Facts the plan brought in that no sheet holds (a price, a count), once said: anyone present can use them. */
-  newFacts: z.array(z.object({ id: z.string(), text: z.string(), by: z.string() })).default([])
+  newFacts: z.array(z.object({ id: z.string(), text: z.string(), by: z.string() })).default([]),
+  /** How hard each character's aim presses now, as an index into the ruleset's pressure words; moves a step a turn. */
+  pressures: z.record(z.string(), z.number().int().nonnegative()).default({}),
+  /** Secrets (fact ids) whose tell the writer has already been given this scene: a tell shows once unless someone looks closely. */
+  tells: z.array(z.string()).default([])
 })
 export type Scene = z.infer<typeof SceneSchema>

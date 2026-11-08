@@ -1,3 +1,4 @@
+import type { Usage } from './repeats'
 import type { CallTrace } from '@engine/core'
 import type { Meters } from '@engine/characters'
 import type { Beat, GameState } from '@engine/state'
@@ -46,6 +47,8 @@ export interface TurnTrace {
   }
   /** The beats as shown, each traced to its line in the reply it came from and to the plan item it carries out. */
   beats: BeatTrace[]
+  /** Slang, aim words and gestures in the beats shown (claude/scene-system-redesign.md §11); older logs have none. */
+  usage?: Usage
   tags: { parsed: Tags; dropped: string[] }
   cost: { calls: number; ms: number; tokens?: { input: number; output: number } }
   calls: CallTrace[]

@@ -10,7 +10,8 @@ import { castSnapshot, checkTraces, planItems, type BeatTrace, type TurnTrace } 
 import { applyTurn } from './turn'
 import { buildRewritePrompt, buildWriterPrompt, sceneSpeakers } from './writer'
 import { buildDirector2Prompt } from './director2'
-import { parsePlan2, validatePlan2 } from './plan2'
+import { parsePlan2, settlePlan2, validatePlan2 } from './plan2'
+import { recentlyUsed, repeatProblems, usageOf } from './repeats'
 import { buildWriter2Prompt } from './writer2'
 
 /**
@@ -98,10 +99,12 @@ export async function runTurn(
     const directed = situation ? parsePlan2(directorReply) : parsePlan(directorReply)
     const validated = directed
       ? situation
-        ? validatePlan2(content, state, directed as NonNullable<ReturnType<typeof parsePlan2>>)
+        ? validatePlan2(content, state, directed as NonNullable<ReturnType<typeof parsePlan2>>, input)
         : validatePlan(content, state, directed as NonNullable<ReturnType<typeof parsePlan>>)
       : { plan: fallbackPlan(content, state, input), corrections: [] }
-    const { plan, dice } = resolvePlan(content, state, validated.plan, options)
+    const resolved = resolvePlan(content, state, validated.plan, options)
+    const dice = resolved.dice
+    const plan = situation ? settlePlan2(content, state, resolved.plan) : resolved.plan
     emit({ type: 'planned', speakers: plan.speakers.map((s) => s.id), checks: plan.checks.flatMap((c) => (c.line ? [c.line] : [])), corrections: validated.corrections, fallback: !directed })
 
     // Call 2: the writer, streamed.
@@ -123,7 +126,10 @@ export async function runTurn(
       )
     const draft = await stream('writer', writerPrompt)
     let parsed: ParsedReply = parseReply(draft, speakers)
-    const problems = checkReply(parsed, plan, speakers, input, content.phrases)
+    // The repetition tracker runs for the situation pipeline only, so the older one stays a fixed baseline.
+    const recent = situation ? recentlyUsed(content, scene) : {}
+    const check = (reply: ParsedReply) => [...checkReply(reply, plan, speakers, input, content.phrases), ...repeatProblems(content, reply, recent)]
+    const problems = check(parsed)
     let remaining: Problem[] = []
     let kept = parsed.beats.map((_, i) => i)
 
@@ -132,7 +138,7 @@ export async function runTurn(
       emit({ type: 'restart', reason: 'rewrite', problems: problems.map((p) => p.fix) })
       const rewrite = await stream('rewrite', buildRewritePrompt(writerPrompt, draft, problems.map((p) => p.fix)))
       parsed = parseReply(rewrite, speakers)
-      remaining = checkReply(parsed, plan, speakers, input, content.phrases)
+      remaining = check(parsed)
       kept = remaining.length > 0 ? salvaged(parsed.beats.length, remaining) : parsed.beats.map((_, i) => i)
       const spoken = new Set(remaining.filter((p) => p.kind === 'speech-in-narration').map((p) => p.beat! - 1))
       if (spoken.size > 0) {
@@ -176,6 +182,7 @@ export async function runTurn(
         }
       }),
       beats: beatTraces,
+      usage: usageOf(content, beats),
       tags: { parsed: parsed.tags, dropped: parsed.droppedTags },
       cost: {
         calls: calls.length,

@@ -9,7 +9,7 @@ import { compareRuns } from '../../tools/bench/report'
 import { mockLlm, readRun, runBench, writeRun, type BenchRun } from '../../tools/bench/run'
 import { loadScenarios, scenarioState, ScenarioSchema } from '../../tools/bench/scenario'
 import { flagsFor, metricInput } from '../../tools/logs/load'
-import { copiedFromPlan, exchangeShape, metrics, renderMetrics, repeatedPhrases } from '../../tools/logs/metrics'
+import { copiedFromPlan, exchangeShape, gestureRepeats, metrics, relevanceOf, renderMetrics, repeatedPhrases } from '../../tools/logs/metrics'
 import { blindTest, renderFlags } from '../../tools/logs/review'
 import { toScenario } from '../../tools/logs/scenario'
 import { scoreSession, type Scorer } from '../../tools/logs/score'
@@ -120,6 +120,23 @@ describe('npm run logs (milestone 2, A4)', () => {
     expect(copiedFromPlan([turn('Down the maintenance stair behind the bar, a skiff through the flooded level.', ['speaker:oria-senn', 'line:1'])])).toBe(1)
     expect(copiedFromPlan([turn('We take the back way down, darling, and a boat does the rest.', ['speaker:oria-senn', 'line:1'])])).toBe(0)
     expect(copiedFromPlan([])).toBeNaN()
+  })
+
+  // Redesign step 2: is the patch back every turn, and how many lines are slang or about the speaker's aim.
+  it('measures relevance: kept secrets, slang and aim lines, gestures that come back within a scene', () => {
+    const turn = (sceneId: string, hiding: boolean, usage: object | undefined, speakers: string[]) =>
+      ({ sceneId, director: { plan: { speakers: [{ id: 'teo-varrin', ...(hiding && { hiding: 'x' }) }, { id: 'kesh' }] } }, beats: speakers.map((w) => ({ beat: { kind: 'dialogue', speaker: w, text: '' } })), usage }) as never
+    const patch = { slang: [], aim: [], gestures: [{ beat: 1, who: 'teo-varrin', gesture: 'rubs the patch on his jacket' }] }
+    const turns = [
+      turn('a', true, { ...patch, slang: [{ beat: 1, speaker: 'teo-varrin', terms: ['a cold start'] }] }, ['teo-varrin', 'kesh']),
+      turn('a', false, { ...patch, aim: [{ beat: 2, speaker: 'kesh' }] }, ['teo-varrin', 'kesh']),
+      turn('b', false, patch, ['kesh'])
+    ]
+    expect(gestureRepeats(turns)).toBe(1)
+    const r = relevanceOf(turns)
+    expect(r).toMatchObject({ liveSecretRate: 1 / 6, slangRate: 1 / 5, aimRate: 1 / 5, gestureRepeatsPerTurn: 1 / 3, speakersPerTurn: 5 / 3 })
+    expect(r.slangBySpeaker).toEqual({ 'teo-varrin': 0.5 })
+    expect(relevanceOf([turn('a', false, undefined, ['kesh'])]).slangRate).toBeNaN()
   })
 
   it('counts a phrase repeated across turns of one scene once per extra turn, and not across scenes', () => {

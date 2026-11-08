@@ -66,6 +66,14 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
     for (const s of m.says)
       if (!s.id && !newFacts.some((f) => f.text === s.text)) newFacts.push({ id: `said.${newFacts.length + 1}`, text: s.text, by: m.who })
 
+  // How hard each speaker's aim pressed this turn, so the next can move it only a step; and which secrets' tells have shown.
+  const pressures = { ...scene.pressures }
+  for (const s of written.plan.speakers) {
+    const level = s.pressure ? content.ruleset.pressures.indexOf(s.pressure) : -1
+    if (level >= 0) pressures[s.id] = level
+  }
+  const tells = [...new Set([...scene.tells, ...written.plan.speakers.flatMap((s) => (s.tell && s.kept ? s.kept : []))])]
+
   return {
     ...state,
     time: state.time + MINUTES_PER_TURN,
@@ -80,7 +88,9 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
       departed: [...scene.departed, ...leaving],
       ended: scene.ended || written.plan.end_scene,
       told,
-      newFacts
+      newFacts,
+      pressures,
+      tells
     }
   }
 }

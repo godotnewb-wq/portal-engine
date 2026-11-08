@@ -45,7 +45,7 @@ export function voiceCard(name: string, v: VoiceCard, portrait?: string): string
     v.slang.length > 0 && `Words they might use, rarely: ${v.slang.join(', ')}`,
     v.avoids.length > 0 && `Avoids: ${v.avoids.join('; ')}`,
     `Sample lines: ${v.sampleLines.map((l) => `"${l}"`).join(' ')}`,
-    `When angry: ${v.shifts.angry}. Flirting: ${v.shifts.flirting}. Lying: ${v.shifts.lying}.`
+    `When angry: ${v.shifts.angry}. Warm: ${v.shifts.warm}. Lying: ${v.shifts.lying}.`
   ]
     .filter(Boolean)
     .join('\n')

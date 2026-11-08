@@ -22,7 +22,13 @@ export const PlannedSpeakerSchema = z.object({
   knows: text.optional(),
   hiding: text.optional(),
   approach: text.optional(),
-  depends_on_check: z.string().optional().catch(undefined)
+  depends_on_check: z.string().optional().catch(undefined),
+  /** Situation plan: how hard their aim for the scene presses this turn, as a ruleset pressure word. */
+  pressure: text.optional(),
+  /** Situation plan: the fact ids of the secrets they keep this turn (each touched by something just said). */
+  kept: z.array(z.string()).optional().catch(undefined),
+  /** Situation plan: the kept secret's tell, when the game lets it show this turn. */
+  tell: text.optional()
 })
 
 export const PlannedCheckSchema = z.object({
@@ -99,6 +105,8 @@ export interface Move {
   answers: 'player' | number
   move: string
   says: Said[]
+  /** A check this move depends on: it happens only if the check succeeds (someone seeing through a lie). */
+  needs?: string
 }
 
 /**

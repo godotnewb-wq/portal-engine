@@ -82,5 +82,6 @@
       { "label": "friends", "min": { "approval": 65, "trust": 60 } }
     ],
     "otherwise": "acquaintances"
-  }
+  },
+  "pressures": ["background", "pressing", "urgent"]
 }

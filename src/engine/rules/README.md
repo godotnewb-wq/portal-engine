@@ -1,6 +1,6 @@
 # engine/rules
 
-Story checks, read entirely from the pack's ruleset: attributes and their modifier formula, skills, rank caps by level, difficulty words and their targets, degree margins, criticals, advantage (never stacked; advantage and disadvantage cancel) and assists.
+Story checks, read entirely from the pack's ruleset: attributes and their modifier formula, skills, rank caps by level, difficulty words and their targets, degree margins, criticals, advantage (never stacked; advantage and disadvantage cancel) and assists. The ruleset also holds the pressure words the scene director uses for how hard a character's aim presses (`pressures`, weakest first).
 
 **Public API** (`@engine/rules`)
 - `RulesetSchema`, `Ruleset`, `rulesetProblems`, `skillById`, `difficultyDc`, `meterIds`, `neutralWord`.

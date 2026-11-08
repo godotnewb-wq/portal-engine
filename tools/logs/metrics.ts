@@ -1,5 +1,5 @@
 import type { CallTrace } from '@engine/core'
-import { planLines, type TurnTrace } from '@engine/scene'
+import { gestureKey, planLines, type TurnTrace } from '@engine/scene'
 import { currentFlags, RUBRIC, type FlagRecord, type ScoreRecord } from '@engine/review'
 import type { ErrorRecord } from '@platform/logs'
 
@@ -133,7 +133,34 @@ export interface Metrics {
     /** Of beats both a person and the scorer marked, how often they agreed on the rating. */
     agreement: { both: number; same: number; humanBadMarkedBad: number; humanBad: number; aiBadFlaggedBad: number; aiBad: number }
   }
+  /**
+   * Relevance (claude/scene-system-redesign.md §11): how often a speaker keeps a secret, how many lines use slang or
+   * talk about the speaker's aim, gestures repeated within a scene, and how many characters speak a turn. Rates over
+   * logs without usage counts (before redesign step 2) are NaN.
+   */
+  relevance: {
+    liveSecretRate: number
+    slangRate: number
+    aimRate: number
+    gestureRepeatsPerTurn: number
+    speakersPerTurn: number
+    slangBySpeaker: Record<string, number>
+    aimBySpeaker: Record<string, number>
+  }
   errors: Record<string, number>
+}
+
+/** Gestures that come back within a scene, per turn they come back in: the same character, the same first words. */
+export function gestureRepeats(turns: Omit<TurnTrace, 'calls'>[]): number {
+  const seen = new Map<string, Set<string>>()
+  let repeats = 0
+  for (const t of turns) {
+    const keys = new Set((t.usage?.gestures ?? []).map((g) => `${g.who}\u0000${gestureKey(g.gesture)}`))
+    const before = seen.get(t.sceneId) ?? new Set<string>()
+    for (const k of keys) if (before.has(k)) repeats++
+    seen.set(t.sceneId, new Set([...before, ...keys]))
+  }
+  return repeats
 }
 
 /** The automatic metrics (milestone 2, B2), over one or more sessions. */
@@ -261,7 +288,29 @@ export function metrics(inputs: MetricInput[]): Metrics {
         aiBad: aiBad.length
       }
     },
+    relevance: relevanceOf(turns),
     errors: count(inputs.flatMap((i) => i.errors.map((e) => e.where)))
+  }
+}
+
+/** The relevance metrics (redesign step 2) over a set of turns. */
+export function relevanceOf(turns: Omit<TurnTrace, 'calls'>[]): Metrics['relevance'] {
+  const slots = turns.flatMap((t) => t.director.plan.speakers)
+  const counted = turns.filter((t) => t.usage)
+  const lines = counted.flatMap((t) => t.beats.filter((b) => b.beat.kind === 'dialogue').map((b) => ({ t, b })))
+  const linesBy = count(lines.map(({ b }) => (b.beat as { speaker: string }).speaker))
+  const per = (hits: { speaker: string }[]) => Object.fromEntries(Object.entries(count(hits.map((h) => h.speaker))).map(([k, v]) => [k, share(v, linesBy[k] ?? 0)]))
+  const slang = counted.flatMap((t) => t.usage!.slang)
+  const aim = counted.flatMap((t) => t.usage!.aim)
+  const rate = (n: number) => (counted.length === 0 ? Number.NaN : share(n, lines.length))
+  return {
+    liveSecretRate: share(slots.filter((s) => s.hiding).length, slots.length),
+    slangRate: rate(slang.length),
+    aimRate: rate(aim.length),
+    gestureRepeatsPerTurn: counted.length === 0 ? Number.NaN : share(gestureRepeats(counted), counted.length),
+    speakersPerTurn: avg(turns.map((t) => new Set(t.beats.flatMap((b) => (b.beat.kind === 'dialogue' ? [b.beat.speaker] : []))).size)),
+    slangBySpeaker: per(slang),
+    aimBySpeaker: per(aim)
   }
 }
 
@@ -289,6 +338,11 @@ export function headline(m: Metrics): [string, number, 'lower' | 'higher' | 'inf
     ['answered back / turn', m.cast.answeredBackPerTurn, 'higher'],
     ['same speaker twice / turn', m.cast.sameSpeakerPerTurn, 'lower'],
     ['copied from plan rate', m.copiedFromPlan, 'lower'],
+    ['speakers / turn', m.relevance.speakersPerTurn, 'info'],
+    ['live secret rate', m.relevance.liveSecretRate, 'lower'],
+    ['slang line rate', m.relevance.slangRate, 'lower'],
+    ['aim line rate', m.relevance.aimRate, 'lower'],
+    ['gesture repeats / turn', m.relevance.gestureRepeatsPerTurn, 'lower'],
     ['beats / turn', m.pacing.beatsPerTurn, 'info'],
     ['words / beat', m.pacing.wordsPerBeat, 'info'],
     ['repeated phrases / turn', m.repetition.repeatedPerTurn, 'lower'],
@@ -317,6 +371,7 @@ export function renderMetrics(m: Metrics, nameOf: (id: string) => string = (id) 
     `- **Longest silence (turns):** ${list(named(m.cast.longestSilence))}`,
     `- **Dialogue words:** ${list(named(m.cast.dialogueWords))}`,
     `- **Checks:** ${m.checks.total}; skills ${list(m.checks.skills)}; difficulties ${list(m.checks.difficulties)}`,
+    `- **Slang lines by speaker:** ${list(named(m.relevance.slangBySpeaker), pct)}; **aim lines by speaker:** ${list(named(m.relevance.aimBySpeaker), pct)}`,
     `- **Repeated phrases:** ${m.repetition.top.map(([g, n]) => `"${g}" ×${n}`).join(', ') || '—'}`,
     `- **Flags:** ${m.flags.beatsFlagged} beats, ${m.flags.turnFlags} turns; reasons ${list(m.flags.byReason)}`,
     `- **Flags by speaker:** ${Object.entries(m.flags.bySpeaker).map(([k, v]) => `${nameOf(k)} ${v.good}/${v.meh}/${v.bad} (good/meh/bad)`).join(', ') || '—'}`,

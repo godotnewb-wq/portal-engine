@@ -3,7 +3,7 @@ import type { ParsedReply, Speaker } from './beats'
 import type { BeatPlan } from './plan'
 import { BEATS, OVERUSED_PHRASES } from './style'
 
-export type ProblemKind = 'player-voice' | 'player-action' | 'unplanned-speaker' | 'unknown-speaker' | 'speech-in-narration' | 'overused-phrase' | 'beat-count' | 'beat-length'
+export type ProblemKind = 'player-voice' | 'player-action' | 'unplanned-speaker' | 'unknown-speaker' | 'speech-in-narration' | 'overused-phrase' | 'repeated' | 'beat-count' | 'beat-length'
 
 export interface Problem {
   kind: ProblemKind

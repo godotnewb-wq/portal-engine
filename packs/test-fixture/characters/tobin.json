@@ -14,7 +14,7 @@
     "rhythm": "Slow, formal",
     "vocabulary": "Old-fashioned",
     "sampleLines": ["I could not say, miss."],
-    "shifts": { "angry": "Goes silent", "flirting": "Polishes his plates", "lying": "Hums" }
+    "shifts": { "angry": "Goes silent", "warm": "Polishes his plates", "lying": "Hums" }
   },
   "mood": "uneasy",
   "secrets": [{ "id": "after-closing", "text": "Tobin let someone into the yard after closing.", "tell": "Hums" }],

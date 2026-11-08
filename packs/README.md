@@ -44,6 +44,7 @@ The engine supplies the mechanics; the ruleset their parameters and words. See `
 - `meters`: the relationship meters every character keeps toward the player and each other (`id`, `name`, `description` used in summary prompts), and their range.
 - `wordScale`: the words summaries judge a change in, worst to best, each with its value; one must be worth 0.
 - `relations`: where a new relation starts, and labels by meter bands.
+- `pressures`: words for how hard a character's aim for the scene presses on them, weakest first (at least two). The weakest keeps the aim out of the writer's brief; the strongest makes it what drives them.
 
 ## setting.json, primer.md, tone.md
 

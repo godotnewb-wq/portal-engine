@@ -39,7 +39,7 @@
     ],
     "shifts": {
       "angry": "Very quiet, very formal, every word exact",
-      "flirting": "Answers with a statistic, then looks away",
+      "warm": "Gives you the exact time of something you once mentioned, and asks how it went",
       "lying": "Can't keep a figure straight, and corrects herself"
     }
   },

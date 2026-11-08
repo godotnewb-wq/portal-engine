@@ -40,7 +40,7 @@
     ],
     "shifts": {
       "angry": "Stops talking entirely and starts fixing something with his hands, too hard",
-      "flirting": "Ears go pink, talks about engines at length, can't finish a compliment",
+      "warm": "Offers to fix something of yours, and talks about it longer than he needs to",
       "lying": "Looks at the nearest machine instead of the person, and answers too fast"
     }
   },

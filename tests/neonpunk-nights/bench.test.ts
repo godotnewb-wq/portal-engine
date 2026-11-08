@@ -14,14 +14,14 @@ const scenarios = loadScenarios(join(PACK_DIR, 'bench'))
 
 describe('the shipped scenarios', () => {
   it('cover the plan’s cases and all fit the content', () => {
-    expect(scenarios.map((s) => s.id)).toEqual(['deception-caught', 'deception-uncaught', 'flirtation-gone-wrong', 'tense-negotiation', 'three-way-argument', 'tram-attempt', 'tram-small-talk', 'tram-stay-or-go'])
+    expect(scenarios.map((s) => s.id)).toEqual(['deception-caught', 'deception-uncaught', 'tense-negotiation', 'three-way-argument', 'tram-attempt', 'tram-small-talk', 'tram-stay-or-go', 'warmth-gone-wrong'])
     for (const s of scenarios) expect(scenarioProblems(content, s), s.id).toEqual([])
   })
 
   it('open on their own starting feelings and moods', () => {
-    const flirt = scenarios.find((s) => s.id === 'flirtation-gone-wrong')!
-    const state = scenarioState(content, flirt)
-    expect(state.meters['vex']).toEqual({ approval: 62, trust: 55, attraction: 58 })
+    const warm = scenarios.find((s) => s.id === 'warmth-gone-wrong')!
+    const state = scenarioState(content, warm)
+    expect(state.meters['vex']).toEqual({ approval: 62, trust: 55, attraction: 20 })
     expect(state.scene!.moods['vex']).toMatch(/a drink in/)
     expect(state.scene!.cast).toEqual(['vex', 'brask'])
   })

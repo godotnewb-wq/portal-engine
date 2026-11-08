@@ -9,10 +9,10 @@ export function mockLlm(): BenchLlm {
     turn: {
       direct: async () => '(mock director: no plan)',
       write: async (prompt, onDelta) => {
-        // The line-plan brief says "- Ada speaks."; the situation brief lists "- Ada: wants …" under "# Who speaks".
+        // The line-plan brief says "- Ada speaks."; the situation brief lists "- Ada: in this exchange, …" under "# Who speaks".
         const lines = [...prompt.user.matchAll(/^- (\S+) speaks\./gm)].map((m) => m[1]!)
         const who = prompt.user.split('# Who speaks\n')[1]?.split('\n\n')[0] ?? ''
-        const speakers = lines.length > 0 ? lines : [...who.matchAll(/^- ([^:\s]+): wants this exchange/gm)].map((m) => m[1]!)
+        const speakers = lines.length > 0 ? lines : [...who.matchAll(/^- ([^:\s]+): in this exchange/gm)].map((m) => m[1]!)
         const reply = ['NARRATION: The conduit buzzes overhead.', ...speakers.map((name) => `${name}: "Mock line from ${name}."`)].join('\n')
         onDelta(reply)
         return reply

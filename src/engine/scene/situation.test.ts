@@ -4,7 +4,7 @@ import { fixture, yardScene } from '@tests/fixture'
 import { turnText } from './director'
 import { buildDirector2Prompt } from './director2'
 import { canSay, sceneFacts } from './facts'
-import { parsePlan2, validatePlan2 } from './plan2'
+import { parsePlan2, settlePlan2, validatePlan2 } from './plan2'
 import { runTurn, type TurnLlm } from './runTurn'
 import { buildWriter2Prompt } from './writer2'
 
@@ -13,7 +13,7 @@ const plan = (over: object = {}) =>
   JSON.stringify({
     player_action: { doing: 'asks Tobin who came by', uncertain: false },
     speakers: [
-      { id: 'tobin', goal: 'get the question dropped', mood: 'uneasy', keeps: ['tobin.after-closing'], approach: 'deflect' },
+      { id: 'tobin', goal: 'get the question dropped', mood: 'uneasy', keeps: ['tobin.after-closing'], touched: 'who came by', approach: 'deflect' },
       { id: 'mara', goal: 'catch him out', mood: 'sharp', keeps: [] }
     ],
     moves: [
@@ -42,7 +42,7 @@ describe('facts and who may say them', () => {
 
 describe('the situation plan', () => {
   it('reads moves with their facts, and marks what the player has not heard', () => {
-    const { plan: p, corrections } = validatePlan2(fixture, yardScene(), parsePlan2(plan())!)
+    const { plan: p, corrections } = validatePlan2(fixture, yardScene(), parsePlan2(plan())!, 'Tobin, who came by?')
     expect(corrections).toEqual([])
     expect(p.moves).toEqual([
       { who: 'tobin', answers: 'player', move: 'dodge', says: [{ text: 'he locked up at the usual hour', unheard: true }] },
@@ -60,7 +60,7 @@ describe('the situation plan', () => {
     const leak = plan({ moves: [{ who: 'tobin', answers: 'player', move: 'answer', uses: ['mara.k1', 'nobody.k9'] }] })
     const { plan: p, corrections } = validatePlan2(fixture, yardScene(), parsePlan2(leak)!)
     expect(p.moves![0]!.says).toEqual([])
-    expect(corrections).toEqual(expect.arrayContaining(["move 1: tobin can't know mara.k1", 'move 1: no fact "nobody.k9"', 'move 1 (tobin) says nothing', 'speaker "mara" had no move']))
+    expect(corrections).toEqual(expect.arrayContaining(["move 1: tobin can't know mara.k1", 'move 1: no fact "nobody.k9"', 'speaker "mara" had no move']))
   })
 
   // Round 0, F4: 22 of 22 checks were the player's Empathy, rolled whatever the player did.
@@ -80,11 +80,11 @@ describe('the situation plan', () => {
     expect(director.system).toMatch(/Secret \[tobin\.after-closing\]/)
     expect(director.system).toMatch(/The player leads\. Start from what the player just said or did: move 1 answers it/)
     expect(director.user).toMatch(/# Nothing has been said on screen yet\./)
-    const { plan: p } = validatePlan2(fixture, state, parsePlan2(plan())!)
-    const writer = buildWriter2Prompt(fixture, state, p, 'Tobin, who came by?')
+    const { plan: p } = validatePlan2(fixture, state, parsePlan2(plan())!, 'Tobin, who came by?')
+    const writer = buildWriter2Prompt(fixture, state, settlePlan2(fixture, state, p), 'Tobin, who came by?')
     expect(writer.system).toMatch(/People talk like people: complete, plain sentences/)
     expect(writer.system).not.toMatch(/dialogue, then narration, then dialogue/)
-    expect(writer.user).toMatch(/# The conversation, in order\n1\. Tobin, answering the player: dodge: he locked up at the usual hour \[new to the player\]\n2\. Mara, answering 1 \(Tobin\): push back: Tobin was in the yard after closing \[new to the player\]/)
+    expect(writer.user).toMatch(/# The conversation, in order\n1\. Tobin, answering the player: dodge \(may draw on: he locked up at the usual hour \[new to the player\]\)\n2\. Mara, answering 1 \(Tobin\): push back \(may draw on: Tobin was in the yard after closing \[new to the player\]\)/)
     expect(writer.user).toMatch(/It shows only as: Hums\./)
     expect(writer.user).toMatch(/Nothing yet beyond what they can see\./)
   })

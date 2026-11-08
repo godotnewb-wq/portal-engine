@@ -14,8 +14,9 @@
   "voice": {
     "rhythm": "Short, exact sentences",
     "vocabulary": "Ledger words",
+    "slang": ["by the book"],
     "sampleLines": ["That doesn't add up.", "Count it again."],
-    "shifts": { "angry": "Lists your mistakes", "flirting": "Rounds in your favor", "lying": "Gives exact numbers" }
+    "shifts": { "angry": "Lists your mistakes", "warm": "Rounds in your favor", "lying": "Gives exact numbers" }
   },
   "mood": "busy, curious",
   "knowledge": ["Tobin was in the yard after closing"],

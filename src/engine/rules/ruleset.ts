@@ -83,7 +83,13 @@ export const RulesetSchema = z.object({
      */
     bands: z.array(z.object({ label: z.string(), min: z.record(id, z.number()).default({}), max: z.record(id, z.number()).default({}) })),
     otherwise: z.string()
-  })
+  }),
+  /**
+   * How hard a character's aim for the scene presses on them, weakest first (e.g. "idle", "keen", "driven"). The
+   * director picks a word each turn; the weakest keeps the aim out of the writer's brief, the strongest makes it
+   * what drives them (claude/scene-system-redesign.md §5.3).
+   */
+  pressures: z.array(z.string().min(1)).min(2)
 })
 export type Ruleset = z.infer<typeof RulesetSchema>
 
@@ -100,6 +106,7 @@ export function rulesetProblems(r: Ruleset): string[] {
   unique('difficulty', r.difficulties.map((d) => d.word))
   unique('meter', meters)
   unique('scale word', r.wordScale.map((w) => w.word))
+  unique('pressure word', r.pressures)
   for (const s of r.skills) if (!attributes.includes(s.attribute)) problems.push(`skill "${s.id}" uses unknown attribute "${s.attribute}"`)
   if (!meters.includes(r.assists.meter)) problems.push(`assists use unknown meter "${r.assists.meter}"`)
   for (const m of meters) if (!(m in r.relations.start)) problems.push(`relations.start has no value for meter "${m}"`)

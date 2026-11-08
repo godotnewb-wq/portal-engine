@@ -25,8 +25,8 @@ export const VoiceCardSchema = z.object({
   /** What they never say, or steer around. */
   avoids: z.array(z.string()).default([]),
   sampleLines: z.array(z.string()).min(1),
-  /** How the voice changes under pressure. */
-  shifts: z.object({ angry: z.string(), flirting: z.string(), lying: z.string() })
+  /** How the voice changes: angry, warm toward someone they like, and lying. */
+  shifts: z.object({ angry: z.string(), warm: z.string(), lying: z.string() })
 })
 export type VoiceCard = z.infer<typeof VoiceCardSchema>
 
