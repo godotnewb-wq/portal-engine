@@ -130,7 +130,21 @@ export function parseSummary(r: Ruleset, reply: string): Summary {
   } catch {
     raw = undefined
   }
-  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) return { memory: body.trim(), level: 'normal', reason: '', delta: noChange(r), learned: [], others: [] }
+  if (typeof raw !== 'object' || raw === null || Array.isArray(raw)) {
+    // A reply cut off mid-JSON (a thinking model out of tokens, session 2026-11-07_1955_cdd1) is not a memory: keep its
+    // memory field if it got that far, otherwise leave it empty so the plain memory is used. Plain prose is kept.
+    const cut = body.trim().startsWith('{')
+    const field = cut ? body.match(/"memory"\s*:\s*"((?:[^"\\]|\\.)*)"/) : null
+    let memory = cut ? '' : body.trim()
+    if (field) {
+      try {
+        memory = JSON.parse(`"${field[1]}"`) as string
+      } catch {
+        memory = ''
+      }
+    }
+    return { memory, level: 'normal', reason: '', delta: noChange(r), learned: [], others: [] }
+  }
   const given = raw as Record<string, unknown>
   return {
     memory: text(given['memory']),

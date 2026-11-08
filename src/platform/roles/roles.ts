@@ -28,10 +28,14 @@ function metaOf(settings: Settings, routed: RoutedReply, info: CallInfo): CallMe
 }
 
 /**
- * The fewest reply tokens a director plan gets, whatever its profile says. With three speakers a plan runs to about a
- * thousand tokens, and a profile left at the old default cut a fifth of them off mid-JSON (bench 2026-11-08, `lines`).
+ * The fewest reply tokens a JSON call gets, whatever its profile says. With three speakers a director plan runs to
+ * about a thousand tokens, and a profile left at the old default cut a fifth of them off mid-JSON (bench 2026-11-08,
+ * `lines`); a thinking model spends part of the limit reasoning before it answers, so it needs room for both
+ * (session 2026-11-07_1955_cdd1: plans and summaries cut off at 2000 and 800).
  */
-export const DIRECTOR_MIN_TOKENS = 2000
+export const DIRECTOR_MIN_TOKENS = 4000
+export const SUMMARY_MIN_TOKENS = 2000
+export const SCORER_MIN_TOKENS = 3000
 
 /** A JSON call through a role's profile, with its metadata. `minTokens` raises the profile's reply limit if it is lower. */
 async function judged(settings: Settings, role: LlmRole, nsfw: boolean, prompt: Prompt, minTokens?: number) {
@@ -55,10 +59,10 @@ export function turnLlm(settings: Settings, nsfw: boolean): TurnLlm {
 
 /** The end-of-scene summary call: low temperature, JSON. */
 export function summaryLlm(settings: Settings, nsfw: boolean): Summarize {
-  return (prompt) => judged(settings, 'summary', nsfw, prompt)
+  return (prompt) => judged(settings, 'summary', nsfw, prompt, SUMMARY_MIN_TOKENS)
 }
 
 /** The AI scorer's call (milestone 2, A5): JSON, after play only. */
 export function scorerLlm(settings: Settings): (prompt: Prompt) => Promise<{ text: string; meta: CallMeta }> {
-  return (prompt) => judged(settings, 'scorer', false, prompt)
+  return (prompt) => judged(settings, 'scorer', false, prompt, SCORER_MIN_TOKENS)
 }

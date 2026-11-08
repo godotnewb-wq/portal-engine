@@ -65,7 +65,9 @@ export function buildWriter2Prompt(content: Pack, state: GameState, plan: BeatPl
   // A plan without moves (the game planned the turn itself) still has its lines in the exchange.
   const moves: Move[] = plan.moves ?? plan.exchange.map((l) => ({ who: l.who, answers: l.answers, move: 'answer', says: [{ text: l.point, unheard: false }] }))
   const answering = (m: Move) => (m.answers === 'player' ? 'the player' : `${m.answers} (${nameOf(moves[m.answers - 1]?.who ?? '')})`)
-  const said = (m: Move) => m.says.map((s) => (s.unheard ? `${s.text} [new to the player]` : s.text)).join('; ')
+  // A fact already said is marked, so it isn't said again in other words (session 2026-11-07_1949_ffec: "a crew is on
+  // its way" three times, "five minutes" four).
+  const said = (m: Move) => m.says.map((s) => `${s.text} ${s.unheard ? '[new to the player]' : "[already said; don't repeat it]"}`).join('; ')
   // An aim reaches the writer only when it presses (claude/scene-system-redesign.md §5.3): the weakest word keeps it out.
   const words = content.ruleset.pressures
   const aim = (id: string, pressure?: string) => {

@@ -4,4 +4,4 @@ Connects the engine's LLM roles to the configured profiles: `turnLlm(settings, n
 
 **Depends on:** llm, engine/scene, engine/relationships.
 
-The director's calls get at least `DIRECTOR_MIN_TOKENS` (2000) reply tokens, whatever the profile says, so a long plan isn't cut off mid-JSON.
+JSON calls get at least a floor of reply tokens whatever the profile says (`DIRECTOR_MIN_TOKENS` 4000, `SUMMARY_MIN_TOKENS` 2000, `SCORER_MIN_TOKENS` 3000), so a long plan, or a thinking model's reasoning plus its answer, isn't cut off mid-JSON.

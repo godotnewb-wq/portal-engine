@@ -64,6 +64,10 @@ describe('parseSummary', () => {
 
   it('takes a reply that is not JSON as the memory alone, changing nothing', () => {
     expect(parseSummary(content.ruleset, 'Vex watched Oria squirm.')).toMatchObject({ memory: 'Vex watched Oria squirm.', delta: { approval: 0, trust: 0, attraction: 0 } })
+    // Session 2026-11-07_1955_cdd1: a reply cut off mid-JSON became Vex's memory, braces and all.
+    const cut = '{"memory": "Vex pushed Oria for a name and got \\"charm\\" instead.", "level": "normal", "others": [{"with": "brask", "trust": "'
+    expect(parseSummary(content.ruleset, cut)).toMatchObject({ memory: 'Vex pushed Oria for a name and got "charm" instead.', delta: { approval: 0, trust: 0, attraction: 0 } })
+    expect(parseSummary(content.ruleset, '{"level": "normal", "memo').memory).toBe('')
   })
 })
 

@@ -113,6 +113,7 @@ describe('a turn on the situation pipeline', () => {
     // Now that it has been said, Tobin may repeat it, and it is no longer new to the player.
     const again = validatePlan2(fixture, state, parsePlan2(plan({ moves: [{ who: 'tobin', answers: 'player', move: 'concede', uses: ['mara.k1'] }] }))!)
     expect(again.plan.moves![0]!.says).toEqual([{ text: 'Tobin was in the yard after closing', id: 'mara.k1', unheard: false }])
+    expect(buildWriter2Prompt(fixture, state, again.plan, 'Mara, what did you see?').user).toMatch(/concede \(may draw on: Tobin was in the yard after closing \[already said; don't repeat it\]\)/)
   })
 
   it('shows past lines in quotes, under the name the writer uses', () => {
