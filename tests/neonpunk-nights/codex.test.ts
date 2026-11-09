@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { checkNames, codexWarnings, entryById, locationChain, secretLeaks } from '@engine/codex'
 import { packNames } from '@engine/scene'
-import { characterById } from '@engine/pack'
+import { characterById, knowerOf } from '@engine/pack'
 import { content } from './support'
 
 /** How the pack is written, checked here rather than in the engine (claude/lore-injection.md §2.1). */
@@ -137,5 +137,26 @@ describe('the name check on Neonpunk prose', () => {
   it('sees a codex secret named in prose', () => {
     const secret = content.codex.find((e) => e.knowledge === 'secret')!
     expect(secretLeaks(`They spoke of ${secret.name.toLowerCase()} in whispers.`, content.codex).map((l) => l.entry.id)).toContain(secret.id)
+  })
+})
+
+describe('Oria’s linked secret', () => {
+  it('points to the control core, resolved from the codex with her part in it', () => {
+    const oria = characterById(content, 'oria-senn')!
+    const linked = oria.secrets.find((s) => s.id === 'the-case')!
+    expect(linked.codex).toBe('faction.aether-grid-corporation.control-core')
+    expect(linked.text).toMatch(/^Is fetching it for them: The sealed case .* original control core/)
+    expect(linked.text).toMatch(/How they feel about it: doesn’t want to know|How they feel about it: doesn't want to know/)
+    expect(knowerOf(oria).holds).toEqual(['faction.aether-grid-corporation.control-core'])
+  })
+
+  it('lets her slip about the core while she guards it, and cuts it otherwise', () => {
+    const line = 'Oria lets it drop: the control core is in there.'
+    expect(secretLeaks(line, content.codex).map((l) => l.entry.id)).toEqual(['faction.aether-grid-corporation.control-core'])
+    expect(secretLeaks(line, content.codex, new Set(['faction.aether-grid-corporation.control-core']))).toEqual([])
+  })
+
+  it('leaves the reclamation itself held by nobody', () => {
+    expect(content.characters.flatMap((c) => knowerOf(c).holds)).not.toContain('faction.aether-grid-corporation.reclamation')
   })
 })

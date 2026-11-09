@@ -14,7 +14,7 @@ const scenarios = loadScenarios(join(PACK_DIR, 'bench'))
 
 describe('the shipped scenarios', () => {
   it('cover the plan’s cases and all fit the content', () => {
-    expect(scenarios.map((s) => s.id)).toEqual(['deception-caught', 'deception-uncaught', 'tense-negotiation', 'three-way-argument', 'tram-attempt', 'tram-small-talk', 'tram-stay-or-go', 'warmth-gone-wrong'])
+    expect(scenarios.map((s) => s.id)).toEqual(['deception-caught', 'deception-uncaught', 'secret-dormant', 'secret-touched', 'tense-negotiation', 'three-way-argument', 'tram-attempt', 'tram-small-talk', 'tram-stay-or-go', 'warmth-gone-wrong'])
     for (const s of scenarios) expect(scenarioProblems(content, s), s.id).toEqual([])
   })
 

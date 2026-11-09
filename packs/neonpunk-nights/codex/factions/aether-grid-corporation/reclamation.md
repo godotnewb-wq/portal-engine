@@ -1,7 +1,7 @@
 ---
 name: The Ninth Turn reclamation
 kind: faction
-keywords: [the reclamation, control core]
+keywords: [the reclamation]
 summary: The Grid means to reopen the Ninth Turn’s flooded pump stations.
 knowledge: secret
 known-by: [aether-grid-corporation trusted+, house-sarrant trusted+]
