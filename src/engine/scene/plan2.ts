@@ -1,7 +1,8 @@
 import { z } from 'zod'
 import type { GameState } from '@engine/state'
 import { characterById, knowerOf, type Pack } from '@engine/pack'
-import { entryById, knows } from '@engine/codex'
+import { checkNames, entryById, knows } from '@engine/codex'
+import { packNames } from './checks'
 import { turnLore, type TurnLore } from './lore'
 import { canSay, sceneFacts, toldPlayer } from './facts'
 import {
@@ -216,6 +217,8 @@ function validateLore(content: Pack, state: GameState, raw: RawPlan2, lore: Turn
     if (!entry || !given.has(id)) return fix(`dropped lore line ${n}: "${id}" wasn't given this turn`)
     if (entry.knowledge === 'secret') return fix(`dropped lore line ${n}: "${id}" is a secret`)
     if (lines.length >= MAX_LORE_LINES) return fix(`dropped lore line ${n}: at most ${MAX_LORE_LINES}`)
+    const bad = checkNames(line, packNames(content, [state.player.name]))[0]
+    if (bad) return fix(`dropped lore line ${n}: "${bad.name}" isn't a name in this world`)
     if (QUOTED_WORDS.test(line)) fix(`lore line ${n} quotes dialogue`)
     const w = line.split(/\s+/)
     const said = w.length > LORE_LINE_WORDS ? w.slice(0, LORE_LINE_WORDS).join(' ') : line

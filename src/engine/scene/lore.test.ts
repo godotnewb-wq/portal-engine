@@ -30,6 +30,12 @@ const validate = (lore: object[], speakers?: object[]) => {
 }
 
 describe('lore lines', () => {
+  it('drop a line that gets a name wrong', () => {
+    const { plan, corrections } = validate([{ entry: 'faction.guild', line: 'The Night Crew answers to the Guild.' }])
+    expect(plan.lore).toBeUndefined()
+    expect(corrections).toEqual(['dropped lore line 1: "The Night Crew" isn\'t a name in this world'])
+  })
+
   it('keep a common line for anyone, and an insider line for a speaker who knows it', () => {
     const { plan, corrections } = validate([
       { entry: 'faction.guild', line: 'The Guild owns the yard and sets the cart fees.' },

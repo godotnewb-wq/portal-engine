@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { codexWarnings, entryById, locationChain } from '@engine/codex'
+import { checkNames, codexWarnings, entryById, locationChain, secretLeaks } from '@engine/codex'
+import { packNames } from '@engine/scene'
 import { characterById } from '@engine/pack'
 import { content } from './support'
 
@@ -110,5 +111,31 @@ describe('the Neonpunk Nights knowledge filter', () => {
       '- The Aether Grid Corporation toward The Garden Guard: rival',
       '- The Garden Guard toward The Aether Grid Corporation: enemy'
     ])
+  })
+})
+
+describe('the name check on Neonpunk prose', () => {
+  const names = (text: string) => checkNames(text, packNames(content)).map((f) => (f.kind === 'wrong-name' ? `${f.name} → ${f.canon[0]}` : `new: ${f.name}`))
+
+  it('passes canon names, aliases, possessives and two names side by side', () => {
+    expect(names('A Grid Corp van idled outside the Wheel Clinic while the Saints watched the Lower Stairs.')).toEqual([])
+    expect(names("House Sarrant's people met the Wardens of the Ninth Turn at Pump Station Nine.")).toEqual([])
+    expect(names('The Low Turns Ward Office was shut. Behind Kettle Court, Coil Line Car 14 waited.')).toEqual([])
+  })
+
+  it('flags near misses with the right name, and new groups', () => {
+    expect(names('Agents of the Grid Authority came for House Sarant.')).toEqual(['Grid Authority → The Aether Grid Corporation', 'House Sarant → House Sarrant'])
+    expect(names('The Drowned Sinners and the Phoenix Collective both wanted it.')).toEqual(['The Drowned Sinners → The Drowned Saints', 'Phoenix Collective → The Phoenix Academy'])
+    expect(names('A crew called the Rawdog Gang ran the stalls.')).toEqual(['new: Rawdog Gang'])
+  })
+
+  it('finds none in the pack’s own prose', () => {
+    const prose = [...content.codex.flatMap((e) => [e.summary, e.full]), ...content.locations.map((l) => l.description)]
+    expect(prose.flatMap(names)).toEqual([])
+  })
+
+  it('sees a codex secret named in prose', () => {
+    const secret = content.codex.find((e) => e.knowledge === 'secret')!
+    expect(secretLeaks(`They spoke of ${secret.name.toLowerCase()} in whispers.`, content.codex).map((l) => l.entry.id)).toContain(secret.id)
   })
 })

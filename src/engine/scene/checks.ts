@@ -1,9 +1,23 @@
-import type { Beat } from '@engine/state'
+import type { Beat, GameState } from '@engine/state'
+import { checkNames, nameIndex, secretLeaks, withProseNames, type NameIndex } from '@engine/codex'
+import { characterById, type Pack } from '@engine/pack'
 import type { ParsedReply, Speaker } from './beats'
 import type { BeatPlan } from './plan'
 import { BEATS, OVERUSED_PHRASES } from './style'
 
-export type ProblemKind = 'player-voice' | 'player-action' | 'unplanned-speaker' | 'unknown-speaker' | 'speech-in-narration' | 'overused-phrase' | 'repeated' | 'beat-count' | 'beat-length'
+export type ProblemKind =
+  | 'player-voice'
+  | 'player-action'
+  | 'unplanned-speaker'
+  | 'unknown-speaker'
+  | 'speech-in-narration'
+  | 'overused-phrase'
+  | 'repeated'
+  | 'beat-count'
+  | 'beat-length'
+  | 'wrong-name'
+  | 'invented-name'
+  | 'secret-leak'
 
 export interface Problem {
   kind: ProblemKind
@@ -122,7 +136,50 @@ export function salvaged(count: number, problems: Problem[]): number[] {
   return [...Array(count).keys()].filter((i) => !drop.has(i)).slice(0, BEATS.max)
 }
 
-const SALVAGE_DROPS: ProblemKind[] = ['player-voice', 'player-action', 'unplanned-speaker', 'unknown-speaker']
+const SALVAGE_DROPS: ProblemKind[] = ['player-voice', 'player-action', 'unplanned-speaker', 'unknown-speaker', 'secret-leak']
+
+const indexes = new WeakMap<Pack, NameIndex>()
+/** The pack's canon names and its people, built once per pack. */
+export function packNames(content: Pack, extraPeople: string[] = []): NameIndex {
+  let index = indexes.get(content)
+  if (!index) {
+    const people = [...content.characters.map((c) => c.name), content.player.name, ...content.locations.flatMap((l) => l.walkOns.flatMap((w) => (w.name ? [w.name] : [])))]
+    const prose = [
+      ...content.codex.flatMap((e) => [e.summary, e.full]),
+      ...content.locations.flatMap((l) => [l.description, ...Object.values(l.texture).flat(), ...l.extras])
+    ]
+    index = withProseNames(nameIndex(content.codex, content.setting, people, content.vocabulary.genericWords), prose)
+    indexes.set(content, index)
+  }
+  if (extraPeople.length === 0) return index
+  return { ...index, people: new Set([...index.people, ...extraPeople.map((p) => p.toLowerCase())]) }
+}
+
+/**
+ * The lore checks on a reply (claude/lore-injection.md §11): names of groups and places that aren't canon (a near
+ * miss is told the right name; anything else new is told to use a description), and codex secrets showing in the
+ * prose that nobody here is keeping. Salvage drops a beat that leaks a secret.
+ */
+export function loreProblems(content: Pack, state: GameState, plan: BeatPlan, parsed: ParsedReply): Problem[] {
+  if (content.codex.length === 0) return []
+  const problems: Problem[] = []
+  const index = packNames(content, [state.player.name])
+  // A speaker keeping a linked secret this turn may let it slip; that's the relevance gate's business, not a leak.
+  const allowed = new Set(
+    plan.speakers.flatMap((s) => (s.kept ?? []).flatMap((id) => characterById(content, s.id)?.secrets.filter((x) => `${s.id}.${x.id}` === id && x.codex).map((x) => x.codex!) ?? []))
+  )
+  parsed.beats.forEach((beat, i) => {
+    const n = i + 1
+    for (const f of checkNames(beat.text, index)) {
+      if (f.kind === 'wrong-name') problems.push({ kind: 'wrong-name', beat: n, text: f.name, fix: `Beat ${n} calls something "${f.name}", which isn't its name. Use ${f.canon.map((c) => `"${c}"`).join(' or ')}, or describe it.` })
+      else problems.push({ kind: 'invented-name', beat: n, text: f.name, fix: `Beat ${n} names "${f.name}", which doesn't exist. Use an existing name or a plain description.` })
+    }
+    for (const leak of secretLeaks(beat.text, content.codex, allowed)) {
+      problems.push({ kind: 'secret-leak', beat: n, text: leak.words, fix: `Beat ${n} reveals something no one here would say ("${leak.words}"). Cut it.` })
+    }
+  })
+  return problems
+}
 
 /** The beats (1-based) salvage drops for these problems, before the cut to the budget. */
 export const droppedBeats = (problems: Problem[]): number[] => [...new Set(problems.filter((p) => p.beat && SALVAGE_DROPS.includes(p.kind)).map((p) => p.beat!))].sort((a, b) => a - b)

@@ -3,7 +3,7 @@ import { parseReply, type ParsedReply } from './beats'
 import type { Pack } from '@engine/pack'
 import { buildDirectorPrompt } from './director'
 import { traced, TracedError, type CallTrace, type LlmReply, type Prompt } from '@engine/core'
-import { checkReply, droppedBeats, salvaged, withoutSpeech, type Problem } from './checks'
+import { checkReply, droppedBeats, loreProblems, salvaged, withoutSpeech, type Problem } from './checks'
 import { fallbackPlan, parsePlan, validatePlan, type BeatPlan } from './plan'
 import { resolvePlan, type ResolveOptions } from './resolve'
 import { castSnapshot, checkTraces, planItems, type BeatTrace, type TurnTrace } from './trace'
@@ -130,7 +130,7 @@ export async function runTurn(
     let parsed: ParsedReply = parseReply(draft, speakers)
     // The repetition tracker runs for the situation pipeline only, so the older one stays a fixed baseline.
     const recent = situation ? recentlyUsed(content, scene) : {}
-    const check = (reply: ParsedReply) => [...checkReply(reply, plan, speakers, input, content.phrases), ...repeatProblems(content, reply, recent)]
+    const check = (reply: ParsedReply) => [...checkReply(reply, plan, speakers, input, content.phrases), ...repeatProblems(content, reply, recent), ...loreProblems(content, state, plan, reply)]
     const problems = check(parsed)
     let remaining: Problem[] = []
     let kept = parsed.beats.map((_, i) => i)
