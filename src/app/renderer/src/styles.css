@@ -151,6 +151,7 @@ label.check { flex-direction: row; align-items: center; gap: 0.5rem; font-size: 
 .turn-details ul, .turn-details ol { margin: 0; padding-left: 1.1rem; display: flex; flex-direction: column; gap: 0.25rem; }
 .turn-details .muted { color: var(--muted); }
 .turn-details .warn { color: #e0b04a; }
+.turn-details .layer { margin-top: 0.4rem; }
 .turn-details .mono { font-family: ui-monospace, 'Cascadia Mono', Consolas, monospace; font-size: 0.75rem; }
 .detail-beats li { cursor: pointer; }
 .detail-beats li:hover { color: var(--neon); }

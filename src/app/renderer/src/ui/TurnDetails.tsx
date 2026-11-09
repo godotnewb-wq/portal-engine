@@ -58,6 +58,38 @@ export function TurnDetails({ nameOf, details, loading, flags, flaggable, onFlag
   )
 }
 
+/** Which codex entries reached the director this turn, layer by layer (milestone 3). */
+function Lore({ lore }: { lore: NonNullable<Details['turn']['lore']> }) {
+  const total = lore.tokens.stage + lore.tokens.scene + lore.tokens.triggered
+  const list = (entries: typeof lore.scene, none: string) =>
+    entries.length > 0 ? (
+      <ul>
+        {entries.map((e) => (
+          <li key={e.id} title={e.id}>
+            {e.name}
+            {e.form === 'summary' && <span className="muted"> · summary only</span>}
+          </li>
+        ))}
+      </ul>
+    ) : (
+      <p className="muted">{none}</p>
+    )
+  return (
+    <section>
+      <h3>
+        Lore <small>(≈{total} tokens to the director)</small>
+      </h3>
+      <div className="muted layer">Triggered this turn (≈{lore.tokens.triggered} tok)</div>
+      {list(lore.triggered, 'Nothing came up.')}
+      <div className="muted layer">Active in the scene (≈{lore.tokens.scene} tok)</div>
+      {list(lore.scene, 'None: no codex lore for this place or these people.')}
+      <div className="muted layer">
+        Stage: {lore.stage.length} lines, always on (≈{lore.tokens.stage} tok) · writer’s stage ≈{lore.tokens.writerStage} tok
+      </div>
+    </section>
+  )
+}
+
 function Body({ details, nameOf, flags, onBeat }: { details: Details; nameOf: (id: string) => string; flags: FlagRecord[]; onBeat: (n: number) => void }) {
   const t = details.turn
   const plan = t.director.plan
@@ -112,6 +144,7 @@ function Body({ details, nameOf, flags, onBeat }: { details: Details; nameOf: (i
           </ul>
         </section>
       )}
+      {t.lore && <Lore lore={t.lore} />}
       {(t.findings.length > 0 || t.rewrite) && (
         <section>
           <h3>Code checks</h3>

@@ -90,6 +90,8 @@ export interface LoreScene {
 
 export interface LayerEntry {
   id: string
+  /** The entry's name, so logs read without the codex at hand. */
+  name: string
   form: 'full' | 'summary'
 }
 
@@ -174,7 +176,7 @@ function fit(entries: CodexEntry[], forms: Map<string, 'full' | 'summary'>, budg
     kept.splice(kept.indexOf(e), 1)
   }
   const text = render(kept, forms)
-  return { text, entries: kept.map((e) => ({ id: e.id, form: forms.get(e.id)! })), tokens: tokensOf(text) }
+  return { text, entries: kept.map((e) => ({ id: e.id, name: e.name, form: forms.get(e.id)! })), tokens: tokensOf(text) }
 }
 
 /** The scene-scoped and triggered layers for one turn. An entry in the scene layer isn't repeated in the triggered one. */

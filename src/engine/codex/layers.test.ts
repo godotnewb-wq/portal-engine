@@ -32,10 +32,10 @@ describe('the scene-scoped layer', () => {
   it('carries the place’s whole map chain, the factions and peoples of those present, and what the place links to as summaries', () => {
     const { scene } = loreLayers(fixture.codex, fixture.setting, yard, budget)
     expect(scene.entries).toEqual([
-      { id: 'location.lower.east-gate.the-yard', form: 'full' },
-      { id: 'location.lower.east-gate', form: 'full' },
-      { id: 'location.lower', form: 'full' },
-      { id: 'faction.guild', form: 'full' }
+      { id: 'location.lower.east-gate.the-yard', name: 'The Guild Yard', form: 'full' },
+      { id: 'location.lower.east-gate', name: 'East Gate', form: 'full' },
+      { id: 'location.lower', name: 'The Lower Ward', form: 'full' },
+      { id: 'faction.guild', name: 'The Guild', form: 'full' }
     ])
     expect(scene.text).toContain('## The Guild Yard\nCrates stand three high')
   })
