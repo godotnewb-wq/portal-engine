@@ -6,7 +6,7 @@
     { "id": "high-turns", "name": "The High Turns", "feel": "wealthy rings: corporate arcologies, galleries, Off-world House estates", "danger": "intrigue, surveillance, corporate violence" },
     { "id": "bulk", "name": "The Bulk", "feel": "the working heart: markets, foundries, transit, most of the population", "danger": "crime, faction turf, ordinary trouble" },
     { "id": "low-turns", "name": "The Low Turns", "feel": "old districts, overgrown machinery, Aether bleeding into everything; refugee communities", "danger": "gangs, wild magic, smugglers" },
-    { "id": "deepwell", "name": "The Deepwell", "feel": "the chasm where the Aether rises: half-ruined, raw and transforming", "danger": "monsters, wild magic, the unknown" }
+    { "id": "deepwell", "name": "The Deepwell", "feel": "the chasm where the Aether rises: half-ruined and raw, with Aether strong enough to sicken almost anyone", "danger": "monsters, wild magic, the unknown" }
   ],
   "species": [
     { "id": "human", "name": "Human", "drawable": "", "color": "#8f8aa3" },
@@ -19,12 +19,19 @@
     { "id": "spire-council", "name": "The Spire Council", "summary": "the official government; real power sits in the Crown" },
     { "id": "aether-grid-corporation", "name": "The Aether Grid Corporation", "summary": "controls the flow of Aether upward; partly owned by off-world money" },
     { "id": "phoenix-academy", "name": "The Phoenix Academy", "summary": "Aether research and the center of the philosophical debate; rediscovering what was lost in the Burn" },
-    { "id": "animist-order", "name": "The Animist order", "summary": "guards the Aether's source; sees the grid as exploitation; peaceful to radical" },
-    { "id": "golem-rights-movement", "name": "The golem rights movement", "summary": "won golem personhood; now fights the leftover legal battles" },
+    { "id": "garden-guard", "name": "The Garden Guard", "summary": "the Animist order; guards the Aether's source; sees the grid as exploitation; peaceful to radical" },
     { "id": "off-world-houses", "name": "The Off-world Houses", "summary": "galactic aristocratic families with business interests here" },
+    { "id": "house-sarrant", "name": "House Sarrant", "summary": "an old off-world House with a large share of the Grid", "parent": "off-world-houses" },
     { "id": "refugee-networks", "name": "The refugee networks", "summary": "mutual-aid groups, and sometimes resistance cells" },
     { "id": "low-turns-syndicates", "name": "The Low Turns syndicates", "summary": "raw Aether and artifact smuggling" },
+    { "id": "drowned-saints", "name": "The Drowned Saints", "summary": "the Ninth Turn's syndicate; hold the lower stairs and take a tithe", "parent": "low-turns-syndicates" },
     { "id": "couriers", "name": "The Couriers", "summary": "neutral messengers and smugglers who work for anyone in any tier" }
+  ],
+  "stances": [
+    { "from": "garden-guard", "toward": "aether-grid-corporation", "stance": "enemy" },
+    { "from": "aether-grid-corporation", "toward": "garden-guard", "stance": "rival" },
+    { "from": "spire-council", "toward": "low-turns-syndicates", "stance": "enemy" },
+    { "from": "spire-council", "toward": "off-world-houses", "stance": "friendly" }
   ],
   "currency": { "name": "cinders", "note": "metal coins digitally imprinted with credit values; credits are the galactic standard" }
 }

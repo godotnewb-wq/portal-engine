@@ -2,6 +2,7 @@
   "id": "coil-line-car-14",
   "name": "Coil Line car 14",
   "tier": "bulk",
+  "parent": "location.bulk.kilnworks",
   "district": "the Coil Line's mid-span, stalled between the foundry stop and the market stop",
   "description": "A narrow tram car on the Coil Line, the transit loop that carries the Bulk's shift workers around the city's spiral. The grid dropped out two minutes ago and the car hangs stalled on its rail above the foundry district, emergency runes glowing amber, the doors sealed. A roof hatch, a conductor's cabin at the front, twelve seats, standing room. Line Control has said \"a short delay\" once.",
   "texture": {

@@ -2,6 +2,7 @@
   "id": "sump-lantern",
   "name": "The Sump Lantern",
   "tier": "low-turns",
+  "parent": "location.low-turns.ninth-turn",
   "district": "Ninth Turn, under the old pumphouse",
   "description": "A low-ceilinged bar built into a decommissioned pump hall. Aether-cooled pipes run overhead and sweat onto the tables; the light is a green-gold glow from a cracked conduit nobody has the money to fix. Couriers, mechanics and people waiting for work drink here, and fixers keep booths in the back.",
   "texture": {

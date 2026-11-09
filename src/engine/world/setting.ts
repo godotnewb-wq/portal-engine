@@ -11,8 +11,8 @@ export type FactionLevel = z.infer<typeof FactionLevelSchema>
 export const levelRank = (l: FactionLevel) => FACTION_LEVELS.indexOf(l)
 
 /**
- * A sub-group's standing counts one level lower in its parent, and never above trusted: the head of one House isn't
- * the head of all the Houses. Affiliated in a sub-group counts for nothing in the parent.
+ * A sub-group's standing counts one level lower in its parent, and never above trusted: the head of one crew isn't
+ * the head of the whole faction. Affiliated in a sub-group counts for nothing in the parent.
  */
 export function parentLevel(l: FactionLevel): FactionLevel | undefined {
   const i = Math.min(levelRank(l) - 1, levelRank('trusted'))

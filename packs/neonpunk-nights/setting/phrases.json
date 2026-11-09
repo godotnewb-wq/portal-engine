@@ -1,3 +1,6 @@
 {
-  "overused": ["neon-soaked", "the Aether hums", "the Aether hummed", "crackling with Aether"]
+  "overused": ["neon-soaked", "the Aether hums", "the Aether hummed", "crackling with Aether"],
+  "stanceWords": ["allied", "friendly", "neutral", "rival", "enemy"],
+  "stanceWarnings": ["allied with", "at war with", "enemies of", "sworn enemies", "sworn enemy", "rivals of"],
+  "genericWords": ["the", "a", "of", "corporation", "council", "order", "movement", "network", "networks", "district", "gang", "syndicate", "syndicates", "house", "houses", "guard", "academy", "office", "station", "line", "turn", "turns", "court", "wall", "stop", "row", "clinic", "car"]
 }

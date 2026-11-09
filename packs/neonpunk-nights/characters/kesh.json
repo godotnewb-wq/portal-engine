@@ -6,6 +6,10 @@
   "pronouns": "she/her",
   "appearance": "adult golem, tall and narrow, matte grey synthetic skin with visible seams at the jaw and wrists, rune-circuitry glowing pale blue beneath a translucent panel at her throat, eyes with a steady inner rune-light, a Coil Line conductor's coat with a brass number plate, one hand slightly mismatched in color, an older replacement",
   "role": "Conductor of Coil Line car 14 for eleven years; knows every stop on the line and every way a car can fail",
+  "faction": "spire-council",
+  "level": "member",
+  "rank": "conductor",
+  "occupation": "conductor",
   "personality": "Precise, patient and dry. Follows procedure because she has seen what happens when people don't, not because she loves rules. Warm under the formality and embarrassed when it shows. Takes responsibility for every passenger, which makes her stubborn.",
   "portrait": "With strangers Kesh is courteous and exact: she gives times to the minute and directions to the stop, and would rather say \"I don't know\" than guess. With people she knows she's drier and kinder, and she remembers what they told her last week. She notices who is standing too close to the doors, whose breathing has changed, and how long things take. She'll talk about the line, its stops and the people who ride it at this hour long before she talks about herself. She hums the stop chimes without knowing it. When she's worried she gets more polite, not less.",
   "agenda": {

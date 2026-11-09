@@ -7,6 +7,9 @@
   "appearance": "adult deep elf woman, late twenties in look, lean runner's build, deep violet skin, long pointed ears with three brass rings in the left, reflective silver eyes, faint teal bioluminescent markings tracing her collarbones and jaw, black hair shaved on one side and braided on the other, scuffed Courier jacket with a reflective sigil on the shoulder, fingerless gloves",
   "role": "Couriers' sigil-runner who works the Low Turns and the Bulk; drinks at the Sump Lantern because nobody there asks where she's been",
   "faction": "couriers",
+  "level": "member",
+  "rank": "sigil-runner",
+  "occupation": "courier",
   "personality": "Dry, watchful, quick to call a lie and slow to explain why she's still around. Keeps a running tally of favors owed in both directions and never mentions it. Laughs at the wrong moments, usually at herself. Fiercely loyal once she decides you're worth it, and pretends that decision hasn't been made.",
   "portrait": "With strangers Vex is economical: a nod, a few dry words, and a look that says she has already judged you, kindly or not. With people she knows she's funnier, rude in a way that's affectionate, and quick to step between them and trouble without saying so. She notices exits, hands, who's watching whom, and who's nervous. She'll talk about routes, bad dispatchers, the weather in the Bulk and Brask's terrible taste in drinks long before anything personal. She walks a coin across her knuckles. When she cares about something she gets more sarcastic, not less.",
   "agenda": {
