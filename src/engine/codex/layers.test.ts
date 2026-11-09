@@ -1,11 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import { fixture } from '@tests/fixture'
-import { canonNames, codexFactionId, directorStage, loreLayers, triggeredEntries, writerStage, type LoreScene } from './layers'
+import { canonNames, codexFactionId, directorStage, loreLayers, stanceLines, triggeredEntries, writerStage, type LoreScene } from './layers'
 
 const budget = { sceneTokens: fixture.ruleset.codex.sceneTokens, triggeredTokens: fixture.ruleset.codex.triggeredTokens }
 const yard: LoreScene = {
   location: { id: 'the-yard', parent: 'location.lower.east-gate' },
-  present: [{ id: 'mara', name: 'Mara Quill', species: 'person', faction: 'guild' }],
+  present: [{ id: 'mara', name: 'Mara Quill', species: 'person', faction: 'guild', level: 'trusted', occupation: 'clerk', holds: [] }],
   texts: [],
   ignore: ['Mara Quill', 'Mara', 'Tobin']
 }
@@ -42,13 +42,24 @@ describe('the scene-scoped layer', () => {
 
   it('walks a sub-group up to its parent, and gives an automaton their people’s culture', () => {
     expect(codexFactionId(fixture.setting, 'night-shift')).toBe('faction.guild.night-shift')
-    const { scene } = loreLayers(fixture.codex, fixture.setting, { ...yard, present: [{ id: 'x', name: 'Cog', species: 'automaton', faction: 'night-shift' }] }, budget)
+    const { scene } = loreLayers(fixture.codex, fixture.setting, { ...yard, present: [{ id: 'x', name: 'Cog', species: 'automaton', faction: 'night-shift', holds: [] }] }, budget)
     expect(ids(scene.entries)).toEqual(expect.arrayContaining(['faction.guild', 'faction.guild.night-shift', 'species.automaton']))
   })
 
-  it('never carries circles or secret entries (they come with the knowledge filter, and secrets only with their holders)', () => {
-    const { scene, triggered } = loreLayers(fixture.codex, fixture.setting, { ...yard, texts: ['the tallies, the second ledger and the back door'] }, budget)
-    expect([...ids(scene.entries), ...ids(triggered.entries)].filter((id) => /tallies|ledger|back-door/.test(id))).toEqual([])
+  it('carries an insider entry only when someone present knows it, marked with who; never a secret', () => {
+    const texts = ['the tallies, the second ledger and the back door']
+    const asMara = loreLayers(fixture.codex, fixture.setting, { ...yard, texts }, budget)
+    const all = [...ids(asMara.scene.entries), ...ids(asMara.triggered.entries)]
+    expect(all).toContain('faction.guild.tallies')
+    expect(asMara.triggered.text).toContain('## How the tallies work (insider knowledge: only Mara here knows this)')
+    expect(all.filter((id) => /ledger|back-door/.test(id))).toEqual([])
+    const outsider = loreLayers(fixture.codex, fixture.setting, { ...yard, present: [{ id: 'pell', name: 'Pell', species: 'person', holds: [] }], texts }, budget)
+    expect([...ids(outsider.scene.entries), ...ids(outsider.triggered.entries)].filter((id) => /tallies|ledger|back-door/.test(id))).toEqual([])
+  })
+
+  it('brings the insider entries someone’s trade opens, without anyone naming them', () => {
+    const porter = loreLayers(fixture.codex, fixture.setting, { ...yard, present: [{ id: 'tobin', name: 'Tobin', species: 'person', occupation: 'porter', holds: [] }] }, budget)
+    expect(porter.scene.text).toContain('How the tallies work (insider knowledge: only Tobin here knows this)')
   })
 
   it('is the same text for the same inputs', () => {
@@ -84,6 +95,20 @@ describe('the triggered layer', () => {
 
   it('leaves out what the scene layer already carries in full', () => {
     const { triggered } = loreLayers(fixture.codex, fixture.setting, { ...yard, texts: ['the Guild and the Ward Watch'] }, budget)
-    expect(ids(triggered.entries)).toEqual(['faction.watch'])
+    expect(ids(triggered.entries)).not.toContain('faction.guild')
+    expect(ids(triggered.entries)).toContain('faction.watch')
+  })
+})
+
+describe('stance lines', () => {
+  it('give each official stance among the factions in play, one way, in the pack’s words', () => {
+    const { stances } = loreLayers(fixture.codex, fixture.setting, { ...yard, texts: ['the watch'] }, { ...budget, stanceWords: fixture.vocabulary.stanceWords })
+    expect(stances).toEqual(['- The Ward Watch toward The Guild: sour'])
+  })
+
+  it('cover a sub-group through its parent, but don’t repeat it when the parent is in play', () => {
+    expect(stanceLines(fixture.setting, fixture.vocabulary.stanceWords, ['watch', 'night-shift'])).toEqual(['- The Ward Watch toward The Night Shift: sour'])
+    expect(stanceLines(fixture.setting, fixture.vocabulary.stanceWords, ['watch', 'night-shift', 'guild'])).toEqual(['- The Ward Watch toward The Guild: sour'])
+    expect(stanceLines(fixture.setting, fixture.vocabulary.stanceWords, ['guild'])).toEqual([])
   })
 })

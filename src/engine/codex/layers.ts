@@ -1,4 +1,6 @@
-import { factionChain, type Setting } from '@engine/world'
+import { factionById, factionChain, type Setting } from '@engine/world'
+import { firstName } from '@engine/core'
+import { fits, knows, type Knower } from './knowledge'
 import { locationChain } from './load'
 import type { CodexEntry, CodexKind } from './schema'
 
@@ -67,21 +69,13 @@ export function writerStage(tone: string, codex: CodexEntry[]): Stage {
   return { text, ids: [], tokens: tokensOf(text) }
 }
 
-/** Who is in the scene, as the layers need them. */
-export interface LorePerson {
-  id: string
-  name: string
-  species: string
-  faction?: string
-}
-
 export interface LoreScene {
   /**
    * The codex location the scene is at. A place's id is its region's id plus the location file's id, by convention
    * (`location.<tier>.<region>.<location id>`); when the place has no entry, the region's chain is used.
    */
   location?: { id: string; parent?: string }
-  present: LorePerson[]
+  present: Knower[]
   /** What triggered entries are matched against: the player's input, the last exchanges, the scene summary. */
   texts: string[]
   /** Character names, which never trigger an entry even if a keyword is inside one. */
@@ -104,15 +98,19 @@ export interface Layer {
 export interface LoreLayers {
   scene: Layer
   triggered: Layer
+  /** Official stances between the factions in play, one line per direction that has one. */
+  stances: string[]
 }
 
 export interface LoreBudget {
   sceneTokens: number
   triggeredTokens: number
+  /** The pack's words for the five stance levels, warmest first. */
+  stanceWords?: string[]
 }
 
-/** Entries that may go in the scene and triggered layers this milestone step: common ones. Circles wait for the knowledge filter; secrets never come this way. */
-const open = (e: CodexEntry) => e.knowledge === 'common' && e.audience.includes('director') && e.kind !== 'species-drawable'
+/** Entries the layers may carry. Secrets never come this way: they arrive on a holder's sheet (§5). */
+const open = (e: CodexEntry) => e.knowledge !== 'secret' && e.audience.includes('director') && e.kind !== 'species-drawable'
 
 function sceneEntries(codex: CodexEntry[], setting: Setting, scene: LoreScene): { full: Set<string>; summary: Set<string> } {
   const full = new Set<string>()
@@ -126,6 +124,9 @@ function sceneEntries(codex: CodexEntry[], setting: Setting, scene: LoreScene): 
     if (p.faction) for (const f of factionChain(setting, p.faction)) full.add(codexFactionId(setting, f.id))
     full.add(`species.${p.species}`)
   }
+  // Insider entries someone's trade opens come with them (an "occupation" selector that fits).
+  for (const e of codex)
+    if (e.knowledge === 'circles' && [...(e.circle ? [e.circle] : []), ...e.also].some((s) => s.by === 'occupation' && scene.present.some((p) => fits(setting, s, p)))) full.add(e.id)
   const summary = new Set<string>()
   for (const id of full) for (const r of codex.find((e) => e.id === id)?.related ?? []) if (!full.has(r)) summary.add(r)
   return { full, summary }
@@ -158,15 +159,19 @@ function specificity(e: CodexEntry): number {
   return 50 - KIND_ORDER.indexOf(e.kind) + (e.kind === 'faction' ? e.id.split('.').length : 0)
 }
 
-function render(entries: CodexEntry[], forms: Map<string, 'full' | 'summary'>): string {
-  return entries.map((e) => (forms.get(e.id) === 'full' ? `## ${e.name}\n${e.full}` : `- ${e.name}: ${e.summary}`)).join('\n')
+/** Who present knows each insider entry, by first name; an insider entry nobody here knows isn't carried at all. */
+type Knowers = Map<string, string[]>
+
+function render(entries: CodexEntry[], forms: Map<string, 'full' | 'summary'>, knowers: Knowers): string {
+  const note = (e: CodexEntry) => (knowers.has(e.id) ? ` (insider knowledge: only ${knowers.get(e.id)!.join(', ')} here know${knowers.get(e.id)!.length === 1 ? 's' : ''} this)` : '')
+  return entries.map((e) => (forms.get(e.id) === 'full' ? `## ${e.name}${note(e)}\n${e.full}` : `- ${e.name}${note(e)}: ${e.summary}`)).join('\n')
 }
 
 /** Fits a layer to its budget: least specific entries drop to their summaries first, then drop out. */
-function fit(entries: CodexEntry[], forms: Map<string, 'full' | 'summary'>, budget: number, order: (a: CodexEntry, b: CodexEntry) => number): Layer {
+function fit(entries: CodexEntry[], forms: Map<string, 'full' | 'summary'>, budget: number, order: (a: CodexEntry, b: CodexEntry) => number, knowers: Knowers): Layer {
   const kept = [...entries].sort(order)
   const giveWay = [...kept].sort((a, b) => specificity(a) - specificity(b) || a.id.localeCompare(b.id))
-  const over = () => tokensOf(render(kept, forms)) > budget
+  const over = () => tokensOf(render(kept, forms, knowers)) > budget
   for (const e of giveWay) {
     if (!over()) break
     if (forms.get(e.id) === 'full') forms.set(e.id, 'summary')
@@ -175,22 +180,54 @@ function fit(entries: CodexEntry[], forms: Map<string, 'full' | 'summary'>, budg
     if (!over()) break
     kept.splice(kept.indexOf(e), 1)
   }
-  const text = render(kept, forms)
+  const text = render(kept, forms, knowers)
   return { text, entries: kept.map((e) => ({ id: e.id, name: e.name, form: forms.get(e.id)! })), tokens: tokensOf(text) }
 }
 
-/** The scene-scoped and triggered layers for one turn. An entry in the scene layer isn't repeated in the triggered one. */
+/**
+ * Official stances among the factions in play (§5, Generated lines), from setting data, one line per direction that
+ * has one. A stance toward a faction covers its sub-groups unless they have their own; when the parent is in play
+ * too, the sub-group's inherited line is left out as a repeat.
+ */
+export function stanceLines(setting: Setting, words: string[], factions: string[]): string[] {
+  if (words.length === 0) return []
+  const inPlay = [...new Set(factions)].filter((f) => factionById(setting, f))
+  const lines: string[] = []
+  for (const from of inPlay)
+    for (const toward of inPlay) {
+      if (from === toward) continue
+      const chain = factionChain(setting, toward)
+      const holder = chain.find((t) => setting.stances.some((s) => s.from === from && s.toward === t.id))
+      if (!holder || (holder.id !== toward && inPlay.includes(holder.id))) continue
+      const stance = setting.stances.find((s) => s.from === from && s.toward === holder.id)!.stance
+      lines.push(`- ${factionById(setting, from)!.name} toward ${factionById(setting, toward)!.name}: ${stance}`)
+    }
+  return lines
+}
+
+/**
+ * The scene-scoped and triggered layers for one turn. An entry in the scene layer isn't repeated in the triggered
+ * one. Insider entries come in only when someone present knows them, marked with who.
+ */
 export function loreLayers(codex: CodexEntry[], setting: Setting, scene: LoreScene, budget: LoreBudget): LoreLayers {
-  const byId = new Map(codex.filter(open).map((e) => [e.id, e]))
+  const knowers: Knowers = new Map()
+  for (const e of codex)
+    if (e.knowledge === 'circles') {
+      const who = scene.present.filter((p) => knows(setting, e, p)).map((p) => firstName(p.name))
+      if (who.length > 0) knowers.set(e.id, who)
+    }
+  const byId = new Map(codex.filter((e) => open(e) && (e.knowledge === 'common' || knowers.has(e.id))).map((e) => [e.id, e]))
   const order = byKind(KIND_ORDER, setting)
   const { full, summary } = sceneEntries(codex, setting, scene)
   const sceneForms = new Map<string, 'full' | 'summary'>()
   for (const id of full) if (byId.has(id)) sceneForms.set(id, 'full')
   for (const id of summary) if (byId.has(id) && !sceneForms.has(id)) sceneForms.set(id, 'summary')
-  const sceneLayer = fit([...sceneForms.keys()].map((id) => byId.get(id)!), sceneForms, budget.sceneTokens, order)
+  const sceneLayer = fit([...sceneForms.keys()].map((id) => byId.get(id)!), sceneForms, budget.sceneTokens, order, knowers)
 
   const inScene = new Set(sceneLayer.entries.filter((e) => e.form === 'full').map((e) => e.id))
   const hits = triggeredEntries([...byId.values()], scene.texts, scene.ignore).filter((e) => !inScene.has(e.id))
   const triggeredForms = new Map(hits.map((e) => [e.id, 'full' as const]))
-  return { scene: sceneLayer, triggered: fit(hits, triggeredForms as Map<string, 'full' | 'summary'>, budget.triggeredTokens, order) }
+  const triggered = fit(hits, triggeredForms as Map<string, 'full' | 'summary'>, budget.triggeredTokens, order, knowers)
+  const factions = [...sceneLayer.entries, ...triggered.entries].flatMap((l) => codex.find((e) => e.id === l.id)?.faction ?? []).concat(scene.present.flatMap((p) => p.faction ?? []))
+  return { scene: sceneLayer, triggered, stances: stanceLines(setting, budget.stanceWords ?? [], factions) }
 }

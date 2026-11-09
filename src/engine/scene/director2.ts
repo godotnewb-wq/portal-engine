@@ -90,6 +90,7 @@ export function buildDirector2Prompt(content: Pack, state: GameState, input: str
     Object.keys(scene.pressures).length > 0 && `# Pressure now\n${present.filter((id) => scene.pressures[id] !== undefined).map((id) => `${id}: ${content.ruleset.pressures[scene.pressures[id]!]}`).join(', ')}`,
     quietOnes.length > 0 && `# Quiet for a while\n${quietOnes.join('\n')}`,
     lore.layers.triggered.text && `# Lore that has come up (background, not things to recite)\n${lore.layers.triggered.text}`,
+    lore.layers.stances.length > 0 && `# Official stances between the factions here (individuals feel as their sheets say)\n${lore.layers.stances.join('\n')}`,
     `# The player says or does\n${input}`,
     'Return the JSON plan.'
   ]

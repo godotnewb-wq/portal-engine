@@ -83,6 +83,16 @@ function Lore({ lore }: { lore: NonNullable<Details['turn']['lore']> }) {
       {list(lore.triggered, 'Nothing came up.')}
       <div className="muted layer">Active in the scene (≈{lore.tokens.scene} tok)</div>
       {list(lore.scene, 'None: no codex lore for this place or these people.')}
+      {lore.stances && lore.stances.length > 0 && (
+        <>
+          <div className="muted layer">Official stances given</div>
+          <ul>
+            {lore.stances.map((s) => (
+              <li key={s}>{s.replace(/^- /, '')}</li>
+            ))}
+          </ul>
+        </>
+      )}
       <div className="muted layer">
         Stage: {lore.stage.length} lines, always on (≈{lore.tokens.stage} tok) · writer’s stage ≈{lore.tokens.writerStage} tok
       </div>

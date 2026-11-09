@@ -175,7 +175,7 @@ export async function runTurn(
       dice: { before: state.dice, after: dice },
       checks: checkTraces(plan),
       // The lines pipeline carries the stage only, so its trace says so: no scene or triggered lore reached it.
-      lore: situation ? loreTrace(lore) : { ...loreTrace(lore), scene: [], triggered: [], tokens: { ...loreTrace(lore).tokens, scene: 0, triggered: 0 } },
+      lore: situation ? loreTrace(lore) : { ...loreTrace(lore), scene: [], triggered: [], stances: [], tokens: { ...loreTrace(lore).tokens, scene: 0, triggered: 0 } },
       writer: { callId: `${turnId}:writer`, ...(parsed.reshaped.length > 0 && { reshaped: parsed.reshaped }) },
       findings: problems,
       ...(rewritten && {

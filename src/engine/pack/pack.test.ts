@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { rulesetProblems, RulesetSchema } from '@engine/rules'
 import { fixture, fixtureCodex } from '@tests/fixture'
-import { buildPack, packProblems, type PackFiles } from './content'
+import { buildPack, characterById, packProblems, type PackFiles } from './content'
 import { ENGINE_VERSION, satisfies } from './manifest'
 
 /** The fixture pack's files again, as plain data, to break one thing at a time. */
@@ -119,5 +119,30 @@ describe('buildPack', () => {
       ])
     )
     expect(packProblems({ ...fixture, vocabulary: { ...fixture.vocabulary, stanceWords: ['warm', 'cold'] } })).toContain('setting/phrases.json: stanceWords needs exactly 5 words, warmest first, for the setting\'s stances')
+  })
+
+  it('resolves a linked secret’s text from the codex, with the holder’s part and feelings', () => {
+    const mara = characterById(fixture, 'mara')!
+    expect(mara.secrets[0]!.text).toBe('Keeps it: A second ledger records what the yard really takes in. It is kept in the tally office, under the floor. How they feel about it: would rather lose her post than see it found')
+  })
+
+  it('checks secret pointers: the entry exists and is a secret, the holder may know it, and the cap holds', () => {
+    const mara = characterById(fixture, 'mara')!
+    const tobin = characterById(fixture, 'tobin')!
+    const point = (codex: string) => ({ id: 'p', codex, role: 'knows of it', angle: 'uneasy', tell: 'hums', text: 'x' })
+    const characters = [
+      { ...mara, secrets: [...mara.secrets, point('faction.guild.nothing'), point('faction.guild.tallies')] },
+      { ...tobin, secrets: [point('faction.guild.second-ledger')] },
+      { ...mara, id: 'mara-2', secrets: [point('faction.guild.second-ledger')] },
+      { ...mara, id: 'mara-3', secrets: [point('faction.guild.second-ledger')] }
+    ]
+    expect(packProblems({ ...fixture, characters })).toEqual(
+      expect.arrayContaining([
+        'mara\'s secret "p" points to unknown codex entry "faction.guild.nothing"',
+        'mara\'s secret "p" points to "faction.guild.tallies", which isn\'t a secret entry',
+        'tobin can\'t hold "faction.guild.second-ledger": not among who may know it',
+        'codex/factions/guild/second-ledger.md: 4 characters hold it (mara, tobin, mara-2, mara-3); the cap is 2'
+      ])
+    )
   })
 })

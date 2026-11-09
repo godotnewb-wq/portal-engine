@@ -31,15 +31,29 @@ export const VoiceCardSchema = z.object({
 })
 export type VoiceCard = z.infer<typeof VoiceCardSchema>
 
-export const SecretSchema = z.object({
-  id,
-  text: z.string(),
-  /** How they behave when guarding it, so deception reads on the page. */
-  tell: z.string(),
-  /** When they would let it go (free text for the director, until reveal conditions are built). */
-  revealWhen: z.string().optional()
-})
-export type Secret = z.infer<typeof SecretSchema>
+/**
+ * A secret is personal (free text about their own life, which may name factions and places) or linked: a pointer to
+ * a codex secret, with their part in it and how they feel about it, so faction canon is written once, in the codex
+ * (claude/lore-injection.md §7.1). A linked secret's text is filled in from the codex when the pack loads.
+ */
+export const SecretSchema = z
+  .object({
+    id,
+    text: z.string().min(1).optional(),
+    /** Linked: the codex secret it points to, e.g. "faction.ada-guild.ledger". */
+    codex: z.string().min(1).optional(),
+    /** Linked: their part in it, in words ("moved it for them", "knows of it"). */
+    role: z.string().min(1).optional(),
+    /** Linked: how they feel about it, what they'd do to keep it. */
+    angle: z.string().min(1).optional(),
+    /** How they behave when guarding it, so deception reads on the page. */
+    tell: z.string(),
+    /** When they would let it go (free text for the director, until reveal conditions are built). */
+    revealWhen: z.string().optional()
+  })
+  .refine((s) => (s.codex ? !!s.role && !!s.angle : !!s.text), { message: 'a secret needs its text, or a codex pointer with a role and an angle' })
+/** After loading every secret has its text: written, or resolved from the codex. */
+export type Secret = z.infer<typeof SecretSchema> & { text: string }
 
 export const ValueSchema = z.object({ value: z.string(), stance: z.enum(['likes', 'dislikes']) })
 
@@ -95,4 +109,7 @@ export const CharacterSchema = z
     sprite: z.string().optional()
   })
   .refine((c) => c.tier !== 'companion' || c.stats !== undefined, { message: 'companions need a stat block', path: ['stats'] })
-export type Character = z.infer<typeof CharacterSchema>
+/** A character file as written; linked secrets have no text yet. */
+export type CharacterFile = z.infer<typeof CharacterSchema>
+/** A loaded character: every secret has its text. */
+export type Character = Omit<CharacterFile, 'secrets'> & { secrets: Secret[] }

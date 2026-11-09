@@ -24,7 +24,7 @@
   "mood": "busy, curious",
   "knowledge": ["Tobin was in the yard after closing"],
   "values": [{ "value": "honesty", "stance": "likes" }],
-  "secrets": [{ "id": "two-books", "text": "Mara keeps a second set of tallies.", "tell": "Gives exact numbers" }],
+  "secrets": [{ "id": "two-books", "codex": "faction.guild.second-ledger", "role": "keeps it", "angle": "would rather lose her post than see it found", "tell": "Gives exact numbers" }],
   "meters": { "warmth": 10, "bond": 8 },
   "relations": [{ "to": "tobin", "label": "known", "meters": { "warmth": 9, "bond": 4 } }],
   "stats": { "level": 2, "attributes": { "brawn": 3, "wits": 7, "nerve": 5 }, "skills": { "notice": 1, "talk": 1 } }

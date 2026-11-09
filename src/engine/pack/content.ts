@@ -1,7 +1,7 @@
 import { z } from 'zod'
-import { CharacterSchema, PlayerSchema, type Character, type Meters, type Player } from '@engine/characters'
+import { CharacterSchema, PlayerSchema, type Character, type CharacterFile, type Meters, type Player } from '@engine/characters'
 import { rankCap, RulesetSchema, rulesetProblems, type Ruleset, type StatBlock } from '@engine/rules'
-import { buildCodex, codexProblems, type CodexEntry, type CodexFile } from '@engine/codex'
+import { buildCodex, codexProblems, entryById, mayHold, type CodexEntry, type CodexFile, type Knower } from '@engine/codex'
 import { LocationSchema, SettingSchema, settingProblems, speciesById, factionById, tierById, STANCE_LEVEL_COUNT, type Location, type Setting } from '@engine/world'
 import { ENGINE_VERSION, PackManifestSchema, satisfies, type PackManifest } from './manifest'
 
@@ -91,10 +91,36 @@ export function buildPack(files: PackFiles): BuiltPack {
   if (problems.length > 0 || !manifest || !ruleset || !setting || !player || !words) return { ok: false, problems, ...(manifest && { manifest }) }
 
   const { overused, ...vocabulary } = words
-  const pack: Pack = { manifest, ruleset, setting, primer: files.primer.trim(), tone: files.tone.trim(), phrases: overused, vocabulary, codex: codex.entries, characters, locations, player }
+  const pack: Pack = { manifest, ruleset, setting, primer: files.primer.trim(), tone: files.tone.trim(), phrases: overused, vocabulary, codex: codex.entries, characters: characters.map((c) => withSecretTexts(c, codex.entries)), locations, player }
   const cross = packProblems(pack)
   return cross.length > 0 ? { ok: false, problems: cross, manifest } : { ok: true, pack }
 }
+
+/**
+ * A linked secret's text, resolved from the codex so every system that reads secrets sees the fact with the holder's
+ * part and feelings: one fact, one home (claude/lore-injection.md §7.1). A broken pointer is reported by `packProblems`.
+ */
+export function withSecretTexts(c: CharacterFile, codex: CodexEntry[]): Character {
+  return {
+    ...c,
+    secrets: c.secrets.map((s) => {
+      if (!s.codex) return { ...s, text: s.text! }
+      const fact = entryById(codex, s.codex)?.full ?? `(missing codex secret "${s.codex}")`
+      return { ...s, text: `${s.role![0]!.toUpperCase()}${s.role!.slice(1)}: ${fact} How they feel about it: ${s.angle}` }
+    })
+  }
+}
+
+/** A character as the knowledge filter sees them. */
+export const knowerOf = (c: Character): Knower => ({
+  id: c.id,
+  name: c.name,
+  species: c.species,
+  ...(c.faction && { faction: c.faction }),
+  ...(c.level && { level: c.level }),
+  ...(c.occupation && { occupation: c.occupation }),
+  holds: c.secrets.flatMap((s) => (s.codex ? [s.codex] : []))
+})
 
 function meterProblems(r: Ruleset, what: string, meters: Meters): string[] {
   const ids = r.meters.list.map((m) => m.id)
@@ -148,6 +174,13 @@ export function packProblems(pack: Pack): string[] {
     if (c.faction && !factionById(s, c.faction)) problems.push(`${c.id} belongs to unknown faction "${c.faction}"`)
     if (c.level && !c.faction) problems.push(`${c.id} has a faction level but no faction`)
     if (c.rank && !c.level) problems.push(`${c.id} has a rank title but no faction level`)
+    for (const sec of c.secrets) {
+      if (!sec.codex) continue
+      const e = entryById(pack.codex, sec.codex)
+      if (!e) problems.push(`${c.id}'s secret "${sec.id}" points to unknown codex entry "${sec.codex}"`)
+      else if (e.knowledge !== 'secret') problems.push(`${c.id}'s secret "${sec.id}" points to "${sec.codex}", which isn't a secret entry`)
+      else if (!mayHold(s, e, knowerOf(c))) problems.push(`${c.id} can't hold "${sec.codex}": not among who may know it`)
+    }
     problems.push(...meterProblems(r, c.id, c.meters))
     if (c.stats) problems.push(...statProblems(r, c.id, c.stats))
     for (const rel of c.relations) {
@@ -165,6 +198,10 @@ export function packProblems(pack: Pack): string[] {
   const stanceWords = pack.vocabulary.stanceWords
   if (s.stances.length > 0 && stanceWords.length !== STANCE_LEVEL_COUNT) problems.push(`setting/phrases.json: stanceWords needs exactly ${STANCE_LEVEL_COUNT} words, warmest first, for the setting's stances`)
   for (const st of s.stances) if (!stanceWords.includes(st.stance)) problems.push(`setting/setting.json: the stance from "${st.from}" toward "${st.toward}" is "${st.stance}", which isn't a stance word`)
+  for (const e of pack.codex.filter((e) => e.cap !== undefined)) {
+    const holders = pack.characters.filter((c) => c.secrets.some((x) => x.codex === e.id))
+    if (holders.length > e.cap!) problems.push(`codex/${e.file}: ${holders.length} characters hold it (${holders.map((c) => c.id).join(', ')}); the cap is ${e.cap}`)
+  }
   problems.push(...codexProblems(pack.codex, { setting: s, characterIds: [...characters], locations: pack.locations, fullWords: r.codex.fullWords, stanceWarnings: pack.vocabulary.stanceWarnings }))
   problems.push(...statProblems(r, 'the player', pack.player.stats))
 

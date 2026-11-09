@@ -81,3 +81,34 @@ describe('the Neonpunk Nights lore layers (the worked example, claude/lore-injec
     expect(lore.writerStage.text).toContain('the Grid')
   })
 })
+
+describe('the Neonpunk Nights knowledge filter', () => {
+  const lore = async (location: string, cast: string[], input: string) => {
+    const { createInitialState, startScene } = await import('@engine/state')
+    const { turnLore } = await import('@engine/scene')
+    return turnLore(content, startScene(content, createInitialState(content, 1), location, cast), input)
+  }
+
+  it('gives Vex the load-shedding as Courier knowledge at the Sump Lantern; Brask and Oria don’t know it', async () => {
+    const l = await lore('sump-lantern', ['vex', 'brask', 'oria-senn'], 'Evening.')
+    expect(l.layers.scene.text).toContain('How the grid really runs (insider knowledge: only Vex here knows this)')
+  })
+
+  it('gives Teo the Grid’s insider entries as a member when the Grid comes up on the tram, never the reclamation', async () => {
+    const l = await lore('coil-line-car-14', ['kesh', 'jun-halloway', 'teo-varrin'], 'Is the Grid cutting the power on purpose?')
+    const all = [...l.layers.scene.entries, ...l.layers.triggered.entries].map((e) => e.id)
+    expect(all).toEqual(expect.arrayContaining(['faction.aether-grid-corporation.load-shedding', 'faction.aether-grid-corporation.view-of-others']))
+    expect(all.filter((id) => /reclamation|ninth-turn$/.test(id))).toEqual([])
+    expect([l.layers.scene.text, l.layers.triggered.text].join('\n')).toContain('only Teo here knows this')
+  })
+
+  it('gives the director the official stances among the factions in play, both ways where both exist', async () => {
+    const l = await lore('coil-line-car-14', ['kesh', 'jun-halloway', 'teo-varrin'], 'Does the Garden Guard cut the lines?')
+    // House Sarrant is in play through the Grid's linked entry; the Council's stance toward the Houses covers it.
+    expect(l.layers.stances).toEqual([
+      '- The Spire Council toward House Sarrant: friendly',
+      '- The Aether Grid Corporation toward The Garden Guard: rival',
+      '- The Garden Guard toward The Aether Grid Corporation: enemy'
+    ])
+  })
+})
