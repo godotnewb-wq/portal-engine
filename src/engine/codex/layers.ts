@@ -164,7 +164,7 @@ type Knowers = Map<string, string[]>
 
 function render(entries: CodexEntry[], forms: Map<string, 'full' | 'summary'>, knowers: Knowers): string {
   const note = (e: CodexEntry) => (knowers.has(e.id) ? ` (insider knowledge: only ${knowers.get(e.id)!.join(', ')} here know${knowers.get(e.id)!.length === 1 ? 's' : ''} this)` : '')
-  return entries.map((e) => (forms.get(e.id) === 'full' ? `## ${e.name}${note(e)}\n${e.full}` : `- ${e.name}${note(e)}: ${e.summary}`)).join('\n')
+  return entries.map((e) => (forms.get(e.id) === 'full' ? `## ${e.name} [${e.id}]${note(e)}\n${e.full}` : `- ${e.name} [${e.id}]${note(e)}: ${e.summary}`)).join('\n')
 }
 
 /** Fits a layer to its budget: least specific entries drop to their summaries first, then drop out. */

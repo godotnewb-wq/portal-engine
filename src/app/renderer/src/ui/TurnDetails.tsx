@@ -118,6 +118,7 @@ function Body({ details, nameOf, flags, onBeat }: { details: Details; nameOf: (i
             <li key={s.id}>
               <b>{nameOf(s.id)}</b> speaks: {s.intent}
               {s.mood && <i> — {s.mood}</i>}
+              {s.framing && <span className="muted"> · view: {s.framing}</span>}
               {s.hiding && <span className="muted"> · hiding {s.hiding} ({s.approach ?? 'deflect'})</span>}
             </li>
           ))}
@@ -129,6 +130,11 @@ function Body({ details, nameOf, flags, onBeat }: { details: Details; nameOf: (i
           {plan.walk_ons.map((w) => (
             <li key={w.id} className="muted">
               {nameOf(w.id)}: {w.line}
+            </li>
+          ))}
+          {plan.lore?.map((l) => (
+            <li key={l.entry + l.line} title={l.entry}>
+              Lore ({l.name}){l.who && <> for <b>{nameOf(l.who)}</b></>}: {l.line}
             </li>
           ))}
           {plan.texture.length > 0 && <li className="muted">Texture: {plan.texture.join('; ')}</li>}

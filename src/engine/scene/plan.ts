@@ -28,7 +28,9 @@ export const PlannedSpeakerSchema = z.object({
   /** Situation plan: the fact ids of the secrets they keep this turn (each touched by something just said). */
   kept: z.array(z.string()).optional().catch(undefined),
   /** Situation plan: the kept secret's tell, when the game lets it show this turn. */
-  tell: text.optional()
+  tell: text.optional(),
+  /** Situation plan: how they colour what they say about the world ("resentful, street-level view"). */
+  framing: text.optional()
 })
 
 export const PlannedCheckSchema = z.object({
@@ -113,10 +115,24 @@ export interface Move {
  * The validated plan. `moves`, `player_action` and `change` come from the situation plan (`plan2.ts`); a plan from
  * the older director has none of them, and `exchange` then carries the lines.
  */
+/**
+ * A line of world lore the writer may draw on this turn (claude/lore-injection.md §8): the codex entry it comes from,
+ * the fact in plain words, and, for insider knowledge, the one speaker who would say it.
+ */
+export interface LoreLine {
+  entry: string
+  /** The entry's name, for read-outs. */
+  name: string
+  line: string
+  who?: string
+}
+
 export type BeatPlan = Omit<RawPlan, 'checks' | 'exchange'> & {
   checks: PlannedCheck[]
   exchange: ExchangeLine[]
   moves?: Move[]
+  /** Situation plan: a pool of lore lines, apart from the moves. */
+  lore?: LoreLine[]
   player_action?: { doing: string; uncertain: boolean }
   change?: string
 }

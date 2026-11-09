@@ -1,6 +1,8 @@
 import { z } from 'zod'
 import type { GameState } from '@engine/state'
-import { characterById, type Pack } from '@engine/pack'
+import { characterById, knowerOf, type Pack } from '@engine/pack'
+import { entryById, knows } from '@engine/codex'
+import { turnLore, type TurnLore } from './lore'
 import { canSay, sceneFacts, toldPlayer } from './facts'
 import {
   MAX_LINES,
@@ -12,6 +14,7 @@ import {
   validatePlan,
   type BeatPlan,
   type ExchangeLine,
+  type LoreLine,
   type Move,
   type RawPlan,
   type Said
@@ -27,6 +30,11 @@ export const MOVE_KINDS = ['answer', 'ask', 'push back', 'dodge', 'offer', 'refu
 /** Something new a move brings in, at most this many words: a price, a time, a plan; never a line of dialogue. */
 export const NEW_FACT_WORDS = 25
 
+/** Lore lines a turn: a small optional pool for the writer, never one per spoken line (claude/lore-injection.md §8; tune). */
+export const MAX_LORE_LINES = 3
+/** A lore line is a fact in plain words, at most this long. */
+export const LORE_LINE_WORDS = 30
+
 const RawMoveSchema = z.object({
   who: z.string(),
   answers: z.union([z.number(), z.string()]).catch('player'),
@@ -38,8 +46,9 @@ const RawMoveSchema = z.object({
 
 export const RawPlan2Schema = z.object({
   player_action: z.object({ doing: text, uncertain: z.boolean().catch(false) }).catch({ doing: '', uncertain: false }),
-  speakers: list(z.object({ id: z.string(), goal: text, mood: text, pressure: text, keeps: list(z.string()), touched: text, approach: text.optional() })),
+  speakers: list(z.object({ id: z.string(), goal: text, mood: text, pressure: text, keeps: list(z.string()), touched: text, approach: text.optional(), framing: text.optional() })),
   moves: list(RawMoveSchema),
+  lore: list(z.object({ entry: z.string(), who: z.string().optional().catch(undefined), line: text })),
   change: text,
   reactions: list(z.object({ id: z.string(), beat: z.string() })),
   checks: list(PlannedCheckSchema),
@@ -94,7 +103,7 @@ function justSaid(state: GameState, input: string): string {
  * of speaker slots). An aim's pressure moves at most one step a turn. A move's facts are a pool it may draw on, so a
  * move with none is fine.
  */
-export function validatePlan2(content: Pack, state: GameState, raw: RawPlan2, input = ''): { plan: BeatPlan; corrections: string[] } {
+export function validatePlan2(content: Pack, state: GameState, raw: RawPlan2, input = '', lore: TurnLore = turnLore(content, state, input)): { plan: BeatPlan; corrections: string[] } {
   const scene = state.scene!
   const facts = new Map(sceneFacts(content, state).map((f) => [f.id, f]))
   const words = content.ruleset.pressures
@@ -122,6 +131,7 @@ export function validatePlan2(content: Pack, state: GameState, raw: RawPlan2, in
         intent: s.goal,
         mood: s.mood,
         pressure: words[level]!,
+        ...(s.framing?.trim() && { framing: s.framing.trim() }),
         ...(kept.length > 0 && { hiding: kept.map((f) => f.text).join(' '), approach: s.approach || 'deflect', kept: kept.map((f) => f.id) })
       }
     }),
@@ -181,10 +191,45 @@ export function validatePlan2(content: Pack, state: GameState, raw: RawPlan2, in
   for (const id of speakers) if (!moves.some((m) => m.who === id)) fix(`speaker "${id}" had no move`)
 
   const exchange: ExchangeLine[] = moves.map((m) => ({ who: m.who, answers: m.answers, point: moveText(m) }))
+  const loreLines = validateLore(content, state, raw, lore, speakers, fix)
   return {
-    plan: { ...plan, exchange, moves, player_action: raw.player_action, change: raw.change },
+    plan: { ...plan, exchange, moves, player_action: raw.player_action, change: raw.change, ...(loreLines.length > 0 && { lore: loreLines }) },
     corrections
   }
+}
+
+/**
+ * The plan's lore lines, checked the way `canSay` checks facts (claude/lore-injection.md §8): the entry must be one
+ * the director was given this turn, never a secret; an insider entry's line needs a `who`, a speaker who knows it,
+ * and only they would say it; a common entry's line may be said by anyone, or used in narration. A line that fails
+ * is dropped and counted as a correction. At most `MAX_LORE_LINES`, each a fact in plain words, not dialogue.
+ */
+function validateLore(content: Pack, state: GameState, raw: RawPlan2, lore: TurnLore, speakers: Set<string>, fix: (why: string) => void): LoreLine[] {
+  const given = new Set([...lore.layers.scene.entries, ...lore.layers.triggered.entries].map((e) => e.id))
+  const lines: LoreLine[] = []
+  raw.lore.forEach((l, i) => {
+    const n = i + 1
+    const id = l.entry.trim().replace(/^\[|\]$/g, '')
+    const line = l.line.trim()
+    const entry = entryById(content.codex, id)
+    if (!line) return fix(`dropped lore line ${n}: it says nothing`)
+    if (!entry || !given.has(id)) return fix(`dropped lore line ${n}: "${id}" wasn't given this turn`)
+    if (entry.knowledge === 'secret') return fix(`dropped lore line ${n}: "${id}" is a secret`)
+    if (lines.length >= MAX_LORE_LINES) return fix(`dropped lore line ${n}: at most ${MAX_LORE_LINES}`)
+    if (QUOTED_WORDS.test(line)) fix(`lore line ${n} quotes dialogue`)
+    const w = line.split(/\s+/)
+    const said = w.length > LORE_LINE_WORDS ? w.slice(0, LORE_LINE_WORDS).join(' ') : line
+    const who = l.who?.trim() ? presentId(content, state.scene!, l.who.trim()) : undefined
+    if (entry.knowledge === 'circles') {
+      const c = who ? characterById(content, who) : undefined
+      if (!who || !speakers.has(who) || !c) return fix(`dropped lore line ${n}: insider knowledge needs a speaker who knows it`)
+      if (!knows(content.setting, entry, knowerOf(c))) return fix(`dropped lore line ${n}: ${who} doesn't know ${id}`)
+      return void lines.push({ entry: id, name: entry.name, line: said, who })
+    }
+    if (l.who?.trim() && (!who || !speakers.has(who))) fix(`lore line ${n}: "${l.who.trim()}" isn't a speaker; anyone may use it`)
+    lines.push({ entry: id, name: entry.name, line: said, ...(who && speakers.has(who) && { who }) })
+  })
+  return lines
 }
 
 /**

@@ -37,7 +37,7 @@ describe('the scene-scoped layer', () => {
       { id: 'location.lower', name: 'The Lower Ward', form: 'full' },
       { id: 'faction.guild', name: 'The Guild', form: 'full' }
     ])
-    expect(scene.text).toContain('## The Guild Yard\nCrates stand three high')
+    expect(scene.text).toContain('## The Guild Yard [location.lower.east-gate.the-yard]\nCrates stand three high')
   })
 
   it('walks a sub-group up to its parent, and gives an automaton their people’s culture', () => {
@@ -51,7 +51,7 @@ describe('the scene-scoped layer', () => {
     const asMara = loreLayers(fixture.codex, fixture.setting, { ...yard, texts }, budget)
     const all = [...ids(asMara.scene.entries), ...ids(asMara.triggered.entries)]
     expect(all).toContain('faction.guild.tallies')
-    expect(asMara.triggered.text).toContain('## How the tallies work (insider knowledge: only Mara here knows this)')
+    expect(asMara.triggered.text).toContain('## How the tallies work [faction.guild.tallies] (insider knowledge: only Mara here knows this)')
     expect(all.filter((id) => /ledger|back-door/.test(id))).toEqual([])
     const outsider = loreLayers(fixture.codex, fixture.setting, { ...yard, present: [{ id: 'pell', name: 'Pell', species: 'person', holds: [] }], texts }, budget)
     expect([...ids(outsider.scene.entries), ...ids(outsider.triggered.entries)].filter((id) => /tallies|ledger|back-door/.test(id))).toEqual([])
@@ -59,7 +59,7 @@ describe('the scene-scoped layer', () => {
 
   it('brings the insider entries someone’s trade opens, without anyone naming them', () => {
     const porter = loreLayers(fixture.codex, fixture.setting, { ...yard, present: [{ id: 'tobin', name: 'Tobin', species: 'person', occupation: 'porter', holds: [] }] }, budget)
-    expect(porter.scene.text).toContain('How the tallies work (insider knowledge: only Tobin here knows this)')
+    expect(porter.scene.text).toContain('How the tallies work [faction.guild.tallies] (insider knowledge: only Tobin here knows this)')
   })
 
   it('is the same text for the same inputs', () => {
@@ -67,10 +67,10 @@ describe('the scene-scoped layer', () => {
   })
 
   it('drops the least specific entries to summaries first under budget pressure, keeping the place in full', () => {
-    const { scene } = loreLayers(fixture.codex, fixture.setting, yard, { ...budget, sceneTokens: 90 })
+    const { scene } = loreLayers(fixture.codex, fixture.setting, yard, { ...budget, sceneTokens: 100 })
     expect(scene.entries.find((e) => e.id === 'location.lower.east-gate.the-yard')?.form).toBe('full')
     expect(scene.entries.find((e) => e.id === 'faction.guild')?.form).toBe('summary')
-    expect(scene.tokens).toBeLessThanOrEqual(90)
+    expect(scene.tokens).toBeLessThanOrEqual(100)
   })
 })
 

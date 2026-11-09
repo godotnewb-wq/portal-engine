@@ -101,7 +101,7 @@ export async function runTurn(
     const directed = situation ? parsePlan2(directorReply) : parsePlan(directorReply)
     const validated = directed
       ? situation
-        ? validatePlan2(content, state, directed as NonNullable<ReturnType<typeof parsePlan2>>, input)
+        ? validatePlan2(content, state, directed as NonNullable<ReturnType<typeof parsePlan2>>, input, lore)
         : validatePlan(content, state, directed as NonNullable<ReturnType<typeof parsePlan>>)
       : { plan: fallbackPlan(content, state, input), corrections: [] }
     const resolved = resolvePlan(content, state, validated.plan, options)

@@ -91,7 +91,7 @@ describe('the Neonpunk Nights knowledge filter', () => {
 
   it('gives Vex the load-shedding as Courier knowledge at the Sump Lantern; Brask and Oria don’t know it', async () => {
     const l = await lore('sump-lantern', ['vex', 'brask', 'oria-senn'], 'Evening.')
-    expect(l.layers.scene.text).toContain('How the grid really runs (insider knowledge: only Vex here knows this)')
+    expect(l.layers.scene.text).toContain('How the grid really runs [faction.aether-grid-corporation.load-shedding] (insider knowledge: only Vex here knows this)')
   })
 
   it('gives Teo the Grid’s insider entries as a member when the Grid comes up on the tram, never the reclamation', async () => {
