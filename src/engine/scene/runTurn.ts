@@ -13,6 +13,7 @@ import { buildDirector2Prompt } from './director2'
 import { parsePlan2, settlePlan2, validatePlan2 } from './plan2'
 import { recentlyUsed, repeatProblems, usageOf } from './repeats'
 import { buildWriter2Prompt } from './writer2'
+import { loreTrace, turnLore } from './lore'
 
 /**
  * The LLM calls a turn may make. `write` streams; it is used for the scene writer and its one rewrite. Either may
@@ -94,7 +95,8 @@ export async function runTurn(
   try {
     // Call 1: the director.
     const situation = (options.pipeline ?? 'situation') === 'situation'
-    const directorPrompt = situation ? buildDirector2Prompt(content, state, input) : buildDirectorPrompt(content, state, input)
+    const lore = turnLore(content, state, input)
+    const directorPrompt = situation ? buildDirector2Prompt(content, state, input, lore) : buildDirectorPrompt(content, state, input)
     const directorReply = await call('director', directorPrompt, () => llm.direct(directorPrompt))
     const directed = situation ? parsePlan2(directorReply) : parsePlan(directorReply)
     const validated = directed
@@ -172,6 +174,8 @@ export async function runTurn(
       director: { callId: directorCall.id, read: !directed ? 'unreadable' : directorCall.meta?.jsonRetried ? 'json-retried' : 'json', plan, corrections: validated.corrections, pipeline: situation ? 'situation' : 'lines' },
       dice: { before: state.dice, after: dice },
       checks: checkTraces(plan),
+      // The lines pipeline carries the stage only, so its trace says so: no scene or triggered lore reached it.
+      lore: situation ? loreTrace(lore) : { ...loreTrace(lore), scene: [], triggered: [], tokens: { ...loreTrace(lore).tokens, scene: 0, triggered: 0 } },
       writer: { callId: `${turnId}:writer`, ...(parsed.reshaped.length > 0 && { reshaped: parsed.reshaped }) },
       findings: problems,
       ...(rewritten && {

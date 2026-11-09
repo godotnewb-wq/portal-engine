@@ -8,6 +8,7 @@ import { sceneFacts } from './facts'
 import { MAX_CHECKS, MAX_LINES, MAX_SPEAKERS, QUIET_TURNS, presentCast, silence } from './plan'
 import { MOVE_KINDS, NEW_FACT_WORDS } from './plan2'
 import { ADULTS_ONLY } from './style'
+import { turnLore, type TurnLore } from './lore'
 
 /**
  * The situation director's rules (director-writer review, option B). It plans what is true, wanted and at stake, as
@@ -47,7 +48,7 @@ Return only this JSON object:
 - leaves: characters who walk out. end_scene: true only at a natural close.
 - Never decide, say or do anything for the player.`
 
-export function buildDirector2Prompt(content: Pack, state: GameState, input: string): Prompt {
+export function buildDirector2Prompt(content: Pack, state: GameState, input: string, lore: TurnLore = turnLore(content, state, input)): Prompt {
   const scene = state.scene
   if (!scene) throw new Error('No scene in progress')
   const location = locationById(content, scene.locationId)!
@@ -59,7 +60,7 @@ export function buildDirector2Prompt(content: Pack, state: GameState, input: str
 
   const system = [
     director2Rules(content.ruleset),
-    `# World: ${content.setting.name}\n${content.primer}\n${ADULTS_ONLY}`,
+    `# World: ${content.setting.name}\n${lore.stage.text}\n${ADULTS_ONLY}`,
     content.tone && `# Tone\n${content.tone}`,
     [
       `# Location: ${location.name} (${tierById(content.setting, location.tier)?.name ?? location.tier}, ${location.district})`,
@@ -67,6 +68,7 @@ export function buildDirector2Prompt(content: Pack, state: GameState, input: str
       `Details: ${[...location.texture.sights, ...location.texture.sounds, ...location.texture.smells].join('; ')}`,
       ...facts.filter((f) => f.kind === 'place').map((f) => `- [${f.id}] ${f.text}`)
     ].join('\n'),
+    lore.layers.scene.text && `# Lore of this place and the people here (background, not things to recite)\n${lore.layers.scene.text}`,
     walkOns.length > 0 && `# Walk-ons\n${walkOns.map((w) => `- ${w.label}${w.name ? ` (${w.name})` : ''} [id: ${w.id}]: ${w.species}; ${w.look}; ${w.manner}; ${w.role}`).join('\n')}`,
     `# The player: ${player.name} (${player.species}, ${player.pronouns})\n${player.appearance}. ${player.background}`,
     `# Characters present\n${cast.map((c) => sheet(content, state, c, present, true)).join('\n\n')}`
@@ -87,6 +89,7 @@ export function buildDirector2Prompt(content: Pack, state: GameState, input: str
     `# Turns since each last spoke\n${present.map((id) => `${id}: ${quiet[id]}`).join(', ')}`,
     Object.keys(scene.pressures).length > 0 && `# Pressure now\n${present.filter((id) => scene.pressures[id] !== undefined).map((id) => `${id}: ${content.ruleset.pressures[scene.pressures[id]!]}`).join(', ')}`,
     quietOnes.length > 0 && `# Quiet for a while\n${quietOnes.join('\n')}`,
+    lore.layers.triggered.text && `# Lore that has come up (background, not things to recite)\n${lore.layers.triggered.text}`,
     `# The player says or does\n${input}`,
     'Return the JSON plan.'
   ]

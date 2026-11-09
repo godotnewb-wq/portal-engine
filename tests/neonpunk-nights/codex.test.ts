@@ -63,3 +63,21 @@ describe('the Neonpunk Nights codex', () => {
     expect(who('jun-halloway')).toEqual([undefined, undefined, undefined, 'nurse'])
   })
 })
+
+describe('the Neonpunk Nights lore layers (the worked example, claude/lore-injection.md §12)', () => {
+  it('at the Sump Lantern: the place, the Ninth Turn and the Low Turns, the Couriers for Vex, and the peoples present', async () => {
+    const { createInitialState, startScene } = await import('@engine/state')
+    const { turnLore } = await import('@engine/scene')
+    const state = startScene(content, createInitialState(content, 1), 'sump-lantern', ['vex', 'brask', 'oria-senn'])
+    const lore = turnLore(content, state, 'Is this job for the Grid Corporation, Oria?')
+    const scene = lore.layers.scene.entries.map((e) => e.id)
+    expect(scene.slice(0, 3)).toEqual(['location.low-turns.ninth-turn.sump-lantern', 'location.low-turns.ninth-turn', 'location.low-turns'])
+    expect(scene).toEqual(expect.arrayContaining(['faction.couriers', 'species.deep-elf', 'species.goblin', 'species.light-elf']))
+    const triggered = lore.layers.triggered.entries.map((e) => e.id)
+    expect(triggered).toEqual(expect.arrayContaining(['faction.aether-grid-corporation', 'faction.aether-grid-corporation.apprenticeships']))
+    // Insider entries wait for the knowledge filter; the reclamation never comes this way.
+    expect(triggered.filter((id) => /load-shedding|reclamation|view-of-others/.test(id))).toEqual([])
+    expect(lore.stage.text).toContain('The Aether Grid Corporation pipes refined Aether up the spire')
+    expect(lore.writerStage.text).toContain('the Grid')
+  })
+})

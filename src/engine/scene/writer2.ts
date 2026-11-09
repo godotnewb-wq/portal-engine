@@ -8,6 +8,7 @@ import type { BeatPlan, Move } from './plan'
 import { ADULTS_ONLY, BEATS } from './style'
 import { checkLine, voiceCard } from './writer'
 import { recentlyUsed } from './repeats'
+import { writerStage } from '@engine/codex'
 
 /**
  * How the conversation should read (director-writer review, option B). A few principles and one example in place of
@@ -51,7 +52,7 @@ export function buildWriter2Prompt(content: Pack, state: GameState, plan: BeatPl
   const system = [
     "You write one turn of a visual-novel RPG scene from a director's plan: the conversation and what happens.",
     WRITER2_STYLE,
-    content.tone && `Tone:\n${content.tone}`,
+    writerStage(content.tone, content.codex).text,
     ADULTS_ONLY,
     WRITER2_FORMAT,
     `The player is ${state.player.name} (${state.player.pronouns}), addressed as "you".`,

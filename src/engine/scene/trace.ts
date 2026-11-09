@@ -8,6 +8,7 @@ import { firstName } from '@engine/core'
 import type { Tags } from './beats'
 import type { Problem } from './checks'
 import type { BeatPlan } from './plan'
+import type { LoreTrace } from './lore'
 
 /**
  * Everything one turn did, for the logs (milestone 2, A1): the engine builds it, the platform writes it. Calls are
@@ -34,6 +35,8 @@ export interface TurnTrace {
   }
   dice: { before: number; after: number }
   checks: CheckTrace[]
+  /** Which codex entries reached the director, layer by layer, and their rough size (milestone 3); older logs have none. */
+  lore?: LoreTrace
   /** `reshaped`: lines of the shown reply where code split speech from action (round 0 F1). */
   writer: { callId: string; reshaped?: number[] }
   /** What the code checks found in the draft; the rewrite was asked to fix these. */

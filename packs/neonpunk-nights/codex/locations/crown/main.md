@@ -2,7 +2,7 @@
 name: The Crown
 kind: location
 keywords: [the spaceport]
-summary: "The tower\u2019s top: governing families, the Academy, grid control rooms, the spaceport."
+summary: "The tower’s top: governing families, the Academy, grid control rooms, the spaceport."
 stage: The Crown, at the tower’s top, holds the governing families, the Academy, the grid’s control rooms and the spaceport.
 source: Spire City > The Crown
 ---

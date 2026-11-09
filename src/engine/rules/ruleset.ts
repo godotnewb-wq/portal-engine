@@ -90,8 +90,17 @@ export const RulesetSchema = z.object({
    * what drives them (claude/scene-system-redesign.md §5.3).
    */
   pressures: z.array(z.string().min(1)).min(2),
-  /** Codex tuning (claude/lore-injection.md): the most words an entry's full text may have. */
-  codex: z.object({ fullWords: z.number().int().positive() }).default({ fullWords: 120 })
+  /**
+   * Codex tuning (claude/lore-injection.md §4–5): the most words an entry's full text may have, and the rough token
+   * budgets for the scene-scoped and triggered layers (generous starting points, tuned from the bench).
+   */
+  codex: z
+    .object({
+      fullWords: z.number().int().positive().default(120),
+      sceneTokens: z.number().int().positive().default(800),
+      triggeredTokens: z.number().int().positive().default(400)
+    })
+    .default({ fullWords: 120, sceneTokens: 800, triggeredTokens: 400 })
 })
 export type Ruleset = z.infer<typeof RulesetSchema>
 

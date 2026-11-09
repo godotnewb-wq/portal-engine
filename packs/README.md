@@ -45,7 +45,7 @@ The engine supplies the mechanics; the ruleset their parameters and words. See `
 - `meters`: the relationship meters every character keeps toward the player and each other (`id`, `name`, `description` used in summary prompts), and their range.
 - `wordScale`: the words summaries judge a change in, worst to best, each with its value; one must be worth 0.
 - `relations`: where a new relation starts, and labels by meter bands.
-- `codex`: `fullWords`, the most words a codex entry's text may have (default 120).
+- `codex`: `fullWords`, the most words a codex entry's text may have (default 120); `sceneTokens` and `triggeredTokens`, rough budgets for the scene-scoped and triggered lore layers (defaults 800 and 400).
 - `pressures`: words for how hard a character's aim for the scene presses on them, weakest first (at least two). The weakest keeps the aim out of the writer's brief; the strongest makes it what drives them.
 
 ## setting.json, primer.md, tone.md, phrases.json
@@ -53,7 +53,7 @@ The engine supplies the mechanics; the ruleset their parameters and words. See `
 - `name` (and optional `world`), `tiers` (`id`, `name`, `feel`, `danger`), `species` (`id`, `name`, `drawable`, a placeholder `color`), `factions` (`id`, `name`, `summary`, and `parent` for a sub-group with an identity of its own), `stances`, `currency`.
 - `stances`: official stances between factions, one way: `{ "from", "toward", "stance" }`, `stance` being one of the pack's stance words. Write only the ones that matter; a faction with none toward another has none, and nothing is mirrored.
 - `phrases.json`: `overused` (phrases this world's prose over-uses), `stanceWords` (exactly five, warmest first, if there are stances), `stanceWarnings` (words that suggest codex prose is stating a stance; flagged as warnings) and `genericWords` (words the name check ignores when comparing names, like "the" or "council").
-- `primer.md`: a short paragraph of the world's essentials, in prompt-ready prose. Keep it under ~200 words.
+- `primer.md`: a short paragraph of the world's essentials, in prompt-ready prose. Keep it under ~200 words. With a codex, it opens the stage before every entry's `stage` line, so keep to what no stage line says.
 - `tone.md`: a few lines on tone. The engine adds its general style guide and its adults-only rule; a pack can't turn the latter off.
 
 ## Characters, locations, player
@@ -81,6 +81,7 @@ The Guild owns the yard, sets the cart fees and keeps the tallies.
 
 - **Header:** `key: value` lines, quoted strings and one-line lists only. Fields: `name`, `kind`, `summary` (required); `keywords`, `aliases`, `stage`, `knowledge` (`common`, `circles`, `secret`), `circle`, `also`, `known-by`, `cap`, `audience`, `belief`, `related`, `source`, `expires`. The body is the entry's text (at most the ruleset's `codex.fullWords`).
 - **Locations are the map tree:** `locations/<tier>/main.md`, `locations/<tier>/<region>/main.md`, `locations/<tier>/<region>/<place>.md`. The first folder must be a setting tier, and every layer needs its own entry.
+- **A place's entry** is its region's folder plus the location file's id (`locations/<tier>/<region>/<location id>.md`), so the location file's `parent` finds it.
 - **Factions:** a folder per faction with `main.md` and any deeper entries beside it; a sub-group's folder sits inside its parent's. Only a top-level faction's `main.md` has a `stage` line.
 - **Who knows what:** `circles` entries say who's inside with `circle` (default: the entry's faction, member and above) and `also`; `secret` entries say who may hold them with `known-by` and an optional `cap`. Selectors: `<faction> [affiliated+|member+|trusted+|leadership+]`, `occupation <words>`, `tier <id>`, `species <id>`, `character <id>`.
 - Never state a stance in codex text: stances are setting data.
