@@ -1,7 +1,7 @@
 import { join } from 'node:path'
 import type { Pack } from '@engine/pack'
 import { createInitialState, startScene, type GameState } from '@engine/state'
-import { loadPack } from '@platform/packs'
+import { loadPack, readPackFiles } from '@platform/packs'
 
 /**
  * The test-fixture pack, which engine tests run against. Its ruleset is deliberately unlike any game's (other
@@ -16,3 +16,6 @@ export function yardScene(seed = 1): GameState {
   const { location, cast } = fixture.manifest.start
   return startScene(fixture, createInitialState(fixture, seed), location, cast)
 }
+
+/** The fixture's codex files as read from disk, for tests that rebuild the pack with one thing broken. */
+export const fixtureCodex = () => readPackFiles(FIXTURE_DIR).files.codex

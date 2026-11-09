@@ -1,8 +1,26 @@
 import { z } from 'zod'
 import { CharacterSchema, PlayerSchema, type Character, type Meters, type Player } from '@engine/characters'
 import { rankCap, RulesetSchema, rulesetProblems, type Ruleset, type StatBlock } from '@engine/rules'
-import { LocationSchema, SettingSchema, settingProblems, speciesById, factionById, tierById, type Location, type Setting } from '@engine/world'
+import { buildCodex, codexProblems, type CodexEntry, type CodexFile } from '@engine/codex'
+import { LocationSchema, SettingSchema, settingProblems, speciesById, factionById, tierById, STANCE_LEVEL_COUNT, type Location, type Setting } from '@engine/world'
 import { ENGINE_VERSION, PackManifestSchema, satisfies, type PackManifest } from './manifest'
+
+/**
+ * The pack's own words for things the engine says to the LLM or the player (`setting/phrases.json`): phrases its prose
+ * over-uses, the words for the five stance levels, words that suggest prose is stating a stance, and the generic words
+ * the name check ignores when comparing names.
+ */
+export const PhrasesSchema = z
+  .object({
+    overused: z.array(z.string().min(1)).default([]),
+    /** Warmest first, exactly five when the setting has stances. */
+    stanceWords: z.array(z.string().min(1)).default([]),
+    stanceWarnings: z.array(z.string().min(1)).default([]),
+    genericWords: z.array(z.string().min(1)).default([])
+  })
+  .strict()
+  .default({ overused: [], stanceWords: [], stanceWarnings: [], genericWords: [] })
+export type Vocabulary = Omit<z.infer<typeof PhrasesSchema>, 'overused'>
 
 /** Everything one game is played with: a loaded, validated pack. */
 export interface Pack {
@@ -15,6 +33,10 @@ export interface Pack {
   tone: string
   /** Phrases this world's prose over-uses, on top of the engine's own list. */
   phrases: string[]
+  /** Stance words, stance warnings and generic words, from the same file. */
+  vocabulary: Vocabulary
+  /** Lore entries, from `codex/` (claude/lore-injection.md). */
+  codex: CodexEntry[]
   characters: Character[]
   locations: Location[]
   player: Player
@@ -31,6 +53,8 @@ export interface PackFiles {
   player: unknown
   characters: { file: string; data: unknown }[]
   locations: { file: string; data: unknown }[]
+  /** Every `.md` file under `codex/`, by path relative to it. */
+  codex: CodexFile[]
 }
 
 export type BuiltPack =
@@ -54,17 +78,20 @@ export function buildPack(files: PackFiles): BuiltPack {
   const manifest = parse(PackManifestSchema, 'pack.json', files.manifest, problems)
   const ruleset = parse(RulesetSchema, 'ruleset/ruleset.json', files.ruleset, problems)
   const setting = parse(SettingSchema, 'setting/setting.json', files.setting, problems)
-  const phrases = parse(z.array(z.string()).default([]), 'setting/phrases.json', files.phrases, problems)
+  const words = parse(PhrasesSchema, 'setting/phrases.json', files.phrases, problems)
   const player = parse(PlayerSchema, 'player.json', files.player, problems)
   const characters = files.characters.flatMap((f) => parse(CharacterSchema, `characters/${f.file}`, f.data, problems) ?? [])
   const locations = files.locations.flatMap((f) => parse(LocationSchema, `locations/${f.file}`, f.data, problems) ?? [])
+  const codex = buildCodex(files.codex)
+  problems.push(...codex.problems)
   if (manifest && !satisfies(ENGINE_VERSION, manifest.engine)) problems.push(`pack.json: needs engine ${manifest.engine}; this is ${ENGINE_VERSION}`)
   if (ruleset) problems.push(...rulesetProblems(ruleset).map((p) => `ruleset/ruleset.json: ${p}`))
   if (setting) problems.push(...settingProblems(setting).map((p) => `setting/setting.json: ${p}`))
   if (!files.primer.trim()) problems.push('setting/primer.md: missing or empty')
-  if (problems.length > 0 || !manifest || !ruleset || !setting || !player || !phrases) return { ok: false, problems, ...(manifest && { manifest }) }
+  if (problems.length > 0 || !manifest || !ruleset || !setting || !player || !words) return { ok: false, problems, ...(manifest && { manifest }) }
 
-  const pack: Pack = { manifest, ruleset, setting, primer: files.primer.trim(), tone: files.tone.trim(), phrases, characters, locations, player }
+  const { overused, ...vocabulary } = words
+  const pack: Pack = { manifest, ruleset, setting, primer: files.primer.trim(), tone: files.tone.trim(), phrases: overused, vocabulary, codex: codex.entries, characters, locations, player }
   const cross = packProblems(pack)
   return cross.length > 0 ? { ok: false, problems: cross, manifest } : { ok: true, pack }
 }
@@ -119,6 +146,8 @@ export function packProblems(pack: Pack): string[] {
   for (const c of pack.characters) {
     species(c.id, c.species)
     if (c.faction && !factionById(s, c.faction)) problems.push(`${c.id} belongs to unknown faction "${c.faction}"`)
+    if (c.level && !c.faction) problems.push(`${c.id} has a faction level but no faction`)
+    if (c.rank && !c.level) problems.push(`${c.id} has a rank title but no faction level`)
     problems.push(...meterProblems(r, c.id, c.meters))
     if (c.stats) problems.push(...statProblems(r, c.id, c.stats))
     for (const rel of c.relations) {
@@ -132,6 +161,11 @@ export function packProblems(pack: Pack): string[] {
     for (const w of l.walkOns) species(`walk-on ${w.id} in ${l.id}`, w.species)
   }
   species('the player', pack.player.species)
+
+  const stanceWords = pack.vocabulary.stanceWords
+  if (s.stances.length > 0 && stanceWords.length !== STANCE_LEVEL_COUNT) problems.push(`setting/phrases.json: stanceWords needs exactly ${STANCE_LEVEL_COUNT} words, warmest first, for the setting's stances`)
+  for (const st of s.stances) if (!stanceWords.includes(st.stance)) problems.push(`setting/setting.json: the stance from "${st.from}" toward "${st.toward}" is "${st.stance}", which isn't a stance word`)
+  problems.push(...codexProblems(pack.codex, { setting: s, characterIds: [...characters], locations: pack.locations, fullWords: r.codex.fullWords, stanceWarnings: pack.vocabulary.stanceWarnings }))
   problems.push(...statProblems(r, 'the player', pack.player.stats))
 
   const start = pack.manifest.start

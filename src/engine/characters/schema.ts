@@ -1,6 +1,7 @@
 import { z } from 'zod'
 import { IdSchema } from '@engine/core'
 import { StatBlockSchema } from '@engine/rules'
+import { FactionLevelSchema } from '@engine/world'
 
 /**
  * Persistent NPC tiers (quests-relationships-npcs §5). Extras are narration only and walk-ons live on a scene card,
@@ -61,6 +62,12 @@ export const CharacterSchema = z
     /** Who they are in the city: work, haunt, faction ties. */
     role: z.string(),
     faction: z.string().optional(),
+    /** Their standing in that faction, on the engine's four levels; this is what decides what insiders know. */
+    level: FactionLevelSchema.optional(),
+    /** The title they go by there ("handler", "deacon"): flavor only, never read by rules. */
+    rank: z.string().min(1).optional(),
+    /** Their trade, lower case ("courier", "nurse"); entries can open to people by occupation. */
+    occupation: z.string().min(1).optional(),
     /** Specific details, never an archetype label. */
     personality: z.string(),
     /**

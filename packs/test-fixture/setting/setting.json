@@ -8,6 +8,11 @@
     { "id": "person", "name": "Person", "color": "#a0a0c0" },
     { "id": "automaton", "name": "Automaton", "drawable": "brass plates, glass eyes", "color": "#c0a060" }
   ],
-  "factions": [{ "id": "guild", "name": "The Guild", "summary": "runs the yard" }],
+  "factions": [
+    { "id": "guild", "name": "The Guild", "summary": "runs the yard" },
+    { "id": "night-shift", "name": "The Night Shift", "summary": "the Guild's after-dark crew", "parent": "guild" },
+    { "id": "watch", "name": "The Ward Watch", "summary": "keeps order, badly" }
+  ],
+  "stances": [{ "from": "watch", "toward": "guild", "stance": "sour" }],
   "currency": { "name": "pennies" }
 }

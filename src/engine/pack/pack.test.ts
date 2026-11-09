@@ -1,22 +1,23 @@
 import { describe, expect, it } from 'vitest'
 import { rulesetProblems, RulesetSchema } from '@engine/rules'
-import { fixture } from '@tests/fixture'
+import { fixture, fixtureCodex } from '@tests/fixture'
 import { buildPack, packProblems, type PackFiles } from './content'
 import { ENGINE_VERSION, satisfies } from './manifest'
 
 /** The fixture pack's files again, as plain data, to break one thing at a time. */
 function files(): PackFiles {
-  const { manifest, ruleset, setting, primer, tone, phrases, player, characters, locations } = structuredClone(fixture)
+  const { manifest, ruleset, setting, primer, tone, phrases, vocabulary, player, characters, locations } = structuredClone(fixture)
   return {
     manifest,
     ruleset,
     setting,
     primer,
     tone,
-    phrases,
+    phrases: { overused: phrases, ...vocabulary },
     player,
     characters: characters.map((data) => ({ file: `${data.id}.json`, data })),
-    locations: locations.map((data) => ({ file: `${data.id}.json`, data }))
+    locations: locations.map((data) => ({ file: `${data.id}.json`, data })),
+    codex: fixtureCodex()
   }
 }
 const problemsOf = (f: PackFiles) => {
@@ -105,5 +106,18 @@ describe('buildPack', () => {
     expect(packProblems({ ...fixture, characters: [...fixture.characters, mara, { ...mara, id: 'ghost', relations: [{ to: 'nobody', label: 'x', meters: mara.meters }] }] })).toEqual(
       expect.arrayContaining(['character id "mara" is used twice', 'ghost has a relation to unknown character "nobody"'])
     )
+  })
+
+  it('holds faction levels and rank titles to a faction, and stances to the pack’s stance words', () => {
+    const tobin = fixture.characters.find((c) => c.id === 'tobin')!
+    const setting = { ...fixture.setting, stances: [...fixture.setting.stances, { from: 'guild', toward: 'watch', stance: 'fond' }] }
+    expect(packProblems({ ...fixture, setting, characters: [...fixture.characters.filter((c) => c !== tobin), { ...tobin, level: 'member', rank: undefined }, { ...tobin, id: 'tam', faction: 'guild', level: undefined, rank: 'boss' }] })).toEqual(
+      expect.arrayContaining([
+        'tobin has a faction level but no faction',
+        'tam has a rank title but no faction level',
+        'setting/setting.json: the stance from "guild" toward "watch" is "fond", which isn\'t a stance word'
+      ])
+    )
+    expect(packProblems({ ...fixture, vocabulary: { ...fixture.vocabulary, stanceWords: ['warm', 'cold'] } })).toContain('setting/phrases.json: stanceWords needs exactly 5 words, warmest first, for the setting\'s stances')
   })
 })

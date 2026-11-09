@@ -29,10 +29,14 @@ function packFiles(id: string): PackFiles {
     setting: json[at('setting/setting.json')],
     primer: text[at('setting/primer.md')] ?? '',
     tone: text[at('setting/tone.md')] ?? '',
-    phrases: json[at('setting/phrases.json')] ?? [],
+    phrases: json[at('setting/phrases.json')],
     player: json[at('player.json')],
     characters: folder('characters'),
-    locations: folder('locations')
+    locations: folder('locations'),
+    codex: Object.entries(text)
+      .filter(([path]) => path.startsWith(at('codex/')))
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([path, body]) => ({ path: path.slice(at('codex/').length), text: body }))
   }
 }
 

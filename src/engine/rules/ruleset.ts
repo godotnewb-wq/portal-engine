@@ -89,7 +89,9 @@ export const RulesetSchema = z.object({
    * director picks a word each turn; the weakest keeps the aim out of the writer's brief, the strongest makes it
    * what drives them (claude/scene-system-redesign.md §5.3).
    */
-  pressures: z.array(z.string().min(1)).min(2)
+  pressures: z.array(z.string().min(1)).min(2),
+  /** Codex tuning (claude/lore-injection.md): the most words an entry's full text may have. */
+  codex: z.object({ fullWords: z.number().int().positive() }).default({ fullWords: 120 })
 })
 export type Ruleset = z.infer<typeof RulesetSchema>
 

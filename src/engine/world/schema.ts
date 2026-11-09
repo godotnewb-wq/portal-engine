@@ -32,6 +32,11 @@ export const LocationSchema = z.object({
   name: z.string(),
   /** One of the setting's tiers (or regions). */
   tier: IdSchema,
+  /**
+   * The codex region the place sits in (`location.<tier>.<region>`), so it knows its whole map chain. Checked against
+   * the codex: it exists, is one layer up, and is under the place's tier.
+   */
+  parent: z.string().optional(),
   district: z.string(),
   description: z.string(),
   texture: TextureCardSchema,

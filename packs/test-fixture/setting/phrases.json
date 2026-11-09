@@ -1,1 +1,6 @@
-["it was a dark and stormy night"]
+{
+  "overused": ["it was a dark and stormy night"],
+  "stanceWords": ["sworn", "warm", "cool", "sour", "bitter"],
+  "stanceWarnings": ["feud", "sworn foes"],
+  "genericWords": ["the", "ward", "yard"]
+}

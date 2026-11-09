@@ -2,6 +2,7 @@
   "id": "the-yard",
   "name": "The Guild Yard",
   "tier": "lower",
+  "parent": "location.lower.east-gate",
   "district": "east gate",
   "description": "A muddy yard of crates and carts behind the Guild hall.",
   "texture": { "sights": ["stacked crates", "a cart with a broken wheel"], "sounds": ["a gate creaking"], "smells": ["wet straw"] },
