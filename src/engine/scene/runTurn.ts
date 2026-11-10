@@ -14,6 +14,7 @@ import { parsePlan2, settlePlan2, validatePlan2 } from './plan2'
 import { recentlyUsed, repeatProblems, usageOf } from './repeats'
 import { buildWriter2Prompt } from './writer2'
 import { loreTrace, turnLore } from './lore'
+import type { LoreBudgetOverrides } from '@engine/rules'
 
 /**
  * The LLM calls a turn may make. `write` streams; it is used for the scene writer and its one rewrite. Either may
@@ -64,6 +65,8 @@ export interface TurnOptions extends ResolveOptions {
    * kept so the bench can compare the two).
    */
   pipeline?: Pipeline
+  /** Lore budgets the player set in Settings, over the pack's; left out, the pack's apply (milestone 3, task 10). */
+  loreBudgets?: LoreBudgetOverrides
 }
 
 export type Pipeline = 'situation' | 'lines'
@@ -95,7 +98,7 @@ export async function runTurn(
   try {
     // Call 1: the director.
     const situation = (options.pipeline ?? 'situation') === 'situation'
-    const lore = turnLore(content, state, input)
+    const lore = turnLore(content, state, input, options.loreBudgets)
     const directorPrompt = situation ? buildDirector2Prompt(content, state, input, lore) : buildDirectorPrompt(content, state, input)
     const directorReply = await call('director', directorPrompt, () => llm.direct(directorPrompt))
     const directed = situation ? parsePlan2(directorReply) : parsePlan(directorReply)

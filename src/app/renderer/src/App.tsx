@@ -116,7 +116,7 @@ export function App() {
     }
   }
 
-  if (screen === 'settings') return <Settings onClose={() => setScreen(from)} />
+  if (screen === 'settings') return <Settings pack={content} onClose={() => setScreen(from)} />
   if (screen === 'picker' || !content) return <PackPicker onChosen={choose} onSettings={openSettings} />
   if (screen === 'save' || screen === 'load') {
     return <SavesView mode={screen} state={state ?? undefined} onLoaded={(game) => resume(game)} onClose={() => setScreen(from)} />

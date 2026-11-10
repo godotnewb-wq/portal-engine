@@ -91,16 +91,19 @@ export const RulesetSchema = z.object({
    */
   pressures: z.array(z.string().min(1)).min(2),
   /**
-   * Codex tuning (claude/lore-injection.md §4–5): the most words an entry's full text may have, and the rough token
-   * budgets for the scene-scoped and triggered layers (generous starting points, tuned from the bench).
+   * Codex tuning (claude/lore-injection.md §4–5): the most words an entry's full text may have, the rough token
+   * budgets for the scene-scoped and triggered layers, and the most lore lines the director may give the writer a
+   * turn (generous starting points, tuned from the bench). The player can override the budgets in Settings
+   * (`loreBudgets`); these are the pack's defaults.
    */
   codex: z
     .object({
       fullWords: z.number().int().positive().default(120),
-      sceneTokens: z.number().int().positive().default(1200),
-      triggeredTokens: z.number().int().positive().default(800)
+      sceneTokens: z.number().int().min(0).default(1200),
+      triggeredTokens: z.number().int().min(0).default(800),
+      loreLines: z.number().int().min(0).default(3)
     })
-    .default({ fullWords: 120, sceneTokens: 1200, triggeredTokens: 800 })
+    .default({ fullWords: 120, sceneTokens: 1200, triggeredTokens: 800, loreLines: 3 })
 })
 export type Ruleset = z.infer<typeof RulesetSchema>
 

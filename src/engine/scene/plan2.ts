@@ -31,8 +31,6 @@ export const MOVE_KINDS = ['answer', 'ask', 'push back', 'dodge', 'offer', 'refu
 /** Something new a move brings in, at most this many words: a price, a time, a plan; never a line of dialogue. */
 export const NEW_FACT_WORDS = 25
 
-/** Lore lines a turn: a small optional pool for the writer, never one per spoken line (claude/lore-injection.md §8; tune). */
-export const MAX_LORE_LINES = 3
 /** A lore line is a fact in plain words, at most this long (kept in the codex, whose summaries share the limit). */
 export { LORE_LINE_WORDS }
 
@@ -203,7 +201,8 @@ export function validatePlan2(content: Pack, state: GameState, raw: RawPlan2, in
  * The plan's lore lines, checked the way `canSay` checks facts (claude/lore-injection.md §8): the entry must be one
  * the director was given this turn, never a secret; an insider entry's line needs a `who`, a speaker who knows it,
  * and only they would say it; a common entry's line may be said by anyone, or used in narration. A line that fails
- * is dropped and counted as a correction. At most `MAX_LORE_LINES`, each a fact in plain words, not dialogue.
+ * is dropped and counted as a correction. At most the turn's `loreLines` budget (the ruleset's, or the player's setting),
+ * each a fact in plain words, not dialogue.
  */
 function validateLore(content: Pack, state: GameState, raw: RawPlan2, lore: TurnLore, speakers: Set<string>, fix: (why: string) => void): LoreLine[] {
   const given = new Set([...lore.layers.scene.entries, ...lore.layers.triggered.entries].map((e) => e.id))
@@ -216,7 +215,7 @@ function validateLore(content: Pack, state: GameState, raw: RawPlan2, lore: Turn
     if (!line) return fix(`dropped lore line ${n}: it says nothing`)
     if (!entry || !given.has(id)) return fix(`dropped lore line ${n}: "${id}" wasn't given this turn`)
     if (entry.knowledge === 'secret') return fix(`dropped lore line ${n}: "${id}" is a secret`)
-    if (lines.length >= MAX_LORE_LINES) return fix(`dropped lore line ${n}: at most ${MAX_LORE_LINES}`)
+    if (lines.length >= lore.budgets.loreLines) return fix(`dropped lore line ${n}: at most ${lore.budgets.loreLines}`)
     // A line that runs long gives way to the entry's own summary: cutting it could end mid-sentence or before the words
     // that change its meaning, and the summary is a whole sentence about the same entry (kept short by the content check).
     const words = line.split(/\s+/).length

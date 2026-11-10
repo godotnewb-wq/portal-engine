@@ -112,6 +112,8 @@ app.whenReady().then(() => {
   })
 
   ipcMain.handle(IPC.getSettings, () => toView(settings.get()))
+  ipcMain.handle(IPC.getLoreBudgets, () => settings.getLoreBudgets())
+  ipcMain.handle(IPC.setLoreBudgets, (_event, budgets: unknown) => settings.setLoreBudgets(budgets))
   ipcMain.handle(IPC.saveSettings, (_event, update: unknown) => toView(settings.update(SettingsUpdateSchema.parse(update))))
   ipcMain.handle(IPC.listModels, async (_event, request: unknown) => {
     const { profileId: id, baseUrl, apiKey } = ListModelsRequestSchema.parse(request)
@@ -155,7 +157,7 @@ app.whenReady().then(() => {
       // Scene ids are random and unique; the number makes the turn id read in order.
       const turnId = scene ? `${scene.id}-${scene.turns.length + 1}` : undefined
       try {
-        const outcome = await runTurn(pack, state, input.trim(), turnLlm(settings.get(), scene?.nsfw ?? false), send, { ...(turnId && { turnId }), ...(session && { log: session }) })
+        const outcome = await runTurn(pack, state, input.trim(), turnLlm(settings.get(), scene?.nsfw ?? false), send, { ...(turnId && { turnId }), ...(session && { log: session }), loreBudgets: settings.getLoreBudgets() })
         const details = logs.turn(outcome.trace, { location: scene!.locationId, cast: scene!.cast }) ?? detailsOf('', outcome.trace)
         return {
           ok: true,

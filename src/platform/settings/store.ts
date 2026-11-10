@@ -3,6 +3,7 @@
 import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { LLM_PROFILE_IDS, SettingsSchema, type LlmProfile, type Settings, type SettingsUpdate } from '@llm'
+import { cleanLoreBudgets, type LoreBudgetOverrides } from '@engine/rules'
 
 /** Encrypts API keys at rest. Backed by Electron's safeStorage in the app. */
 export interface KeyCipher {
@@ -13,14 +14,16 @@ export interface KeyCipher {
 type StoredProfile = Omit<LlmProfile, 'apiKey'> & { apiKey: string; apiKeyEncrypted: boolean }
 
 /**
- * Persists settings as JSON: the LLM profiles, and the extra folders to look for packs in. Without a cipher, API keys
- * are written in plain text.
+ * Persists settings as JSON: the LLM profiles, the extra folders to look for packs in, and the lore budgets the player
+ * set over the packs' own. Without a cipher, API keys are written in plain text.
  */
 export class SettingsStore {
   private settings: Settings
   private packFolders: string[] = []
   /** Whether play is logged (milestone 2, A2). On until the game is public, so playtests always leave evidence. */
   private logging = true
+  /** Lore budgets over every pack's defaults (milestone 3, task 10); a field left out uses the pack's. */
+  private loreBudgets: LoreBudgetOverrides = {}
 
   constructor(
     private readonly path: string,
@@ -48,6 +51,17 @@ export class SettingsStore {
     return this.logging
   }
 
+  getLoreBudgets(): LoreBudgetOverrides {
+    return this.loreBudgets
+  }
+
+  /** Saves the player's lore budgets, cleaned (numbers only, rounded, within bounds). Returns what was kept. */
+  setLoreBudgets(raw: unknown): LoreBudgetOverrides {
+    this.loreBudgets = cleanLoreBudgets(raw).overrides
+    this.write()
+    return this.loreBudgets
+  }
+
   setPackFolders(folders: string[]): string[] {
     this.packFolders = [...new Set(folders.map((f) => f.trim()).filter((f) => f.length > 0))]
     this.write()
@@ -73,6 +87,8 @@ export class SettingsStore {
       if (Array.isArray(folders)) this.packFolders = folders.filter((f): f is string => typeof f === 'string')
       const logging = (raw as { logging?: unknown }).logging
       if (typeof logging === 'boolean') this.logging = logging
+      // A hand-edited value out of bounds is brought back in rather than refused.
+      this.loreBudgets = cleanLoreBudgets((raw as { loreBudgets?: unknown }).loreBudgets).overrides
     } catch {
       // Missing or unreadable file: start from defaults.
       return SettingsSchema.parse({})
@@ -105,6 +121,6 @@ export class SettingsStore {
       stored[id] = { ...profile, apiKey: encrypt ? this.cipher!.encrypt(profile.apiKey) : profile.apiKey, apiKeyEncrypted: encrypt }
     }
     mkdirSync(dirname(this.path), { recursive: true })
-    writeFileSync(this.path, JSON.stringify({ ...stored, packFolders: this.packFolders, logging: this.logging }, null, 2))
+    writeFileSync(this.path, JSON.stringify({ ...stored, packFolders: this.packFolders, logging: this.logging, loreBudgets: this.loreBudgets }, null, 2))
   }
 }

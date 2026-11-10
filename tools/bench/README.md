@@ -44,6 +44,8 @@ The app's settings can't be reused (their keys are encrypted for the app only). 
 
 `--config <path>` points at another file.
 
+**Lore budgets:** `bench.config.json` may also carry `"loreBudgets": { "sceneTokens": 1500, "triggeredTokens": 600, "loreLines": 2 }`, the same field the app's Settings keep. A field left out uses the pack's ruleset; a value out of bounds is clamped with a warning. They apply with `--mock` too. The report's first line and `--compare`'s headers say which budgets each run used, marking those the config set.
+
 ## Scenarios
 
 Each pack keeps its own in `bench/*.json`:

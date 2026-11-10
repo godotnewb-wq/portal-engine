@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { fixture, yardScene } from '@tests/fixture'
 import { buildDirector2Prompt } from './director2'
 import { turnLore } from './lore'
-import { LORE_LINE_WORDS, MAX_LORE_LINES, parsePlan2, validatePlan2 } from './plan2'
+import { LORE_LINE_WORDS, parsePlan2, validatePlan2 } from './plan2'
 import { buildWriter2Prompt } from './writer2'
 
 // Lore lines and framing on the situation plan (claude/lore-injection.md §8, option B).
@@ -24,9 +24,9 @@ const raw = (lore: object[], speakers?: object[]) =>
       checks: []
     })
   )!
-const validate = (lore: object[], speakers?: object[]) => {
+const validate = (lore: object[], speakers?: object[], budgets = {}) => {
   const state = yardScene()
-  return validatePlan2(fixture, state, raw(lore, speakers), ASK, turnLore(fixture, state, ASK))
+  return validatePlan2(fixture, state, raw(lore, speakers), ASK, turnLore(fixture, state, ASK, budgets))
 }
 
 describe('lore lines', () => {
@@ -63,7 +63,7 @@ describe('lore lines', () => {
       'dropped lore line 1: insider knowledge needs a speaker who knows it',
       'dropped lore line 2: "concept.pennies" wasn\'t given this turn',
       'dropped lore line 3: "faction.guild.second-ledger" wasn\'t given this turn',
-      `dropped lore line 7: at most ${MAX_LORE_LINES}`
+      `dropped lore line 7: at most ${fixture.ruleset.codex.loreLines}`
     ])
   })
 
@@ -72,6 +72,29 @@ describe('lore lines', () => {
     const { plan, corrections } = validate([{ entry: 'faction.guild', line: long }])
     expect(plan.lore).toEqual([{ entry: 'faction.guild', name: 'The Guild', line: 'Runs the yard and counts every crate.' }])
     expect(corrections).toEqual([`lore line 1 was ${long.split(' ').length} words; the most is ${LORE_LINE_WORDS}, so the entry's summary stands in`])
+  })
+
+  it('keep to the lore lines budget the player set, and tell the director nothing about lore lines when it is 0', () => {
+    const two = [
+      { entry: 'faction.guild', line: 'The Guild owns the yard.' },
+      { entry: 'location.lower', line: 'The lower town floods in spring.' }
+    ]
+    const { plan, corrections } = validate(two, undefined, { loreLines: 1 })
+    expect(plan.lore?.map((l) => l.line)).toEqual(['The Guild owns the yard.'])
+    expect(corrections).toEqual(['dropped lore line 2: at most 1'])
+    const state = yardScene()
+    const off = buildDirector2Prompt(fixture, state, ASK, turnLore(fixture, state, ASK, { loreLines: 0 })).system
+    expect(off).not.toMatch(/"lore"|lore: at most/)
+    const on = buildDirector2Prompt(fixture, state, ASK, turnLore(fixture, state, ASK)).system
+    expect(on).toMatch(/lore: at most 3 facts/)
+  })
+
+  it('record the budgets in effect, and which the player set', () => {
+    const state = yardScene()
+    expect(turnLore(fixture, state, ASK).budgets).toEqual({ sceneTokens: 1200, triggeredTokens: 800, loreLines: 3, set: [] })
+    const lore = turnLore(fixture, state, ASK, { sceneTokens: 0 })
+    expect(lore.budgets).toMatchObject({ sceneTokens: 0, set: ['sceneTokens'] })
+    expect(lore.layers.scene.entries).toEqual([])
   })
 
   it('drop an insider line given to someone who doesn’t know it', () => {

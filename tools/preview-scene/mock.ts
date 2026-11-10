@@ -11,6 +11,7 @@ import { runTurn, type TurnLlm } from '@engine/scene'
 import { endScene } from '@engine/relationships'
 import { currentFlags, type FlagRecord } from '@engine/review'
 import type { TurnDetails } from '@platform/logs'
+import { cleanLoreBudgets, type LoreBudgetOverrides } from '@engine/rules'
 // Every pack in packs/, as Vite bundles them: JSON parsed, Markdown as text.
 const json = import.meta.glob('../../packs/*/**/*.json', { eager: true, import: 'default' }) as Record<string, unknown>
 const text = import.meta.glob('../../packs/*/**/*.md', { eager: true, import: 'default', query: '?raw' }) as Record<string, string>
@@ -96,6 +97,7 @@ const scripted: TurnLlm = {
 // Logs live in memory for the preview: one session, its turns' details and its flags.
 const SESSION = 'preview'
 let logging = true
+let loreBudgets: LoreBudgetOverrides = {}
 const logged = new Map<string, TurnDetails>()
 const flagged: FlagRecord[] = []
 
@@ -104,11 +106,13 @@ const saved = new Map<string, { pack: string; slotId: string; savedAt: string; n
 const api: RendererApi = {
   getSettings: async () => toView(SettingsSchema.parse({})),
   saveSettings: async () => toView(SettingsSchema.parse({})),
+  getLoreBudgets: async () => loreBudgets,
+  setLoreBudgets: async (budgets) => (loreBudgets = cleanLoreBudgets(budgets).overrides),
   listModels: async () => ({ models: [] }),
   testConnection: async () => ({ ok: true, detail: 'mock' }),
   sceneTurn: async ({ state, input }) => {
     const llm = content.manifest.id === 'neonpunk-nights' ? scripted : mockLlm().turn
-    const outcome = await runTurn(content, state, input, llm, emit, logging ? { log: SESSION } : {})
+    const outcome = await runTurn(content, state, input, llm, emit, { loreBudgets, ...(logging && { log: SESSION }) })
     const { calls, ...trace } = outcome.trace
     const details: TurnDetails = {
       session: logging ? SESSION : '',

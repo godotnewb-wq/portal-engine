@@ -24,7 +24,7 @@ import { join, resolve } from 'node:path'
 import { isConfigured } from '@llm'
 import { existsSync } from 'node:fs'
 import { loadPack } from '@platform/packs'
-import { benchSettings, modelsOf } from './config'
+import { benchLoreBudgets, benchSettings, modelsOf } from './config'
 import { compareRuns, renderReport } from './report'
 import { mockLlm, readRun, runBench, writeRun, type BenchLlm } from './run'
 import { scoreSession, type Scorer } from '../logs/score'
@@ -94,11 +94,15 @@ async function main(): Promise<void> {
     scorer = scorerLlm(settings)
   }
 
+  const configPath = option('--config') ?? join(root, 'bench.config.json')
+  // The config's lore budgets apply with --mock too, so budget changes can be checked without a model.
+  const lore = benchLoreBudgets(configPath)
+  for (const w of lore.warnings) console.log(`Warning: ${w}`)
   const label = option('--label') ?? (flag('--mock') ? 'mock' : 'run')
   const out = join(outRoot, `${stamp()}-${label}`)
   mkdirSync(out, { recursive: true })
   const engine = (JSON.parse(readFileSync(join(root, 'package.json'), 'utf8')) as { version: string }).version
-  let bench = await runBench(content, scenarios, llm, label, models, { repeat, out, engine, roleModels: sessionModels, log: (line) => console.log(line), ...(pipeline && { pipeline }) })
+  let bench = await runBench(content, scenarios, llm, label, models, { repeat, out, engine, roleModels: sessionModels, log: (line) => console.log(line), ...(pipeline && { pipeline }), loreBudgets: lore.budgets })
   bench.options.score = flag('--score')
   writeRun(out, bench)
   if (flag('--score') && scorer) {

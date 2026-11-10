@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs'
 import { SettingsSchema, isConfigured, profileFor, type Settings } from '@llm'
+import { cleanLoreBudgets, type LoreBudgetOverrides } from '@engine/rules'
 
 /**
  * Model settings for the bench. The app's own settings can't be used: their keys are encrypted with Electron's
@@ -20,6 +21,16 @@ export function benchSettings(configPath: string | undefined, env: Record<string
     scorer: model(env['BENCH_SCORER_MODEL']),
     nsfw: model(env['BENCH_NSFW_MODEL'])
   })
+}
+
+/**
+ * Lore budgets for the run, from `bench.config.json`'s `loreBudgets` (the same field the app's settings keep): a field
+ * left out uses the pack's. Values out of bounds are clamped, with a warning, as the app does.
+ */
+export function benchLoreBudgets(configPath: string | undefined): { budgets: LoreBudgetOverrides; warnings: string[] } {
+  if (!configPath || !existsSync(configPath)) return { budgets: {}, warnings: [] }
+  const { overrides, warnings } = cleanLoreBudgets((JSON.parse(readFileSync(configPath, 'utf8')) as { loreBudgets?: unknown }).loreBudgets)
+  return { budgets: overrides, warnings }
 }
 
 /** Which model each role will really use, for the report: unset roles borrow the writer's. */

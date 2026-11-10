@@ -51,3 +51,15 @@ describe('logging', () => {
     expect(new SettingsStore(path, cipher).getLogging()).toBe(false)
   })
 })
+
+describe('lore budgets', () => {
+  it('start empty (the packs’ own apply), keep what was set across restarts, and clean it', () => {
+    const path = pathIn()
+    const store = new SettingsStore(path, cipher)
+    expect(store.getLoreBudgets()).toEqual({})
+    expect(store.setLoreBudgets({ sceneTokens: 1500, triggeredTokens: 99999, loreLines: 'two' })).toEqual({ sceneTokens: 1500, triggeredTokens: 4000 })
+    expect(new SettingsStore(path, cipher).getLoreBudgets()).toEqual({ sceneTokens: 1500, triggeredTokens: 4000 })
+    store.setLoreBudgets({})
+    expect(new SettingsStore(path, cipher).getLoreBudgets()).toEqual({})
+  })
+})

@@ -61,6 +61,10 @@ export function TurnDetails({ nameOf, details, loading, flags, flaggable, onFlag
 /** Which codex entries reached the director this turn, layer by layer (milestone 3). */
 function Lore({ lore }: { lore: NonNullable<Details['turn']['lore']> }) {
   const total = lore.tokens.stage + lore.tokens.scene + lore.tokens.triggered
+  const b = lore.budgets
+  // Older logs carry no budgets; then only the tokens used are shown.
+  const used = (field: 'sceneTokens' | 'triggeredTokens', tokens: number) =>
+    b ? `≈${tokens} / ${b[field].toLocaleString()} tok${b.set.includes(field) ? ', your setting' : ''}` : `≈${tokens} tok`
   const list = (entries: typeof lore.scene, none: string) =>
     entries.length > 0 ? (
       <ul>
@@ -79,9 +83,9 @@ function Lore({ lore }: { lore: NonNullable<Details['turn']['lore']> }) {
       <h3>
         Lore <small>(≈{total} tokens to the director)</small>
       </h3>
-      <div className="muted layer">Triggered this turn (≈{lore.tokens.triggered} tok)</div>
+      <div className="muted layer">Triggered this turn ({used('triggeredTokens', lore.tokens.triggered)})</div>
       {list(lore.triggered, 'Nothing came up.')}
-      <div className="muted layer">Active in the scene (≈{lore.tokens.scene} tok)</div>
+      <div className="muted layer">Active in the scene ({used('sceneTokens', lore.tokens.scene)})</div>
       {list(lore.scene, 'None: no codex lore for this place or these people.')}
       {lore.stances && lore.stances.length > 0 && (
         <>
@@ -95,6 +99,7 @@ function Lore({ lore }: { lore: NonNullable<Details['turn']['lore']> }) {
       )}
       <div className="muted layer">
         Stage: {lore.stage.length} lines, always on (≈{lore.tokens.stage} tok) · writer’s stage ≈{lore.tokens.writerStage} tok
+        {b && ` · lore lines: up to ${b.loreLines}${b.set.includes('loreLines') ? ', your setting' : ''}`}
       </div>
     </section>
   )

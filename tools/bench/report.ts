@@ -92,13 +92,21 @@ function scenarioSection(content: Pack, run: ScenarioRun, repeats = false): stri
 /** What each witness took from the scene. */
 const reportsOf = (run: ScenarioRun): WitnessReport[] => run.sceneEnd?.witnesses.flatMap((w) => (w.report ? [{ ...w.report, ...(w.error && { error: w.error }) }] : [])) ?? []
 
+/** The lore budgets a run used, marking those the config set; nothing for runs from before they were recorded. */
+const budgetsLine = (bench: BenchRun): string => {
+  const b = bench.loreBudgets
+  if (!b) return ''
+  const mark = (f: 'sceneTokens' | 'triggeredTokens' | 'loreLines', v: number) => `${v}${b.set.includes(f) ? ' (config)' : ''}`
+  return ` Lore budgets: scene ${mark('sceneTokens', b.sceneTokens)}, triggered ${mark('triggeredTokens', b.triggeredTokens)}, lines ${mark('loreLines', b.loreLines)}.`
+}
+
 /** A run as a readable report: the numbers first, then every scenario's turns, plans, beats and summaries. */
 export function renderReport(content: Pack, bench: BenchRun): string {
   const repeats = bench.options.repeat > 1
   return [
     `# Scene test bench — ${bench.label}`,
     '',
-    `Run ${bench.startedAt}, pack \`${bench.pack}\` ${bench.packVersion}, prompts \`${bench.prompts}\`${bench.options.pipeline ? `, pipeline \`${bench.options.pipeline}\`` : ''}${repeats ? `, ${bench.options.repeat} repeats` : ''}. Models: ${Object.entries(bench.models).map(([role, model]) => `${role} \`${model}\``).join(', ')}.`,
+    `Run ${bench.startedAt}, pack \`${bench.pack}\` ${bench.packVersion}, prompts \`${bench.prompts}\`${bench.options.pipeline ? `, pipeline \`${bench.options.pipeline}\`` : ''}${repeats ? `, ${bench.options.repeat} repeats` : ''}. Models: ${Object.entries(bench.models).map(([role, model]) => `${role} \`${model}\``).join(', ')}.${budgetsLine(bench)}`,
     '',
     `| ${STAT_HEADS.join(' | ')} |`,
     `|${STAT_HEADS.map(() => '---').join('|')}|`,
@@ -123,8 +131,8 @@ export function compareRuns(content: Pack, a: BenchRun, b: BenchRun): string {
   const lines = [
     `# Bench comparison: ${a.label} vs ${b.label}`,
     '',
-    `- **A** — ${a.label} (${a.startedAt}): ${Object.entries(a.models).map(([r, m]) => `${r} \`${m}\``).join(', ')}`,
-    `- **B** — ${b.label} (${b.startedAt}): ${Object.entries(b.models).map(([r, m]) => `${r} \`${m}\``).join(', ')}`,
+    `- **A** — ${a.label} (${a.startedAt}): ${Object.entries(a.models).map(([r, m]) => `${r} \`${m}\``).join(', ')}.${budgetsLine(a)}`,
+    `- **B** — ${b.label} (${b.startedAt}): ${Object.entries(b.models).map(([r, m]) => `${r} \`${m}\``).join(', ')}.${budgetsLine(b)}`,
     '',
     `| Run | ${STAT_HEADS.join(' | ')} |`,
     `|---|${STAT_HEADS.map(() => '---').join('|')}|`

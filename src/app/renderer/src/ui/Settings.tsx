@@ -1,5 +1,7 @@
 import { useEffect, useState } from 'react'
 import { LLM_PROFILE_IDS, REASONING_LEVELS, type LlmProfileId, type LlmProfileView, type SettingsUpdate, type SettingsView } from '@llm'
+import { LORE_BUDGET_BOUNDS, LORE_BUDGET_FIELDS, RulesetSchema, type LoreBudgetField, type LoreBudgetOverrides } from '@engine/rules'
+import type { Pack } from '@engine/pack'
 import { Button } from './Button'
 
 const LABEL: Record<LlmProfileId, { name: string; hint: string }> = {
@@ -121,6 +123,68 @@ function PackFolders() {
   )
 }
 
+const BUDGET_LABEL: Record<LoreBudgetField, { name: string; hint: string }> = {
+  sceneTokens: { name: 'Scene lore (tokens)', hint: 'Lore about the place and the people present, rebuilt each turn. 0 turns it off.' },
+  triggeredTokens: { name: 'Lore that comes up (tokens)', hint: 'Lore brought in by what was just said. 0 turns it off.' },
+  loreLines: { name: 'Lore lines a turn', hint: 'Facts about the world the director may hand the writer each turn. 0 gives none.' }
+}
+
+/** The engine's own defaults, shown before a game is chosen. */
+const ENGINE_CODEX = RulesetSchema.shape.codex.parse(undefined)
+
+/** A field as typed: blank means the pack's value. */
+type BudgetDraft = Record<LoreBudgetField, string>
+
+const draftOf = (budgets: LoreBudgetOverrides): BudgetDraft =>
+  Object.fromEntries(LORE_BUDGET_FIELDS.map((f) => [f, budgets[f] === undefined ? '' : String(budgets[f])])) as BudgetDraft
+
+/** What's wrong with a typed value, if anything: whole numbers within the bounds only. */
+function budgetProblem(field: LoreBudgetField, typed: string): string | null {
+  if (typed.trim() === '') return null
+  const n = Number(typed)
+  const { min, max } = LORE_BUDGET_BOUNDS[field]
+  return Number.isInteger(n) && n >= min && n <= max ? null : `${min}–${max}`
+}
+
+/**
+ * Lore budgets (milestone 3, task 10): the player's values over every pack's own, applied from the next turn. A blank
+ * field uses the pack's, shown beside it; with no pack chosen, the engine's defaults are shown.
+ */
+function LoreBudgets({ pack, draft, onChange, onReset }: { pack: Pack | null; draft: BudgetDraft; onChange: (next: BudgetDraft) => void; onReset: () => void }) {
+  const defaults = pack?.ruleset.codex ?? ENGINE_CODEX
+  return (
+    <fieldset className="profile lore-budgets">
+      <legend title="How much world lore each turn's prompts may carry. Blank uses the game's own values.">Lore budgets</legend>
+      <div className="row">
+        {LORE_BUDGET_FIELDS.map((f) => {
+          const problem = budgetProblem(f, draft[f])
+          return (
+            <label key={f} title={BUDGET_LABEL[f].hint}>
+              {BUDGET_LABEL[f].name}
+              <input
+                type="number"
+                min={LORE_BUDGET_BOUNDS[f].min}
+                max={LORE_BUDGET_BOUNDS[f].max}
+                value={draft[f]}
+                placeholder={String(defaults[f])}
+                className={problem ? 'invalid' : undefined}
+                onChange={(e) => onChange({ ...draft, [f]: e.target.value })}
+              />
+              <span className="status">{problem ? `Use ${problem}` : `${pack ? 'Game' : 'Default'}: ${defaults[f]}`}</span>
+            </label>
+          )
+        })}
+      </div>
+      <div className="row">
+        <Button size="sm" variant="ghost" onClick={onReset} disabled={LORE_BUDGET_FIELDS.every((f) => draft[f] === '')}>
+          Reset to game defaults
+        </Button>
+        <span className="status">Apply from the next turn, in every game.</span>
+      </div>
+    </fieldset>
+  )
+}
+
 /** Play logs (milestone 2): on or off, and where they are. Nothing deletes them but the player. */
 function Logging() {
   const [on, setOn] = useState<boolean | null>(null)
@@ -146,14 +210,19 @@ function Logging() {
   )
 }
 
-export function Settings({ onClose }: { onClose: () => void }) {
+export function Settings({ onClose, pack = null }: { onClose: () => void; pack?: Pack | null }) {
   const [draft, setDraft] = useState<Record<LlmProfileId, Draft> | null>(null)
+  const [budgets, setBudgets] = useState<BudgetDraft | null>(null)
   const [saved, setSaved] = useState('')
 
   useEffect(() => {
     window.api.getSettings().then(setDraft)
+    window.api.getLoreBudgets().then((b) => setBudgets(draftOf(b)))
   }, [])
-  if (!draft) return <div className="screen">Loading…</div>
+  if (!draft || !budgets) return <div className="screen">Loading…</div>
+  const budgetsValid = LORE_BUDGET_FIELDS.every((f) => budgetProblem(f, budgets[f]) === null)
+  const typedBudgets = (b: BudgetDraft): LoreBudgetOverrides =>
+    Object.fromEntries(LORE_BUDGET_FIELDS.flatMap((f) => (b[f].trim() === '' ? [] : [[f, Number(b[f])]])))
 
   const save = async () => {
     const update = Object.fromEntries(
@@ -165,6 +234,7 @@ export function Settings({ onClose }: { onClose: () => void }) {
     ) as SettingsUpdate
     const view: SettingsView = await window.api.saveSettings(update)
     setDraft(view)
+    setBudgets(draftOf(await window.api.setLoreBudgets(typedBudgets(budgets))))
     setSaved('Saved')
   }
 
@@ -177,9 +247,15 @@ export function Settings({ onClose }: { onClose: () => void }) {
         ))}
       </div>
       <PackFolders />
+      <LoreBudgets
+        pack={pack}
+        draft={budgets}
+        onChange={(next) => (setSaved(''), setBudgets(next))}
+        onReset={async () => (setBudgets(draftOf(await window.api.setLoreBudgets({}))), setSaved('Lore budgets reset'))}
+      />
       <Logging />
       <div className="row">
-        <Button variant="primary" onClick={save}>
+        <Button variant="primary" onClick={save} disabled={!budgetsValid}>
           Save
         </Button>
         <Button variant="ghost" onClick={onClose}>

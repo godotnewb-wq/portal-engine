@@ -1,6 +1,7 @@
 import { directorStage, loreLayers, writerStage, type LayerEntry, type LoreLayers, type Stage } from '@engine/codex'
 import { firstName } from '@engine/core'
 import { characterById, knowerOf, locationById, type Pack } from '@engine/pack'
+import { loreBudgets, type LoreBudgetOverrides, type LoreBudgets } from '@engine/rules'
 import type { GameState } from '@engine/state'
 import { RECENT_TURNS } from './director'
 import { presentCast } from './plan'
@@ -10,6 +11,8 @@ export interface TurnLore {
   stage: Stage
   writerStage: Stage
   layers: LoreLayers
+  /** The budgets this turn ran with: the pack's, with any the player set in Settings. */
+  budgets: LoreBudgets
 }
 
 /** What the turn's lore was, for the trace: entry ids per layer and their rough size. */
@@ -20,9 +23,11 @@ export interface LoreTrace {
   /** Official stance lines the director was given; absent in logs from before the knowledge filter. */
   stances?: string[]
   tokens: { stage: number; writerStage: number; scene: number; triggered: number }
+  /** The budgets in effect and which came from Settings; absent in logs from before they could be set. */
+  budgets?: LoreBudgets
 }
 
-export function turnLore(content: Pack, state: GameState, input: string): TurnLore {
+export function turnLore(content: Pack, state: GameState, input: string, overrides: LoreBudgetOverrides = {}): TurnLore {
   const scene = state.scene!
   const location = locationById(content, scene.locationId)
   const present = presentCast(scene).flatMap((id) => {
@@ -35,14 +40,16 @@ export function turnLore(content: Pack, state: GameState, input: string): TurnLo
   // What the player typed matches in any case; what the model wrote is stricter about capitalized names (codex layers).
   const texts = [input, ...recent.map((t) => t.player)]
   const written = [...recent.flatMap((t) => t.beats.map((b) => b.text)), scene.summary]
+  const budgets = loreBudgets(content.ruleset, overrides)
   return {
+    budgets,
     stage: directorStage(content.primer, content.codex, content.setting),
     writerStage: writerStage(content.tone, content.codex),
     layers: loreLayers(
       content.codex,
       content.setting,
       { ...(location && { location: { id: location.id, ...(location.parent && { parent: location.parent }) } }), present, texts, written, ignore },
-      { sceneTokens: content.ruleset.codex.sceneTokens, triggeredTokens: content.ruleset.codex.triggeredTokens, stanceWords: content.vocabulary.stanceWords }
+      { sceneTokens: budgets.sceneTokens, triggeredTokens: budgets.triggeredTokens, stanceWords: content.vocabulary.stanceWords }
     )
   }
 }
@@ -52,5 +59,6 @@ export const loreTrace = (lore: TurnLore): LoreTrace => ({
   scene: lore.layers.scene.entries,
   triggered: lore.layers.triggered.entries,
   stances: lore.layers.stances,
-  tokens: { stage: lore.stage.tokens, writerStage: lore.writerStage.tokens, scene: lore.layers.scene.tokens, triggered: lore.layers.triggered.tokens }
+  tokens: { stage: lore.stage.tokens, writerStage: lore.writerStage.tokens, scene: lore.layers.scene.tokens, triggered: lore.layers.triggered.tokens },
+  budgets: lore.budgets
 })

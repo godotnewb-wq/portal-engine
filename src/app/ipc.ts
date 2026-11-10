@@ -7,6 +7,7 @@ import type { Beat, GameState } from '@engine/state'
 import type { FlagInput, TurnDetails } from '@platform/logs'
 import type { FlagRecord } from '@engine/review'
 import type { ListModelsRequest, ListModelsResponse, LlmProfileId, SettingsUpdate, SettingsView } from '@llm'
+import type { LoreBudgetOverrides } from '@engine/rules'
 
 /** IPC channel names, shared by main and preload. */
 export const IPC = {
@@ -17,6 +18,8 @@ export const IPC = {
   setPackFolders: 'settings:set-pack-folders',
   chooseFolder: 'settings:choose-folder',
   getSettings: 'settings:get',
+  getLoreBudgets: 'settings:lore-budgets',
+  setLoreBudgets: 'settings:set-lore-budgets',
   saveSettings: 'settings:save',
   listModels: 'settings:list-models',
   testConnection: 'settings:test',
@@ -89,6 +92,10 @@ export interface RendererApi {
   chooseFolder(): Promise<string | null>
   getSettings(): Promise<SettingsView>
   saveSettings(update: SettingsUpdate): Promise<SettingsView>
+  /** The lore budgets set over every pack's defaults; a field left out uses the pack's (milestone 3, task 10). */
+  getLoreBudgets(): Promise<LoreBudgetOverrides>
+  /** Saves them, cleaned; returns what was kept. They apply from the next turn. */
+  setLoreBudgets(budgets: LoreBudgetOverrides): Promise<LoreBudgetOverrides>
   listModels(request: ListModelsRequest): Promise<ListModelsResponse>
   testConnection(profileId: LlmProfileId): Promise<TestConnectionResult>
   sceneTurn(request: SceneTurnRequest): Promise<SceneTurnResponse>

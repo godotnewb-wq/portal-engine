@@ -139,7 +139,9 @@ input, select { background: var(--bg); color: var(--text); border: 1px solid var
 .settings .pack-folders { margin-bottom: 1rem; }
 
 /* Logs, flags and turn details (milestone 2) */
-.logging, .pack-folders { margin-bottom: 1rem; }
+.logging, .pack-folders, .lore-budgets { margin-bottom: 1rem; }
+.lore-budgets label { flex: 1; }
+input.invalid { border-color: var(--danger, #e05a5a); }
 label.check { flex-direction: row; align-items: center; gap: 0.5rem; font-size: 0.9rem; color: var(--text); }
 .stage-wrap { position: relative; display: flex; min-height: 0; }
 .stage-wrap .stage { flex: 1; }

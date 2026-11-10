@@ -6,7 +6,7 @@ import { tierById } from '@engine/world'
 import { RECENT_TURNS, sheet, turnText } from './director'
 import { sceneFacts } from './facts'
 import { MAX_CHECKS, MAX_LINES, MAX_SPEAKERS, QUIET_TURNS, presentCast, silence } from './plan'
-import { LORE_LINE_WORDS, MAX_LORE_LINES, MOVE_KINDS, NEW_FACT_WORDS } from './plan2'
+import { LORE_LINE_WORDS, MOVE_KINDS, NEW_FACT_WORDS } from './plan2'
 import { ADULTS_ONLY } from './style'
 import { turnLore, type TurnLore } from './lore'
 
@@ -15,7 +15,7 @@ import { turnLore, type TurnLore } from './lore'
  * choices and fact ids, and writes no prose and no dialogue. Short on purpose: what code can check (who knows what,
  * what's been said, who may speak) is checked in code, not asked for here.
  */
-export const director2Rules = (r: Ruleset): string => `You are the director of a visual-novel RPG scene. You don't write prose or dialogue. You decide what happens this turn and return JSON; a writer turns it into the scene.
+export const director2Rules = (r: Ruleset, loreLines = r.codex.loreLines): string => `You are the director of a visual-novel RPG scene. You don't write prose or dialogue. You decide what happens this turn and return JSON; a writer turns it into the scene.
 
 Return only this JSON object:
 {
@@ -23,8 +23,7 @@ Return only this JSON object:
   "checks": [{"id","who","skill","difficulty","stakes","assist","edge","edge_reason"}],
   "speakers": [{"id","goal","mood","pressure","keeps","touched","approach","framing"}],
   "moves": [{"who","answers","move","uses","new","needs"}],
-  "lore": [{"entry","who","line"}],
-  "change": "...",
+${loreLines > 0 ? '  "lore": [{"entry","who","line"}],\n' : ''}  "change": "...",
   "reactions": [{"id","beat"}],
   "walk_ons": [{"id","line"}],
   "texture": [], "avoid": [], "leaves": [], "end_scene": false
@@ -41,8 +40,7 @@ Return only this JSON object:
 - moves: the conversation in order, at most ${MAX_LINES}. who: a speaker. answers: "player", or the number of an earlier move (1 is the first). move: one of ${MOVE_KINDS.join(', ')}. uses: ids of facts the line may draw on, if it needs any: a pool to pick from, not a list to recite. Plenty of lines need none. A speaker can use only their own facts, the place's, and facts already said on screen. new: anything the line needs that no fact holds (a price, a time, a plan), in at most ${NEW_FACT_WORDS} plain words; never a line of dialogue. needs: the id of a check the move depends on; it happens only if the check succeeds.
 - A move answers the move before it, or the player. A speaker can have two moves when someone answers them.
 - framing: only when it matters, how a speaker colours what they say about the world (e.g. "bitter, street-level view").
-- lore: at most ${MAX_LORE_LINES} facts of world lore the writer may draw on this turn, when the conversation turns to the world; usually none. entry: the [id] of a lore entry given above. line: the fact in plain words, at most ${LORE_LINE_WORDS}, never dialogue. An insider entry needs who: a speaker it says knows it. A lore line is something to draw on, not a line to say.
-- Don't repeat a fact already said unless someone asks again. A question asked and not answered gets an answer or a visible dodge.
+${loreLines > 0 ? `- lore: at most ${loreLines} facts of world lore the writer may draw on this turn, when the conversation turns to the world; usually none. entry: the [id] of a lore entry given above. line: the fact in plain words, at most ${LORE_LINE_WORDS}, never dialogue. An insider entry needs who: a speaker it says knows it. A lore line is something to draw on, not a line to say.\n` : ''}- Don't repeat a fact already said unless someone asks again. A question asked and not answered gets an answer or a visible dodge.
 - change: what is different at the end of this turn: something decided, conceded, refused, revealed or learned. A check result that matters changes it.
 - reactions: everyone else present: silent, one line each (a look, a gesture, a move).
 - walk_ons: only when the player speaks to them, or they have news that changes things.
@@ -62,7 +60,7 @@ export function buildDirector2Prompt(content: Pack, state: GameState, input: str
   const facts = sceneFacts(content, state)
 
   const system = [
-    director2Rules(content.ruleset),
+    director2Rules(content.ruleset, lore.budgets.loreLines),
     `# World: ${content.setting.name}\n${lore.stage.text}\n${ADULTS_ONLY}`,
     content.tone && `# Tone\n${content.tone}`,
     [
