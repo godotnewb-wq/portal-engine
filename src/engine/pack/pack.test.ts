@@ -123,7 +123,7 @@ describe('buildPack', () => {
 
   it('resolves a linked secret’s text from the codex, with the holder’s part and feelings', () => {
     const mara = characterById(fixture, 'mara')!
-    expect(mara.secrets[0]!.text).toBe('Keeps it: A second ledger records what the yard really takes in. It is kept in the tally office, under the floor. How they feel about it: would rather lose her post than see it found')
+    expect(mara.secrets[0]!.text).toBe("Mara's part: she keeps the second ledger. A second ledger records what the yard really takes in. It is kept in the tally office, under the floor. How Mara feels about it: would rather lose her post than see it found.")
   })
 
   it('checks secret pointers: the entry exists and is a secret, the holder may know it, and the cap holds', () => {

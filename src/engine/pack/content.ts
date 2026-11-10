@@ -3,6 +3,7 @@ import { CharacterSchema, PlayerSchema, type Character, type CharacterFile, type
 import { rankCap, RulesetSchema, rulesetProblems, type Ruleset, type StatBlock } from '@engine/rules'
 import { buildCodex, codexProblems, entryById, mayHold, type CodexEntry, type CodexFile, type Knower } from '@engine/codex'
 import { LocationSchema, SettingSchema, settingProblems, speciesById, factionById, tierById, STANCE_LEVEL_COUNT, type Location, type Setting } from '@engine/world'
+import { firstName } from '@engine/core'
 import { ENGINE_VERSION, PackManifestSchema, satisfies, type PackManifest } from './manifest'
 
 /**
@@ -100,13 +101,20 @@ export function buildPack(files: PackFiles): BuiltPack {
  * A linked secret's text, resolved from the codex so every system that reads secrets sees the fact with the holder's
  * part and feelings: one fact, one home (claude/lore-injection.md §7.1). A broken pointer is reported by `packProblems`.
  */
+/** Ends a piece of text as a sentence, so pieces joined into one prompt line stay readable. */
+const sentence = (t: string) => {
+  const s = t.trim()
+  return /[.!?]["'’”)]?$/.test(s) ? s : `${s}.`
+}
+
 export function withSecretTexts(c: CharacterFile, codex: CodexEntry[]): Character {
   return {
     ...c,
     secrets: c.secrets.map((s) => {
       if (!s.codex) return { ...s, text: s.text! }
       const fact = entryById(codex, s.codex)?.full ?? `(missing codex secret "${s.codex}")`
-      return { ...s, text: `${s.role![0]!.toUpperCase()}${s.role!.slice(1)}: ${fact} How they feel about it: ${s.angle}` }
+      const who = firstName(c.name)
+      return { ...s, text: `${who}'s part: ${sentence(s.role!)} ${sentence(fact)} How ${who} feels about it: ${sentence(s.angle!)}` }
     })
   }
 }

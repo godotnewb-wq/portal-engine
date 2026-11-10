@@ -145,8 +145,8 @@ describe('Oria’s linked secret', () => {
     const oria = characterById(content, 'oria-senn')!
     const linked = oria.secrets.find((s) => s.id === 'the-case')!
     expect(linked.codex).toBe('faction.aether-grid-corporation.control-core')
-    expect(linked.text).toMatch(/^Is fetching it for them: The sealed case .* original control core/)
-    expect(linked.text).toMatch(/How they feel about it: doesn’t want to know|How they feel about it: doesn't want to know/)
+    expect(linked.text).toMatch(/^Oria's part: she is fetching the sealed case for the Grid\. The sealed case /)
+    expect(linked.text).toMatch(/How Oria feels about it: doesn[’']t want to know .*anyway\.$/)
     expect(knowerOf(oria).holds).toEqual(['faction.aether-grid-corporation.control-core'])
   })
 

@@ -133,7 +133,7 @@ export function validatePlan2(content: Pack, state: GameState, raw: RawPlan2, in
         mood: s.mood,
         pressure: words[level]!,
         ...(s.framing?.trim() && { framing: s.framing.trim() }),
-        ...(kept.length > 0 && { hiding: kept.map((f) => f.text).join(' '), approach: s.approach || 'deflect', kept: kept.map((f) => f.id) })
+        ...(kept.length > 0 && { hiding: kept.length === 1 ? kept[0]!.text : kept.map((f, i) => `(${i + 1}) ${f.text}`).join(' '), approach: s.approach || 'deflect', kept: kept.map((f) => f.id) })
       }
     }),
     exchange: [],

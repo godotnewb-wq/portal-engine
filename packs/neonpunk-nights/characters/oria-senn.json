@@ -87,7 +87,7 @@
     {
       "id": "the-case",
       "codex": "faction.aether-grid-corporation.control-core",
-      "role": "is fetching it for them",
+      "role": "she is fetching the sealed case for the Grid",
       "angle": "doesn't want to know what the Grid wants it for, and suspects anyway",
       "tell": "Steers every question about the case back to the fee",
       "revealWhen": "someone opens the case, or names the control core to her face"

@@ -97,10 +97,10 @@ export const RulesetSchema = z.object({
   codex: z
     .object({
       fullWords: z.number().int().positive().default(120),
-      sceneTokens: z.number().int().positive().default(800),
-      triggeredTokens: z.number().int().positive().default(400)
+      sceneTokens: z.number().int().positive().default(1200),
+      triggeredTokens: z.number().int().positive().default(800)
     })
-    .default({ fullWords: 120, sceneTokens: 800, triggeredTokens: 400 })
+    .default({ fullWords: 120, sceneTokens: 1200, triggeredTokens: 800 })
 })
 export type Ruleset = z.infer<typeof RulesetSchema>
 
