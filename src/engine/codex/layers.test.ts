@@ -89,6 +89,14 @@ describe('the triggered layer', () => {
     expect(hit).not.toContain('faction.guild.night-shift.back-door')
   })
 
+  it('matches what the player says in any case, but a capitalized one-word name in model text only as written', () => {
+    expect(ids(triggeredEntries(fixture.codex, ['ask the guild'], []))).toContain('faction.guild')
+    expect(ids(triggeredEntries(fixture.codex, [], [], ['the guild bell rang twice']))).not.toContain('faction.guild')
+    expect(ids(triggeredEntries(fixture.codex, [], [], ['the Guild bell rang twice']))).toContain('faction.guild')
+    // Keywords and multi-word names keep matching in any case.
+    expect(ids(triggeredEntries(fixture.codex, [], [], ['down by the guild hall']))).toContain('faction.guild')
+  })
+
   it('ignores words inside character names', () => {
     expect(ids(triggeredEntries(fixture.codex, ['Penny Watch said hello'], ['Penny Watch']))).toEqual([])
   })

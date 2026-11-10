@@ -76,8 +76,13 @@ export interface LoreScene {
    */
   location?: { id: string; parent?: string }
   present: Knower[]
-  /** What triggered entries are matched against: the player's input, the last exchanges, the scene summary. */
+  /** What the player said (this input and their recent lines): matched in any case, since players don't capitalize reliably. */
   texts: string[]
+  /**
+   * What the model wrote (recent beats, the scene summary). Here a one-word name or alias that the codex capitalizes
+   * matches only when capitalized, so "the mill burned" doesn't bring in a faction called "the Mill".
+   */
+  written?: string[]
   /** Character names, which never trigger an entry even if a keyword is inside one. */
   ignore: string[]
 }
@@ -143,11 +148,32 @@ const termsOf = (e: CodexEntry) => [...new Set([...e.keywords, e.name, ...e.alia
 /** Whole words, any case, with simple plurals. */
 const matches = (text: string, term: string) => new RegExp(`(?<![\\w-])${escape(term).replace(/ /g, '\\s+')}(?:s|es)?(?![\\w-])`).test(text)
 
+/** Removes character names, so a keyword inside a name never triggers an entry. Case is kept for the strict match. */
+function withoutNames(texts: string[], ignore: string[]): string {
+  let text = texts.join('\n').replace(/[’‘]/g, "'").replace(/\s+/g, ' ')
+  for (const name of [...ignore].sort((a, b) => b.length - a.length)) text = text.replace(new RegExp(`(?<![\\w-])${escape(normalize(name))}(?![\\w-])`, 'gi'), ' ')
+  return text
+}
+
+/**
+ * The capitalized one-word forms of an entry's name and aliases ("Mill" from "the Mill"). In model-written text these
+ * match only as written, because the same word in lowercase is usually the ordinary word. Keywords stay any case.
+ */
+const strictTermsOf = (e: CodexEntry) =>
+  new Set([e.name, ...e.aliases].map((t) => t.trim().replace(/^the /i, '')).filter((t) => !/\s/.test(t) && /^\p{Lu}/u.test(t)).map(normalize))
+
+const matchesAsWritten = (text: string, term: string) =>
+  new RegExp(`(?<![\\w-])${escape(term[0]!.toUpperCase() + term.slice(1))}(?:s|es)?(?![\\w-])`).test(text)
+
 /** Entries whose words appear in the texts, and, for a faction named, its other entries too (§5, Triggered). */
-export function triggeredEntries(codex: CodexEntry[], texts: string[], ignore: string[]): CodexEntry[] {
-  let text = normalize(texts.join('\n'))
-  for (const name of [...ignore].sort((a, b) => b.length - a.length)) text = text.replace(new RegExp(`(?<![\\w-])${escape(normalize(name))}(?![\\w-])`, 'g'), ' ')
-  const hit = codex.filter((e) => termsOf(e).some((t) => matches(text, t)))
+export function triggeredEntries(codex: CodexEntry[], texts: string[], ignore: string[], written: string[] = []): CodexEntry[] {
+  const said = normalize(withoutNames(texts, ignore))
+  const wrote = withoutNames(written, ignore)
+  const wroteLower = normalize(wrote)
+  const hit = codex.filter((e) => {
+    const strict = strictTermsOf(e)
+    return termsOf(e).some((t) => matches(said, t) || (strict.has(t) ? matchesAsWritten(wrote, t) : matches(wroteLower, t)))
+  })
   const named = hit.filter(isFactionMain)
   const deeper = codex.filter((e) => e.kind === 'faction' && named.some((f) => e.faction === f.faction && e.id.startsWith(`${f.id}.`)))
   return [...new Set([...hit, ...deeper])]
@@ -225,7 +251,7 @@ export function loreLayers(codex: CodexEntry[], setting: Setting, scene: LoreSce
   const sceneLayer = fit([...sceneForms.keys()].map((id) => byId.get(id)!), sceneForms, budget.sceneTokens, order, knowers)
 
   const inScene = new Set(sceneLayer.entries.filter((e) => e.form === 'full').map((e) => e.id))
-  const hits = triggeredEntries([...byId.values()], scene.texts, scene.ignore).filter((e) => !inScene.has(e.id))
+  const hits = triggeredEntries([...byId.values()], scene.texts, scene.ignore, scene.written).filter((e) => !inScene.has(e.id))
   const triggeredForms = new Map(hits.map((e) => [e.id, 'full' as const]))
   const triggered = fit(hits, triggeredForms as Map<string, 'full' | 'summary'>, budget.triggeredTokens, order, knowers)
   const factions = [...sceneLayer.entries, ...triggered.entries].flatMap((l) => codex.find((e) => e.id === l.id)?.faction ?? []).concat(scene.present.flatMap((p) => p.faction ?? []))

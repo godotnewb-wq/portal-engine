@@ -2,7 +2,7 @@ import { directorStage, loreLayers, writerStage, type LayerEntry, type LoreLayer
 import { firstName } from '@engine/core'
 import { characterById, knowerOf, locationById, type Pack } from '@engine/pack'
 import type { GameState } from '@engine/state'
-import { RECENT_TURNS, turnText } from './director'
+import { RECENT_TURNS } from './director'
 import { presentCast } from './plan'
 
 /** The lore one turn's prompts carry (claude/lore-injection.md §5), worked out once and shared by both calls. */
@@ -31,14 +31,17 @@ export function turnLore(content: Pack, state: GameState, input: string): TurnLo
   })
   const people = [...content.characters.map((c) => c.name), state.player.name, ...(location?.walkOns.flatMap((w) => (w.name ? [w.name] : [])) ?? [])]
   const ignore = [...new Set([...people, ...people.map(firstName)])]
-  const texts = [input, ...scene.turns.slice(-RECENT_TURNS).map((t) => turnText(content, state.player.name, t)), scene.summary]
+  const recent = scene.turns.slice(-RECENT_TURNS)
+  // What the player typed matches in any case; what the model wrote is stricter about capitalized names (codex layers).
+  const texts = [input, ...recent.map((t) => t.player)]
+  const written = [...recent.flatMap((t) => t.beats.map((b) => b.text)), scene.summary]
   return {
     stage: directorStage(content.primer, content.codex, content.setting),
     writerStage: writerStage(content.tone, content.codex),
     layers: loreLayers(
       content.codex,
       content.setting,
-      { ...(location && { location: { id: location.id, ...(location.parent && { parent: location.parent }) } }), present, texts, ignore },
+      { ...(location && { location: { id: location.id, ...(location.parent && { parent: location.parent }) } }), present, texts, written, ignore },
       { sceneTokens: content.ruleset.codex.sceneTokens, triggeredTokens: content.ruleset.codex.triggeredTokens, stanceWords: content.vocabulary.stanceWords }
     )
   }
