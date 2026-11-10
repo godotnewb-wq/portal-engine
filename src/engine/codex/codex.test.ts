@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { fixture, fixtureCodex } from '@tests/fixture'
-import { codexProblems, codexWarnings, type CodexContext } from './checks'
+import { codexProblems, codexWarnings, LORE_LINE_WORDS, type CodexContext } from './checks'
 import { buildCodex, entryById, idFromPath, locationChain, type CodexFile } from './load'
 import { parseSelector } from './schema'
 
@@ -85,6 +85,7 @@ describe('content checks', () => {
 
   it('catch text over the ruleset’s word cap', () => {
     expect(problemsWith(entry('concepts/long.md', 'name: Long\nkind: concept\nsummary: x', 'word '.repeat(fixture.ruleset.codex.fullWords + 1)))).toContain(`codex/concepts/long.md: its text is ${fixture.ruleset.codex.fullWords + 1} words; the most is ${fixture.ruleset.codex.fullWords}`)
+    expect(problemsWith(entry('concepts/wordy.md', `name: Wordy\nkind: concept\nsummary: ${'word '.repeat(LORE_LINE_WORDS + 1).trim()}`, 'Short.'))).toContain(`codex/concepts/wordy.md: its summary is ${LORE_LINE_WORDS + 1} words; the most is ${LORE_LINE_WORDS}, since it stands in for a lore line that runs long`)
   })
 
   it('keep secrets from the writer, and stage lines on common top-level entries', () => {

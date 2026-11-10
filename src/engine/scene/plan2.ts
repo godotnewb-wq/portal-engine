@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import type { GameState } from '@engine/state'
 import { characterById, knowerOf, type Pack } from '@engine/pack'
-import { checkNames, entryById, knows } from '@engine/codex'
+import { checkNames, entryById, knows, LORE_LINE_WORDS } from '@engine/codex'
 import { packNames } from './checks'
 import { turnLore, type TurnLore } from './lore'
 import { canSay, sceneFacts, toldPlayer } from './facts'
@@ -33,8 +33,8 @@ export const NEW_FACT_WORDS = 25
 
 /** Lore lines a turn: a small optional pool for the writer, never one per spoken line (claude/lore-injection.md §8; tune). */
 export const MAX_LORE_LINES = 3
-/** A lore line is a fact in plain words, at most this long. */
-export const LORE_LINE_WORDS = 30
+/** A lore line is a fact in plain words, at most this long (kept in the codex, whose summaries share the limit). */
+export { LORE_LINE_WORDS }
 
 const RawMoveSchema = z.object({
   who: z.string(),
@@ -217,11 +217,17 @@ function validateLore(content: Pack, state: GameState, raw: RawPlan2, lore: Turn
     if (!entry || !given.has(id)) return fix(`dropped lore line ${n}: "${id}" wasn't given this turn`)
     if (entry.knowledge === 'secret') return fix(`dropped lore line ${n}: "${id}" is a secret`)
     if (lines.length >= MAX_LORE_LINES) return fix(`dropped lore line ${n}: at most ${MAX_LORE_LINES}`)
-    const bad = checkNames(line, packNames(content, [state.player.name]))[0]
-    if (bad) return fix(`dropped lore line ${n}: "${bad.name}" isn't a name in this world`)
-    if (QUOTED_WORDS.test(line)) fix(`lore line ${n} quotes dialogue`)
-    const w = line.split(/\s+/)
-    const said = w.length > LORE_LINE_WORDS ? w.slice(0, LORE_LINE_WORDS).join(' ') : line
+    // A line that runs long gives way to the entry's own summary: cutting it could end mid-sentence or before the words
+    // that change its meaning, and the summary is a whole sentence about the same entry (kept short by the content check).
+    const words = line.split(/\s+/).length
+    const long = words > LORE_LINE_WORDS
+    if (long) fix(`lore line ${n} was ${words} words; the most is ${LORE_LINE_WORDS}, so the entry's summary stands in`)
+    const said = long ? entry.summary.trim() : line
+    if (!long) {
+      const bad = checkNames(line, packNames(content, [state.player.name]))[0]
+      if (bad) return fix(`dropped lore line ${n}: "${bad.name}" isn't a name in this world`)
+      if (QUOTED_WORDS.test(line)) fix(`lore line ${n} quotes dialogue`)
+    }
     const who = l.who?.trim() ? presentId(content, state.scene!, l.who.trim()) : undefined
     if (entry.knowledge === 'circles') {
       const c = who ? characterById(content, who) : undefined

@@ -1,6 +1,12 @@
 import { factionById, factionChain, tierById, type Location, type Setting } from '@engine/world'
 import { MAX_LOCATION_LAYER, selectorText, type CodexEntry, type Selector } from './schema'
 
+/**
+ * The most words in a lore line the director writes for the writer: one fact in plain words (claude/lore-injection.md §8).
+ * An entry's summary keeps to it too, because the summary stands in for a line that runs long.
+ */
+export const LORE_LINE_WORDS = 30
+
 /** What the content check needs from the rest of the pack. */
 export interface CodexContext {
   setting: Setting
@@ -50,6 +56,7 @@ export function codexProblems(entries: CodexEntry[], ctx: CodexContext): string[
   }
 
   for (const e of entries) {
+    if (words(e.summary) > LORE_LINE_WORDS) at(e, `its summary is ${words(e.summary)} words; the most is ${LORE_LINE_WORDS}, since it stands in for a lore line that runs long`)
     if (words(e.full) > ctx.fullWords) at(e, `its text is ${words(e.full)} words; the most is ${ctx.fullWords}`)
     if (e.knowledge === 'secret' && e.audience.includes('writer')) at(e, 'a secret entry can’t have the writer in its audience')
     if (e.stage && e.knowledge !== 'common') at(e, 'only common entries have a stage line')

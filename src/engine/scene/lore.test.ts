@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { fixture, yardScene } from '@tests/fixture'
 import { buildDirector2Prompt } from './director2'
 import { turnLore } from './lore'
-import { MAX_LORE_LINES, parsePlan2, validatePlan2 } from './plan2'
+import { LORE_LINE_WORDS, MAX_LORE_LINES, parsePlan2, validatePlan2 } from './plan2'
 import { buildWriter2Prompt } from './writer2'
 
 // Lore lines and framing on the situation plan (claude/lore-injection.md §8, option B).
@@ -65,6 +65,13 @@ describe('lore lines', () => {
       'dropped lore line 3: "faction.guild.second-ledger" wasn\'t given this turn',
       `dropped lore line 7: at most ${MAX_LORE_LINES}`
     ])
+  })
+
+  it('give way to the entry’s summary when a line runs past the word limit, counted as a correction', () => {
+    const long = 'The Guild owns the yard and sets the cart fees, and every porter, carter and clerk who works the gate pays it something each week, whether in coin or in favors owed to the hall, and nobody argues.'
+    const { plan, corrections } = validate([{ entry: 'faction.guild', line: long }])
+    expect(plan.lore).toEqual([{ entry: 'faction.guild', name: 'The Guild', line: 'Runs the yard and counts every crate.' }])
+    expect(corrections).toEqual([`lore line 1 was ${long.split(' ').length} words; the most is ${LORE_LINE_WORDS}, so the entry's summary stands in`])
   })
 
   it('drop an insider line given to someone who doesn’t know it', () => {
