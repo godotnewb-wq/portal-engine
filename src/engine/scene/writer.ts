@@ -7,7 +7,7 @@ import { RECENT_TURNS, turnText } from './director'
 import { type Prompt } from '@engine/core'
 import { firstName } from '@engine/core'
 import { presentCast, type BeatPlan, type PlannedCheck } from './plan'
-import { ADULTS_ONLY, BEATS, STYLE_GUIDE } from './style'
+import { BEATS, STYLE_GUIDE } from './style'
 
 /** Everyone a beat or tag may name in this scene: the cast present, the walk-ons, and the player. */
 export function sceneSpeakers(content: Pack, state: GameState): Speaker[] {
@@ -75,7 +75,6 @@ export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPla
     'You write the prose of a visual-novel RPG scene from a director\'s plan.',
     STYLE_GUIDE,
     content.tone && `Tone:\n${content.tone}`,
-    ADULTS_ONLY,
     WRITER_FORMAT,
     `The player is ${state.player.name} (${state.player.pronouns}), addressed as "you". Setting: ${location.name}, ${location.district}, ${content.setting.name}.`,
     ...speakers.map((c) => voiceCard(firstName(c.name), c.voice, c.portrait))

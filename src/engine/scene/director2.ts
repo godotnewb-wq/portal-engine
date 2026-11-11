@@ -7,7 +7,6 @@ import { RECENT_TURNS, sheet, turnText } from './director'
 import { sceneFacts } from './facts'
 import { MAX_CHECKS, MAX_LINES, MAX_SPEAKERS, QUIET_TURNS, presentCast, silence } from './plan'
 import { LORE_LINE_WORDS, MOVE_KINDS, NEW_FACT_WORDS } from './plan2'
-import { ADULTS_ONLY } from './style'
 import { turnLore, type TurnLore } from './lore'
 
 /**
@@ -61,7 +60,7 @@ export function buildDirector2Prompt(content: Pack, state: GameState, input: str
 
   const system = [
     director2Rules(content.ruleset, lore.budgets.loreLines),
-    `# World: ${content.setting.name}\n${lore.stage.text}\n${ADULTS_ONLY}`,
+    `# World: ${content.setting.name}\n${lore.stage.text}`,
     content.tone && `# Tone\n${content.tone}`,
     [
       `# Location: ${location.name} (${tierById(content.setting, location.tier)?.name ?? location.tier}, ${location.district})`,

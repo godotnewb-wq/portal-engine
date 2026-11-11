@@ -19,7 +19,6 @@ export const STYLE_GUIDE = `Style:
 - Short visual-novel beats.`
 
 /** Said in every scene prompt, whatever the pack: the engine's adult-content guard, which packs can't turn off. */
-export const ADULTS_ONLY = 'Every character is an adult.'
 
 /**
  * Phrases LLM prose falls back on, in any world; a pack adds its own. A hit in the writer's output triggers the one rewrite (narrator-scene-engine §8).

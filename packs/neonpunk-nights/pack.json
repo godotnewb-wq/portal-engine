@@ -7,11 +7,11 @@
   "license": "All rights reserved (pack content); see the repository for the engine's GPL-3.0 license",
   "engine": "^0.2.0",
   "start": {
-    "location": "coil-line-car-14",
+    "location": "sump-lantern",
     "cast": [
-      "kesh",
-      "jun-halloway",
-      "teo-varrin"
+      "vex",
+      "brask",
+      "oria-senn"
     ]
   },
   "ui": {

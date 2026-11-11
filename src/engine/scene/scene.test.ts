@@ -51,7 +51,7 @@ describe('prompts take the pack’s slots', () => {
     expect(system).toMatch(/skill is one of: fight, sneak, notice, talk, bluff\. difficulty is one of: routine, tough, grim\./)
     expect(system).toMatch(/Toward the player: warmth 10, bond 8 \(0–20\)/)
     expect(system).toMatch(/\(The Lower Ward, east gate\)/)
-    expect(system).toMatch(/Every character is an adult\./)
+    expect(system).not.toMatch(/Every character is an adult\./)
   })
 
   it('gives the writer the pack’s tone and setting name', () => {

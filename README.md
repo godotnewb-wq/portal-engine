@@ -4,7 +4,7 @@ A game-agnostic engine for single-player LLM visual novel RPGs. The engine runs 
 
 The first pack is **Neonpunk Nights**, an adult visual novel RPG set in Spire City (`packs/neonpunk-nights`). `packs/test-fixture` is a tiny pack with a deliberately different ruleset that the engine's tests run against.
 
-Status: **milestone 1.5**. The milestone 1 scene engine has been restructured into engine and packs, with data-driven rulesets and a pack picker.
+Status: **Milestone 3 in progress**. The lore codex, prompt layers, and budget settings are implemented. Benchmark scenarios, lore reporting, and acceptance checks remain open. Continue Milestone 3 work on the designated `milestone-3.5` branch.
 
 ## Running it
 

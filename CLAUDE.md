@@ -25,4 +25,4 @@ A game-agnostic engine for single-player LLM visual novel RPGs (Electron, React 
 - Code copied from Breedhaven keeps a header naming its source file, and is listed in `NOTICE.md`.
 - No backwards compatibility for saves or packs until the game is public.
 - Comments say why, in plain prose. Prompts are terse.
-- Content is US English and always describes characters as adults.
+- Content is written in US English.

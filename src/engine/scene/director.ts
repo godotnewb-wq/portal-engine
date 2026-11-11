@@ -6,7 +6,6 @@ import type { Ruleset } from '@engine/rules'
 import { characterById, locationById, type Pack } from '@engine/pack'
 import { MAX_CHECKS, MAX_LINES, MAX_SPEAKERS, QUIET_TURNS, presentCast, silence } from './plan'
 import { recall } from '@engine/memory'
-import { ADULTS_ONLY } from './style'
 import { tierById } from '@engine/world'
 
 /** How many past turns go into prompts verbatim; older ones live in the running summary. */
@@ -113,7 +112,7 @@ export function buildDirectorPrompt(content: Pack, state: GameState, input: stri
 
   const system = [
     directorRules(content.ruleset),
-    `# World: ${content.setting.name}\n${directorStage(content.primer, content.codex, content.setting).text}\n${ADULTS_ONLY}`,
+    `# World: ${content.setting.name}\n${directorStage(content.primer, content.codex, content.setting).text}`,
     content.tone && `# Tone\n${content.tone}`,
     `# Location: ${location.name} (${tierById(content.setting, location.tier)?.name ?? location.tier}, ${location.district})\n${location.description}\nSights: ${location.texture.sights.join('; ')}\nSounds: ${location.texture.sounds.join('; ')}\nSmells: ${location.texture.smells.join('; ')}${location.texture.slang.length ? `\nLocal slang: ${location.texture.slang.join('; ')}` : ''}${location.texture.current.length ? `\nLately: ${location.texture.current.join('; ')}` : ''}${location.extras.length ? `\nCrowd: ${location.extras.join('; ')}` : ''}`,
     walkOns.length > 0 && `# Walk-ons\n${walkOns.map((w) => `- ${w.label}${w.name ? ` (${w.name})` : ''} [id: ${w.id}]: ${w.species}; ${w.look}; ${w.manner}; ${w.role}`).join('\n')}`,
