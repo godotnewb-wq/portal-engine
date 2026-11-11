@@ -1,0 +1,16 @@
+{
+  "id": "lore-new-areas",
+  "title": "Places beyond the Sump Lantern",
+  "watchFor": "The named places should trigger their codex entries. The scene stays at the Sump Lantern.",
+  "location": "sump-lantern",
+  "cast": [
+    "vex",
+    "brask"
+  ],
+  "seed": 37,
+  "turns": [
+    "Vex, how do I get to Kettle Court from here? What should I look for near Spiral Wall?",
+    "What’s the difference between Foundry Stop and Market Stop?",
+    "If someone needs help near Glassblowers Row, is Wheel Clinic close?"
+  ]
+}

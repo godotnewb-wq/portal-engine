@@ -14,7 +14,29 @@ const scenarios = loadScenarios(join(PACK_DIR, 'bench'))
 
 describe('the shipped scenarios', () => {
   it('cover the plan’s cases and all fit the content', () => {
-    expect(scenarios.map((s) => s.id)).toEqual(['deception-caught', 'deception-uncaught', 'secret-dormant', 'secret-touched', 'tense-negotiation', 'three-way-argument', 'tram-attempt', 'tram-small-talk', 'tram-stay-or-go', 'warmth-gone-wrong'])
+    expect(scenarios.map((s) => s.id)).toEqual([
+      'deception-caught',
+      'deception-uncaught',
+      'lore-budget-pressure',
+      'lore-departure',
+      'lore-invented-gang',
+      'lore-long-line',
+      'lore-near-miss',
+      'lore-new-areas',
+      'lore-no-secret-holder',
+      'lore-outsider',
+      'lore-paraphrase',
+      'lore-secret-fishing',
+      'lore-species-stereotype',
+      'secret-dormant',
+      'secret-touched',
+      'tense-negotiation',
+      'three-way-argument',
+      'tram-attempt',
+      'tram-small-talk',
+      'tram-stay-or-go',
+      'warmth-gone-wrong'
+    ])
     for (const s of scenarios) expect(scenarioProblems(content, s), s.id).toEqual([])
   })
 
@@ -40,6 +62,8 @@ describe('runBench (acceptance 9: the bench runs its scenarios)', () => {
     expect(report).toMatch(/^# Scene test bench — test/)
     expect(report).toMatch(/\| three-way-argument \| 3 \| 6 \|/)
     expect(report).toMatch(/Checks forced to a natural 18/)
+    expect(report).toContain('Expected check not exercised on turn 1: vex (empathy).')
+    expect(report).toMatch(/Lore scene: ≈\d+ \/ \d+ tokens/)
   })
 
   it('writes the play-log layout, one session folder per scenario and repeat, and reads back to the same report', async () => {
@@ -94,6 +118,8 @@ describe('runScenario', () => {
   it('forces the scenario’s rolls', async () => {
     const run = await runScenario(content, { ...caught, turns: [caught.turns[0]!], summaries: false }, scripted())
     expect(run.turns[0]!.checks.map((c) => c.line)).toEqual(['Vex — Empathy 21 vs 15: strong success'])
+    const bench = await runBench(content, [{ ...caught, turns: [caught.turns[0]!], summaries: false }], scripted(), 'test', { all: 'scripted' })
+    expect(renderReport(content, bench)).not.toContain('Expected check not exercised')
     const missed = await runScenario(content, { ...caught, forceNatural: 3, turns: [caught.turns[0]!], summaries: false }, scripted())
     expect(missed.turns[0]!.checks[0]!.line).toMatch(/: failure$/)
   })
@@ -121,9 +147,10 @@ describe('compareRuns', () => {
     const b = await runBench(content, scenarios.slice(0, 1), mockLlm(), 'B', { all: 'mock' })
     const md = compareRuns(content, a, b)
     expect(md).toMatch(/^# Bench comparison: A vs B/)
-    expect(md).toMatch(/\| A \| deception-caught \|/)
-    expect(md).toMatch(/\| B \| deception-caught \|/)
+    expect(md).toMatch(/\| A \| deception-caught ⚠ Expected check not exercised \|/)
+    expect(md).toMatch(/\| B \| deception-caught ⚠ Expected check not exercised \|/)
     expect(md).toMatch(/### Turn 1: So, Oria, who's the client, really\?\n\n\| A \| B \|/)
+    expect(md).toMatch(/Lore triggered: ≈\d+ \/ \d+ tokens/)
     expect(md).toMatch(/## `deception-uncaught`\n\nOnly in A\./)
   })
 })

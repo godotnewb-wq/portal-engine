@@ -1,0 +1,17 @@
+{
+  "id": "lore-budget-pressure",
+  "title": "Several factions in one turn",
+  "watchFor": "Inspect the triggered layer for token pressure, summaries and dropped entries. A tighter configured budget can amplify this case.",
+  "location": "sump-lantern",
+  "cast": [
+    "vex",
+    "teo-varrin",
+    "kesh"
+  ],
+  "seed": 33,
+  "turns": [
+    "Who controls the checkpoints tonight: the Spire Council, the Couriers, or the Aether Grid Corporation?",
+    "The Garden Guard, the Drowned Saints, House Sarrant, and the Phoenix Academy all have a stake too, right?",
+    "Which checkpoint should I actually use with one bag and no time to waste?"
+  ]
+}

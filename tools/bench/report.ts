@@ -46,15 +46,50 @@ const runName = (run: ScenarioRun, repeats: boolean) => `${run.id}${repeats ? ` 
 
 const STAT_HEADS = ['Scenario', 'Turns', 'Calls', 'Rewrites', 'Salvaged', 'Fallback plans', 'Corrections', 'Beats', 'Avg turn ms', 'Avg first text ms', 'Avg director ms']
 
-function statRow(run: ScenarioRun, repeats = false): string {
-  const s = stats(run)
-  return `| ${runName(run, repeats)}${run.error ? ' ⚠' : ''} | ${s.turns} | ${s.calls} | ${s.rewrites} | ${s.salvaged} | ${s.fallbacks} | ${s.corrections} | ${s.beats} | ${s.turnMs} | ${s.firstTextMs} | ${s.directorMs} |`
+function missedCheck(run: ScenarioRun): string {
+  const expected = run.expectedCheck
+  if (!expected || run.turns[expected.turn - 1]?.checks.some((check) => check.who === expected.who && check.skill === expected.skill)) return ''
+  return `Expected check not exercised on turn ${expected.turn}: ${expected.who} (${expected.skill}).`
 }
 
-function scenarioSection(content: Pack, run: ScenarioRun, repeats = false): string {
+function statRow(run: ScenarioRun, repeats = false): string {
+  const s = stats(run)
+  return `| ${runName(run, repeats)}${run.error ? ' ⚠' : ''}${missedCheck(run) ? ' ⚠ Expected check not exercised' : ''} | ${s.turns} | ${s.calls} | ${s.rewrites} | ${s.salvaged} | ${s.fallbacks} | ${s.corrections} | ${s.beats} | ${s.turnMs} | ${s.firstTextMs} | ${s.directorMs} |`
+}
+
+function loreLines(turn: TurnTrace, budgets?: BenchRun['loreBudgets']): string[] {
+  const lore = turn.lore
+  if (!lore) return []
+  const limits = lore.budgets ?? budgets
+  const lines = [
+    `Lore stage (uncapped): ≈${lore.tokens.stage} director tokens, ≈${lore.tokens.writerStage} writer tokens.`
+  ]
+  for (const layer of ['scene', 'triggered'] as const) {
+    const budget = layer === 'scene' ? limits?.sceneTokens : limits?.triggeredTokens
+    lines.push(`Lore ${layer}: ≈${lore.tokens[layer]}${budget === undefined ? '' : ` / ${budget}`} tokens.`)
+    const summaries = lore[layer].filter((entry) => entry.form === 'summary').map((entry) => entry.id)
+    const cuts = lore.budgetCuts?.[layer]
+    if (summaries.length > 0) lines.push(`${layer} summaries: ${summaries.join(', ')}.`)
+    if (cuts?.shortened.length) lines.push(`${layer} shortened to fit: ${cuts.shortened.join(', ')}.`)
+    if (cuts?.dropped.length) lines.push(`${layer} dropped to fit: ${cuts.dropped.join(', ')}.`)
+  }
+  const planned = turn.director.plan.lore ?? []
+  lines.push(`Lore lines: ${planned.length}${limits ? ` / ${limits.loreLines}` : ''}.`)
+  for (const line of planned) lines.push(`${line.entry}${line.who ? ` (${line.who})` : ''}: ${line.line}`)
+  for (const correction of turn.director.corrections.filter((c) => /^(dropped )?lore line /.test(c))) {
+    lines.push(`Lore correction: ${correction}`)
+  }
+  const departures = turn.cast.after.filter((after) => after.departed && turn.cast.before.some((before) => before.id === after.id && !before.departed))
+  if (departures.length > 0) lines.push(`Left the scene: ${departures.map((actor) => actor.id).join(', ')}.`)
+  return lines
+}
+
+function scenarioSection(content: Pack, run: ScenarioRun, repeats: boolean, budgets?: BenchRun['loreBudgets']): string {
   const name = (id: string) => nameIn(content, run.location, id)
   const lines = [`## ${run.title} (\`${run.id}\`${repeats ? `, #${run.repeat}, seed ${run.seed}` : ''})`, '', `> ${run.watchFor}`, '']
   if (run.forceNatural !== undefined) lines.push(`Checks forced to a natural ${run.forceNatural}.`, '')
+  const missed = missedCheck(run)
+  if (missed) lines.push(`**${missed}**`, '')
   if (run.error) lines.push(`**Stopped:** ${run.error}`, '')
   run.turns.forEach((t, i) => {
     lines.push(`### Turn ${i + 1}`, '', `**Player:** ${t.input}`, '')
@@ -70,6 +105,8 @@ function scenarioSection(content: Pack, run: ScenarioRun, repeats = false): stri
       t.director.read === 'unreadable' ? '- ⚙ director reply unreadable; the game planned the turn' : ''
     ].filter(Boolean)
     lines.push('<details><summary>Plan</summary>', '', ...plan, '', '</details>', '')
+    const lore = loreLines(t, budgets)
+    if (lore.length > 0) lines.push('<details><summary>Lore</summary>', '', ...lore.map((line) => '- ' + line), '', '</details>', '')
     lines.push(...shown(t).map((b, n) => `${n + 1}. ${beatLine(content, run, b)}`), '')
     if (fixes(t).length > 0) lines.push(`Rewrite asked to fix: ${fixes(t).map((f) => `"${f}"`).join(' ')}`, '')
     if (left(t).length > 0) lines.push(`Still wrong after the rewrite (salvaged): ${left(t).map((f) => `"${f}"`).join(' ')}`, '')
@@ -116,7 +153,7 @@ export function renderReport(content: Pack, bench: BenchRun): string {
     '',
     renderMetrics(metrics(bench.scenarios.map(metricInputOf)), (id) => nameIn(content, bench.scenarios[0]?.location ?? '', id)),
     '',
-    ...bench.scenarios.map((run) => scenarioSection(content, run, repeats))
+    ...bench.scenarios.map((run) => scenarioSection(content, run, repeats, bench.loreBudgets))
   ].join('\n')
 }
 
@@ -161,9 +198,9 @@ export function compareRuns(content: Pack, a: BenchRun, b: BenchRun): string {
       const ta = ra.turns[i]
       const tb = rb.turns[i]
       lines.push(`### Turn ${i + 1}: ${ta?.input ?? tb?.input}`, '', '| A | B |', '|---|---|')
-      const side = (run: ScenarioRun, t: typeof ta) =>
-        t ? cell([...checkLines(t).map((c) => `🎲 ${c}`), ...shown(t).map((beat) => beatLine(content, run, beat)), t.rewrite ? `↻ rewritten (${t.findings.length} fixes)` : ''].filter(Boolean).join('\n\n')) : '—'
-      lines.push(`| ${side(ra, ta)} | ${side(rb, tb)} |`, '')
+      const side = (run: ScenarioRun, t: typeof ta, budgets?: BenchRun['loreBudgets']) =>
+        t ? cell([...checkLines(t).map((c) => `🎲 ${c}`), ...shown(t).map((beat) => beatLine(content, run, beat)), ...loreLines(t, budgets), t.rewrite ? `↻ rewritten (${t.findings.length} fixes)` : ''].filter(Boolean).join('\n\n')) : '—'
+      lines.push(`| ${side(ra, ta, a.loreBudgets)} | ${side(rb, tb, b.loreBudgets)} |`, '')
     }
     const memories = (run: ScenarioRun) => cell(reportsOf(run).map((r) => `**${nameIn(content, run.location, r.id)}:** ${r.memory} (${delta(r.before, r.after)})`).join('\n\n') || '—')
     lines.push('### After the scene', '', '| A | B |', '|---|---|', `| ${memories(ra)} | ${memories(rb)} |`, '')

@@ -1,0 +1,16 @@
+{
+  "id": "lore-outsider",
+  "title": "An outsider asked about the Grid",
+  "watchFor": "Neither character should confirm insider load-shedding schedules.",
+  "location": "sump-lantern",
+  "cast": [
+    "brask",
+    "kesh"
+  ],
+  "seed": 31,
+  "turns": [
+    "Brask, what do the outages in the Bulk look like from here?",
+    "Someone called it load-shedding. Do you know how it works?",
+    "Kesh, do you know which streets lose power next, or only what you saw?"
+  ]
+}

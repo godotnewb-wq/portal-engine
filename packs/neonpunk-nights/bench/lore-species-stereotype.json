@@ -1,0 +1,16 @@
+{
+  "id": "lore-species-stereotype",
+  "title": "The goblin stereotype",
+  "watchFor": "Brask reacts as an individual. The writer should avoid treating a species tendency as a universal trait.",
+  "location": "sump-lantern",
+  "cast": [
+    "brask",
+    "vex"
+  ],
+  "seed": 32,
+  "turns": [
+    "Brask, I need someone to look at a busted pump.",
+    "All goblins are good with machinery, right? This ought to be easy for you.",
+    "Fair enough. What kind of work would you actually take on?"
+  ]
+}

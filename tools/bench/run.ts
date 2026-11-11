@@ -7,7 +7,7 @@ import { promptSources, runTurn, type Pipeline, type TurnLlm, type TurnTrace } f
 import { callTrace, LogSession, promptVersion, readSession, type SessionRecord } from '@platform/logs'
 import type { FlagRecord, ScoreRecord } from '@engine/review'
 import { loreBudgets, type LoreBudgetOverrides, type LoreBudgets } from '@engine/rules'
-import { scenarioProblems, scenarioState, type Scenario } from './scenario'
+import { scenarioProblems, scenarioState, type ExpectedCheck, type Scenario } from './scenario'
 
 export { mockLlm } from './mock'
 
@@ -21,6 +21,7 @@ export interface ScenarioRun {
   location: string
   watchFor: string
   forceNatural?: number
+  expectedCheck?: ExpectedCheck
   /** 1-based; `--repeat N` plays each scenario N times with different seeds. */
   repeat: number
   seed: number
@@ -86,6 +87,7 @@ export async function runScenario(content: Pack, scenario: Scenario, llm: BenchL
     location: scenario.location,
     watchFor: scenario.watchFor,
     ...(scenario.forceNatural !== undefined && { forceNatural: scenario.forceNatural }),
+    ...(scenario.expectedCheck && { expectedCheck: scenario.expectedCheck }),
     repeat,
     seed,
     session: session?.id ?? `${scenario.id}-${repeat}`,
@@ -175,13 +177,13 @@ export const callsOf = (run: ScenarioRun): CallTrace[] => [...run.turns.flatMap(
 
 /** `run.json`: the run's settings and where its sessions are; the traces live in the session folders. */
 interface RunFile extends Omit<BenchRun, 'scenarios'> {
-  scenarios: { id: string; repeat: number; session: string; error?: string }[]
+  scenarios: { id: string; repeat: number; session: string; error?: string; expectedCheck?: ExpectedCheck }[]
 }
 
 export function writeRun(out: string, bench: BenchRun): void {
   mkdirSync(out, { recursive: true })
   const { scenarios, ...rest } = bench
-  const file: RunFile = { ...rest, scenarios: scenarios.map((s) => ({ id: s.id, repeat: s.repeat, session: s.session, ...(s.error && { error: s.error }) })) }
+  const file: RunFile = { ...rest, scenarios: scenarios.map((s) => ({ id: s.id, repeat: s.repeat, session: s.session, ...(s.expectedCheck && { expectedCheck: s.expectedCheck }), ...(s.error && { error: s.error }) })) }
   writeFileSync(join(out, 'run.json'), JSON.stringify(file, null, 2))
 }
 
@@ -203,6 +205,7 @@ export function readRun(dir: string): BenchRun {
       location: b.location,
       watchFor: b.watchFor,
       ...(b.forceNatural !== undefined && { forceNatural: b.forceNatural }),
+      ...(entry.expectedCheck && { expectedCheck: entry.expectedCheck }),
       repeat: entry.repeat,
       seed: b.seed,
       session: entry.session,

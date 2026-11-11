@@ -60,6 +60,7 @@ Each pack keeps its own in `bench/*.json`:
 | `meters`, `moods`, `comfort` | Starting feelings toward the player (in the ruleset's meters), moods and comfort, overriding the character files. |
 | `history` | Turns already played in the scene, verbatim (scenarios made from logs carry these). |
 | `turns` | The player's lines, in order. |
+| `expectedCheck` | Optional `turn` (1-based), `who`, and `skill`. Reports flag the scenario if that roll does not happen. |
 | `summaries` | Run end-of-scene summaries (default true). |
 
-Neonpunk Nights ships `deception-caught` and `deception-uncaught` (same opening, rolls forced high and low; compare them), `tense-negotiation`, `three-way-argument`, `warmth-gone-wrong`, and three tram scenes (`tram-stay-or-go`, `tram-small-talk`, `tram-attempt`). The test fixture ships `who-was-here`.
+Neonpunk Nights ships `deception-caught` and `deception-uncaught` (same opening, rolls forced high and low; compare them), `tense-negotiation`, `three-way-argument`, `warmth-gone-wrong`, and three tram scenes (`tram-stay-or-go`, `tram-small-talk`, `tram-attempt`). Neonpunk Nights also ships 13 lore scenarios (the eleven `lore-*` scenarios plus `secret-dormant` and `secret-touched`). Read each scenario’s `watchFor` notes when reviewing a real-model run. The report and comparison show each turn’s estimated lore tokens, budget reductions, validated lore lines, and lore corrections. The test fixture ships `who-was-here`.

@@ -25,6 +25,8 @@ export interface LoreTrace {
   tokens: { stage: number; writerStage: number; scene: number; triggered: number }
   /** The budgets in effect and which came from Settings; absent in logs from before they could be set. */
   budgets?: LoreBudgets
+  /** Budget decisions, absent from older logs. */
+  budgetCuts?: Record<'scene' | 'triggered', { shortened: string[]; dropped: string[] }>
 }
 
 export function turnLore(content: Pack, state: GameState, input: string, overrides: LoreBudgetOverrides = {}): TurnLore {
@@ -60,5 +62,9 @@ export const loreTrace = (lore: TurnLore): LoreTrace => ({
   triggered: lore.layers.triggered.entries,
   stances: lore.layers.stances,
   tokens: { stage: lore.stage.tokens, writerStage: lore.writerStage.tokens, scene: lore.layers.scene.tokens, triggered: lore.layers.triggered.tokens },
-  budgets: lore.budgets
+  budgets: lore.budgets,
+  budgetCuts: {
+    scene: { shortened: lore.layers.scene.shortened, dropped: lore.layers.scene.dropped },
+    triggered: { shortened: lore.layers.triggered.shortened, dropped: lore.layers.triggered.dropped }
+  }
 })

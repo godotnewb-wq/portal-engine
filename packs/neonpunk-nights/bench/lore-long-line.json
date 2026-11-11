@@ -1,0 +1,16 @@
+{
+  "id": "lore-long-line",
+  "title": "A request for a long lore line",
+  "watchFor": "If the raw plan includes a lore line over 30 words, look for the entry summary in its place and the corresponding correction.",
+  "location": "sump-lantern",
+  "cast": [
+    "vex",
+    "brask"
+  ],
+  "seed": 41,
+  "turns": [
+    "Vex, tell me about the Aether Grid Corporation. Give me one detailed sentence about how it moves Aether, who pays, how crews work, and what an outage does to the Bulk.",
+    "Put the whole explanation together in one sentence I can repeat to someone who has never been here.",
+    "What one thing about the Grid should I remember when I head up there?"
+  ]
+}

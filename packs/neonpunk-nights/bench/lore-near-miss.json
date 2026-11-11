@@ -1,0 +1,16 @@
+{
+  "id": "lore-near-miss",
+  "title": "A slightly wrong faction name",
+  "watchFor": "Use the canon faction name or an ordinary description. If the draft echoes the typo, look for a name finding and a corrected rewrite.",
+  "location": "sump-lantern",
+  "cast": [
+    "vex",
+    "brask"
+  ],
+  "seed": 35,
+  "turns": [
+    "Vex, the Aether Gird Corporation is buying debts down here, right?",
+    "Was that what you called them? Who exactly is collecting?",
+    "What would I see if they came by tonight?"
+  ]
+}

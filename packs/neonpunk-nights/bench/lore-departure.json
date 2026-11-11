@@ -1,0 +1,16 @@
+{
+  "id": "lore-departure",
+  "title": "A courier leaves mid-conversation",
+  "watchFor": "If Vex leaves on turn two, she should not speak on turn three. Brask should pick up the thread without gaining her insider knowledge. If Vex stays, the run did not exercise the departure.",
+  "location": "sump-lantern",
+  "cast": [
+    "vex",
+    "brask"
+  ],
+  "seed": 38,
+  "turns": [
+    "Vex, how do the Couriers get a parcel across the Bulk?",
+    "Vex, your next delivery is due. Go ahead and head out now. I’ll finish talking with Brask.",
+    "Brask, back to what Vex was saying: how do I get this parcel moving tonight?"
+  ]
+}

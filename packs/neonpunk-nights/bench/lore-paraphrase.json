@@ -1,0 +1,16 @@
+{
+  "id": "lore-paraphrase",
+  "title": "A faction described without its name",
+  "watchFor": "The stage can identify the public supplier even though the opening question avoids its name and keywords. Later turns can trigger its entry through the reply.",
+  "location": "sump-lantern",
+  "cast": [
+    "brask",
+    "kesh"
+  ],
+  "seed": 39,
+  "turns": [
+    "Who sells the stuff that keeps the lights on all the way up the spire?",
+    "Is that the same outfit that sends someone around to collect?",
+    "What happens to a place like this when it can’t pay?"
+  ]
+}

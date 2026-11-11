@@ -6,6 +6,7 @@
   "cast": ["vex", "brask", "oria-senn"],
   "seed": 11,
   "forceNatural": 18,
+  "expectedCheck": { "turn": 1, "who": "vex", "skill": "empathy" },
   "turns": [
     "So, Oria, who's the client, really?",
     "Vex is right. Try again, Oria.",

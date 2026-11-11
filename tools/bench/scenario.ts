@@ -8,6 +8,9 @@ import type { Pack } from '@engine/pack'
 import { createInitialState, startScene, TurnSchema } from '@engine/state'
 import { MINUTES_PER_TURN, RECENT_TURNS, SUMMARY_CHARS, turnText } from '@engine/scene'
 
+export const ExpectedCheckSchema = z.object({ turn: z.number().int().positive(), who: IdSchema, skill: IdSchema })
+export type ExpectedCheck = z.infer<typeof ExpectedCheckSchema>
+
 /**
  * A fixed scene for the test bench (narrator-scene-engine §10): who is where, how they feel going in, and the lines
  * the player says. Run against a prompt or model change, the same scenarios show whether characters got better.
@@ -34,6 +37,8 @@ export const ScenarioSchema = z.object({
    */
   history: z.array(TurnSchema).default([]),
   turns: z.array(z.string().min(1)).min(1),
+  /** A roll the scenario is designed to exercise. Turns are 1-based. */
+  expectedCheck: ExpectedCheckSchema.optional(),
   /** Run the end-of-scene summaries too. */
   summaries: z.boolean().default(true)
 })
@@ -60,6 +65,12 @@ export function scenarioProblems(content: Pack, scenario: Scenario): string[] {
   if (!content.locations.some((l) => l.id === scenario.location)) problems.push(`unknown location "${scenario.location}"`)
   for (const id of [...scenario.cast, ...Object.keys(scenario.meters), ...Object.keys(scenario.moods)]) {
     if (!content.characters.some((c) => c.id === id)) problems.push(`unknown character "${id}"`)
+  }
+  const expected = scenario.expectedCheck
+  if (expected) {
+    if (expected.turn > scenario.turns.length) problems.push(`expected check is outside the scripted turns (${expected.turn})`)
+    if (expected.who !== 'player' && !scenario.cast.includes(expected.who)) problems.push(`expected check roller "${expected.who}" is not in the cast`)
+    if (!content.ruleset.skills.some((skill) => skill.id === expected.skill)) problems.push(`unknown expected check skill "${expected.skill}"`)
   }
   return [...new Set(problems)]
 }

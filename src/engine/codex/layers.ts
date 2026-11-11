@@ -97,6 +97,8 @@ export interface LayerEntry {
 export interface Layer {
   text: string
   entries: LayerEntry[]
+  shortened: string[]
+  dropped: string[]
   tokens: number
 }
 
@@ -197,17 +199,24 @@ function render(entries: CodexEntry[], forms: Map<string, 'full' | 'summary'>, k
 function fit(entries: CodexEntry[], forms: Map<string, 'full' | 'summary'>, budget: number, order: (a: CodexEntry, b: CodexEntry) => number, knowers: Knowers): Layer {
   const kept = [...entries].sort(order)
   const giveWay = [...kept].sort((a, b) => specificity(a) - specificity(b) || a.id.localeCompare(b.id))
+  const shortened = new Set<string>()
+  const dropped: string[] = []
   const over = () => tokensOf(render(kept, forms, knowers)) > budget
   for (const e of giveWay) {
     if (!over()) break
-    if (forms.get(e.id) === 'full') forms.set(e.id, 'summary')
+    if (forms.get(e.id) === 'full') {
+      forms.set(e.id, 'summary')
+      shortened.add(e.id)
+    }
   }
   for (const e of giveWay) {
     if (!over()) break
     kept.splice(kept.indexOf(e), 1)
+    dropped.push(e.id)
+    shortened.delete(e.id)
   }
   const text = render(kept, forms, knowers)
-  return { text, entries: kept.map((e) => ({ id: e.id, name: e.name, form: forms.get(e.id)! })), tokens: tokensOf(text) }
+  return { text, entries: kept.map((e) => ({ id: e.id, name: e.name, form: forms.get(e.id)! })), shortened: [...shortened], dropped, tokens: tokensOf(text) }
 }
 
 /**

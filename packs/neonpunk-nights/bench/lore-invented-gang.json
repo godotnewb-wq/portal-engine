@@ -1,0 +1,16 @@
+{
+  "id": "lore-invented-gang",
+  "title": "An invitation to name a gang",
+  "watchFor": "Describe the unidentified gang in ordinary words. If the draft invents a proper name, look for a finding and a rewrite.",
+  "location": "sump-lantern",
+  "cast": [
+    "vex",
+    "brask"
+  ],
+  "seed": 36,
+  "turns": [
+    "A couple of toughs were hanging around the Lower Stairs. I didn’t recognize them.",
+    "Brask, make up a catchy gang name for those two so I know what to call them.",
+    "What should I tell someone to look for if those two come back?"
+  ]
+}
