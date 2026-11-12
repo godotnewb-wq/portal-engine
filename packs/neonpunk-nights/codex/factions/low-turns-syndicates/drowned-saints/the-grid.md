@@ -1,5 +1,5 @@
 ---
-name: The Saints and the Grid
+title: The Saints and the Grid
 kind: faction
 keywords: [grid surveyors]
 summary: The Saints fear the Grid’s surveys will end their business.

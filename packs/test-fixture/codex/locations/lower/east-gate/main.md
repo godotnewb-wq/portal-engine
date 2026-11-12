@@ -1,5 +1,6 @@
 ---
-name: East Gate
+title: East Gate
+label: East Gate
 kind: location
 keywords: [east gate]
 summary: The gate district where carts come in.

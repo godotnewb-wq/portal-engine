@@ -1,5 +1,6 @@
 ---
-name: The Kilnworks
+title: The Kilnworks
+label: The Kilnworks
 kind: location
 keywords: [the foundries, foundry hands]
 summary: The foundry district under the Coil Line’s mid-span.

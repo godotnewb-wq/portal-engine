@@ -1,5 +1,5 @@
 ---
-name: Grid apprenticeships
+title: Grid apprenticeships
 kind: faction
 keywords: [line tech, apprenticeship debt, surveyor]
 summary: Line techs start out in apprenticeship debt to the company.

@@ -1,5 +1,5 @@
 ---
-name: Goblin culture
+title: Goblin culture
 kind: species-culture
 keywords: [goblin, goblins]
 summary: Known as the city’s scrappy, punk heart.

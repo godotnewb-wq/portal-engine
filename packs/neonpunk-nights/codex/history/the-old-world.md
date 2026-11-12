@@ -1,7 +1,8 @@
 ---
-name: The old world
-kind: world
-keywords: [the Aether Arts, old kingdoms]
+title: The old world
+label: The old world
+kind: history
+keywords: [old kingdoms]
 summary: Kingdoms, sorcerers and knights before the Lattice and the Burn.
 source: History > The Old World
 ---

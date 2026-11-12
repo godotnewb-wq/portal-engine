@@ -1,5 +1,6 @@
 ---
-name: The Garden Guard
+title: The Garden Guard
+label: The Garden Guard
 kind: faction
 aliases: [the Guard]
 keywords: [keeper, keepers, chalked spiral]

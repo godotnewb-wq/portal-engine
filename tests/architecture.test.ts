@@ -135,8 +135,8 @@ function properNouns(dir: string): string[] {
     ...pack.setting.factions.map((f) => strip(f.name)),
     ...pack.locations.flatMap((l) => [strip(l.name), ...l.walkOns.flatMap((w) => (w.name ? [w.name] : []))]),
     ...pack.characters.flatMap((c) => [c.name, c.name.split(' ')[0]!]),
-    // Codex entries that are things in the world (not descriptive titles like "How the tallies work").
-    ...pack.codex.filter((e) => e.kind === 'location' || (e.kind === 'faction' && e.id.split('.').at(-1) === e.faction) || e.kind === 'world').flatMap((e) => [strip(e.name), ...e.aliases.map(strip)]),
+    // Codex entries' in-world names (not descriptive titles like "How the tallies work").
+    ...pack.codex.flatMap((e) => [...(e.label ? [strip(e.label)] : []), ...e.aliases.map(strip)]),
     pack.player.name
   ]
   return [...new Set(names.filter((n) => n.length > 2))]

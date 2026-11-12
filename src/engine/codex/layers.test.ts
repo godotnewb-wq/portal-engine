@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { fixture } from '@tests/fixture'
+import { fixture, fixtureCodex } from '@tests/fixture'
+import { buildCodex } from './load'
 import { canonNames, codexFactionId, directorStage, loreLayers, stanceLines, triggeredEntries, writerStage, type LoreScene } from './layers'
 
 const budget = { sceneTokens: fixture.ruleset.codex.sceneTokens, triggeredTokens: fixture.ruleset.codex.triggeredTokens }
@@ -12,7 +13,7 @@ const yard: LoreScene = {
 const ids = (entries: { id: string }[]) => entries.map((e) => e.id)
 
 describe('the stage', () => {
-  it('is the primer, then every common stage line in a fixed order: world, places, peoples, worldviews, factions, concepts', () => {
+  it('is the primer, then every common stage line in a fixed order: background, history, places, peoples, worldviews, factions, concepts, current', () => {
     const stage = directorStage(fixture.primer, fixture.codex, fixture.setting)
     expect(stage.text.startsWith(fixture.primer)).toBe(true)
     expect(stage.ids).toEqual(['location.upper', 'location.lower', 'faction.guild', 'faction.watch', 'concept.pennies'])
@@ -28,14 +29,90 @@ describe('the stage', () => {
   })
 })
 
+/** The fixture's codex plus some entries written here. */
+const withEntries = (...files: [string, string][]) =>
+  buildCodex([...fixtureCodex(), ...files.map(([path, header]) => ({ path, text: `---\n${header}\n---\nSome text.\n` }))]).entries
+
+describe('names come from labels (milestone 3.5, task 2)', () => {
+  const codex = withEntries(
+    ['concepts/fog.md', 'title: How the fog rolls in\nlabel: The Grey\nkind: concept\nkeywords: [Tally Desk]\nsummary: x'],
+    ['concepts/ropes.md', 'title: Rope work\nkind: concept\nsummary: x'],
+    ['concepts/hush.md', 'title: The hush\nlabel: The Hush Room\nkind: concept\nknowledge: circles\nalso: [occupation porter]\nsummary: x']
+  )
+
+  it('gives the writer only common labels and their aliases, whatever the kind; never titles or keywords', () => {
+    const names = canonNames(codex)
+    expect(names).toEqual(expect.arrayContaining(['The Grey', 'The Guild', 'the hall', 'Pennies']))
+    for (const not of ['How the fog rolls in', 'Rope work', 'Tally Desk', 'The Hush Room', 'Automaton culture']) expect(names).not.toContain(not)
+  })
+
+  it('lets a title trigger its entry, with or without a label', () => {
+    expect(ids(triggeredEntries(codex, ['so that’s how the fog rolls in'], []))).toContain('concept.fog')
+    expect(ids(triggeredEntries(codex, ['any rope work today?'], []))).toContain('concept.ropes')
+    expect(ids(triggeredEntries(codex, ['the grey again'], []))).toContain('concept.fog')
+  })
+
+  it('matches a one-word label only as written in model text, but a title that is no label in any case', () => {
+    const one = withEntries(['concepts/ropes.md', 'title: Ropes\nkind: concept\nsummary: x'], ['concepts/fog.md', 'title: Grey\nlabel: Grey\nkind: concept\nsummary: x'])
+    expect(ids(triggeredEntries(one, [], [], ['a grey morning']))).not.toContain('concept.fog')
+    expect(ids(triggeredEntries(one, [], [], ['the Grey came down']))).toContain('concept.fog')
+    expect(ids(triggeredEntries(one, [], [], ['coils of ropes']))).toContain('concept.ropes')
+  })
+})
+
+describe('history, background and current (milestone 3.5, task 3)', () => {
+  const body = (what: string) => `${what} `.repeat(40).trim()
+  const files = (...more: [string, string, string][]) =>
+    buildCodex([...fixtureCodex(), ...more.map(([path, header, text]) => ({ path, text: `---\n${header}\n---\n${text}\n` }))]).entries
+  const codex = files(
+    ['background/the-fog.md', 'title: The fog\nkind: background\nkeywords: [fog]\nsummary: Fog lies over the ward.\nstage: Fog lies over the ward.', body('Fog lies over the ward.')],
+    ['history/the-flood.md', 'title: The flood\nkind: history\nkeywords: [fog]\nsummary: The ward flooded long ago.\nstage: The ward flooded long ago.\nrelated: [location.lower]', body('The ward flooded about ninety years ago.')],
+    ['current/the-strike.md', 'title: The strike\nkind: current\nkeywords: [fog]\nsummary: The porters are on strike.\nstage: The porters are on strike.', body('The porters are on strike this week.')]
+  )
+
+  it('puts how things are and what happened first on the stage, and what’s going on now last', () => {
+    const stage = directorStage(fixture.primer, codex, fixture.setting).ids
+    expect(stage.slice(0, 2)).toEqual(['background.the-fog', 'history.the-flood'])
+    expect(stage.at(-1)).toBe('current.the-strike')
+  })
+
+  it('lists what’s going on now before history, and history before background, in a layer', () => {
+    const { triggered } = loreLayers(codex, fixture.setting, { ...yard, texts: ['the fog again'] }, { ...budget, triggeredTokens: 100_000 })
+    const order = ids(triggered.entries).filter((id) => /^(current|history|background)\./.test(id))
+    expect(order).toEqual(['current.the-strike', 'history.the-flood', 'background.the-fog'])
+  })
+
+  it('gives way under budget pressure: background first, then history, then what’s going on now', () => {
+    const at = (triggeredTokens: number) => loreLayers(codex, fixture.setting, { ...yard, texts: ['the fog again'] }, { ...budget, triggeredTokens }).triggered
+    const full = at(100_000).tokens
+    // Walking the budget down, record the order entries shorten and then drop.
+    const shortened: string[] = []
+    const dropped: string[] = []
+    for (let b = full; b >= 0; b -= 5) {
+      const layer = at(b)
+      for (const id of layer.shortened) if (!shortened.includes(id)) shortened.push(id)
+      for (const id of layer.dropped) if (!dropped.includes(id)) dropped.push(id)
+      expect(layer.tokens).toBeLessThanOrEqual(Math.max(b, 0))
+    }
+    expect(shortened).toEqual(['background.the-fog', 'history.the-flood', 'current.the-strike'])
+    expect(dropped).toEqual(['background.the-fog', 'history.the-flood', 'current.the-strike'])
+  })
+
+  it('keeps the stage uncapped', () => {
+    const stage = directorStage(fixture.primer, codex, fixture.setting)
+    expect(stage.text).toContain('Fog lies over the ward.')
+    expect(stage.text).toContain('The porters are on strike.')
+  })
+})
+
 describe('the scene-scoped layer', () => {
   it('carries the place’s whole map chain, the factions and peoples of those present, and what the place links to as summaries', () => {
     const { scene } = loreLayers(fixture.codex, fixture.setting, yard, budget)
     expect(scene.entries).toEqual([
-      { id: 'location.lower.east-gate.the-yard', name: 'The Guild Yard', form: 'full' },
-      { id: 'location.lower.east-gate', name: 'East Gate', form: 'full' },
-      { id: 'location.lower', name: 'The Lower Ward', form: 'full' },
-      { id: 'faction.guild', name: 'The Guild', form: 'full' }
+      { id: 'location.lower.east-gate.the-yard', title: 'The Guild Yard', form: 'full' },
+      { id: 'location.lower.east-gate', title: 'East Gate', form: 'full' },
+      { id: 'location.lower', title: 'The Lower Ward', form: 'full' },
+      { id: 'faction.guild', title: 'The Guild', form: 'full' }
     ])
     expect(scene.text).toContain('## The Guild Yard [location.lower.east-gate.the-yard]\nCrates stand three high')
   })

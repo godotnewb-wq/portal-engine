@@ -1,5 +1,5 @@
 ---
-name: The radical keepers
+title: The radical keepers
 kind: faction
 keywords: [cut lines]
 summary: A few keepers cut Grid lines.

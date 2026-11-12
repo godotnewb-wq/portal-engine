@@ -1,5 +1,6 @@
 ---
-name: The Deepwell
+title: The Deepwell
+label: The Deepwell
 kind: location
 summary: The chasm where the Aether rises; strong enough to sicken almost anyone.
 stage: The Deepwell is the chasm at the city’s base where the Aether rises, raw enough to sicken almost anyone.

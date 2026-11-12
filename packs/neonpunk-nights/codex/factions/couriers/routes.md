@@ -1,5 +1,5 @@
 ---
-name: How the routes work
+title: How the routes work
 kind: faction
 keywords: [route information]
 summary: Dispatchers trade route information, sometimes with the wrong people.

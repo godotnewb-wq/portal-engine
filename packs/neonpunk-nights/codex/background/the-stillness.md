@@ -1,7 +1,7 @@
 ---
-name: The Stillness
-kind: world
-keywords: [Korrath]
+title: The Stillness
+label: The Stillness
+kind: background
 summary: A conquering power that has taken other worlds; never seen here.
 stage: The Stillness, a distant conquering power, has taken other worlds; its refugees live here.
 source: Galactic background (background only)

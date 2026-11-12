@@ -1,5 +1,6 @@
 ---
-name: The Wheel
+title: The Wheel
+label: The Wheel
 kind: location
 keywords: [the Wheel market, the turntable]
 summary: The market district built around a pre-Burn turntable.

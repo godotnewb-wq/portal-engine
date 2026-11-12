@@ -43,8 +43,8 @@ describe('lore lines', () => {
     ])
     expect(corrections).toEqual([])
     expect(plan.lore).toEqual([
-      { entry: 'faction.guild', name: 'The Guild', line: 'The Guild owns the yard and sets the cart fees.' },
-      { entry: 'faction.guild.tallies', name: 'How the tallies work', line: 'Every tally is rounded up a crate or two.', who: 'mara' }
+      { entry: 'faction.guild', title: 'The Guild', line: 'The Guild owns the yard and sets the cart fees.' },
+      { entry: 'faction.guild.tallies', title: 'How the tallies work', line: 'Every tally is rounded up a crate or two.', who: 'mara' }
     ])
   })
 
@@ -70,7 +70,7 @@ describe('lore lines', () => {
   it('give way to the entry’s summary when a line runs past the word limit, counted as a correction', () => {
     const long = 'The Guild owns the yard and sets the cart fees, and every porter, carter and clerk who works the gate pays it something each week, whether in coin or in favors owed to the hall, and nobody argues.'
     const { plan, corrections } = validate([{ entry: 'faction.guild', line: long }])
-    expect(plan.lore).toEqual([{ entry: 'faction.guild', name: 'The Guild', line: 'Runs the yard and counts every crate.' }])
+    expect(plan.lore).toEqual([{ entry: 'faction.guild', title: 'The Guild', line: 'Runs the yard and counts every crate.' }])
     expect(corrections).toEqual([`lore line 1 was ${long.split(' ').length} words; the most is ${LORE_LINE_WORDS}, so the entry's summary stands in`])
   })
 

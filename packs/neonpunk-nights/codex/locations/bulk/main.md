@@ -1,5 +1,6 @@
 ---
-name: The Bulk
+title: The Bulk
+label: The Bulk
 kind: location
 summary: "The working heart: markets, foundries, transit and most of the population."
 stage: "The Bulk is the working heart: markets, foundries, transit, and most of the city’s people."

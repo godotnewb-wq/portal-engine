@@ -1,6 +1,7 @@
 ---
-name: Galactic society
-kind: world
+title: Galactic society
+label: Galactic society
+kind: background
 keywords: [off-worlder, off-worlders, aliens, off-world artifact]
 summary: Faeworld is a backwater of galactic society; space travel is for the rich.
 stage: Faeworld is a backwater of galactic society; off-worlders live here in every class.

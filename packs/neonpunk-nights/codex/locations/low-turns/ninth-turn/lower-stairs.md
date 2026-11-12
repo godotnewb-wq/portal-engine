@@ -1,5 +1,6 @@
 ---
-name: The Lower Stairs
+title: The Lower Stairs
+label: The Lower Stairs
 kind: location
 keywords: [the landing]
 summary: The switchback stair from the pumphouse down to the water.

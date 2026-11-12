@@ -1,5 +1,6 @@
 ---
-name: The Upper Ward
+title: The Upper Ward
+label: The Upper Ward
 kind: location
 keywords: [upper ward]
 summary: The clean half of Testhold, where gossip is the danger.

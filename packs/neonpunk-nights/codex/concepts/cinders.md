@@ -1,5 +1,6 @@
 ---
-name: Cinders
+title: Cinders
+label: Cinders
 kind: concept
 keywords: [cinder, credits, drop a cinder]
 summary: Metal coins imprinted with credit values.

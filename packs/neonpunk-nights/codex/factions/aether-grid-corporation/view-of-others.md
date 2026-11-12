@@ -1,5 +1,5 @@
 ---
-name: How Grid people talk about the others
+title: How Grid people talk about the others
 kind: faction
 summary: A nuisance, a customer, thieves, a useful pipe.
 knowledge: circles

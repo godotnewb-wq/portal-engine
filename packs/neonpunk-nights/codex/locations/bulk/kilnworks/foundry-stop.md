@@ -1,5 +1,6 @@
 ---
-name: The Foundry Stop
+title: The Foundry Stop
+label: The Foundry Stop
 kind: location
 summary: The Coil Line platform at the foundry gates, with an all-night canteen.
 source: The fixed sandbox > The Kilnworks > The foundry stop

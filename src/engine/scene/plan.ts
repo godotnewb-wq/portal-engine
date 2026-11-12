@@ -121,8 +121,8 @@ export interface Move {
  */
 export interface LoreLine {
   entry: string
-  /** The entry's name, for read-outs. */
-  name: string
+  /** The entry's title, for read-outs. */
+  title: string
   line: string
   who?: string
 }

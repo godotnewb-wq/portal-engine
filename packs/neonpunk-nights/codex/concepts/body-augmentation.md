@@ -1,5 +1,5 @@
 ---
-name: Body augmentation
+title: Body augmentation
 kind: concept
 keywords: [augmentation, augmented, augments]
 summary: Anyone can be augmented; golems go furthest.

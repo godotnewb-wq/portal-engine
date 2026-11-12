@@ -1,5 +1,6 @@
 ---
-name: The Guild Yard
+title: The Guild Yard
+label: The Guild Yard
 kind: location
 keywords: [guild yard]
 summary: A muddy yard of crates behind the Guild hall.

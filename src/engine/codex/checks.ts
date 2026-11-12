@@ -21,6 +21,10 @@ export interface CodexContext {
 
 const words = (text: string) => text.split(/\s+/).filter(Boolean).length
 const lower = (s: string) => s.toLowerCase()
+/** An entry's in-world names: its label and aliases. */
+const names = (e: CodexEntry) => [...(e.label ? [e.label] : []), ...e.aliases]
+/** A name as compared for uniqueness: any case, curly or straight apostrophes, without a leading "the". */
+const nameKey = (s: string) => lower(s).replace(/[’‘]/g, "'").replace(/\s+/g, ' ').trim().replace(/^the /, '')
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 /** Two entries are related when one is inside the other's folder, or they share one: a faction and its deeper files. */
@@ -87,16 +91,25 @@ export function codexProblems(entries: CodexEntry[], ctx: CodexContext): string[
     }
   }
 
+  // In-world names are unique across the whole codex, related entries included: a name means one thing.
+  const byName = new Map<string, CodexEntry>()
+  for (const e of entries)
+    for (const n of new Set(names(e).map(nameKey))) {
+      const twin = byName.get(n)
+      if (twin) at(e, `its label or alias "${n}" is also a label or alias of ${twin.file}`)
+      else byName.set(n, e)
+    }
+
   const byKeyword = new Map<string, CodexEntry[]>()
-  for (const e of entries) for (const k of new Set([...e.keywords, ...e.aliases, e.name].map(lower))) byKeyword.set(k, [...(byKeyword.get(k) ?? []), e])
+  for (const e of entries) for (const k of new Set([...e.keywords, ...names(e), e.title].map(lower))) byKeyword.set(k, [...(byKeyword.get(k) ?? []), e])
   for (const [k, list] of byKeyword) {
     for (let i = 0; i < list.length; i++)
       for (let j = i + 1; j < list.length; j++) {
         const [a, b] = [list[i]!, list[j]!]
         if (related(a, b)) continue
-        const isName = (e: CodexEntry) => [e.name, ...e.aliases].map(lower).includes(k)
-        if (isName(a) && isName(b)) at(b, `its name or alias "${k}" is also a name or alias of ${a.file}`)
-        else at(b, `its keyword "${k}" is also used by unrelated ${a.file}`)
+        // Two names clashing is reported above.
+        if (names(a).map(lower).includes(k) && names(b).map(lower).includes(k)) continue
+        at(b, `its keyword or title "${k}" is also used by unrelated ${a.file}`)
       }
   }
 

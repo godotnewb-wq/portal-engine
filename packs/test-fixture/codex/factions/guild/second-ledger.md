@@ -1,5 +1,5 @@
 ---
-name: The second ledger
+title: The second ledger
 kind: faction
 keywords: [second ledger]
 summary: The Guild keeps a second set of books.

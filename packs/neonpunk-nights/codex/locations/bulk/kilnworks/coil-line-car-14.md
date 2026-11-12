@@ -1,5 +1,6 @@
 ---
-name: Coil Line Car 14
+title: Coil Line Car 14
+label: Coil Line Car 14
 kind: location
 aliases: [car 14]
 keywords: [the Coil Line, car 14, the mid-span]

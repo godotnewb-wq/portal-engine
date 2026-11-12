@@ -1,5 +1,6 @@
 ---
-name: The Low Turns syndicates
+title: The Low Turns syndicates
+label: The Low Turns syndicates
 kind: faction
 aliases: [the syndicates]
 keywords: [syndicate, checkpoint, checkpoints, smugglers]

@@ -1,5 +1,6 @@
 ---
-name: The High Turns
+title: The High Turns
+label: The High Turns
 kind: location
 summary: Wealthy rings of arcologies, galleries and Off-world House estates.
 stage: The High Turns are wealthy rings of arcologies, galleries and Off-world House estates.

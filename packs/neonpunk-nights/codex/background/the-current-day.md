@@ -1,6 +1,7 @@
 ---
-name: Faeworld today
-kind: world
+title: Faeworld today
+label: Faeworld today
+kind: background
 keywords: [the wastes, megacities, megacity]
 summary: Most of the planet is wasteland; nine in ten people live in megacities.
 stage: Most of Faeworld is wasteland; nine in ten people live in megacities.

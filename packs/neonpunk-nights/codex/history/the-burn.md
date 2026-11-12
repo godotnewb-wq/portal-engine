@@ -1,6 +1,7 @@
 ---
-name: The Burn
-kind: world
+title: The Burn
+label: The Burn
+kind: history
 keywords: [pre-Burn, post-Burn]
 summary: Three hundred years ago the Aether ignited and nearly destroyed the world.
 stage: Three hundred years ago the Burn nearly destroyed the world; the city was built from its ashes.

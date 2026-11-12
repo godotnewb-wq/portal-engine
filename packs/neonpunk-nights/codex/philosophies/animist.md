@@ -1,5 +1,6 @@
 ---
-name: Animist
+title: Animist
+label: Animist
 kind: philosophy
 keywords: [animists, animism]
 summary: The Aether is alive or aware; tapping it brings obligations.

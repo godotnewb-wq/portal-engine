@@ -1,5 +1,6 @@
 ---
-name: The refugee networks
+title: The refugee networks
+label: The refugee networks
 kind: faction
 aliases: [the networks]
 keywords: [refugee, refugees, mutual aid]

@@ -1,5 +1,5 @@
 ---
-name: Automaton culture
+title: Automaton culture
 kind: species-culture
 keywords: [automaton, automatons]
 summary: Automatons often work the night jobs.

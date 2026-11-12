@@ -1,5 +1,5 @@
 ---
-name: How the Saints hold the stairs
+title: How the Saints hold the stairs
 kind: faction
 keywords: [flooded passages]
 summary: The tithe pays the Wardens; the Saints know every flooded passage.

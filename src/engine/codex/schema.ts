@@ -5,7 +5,7 @@ import { FACTION_LEVELS, type FactionLevel } from '@engine/world'
  * What a codex entry is about. Locations form the map tree (layer 1 → 2 → 3, read from the path); the rest are
  * grouped by folder. The primer isn't an entry: it's the pack's `setting/primer.md`, part of the stage.
  */
-export const CODEX_KINDS = ['location', 'faction', 'species-culture', 'species-drawable', 'philosophy', 'concept', 'event', 'world'] as const
+export const CODEX_KINDS = ['location', 'faction', 'species-culture', 'species-drawable', 'philosophy', 'concept', 'current', 'history', 'background'] as const
 export type CodexKind = (typeof CODEX_KINDS)[number]
 
 /** Who may know an entry: everyone, people in certain circles, or only those who hold it as a secret. */
@@ -26,8 +26,11 @@ export const CODEX_FOLDERS: Record<string, { prefix: string; kinds: readonly Cod
   species: { prefix: 'species', kinds: ['species-culture', 'species-drawable'] },
   philosophies: { prefix: 'philosophy', kinds: ['philosophy'] },
   concepts: { prefix: 'concept', kinds: ['concept'] },
-  events: { prefix: 'event', kinds: ['event'] },
-  world: { prefix: 'world', kinds: ['world'] }
+  // What's going on now, what happened, and how things are (milestone 3.5). A history entry links what it concerns
+  // through `related`, and gives its timing in its text.
+  current: { prefix: 'current', kinds: ['current'] },
+  history: { prefix: 'history', kinds: ['history'] },
+  background: { prefix: 'background', kinds: ['background'] }
 }
 
 /** How deep the map tree goes: tier, region, place. */
@@ -80,7 +83,8 @@ const list = z.array(z.string().min(1)).default([])
 /** The header fields as written (kebab-case keys), before selectors are read. */
 export const EntryHeaderSchema = z
   .object({
-    name: z.string().min(1),
+    title: z.string().trim().min(1, 'needs a title: the heading the entry goes by'),
+    label: z.string().trim().min(1).optional(),
     kind: z.enum(CODEX_KINDS),
     keywords: list,
     aliases: list,
@@ -107,9 +111,16 @@ export interface CodexEntry {
   id: string
   /** The file it was read from, relative to `codex/`. */
   file: string
-  name: string
+  /** The codex heading ("How the grid really runs"): shown in prompts, logs and Turn details, and a lore trigger. */
+  title: string
+  /**
+   * What people in the world call the thing ("The Ada Lantern"), for entries that have an in-world name. Only labels
+   * and aliases are names: the writer's list and the name check read them, never titles.
+   */
+  label?: string
   kind: CodexKind
   keywords: string[]
+  /** Other in-world names for the thing ("the Yard"); only an entry with a `label` has them. */
   aliases: string[]
   summary: string
   /** The body: a short paragraph written as prompt text. */

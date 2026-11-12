@@ -1,5 +1,6 @@
 ---
-name: The Off-world Houses
+title: The Off-world Houses
+label: The Off-world Houses
 kind: faction
 aliases: [the Houses]
 keywords: [retainer, retainers, factor]

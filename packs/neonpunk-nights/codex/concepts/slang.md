@@ -1,5 +1,5 @@
 ---
-name: Street slang
+title: Street slang
 kind: concept
 keywords: [dead span, coil-sick, riding the hatch]
 summary: Low Turns and Bulk slang.

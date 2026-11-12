@@ -65,6 +65,10 @@ export function buildCodex(files: CodexFile[]): { entries: CodexEntry[]; problem
       at(f.path, 'the entry has no text below its header')
       continue
     }
+    if (h.aliases.length > 0 && !h.label) {
+      at(f.path, 'aliases are other names for its label, so an entry with aliases needs a label')
+      continue
+    }
 
     let faction: string | undefined
     if (h.kind === 'faction') {
@@ -92,7 +96,8 @@ export function buildCodex(files: CodexFile[]): { entries: CodexEntry[]; problem
     entries.push({
       id: where.id,
       file: f.path,
-      name: h.name,
+      title: h.title,
+      ...(h.label && { label: h.label }),
       kind: h.kind,
       keywords: h.keywords,
       aliases: h.aliases,

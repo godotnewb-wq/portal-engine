@@ -70,7 +70,7 @@ function Lore({ lore }: { lore: NonNullable<Details['turn']['lore']> }) {
       <ul>
         {entries.map((e) => (
           <li key={e.id} title={e.id}>
-            {e.name}
+            {e.title}
             {e.form === 'summary' && <span className="muted"> · summary only</span>}
           </li>
         ))}
@@ -139,7 +139,7 @@ function Body({ details, nameOf, flags, onBeat }: { details: Details; nameOf: (i
           ))}
           {plan.lore?.map((l) => (
             <li key={l.entry + l.line} title={l.entry}>
-              Lore ({l.name}){l.who && <> for <b>{nameOf(l.who)}</b></>}: {l.line}
+              Lore ({l.title}){l.who && <> for <b>{nameOf(l.who)}</b></>}: {l.line}
             </li>
           ))}
           {plan.texture.length > 0 && <li className="muted">Texture: {plan.texture.join('; ')}</li>}

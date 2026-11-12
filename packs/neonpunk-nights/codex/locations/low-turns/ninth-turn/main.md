@@ -1,5 +1,6 @@
 ---
-name: The Ninth Turn
+title: The Ninth Turn
+label: The Ninth Turn
 kind: location
 keywords: [the old pumphouse]
 summary: An old pumping district of stairs down to flooded pre-Burn stations.

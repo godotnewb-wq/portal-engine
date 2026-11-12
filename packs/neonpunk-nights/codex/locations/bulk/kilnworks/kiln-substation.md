@@ -1,5 +1,6 @@
 ---
-name: The Kiln Substation
+title: The Kiln Substation
+label: The Kiln Substation
 kind: location
 keywords: [the substation]
 summary: The Grid substation that feeds the Kilnworks and the Wheel.

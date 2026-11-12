@@ -1,5 +1,5 @@
 ---
-name: Golem rights
+title: Golem rights
 kind: concept
 keywords: [golem personhood, ownership contracts]
 summary: Personhood came slowly; a loose cause fights the leftover cases. Never named.

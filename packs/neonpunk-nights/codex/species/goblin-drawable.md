@@ -1,5 +1,5 @@
 ---
-name: Goblin looks
+title: Goblin looks
 kind: species-drawable
 summary: Short, large ears, sharp teeth.
 source: Peoples > The Fae (native to Faeworld) > Goblins

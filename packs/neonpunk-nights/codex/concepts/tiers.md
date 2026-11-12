@@ -1,5 +1,5 @@
 ---
-name: How each tier lives
+title: How each tier lives
 kind: concept
 keywords: [height is class, a Turn]
 summary: "Height is class: refined Aether and money above, raw Aether below."

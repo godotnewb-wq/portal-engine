@@ -1,5 +1,5 @@
 ---
-name: Golem culture
+title: Golem culture
 kind: species-culture
 keywords: [golem, golems, rune-core]
 summary: Rune-core synthetics; personhood is settled law.

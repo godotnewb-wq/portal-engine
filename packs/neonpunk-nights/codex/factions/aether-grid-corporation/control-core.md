@@ -1,5 +1,5 @@
 ---
-name: What the sealed case holds
+title: What the sealed case holds
 kind: faction
 keywords: [control core]
 summary: The sealed case wanted from Pump Station Nine is the station's control core.

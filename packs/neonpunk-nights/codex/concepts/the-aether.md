@@ -1,5 +1,6 @@
 ---
-name: The Aether
+title: The Aether
+label: The Aether
 kind: concept
 keywords: [magitech, off-world magic]
 summary: Faeworld’s own magic, rising from the planet’s core.

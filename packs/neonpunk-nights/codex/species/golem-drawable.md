@@ -1,5 +1,5 @@
 ---
-name: Golem looks
+title: Golem looks
 kind: species-drawable
 summary: Panels, seams, rune-circuitry, a glowing core.
 source: Peoples > The Fae (native to Faeworld) > Golems (Faeworld's synthetics)

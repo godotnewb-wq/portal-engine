@@ -1,5 +1,6 @@
 ---
-name: Pump Station Nine
+title: Pump Station Nine
+label: Pump Station Nine
 kind: location
 keywords: [the pump stations, flooded stations]
 summary: A half-flooded pre-Burn pump station under the Turn.

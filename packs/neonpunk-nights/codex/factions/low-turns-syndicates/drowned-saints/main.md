@@ -1,5 +1,6 @@
 ---
-name: The Drowned Saints
+title: The Drowned Saints
+label: The Drowned Saints
 kind: faction
 aliases: [the Saints]
 keywords: [the tithe, the Abbess, deacon]

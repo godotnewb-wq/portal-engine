@@ -232,10 +232,10 @@ function validateLore(content: Pack, state: GameState, raw: RawPlan2, lore: Turn
       const c = who ? characterById(content, who) : undefined
       if (!who || !speakers.has(who) || !c) return fix(`dropped lore line ${n}: insider knowledge needs a speaker who knows it`)
       if (!knows(content.setting, entry, knowerOf(c))) return fix(`dropped lore line ${n}: ${who} doesn't know ${id}`)
-      return void lines.push({ entry: id, name: entry.name, line: said, who })
+      return void lines.push({ entry: id, title: entry.title, line: said, who })
     }
     if (l.who?.trim() && (!who || !speakers.has(who))) fix(`lore line ${n}: "${l.who.trim()}" isn't a speaker; anyone may use it`)
-    lines.push({ entry: id, name: entry.name, line: said, ...(who && speakers.has(who) && { who }) })
+    lines.push({ entry: id, title: entry.title, line: said, ...(who && speakers.has(who) && { who }) })
   })
   return lines
 }

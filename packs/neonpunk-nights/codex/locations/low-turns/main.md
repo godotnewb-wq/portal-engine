@@ -1,5 +1,6 @@
 ---
-name: The Low Turns
+title: The Low Turns
+label: The Low Turns
 kind: location
 summary: Old districts built into pre-Burn machinery, raw with Aether.
 stage: "The Low Turns are old, overgrown districts raw with Aether: refugees, syndicates and smugglers."

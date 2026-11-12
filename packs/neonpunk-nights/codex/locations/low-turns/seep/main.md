@@ -1,5 +1,6 @@
 ---
-name: The Seep
+title: The Seep
+label: The Seep
 kind: location
 summary: The damp drainage district where most of the city’s refugees live.
 related: [faction.refugee-networks, faction.garden-guard]

@@ -1,5 +1,6 @@
 ---
-name: The Phoenix Academy
+title: The Phoenix Academy
+label: The Phoenix Academy
 kind: faction
 aliases: [the Academy]
 keywords: [entrance exam, scholarship]

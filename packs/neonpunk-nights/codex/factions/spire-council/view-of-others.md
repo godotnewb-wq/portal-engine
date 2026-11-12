@@ -1,5 +1,5 @@
 ---
-name: How Council people talk about the others
+title: How Council people talk about the others
 kind: faction
 summary: Courts House money, scorns the syndicates, tolerates the rest.
 knowledge: circles

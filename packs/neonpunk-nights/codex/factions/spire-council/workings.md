@@ -1,5 +1,5 @@
 ---
-name: How the Council works
+title: How the Council works
 kind: faction
 keywords: [council seats]
 summary: Crown families share the seats; Low Turns offices get what’s left.

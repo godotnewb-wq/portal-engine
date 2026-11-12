@@ -1,6 +1,6 @@
 ---
-name: Checkpoints changing hands
-kind: event
+title: Checkpoints changing hands
+kind: current
 keywords: [changed hands]
 summary: Bulk checkpoints have changed hands twice this year.
 source: Everyday Spire City > Current tensions

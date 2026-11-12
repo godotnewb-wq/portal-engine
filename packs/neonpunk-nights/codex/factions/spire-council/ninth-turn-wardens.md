@@ -1,5 +1,6 @@
 ---
-name: The Wardens of the Ninth Turn
+title: The Wardens of the Ninth Turn
+label: The Wardens of the Ninth Turn
 kind: faction
 keywords: [the envelope]
 summary: The Ninth Turn’s Wardens are paid by the Drowned Saints.

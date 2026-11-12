@@ -1,5 +1,5 @@
 ---
-name: How keepers talk about the others
+title: How keepers talk about the others
 kind: faction
 summary: The Grid steals; the Academy asks; the Council looks away.
 knowledge: circles

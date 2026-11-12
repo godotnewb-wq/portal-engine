@@ -1,5 +1,5 @@
 ---
-name: Deep elf culture
+title: Deep elf culture
 kind: species-culture
 keywords: [deep elf, deep elves]
 summary: Often of the lower city, close to the raw Aether.

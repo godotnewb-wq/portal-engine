@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { checkNames, codexWarnings, entryById, locationChain, secretLeaks } from '@engine/codex'
+import { canonNames, checkNames, codexWarnings, entryById, locationChain, secretLeaks } from '@engine/codex'
 import { packNames } from '@engine/scene'
 import { characterById, knowerOf } from '@engine/pack'
 import { content } from './support'
@@ -9,6 +9,15 @@ describe('the Neonpunk Nights codex', () => {
   it('loads with no stance words in its prose', () => {
     expect(content.codex.length).toBeGreaterThan(50)
     expect(codexWarnings(content.codex, content.vocabulary)).toEqual([])
+  })
+
+  it('files the old world and event entries as history, background and current (milestone 3.5, task 3)', () => {
+    const of = (kind: string) => content.codex.filter((e) => e.kind === kind).map((e) => e.id).sort()
+    expect(of('history')).toEqual(['history.the-aether-arts', 'history.the-burn', 'history.the-old-world'])
+    expect(of('background')).toEqual(['background.galactic-society', 'background.the-current-day', 'background.the-korrath', 'background.the-stillness'])
+    expect(of('current')).toHaveLength(5)
+    expect(entryById(content.codex, 'background.the-stillness')?.label).toBe('The Stillness')
+    expect(content.codex).toHaveLength(84)
   })
 
   it('says where in claude/lore.md every entry comes from', () => {
@@ -37,7 +46,7 @@ describe('the Neonpunk Nights codex', () => {
       ['coil-line-car-14', 'location.bulk.kilnworks'],
       ['sump-lantern', 'location.low-turns.ninth-turn']
     ])
-    expect(locationChain(content.codex, 'location.low-turns.ninth-turn.sump-lantern').map((e) => e.name)).toEqual(['The Sump Lantern', 'The Ninth Turn', 'The Low Turns'])
+    expect(locationChain(content.codex, 'location.low-turns.ninth-turn.sump-lantern').map((e) => e.title)).toEqual(['The Sump Lantern', 'The Ninth Turn', 'The Low Turns'])
   })
 
   it('keeps the reclamation and Sarrant’s money secret, and the load-shedding to Grid staff and Couriers', () => {
@@ -121,6 +130,21 @@ describe('the name check on Neonpunk prose', () => {
     expect(names('A Grid Corp van idled outside the Wheel Clinic while the Saints watched the Lower Stairs.')).toEqual([])
     expect(names("House Sarrant's people met the Wardens of the Ninth Turn at Pump Station Nine.")).toEqual([])
     expect(names('The Low Turns Ward Office was shut. Behind Kettle Court, Coil Line Car 14 waited.')).toEqual([])
+    // Found in the milestone 3.5 baseline bench: the possessive used to split this canon name and flag it.
+    expect(names("Close enough to Glassblowers' Row you'll pass it.")).toEqual([])
+    expect(names('The Abbess sent word to the Korrath elders; nobody here studies the Aether Arts.')).toEqual([])
+  })
+
+  it('knows the names that only keywords used to supply, and drops keywords that were never names (milestone 3.5)', () => {
+    expect(names('The Abess wants her tithe, and a Korath elder heard it.')).toEqual(['The Abess → The Abbess', 'Korath → The Korrath'])
+    const index = packNames(content)
+    for (const not of ['Grid bills', 'Aether sickness', 'the Wheel market']) expect(index.written).not.toContain(not)
+  })
+
+  it('gives the writer labels only: no topic titles (milestone 3.5)', () => {
+    const list = canonNames(content.codex)
+    expect(list).toEqual(expect.arrayContaining(['The Lattice', 'The Aether', 'Cinders', 'The Korrath', 'The Aether Arts', 'The Abbess']))
+    for (const not of ['Aether in the body', 'Street slang', 'How each tier lives', 'Body augmentation']) expect(list).not.toContain(not)
   })
 
   it('flags near misses with the right name, and new groups', () => {
@@ -136,7 +160,7 @@ describe('the name check on Neonpunk prose', () => {
 
   it('sees a codex secret named in prose', () => {
     const secret = content.codex.find((e) => e.knowledge === 'secret')!
-    expect(secretLeaks(`They spoke of ${secret.name.toLowerCase()} in whispers.`, content.codex).map((l) => l.entry.id)).toContain(secret.id)
+    expect(secretLeaks(`They spoke of ${secret.title.toLowerCase()} in whispers.`, content.codex).map((l) => l.entry.id)).toContain(secret.id)
   })
 })
 
