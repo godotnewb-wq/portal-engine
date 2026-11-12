@@ -28,7 +28,15 @@ const same = (a: string, b: string) => a === b || singulars(a).some((x) => singu
 const namesOf = (e: CodexEntry) => [...(e.label ? [e.label] : []), ...e.aliases]
 
 /**
- * Everything a pack names: every codex entry's label and aliases, and the setting's own names. Titles and keywords
+ * Whether a faction's own codex entry says it has no in-world name: a plural category such as "the street gangs",
+ * whose words must not make up names ("the Ada Gang") until play can create such groups (milestone 8).
+ */
+const unnamedFaction = (codex: CodexEntry[], faction: string) =>
+  codex.some((e) => e.kind === 'faction' && e.faction === faction && e.id.split('.').at(-1) === faction && !e.label)
+
+/**
+ * Everything a pack names: every codex entry's label and aliases, and the setting's own names. A setting faction's
+ * name counts only if its main codex entry, where there is one, has a label. Titles and keywords
  * don't count, so a heading or a trigger word never becomes canon by being capitalized.
  */
 export function nameIndex(codex: CodexEntry[], setting: Setting, people: string[], genericWords: string[]): NameIndex {
@@ -37,7 +45,7 @@ export function nameIndex(codex: CodexEntry[], setting: Setting, people: string[
     setting.name,
     ...(setting.world ? [setting.world] : []),
     ...setting.tiers.map((t) => t.name),
-    ...setting.factions.map((f) => f.name),
+    ...setting.factions.filter((f) => !unnamedFaction(codex, f.id)).map((f) => f.name),
     ...setting.species.map((s) => s.name)
   ]
   const unique = [...new Map(written.map((w) => [lowerWords(w).join(' '), w])).entries()].filter(([k]) => k)

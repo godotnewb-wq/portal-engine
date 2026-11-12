@@ -26,6 +26,24 @@ describe('the name index (milestone 3.5, task 2)', () => {
   })
 })
 
+describe('setting factions without a name (milestone 3.5, task 4)', () => {
+  // The Ward Watch as a plural category: its main entry loses its label (and so its aliases).
+  const unnamed = fixture.codex.map((e) => (e.id === 'faction.watch' ? { ...e, label: undefined, aliases: [] } : e))
+  const index = (codex: typeof fixture.codex, setting = fixture.setting) => nameIndex(codex, setting, [], fixture.vocabulary.genericWords)
+
+  it('leaves out a setting faction’s name when its main codex entry has no label', () => {
+    const watch = fixture.setting.factions.find((f) => f.id === 'watch')!.name
+    expect(index(fixture.codex).written).toContain(watch)
+    expect(index(unnamed).written).not.toContain(watch)
+    expect(index(unnamed).written).toContain(fixture.setting.factions.find((f) => f.id === 'guild')!.name)
+  })
+
+  it('keeps a setting faction’s name when the codex has no main entry for it', () => {
+    const setting = { ...fixture.setting, factions: [...fixture.setting.factions, { ...fixture.setting.factions[0]!, id: 'ferrymen', name: 'The Ferrymen' }] }
+    expect(index(fixture.codex, setting).written).toContain('The Ferrymen')
+  })
+})
+
 describe('possessives in names (milestone 3.5, task 2)', () => {
   const { index } = indexWith(['locations/lower/east-gate/tanners-row.md', "title: Tanners' Row\nlabel: Tanners' Row\nkind: location\nsummary: x"])
 

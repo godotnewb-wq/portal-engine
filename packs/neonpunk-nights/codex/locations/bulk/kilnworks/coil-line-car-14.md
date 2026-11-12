@@ -3,7 +3,8 @@ title: Coil Line Car 14
 label: Coil Line Car 14
 kind: location
 aliases: [car 14]
-keywords: [the Coil Line, car 14, the mid-span]
+keywords: [car 14, the mid-span]
+related: [concept.the-coil-line]
 summary: Kesh’s forty-year-old tram car, which stalls on the mid-span.
 source: The fixed sandbox > The Kilnworks > Coil Line car 14
 ---

@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { canonNames, checkNames, codexWarnings, entryById, locationChain, secretLeaks } from '@engine/codex'
+import { canonNames, checkNames, codexWarnings, triggeredEntries, entryById, locationChain, secretLeaks } from '@engine/codex'
 import { packNames } from '@engine/scene'
 import { characterById, knowerOf } from '@engine/pack'
 import { content } from './support'
@@ -17,7 +17,25 @@ describe('the Neonpunk Nights codex', () => {
     expect(of('background')).toEqual(['background.galactic-society', 'background.the-current-day', 'background.the-korrath', 'background.the-stillness'])
     expect(of('current')).toHaveLength(5)
     expect(entryById(content.codex, 'background.the-stillness')?.label).toBe('The Stillness')
-    expect(content.codex).toHaveLength(84)
+    expect(content.codex).toHaveLength(85)
+  })
+
+  it('names Faeworld, and leaves topics and the two plural categories unnamed (milestone 3.5, task 4)', () => {
+    const list = canonNames(content.codex)
+    expect(list).toContain('Faeworld')
+    for (const not of ['Faeworld today', 'Galactic society', 'The old world', 'The refugee networks', 'The Low Turns syndicates', 'the networks', 'the syndicates']) expect(list).not.toContain(not)
+    // The categories still bring up their lore.
+    const hit = (t: string) => triggeredEntries(content.codex, [t], []).map((e) => e.id)
+    expect(hit('the syndicates own those stairs')).toContain('faction.low-turns-syndicates')
+    expect(hit('ask the networks')).toContain('faction.refugee-networks')
+  })
+
+  it('has the Coil Line as a name of its own, which brings up its entry rather than car 14 (milestone 3.5, task 4)', () => {
+    expect(canonNames(content.codex)).toContain('The Coil Line')
+    const hit = triggeredEntries(content.codex, ['Is the Coil Line running tonight?'], []).map((e) => e.id)
+    expect(hit).toContain('concept.the-coil-line')
+    expect(hit).not.toContain('location.bulk.kilnworks.coil-line-car-14')
+    expect(entryById(content.codex, 'location.bulk.kilnworks.coil-line-car-14')?.related).toContain('concept.the-coil-line')
   })
 
   it('says where in claude/lore.md every entry comes from', () => {
@@ -145,6 +163,12 @@ describe('the name check on Neonpunk prose', () => {
     const list = canonNames(content.codex)
     expect(list).toEqual(expect.arrayContaining(['The Lattice', 'The Aether', 'Cinders', 'The Korrath', 'The Aether Arts', 'The Abbess']))
     for (const not of ['Aether in the body', 'Street slang', 'How each tier lives', 'Body augmentation']) expect(list).not.toContain(not)
+  })
+
+  it('catches group names made up from the plural categories’ words (milestone 3.5, task 4)', () => {
+    expect(names('The Refugee Council sent food.')).toEqual(['new: The Refugee Council'])
+    expect(names('A runner from the Ninth Turn Syndicate waited.')).not.toEqual([])
+    expect(names('The refugee networks run the kitchens, and the syndicates run the stairs.')).toEqual([])
   })
 
   it('flags near misses with the right name, and new groups', () => {

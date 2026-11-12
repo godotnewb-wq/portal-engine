@@ -1,9 +1,7 @@
 ---
 title: The Low Turns syndicates
-label: The Low Turns syndicates
 kind: faction
-aliases: [the syndicates]
-keywords: [syndicate, checkpoint, checkpoints, smugglers]
+keywords: [the syndicates, syndicate, checkpoint, checkpoints, smugglers]
 summary: The gangs that run the Low Turns’ stairs and smuggle raw Aether.
 stage: The Low Turns syndicates hold stairs and checkpoints and smuggle raw Aether and artifacts.
 source: Factions > The factions in depth > The Low Turns syndicates
