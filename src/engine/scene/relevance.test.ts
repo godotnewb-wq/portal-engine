@@ -94,6 +94,33 @@ describe('seeing through a secret takes the roll (criterion 5)', () => {
     expect(buildWriterPrompt(fixture, yardScene(), passed, ASK).user).toMatch(/2\. Mara, answering 1 \(Tobin\): push back \(may draw on: he is hiding something \[new to the player\]\) \(the check succeeded\)/)
   })
 
+  // Milestone 3.6 code review, P1: a move gated on a check that can't be resolved used to happen unconditionally.
+  it('drops a move gated on a check that is missing or was dropped, and its reply answers what it answered', () => {
+    const gated = (needs: string, extra: object = {}) =>
+      validatePlan(fixture, yardScene(), plan([tobin(), mara()], {
+        checks: [{ id: 'read', who: 'mara', skill: 'notice', difficulty: 'tough', stakes: 'sees Tobin is hiding something' }],
+        moves: [
+          { who: 'tobin', answers: 'player', move: 'dodge', uses: [] },
+          { who: 'mara', answers: 1, move: 'push back', uses: [], new: ['he is hiding something'], needs },
+          { who: 'tobin', answers: 2, move: 'refuse', uses: [] }
+        ],
+        ...extra
+      }), ASK)
+    const missing = gated('read-pell')
+    expect(missing.plan.moves!.map((m) => [m.who, m.answers, m.needs])).toEqual([['tobin', 'player', undefined], ['tobin', 1, undefined]])
+    expect(missing.plan.exchange.map((l) => l.who)).toEqual(['tobin', 'tobin'])
+    expect(missing.corrections).toContain('dropped move 2: it needs check "read-pell", which isn\'t in the plan')
+    // A check validation removed: an unknown skill, and a player check on an action that isn't in doubt.
+    const unknownSkill = gated('read', { checks: [{ id: 'read', who: 'mara', skill: 'mind reading', difficulty: 'tough', stakes: '' }] })
+    expect(unknownSkill.plan.moves!.map((m) => m.who)).toEqual(['tobin', 'tobin'])
+    expect(unknownSkill.corrections).toEqual(expect.arrayContaining(['dropped check "read": no skill "mind reading"', 'dropped move 2: it needs check "read", which isn\'t in the plan']))
+    const playerCheck = gated('talked', { checks: [{ id: 'talked', who: 'player', skill: 'talk', difficulty: 'tough', stakes: '' }] })
+    expect(playerCheck.plan.checks).toEqual([])
+    expect(playerCheck.plan.moves!.map((m) => m.who)).toEqual(['tobin', 'tobin'])
+    // A check that exists keeps its gate: settlePlan decides once it is rolled (above).
+    expect(gated('read').plan.moves!.map((m) => [m.who, m.needs])).toEqual([['tobin', undefined], ['mara', 'read'], ['tobin', undefined]])
+  })
+
   it('shows a kept secret’s tell the first time, then again only when someone else’s check succeeds', () => {
     const state = yardScene()
     const { plan: first } = validatePlan(fixture, state, plan([tobin(), mara()]), ASK)

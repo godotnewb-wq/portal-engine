@@ -182,8 +182,7 @@ Who was in the yard last night?
 # The conversation, in order
 1. Tobin, answering the player: dodge
 2. Mara, answering 1 (Tobin): push back (may draw on: Tobin was in the yard after closing [new to the player]) (the check succeeded)
-3. Mara, answering the player: warn (may draw on: The Guild docks a week of pay for a late gate. [new to the player])
-4. Tobin, answering 2 (Mara): concede (may draw on: The gate stood open until ten. [new to the player])
+3. Tobin, answering 2 (Mara): concede (may draw on: The gate stood open until ten. [new to the player])
 
 # By the end of the turn
 Mara suspects Tobin.
@@ -302,8 +301,7 @@ Mara: "You were here after closing, Tobin. I saw the lamp."
 
 # Already said on screen (anyone present can use these)
 - [mara.k1] Tobin was in the yard after closing
-- [said.1] The Guild docks a week of pay for a late gate.
-- [said.2] The gate stood open until ten.
+- [said.1] The gate stood open until ten.
 
 # Turns since each last spoke
 mara: 0, tobin: 0
@@ -370,7 +368,6 @@ The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
 
 # What the player has been told this scene
 - Tobin was in the yard after closing
-- The Guild docks a week of pay for a late gate.
 - The gate stood open until ten.
 
 # Last turns
@@ -449,7 +446,6 @@ The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
 
 # What the player has been told this scene
 - Tobin was in the yard after closing
-- The Guild docks a week of pay for a late gate.
 - The gate stood open until ten.
 
 # Last turns
@@ -604,9 +600,8 @@ Mara's pen stops over the tally.
 
 # Already said on screen (anyone present can use these)
 - [mara.k1] Tobin was in the yard after closing
-- [said.1] The Guild docks a week of pay for a late gate.
-- [said.2] The gate stood open until ten.
-- [said.3] Someone with a Guild seal knocked after closing.
+- [said.1] The gate stood open until ten.
+- [said.2] Someone with a Guild seal knocked after closing.
 
 # Turns since each last spoke
 mara: 1, tobin: 0
@@ -674,7 +669,6 @@ The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
 
 # What the player has been told this scene
 - Tobin was in the yard after closing
-- The Guild docks a week of pay for a late gate.
 - The gate stood open until ten.
 - Someone with a Guild seal knocked after closing.
 
@@ -760,7 +754,6 @@ The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
 
 # What the player has been told this scene
 - Tobin was in the yard after closing
-- The Guild docks a week of pay for a late gate.
 - The gate stood open until ten.
 - Someone with a Guild seal knocked after closing.
 
@@ -925,10 +918,9 @@ Mara: "Only clerks carry Guild seals. That makes it six people."
 
 # Already said on screen (anyone present can use these)
 - [mara.k1] Tobin was in the yard after closing
-- [said.1] The Guild docks a week of pay for a late gate.
-- [said.2] The gate stood open until ten.
-- [said.3] Someone with a Guild seal knocked after closing.
-- [said.4] Only clerks carry Guild seals.
+- [said.1] The gate stood open until ten.
+- [said.2] Someone with a Guild seal knocked after closing.
+- [said.3] Only clerks carry Guild seals.
 
 # Turns since each last spoke
 mara: 0, tobin: 1
@@ -995,7 +987,6 @@ The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
 
 # What the player has been told this scene
 - Tobin was in the yard after closing
-- The Guild docks a week of pay for a late gate.
 - The gate stood open until ten.
 - Someone with a Guild seal knocked after closing.
 - Only clerks carry Guild seals.
@@ -1143,10 +1134,9 @@ Tobin ducks out through the gate.
 
 # Already said on screen (anyone present can use these)
 - [mara.k1] Tobin was in the yard after closing
-- [said.1] The Guild docks a week of pay for a late gate.
-- [said.2] The gate stood open until ten.
-- [said.3] Someone with a Guild seal knocked after closing.
-- [said.4] Only clerks carry Guild seals.
+- [said.1] The gate stood open until ten.
+- [said.2] Someone with a Guild seal knocked after closing.
+- [said.3] Only clerks carry Guild seals.
 
 # Turns since each last spoke
 mara: 1
@@ -1216,7 +1206,6 @@ The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
 
 # What the player has been told this scene
 - Tobin was in the yard after closing
-- The Guild docks a week of pay for a late gate.
 - The gate stood open until ten.
 - Someone with a Guild seal knocked after closing.
 - Only clerks carry Guild seals.

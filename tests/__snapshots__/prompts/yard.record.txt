@@ -3,7 +3,7 @@
   "input": "Who was in the yard last night?",
   "fallback": false,
   "corrections": [
-    "move 3 needs unknown check \"read-pell\"; it happens either way"
+    "dropped move 3: it needs check \"read-pell\", which isn't in the plan"
   ],
   "plan": {
     "speakers": [
@@ -36,11 +36,6 @@
         "who": "mara",
         "answers": 1,
         "point": "push back: Tobin was in the yard after closing"
-      },
-      {
-        "who": "mara",
-        "answers": "player",
-        "point": "warn: The Guild docks a week of pay for a late gate."
       },
       {
         "who": "tobin",
@@ -102,17 +97,6 @@
           }
         ],
         "needs": "read-tobin"
-      },
-      {
-        "who": "mara",
-        "answers": "player",
-        "move": "warn",
-        "says": [
-          {
-            "text": "The Guild docks a week of pay for a late gate.",
-            "unheard": true
-          }
-        ]
       },
       {
         "who": "tobin",
@@ -317,11 +301,6 @@
     "newFacts": [
       {
         "id": "said.1",
-        "text": "The Guild docks a week of pay for a late gate.",
-        "by": "mara"
-      },
-      {
-        "id": "said.2",
         "text": "The gate stood open until ten.",
         "by": "tobin"
       }
@@ -616,16 +595,11 @@
     "newFacts": [
       {
         "id": "said.1",
-        "text": "The Guild docks a week of pay for a late gate.",
-        "by": "mara"
-      },
-      {
-        "id": "said.2",
         "text": "The gate stood open until ten.",
         "by": "tobin"
       },
       {
-        "id": "said.3",
+        "id": "said.2",
         "text": "Someone with a Guild seal knocked after closing.",
         "by": "tobin"
       }
@@ -878,21 +852,16 @@
     "newFacts": [
       {
         "id": "said.1",
-        "text": "The Guild docks a week of pay for a late gate.",
-        "by": "mara"
-      },
-      {
-        "id": "said.2",
         "text": "The gate stood open until ten.",
         "by": "tobin"
       },
       {
-        "id": "said.3",
+        "id": "said.2",
         "text": "Someone with a Guild seal knocked after closing.",
         "by": "tobin"
       },
       {
-        "id": "said.4",
+        "id": "said.3",
         "text": "Only clerks carry Guild seals.",
         "by": "mara"
       }
@@ -1122,21 +1091,16 @@
     "newFacts": [
       {
         "id": "said.1",
-        "text": "The Guild docks a week of pay for a late gate.",
-        "by": "mara"
-      },
-      {
-        "id": "said.2",
         "text": "The gate stood open until ten.",
         "by": "tobin"
       },
       {
-        "id": "said.3",
+        "id": "said.2",
         "text": "Someone with a Guild seal knocked after closing.",
         "by": "tobin"
       },
       {
-        "id": "said.4",
+        "id": "said.3",
         "text": "Only clerks carry Guild seals.",
         "by": "mara"
       }
@@ -1356,26 +1320,21 @@
     "newFacts": [
       {
         "id": "said.1",
-        "text": "The Guild docks a week of pay for a late gate.",
-        "by": "mara"
-      },
-      {
-        "id": "said.2",
         "text": "The gate stood open until ten.",
         "by": "tobin"
       },
       {
-        "id": "said.3",
+        "id": "said.2",
         "text": "Someone with a Guild seal knocked after closing.",
         "by": "tobin"
       },
       {
-        "id": "said.4",
+        "id": "said.3",
         "text": "Only clerks carry Guild seals.",
         "by": "mara"
       },
       {
-        "id": "said.5",
+        "id": "said.4",
         "text": "She will check the seal log at dawn.",
         "by": "mara"
       }

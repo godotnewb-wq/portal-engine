@@ -165,6 +165,8 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan, inpu
   const speakers = new Set(plan.speakers.map((s) => s.id))
   const moves: Move[] = []
   const renumbered = new Map<number, number>()
+  // A move dropped for a check that can't be resolved passes its place on: a reply to it answers what it answered.
+  const passedOn = new Map<number, Move['answers']>()
   raw.moves.forEach((m, i) => {
     const n = i + 1
     const who = presentId(content, scene, m.who)
@@ -173,9 +175,17 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan, inpu
     const asked = typeof m.answers === 'number' ? m.answers : /^\d+$/.test(m.answers.trim()) ? Number(m.answers) : undefined
     let answers: Move['answers'] = 'player'
     if (asked !== undefined) {
-      const earlier = renumbered.get(asked)
+      const earlier = renumbered.get(asked) ?? passedOn.get(asked)
       if (earlier !== undefined) answers = earlier
       else fix(`move ${n} answered move ${asked}, which isn't an earlier move; it answers the player`)
+    }
+    // A move the director made conditional happens only if its check succeeds (settlePlan). When the check named
+    // doesn't exist or was dropped above, there is nothing that could succeed, so the move is dropped too rather than
+    // happening unconditionally (milestone 3.6 code review, P1).
+    const needs = m.needs?.trim()
+    if (needs && !plan.checks.some((c) => c.id === needs)) {
+      passedOn.set(n, answers)
+      return fix(`dropped move ${n}: it needs check "${needs}", which isn't in the plan`)
     }
     const says: Said[] = []
     for (const id of m.uses) {
@@ -189,9 +199,7 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan, inpu
       const w = t.split(/\s+/)
       says.push({ text: w.length > NEW_FACT_WORDS ? w.slice(0, NEW_FACT_WORDS).join(' ') : t, unheard: true })
     }
-    const needs = m.needs?.trim()
-    if (needs && !plan.checks.some((c) => c.id === needs)) fix(`move ${n} needs unknown check "${needs}"; it happens either way`)
-    moves.push({ who, answers, move: m.move.trim().toLowerCase() || 'answer', says, ...(needs && plan.checks.some((c) => c.id === needs) && { needs }) })
+    moves.push({ who, answers, move: m.move.trim().toLowerCase() || 'answer', says, ...(needs && { needs }) })
     renumbered.set(n, moves.length)
   })
   for (const id of speakers) if (!moves.some((m) => m.who === id)) fix(`speaker "${id}" had no move`)
