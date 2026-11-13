@@ -91,6 +91,11 @@ export const RulesetSchema = z.object({
    */
   pressures: z.array(z.string().min(1)).min(2),
   /**
+   * Lines the game narrates itself, in the pack's words, with `{name}` for a character's first name. `departure`: a
+   * planned departure the turn's kept prose doesn't show (milestone 3.6, task 6a), so nobody vanishes without a word.
+   */
+  narration: z.object({ departure: z.string().min(1) }),
+  /**
    * Codex tuning (claude/lore-injection.md §4–5): the most words an entry's full text may have, the rough token
    * budgets for the scene-scoped and triggered layers, and the most lore lines the director may give the writer a
    * turn (generous starting points, tuned from the bench). The player can override the budgets in Settings
@@ -138,6 +143,7 @@ export function rulesetProblems(r: Ruleset): string[] {
   }
   if (!r.wordScale.some((w) => w.value === 0)) problems.push('the word scale needs a word worth 0 (no change)')
   if (r.attributes.min > r.attributes.max) problems.push('attributes.min is above attributes.max')
+  if (!r.narration.departure.includes('{name}')) problems.push('narration.departure needs {name}, for who leaves')
   return problems
 }
 

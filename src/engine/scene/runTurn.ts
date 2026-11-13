@@ -8,7 +8,7 @@ import { fallbackPlan, parsePlan, settlePlan, validatePlan } from './plan'
 import type { BeatPlan } from './planShape'
 import { resolvePlan, type ResolveOptions } from './resolve'
 import { castSnapshot, checkTraces, planItems, type BeatTrace, type TurnTrace } from './trace'
-import { acceptTags, applyTurn } from './turn'
+import { acceptTags, applyTurn, showDepartures } from './turn'
 import { buildRewritePrompt, buildWriterPrompt, sceneSpeakers } from './writer'
 import { recentlyUsed, repeatProblems, usageOf } from './repeats'
 import { loreTrace, turnLore } from './lore'
@@ -134,8 +134,9 @@ export async function runTurn(
         kept = kept.filter((i) => /\p{L}/u.test(parsed.beats[i]!.text))
       }
     }
-    const beats = kept.map((i) => parsed.beats[i]!)
-    const accepted = acceptTags(content, plan, parsed.tags, parsed.beats, beats)
+    const accepted = acceptTags(content, plan, parsed.tags, parsed.beats, kept.map((i) => parsed.beats[i]!))
+    const departures = showDepartures(content, plan, kept.map((i) => parsed.beats[i]!))
+    const beats = departures.beats
 
     const next = applyTurn(content, state, { id: turnId, ...(options.log && { log: options.log }), input, plan, beats, tags: accepted.tags, dice })
     const rewritten = problems.length > 0
@@ -149,6 +150,7 @@ export async function runTurn(
       salvaged: salvage,
       plan: planItems(content, plan, parsed.beats[i]!, parsed.beats.slice(0, i))
     }))
+    for (const { id, beat } of departures.added) beatTraces.push({ index: beatTraces.length + 1, beat, source: 'game', line: 0, salvaged: false, plan: [`leaves:${id}`] })
     const directorCall = calls.find((c) => c.role === 'director')!
     const usage = calls.flatMap((c) => (c.meta?.usage ? [c.meta.usage] : []))
     const trace: TurnTrace = {

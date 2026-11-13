@@ -1017,6 +1017,9 @@ Tobin, you should go before the clerk sees you.
 # By the end of the turn
 Tobin leaves the yard.
 
+# Leaving this turn
+Tobin leaves. Show them going.
+
 # Also present, silent
 - Mara: watches him go
 

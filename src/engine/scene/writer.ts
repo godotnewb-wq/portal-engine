@@ -55,6 +55,9 @@ export const WRITER_FORMAT = `Output format, nothing else:
 - Never write the player's words, choices, thoughts or actions beyond what their input stated.
 - Honor every check result exactly: a failed roll means it does not happen.`
 
+/** "Ada", "Ada and Ben", "Ada, Ben and Cy". */
+const listed = (names: string[]): string => (names.length <= 1 ? (names[0] ?? '') : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`)
+
 /** The writer's brief: the facts in play as facts, the moves as moves, and nothing in planner prose. */
 export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPlan, input: string): Prompt {
   const scene = state.scene!
@@ -116,6 +119,7 @@ export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPla
     moves.length > 0 && `# The conversation, in order\n${moves.map((m, i) => `${i + 1}. ${nameOf(m.who)}, answering ${answering(m)}: ${m.move}${m.says.length > 0 ? ` (may draw on: ${said(m)})` : ''}${m.needs ? ' (the check succeeded)' : ''}`).join('\n')}`,
     plan.lore && plan.lore.length > 0 && `# About the world, to draw on only if it fits (some, all or none; never recite)\n${plan.lore.map((l) => `- ${l.line}${l.who ? ` (only ${nameOf(l.who)} would say this)` : ''}`).join('\n')}`,
     plan.change && `# By the end of the turn\n${plan.change}`,
+    plan.leaves.length > 0 && `# Leaving this turn\n${listed(plan.leaves.map(nameOf))} ${plan.leaves.length === 1 ? 'leaves' : 'leave'}. Show them going.`,
     plan.reactions.length > 0 && `# Also present, silent\n${plan.reactions.map((r) => `- ${nameOf(r.id)}: ${r.beat}`).join('\n')}`,
     plan.walk_ons.length > 0 && `# Walk-ons\n${plan.walk_ons.map((w) => `- ${nameOf(w.id)}: ${w.line}`).join('\n')}`,
     plan.texture.length > 0 && `# A detail of the place, if it fits\n${plan.texture.join('\n')}`,

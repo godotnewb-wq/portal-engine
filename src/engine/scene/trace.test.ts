@@ -178,3 +178,43 @@ describe('the writer’s tags', () => {
     expect((await runTurn(fixture, yardScene(), ASK, scripted(plan({ end_scene: true }), reply))).state.scene!.ended).toBe(true)
   })
 })
+
+// Milestone 3.6, task 6a: the writer is told who leaves, and the game narrates a departure the kept prose doesn't show.
+describe('planned departures', () => {
+  const ASK = 'Tobin, you should go.'
+  const LEAVE = JSON.stringify({
+    speakers: [{ id: 'tobin', goal: 'get out of sight', mood: 'grateful' }],
+    moves: [{ who: 'tobin', answers: 'player', move: 'agree' }],
+    reactions: [{ id: 'mara', beat: 'watches him go' }],
+    leaves: ['tobin']
+  })
+  const recorded = (...writes: string[]) => {
+    const prompts: Prompt[] = []
+    const llm = scripted(LEAVE, ...writes)
+    return { prompts, llm: { direct: llm.direct, write: (p: Prompt, d: (t: string) => void, r: () => void) => (prompts.push(p), llm.write(p, d, r)) } as TurnLlm }
+  }
+
+  it('tells the writer who leaves, and adds nothing when the prose shows them', async () => {
+    const { prompts, llm } = recorded('Tobin: "Yes. The horses need water."\nNARRATION: Tobin ducks out through the gate.')
+    const { state, beats, trace } = await runTurn(fixture, yardScene(), ASK, llm)
+    expect(prompts[0]!.user).toMatch(/# Leaving this turn\nTobin leaves\. Show them going\./)
+    expect(beats.map((b) => b.text)).toEqual(['Yes. The horses need water.', 'Tobin ducks out through the gate.'])
+    expect(trace.beats.map((b) => b.source)).toEqual(['draft', 'draft'])
+    expect(state.scene!.departed).toEqual(['tobin'])
+  })
+
+  it('narrates the departure in the pack’s words when the writer never shows the one leaving', async () => {
+    const { beats, trace, state } = await runTurn(fixture, yardScene(), ASK, recorded('NARRATION: Rain on the crates.\nMara: "Go, then."').llm)
+    expect(beats.at(-1)).toEqual({ kind: 'narration', text: 'Tobin heads off across the yard.' })
+    expect(trace.beats.at(-1)).toMatchObject({ index: beats.length, source: 'game', line: 0, plan: ['leaves:tobin'] })
+    expect(state.scene!.turns[0]!.beats).toEqual(beats)
+  })
+
+  it('narrates it too when salvage cut every line that showed them', async () => {
+    // Pell speaks without being planned, in the draft and the rewrite; salvage drops the beat, and with it Tobin.
+    const wrong = 'NARRATION: Rain on the crates.\nPell: "Tobin, out you go."'
+    const { beats, trace } = await runTurn(fixture, yardScene(), ASK, recorded(wrong, wrong).llm)
+    expect(trace.rewrite?.salvage).toBeDefined()
+    expect(beats.map((b) => b.text)).toEqual(['Rain on the crates.', 'Tobin heads off across the yard.'])
+  })
+})

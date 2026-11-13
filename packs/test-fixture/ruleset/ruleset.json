@@ -49,5 +49,6 @@
     ],
     "otherwise": "known"
   },
-  "pressures": ["idle", "keen", "driven"]
+  "pressures": ["idle", "keen", "driven"],
+  "narration": { "departure": "{name} heads off across the yard." }
 }

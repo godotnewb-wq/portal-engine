@@ -95,12 +95,13 @@ export interface BeatTrace {
   /** 1-based, as the player reads them in this turn. */
   index: number
   beat: Beat
-  source: 'draft' | 'rewrite'
-  /** Its line in that reply's raw text, 1-based. */
+  /** `game`: a line the game narrated itself (a planned departure the prose didn't show), not from any reply. */
+  source: 'draft' | 'rewrite' | 'game'
+  /** Its line in that reply's raw text, 1-based; 0 for a line the game narrated. */
   line: number
   /** The turn was salvaged and this beat survived it. */
   salvaged: boolean
-  /** Which parts of the plan it carries out: `speaker:<id>`, `line:<n>` (its exchange line), `reaction:<id>`, `walk-on:<id>`, `check:<id>`, or `narration`. */
+  /** Which parts of the plan it carries out: `speaker:<id>`, `line:<n>` (its exchange line), `reaction:<id>`, `walk-on:<id>`, `check:<id>`, `leaves:<id>`, or `narration`. */
   plan: string[]
 }
 

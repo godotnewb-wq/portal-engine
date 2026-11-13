@@ -32,7 +32,7 @@ export function rolledChecks(plan: BeatPlan): RolledCheck[] {
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 /** The cast who appear in these beats: a line of their own, or narration that names them. */
-function appearing(content: Pack, beats: Beat[]): Set<string> {
+export function appearing(content: Pack, beats: Beat[]): Set<string> {
   const ids = new Set<string>()
   for (const b of beats) if (b.kind === 'dialogue') ids.add(b.speaker)
   const narration = beats.flatMap((b) => (b.kind === 'narration' ? [b.text] : [])).join('\n')
@@ -73,6 +73,20 @@ export function acceptTags(content: Pack, plan: BeatPlan, tags: Tags, written: B
     },
     rejected
   }
+}
+
+/**
+ * A planned departure the kept prose doesn't show gets one narration beat in the pack's words (the ruleset's
+ * `narration.departure`), so a character never vanishes without a word on screen (milestone 3.6, task 6a). "Shows"
+ * can only mean the character is in the kept beats, with a line or named in narration: code can't tell whether the
+ * prose has them walk out, which is why the writer is told who leaves.
+ */
+export function showDepartures(content: Pack, plan: BeatPlan, beats: Beat[]): { beats: Beat[]; added: { id: string; beat: Beat }[] } {
+  const shown = appearing(content, beats)
+  const added = plan.leaves
+    .filter((id) => !shown.has(id))
+    .map((id) => ({ id, beat: { kind: 'narration' as const, text: content.ruleset.narration.departure.replaceAll('{name}', firstName(characterById(content, id)?.name ?? id)) } }))
+  return { beats: [...beats, ...added.map((a) => a.beat)], added }
 }
 
 /**

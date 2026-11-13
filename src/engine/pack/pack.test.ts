@@ -98,7 +98,13 @@ describe('buildPack', () => {
     const r = RulesetSchema.parse({ ...structuredClone(fixture.ruleset), assists: { ...fixture.ruleset.assists, meter: 'love' } })
     r.skills.push({ id: 'cook', name: 'Cook', attribute: 'taste', description: '' })
     r.wordScale = r.wordScale.filter((w) => w.value !== 0)
-    expect(rulesetProblems(r)).toEqual(['skill "cook" uses unknown attribute "taste"', 'assists use unknown meter "love"', 'the word scale needs a word worth 0 (no change)'])
+    r.narration.departure = 'Someone leaves.'
+    expect(rulesetProblems(r)).toEqual([
+      'skill "cook" uses unknown attribute "taste"',
+      'assists use unknown meter "love"',
+      'the word scale needs a word worth 0 (no change)',
+      'narration.departure needs {name}, for who leaves'
+    ])
   })
 
   it('reports duplicate ids and relations to nobody across files', () => {
