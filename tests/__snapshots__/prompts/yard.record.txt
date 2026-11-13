@@ -1,0 +1,1485 @@
+===== turn 1 =====
+{
+  "input": "Who was in the yard last night?",
+  "fallback": false,
+  "corrections": [
+    "move 3 needs unknown check \"read-pell\"; it happens either way"
+  ],
+  "plan": {
+    "speakers": [
+      {
+        "id": "tobin",
+        "intent": "change the subject",
+        "mood": "cornered",
+        "pressure": "keen",
+        "hiding": "Tobin let someone into the yard after closing.",
+        "approach": "deflect",
+        "kept": [
+          "tobin.after-closing"
+        ],
+        "tell": "Hums"
+      },
+      {
+        "id": "mara",
+        "intent": "find out what Tobin knows",
+        "mood": "sharp",
+        "pressure": "keen"
+      }
+    ],
+    "exchange": [
+      {
+        "who": "tobin",
+        "answers": "player",
+        "point": "dodge"
+      },
+      {
+        "who": "mara",
+        "answers": 1,
+        "point": "push back: Tobin was in the yard after closing"
+      },
+      {
+        "who": "mara",
+        "answers": "player",
+        "point": "warn: The Guild docks a week of pay for a late gate."
+      },
+      {
+        "who": "tobin",
+        "answers": 2,
+        "point": "concede: The gate stood open until ten."
+      }
+    ],
+    "reactions": [],
+    "checks": [
+      {
+        "id": "read-tobin",
+        "who": "mara",
+        "skill": "notice",
+        "difficulty": "tough",
+        "stakes": "Mara sees that Tobin is dodging",
+        "result": {
+          "skill": "notice",
+          "attribute": "wits",
+          "difficulty": "tough",
+          "dc": 13,
+          "rolls": [
+            12
+          ],
+          "natural": 12,
+          "edge": "none",
+          "modifier": 3,
+          "rank": 1,
+          "bonus": 0,
+          "total": 16,
+          "degree": "success",
+          "critical": null
+        },
+        "line": "Mara — Notice 16 vs 13: success"
+      }
+    ],
+    "walk_ons": [],
+    "texture": [
+      "a gate creaking"
+    ],
+    "contrast": "",
+    "avoid": [],
+    "leaves": [],
+    "end_scene": false,
+    "moves": [
+      {
+        "who": "tobin",
+        "answers": "player",
+        "move": "dodge",
+        "says": []
+      },
+      {
+        "who": "mara",
+        "answers": 1,
+        "move": "push back",
+        "says": [
+          {
+            "text": "Tobin was in the yard after closing",
+            "id": "mara.k1",
+            "unheard": true
+          }
+        ],
+        "needs": "read-tobin"
+      },
+      {
+        "who": "mara",
+        "answers": "player",
+        "move": "warn",
+        "says": [
+          {
+            "text": "The Guild docks a week of pay for a late gate.",
+            "unheard": true
+          }
+        ]
+      },
+      {
+        "who": "tobin",
+        "answers": 2,
+        "move": "concede",
+        "says": [
+          {
+            "text": "The gate stood open until ten.",
+            "unheard": true
+          }
+        ]
+      }
+    ],
+    "player_action": {
+      "doing": "asks who was in the yard last night",
+      "uncertain": false
+    },
+    "change": "Mara suspects Tobin."
+  },
+  "checks": [
+    {
+      "id": "read-tobin",
+      "who": "mara",
+      "skill": "notice",
+      "attribute": "wits",
+      "difficulty": "tough",
+      "dc": 13,
+      "rolls": [
+        12
+      ],
+      "natural": 12,
+      "edge": "none",
+      "modifier": 3,
+      "rank": 1,
+      "bonus": 0,
+      "total": 16,
+      "degree": "success",
+      "critical": null,
+      "line": "Mara — Notice 16 vs 13: success",
+      "stakes": "Mara sees that Tobin is dodging"
+    }
+  ],
+  "lore": {
+    "stage": [
+      "location.upper",
+      "location.lower",
+      "faction.guild",
+      "faction.watch",
+      "concept.pennies"
+    ],
+    "scene": [
+      {
+        "id": "location.lower.east-gate.the-yard",
+        "title": "The Guild Yard",
+        "form": "full"
+      },
+      {
+        "id": "location.lower.east-gate",
+        "title": "East Gate",
+        "form": "full"
+      },
+      {
+        "id": "location.lower",
+        "title": "The Lower Ward",
+        "form": "full"
+      },
+      {
+        "id": "faction.guild",
+        "title": "The Guild",
+        "form": "full"
+      },
+      {
+        "id": "faction.guild.tallies",
+        "title": "How the tallies work",
+        "form": "full"
+      },
+      {
+        "id": "species.automaton",
+        "title": "Automaton culture",
+        "form": "full"
+      }
+    ],
+    "triggered": [],
+    "stances": [],
+    "tokens": {
+      "stage": 91,
+      "writerStage": 60,
+      "scene": 223,
+      "triggered": 0
+    },
+    "budgets": {
+      "sceneTokens": 1200,
+      "triggeredTokens": 800,
+      "loreLines": 3,
+      "set": []
+    },
+    "budgetCuts": {
+      "scene": {
+        "shortened": [],
+        "dropped": []
+      },
+      "triggered": {
+        "shortened": [],
+        "dropped": []
+      }
+    },
+    "secrets": [
+      {
+        "holder": "mara",
+        "id": "mara.two-books",
+        "kind": "linked",
+        "form": "cue",
+        "cueTokens": 29,
+        "expansionTokens": 0
+      },
+      {
+        "holder": "tobin",
+        "id": "tobin.after-closing",
+        "kind": "personal",
+        "form": "cue",
+        "cueTokens": 22,
+        "expansionTokens": 0
+      }
+    ]
+  },
+  "findings": [],
+  "remaining": [],
+  "beats": [
+    {
+      "kind": "narration",
+      "text": "The gate creaks somewhere behind the crates."
+    },
+    {
+      "kind": "dialogue",
+      "speaker": "tobin",
+      "text": "The horses were restless. I sang to them."
+    },
+    {
+      "kind": "dialogue",
+      "speaker": "mara",
+      "text": "You were here after closing, Tobin. I saw the lamp."
+    }
+  ],
+  "tags": {
+    "parsed": {
+      "expressions": {
+        "tobin": "wary"
+      },
+      "comfort": {
+        "mara": {
+          "level": 2,
+          "reason": "the dodge bothers her"
+        }
+      },
+      "moods": {
+        "tobin": "cornered"
+      },
+      "leaves": [],
+      "ended": false
+    },
+    "dropped": []
+  },
+  "scene": {
+    "id": "scene-1200",
+    "locationId": "the-yard",
+    "cast": [
+      "mara",
+      "tobin"
+    ],
+    "walkOns": [
+      "clerk"
+    ],
+    "summary": "",
+    "moods": {
+      "mara": "sharp",
+      "tobin": "cornered"
+    },
+    "comfort": {
+      "mara": 2,
+      "tobin": 3
+    },
+    "expressions": {
+      "mara": "neutral",
+      "tobin": "wary"
+    },
+    "departed": [],
+    "ended": false,
+    "nsfw": false,
+    "baseline": {
+      "mara": {
+        "warmth": 10,
+        "bond": 8
+      },
+      "tobin": {
+        "warmth": 6,
+        "bond": 3
+      }
+    },
+    "told": [
+      "mara.k1"
+    ],
+    "newFacts": [
+      {
+        "id": "said.1",
+        "text": "The Guild docks a week of pay for a late gate.",
+        "by": "mara"
+      },
+      {
+        "id": "said.2",
+        "text": "The gate stood open until ten.",
+        "by": "tobin"
+      }
+    ],
+    "pressures": {
+      "tobin": 1,
+      "mara": 1
+    },
+    "tells": [
+      "tobin.after-closing"
+    ]
+  }
+}
+
+===== turn 2 =====
+{
+  "input": "I'm not the Watch. Tell me who you let into the yard after closing, and I'll keep it quiet.",
+  "fallback": false,
+  "corrections": [],
+  "plan": {
+    "speakers": [
+      {
+        "id": "tobin",
+        "intent": "decide whether to trust Kit",
+        "mood": "torn",
+        "pressure": "keen",
+        "hiding": "Tobin let someone into the yard after closing.",
+        "approach": "partial truth",
+        "kept": [
+          "tobin.after-closing"
+        ],
+        "tell": "Hums"
+      }
+    ],
+    "exchange": [
+      {
+        "who": "tobin",
+        "answers": "player",
+        "point": "concede: Someone with a Guild seal knocked after closing."
+      }
+    ],
+    "reactions": [
+      {
+        "id": "mara",
+        "beat": "stops writing"
+      }
+    ],
+    "checks": [
+      {
+        "id": "persuade-tobin",
+        "who": "player",
+        "skill": "talk",
+        "difficulty": "tough",
+        "stakes": "Tobin says who he let in",
+        "result": {
+          "skill": "talk",
+          "attribute": "nerve",
+          "difficulty": "tough",
+          "dc": 13,
+          "rolls": [
+            8
+          ],
+          "natural": 8,
+          "edge": "none",
+          "modifier": 2,
+          "rank": 1,
+          "bonus": 0,
+          "total": 11,
+          "degree": "cost",
+          "critical": null
+        },
+        "line": "Kit — Talk 11 vs 13: success at a cost"
+      }
+    ],
+    "walk_ons": [],
+    "texture": [
+      "a cart with a broken wheel"
+    ],
+    "contrast": "",
+    "avoid": [],
+    "leaves": [],
+    "end_scene": false,
+    "moves": [
+      {
+        "who": "tobin",
+        "answers": "player",
+        "move": "concede",
+        "says": [
+          {
+            "text": "Someone with a Guild seal knocked after closing.",
+            "unheard": true
+          }
+        ],
+        "needs": "persuade-tobin"
+      }
+    ],
+    "player_action": {
+      "doing": "persuades Tobin to name who he let in",
+      "uncertain": true
+    },
+    "change": "Tobin admits he opened the gate."
+  },
+  "checks": [
+    {
+      "id": "persuade-tobin",
+      "who": "player",
+      "skill": "talk",
+      "attribute": "nerve",
+      "difficulty": "tough",
+      "dc": 13,
+      "rolls": [
+        8
+      ],
+      "natural": 8,
+      "edge": "none",
+      "modifier": 2,
+      "rank": 1,
+      "bonus": 0,
+      "total": 11,
+      "degree": "cost",
+      "critical": null,
+      "line": "Kit — Talk 11 vs 13: success at a cost",
+      "stakes": "Tobin says who he let in"
+    }
+  ],
+  "lore": {
+    "stage": [
+      "location.upper",
+      "location.lower",
+      "faction.guild",
+      "faction.watch",
+      "concept.pennies"
+    ],
+    "scene": [
+      {
+        "id": "location.lower.east-gate.the-yard",
+        "title": "The Guild Yard",
+        "form": "full"
+      },
+      {
+        "id": "location.lower.east-gate",
+        "title": "East Gate",
+        "form": "full"
+      },
+      {
+        "id": "location.lower",
+        "title": "The Lower Ward",
+        "form": "full"
+      },
+      {
+        "id": "faction.guild",
+        "title": "The Guild",
+        "form": "full"
+      },
+      {
+        "id": "faction.guild.tallies",
+        "title": "How the tallies work",
+        "form": "full"
+      },
+      {
+        "id": "species.automaton",
+        "title": "Automaton culture",
+        "form": "full"
+      }
+    ],
+    "triggered": [
+      {
+        "id": "faction.watch",
+        "title": "The Ward Watch",
+        "form": "full"
+      }
+    ],
+    "stances": [
+      "- The Ward Watch toward The Guild: sour"
+    ],
+    "tokens": {
+      "stage": 91,
+      "writerStage": 60,
+      "scene": 223,
+      "triggered": 32
+    },
+    "budgets": {
+      "sceneTokens": 1200,
+      "triggeredTokens": 800,
+      "loreLines": 3,
+      "set": []
+    },
+    "budgetCuts": {
+      "scene": {
+        "shortened": [],
+        "dropped": []
+      },
+      "triggered": {
+        "shortened": [],
+        "dropped": []
+      }
+    },
+    "secrets": [
+      {
+        "holder": "mara",
+        "id": "mara.two-books",
+        "kind": "linked",
+        "form": "cue",
+        "cueTokens": 29,
+        "expansionTokens": 0
+      },
+      {
+        "holder": "tobin",
+        "id": "tobin.after-closing",
+        "kind": "personal",
+        "form": "full",
+        "priority": "kept",
+        "cueTokens": 22,
+        "expansionTokens": 0
+      }
+    ]
+  },
+  "findings": [
+    {
+      "kind": "unplanned-speaker",
+      "beat": 3,
+      "text": "A Guild seal. Of course.",
+      "fix": "Beat 3: Mara was not planned to speak. Show them only through a reaction in narration."
+    }
+  ],
+  "remaining": [],
+  "beats": [
+    {
+      "kind": "narration",
+      "text": "Tobin hums, then stops himself."
+    },
+    {
+      "kind": "dialogue",
+      "speaker": "tobin",
+      "text": "Someone with a Guild seal knocked. I couldn't say no to the seal."
+    },
+    {
+      "kind": "narration",
+      "text": "Mara's pen stops over the tally."
+    }
+  ],
+  "tags": {
+    "parsed": {
+      "expressions": {
+        "tobin": "relieved"
+      },
+      "comfort": {},
+      "moods": {},
+      "leaves": [],
+      "ended": false
+    },
+    "dropped": []
+  },
+  "scene": {
+    "id": "scene-1200",
+    "locationId": "the-yard",
+    "cast": [
+      "mara",
+      "tobin"
+    ],
+    "walkOns": [
+      "clerk"
+    ],
+    "summary": "",
+    "moods": {
+      "mara": "sharp",
+      "tobin": "torn"
+    },
+    "comfort": {
+      "mara": 2,
+      "tobin": 3
+    },
+    "expressions": {
+      "mara": "neutral",
+      "tobin": "relieved"
+    },
+    "departed": [],
+    "ended": false,
+    "nsfw": false,
+    "baseline": {
+      "mara": {
+        "warmth": 10,
+        "bond": 8
+      },
+      "tobin": {
+        "warmth": 6,
+        "bond": 3
+      }
+    },
+    "told": [
+      "mara.k1"
+    ],
+    "newFacts": [
+      {
+        "id": "said.1",
+        "text": "The Guild docks a week of pay for a late gate.",
+        "by": "mara"
+      },
+      {
+        "id": "said.2",
+        "text": "The gate stood open until ten.",
+        "by": "tobin"
+      },
+      {
+        "id": "said.3",
+        "text": "Someone with a Guild seal knocked after closing.",
+        "by": "tobin"
+      }
+    ],
+    "pressures": {
+      "tobin": 1,
+      "mara": 1
+    },
+    "tells": [
+      "tobin.after-closing"
+    ]
+  }
+}
+
+===== turn 3 =====
+{
+  "input": "Whose seal was it?",
+  "fallback": false,
+  "corrections": [],
+  "plan": {
+    "speakers": [
+      {
+        "id": "mara",
+        "intent": "narrow it down without naming herself",
+        "mood": "careful",
+        "pressure": "driven"
+      }
+    ],
+    "exchange": [
+      {
+        "who": "mara",
+        "answers": "player",
+        "point": "answer: Only clerks carry Guild seals."
+      }
+    ],
+    "reactions": [
+      {
+        "id": "tobin",
+        "beat": "looks at the ground"
+      }
+    ],
+    "checks": [],
+    "walk_ons": [],
+    "texture": [
+      "stacked crates"
+    ],
+    "contrast": "",
+    "avoid": [],
+    "leaves": [],
+    "end_scene": false,
+    "moves": [
+      {
+        "who": "mara",
+        "answers": "player",
+        "move": "answer",
+        "says": [
+          {
+            "text": "Only clerks carry Guild seals.",
+            "unheard": true
+          }
+        ]
+      }
+    ],
+    "player_action": {
+      "doing": "asks whose seal it was",
+      "uncertain": false
+    },
+    "change": "The list of suspects is short."
+  },
+  "checks": [],
+  "lore": {
+    "stage": [
+      "location.upper",
+      "location.lower",
+      "faction.guild",
+      "faction.watch",
+      "concept.pennies"
+    ],
+    "scene": [
+      {
+        "id": "location.lower.east-gate.the-yard",
+        "title": "The Guild Yard",
+        "form": "full"
+      },
+      {
+        "id": "location.lower.east-gate",
+        "title": "East Gate",
+        "form": "full"
+      },
+      {
+        "id": "location.lower",
+        "title": "The Lower Ward",
+        "form": "full"
+      },
+      {
+        "id": "faction.guild",
+        "title": "The Guild",
+        "form": "full"
+      },
+      {
+        "id": "faction.guild.tallies",
+        "title": "How the tallies work",
+        "form": "full"
+      },
+      {
+        "id": "species.automaton",
+        "title": "Automaton culture",
+        "form": "full"
+      }
+    ],
+    "triggered": [
+      {
+        "id": "faction.watch",
+        "title": "The Ward Watch",
+        "form": "full"
+      }
+    ],
+    "stances": [
+      "- The Ward Watch toward The Guild: sour"
+    ],
+    "tokens": {
+      "stage": 91,
+      "writerStage": 60,
+      "scene": 223,
+      "triggered": 32
+    },
+    "budgets": {
+      "sceneTokens": 1200,
+      "triggeredTokens": 800,
+      "loreLines": 3,
+      "set": []
+    },
+    "budgetCuts": {
+      "scene": {
+        "shortened": [],
+        "dropped": []
+      },
+      "triggered": {
+        "shortened": [],
+        "dropped": []
+      }
+    },
+    "secrets": [
+      {
+        "holder": "mara",
+        "id": "mara.two-books",
+        "kind": "linked",
+        "form": "full",
+        "priority": "context",
+        "cueTokens": 29,
+        "expansionTokens": 38
+      },
+      {
+        "holder": "tobin",
+        "id": "tobin.after-closing",
+        "kind": "personal",
+        "form": "full",
+        "priority": "kept",
+        "cueTokens": 22,
+        "expansionTokens": 0
+      }
+    ]
+  },
+  "findings": [
+    {
+      "kind": "unplanned-speaker",
+      "beat": 2,
+      "text": "Seven, counting Pell.",
+      "fix": "Beat 2: Tobin was not planned to speak. Show them only through a reaction in narration."
+    }
+  ],
+  "remaining": [
+    {
+      "kind": "unplanned-speaker",
+      "beat": 2,
+      "text": "Seven, counting Pell.",
+      "fix": "Beat 2: Tobin was not planned to speak. Show them only through a reaction in narration."
+    }
+  ],
+  "salvage": {
+    "dropped": [
+      2
+    ],
+    "cut": 0
+  },
+  "beats": [
+    {
+      "kind": "dialogue",
+      "speaker": "mara",
+      "text": "Only clerks carry Guild seals. That makes it six people."
+    }
+  ],
+  "tags": {
+    "parsed": {
+      "expressions": {
+        "mara": "thoughtful"
+      },
+      "comfort": {
+        "tobin": {
+          "level": 1,
+          "reason": "he said too much"
+        }
+      },
+      "moods": {
+        "tobin": "rattled"
+      },
+      "leaves": [],
+      "ended": false
+    },
+    "dropped": []
+  },
+  "scene": {
+    "id": "scene-1200",
+    "locationId": "the-yard",
+    "cast": [
+      "mara",
+      "tobin"
+    ],
+    "walkOns": [
+      "clerk"
+    ],
+    "summary": "",
+    "moods": {
+      "mara": "careful",
+      "tobin": "rattled"
+    },
+    "comfort": {
+      "mara": 2,
+      "tobin": 1
+    },
+    "expressions": {
+      "mara": "thoughtful",
+      "tobin": "relieved"
+    },
+    "departed": [],
+    "ended": false,
+    "nsfw": false,
+    "baseline": {
+      "mara": {
+        "warmth": 10,
+        "bond": 8
+      },
+      "tobin": {
+        "warmth": 6,
+        "bond": 3
+      }
+    },
+    "told": [
+      "mara.k1"
+    ],
+    "newFacts": [
+      {
+        "id": "said.1",
+        "text": "The Guild docks a week of pay for a late gate.",
+        "by": "mara"
+      },
+      {
+        "id": "said.2",
+        "text": "The gate stood open until ten.",
+        "by": "tobin"
+      },
+      {
+        "id": "said.3",
+        "text": "Someone with a Guild seal knocked after closing.",
+        "by": "tobin"
+      },
+      {
+        "id": "said.4",
+        "text": "Only clerks carry Guild seals.",
+        "by": "mara"
+      }
+    ],
+    "pressures": {
+      "tobin": 1,
+      "mara": 2
+    },
+    "tells": [
+      "tobin.after-closing"
+    ]
+  }
+}
+
+===== turn 4 =====
+{
+  "input": "Tobin, you should go before the clerk sees you.",
+  "fallback": false,
+  "corrections": [],
+  "plan": {
+    "speakers": [
+      {
+        "id": "tobin",
+        "intent": "get out of sight",
+        "mood": "grateful",
+        "pressure": "idle"
+      }
+    ],
+    "exchange": [
+      {
+        "who": "tobin",
+        "answers": "player",
+        "point": "agree"
+      }
+    ],
+    "reactions": [
+      {
+        "id": "mara",
+        "beat": "watches him go"
+      }
+    ],
+    "checks": [],
+    "walk_ons": [],
+    "texture": [
+      "wet straw"
+    ],
+    "contrast": "",
+    "avoid": [],
+    "leaves": [
+      "tobin"
+    ],
+    "end_scene": false,
+    "moves": [
+      {
+        "who": "tobin",
+        "answers": "player",
+        "move": "agree",
+        "says": []
+      }
+    ],
+    "player_action": {
+      "doing": "tells Tobin to leave",
+      "uncertain": false
+    },
+    "change": "Tobin leaves the yard."
+  },
+  "checks": [],
+  "lore": {
+    "stage": [
+      "location.upper",
+      "location.lower",
+      "faction.guild",
+      "faction.watch",
+      "concept.pennies"
+    ],
+    "scene": [
+      {
+        "id": "location.lower.east-gate.the-yard",
+        "title": "The Guild Yard",
+        "form": "full"
+      },
+      {
+        "id": "location.lower.east-gate",
+        "title": "East Gate",
+        "form": "full"
+      },
+      {
+        "id": "location.lower",
+        "title": "The Lower Ward",
+        "form": "full"
+      },
+      {
+        "id": "faction.guild",
+        "title": "The Guild",
+        "form": "full"
+      },
+      {
+        "id": "faction.guild.tallies",
+        "title": "How the tallies work",
+        "form": "full"
+      },
+      {
+        "id": "species.automaton",
+        "title": "Automaton culture",
+        "form": "full"
+      }
+    ],
+    "triggered": [
+      {
+        "id": "faction.watch",
+        "title": "The Ward Watch",
+        "form": "full"
+      }
+    ],
+    "stances": [
+      "- The Ward Watch toward The Guild: sour"
+    ],
+    "tokens": {
+      "stage": 91,
+      "writerStage": 60,
+      "scene": 223,
+      "triggered": 32
+    },
+    "budgets": {
+      "sceneTokens": 1200,
+      "triggeredTokens": 800,
+      "loreLines": 3,
+      "set": []
+    },
+    "budgetCuts": {
+      "scene": {
+        "shortened": [],
+        "dropped": []
+      },
+      "triggered": {
+        "shortened": [],
+        "dropped": []
+      }
+    },
+    "secrets": [
+      {
+        "holder": "mara",
+        "id": "mara.two-books",
+        "kind": "linked",
+        "form": "full",
+        "priority": "context",
+        "cueTokens": 29,
+        "expansionTokens": 38
+      },
+      {
+        "holder": "tobin",
+        "id": "tobin.after-closing",
+        "kind": "personal",
+        "form": "cue",
+        "cueTokens": 22,
+        "expansionTokens": 0
+      }
+    ]
+  },
+  "findings": [],
+  "remaining": [],
+  "beats": [
+    {
+      "kind": "dialogue",
+      "speaker": "tobin",
+      "text": "Yes. The horses need water anyway."
+    },
+    {
+      "kind": "narration",
+      "text": "Tobin ducks out through the gate."
+    }
+  ],
+  "tags": {
+    "parsed": {
+      "expressions": {
+        "tobin": "relieved"
+      },
+      "comfort": {},
+      "moods": {},
+      "leaves": [
+        "tobin"
+      ],
+      "ended": false
+    },
+    "dropped": []
+  },
+  "scene": {
+    "id": "scene-1200",
+    "locationId": "the-yard",
+    "cast": [
+      "mara",
+      "tobin"
+    ],
+    "walkOns": [
+      "clerk"
+    ],
+    "summary": "Kit: Who was in the yard last night?\nThe gate creaks somewhere behind the crates.\nTobin: \"The horses were restless. I sang to them.\"\nMara: \"You were here after closing, Tobin. I saw the lamp.\"",
+    "moods": {
+      "mara": "careful",
+      "tobin": "grateful"
+    },
+    "comfort": {
+      "mara": 2,
+      "tobin": 1
+    },
+    "expressions": {
+      "mara": "thoughtful",
+      "tobin": "relieved"
+    },
+    "departed": [
+      "tobin"
+    ],
+    "ended": false,
+    "nsfw": false,
+    "baseline": {
+      "mara": {
+        "warmth": 10,
+        "bond": 8
+      },
+      "tobin": {
+        "warmth": 6,
+        "bond": 3
+      }
+    },
+    "told": [
+      "mara.k1"
+    ],
+    "newFacts": [
+      {
+        "id": "said.1",
+        "text": "The Guild docks a week of pay for a late gate.",
+        "by": "mara"
+      },
+      {
+        "id": "said.2",
+        "text": "The gate stood open until ten.",
+        "by": "tobin"
+      },
+      {
+        "id": "said.3",
+        "text": "Someone with a Guild seal knocked after closing.",
+        "by": "tobin"
+      },
+      {
+        "id": "said.4",
+        "text": "Only clerks carry Guild seals.",
+        "by": "mara"
+      }
+    ],
+    "pressures": {
+      "tobin": 0,
+      "mara": 2
+    },
+    "tells": [
+      "tobin.after-closing"
+    ]
+  }
+}
+
+===== turn 5 =====
+{
+  "input": "Mara, what will you do with this?",
+  "fallback": false,
+  "corrections": [],
+  "plan": {
+    "speakers": [
+      {
+        "id": "mara",
+        "intent": "keep it quiet until she knows more",
+        "mood": "resolved",
+        "pressure": "driven"
+      }
+    ],
+    "exchange": [
+      {
+        "who": "mara",
+        "answers": "player",
+        "point": "answer: She will check the seal log at dawn."
+      }
+    ],
+    "reactions": [],
+    "checks": [],
+    "walk_ons": [],
+    "texture": [
+      "stacked crates"
+    ],
+    "contrast": "",
+    "avoid": [],
+    "leaves": [],
+    "end_scene": false,
+    "moves": [
+      {
+        "who": "mara",
+        "answers": "player",
+        "move": "answer",
+        "says": [
+          {
+            "text": "She will check the seal log at dawn.",
+            "unheard": true
+          }
+        ]
+      }
+    ],
+    "player_action": {
+      "doing": "asks Mara what she will do",
+      "uncertain": false
+    },
+    "change": "Mara has a plan."
+  },
+  "checks": [],
+  "lore": {
+    "stage": [
+      "location.upper",
+      "location.lower",
+      "faction.guild",
+      "faction.watch",
+      "concept.pennies"
+    ],
+    "scene": [
+      {
+        "id": "location.lower.east-gate.the-yard",
+        "title": "The Guild Yard",
+        "form": "full"
+      },
+      {
+        "id": "location.lower.east-gate",
+        "title": "East Gate",
+        "form": "full"
+      },
+      {
+        "id": "location.lower",
+        "title": "The Lower Ward",
+        "form": "full"
+      },
+      {
+        "id": "faction.guild",
+        "title": "The Guild",
+        "form": "full"
+      }
+    ],
+    "triggered": [
+      {
+        "id": "faction.guild.tallies",
+        "title": "How the tallies work",
+        "form": "full"
+      },
+      {
+        "id": "faction.watch",
+        "title": "The Ward Watch",
+        "form": "full"
+      }
+    ],
+    "stances": [
+      "- The Ward Watch toward The Guild: sour"
+    ],
+    "tokens": {
+      "stage": 91,
+      "writerStage": 60,
+      "scene": 136,
+      "triggered": 83
+    },
+    "budgets": {
+      "sceneTokens": 1200,
+      "triggeredTokens": 800,
+      "loreLines": 3,
+      "set": []
+    },
+    "budgetCuts": {
+      "scene": {
+        "shortened": [],
+        "dropped": []
+      },
+      "triggered": {
+        "shortened": [],
+        "dropped": []
+      }
+    },
+    "secrets": [
+      {
+        "holder": "mara",
+        "id": "mara.two-books",
+        "kind": "linked",
+        "form": "full",
+        "priority": "context",
+        "cueTokens": 29,
+        "expansionTokens": 38
+      }
+    ]
+  },
+  "findings": [],
+  "remaining": [],
+  "beats": [
+    {
+      "kind": "narration",
+      "text": "Mara closes the tally book and tucks the pen behind her ear."
+    },
+    {
+      "kind": "dialogue",
+      "speaker": "mara",
+      "text": "Check the seal log at dawn. Quietly, before the clerks come in."
+    },
+    {
+      "kind": "narration",
+      "text": "She glances at the gate Tobin left by."
+    }
+  ],
+  "tags": {
+    "parsed": {
+      "expressions": {
+        "mara": "determined"
+      },
+      "comfort": {},
+      "moods": {},
+      "leaves": [
+        "mara"
+      ],
+      "ended": false
+    },
+    "dropped": []
+  },
+  "scene": {
+    "id": "scene-1200",
+    "locationId": "the-yard",
+    "cast": [
+      "mara",
+      "tobin"
+    ],
+    "walkOns": [
+      "clerk"
+    ],
+    "summary": "Kit: Who was in the yard last night?\nThe gate creaks somewhere behind the crates.\nTobin: \"The horses were restless. I sang to them.\"\nMara: \"You were here after closing, Tobin. I saw the lamp.\"\n\nKit: I'm not the Watch. Tell me who you let into the yard after closing, and I'll keep it quiet.\nTobin hums, then stops himself.\nTobin: \"Someone with a Guild seal knocked. I couldn't say no to the seal.\"\nMara's pen stops over the tally.",
+    "moods": {
+      "mara": "resolved",
+      "tobin": "grateful"
+    },
+    "comfort": {
+      "mara": 2,
+      "tobin": 1
+    },
+    "expressions": {
+      "mara": "determined",
+      "tobin": "relieved"
+    },
+    "departed": [
+      "tobin",
+      "mara"
+    ],
+    "ended": false,
+    "nsfw": false,
+    "baseline": {
+      "mara": {
+        "warmth": 10,
+        "bond": 8
+      },
+      "tobin": {
+        "warmth": 6,
+        "bond": 3
+      }
+    },
+    "told": [
+      "mara.k1"
+    ],
+    "newFacts": [
+      {
+        "id": "said.1",
+        "text": "The Guild docks a week of pay for a late gate.",
+        "by": "mara"
+      },
+      {
+        "id": "said.2",
+        "text": "The gate stood open until ten.",
+        "by": "tobin"
+      },
+      {
+        "id": "said.3",
+        "text": "Someone with a Guild seal knocked after closing.",
+        "by": "tobin"
+      },
+      {
+        "id": "said.4",
+        "text": "Only clerks carry Guild seals.",
+        "by": "mara"
+      },
+      {
+        "id": "said.5",
+        "text": "She will check the seal log at dawn.",
+        "by": "mara"
+      }
+    ],
+    "pressures": {
+      "tobin": 0,
+      "mara": 2
+    },
+    "tells": [
+      "tobin.after-closing"
+    ]
+  }
+}
+
+===== end of scene =====
+{
+  "witnesses": [
+    {
+      "id": "mara",
+      "summary": {
+        "memory": "Tobin let someone with a Guild seal into the yard after closing; Kit got it out of him.",
+        "level": "normal",
+        "reason": "Kit kept it quiet",
+        "delta": {
+          "warmth": 3,
+          "bond": 0
+        },
+        "learned": [],
+        "others": [
+          {
+            "with": "tobin",
+            "delta": {
+              "warmth": -3,
+              "bond": 0
+            },
+            "reason": "he lied to her"
+          }
+        ]
+      },
+      "report": {
+        "id": "mara",
+        "memory": "Tobin let someone with a Guild seal into the yard after closing; Kit got it out of him.",
+        "level": "normal",
+        "reason": "Kit kept it quiet",
+        "before": {
+          "warmth": 10,
+          "bond": 8
+        },
+        "after": {
+          "warmth": 13,
+          "bond": 8
+        },
+        "learned": [],
+        "others": [
+          {
+            "with": "tobin",
+            "before": {
+              "warmth": 9,
+              "bond": 4
+            },
+            "after": {
+              "warmth": 6,
+              "bond": 4
+            },
+            "label": "known",
+            "reason": "he lied to her"
+          }
+        ]
+      }
+    },
+    {
+      "id": "tobin",
+      "summary": {
+        "memory": "I told Kit about the seal. Mara heard.",
+        "level": "core",
+        "reason": "Kit let him leave",
+        "delta": {
+          "warmth": 3,
+          "bond": 3
+        },
+        "learned": [],
+        "others": []
+      },
+      "report": {
+        "id": "tobin",
+        "memory": "I told Kit about the seal. Mara heard.",
+        "level": "core",
+        "reason": "Kit let him leave",
+        "before": {
+          "warmth": 6,
+          "bond": 3
+        },
+        "after": {
+          "warmth": 9,
+          "bond": 6
+        },
+        "learned": [],
+        "others": []
+      }
+    }
+  ]
+}

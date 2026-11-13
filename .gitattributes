@@ -1,0 +1,2 @@
+# Snapshot files are compared byte for byte, so they keep LF line ends on every platform.
+**/__snapshots__/** text eol=lf

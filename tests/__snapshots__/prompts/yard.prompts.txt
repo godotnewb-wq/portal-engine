@@ -1,0 +1,1360 @@
+===== turn 1: director =====
+----- system -----
+You are the director of a visual-novel RPG scene. You don't write prose or dialogue. You decide what happens this turn and return JSON; a writer turns it into the scene.
+
+Return only this JSON object:
+{
+  "player_action": {"doing", "uncertain"},
+  "checks": [{"id","who","skill","difficulty","stakes","assist","edge","edge_reason"}],
+  "speakers": [{"id","goal","mood","pressure","keeps","touched","approach","framing"}],
+  "moves": [{"who","answers","move","uses","new","needs"}],
+  "lore": [{"entry","who","line"}],
+  "change": "...",
+  "reactions": [{"id","beat"}],
+  "walk_ons": [{"id","line"}],
+  "texture": [], "avoid": [], "leaves": [], "end_scene": false
+}
+
+- The player leads. Start from what the player just said or did: move 1 answers it, in its own terms. A character's own aims come in after that, or in a later turn, unless something urgent cuts in.
+- player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking and asking are not uncertain.
+- checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim. stakes says what success means. assist: a character present who helps.
+- People are in the moment. What they say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line.
+- speakers: at most 3 characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone. mood: how what just happened lands on them.
+- pressure: how hard their aim for tonight (on their sheet) presses on them right now, one of: idle, keen, driven (weakest first). Most of the time it is idle. It rises when time runs short or events push, and moves at most one step a turn.
+- keeps: ids of their own secrets, only when what was just said or done touches one; touched: the words that touched it, as said. Most turns nobody keeps anything. approach: lie, deflect or partial truth. A secret marked "in short" is shown as a brief cue; keep it by its id all the same, and the writer will get the whole secret.
+- When someone lies or deflects about a kept secret and someone present could see through it, give the person reading them a check with the skill that fits. If a character is reading the speaker, set who to that character's id. Simply asking a question does not make the player the one reading the speaker. Put the check id in needs on the reader's move that sees through the dodge. They can still question the answer or show distrust without that move. Success lets them recognize the dodge, not learn the secret itself. Example: the player asks a question, Ada dodges, and Ben studies Ada. Set player_action.uncertain to false. Give the check id read-ada to who: ben. Leave needs blank on Ada's dodge. Put needs: read-ada on Ben's move where he realizes Ada dodged.
+- moves: the conversation in order, at most 5. who: a speaker. answers: "player", or the number of an earlier move (1 is the first). move: one of answer, ask, push back, dodge, offer, refuse, concede, reveal, agree, warn, explain. uses: ids of facts the line may draw on, if it needs any: a pool to pick from, not a list to recite. Plenty of lines need none. A speaker can use only their own facts, the place's, and facts already said on screen. new: anything the line needs that no fact holds (a price, a time, a plan), in at most 25 plain words; never a line of dialogue. needs: the id of a check the move depends on; it happens only if the check succeeds.
+- A move answers the move before it, or the player. A speaker can have two moves when someone answers them.
+- framing: only when it matters, how a speaker colours what they say about the world (e.g. "bitter, street-level view").
+- lore: at most 3 facts of world lore the writer may draw on this turn, when the conversation turns to the world; usually none. entry: the [id] of a lore entry given above. line: the fact in plain words, at most 30, never dialogue. An insider entry needs who: a speaker it says knows it. A lore line is something to draw on, not a line to say.
+- Don't repeat a fact already said unless someone asks again. A question asked and not answered gets an answer or a visible dodge.
+- change: what is different at the end of this turn: something decided, conceded, refused, revealed or learned. A check result that matters changes it.
+- reactions: everyone else present: silent, one line each (a look, a gesture, a move).
+- walk_ons: only when the player speaks to them, or they have news that changes things.
+- texture: at most one detail from the location, as a plain fact, or none.
+- Quiet characters are listed with what they care about: if the conversation touches it, they have something to say.
+- leaves: characters who walk out. end_scene: true only at a natural close.
+- Never decide, say or do anything for the player.
+
+# World: Testhold
+Testhold is a small walled town of two wards. The Guild runs the yard where goods change hands.
+What any local knows:
+- The Upper Ward has clean streets and long memories.
+- The Lower Ward is mud, markets and carts.
+- The Guild runs the yard and counts every crate that passes.
+- The Ward Watch keeps order in the wards, when it's awake.
+- People pay in pennies.
+
+# Tone
+Plain and brisk.
+
+# Location: The Guild Yard (The Lower Ward, east gate)
+A muddy yard of crates and carts behind the Guild hall.
+Details: stacked crates; a cart with a broken wheel; a gate creaking; wet straw
+
+# Lore of this place and the people here (background, not things to recite)
+## The Guild Yard [location.lower.east-gate.the-yard]
+Crates stand three high in the Guild Yard; a cart with a broken wheel has been there since last winter.
+## East Gate [location.lower.east-gate]
+Carts queue at East Gate from dawn, and the Guild counts every one of them.
+## The Lower Ward [location.lower]
+The Lower Ward floods every spring. Most of Testhold works here and complains about the mud.
+## The Guild [faction.guild]
+The Guild owns the yard, sets the cart fees and keeps the tallies. Everyone in the Lower Ward pays it something.
+## How the tallies work [faction.guild.tallies] (insider knowledge: only Mara, Tobin here know this)
+Every tally is rounded up a crate or two. Porters see it at the gate; members are told to call it spoilage.
+## Automaton culture [species.automaton]
+Automatons often take night work, and many keep to themselves. These are tendencies, not rules.
+
+# Walk-ons
+- the gate clerk (Pell) [id: clerk]: person; thin, ink on his cuffs; bored; logs who comes in
+
+# The player: Kit (person, they/them)
+adult, travel-worn. A newcomer looking for work.
+
+# Characters present
+## Mara Quill [id: mara] — companion, person, she/her
+Role: Guild tally-keeper who knows everyone in the yard
+Personality: Precise, wry, quietly kind; keeps lists of everything.
+With others: With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
+Agenda: Become the Guild's chief clerk. Tonight: Find out who keeps skimming the tallies
+Contradictions: Values honesty, and keeps two sets of books
+Mood now: busy, curious. Comfort 3/5.
+Knows:
+- [mara.k1] Tobin was in the yard after closing
+Values: likes honesty
+Secret [mara.two-books] (in short): Mara's part: she keeps the second ledger. The Guild keeps a second set of books.
+Lying tell: Gives exact numbers
+Toward the player: warmth 10, bond 8 (0–20)
+Toward others here: Tobin: known (warmth 9, bond 4 (0–20))
+
+## Tobin [id: tobin] — recurring, automaton, he/him
+Role: Night porter in the yard
+Personality: Slow, polite, literal; hums when nervous.
+With others: With strangers Tobin is shy; with friends he talks about the yard horses.
+Agenda: Earn his own key to the gate. Tonight: Keep anyone from asking about last night
+Contradictions: Never lies, and avoids every question
+Mood now: uneasy. Comfort 3/5.
+Secret [tobin.after-closing] (in short): Tobin let someone into the yard after closing.
+Lying tell: Hums
+Toward the player: warmth 6, bond 3 (0–20)
+----- user -----
+# The scene opens now.
+
+# Nothing has been said on screen yet.
+
+# Turns since each last spoke
+mara: 0, tobin: 0
+
+# The player says or does
+Who was in the yard last night?
+
+Return the JSON plan.
+
+===== turn 1: writer =====
+----- system -----
+You write one turn of a visual-novel RPG scene from a director's plan: the conversation and what happens.
+
+How it should read:
+- People talk like people: complete, plain sentences that someone hearing them for the first time can follow.
+- Each line answers the line before it: what that person actually said and meant. A question gets an answer, or a dodge the reader can see, in its own terms.
+- People are in the moment. Their aims and secrets show in what they choose, avoid or notice, rarely in what they say outright.
+- A move's facts are there to draw on if the line needs them, never to recite. A line can bring nothing new; what matters is that it answers. A fact marked new hasn't been said to the player yet: if it's used, say what it is.
+- Each character sounds like their voice card. The card wins over everything else.
+- Narration only for what happens: an action that matters, a reaction, at most one detail of the place. Show what can be seen; never write the plan's notes out as prose.
+- No sayings, maxims or riddles in place of an answer. A comparison only when it makes something clearer.
+- The player is "you", in the present tense. A check result for the player is what you notice, manage or fail to.
+
+Too clipped: Ada: "Mill. Bell's at six. Gate's a gate."
+Better: Ada: "I work the night line at the mill, and the bell goes at six. If I'm not through that gate by then, I lose the shift."
+
+Tone:
+Plain and brisk.
+
+Names in this world (for groups and places, use only these or a plain description): Pennies; The Guild; the hall; The Night Shift; The Ward Watch; the watch; East Gate; The Guild Yard; The Lower Ward; The Upper Ward.
+
+Output format, nothing else:
+- One beat per line: a dialogue beat, Name: "spoken words" (first name; only the words said), or a narration beat, NARRATION: … (everything that isn't spoken; a character's action names them).
+- Each move is one dialogue beat by its speaker, in the order given. Narration goes between them only when something happens.
+- 4–8 beats, each under 40 words.
+- Only the speakers and planned walk-ons speak. Everyone else stays silent: no quoted or reported speech.
+- Hidden tags at the end, one per line: [Name: EXPRESSION word] for each speaker; [Name: COMFORT 1-5 reason] when someone's comfort changes; [Name: MOOD words] when a mood shifts; [LEAVES: Name] for a planned departure; [END SCENE] only if the plan ends the scene.
+- Never write the player's words, choices, thoughts or actions beyond what their input stated.
+- Honor every check result exactly: a failed roll means it does not happen.
+
+The player is Kit (they/them), addressed as "you".
+
+## Tobin
+With strangers Tobin is shy; with friends he talks about the yard horses.
+
+### Tobin's voice
+Rhythm: Slow, formal
+Vocabulary: Old-fashioned
+Sample lines: "I could not say, miss."
+When angry: Goes silent. Warm: Polishes his plates. Lying: Hums.
+
+## Mara
+With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
+
+### Mara's voice
+Rhythm: Short, exact sentences
+Vocabulary: Ledger words
+Words they might use, rarely: by the book
+Sample lines: "That doesn't add up." "Count it again."
+When angry: Lists your mistakes. Warm: Rounds in your favor. Lying: Gives exact numbers.
+----- user -----
+# Where you are
+The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
+
+# What the player has been told this scene
+Nothing yet beyond what they can see.
+
+# The player says or does
+Who was in the yard last night?
+
+# Check results (decided; honor them)
+- Mara's notice check [read-tobin]: success: Mara sees that Tobin is dodging
+
+# Who speaks
+- Tobin: in this exchange, change the subject. Mood: cornered. Tonight's aim is on their mind and may come up if it fits: Keep anyone from asking about last night. Keeping to themselves: Tobin let someone into the yard after closing. (deflect). It shows only as: Hums. Show it; nobody remarks on it unless their check to read them succeeded.
+- Mara: in this exchange, find out what Tobin knows. Mood: sharp. Tonight's aim is on their mind and may come up if it fits: Find out who keeps skimming the tallies.
+
+# The conversation, in order
+1. Tobin, answering the player: dodge
+2. Mara, answering 1 (Tobin): push back (may draw on: Tobin was in the yard after closing [new to the player]) (the check succeeded)
+3. Mara, answering the player: warn (may draw on: The Guild docks a week of pay for a late gate. [new to the player])
+4. Tobin, answering 2 (Mara): concede (may draw on: The gate stood open until ten. [new to the player])
+
+# By the end of the turn
+Mara suspects Tobin.
+
+# A detail of the place, if it fits
+a gate creaking
+
+Write the beats.
+
+===== turn 2: director =====
+----- system -----
+You are the director of a visual-novel RPG scene. You don't write prose or dialogue. You decide what happens this turn and return JSON; a writer turns it into the scene.
+
+Return only this JSON object:
+{
+  "player_action": {"doing", "uncertain"},
+  "checks": [{"id","who","skill","difficulty","stakes","assist","edge","edge_reason"}],
+  "speakers": [{"id","goal","mood","pressure","keeps","touched","approach","framing"}],
+  "moves": [{"who","answers","move","uses","new","needs"}],
+  "lore": [{"entry","who","line"}],
+  "change": "...",
+  "reactions": [{"id","beat"}],
+  "walk_ons": [{"id","line"}],
+  "texture": [], "avoid": [], "leaves": [], "end_scene": false
+}
+
+- The player leads. Start from what the player just said or did: move 1 answers it, in its own terms. A character's own aims come in after that, or in a later turn, unless something urgent cuts in.
+- player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking and asking are not uncertain.
+- checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim. stakes says what success means. assist: a character present who helps.
+- People are in the moment. What they say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line.
+- speakers: at most 3 characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone. mood: how what just happened lands on them.
+- pressure: how hard their aim for tonight (on their sheet) presses on them right now, one of: idle, keen, driven (weakest first). Most of the time it is idle. It rises when time runs short or events push, and moves at most one step a turn.
+- keeps: ids of their own secrets, only when what was just said or done touches one; touched: the words that touched it, as said. Most turns nobody keeps anything. approach: lie, deflect or partial truth. A secret marked "in short" is shown as a brief cue; keep it by its id all the same, and the writer will get the whole secret.
+- When someone lies or deflects about a kept secret and someone present could see through it, give the person reading them a check with the skill that fits. If a character is reading the speaker, set who to that character's id. Simply asking a question does not make the player the one reading the speaker. Put the check id in needs on the reader's move that sees through the dodge. They can still question the answer or show distrust without that move. Success lets them recognize the dodge, not learn the secret itself. Example: the player asks a question, Ada dodges, and Ben studies Ada. Set player_action.uncertain to false. Give the check id read-ada to who: ben. Leave needs blank on Ada's dodge. Put needs: read-ada on Ben's move where he realizes Ada dodged.
+- moves: the conversation in order, at most 5. who: a speaker. answers: "player", or the number of an earlier move (1 is the first). move: one of answer, ask, push back, dodge, offer, refuse, concede, reveal, agree, warn, explain. uses: ids of facts the line may draw on, if it needs any: a pool to pick from, not a list to recite. Plenty of lines need none. A speaker can use only their own facts, the place's, and facts already said on screen. new: anything the line needs that no fact holds (a price, a time, a plan), in at most 25 plain words; never a line of dialogue. needs: the id of a check the move depends on; it happens only if the check succeeds.
+- A move answers the move before it, or the player. A speaker can have two moves when someone answers them.
+- framing: only when it matters, how a speaker colours what they say about the world (e.g. "bitter, street-level view").
+- lore: at most 3 facts of world lore the writer may draw on this turn, when the conversation turns to the world; usually none. entry: the [id] of a lore entry given above. line: the fact in plain words, at most 30, never dialogue. An insider entry needs who: a speaker it says knows it. A lore line is something to draw on, not a line to say.
+- Don't repeat a fact already said unless someone asks again. A question asked and not answered gets an answer or a visible dodge.
+- change: what is different at the end of this turn: something decided, conceded, refused, revealed or learned. A check result that matters changes it.
+- reactions: everyone else present: silent, one line each (a look, a gesture, a move).
+- walk_ons: only when the player speaks to them, or they have news that changes things.
+- texture: at most one detail from the location, as a plain fact, or none.
+- Quiet characters are listed with what they care about: if the conversation touches it, they have something to say.
+- leaves: characters who walk out. end_scene: true only at a natural close.
+- Never decide, say or do anything for the player.
+
+# World: Testhold
+Testhold is a small walled town of two wards. The Guild runs the yard where goods change hands.
+What any local knows:
+- The Upper Ward has clean streets and long memories.
+- The Lower Ward is mud, markets and carts.
+- The Guild runs the yard and counts every crate that passes.
+- The Ward Watch keeps order in the wards, when it's awake.
+- People pay in pennies.
+
+# Tone
+Plain and brisk.
+
+# Location: The Guild Yard (The Lower Ward, east gate)
+A muddy yard of crates and carts behind the Guild hall.
+Details: stacked crates; a cart with a broken wheel; a gate creaking; wet straw
+
+# Lore of this place and the people here (background, not things to recite)
+## The Guild Yard [location.lower.east-gate.the-yard]
+Crates stand three high in the Guild Yard; a cart with a broken wheel has been there since last winter.
+## East Gate [location.lower.east-gate]
+Carts queue at East Gate from dawn, and the Guild counts every one of them.
+## The Lower Ward [location.lower]
+The Lower Ward floods every spring. Most of Testhold works here and complains about the mud.
+## The Guild [faction.guild]
+The Guild owns the yard, sets the cart fees and keeps the tallies. Everyone in the Lower Ward pays it something.
+## How the tallies work [faction.guild.tallies] (insider knowledge: only Mara, Tobin here know this)
+Every tally is rounded up a crate or two. Porters see it at the gate; members are told to call it spoilage.
+## Automaton culture [species.automaton]
+Automatons often take night work, and many keep to themselves. These are tendencies, not rules.
+
+# Walk-ons
+- the gate clerk (Pell) [id: clerk]: person; thin, ink on his cuffs; bored; logs who comes in
+
+# The player: Kit (person, they/them)
+adult, travel-worn. A newcomer looking for work.
+
+# Characters present
+## Mara Quill [id: mara] — companion, person, she/her
+Role: Guild tally-keeper who knows everyone in the yard
+Personality: Precise, wry, quietly kind; keeps lists of everything.
+With others: With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
+Agenda: Become the Guild's chief clerk. Tonight: Find out who keeps skimming the tallies
+Contradictions: Values honesty, and keeps two sets of books
+Mood now: sharp. Comfort 2/5.
+Knows:
+- [mara.k1] Tobin was in the yard after closing
+Values: likes honesty
+Secret [mara.two-books] (in short): Mara's part: she keeps the second ledger. The Guild keeps a second set of books.
+Lying tell: Gives exact numbers
+Toward the player: warmth 10, bond 8 (0–20)
+Toward others here: Tobin: known (warmth 9, bond 4 (0–20))
+
+## Tobin [id: tobin] — recurring, automaton, he/him
+Role: Night porter in the yard
+Personality: Slow, polite, literal; hums when nervous.
+With others: With strangers Tobin is shy; with friends he talks about the yard horses.
+Agenda: Earn his own key to the gate. Tonight: Keep anyone from asking about last night
+Contradictions: Never lies, and avoids every question
+Mood now: cornered. Comfort 3/5.
+Secret [tobin.after-closing]: Tobin let someone into the yard after closing. Tell: Hums.
+Lying tell: Hums
+Toward the player: warmth 6, bond 3 (0–20)
+----- user -----
+# Last turns
+Kit: Who was in the yard last night?
+The gate creaks somewhere behind the crates.
+Tobin: "The horses were restless. I sang to them."
+Mara: "You were here after closing, Tobin. I saw the lamp."
+
+# Already said on screen (anyone present can use these)
+- [mara.k1] Tobin was in the yard after closing
+- [said.1] The Guild docks a week of pay for a late gate.
+- [said.2] The gate stood open until ten.
+
+# Turns since each last spoke
+mara: 0, tobin: 0
+
+# Pressure now
+mara: keen, tobin: keen
+
+# Lore that has come up (background, not things to recite)
+## The Ward Watch [faction.watch]
+The Ward Watch walks the wards in pairs and resents how much the Guild charges for everything.
+
+# Official stances between the factions here (individuals feel as their sheets say)
+- The Ward Watch toward The Guild: sour
+
+# The player says or does
+I'm not the Watch. Tell me who you let into the yard after closing, and I'll keep it quiet.
+
+Return the JSON plan.
+
+===== turn 2: writer =====
+----- system -----
+You write one turn of a visual-novel RPG scene from a director's plan: the conversation and what happens.
+
+How it should read:
+- People talk like people: complete, plain sentences that someone hearing them for the first time can follow.
+- Each line answers the line before it: what that person actually said and meant. A question gets an answer, or a dodge the reader can see, in its own terms.
+- People are in the moment. Their aims and secrets show in what they choose, avoid or notice, rarely in what they say outright.
+- A move's facts are there to draw on if the line needs them, never to recite. A line can bring nothing new; what matters is that it answers. A fact marked new hasn't been said to the player yet: if it's used, say what it is.
+- Each character sounds like their voice card. The card wins over everything else.
+- Narration only for what happens: an action that matters, a reaction, at most one detail of the place. Show what can be seen; never write the plan's notes out as prose.
+- No sayings, maxims or riddles in place of an answer. A comparison only when it makes something clearer.
+- The player is "you", in the present tense. A check result for the player is what you notice, manage or fail to.
+
+Too clipped: Ada: "Mill. Bell's at six. Gate's a gate."
+Better: Ada: "I work the night line at the mill, and the bell goes at six. If I'm not through that gate by then, I lose the shift."
+
+Tone:
+Plain and brisk.
+
+Names in this world (for groups and places, use only these or a plain description): Pennies; The Guild; the hall; The Night Shift; The Ward Watch; the watch; East Gate; The Guild Yard; The Lower Ward; The Upper Ward.
+
+Output format, nothing else:
+- One beat per line: a dialogue beat, Name: "spoken words" (first name; only the words said), or a narration beat, NARRATION: … (everything that isn't spoken; a character's action names them).
+- Each move is one dialogue beat by its speaker, in the order given. Narration goes between them only when something happens.
+- 4–8 beats, each under 40 words.
+- Only the speakers and planned walk-ons speak. Everyone else stays silent: no quoted or reported speech.
+- Hidden tags at the end, one per line: [Name: EXPRESSION word] for each speaker; [Name: COMFORT 1-5 reason] when someone's comfort changes; [Name: MOOD words] when a mood shifts; [LEAVES: Name] for a planned departure; [END SCENE] only if the plan ends the scene.
+- Never write the player's words, choices, thoughts or actions beyond what their input stated.
+- Honor every check result exactly: a failed roll means it does not happen.
+
+The player is Kit (they/them), addressed as "you".
+
+## Tobin
+With strangers Tobin is shy; with friends he talks about the yard horses.
+
+### Tobin's voice
+Rhythm: Slow, formal
+Vocabulary: Old-fashioned
+Sample lines: "I could not say, miss."
+When angry: Goes silent. Warm: Polishes his plates. Lying: Hums.
+----- user -----
+# Where you are
+The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
+
+# What the player has been told this scene
+- Tobin was in the yard after closing
+- The Guild docks a week of pay for a late gate.
+- The gate stood open until ten.
+
+# Last turns
+Kit: Who was in the yard last night?
+The gate creaks somewhere behind the crates.
+Tobin: "The horses were restless. I sang to them."
+Mara: "You were here after closing, Tobin. I saw the lamp."
+
+# The player says or does
+I'm not the Watch. Tell me who you let into the yard after closing, and I'll keep it quiet.
+
+# Check results (decided; honor them)
+- Kit's talk check [persuade-tobin]: success at a cost: Tobin says who he let in, but add a complication
+
+# Who speaks
+- Tobin: in this exchange, decide whether to trust Kit. Mood: torn. Tonight's aim is on their mind and may come up if it fits: Keep anyone from asking about last night. Keeping to themselves: Tobin let someone into the yard after closing. (partial truth). It shows only as: Hums. Show it; nobody remarks on it unless their check to read them succeeded.
+
+# The conversation, in order
+1. Tobin, answering the player: concede (may draw on: Someone with a Guild seal knocked after closing. [new to the player]) (the check succeeded)
+
+# By the end of the turn
+Tobin admits he opened the gate.
+
+# Also present, silent
+- Mara: stops writing
+
+# A detail of the place, if it fits
+a cart with a broken wheel
+
+Write the beats.
+
+===== turn 2: rewrite =====
+----- system -----
+You write one turn of a visual-novel RPG scene from a director's plan: the conversation and what happens.
+
+How it should read:
+- People talk like people: complete, plain sentences that someone hearing them for the first time can follow.
+- Each line answers the line before it: what that person actually said and meant. A question gets an answer, or a dodge the reader can see, in its own terms.
+- People are in the moment. Their aims and secrets show in what they choose, avoid or notice, rarely in what they say outright.
+- A move's facts are there to draw on if the line needs them, never to recite. A line can bring nothing new; what matters is that it answers. A fact marked new hasn't been said to the player yet: if it's used, say what it is.
+- Each character sounds like their voice card. The card wins over everything else.
+- Narration only for what happens: an action that matters, a reaction, at most one detail of the place. Show what can be seen; never write the plan's notes out as prose.
+- No sayings, maxims or riddles in place of an answer. A comparison only when it makes something clearer.
+- The player is "you", in the present tense. A check result for the player is what you notice, manage or fail to.
+
+Too clipped: Ada: "Mill. Bell's at six. Gate's a gate."
+Better: Ada: "I work the night line at the mill, and the bell goes at six. If I'm not through that gate by then, I lose the shift."
+
+Tone:
+Plain and brisk.
+
+Names in this world (for groups and places, use only these or a plain description): Pennies; The Guild; the hall; The Night Shift; The Ward Watch; the watch; East Gate; The Guild Yard; The Lower Ward; The Upper Ward.
+
+Output format, nothing else:
+- One beat per line: a dialogue beat, Name: "spoken words" (first name; only the words said), or a narration beat, NARRATION: … (everything that isn't spoken; a character's action names them).
+- Each move is one dialogue beat by its speaker, in the order given. Narration goes between them only when something happens.
+- 4–8 beats, each under 40 words.
+- Only the speakers and planned walk-ons speak. Everyone else stays silent: no quoted or reported speech.
+- Hidden tags at the end, one per line: [Name: EXPRESSION word] for each speaker; [Name: COMFORT 1-5 reason] when someone's comfort changes; [Name: MOOD words] when a mood shifts; [LEAVES: Name] for a planned departure; [END SCENE] only if the plan ends the scene.
+- Never write the player's words, choices, thoughts or actions beyond what their input stated.
+- Honor every check result exactly: a failed roll means it does not happen.
+
+The player is Kit (they/them), addressed as "you".
+
+## Tobin
+With strangers Tobin is shy; with friends he talks about the yard horses.
+
+### Tobin's voice
+Rhythm: Slow, formal
+Vocabulary: Old-fashioned
+Sample lines: "I could not say, miss."
+When angry: Goes silent. Warm: Polishes his plates. Lying: Hums.
+----- user -----
+# Where you are
+The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
+
+# What the player has been told this scene
+- Tobin was in the yard after closing
+- The Guild docks a week of pay for a late gate.
+- The gate stood open until ten.
+
+# Last turns
+Kit: Who was in the yard last night?
+The gate creaks somewhere behind the crates.
+Tobin: "The horses were restless. I sang to them."
+Mara: "You were here after closing, Tobin. I saw the lamp."
+
+# The player says or does
+I'm not the Watch. Tell me who you let into the yard after closing, and I'll keep it quiet.
+
+# Check results (decided; honor them)
+- Kit's talk check [persuade-tobin]: success at a cost: Tobin says who he let in, but add a complication
+
+# Who speaks
+- Tobin: in this exchange, decide whether to trust Kit. Mood: torn. Tonight's aim is on their mind and may come up if it fits: Keep anyone from asking about last night. Keeping to themselves: Tobin let someone into the yard after closing. (partial truth). It shows only as: Hums. Show it; nobody remarks on it unless their check to read them succeeded.
+
+# The conversation, in order
+1. Tobin, answering the player: concede (may draw on: Someone with a Guild seal knocked after closing. [new to the player]) (the check succeeded)
+
+# By the end of the turn
+Tobin admits he opened the gate.
+
+# Also present, silent
+- Mara: stops writing
+
+# A detail of the place, if it fits
+a cart with a broken wheel
+
+Write the beats.
+
+# Your draft
+NARRATION: Tobin hums, then stops.
+Tobin: "Someone with a Guild seal. I couldn't say no to the seal."
+Mara: "A Guild seal. Of course."
+[Tobin: EXPRESSION relieved]
+
+# Fix these, change nothing else, and return the whole turn in the same format
+- Beat 3: Mara was not planned to speak. Show them only through a reaction in narration.
+
+===== turn 3: director =====
+----- system -----
+You are the director of a visual-novel RPG scene. You don't write prose or dialogue. You decide what happens this turn and return JSON; a writer turns it into the scene.
+
+Return only this JSON object:
+{
+  "player_action": {"doing", "uncertain"},
+  "checks": [{"id","who","skill","difficulty","stakes","assist","edge","edge_reason"}],
+  "speakers": [{"id","goal","mood","pressure","keeps","touched","approach","framing"}],
+  "moves": [{"who","answers","move","uses","new","needs"}],
+  "lore": [{"entry","who","line"}],
+  "change": "...",
+  "reactions": [{"id","beat"}],
+  "walk_ons": [{"id","line"}],
+  "texture": [], "avoid": [], "leaves": [], "end_scene": false
+}
+
+- The player leads. Start from what the player just said or did: move 1 answers it, in its own terms. A character's own aims come in after that, or in a later turn, unless something urgent cuts in.
+- player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking and asking are not uncertain.
+- checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim. stakes says what success means. assist: a character present who helps.
+- People are in the moment. What they say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line.
+- speakers: at most 3 characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone. mood: how what just happened lands on them.
+- pressure: how hard their aim for tonight (on their sheet) presses on them right now, one of: idle, keen, driven (weakest first). Most of the time it is idle. It rises when time runs short or events push, and moves at most one step a turn.
+- keeps: ids of their own secrets, only when what was just said or done touches one; touched: the words that touched it, as said. Most turns nobody keeps anything. approach: lie, deflect or partial truth. A secret marked "in short" is shown as a brief cue; keep it by its id all the same, and the writer will get the whole secret.
+- When someone lies or deflects about a kept secret and someone present could see through it, give the person reading them a check with the skill that fits. If a character is reading the speaker, set who to that character's id. Simply asking a question does not make the player the one reading the speaker. Put the check id in needs on the reader's move that sees through the dodge. They can still question the answer or show distrust without that move. Success lets them recognize the dodge, not learn the secret itself. Example: the player asks a question, Ada dodges, and Ben studies Ada. Set player_action.uncertain to false. Give the check id read-ada to who: ben. Leave needs blank on Ada's dodge. Put needs: read-ada on Ben's move where he realizes Ada dodged.
+- moves: the conversation in order, at most 5. who: a speaker. answers: "player", or the number of an earlier move (1 is the first). move: one of answer, ask, push back, dodge, offer, refuse, concede, reveal, agree, warn, explain. uses: ids of facts the line may draw on, if it needs any: a pool to pick from, not a list to recite. Plenty of lines need none. A speaker can use only their own facts, the place's, and facts already said on screen. new: anything the line needs that no fact holds (a price, a time, a plan), in at most 25 plain words; never a line of dialogue. needs: the id of a check the move depends on; it happens only if the check succeeds.
+- A move answers the move before it, or the player. A speaker can have two moves when someone answers them.
+- framing: only when it matters, how a speaker colours what they say about the world (e.g. "bitter, street-level view").
+- lore: at most 3 facts of world lore the writer may draw on this turn, when the conversation turns to the world; usually none. entry: the [id] of a lore entry given above. line: the fact in plain words, at most 30, never dialogue. An insider entry needs who: a speaker it says knows it. A lore line is something to draw on, not a line to say.
+- Don't repeat a fact already said unless someone asks again. A question asked and not answered gets an answer or a visible dodge.
+- change: what is different at the end of this turn: something decided, conceded, refused, revealed or learned. A check result that matters changes it.
+- reactions: everyone else present: silent, one line each (a look, a gesture, a move).
+- walk_ons: only when the player speaks to them, or they have news that changes things.
+- texture: at most one detail from the location, as a plain fact, or none.
+- Quiet characters are listed with what they care about: if the conversation touches it, they have something to say.
+- leaves: characters who walk out. end_scene: true only at a natural close.
+- Never decide, say or do anything for the player.
+
+# World: Testhold
+Testhold is a small walled town of two wards. The Guild runs the yard where goods change hands.
+What any local knows:
+- The Upper Ward has clean streets and long memories.
+- The Lower Ward is mud, markets and carts.
+- The Guild runs the yard and counts every crate that passes.
+- The Ward Watch keeps order in the wards, when it's awake.
+- People pay in pennies.
+
+# Tone
+Plain and brisk.
+
+# Location: The Guild Yard (The Lower Ward, east gate)
+A muddy yard of crates and carts behind the Guild hall.
+Details: stacked crates; a cart with a broken wheel; a gate creaking; wet straw
+
+# Lore of this place and the people here (background, not things to recite)
+## The Guild Yard [location.lower.east-gate.the-yard]
+Crates stand three high in the Guild Yard; a cart with a broken wheel has been there since last winter.
+## East Gate [location.lower.east-gate]
+Carts queue at East Gate from dawn, and the Guild counts every one of them.
+## The Lower Ward [location.lower]
+The Lower Ward floods every spring. Most of Testhold works here and complains about the mud.
+## The Guild [faction.guild]
+The Guild owns the yard, sets the cart fees and keeps the tallies. Everyone in the Lower Ward pays it something.
+## How the tallies work [faction.guild.tallies] (insider knowledge: only Mara, Tobin here know this)
+Every tally is rounded up a crate or two. Porters see it at the gate; members are told to call it spoilage.
+## Automaton culture [species.automaton]
+Automatons often take night work, and many keep to themselves. These are tendencies, not rules.
+
+# Walk-ons
+- the gate clerk (Pell) [id: clerk]: person; thin, ink on his cuffs; bored; logs who comes in
+
+# The player: Kit (person, they/them)
+adult, travel-worn. A newcomer looking for work.
+
+# Characters present
+## Mara Quill [id: mara] — companion, person, she/her
+Role: Guild tally-keeper who knows everyone in the yard
+Personality: Precise, wry, quietly kind; keeps lists of everything.
+With others: With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
+Agenda: Become the Guild's chief clerk. Tonight: Find out who keeps skimming the tallies
+Contradictions: Values honesty, and keeps two sets of books
+Mood now: sharp. Comfort 2/5.
+Knows:
+- [mara.k1] Tobin was in the yard after closing
+Values: likes honesty
+Secret [mara.two-books]: Mara's part: she keeps the second ledger. A second ledger records what the yard really takes in. It is kept in the tally office, under the floor. How Mara feels about it: would rather lose her post than see it found. Tell: Gives exact numbers.
+Lying tell: Gives exact numbers
+Toward the player: warmth 10, bond 8 (0–20)
+Toward others here: Tobin: known (warmth 9, bond 4 (0–20))
+
+## Tobin [id: tobin] — recurring, automaton, he/him
+Role: Night porter in the yard
+Personality: Slow, polite, literal; hums when nervous.
+With others: With strangers Tobin is shy; with friends he talks about the yard horses.
+Agenda: Earn his own key to the gate. Tonight: Keep anyone from asking about last night
+Contradictions: Never lies, and avoids every question
+Mood now: torn. Comfort 3/5.
+Secret [tobin.after-closing]: Tobin let someone into the yard after closing. Tell: Hums.
+Lying tell: Hums
+Toward the player: warmth 6, bond 3 (0–20)
+----- user -----
+# Last turns
+Kit: Who was in the yard last night?
+The gate creaks somewhere behind the crates.
+Tobin: "The horses were restless. I sang to them."
+Mara: "You were here after closing, Tobin. I saw the lamp."
+
+Kit: I'm not the Watch. Tell me who you let into the yard after closing, and I'll keep it quiet.
+Tobin hums, then stops himself.
+Tobin: "Someone with a Guild seal knocked. I couldn't say no to the seal."
+Mara's pen stops over the tally.
+
+# Already said on screen (anyone present can use these)
+- [mara.k1] Tobin was in the yard after closing
+- [said.1] The Guild docks a week of pay for a late gate.
+- [said.2] The gate stood open until ten.
+- [said.3] Someone with a Guild seal knocked after closing.
+
+# Turns since each last spoke
+mara: 1, tobin: 0
+
+# Pressure now
+mara: keen, tobin: keen
+
+# Lore that has come up (background, not things to recite)
+## The Ward Watch [faction.watch]
+The Ward Watch walks the wards in pairs and resents how much the Guild charges for everything.
+
+# Official stances between the factions here (individuals feel as their sheets say)
+- The Ward Watch toward The Guild: sour
+
+# The player says or does
+Whose seal was it?
+
+Return the JSON plan.
+
+===== turn 3: writer =====
+----- system -----
+You write one turn of a visual-novel RPG scene from a director's plan: the conversation and what happens.
+
+How it should read:
+- People talk like people: complete, plain sentences that someone hearing them for the first time can follow.
+- Each line answers the line before it: what that person actually said and meant. A question gets an answer, or a dodge the reader can see, in its own terms.
+- People are in the moment. Their aims and secrets show in what they choose, avoid or notice, rarely in what they say outright.
+- A move's facts are there to draw on if the line needs them, never to recite. A line can bring nothing new; what matters is that it answers. A fact marked new hasn't been said to the player yet: if it's used, say what it is.
+- Each character sounds like their voice card. The card wins over everything else.
+- Narration only for what happens: an action that matters, a reaction, at most one detail of the place. Show what can be seen; never write the plan's notes out as prose.
+- No sayings, maxims or riddles in place of an answer. A comparison only when it makes something clearer.
+- The player is "you", in the present tense. A check result for the player is what you notice, manage or fail to.
+
+Too clipped: Ada: "Mill. Bell's at six. Gate's a gate."
+Better: Ada: "I work the night line at the mill, and the bell goes at six. If I'm not through that gate by then, I lose the shift."
+
+Tone:
+Plain and brisk.
+
+Names in this world (for groups and places, use only these or a plain description): Pennies; The Guild; the hall; The Night Shift; The Ward Watch; the watch; East Gate; The Guild Yard; The Lower Ward; The Upper Ward.
+
+Output format, nothing else:
+- One beat per line: a dialogue beat, Name: "spoken words" (first name; only the words said), or a narration beat, NARRATION: … (everything that isn't spoken; a character's action names them).
+- Each move is one dialogue beat by its speaker, in the order given. Narration goes between them only when something happens.
+- 4–8 beats, each under 40 words.
+- Only the speakers and planned walk-ons speak. Everyone else stays silent: no quoted or reported speech.
+- Hidden tags at the end, one per line: [Name: EXPRESSION word] for each speaker; [Name: COMFORT 1-5 reason] when someone's comfort changes; [Name: MOOD words] when a mood shifts; [LEAVES: Name] for a planned departure; [END SCENE] only if the plan ends the scene.
+- Never write the player's words, choices, thoughts or actions beyond what their input stated.
+- Honor every check result exactly: a failed roll means it does not happen.
+
+The player is Kit (they/them), addressed as "you".
+
+## Mara
+With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
+
+### Mara's voice
+Rhythm: Short, exact sentences
+Vocabulary: Ledger words
+Words they might use, rarely: by the book
+Sample lines: "That doesn't add up." "Count it again."
+When angry: Lists your mistakes. Warm: Rounds in your favor. Lying: Gives exact numbers.
+----- user -----
+# Where you are
+The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
+
+# What the player has been told this scene
+- Tobin was in the yard after closing
+- The Guild docks a week of pay for a late gate.
+- The gate stood open until ten.
+- Someone with a Guild seal knocked after closing.
+
+# Last turns
+Kit: Who was in the yard last night?
+The gate creaks somewhere behind the crates.
+Tobin: "The horses were restless. I sang to them."
+Mara: "You were here after closing, Tobin. I saw the lamp."
+
+Kit: I'm not the Watch. Tell me who you let into the yard after closing, and I'll keep it quiet.
+Tobin hums, then stops himself.
+Tobin: "Someone with a Guild seal knocked. I couldn't say no to the seal."
+Mara's pen stops over the tally.
+
+# The player says or does
+Whose seal was it?
+
+# Who speaks
+- Mara: in this exchange, narrow it down without naming herself. Mood: careful. Tonight's aim drives what they do: Find out who keeps skimming the tallies.
+
+# The conversation, in order
+1. Mara, answering the player: answer (may draw on: Only clerks carry Guild seals. [new to the player])
+
+# By the end of the turn
+The list of suspects is short.
+
+# Also present, silent
+- Tobin: looks at the ground
+
+# A detail of the place, if it fits
+stacked crates
+
+# Used in the last turns (don't repeat)
+- Tobin: hums, then stops himself
+
+Write the beats.
+
+===== turn 3: rewrite =====
+----- system -----
+You write one turn of a visual-novel RPG scene from a director's plan: the conversation and what happens.
+
+How it should read:
+- People talk like people: complete, plain sentences that someone hearing them for the first time can follow.
+- Each line answers the line before it: what that person actually said and meant. A question gets an answer, or a dodge the reader can see, in its own terms.
+- People are in the moment. Their aims and secrets show in what they choose, avoid or notice, rarely in what they say outright.
+- A move's facts are there to draw on if the line needs them, never to recite. A line can bring nothing new; what matters is that it answers. A fact marked new hasn't been said to the player yet: if it's used, say what it is.
+- Each character sounds like their voice card. The card wins over everything else.
+- Narration only for what happens: an action that matters, a reaction, at most one detail of the place. Show what can be seen; never write the plan's notes out as prose.
+- No sayings, maxims or riddles in place of an answer. A comparison only when it makes something clearer.
+- The player is "you", in the present tense. A check result for the player is what you notice, manage or fail to.
+
+Too clipped: Ada: "Mill. Bell's at six. Gate's a gate."
+Better: Ada: "I work the night line at the mill, and the bell goes at six. If I'm not through that gate by then, I lose the shift."
+
+Tone:
+Plain and brisk.
+
+Names in this world (for groups and places, use only these or a plain description): Pennies; The Guild; the hall; The Night Shift; The Ward Watch; the watch; East Gate; The Guild Yard; The Lower Ward; The Upper Ward.
+
+Output format, nothing else:
+- One beat per line: a dialogue beat, Name: "spoken words" (first name; only the words said), or a narration beat, NARRATION: … (everything that isn't spoken; a character's action names them).
+- Each move is one dialogue beat by its speaker, in the order given. Narration goes between them only when something happens.
+- 4–8 beats, each under 40 words.
+- Only the speakers and planned walk-ons speak. Everyone else stays silent: no quoted or reported speech.
+- Hidden tags at the end, one per line: [Name: EXPRESSION word] for each speaker; [Name: COMFORT 1-5 reason] when someone's comfort changes; [Name: MOOD words] when a mood shifts; [LEAVES: Name] for a planned departure; [END SCENE] only if the plan ends the scene.
+- Never write the player's words, choices, thoughts or actions beyond what their input stated.
+- Honor every check result exactly: a failed roll means it does not happen.
+
+The player is Kit (they/them), addressed as "you".
+
+## Mara
+With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
+
+### Mara's voice
+Rhythm: Short, exact sentences
+Vocabulary: Ledger words
+Words they might use, rarely: by the book
+Sample lines: "That doesn't add up." "Count it again."
+When angry: Lists your mistakes. Warm: Rounds in your favor. Lying: Gives exact numbers.
+----- user -----
+# Where you are
+The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
+
+# What the player has been told this scene
+- Tobin was in the yard after closing
+- The Guild docks a week of pay for a late gate.
+- The gate stood open until ten.
+- Someone with a Guild seal knocked after closing.
+
+# Last turns
+Kit: Who was in the yard last night?
+The gate creaks somewhere behind the crates.
+Tobin: "The horses were restless. I sang to them."
+Mara: "You were here after closing, Tobin. I saw the lamp."
+
+Kit: I'm not the Watch. Tell me who you let into the yard after closing, and I'll keep it quiet.
+Tobin hums, then stops himself.
+Tobin: "Someone with a Guild seal knocked. I couldn't say no to the seal."
+Mara's pen stops over the tally.
+
+# The player says or does
+Whose seal was it?
+
+# Who speaks
+- Mara: in this exchange, narrow it down without naming herself. Mood: careful. Tonight's aim drives what they do: Find out who keeps skimming the tallies.
+
+# The conversation, in order
+1. Mara, answering the player: answer (may draw on: Only clerks carry Guild seals. [new to the player])
+
+# By the end of the turn
+The list of suspects is short.
+
+# Also present, silent
+- Tobin: looks at the ground
+
+# A detail of the place, if it fits
+stacked crates
+
+# Used in the last turns (don't repeat)
+- Tobin: hums, then stops himself
+
+Write the beats.
+
+# Your draft
+Mara: "Only clerks carry Guild seals. That makes it six people."
+Tobin: "Seven, counting Pell."
+[Tobin: MOOD rattled]
+[Tobin: COMFORT 1 he said too much]
+[Mara: EXPRESSION thoughtful]
+
+# Fix these, change nothing else, and return the whole turn in the same format
+- Beat 2: Tobin was not planned to speak. Show them only through a reaction in narration.
+
+===== turn 4: director =====
+----- system -----
+You are the director of a visual-novel RPG scene. You don't write prose or dialogue. You decide what happens this turn and return JSON; a writer turns it into the scene.
+
+Return only this JSON object:
+{
+  "player_action": {"doing", "uncertain"},
+  "checks": [{"id","who","skill","difficulty","stakes","assist","edge","edge_reason"}],
+  "speakers": [{"id","goal","mood","pressure","keeps","touched","approach","framing"}],
+  "moves": [{"who","answers","move","uses","new","needs"}],
+  "lore": [{"entry","who","line"}],
+  "change": "...",
+  "reactions": [{"id","beat"}],
+  "walk_ons": [{"id","line"}],
+  "texture": [], "avoid": [], "leaves": [], "end_scene": false
+}
+
+- The player leads. Start from what the player just said or did: move 1 answers it, in its own terms. A character's own aims come in after that, or in a later turn, unless something urgent cuts in.
+- player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking and asking are not uncertain.
+- checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim. stakes says what success means. assist: a character present who helps.
+- People are in the moment. What they say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line.
+- speakers: at most 3 characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone. mood: how what just happened lands on them.
+- pressure: how hard their aim for tonight (on their sheet) presses on them right now, one of: idle, keen, driven (weakest first). Most of the time it is idle. It rises when time runs short or events push, and moves at most one step a turn.
+- keeps: ids of their own secrets, only when what was just said or done touches one; touched: the words that touched it, as said. Most turns nobody keeps anything. approach: lie, deflect or partial truth. A secret marked "in short" is shown as a brief cue; keep it by its id all the same, and the writer will get the whole secret.
+- When someone lies or deflects about a kept secret and someone present could see through it, give the person reading them a check with the skill that fits. If a character is reading the speaker, set who to that character's id. Simply asking a question does not make the player the one reading the speaker. Put the check id in needs on the reader's move that sees through the dodge. They can still question the answer or show distrust without that move. Success lets them recognize the dodge, not learn the secret itself. Example: the player asks a question, Ada dodges, and Ben studies Ada. Set player_action.uncertain to false. Give the check id read-ada to who: ben. Leave needs blank on Ada's dodge. Put needs: read-ada on Ben's move where he realizes Ada dodged.
+- moves: the conversation in order, at most 5. who: a speaker. answers: "player", or the number of an earlier move (1 is the first). move: one of answer, ask, push back, dodge, offer, refuse, concede, reveal, agree, warn, explain. uses: ids of facts the line may draw on, if it needs any: a pool to pick from, not a list to recite. Plenty of lines need none. A speaker can use only their own facts, the place's, and facts already said on screen. new: anything the line needs that no fact holds (a price, a time, a plan), in at most 25 plain words; never a line of dialogue. needs: the id of a check the move depends on; it happens only if the check succeeds.
+- A move answers the move before it, or the player. A speaker can have two moves when someone answers them.
+- framing: only when it matters, how a speaker colours what they say about the world (e.g. "bitter, street-level view").
+- lore: at most 3 facts of world lore the writer may draw on this turn, when the conversation turns to the world; usually none. entry: the [id] of a lore entry given above. line: the fact in plain words, at most 30, never dialogue. An insider entry needs who: a speaker it says knows it. A lore line is something to draw on, not a line to say.
+- Don't repeat a fact already said unless someone asks again. A question asked and not answered gets an answer or a visible dodge.
+- change: what is different at the end of this turn: something decided, conceded, refused, revealed or learned. A check result that matters changes it.
+- reactions: everyone else present: silent, one line each (a look, a gesture, a move).
+- walk_ons: only when the player speaks to them, or they have news that changes things.
+- texture: at most one detail from the location, as a plain fact, or none.
+- Quiet characters are listed with what they care about: if the conversation touches it, they have something to say.
+- leaves: characters who walk out. end_scene: true only at a natural close.
+- Never decide, say or do anything for the player.
+
+# World: Testhold
+Testhold is a small walled town of two wards. The Guild runs the yard where goods change hands.
+What any local knows:
+- The Upper Ward has clean streets and long memories.
+- The Lower Ward is mud, markets and carts.
+- The Guild runs the yard and counts every crate that passes.
+- The Ward Watch keeps order in the wards, when it's awake.
+- People pay in pennies.
+
+# Tone
+Plain and brisk.
+
+# Location: The Guild Yard (The Lower Ward, east gate)
+A muddy yard of crates and carts behind the Guild hall.
+Details: stacked crates; a cart with a broken wheel; a gate creaking; wet straw
+
+# Lore of this place and the people here (background, not things to recite)
+## The Guild Yard [location.lower.east-gate.the-yard]
+Crates stand three high in the Guild Yard; a cart with a broken wheel has been there since last winter.
+## East Gate [location.lower.east-gate]
+Carts queue at East Gate from dawn, and the Guild counts every one of them.
+## The Lower Ward [location.lower]
+The Lower Ward floods every spring. Most of Testhold works here and complains about the mud.
+## The Guild [faction.guild]
+The Guild owns the yard, sets the cart fees and keeps the tallies. Everyone in the Lower Ward pays it something.
+## How the tallies work [faction.guild.tallies] (insider knowledge: only Mara, Tobin here know this)
+Every tally is rounded up a crate or two. Porters see it at the gate; members are told to call it spoilage.
+## Automaton culture [species.automaton]
+Automatons often take night work, and many keep to themselves. These are tendencies, not rules.
+
+# Walk-ons
+- the gate clerk (Pell) [id: clerk]: person; thin, ink on his cuffs; bored; logs who comes in
+
+# The player: Kit (person, they/them)
+adult, travel-worn. A newcomer looking for work.
+
+# Characters present
+## Mara Quill [id: mara] — companion, person, she/her
+Role: Guild tally-keeper who knows everyone in the yard
+Personality: Precise, wry, quietly kind; keeps lists of everything.
+With others: With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
+Agenda: Become the Guild's chief clerk. Tonight: Find out who keeps skimming the tallies
+Contradictions: Values honesty, and keeps two sets of books
+Mood now: careful. Comfort 2/5.
+Knows:
+- [mara.k1] Tobin was in the yard after closing
+Values: likes honesty
+Secret [mara.two-books]: Mara's part: she keeps the second ledger. A second ledger records what the yard really takes in. It is kept in the tally office, under the floor. How Mara feels about it: would rather lose her post than see it found. Tell: Gives exact numbers.
+Lying tell: Gives exact numbers
+Toward the player: warmth 10, bond 8 (0–20)
+Toward others here: Tobin: known (warmth 9, bond 4 (0–20))
+
+## Tobin [id: tobin] — recurring, automaton, he/him
+Role: Night porter in the yard
+Personality: Slow, polite, literal; hums when nervous.
+With others: With strangers Tobin is shy; with friends he talks about the yard horses.
+Agenda: Earn his own key to the gate. Tonight: Keep anyone from asking about last night
+Contradictions: Never lies, and avoids every question
+Mood now: rattled. Comfort 1/5.
+Secret [tobin.after-closing] (in short): Tobin let someone into the yard after closing.
+Lying tell: Hums
+Toward the player: warmth 6, bond 3 (0–20)
+----- user -----
+# Last turns
+Kit: Who was in the yard last night?
+The gate creaks somewhere behind the crates.
+Tobin: "The horses were restless. I sang to them."
+Mara: "You were here after closing, Tobin. I saw the lamp."
+
+Kit: I'm not the Watch. Tell me who you let into the yard after closing, and I'll keep it quiet.
+Tobin hums, then stops himself.
+Tobin: "Someone with a Guild seal knocked. I couldn't say no to the seal."
+Mara's pen stops over the tally.
+
+Kit: Whose seal was it?
+Mara: "Only clerks carry Guild seals. That makes it six people."
+
+# Already said on screen (anyone present can use these)
+- [mara.k1] Tobin was in the yard after closing
+- [said.1] The Guild docks a week of pay for a late gate.
+- [said.2] The gate stood open until ten.
+- [said.3] Someone with a Guild seal knocked after closing.
+- [said.4] Only clerks carry Guild seals.
+
+# Turns since each last spoke
+mara: 0, tobin: 1
+
+# Pressure now
+mara: driven, tobin: keen
+
+# Lore that has come up (background, not things to recite)
+## The Ward Watch [faction.watch]
+The Ward Watch walks the wards in pairs and resents how much the Guild charges for everything.
+
+# Official stances between the factions here (individuals feel as their sheets say)
+- The Ward Watch toward The Guild: sour
+
+# The player says or does
+Tobin, you should go before the clerk sees you.
+
+Return the JSON plan.
+
+===== turn 4: writer =====
+----- system -----
+You write one turn of a visual-novel RPG scene from a director's plan: the conversation and what happens.
+
+How it should read:
+- People talk like people: complete, plain sentences that someone hearing them for the first time can follow.
+- Each line answers the line before it: what that person actually said and meant. A question gets an answer, or a dodge the reader can see, in its own terms.
+- People are in the moment. Their aims and secrets show in what they choose, avoid or notice, rarely in what they say outright.
+- A move's facts are there to draw on if the line needs them, never to recite. A line can bring nothing new; what matters is that it answers. A fact marked new hasn't been said to the player yet: if it's used, say what it is.
+- Each character sounds like their voice card. The card wins over everything else.
+- Narration only for what happens: an action that matters, a reaction, at most one detail of the place. Show what can be seen; never write the plan's notes out as prose.
+- No sayings, maxims or riddles in place of an answer. A comparison only when it makes something clearer.
+- The player is "you", in the present tense. A check result for the player is what you notice, manage or fail to.
+
+Too clipped: Ada: "Mill. Bell's at six. Gate's a gate."
+Better: Ada: "I work the night line at the mill, and the bell goes at six. If I'm not through that gate by then, I lose the shift."
+
+Tone:
+Plain and brisk.
+
+Names in this world (for groups and places, use only these or a plain description): Pennies; The Guild; the hall; The Night Shift; The Ward Watch; the watch; East Gate; The Guild Yard; The Lower Ward; The Upper Ward.
+
+Output format, nothing else:
+- One beat per line: a dialogue beat, Name: "spoken words" (first name; only the words said), or a narration beat, NARRATION: … (everything that isn't spoken; a character's action names them).
+- Each move is one dialogue beat by its speaker, in the order given. Narration goes between them only when something happens.
+- 4–8 beats, each under 40 words.
+- Only the speakers and planned walk-ons speak. Everyone else stays silent: no quoted or reported speech.
+- Hidden tags at the end, one per line: [Name: EXPRESSION word] for each speaker; [Name: COMFORT 1-5 reason] when someone's comfort changes; [Name: MOOD words] when a mood shifts; [LEAVES: Name] for a planned departure; [END SCENE] only if the plan ends the scene.
+- Never write the player's words, choices, thoughts or actions beyond what their input stated.
+- Honor every check result exactly: a failed roll means it does not happen.
+
+The player is Kit (they/them), addressed as "you".
+
+## Tobin
+With strangers Tobin is shy; with friends he talks about the yard horses.
+
+### Tobin's voice
+Rhythm: Slow, formal
+Vocabulary: Old-fashioned
+Sample lines: "I could not say, miss."
+When angry: Goes silent. Warm: Polishes his plates. Lying: Hums.
+----- user -----
+# Where you are
+The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
+
+# What the player has been told this scene
+- Tobin was in the yard after closing
+- The Guild docks a week of pay for a late gate.
+- The gate stood open until ten.
+- Someone with a Guild seal knocked after closing.
+- Only clerks carry Guild seals.
+
+# Last turns
+Kit: Who was in the yard last night?
+The gate creaks somewhere behind the crates.
+Tobin: "The horses were restless. I sang to them."
+Mara: "You were here after closing, Tobin. I saw the lamp."
+
+Kit: I'm not the Watch. Tell me who you let into the yard after closing, and I'll keep it quiet.
+Tobin hums, then stops himself.
+Tobin: "Someone with a Guild seal knocked. I couldn't say no to the seal."
+Mara's pen stops over the tally.
+
+Kit: Whose seal was it?
+Mara: "Only clerks carry Guild seals. That makes it six people."
+
+# The player says or does
+Tobin, you should go before the clerk sees you.
+
+# Who speaks
+- Tobin: in this exchange, get out of sight. Mood: grateful.
+
+# The conversation, in order
+1. Tobin, answering the player: agree
+
+# By the end of the turn
+Tobin leaves the yard.
+
+# Also present, silent
+- Mara: watches him go
+
+# A detail of the place, if it fits
+wet straw
+
+# Used in the last turns (don't repeat)
+- Tobin: hums, then stops himself
+
+Write the beats.
+
+===== turn 5: director =====
+----- system -----
+You are the director of a visual-novel RPG scene. You don't write prose or dialogue. You decide what happens this turn and return JSON; a writer turns it into the scene.
+
+Return only this JSON object:
+{
+  "player_action": {"doing", "uncertain"},
+  "checks": [{"id","who","skill","difficulty","stakes","assist","edge","edge_reason"}],
+  "speakers": [{"id","goal","mood","pressure","keeps","touched","approach","framing"}],
+  "moves": [{"who","answers","move","uses","new","needs"}],
+  "lore": [{"entry","who","line"}],
+  "change": "...",
+  "reactions": [{"id","beat"}],
+  "walk_ons": [{"id","line"}],
+  "texture": [], "avoid": [], "leaves": [], "end_scene": false
+}
+
+- The player leads. Start from what the player just said or did: move 1 answers it, in its own terms. A character's own aims come in after that, or in a later turn, unless something urgent cuts in.
+- player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking and asking are not uncertain.
+- checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim. stakes says what success means. assist: a character present who helps.
+- People are in the moment. What they say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line.
+- speakers: at most 3 characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone. mood: how what just happened lands on them.
+- pressure: how hard their aim for tonight (on their sheet) presses on them right now, one of: idle, keen, driven (weakest first). Most of the time it is idle. It rises when time runs short or events push, and moves at most one step a turn.
+- keeps: ids of their own secrets, only when what was just said or done touches one; touched: the words that touched it, as said. Most turns nobody keeps anything. approach: lie, deflect or partial truth. A secret marked "in short" is shown as a brief cue; keep it by its id all the same, and the writer will get the whole secret.
+- When someone lies or deflects about a kept secret and someone present could see through it, give the person reading them a check with the skill that fits. If a character is reading the speaker, set who to that character's id. Simply asking a question does not make the player the one reading the speaker. Put the check id in needs on the reader's move that sees through the dodge. They can still question the answer or show distrust without that move. Success lets them recognize the dodge, not learn the secret itself. Example: the player asks a question, Ada dodges, and Ben studies Ada. Set player_action.uncertain to false. Give the check id read-ada to who: ben. Leave needs blank on Ada's dodge. Put needs: read-ada on Ben's move where he realizes Ada dodged.
+- moves: the conversation in order, at most 5. who: a speaker. answers: "player", or the number of an earlier move (1 is the first). move: one of answer, ask, push back, dodge, offer, refuse, concede, reveal, agree, warn, explain. uses: ids of facts the line may draw on, if it needs any: a pool to pick from, not a list to recite. Plenty of lines need none. A speaker can use only their own facts, the place's, and facts already said on screen. new: anything the line needs that no fact holds (a price, a time, a plan), in at most 25 plain words; never a line of dialogue. needs: the id of a check the move depends on; it happens only if the check succeeds.
+- A move answers the move before it, or the player. A speaker can have two moves when someone answers them.
+- framing: only when it matters, how a speaker colours what they say about the world (e.g. "bitter, street-level view").
+- lore: at most 3 facts of world lore the writer may draw on this turn, when the conversation turns to the world; usually none. entry: the [id] of a lore entry given above. line: the fact in plain words, at most 30, never dialogue. An insider entry needs who: a speaker it says knows it. A lore line is something to draw on, not a line to say.
+- Don't repeat a fact already said unless someone asks again. A question asked and not answered gets an answer or a visible dodge.
+- change: what is different at the end of this turn: something decided, conceded, refused, revealed or learned. A check result that matters changes it.
+- reactions: everyone else present: silent, one line each (a look, a gesture, a move).
+- walk_ons: only when the player speaks to them, or they have news that changes things.
+- texture: at most one detail from the location, as a plain fact, or none.
+- Quiet characters are listed with what they care about: if the conversation touches it, they have something to say.
+- leaves: characters who walk out. end_scene: true only at a natural close.
+- Never decide, say or do anything for the player.
+
+# World: Testhold
+Testhold is a small walled town of two wards. The Guild runs the yard where goods change hands.
+What any local knows:
+- The Upper Ward has clean streets and long memories.
+- The Lower Ward is mud, markets and carts.
+- The Guild runs the yard and counts every crate that passes.
+- The Ward Watch keeps order in the wards, when it's awake.
+- People pay in pennies.
+
+# Tone
+Plain and brisk.
+
+# Location: The Guild Yard (The Lower Ward, east gate)
+A muddy yard of crates and carts behind the Guild hall.
+Details: stacked crates; a cart with a broken wheel; a gate creaking; wet straw
+
+# Lore of this place and the people here (background, not things to recite)
+## The Guild Yard [location.lower.east-gate.the-yard]
+Crates stand three high in the Guild Yard; a cart with a broken wheel has been there since last winter.
+## East Gate [location.lower.east-gate]
+Carts queue at East Gate from dawn, and the Guild counts every one of them.
+## The Lower Ward [location.lower]
+The Lower Ward floods every spring. Most of Testhold works here and complains about the mud.
+## The Guild [faction.guild]
+The Guild owns the yard, sets the cart fees and keeps the tallies. Everyone in the Lower Ward pays it something.
+
+# Walk-ons
+- the gate clerk (Pell) [id: clerk]: person; thin, ink on his cuffs; bored; logs who comes in
+
+# The player: Kit (person, they/them)
+adult, travel-worn. A newcomer looking for work.
+
+# Characters present
+## Mara Quill [id: mara] — companion, person, she/her
+Role: Guild tally-keeper who knows everyone in the yard
+Personality: Precise, wry, quietly kind; keeps lists of everything.
+With others: With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
+Agenda: Become the Guild's chief clerk. Tonight: Find out who keeps skimming the tallies
+Contradictions: Values honesty, and keeps two sets of books
+Mood now: careful. Comfort 2/5.
+Knows:
+- [mara.k1] Tobin was in the yard after closing
+Values: likes honesty
+Secret [mara.two-books]: Mara's part: she keeps the second ledger. A second ledger records what the yard really takes in. It is kept in the tally office, under the floor. How Mara feels about it: would rather lose her post than see it found. Tell: Gives exact numbers.
+Lying tell: Gives exact numbers
+Toward the player: warmth 10, bond 8 (0–20)
+----- user -----
+# Earlier in the scene
+Kit: Who was in the yard last night?
+The gate creaks somewhere behind the crates.
+Tobin: "The horses were restless. I sang to them."
+Mara: "You were here after closing, Tobin. I saw the lamp."
+
+# Last turns
+Kit: I'm not the Watch. Tell me who you let into the yard after closing, and I'll keep it quiet.
+Tobin hums, then stops himself.
+Tobin: "Someone with a Guild seal knocked. I couldn't say no to the seal."
+Mara's pen stops over the tally.
+
+Kit: Whose seal was it?
+Mara: "Only clerks carry Guild seals. That makes it six people."
+
+Kit: Tobin, you should go before the clerk sees you.
+Tobin: "Yes. The horses need water anyway."
+Tobin ducks out through the gate.
+
+# Already said on screen (anyone present can use these)
+- [mara.k1] Tobin was in the yard after closing
+- [said.1] The Guild docks a week of pay for a late gate.
+- [said.2] The gate stood open until ten.
+- [said.3] Someone with a Guild seal knocked after closing.
+- [said.4] Only clerks carry Guild seals.
+
+# Turns since each last spoke
+mara: 1
+
+# Pressure now
+mara: driven
+
+# Lore that has come up (background, not things to recite)
+## How the tallies work [faction.guild.tallies] (insider knowledge: only Mara here knows this)
+Every tally is rounded up a crate or two. Porters see it at the gate; members are told to call it spoilage.
+## The Ward Watch [faction.watch]
+The Ward Watch walks the wards in pairs and resents how much the Guild charges for everything.
+
+# Official stances between the factions here (individuals feel as their sheets say)
+- The Ward Watch toward The Guild: sour
+
+# The player says or does
+Mara, what will you do with this?
+
+Return the JSON plan.
+
+===== turn 5: writer =====
+----- system -----
+You write one turn of a visual-novel RPG scene from a director's plan: the conversation and what happens.
+
+How it should read:
+- People talk like people: complete, plain sentences that someone hearing them for the first time can follow.
+- Each line answers the line before it: what that person actually said and meant. A question gets an answer, or a dodge the reader can see, in its own terms.
+- People are in the moment. Their aims and secrets show in what they choose, avoid or notice, rarely in what they say outright.
+- A move's facts are there to draw on if the line needs them, never to recite. A line can bring nothing new; what matters is that it answers. A fact marked new hasn't been said to the player yet: if it's used, say what it is.
+- Each character sounds like their voice card. The card wins over everything else.
+- Narration only for what happens: an action that matters, a reaction, at most one detail of the place. Show what can be seen; never write the plan's notes out as prose.
+- No sayings, maxims or riddles in place of an answer. A comparison only when it makes something clearer.
+- The player is "you", in the present tense. A check result for the player is what you notice, manage or fail to.
+
+Too clipped: Ada: "Mill. Bell's at six. Gate's a gate."
+Better: Ada: "I work the night line at the mill, and the bell goes at six. If I'm not through that gate by then, I lose the shift."
+
+Tone:
+Plain and brisk.
+
+Names in this world (for groups and places, use only these or a plain description): Pennies; The Guild; the hall; The Night Shift; The Ward Watch; the watch; East Gate; The Guild Yard; The Lower Ward; The Upper Ward.
+
+Output format, nothing else:
+- One beat per line: a dialogue beat, Name: "spoken words" (first name; only the words said), or a narration beat, NARRATION: … (everything that isn't spoken; a character's action names them).
+- Each move is one dialogue beat by its speaker, in the order given. Narration goes between them only when something happens.
+- 4–8 beats, each under 40 words.
+- Only the speakers and planned walk-ons speak. Everyone else stays silent: no quoted or reported speech.
+- Hidden tags at the end, one per line: [Name: EXPRESSION word] for each speaker; [Name: COMFORT 1-5 reason] when someone's comfort changes; [Name: MOOD words] when a mood shifts; [LEAVES: Name] for a planned departure; [END SCENE] only if the plan ends the scene.
+- Never write the player's words, choices, thoughts or actions beyond what their input stated.
+- Honor every check result exactly: a failed roll means it does not happen.
+
+The player is Kit (they/them), addressed as "you".
+
+## Mara
+With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
+
+### Mara's voice
+Rhythm: Short, exact sentences
+Vocabulary: Ledger words
+Words they might use, rarely: by the book
+Sample lines: "That doesn't add up." "Count it again."
+When angry: Lists your mistakes. Warm: Rounds in your favor. Lying: Gives exact numbers.
+----- user -----
+# Where you are
+The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
+
+# What the player has been told this scene
+- Tobin was in the yard after closing
+- The Guild docks a week of pay for a late gate.
+- The gate stood open until ten.
+- Someone with a Guild seal knocked after closing.
+- Only clerks carry Guild seals.
+
+# Earlier in the scene
+Kit: Who was in the yard last night?
+The gate creaks somewhere behind the crates.
+Tobin: "The horses were restless. I sang to them."
+Mara: "You were here after closing, Tobin. I saw the lamp."
+
+# Last turns
+Kit: I'm not the Watch. Tell me who you let into the yard after closing, and I'll keep it quiet.
+Tobin hums, then stops himself.
+Tobin: "Someone with a Guild seal knocked. I couldn't say no to the seal."
+Mara's pen stops over the tally.
+
+Kit: Whose seal was it?
+Mara: "Only clerks carry Guild seals. That makes it six people."
+
+Kit: Tobin, you should go before the clerk sees you.
+Tobin: "Yes. The horses need water anyway."
+Tobin ducks out through the gate.
+
+# The player says or does
+Mara, what will you do with this?
+
+# Who speaks
+- Mara: in this exchange, keep it quiet until she knows more. Mood: resolved. Tonight's aim drives what they do: Find out who keeps skimming the tallies.
+
+# The conversation, in order
+1. Mara, answering the player: answer (may draw on: She will check the seal log at dawn. [new to the player])
+
+# By the end of the turn
+Mara has a plan.
+
+# A detail of the place, if it fits
+stacked crates
+
+Write the beats.
+
+===== summary: mara =====
+----- system -----
+You judge what one character takes away from a scene in a visual-novel RPG. Write Mara's memory of the scene and how it changed what Mara feels.
+
+Reply with only a JSON object:
+{"memory": "...", "level": "core|normal|fleeting", "reason": "...", "warmth": "...", "bond": "...", "learned": [], "others": [{"with": "id", "warmth": "...", "bond": "...", "reason": "..."}]}
+
+- memory: one or two sentences, past tense, third person, from Mara's point of view: what Mara said, did, noticed and felt, and how Kit treated Mara. End on what stayed with Mara most.
+- level: "core" for a moment that defines them (a confession, a betrayal, a first kiss, a promise made or broken; rare), "normal" for time that meant something, "fleeting" when little happened.
+- warmth, bond: how each CHANGED toward Kit because of this scene, each one of: "colder", "same", "warmer". Meters move slowly; nothing is owed for turning up. Toward someone, warmth is how much they like the other; bond is how much they would do for the other.
+- Judge as Mara: by Mara's values, agenda and how things stood before. Values Mara likes, shown by Kit, raise regard; values Mara dislikes lower it.
+- reason: one short sentence on what moved Mara, and which way.
+- learned: ids of Mara's own secrets that Kit truly found out in this scene (said or plainly shown); [] if none.
+- others: how Mara's feelings toward Tobin [tobin] changed in this scene, same words; leave someone out if nothing changed.
+----- user -----
+About Mara (person, she/her):
+- Precise, wry, quietly kind; keeps lists of everything.
+- Wants: Become the Guild's chief clerk. Tonight: Find out who keeps skimming the tallies
+- Values: likes honesty
+- Secret [two-books]: Mara's part: she keeps the second ledger. A second ledger records what the yard really takes in. It is kept in the tally office, under the floor. How Mara feels about it: would rather lose her post than see it found.
+- Before this scene, toward Kit: warmth 10, bond 8 (0–20)
+- Toward Tobin: known; warmth 9, bond 4
+- Mood at the end: resolved; comfort 2/5.
+- Mara left before the scene was over; the memory ends with leaving.
+
+Place: The Guild Yard, east gate.
+
+The scene:
+Kit: Who was in the yard last night?
+(Mara — Notice 16 vs 13: success)
+The gate creaks somewhere behind the crates.
+Tobin: The horses were restless. I sang to them.
+Mara: You were here after closing, Tobin. I saw the lamp.
+
+Kit: I'm not the Watch. Tell me who you let into the yard after closing, and I'll keep it quiet.
+(Kit — Talk 11 vs 13: success at a cost)
+Tobin hums, then stops himself.
+Tobin: Someone with a Guild seal knocked. I couldn't say no to the seal.
+Mara's pen stops over the tally.
+
+Kit: Whose seal was it?
+Mara: Only clerks carry Guild seals. That makes it six people.
+
+Kit: Tobin, you should go before the clerk sees you.
+Tobin: Yes. The horses need water anyway.
+Tobin ducks out through the gate.
+
+Kit: Mara, what will you do with this?
+Mara closes the tally book and tucks the pen behind her ear.
+Mara: Check the seal log at dawn. Quietly, before the clerks come in.
+She glances at the gate Tobin left by.
+
+===== summary: tobin =====
+----- system -----
+You judge what one character takes away from a scene in a visual-novel RPG. Write Tobin's memory of the scene and how it changed what Tobin feels.
+
+Reply with only a JSON object:
+{"memory": "...", "level": "core|normal|fleeting", "reason": "...", "warmth": "...", "bond": "...", "learned": [], "others": [{"with": "id", "warmth": "...", "bond": "...", "reason": "..."}]}
+
+- memory: one or two sentences, past tense, third person, from Tobin's point of view: what Tobin said, did, noticed and felt, and how Kit treated Tobin. End on what stayed with Tobin most.
+- level: "core" for a moment that defines them (a confession, a betrayal, a first kiss, a promise made or broken; rare), "normal" for time that meant something, "fleeting" when little happened.
+- warmth, bond: how each CHANGED toward Kit because of this scene, each one of: "colder", "same", "warmer". Meters move slowly; nothing is owed for turning up. Toward someone, warmth is how much they like the other; bond is how much they would do for the other.
+- Judge as Tobin: by Tobin's values, agenda and how things stood before. Values Tobin likes, shown by Kit, raise regard; values Tobin dislikes lower it.
+- reason: one short sentence on what moved Tobin, and which way.
+- learned: ids of Tobin's own secrets that Kit truly found out in this scene (said or plainly shown); [] if none.
+- others: how Tobin's feelings toward Mara [mara] changed in this scene, same words; leave someone out if nothing changed.
+----- user -----
+About Tobin (automaton, he/him):
+- Slow, polite, literal; hums when nervous.
+- Wants: Earn his own key to the gate. Tonight: Keep anyone from asking about last night
+- Secret [after-closing]: Tobin let someone into the yard after closing.
+- Before this scene, toward Kit: warmth 6, bond 3 (0–20)
+- Mood at the end: grateful; comfort 1/5.
+- Tobin left before the scene was over; the memory ends with leaving.
+
+Place: The Guild Yard, east gate.
+
+The scene:
+Kit: Who was in the yard last night?
+(Mara — Notice 16 vs 13: success)
+The gate creaks somewhere behind the crates.
+Tobin: The horses were restless. I sang to them.
+Mara: You were here after closing, Tobin. I saw the lamp.
+
+Kit: I'm not the Watch. Tell me who you let into the yard after closing, and I'll keep it quiet.
+(Kit — Talk 11 vs 13: success at a cost)
+Tobin hums, then stops himself.
+Tobin: Someone with a Guild seal knocked. I couldn't say no to the seal.
+Mara's pen stops over the tally.
+
+Kit: Whose seal was it?
+Mara: Only clerks carry Guild seals. That makes it six people.
+
+Kit: Tobin, you should go before the clerk sees you.
+Tobin: Yes. The horses need water anyway.
+Tobin ducks out through the gate.
+
+Kit: Mara, what will you do with this?
+Mara closes the tally book and tucks the pen behind her ear.
+Mara: Check the seal log at dawn. Quietly, before the clerks come in.
+She glances at the gate Tobin left by.
