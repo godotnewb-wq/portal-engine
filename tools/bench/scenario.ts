@@ -2,7 +2,7 @@ import { existsSync, readdirSync, readFileSync } from 'node:fs'
 import { basename, join } from 'node:path'
 import { z } from 'zod'
 import { IdSchema } from '@engine/core'
-import { MetersSchema } from '@engine/characters'
+import { FeelingWordsSchema, feelingProblem, MetersSchema, readFeeling, type Feeling } from '@engine/characters'
 import type { GameState } from '@engine/state'
 import type { Pack } from '@engine/pack'
 import { createInitialState, startScene, TurnSchema } from '@engine/state'
@@ -27,8 +27,8 @@ export const ScenarioSchema = z.object({
   forceNatural: z.number().int().min(1).max(20).optional(),
   /** Starting feelings toward the player, overriding the character files. */
   meters: z.record(IdSchema, MetersSchema).default({}),
-  /** Starting moods, overriding the character files. */
-  moods: z.record(IdSchema, z.string()).default({}),
+  /** Starting moods, overriding the character files: a feeling in the ruleset's words, with words for it or a reason (milestone 4b). */
+  moods: z.record(IdSchema, FeelingWordsSchema.extend({ text: z.string().min(1).optional(), reason: z.string().min(1).optional() })).default({}),
   /** Starting comfort (1–5), overriding the default. */
   comfort: z.record(IdSchema, z.number().int().min(1).max(5)).default({}),
   /**
@@ -66,6 +66,10 @@ export function scenarioProblems(content: Pack, scenario: Scenario): string[] {
   for (const id of [...scenario.cast, ...Object.keys(scenario.meters), ...Object.keys(scenario.moods)]) {
     if (!content.characters.some((c) => c.id === id)) problems.push(`unknown character "${id}"`)
   }
+  for (const [id, m] of Object.entries(scenario.moods)) {
+    const problem = feelingProblem(content.ruleset, m)
+    if (problem) problems.push(`${id}'s mood: ${problem}`)
+  }
   const expected = scenario.expectedCheck
   if (expected) {
     if (expected.turn > scenario.turns.length) problems.push(`expected check is outside the scripted turns (${expected.turn})`)
@@ -87,9 +91,13 @@ export function scenarioState(content: Pack, scenario: Scenario): GameState {
     .map((t) => turnText(content, state.player.name, t))
     .join('\n\n')
     .slice(-SUMMARY_CHARS)
+  const moods = Object.fromEntries(Object.entries(scenario.moods).flatMap(([id, m]): [string, Feeling][] => {
+    const read = readFeeling(content.ruleset, m)
+    return 'feeling' in read ? [[id, { ...read.feeling, ...(m.text && { text: m.text }) }]] : []
+  }))
   return {
     ...state,
     time: state.time + turns.length * MINUTES_PER_TURN,
-    scene: { ...state.scene!, turns, summary, moods: { ...state.scene!.moods, ...scenario.moods }, comfort: { ...state.scene!.comfort, ...scenario.comfort } }
+    scene: { ...state.scene!, turns, summary, moods: { ...state.scene!.moods, ...moods }, comfort: { ...state.scene!.comfort, ...scenario.comfort } }
   }
 }

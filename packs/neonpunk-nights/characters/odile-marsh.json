@@ -102,7 +102,7 @@
       ]
     }
   ],
-  "mood": "busy, loud, sweating at the furnace",
+  "mood": { "text": "busy, loud, sweating at the furnace", "shade": "irritation", "intensity": 1 },
   "knowledge": [
     "Rafe Halloway is the best apprentice she's had in twenty years",
     "Small furnaces on the Row are closing because of the Grid's prices",

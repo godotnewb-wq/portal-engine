@@ -89,6 +89,20 @@
       ]
     },
     "masking": { "levels": ["bare", "thin", "thick"], "axis": "guard", "byStage": { "open": "bare", "level": "thin", "closed": "thick" } },
+    "visibility": {
+      "guarded": -1,
+      "trusted": 1,
+      "trust": 4,
+      "trustMeter": "bond",
+      "guardedTags": ["foe"],
+      "hostileStances": 2,
+      "bands": [
+        { "word": "hidden", "max": 0, "shows": "Nothing shows" },
+        { "word": "leaking", "max": 1, "shows": "It leaks a little" },
+        { "word": "plain", "shows": "It is plain to see" }
+      ]
+    },
+    "reading": { "skill": "notice", "difficulty": { "bare": "routine", "thin": "tough", "thick": "grim" }, "harder": ["closed"] },
     "ladder": [
       { "word": "any" },
       { "word": "cool", "min": -4 },

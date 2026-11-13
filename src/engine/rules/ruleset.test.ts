@@ -33,6 +33,13 @@ describe('meter bands', () => {
   })
 })
 
+describe('rulesetProblems: reading people (milestone 4b)', () => {
+  it('needs the reading skill and its difficulty words to be the ruleset’s', () => {
+    const reading = { ...R.people.reading, skill: 'juggle', difficulty: { ...R.people.reading.difficulty, thick: 'brutal' } }
+    expect(rulesetProblems({ ...R, people: { ...R.people, reading } })).toEqual(['people.reading.skill names unknown skill "juggle"', 'people.reading.difficulty gives "thick" the unknown difficulty "brutal"'])
+  })
+})
+
 describe('rulesetProblems: meters', () => {
   const withMeters = (meters: Partial<Ruleset['meters']>, start = R.relations.start): Ruleset => ({ ...R, meters: { ...R.meters, ...meters }, relations: { start } })
 

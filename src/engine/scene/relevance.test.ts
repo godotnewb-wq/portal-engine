@@ -59,8 +59,8 @@ describe('an aim’s pressure', () => {
     expect(p.speakers.map((s) => s.pressure)).toEqual(['keen', 'idle'])
     expect(corrections).toContain("tobin's pressure moved one step, to keen")
     const brief = buildWriterPrompt(fixture, state, p, ASK).user
-    expect(brief).toMatch(/- Tobin: in this exchange, get it dropped\. Mood: uneasy\. Tonight's aim is on their mind and may come up if it fits: Keep anyone from asking about last night\./)
-    expect(brief).toMatch(/- Mara: in this exchange, catch him out\. Mood: sharp\.\n/)
+    expect(brief).toMatch(/- Tobin: in this exchange, get it dropped\. Feels sore \(sad\)\. Nothing shows\. Tonight's aim is on their mind and may come up if it fits: Keep anyone from asking about last night\./)
+    expect(brief).toMatch(/- Mara: in this exchange, catch him out\. Feels glum\. Nothing shows\.\n/)
     const next = applyTurn(fixture, state, { id: 't1', input: ASK, plan: p, beats: [], tags: parseReply('', []).tags, dice: state.dice })
     expect(next.scene!.pressures).toEqual({ tobin: 1, mara: 0 })
   })

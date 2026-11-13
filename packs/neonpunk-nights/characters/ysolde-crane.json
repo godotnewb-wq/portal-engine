@@ -102,7 +102,7 @@
       ]
     }
   ],
-  "mood": "watchful, courteous, counting cinders",
+  "mood": { "text": "watchful, courteous, counting cinders", "shade": "worry", "intensity": 1 },
   "knowledge": [
     "The Drowned Saints skim raw Aether from Pump Station Nine's flooded lower level at low tide",
     "Grid surveyor Corvin Hale has been down to Pump Station Nine three times this month",

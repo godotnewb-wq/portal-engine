@@ -2,7 +2,7 @@ import type { Beat } from '@engine/state'
 import type { WitnessReport } from '@engine/relationships'
 import type { Meters } from '@engine/characters'
 import type { Pack } from '@engine/pack'
-import { lineText, planLines, type TurnTrace } from '@engine/scene'
+import { lineText, moodOf, planLines, type TurnTrace } from '@engine/scene'
 import { callsOf, metricInputOf, nameIn, type BenchRun, type ScenarioRun } from './run'
 import { comparability } from './inputs'
 import { compareMetrics, metrics, renderMetrics } from '../logs/metrics'
@@ -116,7 +116,7 @@ function scenarioSection(names: Names, run: ScenarioRun, repeats: boolean, budge
     const exchange = planLines(p)
     const plan = [
       ...exchange.map((_, i) => `- line ${lineText(exchange, i, name)}`),
-      ...p.speakers.map((s) => `- **${name(s.id)}** speaks: ${s.intent}${s.mood ? ` *(mood: ${s.mood})*` : ''}${s.hiding ? ` — hiding: ${s.hiding} (${s.approach ?? '?'})` : ''}`),
+      ...p.speakers.map((s) => `- **${name(s.id)}** speaks: ${s.intent}${moodOf(s) ? ` *(feels: ${moodOf(s)})*` : ''}${s.hiding ? ` — hiding: ${s.hiding} (${s.approach ?? '?'})` : ''}`),
       ...p.reactions.map((r) => `- ${name(r.id)} reacts: ${r.beat}`),
       ...checkLines(t).map((c) => `- 🎲 ${c}`),
       p.texture.length > 0 ? `- Texture: ${p.texture.join('; ')}` : '',

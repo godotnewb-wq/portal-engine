@@ -107,7 +107,7 @@
       ]
     }
   ],
-  "mood": "calm, patient, listening to the wall",
+  "mood": { "text": "calm, patient, listening to the wall", "shade": "hope", "intensity": 1 },
   "knowledge": [
     "Chalked spirals mark places the Grid has surveyed; the Garden Guard is watching the Ninth Turn",
     "A few keepers cut Grid lines, and the Grid blames them for the outages it schedules too",

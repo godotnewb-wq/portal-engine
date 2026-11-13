@@ -8,7 +8,12 @@
       {
         "id": "oria-senn",
         "intent": "keep the client hidden",
-        "mood": "composed, too polished",
+        "feels": {
+          "shade": "dread",
+          "family": "fear",
+          "intensity": 3,
+          "reason": "the client must stay hidden"
+        },
         "pressure": "pressing",
         "hiding": "The 'private client' is the Aether Grid Corporation, and she owes them; this job pays down her debt.",
         "approach": "lie",
@@ -20,13 +25,24 @@
       {
         "id": "vex",
         "intent": "catch the lie",
-        "mood": "wary",
+        "feels": {
+          "shade": "irritation",
+          "family": "anger",
+          "intensity": 2,
+          "reason": "Oria is playing them"
+        },
         "pressure": "background"
       },
       {
         "id": "brask",
         "intent": "keep the peace",
-        "mood": "uneasy",
+        "feels": {
+          "shade": "worry",
+          "family": "fear",
+          "intensity": 4,
+          "reason": "the table is turning on itself",
+          "atypical": true
+        },
         "pressure": "background"
       }
     ],
@@ -50,7 +66,13 @@
     "reactions": [
       {
         "id": "kesh",
-        "beat": "watches the door"
+        "beat": "watches the door",
+        "feels": {
+          "shade": "nervousness",
+          "family": "fear",
+          "intensity": 2,
+          "reason": "raised voices"
+        }
       }
     ],
     "checks": [
@@ -399,10 +421,10 @@
     "cut": [],
     "dropped": [],
     "recurring": {
-      "vex": 365,
-      "brask": 393,
-      "oria-senn": 422,
-      "kesh": 240
+      "vex": 377,
+      "brask": 404,
+      "oria-senn": 434,
+      "kesh": 251
     }
   },
   "findings": [],
@@ -444,7 +466,6 @@
           "reason": "too loud in here"
         }
       },
-      "moods": {},
       "leaves": [],
       "ended": false
     },
@@ -464,10 +485,31 @@
     ],
     "summary": "",
     "moods": {
-      "vex": "wary",
-      "brask": "uneasy",
-      "oria-senn": "composed, too polished",
-      "kesh": "calm on the surface, counting minutes"
+      "vex": {
+        "shade": "irritation",
+        "family": "anger",
+        "intensity": 2,
+        "reason": "Oria is playing them"
+      },
+      "brask": {
+        "shade": "worry",
+        "family": "fear",
+        "intensity": 4,
+        "reason": "the table is turning on itself",
+        "atypical": true
+      },
+      "oria-senn": {
+        "shade": "dread",
+        "family": "fear",
+        "intensity": 3,
+        "reason": "the client must stay hidden"
+      },
+      "kesh": {
+        "shade": "nervousness",
+        "family": "fear",
+        "intensity": 2,
+        "reason": "raised voices"
+      }
     },
     "comfort": {
       "vex": 3,
@@ -532,7 +574,12 @@
       {
         "id": "oria-senn",
         "intent": "steer back to the fee",
-        "mood": "irritated",
+        "feels": {
+          "shade": "frustration",
+          "family": "anger",
+          "intensity": 3,
+          "reason": "they keep asking about the case"
+        },
         "pressure": "pressing",
         "hiding": "Oria's part: she is fetching the sealed case for the Grid. The sealed case the Grid wants pulled from Pump Station Nine's flooded lower level holds the station's original control core: a pre-Burn rune-key that lets whoever holds it restart the station as its legal owner. The Grid hires the job through fixers and pays far over the going rate to get it before anyone else does. Those who carry the job know what's in the case, not what the Grid means to do with it. How Oria feels about it: doesn't want to know what the Grid wants it for, and suspects anyway.",
         "approach": "deflect",
@@ -544,7 +591,6 @@
       {
         "id": "vex",
         "intent": "make Oria answer",
-        "mood": "dry",
         "pressure": "background"
       }
     ],
@@ -898,10 +944,10 @@
     "cut": [],
     "dropped": [],
     "recurring": {
-      "vex": 354,
-      "brask": 384,
-      "oria-senn": 414,
-      "kesh": 240
+      "vex": 368,
+      "brask": 398,
+      "oria-senn": 424,
+      "kesh": 244
     }
   },
   "findings": [],
@@ -926,13 +972,12 @@
     "parsed": {
       "expressions": {},
       "comfort": {},
-      "moods": {
-        "oria-senn": "irritated"
-      },
       "leaves": [],
       "ended": false
     },
-    "dropped": []
+    "dropped": [
+      "[Oria: MOOD irritated]"
+    ]
   },
   "scene": {
     "id": "scene-1200",
@@ -948,10 +993,31 @@
     ],
     "summary": "",
     "moods": {
-      "vex": "dry",
-      "brask": "uneasy",
-      "oria-senn": "irritated",
-      "kesh": "calm on the surface, counting minutes"
+      "vex": {
+        "shade": "irritation",
+        "family": "anger",
+        "intensity": 2,
+        "reason": "Oria is playing them"
+      },
+      "brask": {
+        "shade": "worry",
+        "family": "fear",
+        "intensity": 4,
+        "reason": "the table is turning on itself",
+        "atypical": true
+      },
+      "oria-senn": {
+        "shade": "frustration",
+        "family": "anger",
+        "intensity": 3,
+        "reason": "they keep asking about the case"
+      },
+      "kesh": {
+        "shade": "nervousness",
+        "family": "fear",
+        "intensity": 2,
+        "reason": "raised voices"
+      }
     },
     "comfort": {
       "vex": 3,
@@ -1013,20 +1079,31 @@
   "input": "Fine. When do we go, and what does it pay?",
   "fallback": false,
   "corrections": [
-    "oria-senn's secret isn't in play: \"when do we go\" isn't in what was just said"
+    "oria-senn's secret isn't in play: \"when do we go\" isn't in what was just said",
+    "check \"read-brask\": reading brask is moderate, not trivial, by their masking"
   ],
   "plan": {
     "speakers": [
       {
         "id": "oria-senn",
         "intent": "close the deal",
-        "mood": "relieved",
+        "feels": {
+          "shade": "relief",
+          "family": "joy",
+          "intensity": 3,
+          "reason": "the deal is close"
+        },
         "pressure": "urgent"
       },
       {
         "id": "brask",
         "intent": "raise the practical problem",
-        "mood": "worried",
+        "feels": {
+          "shade": "panic",
+          "family": "fear",
+          "intensity": 5,
+          "reason": "the lower level floods at midnight"
+        },
         "pressure": "background"
       }
     ],
@@ -1052,7 +1129,34 @@
         "beat": "stands to leave"
       }
     ],
-    "checks": [],
+    "checks": [
+      {
+        "id": "read-brask",
+        "who": "vex",
+        "skill": "empathy",
+        "difficulty": "moderate",
+        "target": "brask",
+        "stakes": "Vex sees how scared Brask really is",
+        "result": {
+          "skill": "empathy",
+          "attribute": "insight",
+          "difficulty": "moderate",
+          "dc": 15,
+          "rolls": [
+            11
+          ],
+          "natural": 11,
+          "edge": "none",
+          "modifier": 2,
+          "rank": 2,
+          "bonus": 0,
+          "total": 15,
+          "degree": "success",
+          "critical": null
+        },
+        "line": "Vex — Empathy 15 vs 15: success"
+      }
+    ],
     "walk_ons": [],
     "texture": [
       "a dead pump wheel bolted to the wall as decoration, still faintly humming"
@@ -1095,9 +1199,43 @@
       "doing": "asks when and for how much",
       "uncertain": false
     },
-    "change": "The job has a deadline: midnight."
+    "change": "The job has a deadline: midnight.",
+    "reads": [
+      {
+        "by": "vex",
+        "target": "brask",
+        "feeling": {
+          "shade": "panic",
+          "family": "fear",
+          "intensity": 5,
+          "reason": "the lower level floods at midnight"
+        }
+      }
+    ]
   },
-  "checks": [],
+  "checks": [
+    {
+      "id": "read-brask",
+      "who": "vex",
+      "skill": "empathy",
+      "attribute": "insight",
+      "difficulty": "moderate",
+      "dc": 15,
+      "rolls": [
+        11
+      ],
+      "natural": 11,
+      "edge": "none",
+      "modifier": 2,
+      "rank": 2,
+      "bonus": 0,
+      "total": 15,
+      "degree": "success",
+      "critical": null,
+      "line": "Vex — Empathy 15 vs 15: success",
+      "stakes": "Vex sees how scared Brask really is"
+    }
+  ],
   "lore": {
     "stage": [
       "background.galactic-society",
@@ -1368,10 +1506,10 @@
     "cut": [],
     "dropped": [],
     "recurring": {
-      "vex": 353,
-      "brask": 384,
-      "oria-senn": 555,
-      "kesh": 240
+      "vex": 368,
+      "brask": 398,
+      "oria-senn": 571,
+      "kesh": 244
     }
   },
   "findings": [],
@@ -1398,13 +1536,12 @@
         "oria-senn": "satisfied"
       },
       "comfort": {},
-      "moods": {
-        "brask": "worried"
-      },
       "leaves": [],
       "ended": false
     },
-    "dropped": []
+    "dropped": [
+      "[Brask: MOOD worried]"
+    ]
   },
   "scene": {
     "id": "scene-1200",
@@ -1420,10 +1557,30 @@
     ],
     "summary": "",
     "moods": {
-      "vex": "dry",
-      "brask": "worried",
-      "oria-senn": "relieved",
-      "kesh": "calm on the surface, counting minutes"
+      "vex": {
+        "shade": "irritation",
+        "family": "anger",
+        "intensity": 2,
+        "reason": "Oria is playing them"
+      },
+      "brask": {
+        "shade": "panic",
+        "family": "fear",
+        "intensity": 5,
+        "reason": "the lower level floods at midnight"
+      },
+      "oria-senn": {
+        "shade": "relief",
+        "family": "joy",
+        "intensity": 3,
+        "reason": "the deal is close"
+      },
+      "kesh": {
+        "shade": "nervousness",
+        "family": "fear",
+        "intensity": 2,
+        "reason": "raised voices"
+      }
     },
     "comfort": {
       "vex": 3,

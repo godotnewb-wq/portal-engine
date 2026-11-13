@@ -10,7 +10,12 @@
       {
         "id": "tobin",
         "intent": "change the subject",
-        "mood": "cornered",
+        "feels": {
+          "shade": "sore",
+          "family": "mad",
+          "intensity": 3,
+          "reason": "Mara is pressing him"
+        },
         "pressure": "keen",
         "hiding": "Tobin let someone into the yard after closing.",
         "approach": "deflect",
@@ -22,7 +27,12 @@
       {
         "id": "mara",
         "intent": "find out what Tobin knows",
-        "mood": "sharp",
+        "feels": {
+          "shade": "livid",
+          "family": "mad",
+          "intensity": 4,
+          "reason": "someone is skimming the tallies"
+        },
         "pressure": "keen"
       }
     ],
@@ -246,8 +256,8 @@
     "cut": [],
     "dropped": [],
     "recurring": {
-      "mara": 162,
-      "tobin": 124
+      "mara": 173,
+      "tobin": 136
     }
   },
   "findings": [],
@@ -279,13 +289,12 @@
           "reason": "the dodge bothers her"
         }
       },
-      "moods": {
-        "tobin": "cornered"
-      },
       "leaves": [],
       "ended": false
     },
-    "dropped": []
+    "dropped": [
+      "[Tobin: MOOD cornered]"
+    ]
   },
   "scene": {
     "id": "scene-1200",
@@ -299,8 +308,18 @@
     ],
     "summary": "",
     "moods": {
-      "mara": "sharp",
-      "tobin": "cornered"
+      "mara": {
+        "shade": "livid",
+        "family": "mad",
+        "intensity": 4,
+        "reason": "someone is skimming the tallies"
+      },
+      "tobin": {
+        "shade": "sore",
+        "family": "mad",
+        "intensity": 3,
+        "reason": "Mara is pressing him"
+      }
     },
     "comfort": {
       "mara": 2,
@@ -352,7 +371,12 @@
       {
         "id": "tobin",
         "intent": "decide whether to trust Kit",
-        "mood": "torn",
+        "feels": {
+          "shade": "glum",
+          "family": "sad",
+          "intensity": 3,
+          "reason": "he wants to trust Kit"
+        },
         "pressure": "keen",
         "hiding": "Tobin let someone into the yard after closing.",
         "approach": "partial truth",
@@ -582,8 +606,8 @@
     "cut": [],
     "dropped": [],
     "recurring": {
-      "mara": 160,
-      "tobin": 125
+      "mara": 175,
+      "tobin": 138
     }
   },
   "findings": [
@@ -616,7 +640,6 @@
         "tobin": "relieved"
       },
       "comfort": {},
-      "moods": {},
       "leaves": [],
       "ended": false
     },
@@ -634,8 +657,18 @@
     ],
     "summary": "",
     "moods": {
-      "mara": "sharp",
-      "tobin": "torn"
+      "mara": {
+        "shade": "livid",
+        "family": "mad",
+        "intensity": 4,
+        "reason": "someone is skimming the tallies"
+      },
+      "tobin": {
+        "shade": "glum",
+        "family": "sad",
+        "intensity": 3,
+        "reason": "he wants to trust Kit"
+      }
     },
     "comfort": {
       "mara": 2,
@@ -692,7 +725,6 @@
       {
         "id": "mara",
         "intent": "narrow it down without naming herself",
-        "mood": "careful",
         "pressure": "driven"
       }
     ],
@@ -837,8 +869,8 @@
     "cut": [],
     "dropped": [],
     "recurring": {
-      "mara": 198,
-      "tobin": 124
+      "mara": 213,
+      "tobin": 137
     }
   },
   "findings": [
@@ -881,14 +913,11 @@
           "reason": "he said too much"
         }
       },
-      "moods": {
-        "tobin": "rattled"
-      },
       "leaves": [],
       "ended": false
     },
     "dropped": [
-      "[Tobin: MOOD rattled] (salvage cut their lines)",
+      "[Tobin: MOOD rattled]",
       "[Tobin: COMFORT 1 he said too much] (salvage cut their lines)"
     ]
   },
@@ -904,8 +933,18 @@
     ],
     "summary": "",
     "moods": {
-      "mara": "careful",
-      "tobin": "torn"
+      "mara": {
+        "shade": "livid",
+        "family": "mad",
+        "intensity": 4,
+        "reason": "someone is skimming the tallies"
+      },
+      "tobin": {
+        "shade": "glum",
+        "family": "sad",
+        "intensity": 3,
+        "reason": "he wants to trust Kit"
+      }
     },
     "comfort": {
       "mara": 2,
@@ -967,7 +1006,11 @@
       {
         "id": "tobin",
         "intent": "get out of sight",
-        "mood": "grateful",
+        "feels": {
+          "shade": "jolted",
+          "family": "startled",
+          "intensity": 2
+        },
         "pressure": "idle"
       }
     ],
@@ -1133,8 +1176,8 @@
     "cut": [],
     "dropped": [],
     "recurring": {
-      "mara": 198,
-      "tobin": 123
+      "mara": 213,
+      "tobin": 137
     }
   },
   "findings": [],
@@ -1156,7 +1199,6 @@
         "tobin": "relieved"
       },
       "comfort": {},
-      "moods": {},
       "leaves": [
         "tobin"
       ],
@@ -1176,8 +1218,17 @@
     ],
     "summary": "Kit: Who was in the yard last night?\nThe gate creaks somewhere behind the crates.\nTobin: \"The horses were restless. I sang to them.\"\nMara: \"You were here after closing, Tobin. I saw the lamp.\"",
     "moods": {
-      "mara": "careful",
-      "tobin": "grateful"
+      "mara": {
+        "shade": "livid",
+        "family": "mad",
+        "intensity": 4,
+        "reason": "someone is skimming the tallies"
+      },
+      "tobin": {
+        "shade": "jolted",
+        "family": "startled",
+        "intensity": 2
+      }
     },
     "comfort": {
       "mara": 2,
@@ -1241,7 +1292,12 @@
       {
         "id": "mara",
         "intent": "keep it quiet until she knows more",
-        "mood": "resolved",
+        "feels": {
+          "shade": "sore",
+          "family": "mad",
+          "intensity": 2,
+          "reason": "she wants to know more first"
+        },
         "pressure": "driven"
       }
     ],
@@ -1384,7 +1440,7 @@
     "cut": [],
     "dropped": [],
     "recurring": {
-      "mara": 192
+      "mara": 206
     }
   },
   "findings": [],
@@ -1410,7 +1466,6 @@
         "mara": "determined"
       },
       "comfort": {},
-      "moods": {},
       "leaves": [
         "mara"
       ],
@@ -1432,8 +1487,17 @@
     ],
     "summary": "Kit: Who was in the yard last night?\nThe gate creaks somewhere behind the crates.\nTobin: \"The horses were restless. I sang to them.\"\nMara: \"You were here after closing, Tobin. I saw the lamp.\"\n\nKit: I'm not the Watch. Tell me who you let into the yard after closing, and I'll keep it quiet.\nTobin hums, then stops himself.\nTobin: \"Someone with a Guild seal knocked. I couldn't say no to the seal.\"\nMara's pen stops over the tally.",
     "moods": {
-      "mara": "resolved",
-      "tobin": "grateful"
+      "mara": {
+        "shade": "sore",
+        "family": "mad",
+        "intensity": 2,
+        "reason": "she wants to know more first"
+      },
+      "tobin": {
+        "shade": "jolted",
+        "family": "startled",
+        "intensity": 2
+      }
     },
     "comfort": {
       "mara": 2,

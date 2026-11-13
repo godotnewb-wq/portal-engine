@@ -6,9 +6,9 @@ import { GameStateSchema } from './schema'
 /**
  * Bump when the save format changes; older saves are then refused with a clear message (no backwards compatibility
  * before release). 4: signed meters, Interest for Attraction, relation notes for derived labels; 5: the `major` tier and a
- * separate party list; 6: relationship tags (all milestone 4a).
+ * separate party list; 6: relationship tags (all milestone 4a); 7: felt moods and reading results (milestone 4b).
  */
-export const SAVE_VERSION = 6
+export const SAVE_VERSION = 7
 
 /** The game's own slot: written after every turn and every scene's end, never by hand. */
 export const AUTO_SLOT_ID = 'auto'

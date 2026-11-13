@@ -15,8 +15,8 @@ const TURNS: ScriptedTurn[] = [
       player_action: { doing: 'asks who was in the yard last night', uncertain: false },
       checks: [{ id: 'read-tobin', who: 'mara', skill: 'notice', difficulty: 'tough', stakes: 'Mara sees that Tobin is dodging' }],
       speakers: [
-        { id: 'tobin', goal: 'change the subject', mood: 'cornered', pressure: 'keen', keeps: ['tobin.after-closing'], touched: 'last night', approach: 'deflect' },
-        { id: 'mara', goal: 'find out what Tobin knows', mood: 'sharp', pressure: 'keen', keeps: [], touched: '' }
+        { id: 'tobin', goal: 'change the subject', feels: { shade: 'sore', family: 'mad', intensity: 3, reason: 'Mara is pressing him' }, pressure: 'keen', keeps: ['tobin.after-closing'], touched: 'last night', approach: 'deflect' },
+        { id: 'mara', goal: 'find out what Tobin knows', feels: { shade: 'livid', intensity: 4, reason: 'someone is skimming the tallies' }, pressure: 'keen', keeps: [], touched: '' }
       ],
       moves: [
         { who: 'tobin', answers: 'player', move: 'dodge', uses: [], new: [] },
@@ -46,7 +46,7 @@ Mara: "You were here after closing, Tobin. I saw the lamp."
     plan: {
       player_action: { doing: 'persuades Tobin to name who he let in', uncertain: true },
       checks: [{ id: 'persuade-tobin', who: 'player', skill: 'talk', difficulty: 'tough', stakes: 'Tobin says who he let in' }],
-      speakers: [{ id: 'tobin', goal: 'decide whether to trust Kit', mood: 'torn', pressure: 'keen', keeps: ['tobin.after-closing'], touched: 'into the yard after closing', approach: 'partial truth' }],
+      speakers: [{ id: 'tobin', goal: 'decide whether to trust Kit', feels: { shade: 'glum', intensity: 3, reason: 'he wants to trust Kit' }, pressure: 'keen', keeps: ['tobin.after-closing'], touched: 'into the yard after closing', approach: 'partial truth' }],
       moves: [{ who: 'tobin', answers: 'player', move: 'concede', uses: [], new: ['Someone with a Guild seal knocked after closing.'], needs: 'persuade-tobin' }],
       change: 'Tobin admits he opened the gate.',
       reactions: [{ id: 'mara', beat: 'stops writing' }],
@@ -72,7 +72,7 @@ NARRATION: Mara's pen stops over the tally.
     plan: {
       player_action: { doing: 'asks whose seal it was', uncertain: false },
       checks: [],
-      speakers: [{ id: 'mara', goal: 'narrow it down without naming herself', mood: 'careful', pressure: 'driven', keeps: [], touched: '' }],
+      speakers: [{ id: 'mara', goal: 'narrow it down without naming herself', pressure: 'driven', keeps: [], touched: '' }],
       moves: [{ who: 'mara', answers: 'player', move: 'answer', uses: [], new: ['Only clerks carry Guild seals.'] }],
       change: 'The list of suspects is short.',
       reactions: [{ id: 'tobin', beat: 'looks at the ground' }],
@@ -100,7 +100,7 @@ Tobin: "Seven, counting Pell."
     plan: {
       player_action: { doing: 'tells Tobin to leave', uncertain: false },
       checks: [],
-      speakers: [{ id: 'tobin', goal: 'get out of sight', mood: 'grateful', pressure: 'idle', keeps: [], touched: '' }],
+      speakers: [{ id: 'tobin', goal: 'get out of sight', feels: { shade: 'jolted', intensity: 2 }, pressure: 'idle', keeps: [], touched: '' }],
       moves: [{ who: 'tobin', answers: 'player', move: 'agree', uses: [], new: [] }],
       change: 'Tobin leaves the yard.',
       reactions: [{ id: 'mara', beat: 'watches him go' }],
@@ -122,7 +122,7 @@ NARRATION: Tobin ducks out through the gate.
     plan: {
       player_action: { doing: 'asks Mara what she will do', uncertain: false },
       checks: [],
-      speakers: [{ id: 'mara', goal: 'keep it quiet until she knows more', mood: 'resolved', pressure: 'driven', keeps: [], touched: '' }],
+      speakers: [{ id: 'mara', goal: 'keep it quiet until she knows more', feels: { shade: 'sore', family: 'mad', intensity: 2, reason: 'she wants to know more first' }, pressure: 'driven', keeps: [], touched: '' }],
       moves: [{ who: 'mara', answers: 'player', move: 'answer', uses: [], new: ['She will check the seal log at dawn.'] }],
       change: 'Mara has a plan.',
       reactions: [],

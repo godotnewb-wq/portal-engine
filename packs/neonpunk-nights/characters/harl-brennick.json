@@ -98,7 +98,7 @@
       "days": "weekdays"
     }
   ],
-  "mood": "gruff, tired, watchful",
+  "mood": { "text": "gruff, tired, watchful", "shade": "irritation", "intensity": 1 },
   "knowledge": [
     "Somebody has been warning the Wheel clinic before planned blackouts; the timing matches the substation's schedule",
     "Teo Varrin did an unauthorized repair last month and is on a final warning; Harl wrote it as lightly as he could",

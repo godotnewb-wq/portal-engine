@@ -146,7 +146,7 @@
       "days": "weekends"
     }
   ],
-  "mood": "wary, a little bored, quietly glad of the company",
+  "mood": { "text": "wary, a little bored, quietly glad of the company", "shade": "fondness", "intensity": 1 },
   "knowledge": [
     "Oria Senn has lied to her before, smoothly, about a run that went bad; Vex didn't catch it until afterward",
     "Her old running partner Sef was stopped at a Drowned Saints checkpoint on a tip two years ago and hasn't run since",

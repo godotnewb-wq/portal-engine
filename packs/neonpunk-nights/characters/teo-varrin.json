@@ -116,7 +116,7 @@
       "days": "weekdays"
     }
   ],
-  "mood": "exhausted, guilty, half-hoping someone asks",
+  "mood": { "text": "exhausted, guilty, half-hoping someone asks", "shade": "guilt", "intensity": 3 },
   "knowledge": [
     "The stall is a grid drop, not a fault in the car",
     "A cold start from the cabin takes about five minutes and some nerve",

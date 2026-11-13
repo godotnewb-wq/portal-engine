@@ -269,6 +269,25 @@
       "axis": "composure",
       "byStage": { "unfiltered": "none", "open": "light", "balanced": "moderate", "reserved": "heavy", "masked": "heavy" }
     },
+    "visibility": {
+      "guarded": -1,
+      "trusted": 1,
+      "trust": 25,
+      "trustMeter": "trust",
+      "guardedTags": ["rival", "enemy"],
+      "hostileStances": 2,
+      "bands": [
+        { "word": "hidden", "max": 0, "shows": "Only the surface shows" },
+        { "word": "tells", "max": 1, "shows": "It shows only in small tells" },
+        { "word": "visible", "max": 2, "shows": "It shows clearly, in their own way" },
+        { "word": "overwhelmed", "shows": "It overwhelms them; the mask breaks" }
+      ]
+    },
+    "reading": {
+      "skill": "empathy",
+      "difficulty": { "none": "easy", "light": "easy", "moderate": "moderate", "heavy": "hard" },
+      "harder": ["masked"]
+    },
     "ladder": [
       { "word": "none" },
       { "word": "grudging", "min": -35 },

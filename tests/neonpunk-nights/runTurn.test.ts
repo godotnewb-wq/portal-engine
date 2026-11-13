@@ -6,7 +6,7 @@ import { runTurn, type TurnEvent, type TurnLlm } from '@engine/scene'
 
 const PLAN = JSON.stringify({
   speakers: [
-    { id: 'oria', intent: 'Deflect.', mood: 'composed, too polished', hiding: 'client is the consortium', approach: 'lie' },
+    { id: 'oria', intent: 'Deflect.', feels: { shade: 'dread', intensity: 3, reason: 'the client could come out' }, hiding: 'client is the consortium', approach: 'lie' },
     { id: 'vex', intent: 'Call out the lie if she catches it.', mood: 'wary', depends_on_check: 'vex_empathy' }
   ],
   reactions: [{ id: 'brask', beat: 'fidgets, ears flat' }],
@@ -56,8 +56,9 @@ describe('runTurn', () => {
     expect(scene.turns[0]!.speakers).toEqual(['oria-senn', 'vex'])
     expect(scene.expressions['vex']).toBe('smirk')
     expect(scene.comfort['brask']).toBe(2)
-    expect(scene.moods['oria-senn']).toBe('caught out, recalculating')
-    expect(scene.moods['vex']).toBe('wary')
+    // Felt moods come from the plan's feels; the writer's retired MOOD tag changes nothing, and Vex, given none, keeps hers.
+    expect(scene.moods['oria-senn']).toEqual({ shade: 'dread', family: 'fear', intensity: 3, reason: 'the client could come out' })
+    expect(scene.moods['vex']).toMatchObject({ shade: 'fondness', text: expect.stringMatching(/wary/) })
     expect(outcome.state.dice).not.toBe(barScene(9).dice)
     expect(GameStateSchema.parse(outcome.state)).toEqual(outcome.state)
   })

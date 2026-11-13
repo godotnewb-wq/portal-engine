@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { IdSchema } from '@engine/core'
-import { MetersSchema } from '@engine/characters'
+import { FeelingSchema, MetersSchema } from '@engine/characters'
 
 /** One click of the VN text box: a line of narration, or one character's line (director writer §2). */
 export const BeatSchema = z.discriminatedUnion('kind', [
@@ -42,6 +42,11 @@ export const TurnSchema = z.object({
    */
   kept: z.array(z.string()).optional(),
   /**
+   * Reading checks that succeeded this turn (npc design §7, milestone 4b): who saw through to what someone felt, for
+   * the reader's end-of-scene memory. Absent when none.
+   */
+  reads: z.array(z.object({ by: z.string(), target: z.string(), feeling: FeelingSchema })).optional(),
+  /**
    * Optional brief detail this turn used or left open (director writer §7): carried into the next turn's brief on a
    * follow-up, dropped on a change of topic. Absent when none.
    */
@@ -61,8 +66,8 @@ export const SceneSchema = z.object({
   turns: z.array(TurnSchema).default([]),
   /** Running summary of what came before the last few turns. */
   summary: z.string().default(''),
-  /** Each character's mood as it stands now. */
-  moods: z.record(z.string(), z.string()).default({}),
+  /** What each character feels as it stands now (milestone 4b): the card's default mood, then the director's `feels`. */
+  moods: z.record(z.string(), FeelingSchema).default({}),
   /** Each character's comfort, 1 (wants out) to 5 (at ease). */
   comfort: z.record(z.string(), z.number().int().min(1).max(5)).default({}),
   /** Each character's sprite expression as it stands now. */

@@ -119,7 +119,7 @@
       "note": "walks past her brother's glassworks on the way home, to see he made it in"
     }
   ],
-  "mood": "impatient, watching the clock",
+  "mood": { "text": "impatient, watching the clock", "shade": "irritation", "intensity": 2 },
   "knowledge": [
     "The clinic has one other nurse tonight, and she leaves at the shift change",
     "The market stop is about four hundred meters along the rail",

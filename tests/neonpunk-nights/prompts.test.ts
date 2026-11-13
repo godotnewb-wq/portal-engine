@@ -5,7 +5,8 @@ import { playScene, type ScriptedTurn } from '../prompts'
 
 /**
  * Prompt snapshots on Neonpunk Nights (milestone 3.6, task 2): the Sump Lantern with four of the cast, so three speak
- * and one stays quiet. Covers a lie with a reading check, a lore line, a secret shown as a cue then kept and expanded,
+ * and one stays quiet. Covers a lie with a reading check, felt emotion that carries, shows as tells or breaks through,
+ * and a reading check aimed at Brask whose difficulty the game sets from his masking (milestone 4b), a lore line, a secret shown as a cue then kept and expanded,
  * a second character keeping a secret, and the four end-of-scene summaries.
  */
 const TURNS: ScriptedTurn[] = [
@@ -15,9 +16,9 @@ const TURNS: ScriptedTurn[] = [
       player_action: { doing: 'presses Oria about the client', uncertain: false },
       checks: [{ id: 'read-oria', who: 'vex', skill: 'empathy', difficulty: 'moderate', stakes: 'Vex sees that Oria is lying' }],
       speakers: [
-        { id: 'oria-senn', goal: 'keep the client hidden', mood: 'composed, too polished', pressure: 'pressing', keeps: ['oria-senn.client-is-grid-corporation'], touched: 'who is the client', approach: 'lie' },
-        { id: 'vex', goal: 'catch the lie', mood: 'wary', pressure: 'background', keeps: [], touched: '' },
-        { id: 'brask', goal: 'keep the peace', mood: 'uneasy', pressure: 'background', keeps: [], touched: '' }
+        { id: 'oria-senn', goal: 'keep the client hidden', feels: { shade: 'dread', intensity: 3, reason: 'the client must stay hidden' }, pressure: 'pressing', keeps: ['oria-senn.client-is-grid-corporation'], touched: 'who is the client', approach: 'lie' },
+        { id: 'vex', goal: 'catch the lie', feels: { shade: 'irritation', intensity: 2, reason: 'Oria is playing them' }, pressure: 'background', keeps: [], touched: '' },
+        { id: 'brask', goal: 'keep the peace', feels: { shade: 'worry', intensity: 4, reason: 'the table is turning on itself' }, pressure: 'background', keeps: [], touched: '' }
       ],
       moves: [
         { who: 'oria-senn', answers: 'player', move: 'dodge', uses: ['oria-senn.k3'], new: [] },
@@ -26,7 +27,7 @@ const TURNS: ScriptedTurn[] = [
       ],
       lore: [{ entry: 'faction.couriers', line: 'Couriers carry for anyone and take no side.' }],
       change: 'The table knows Oria is hiding something.',
-      reactions: [{ id: 'kesh', beat: 'watches the door' }],
+      reactions: [{ id: 'kesh', beat: 'watches the door', feels: { shade: 'nervousness', intensity: 2, reason: 'raised voices' } }],
       walk_ons: [],
       texture: ['condensation dripping from an Aether-cooled pipe overhead'],
       avoid: [],
@@ -50,8 +51,8 @@ NARRATION: Kesh keeps her eyes on the door.
       player_action: { doing: 'asks what is in the case', uncertain: false },
       checks: [],
       speakers: [
-        { id: 'oria-senn', goal: 'steer back to the fee', mood: 'irritated', pressure: 'pressing', keeps: ['oria-senn.the-case'], touched: 'sealed case', approach: 'deflect' },
-        { id: 'vex', goal: 'make Oria answer', mood: 'dry', pressure: 'background', keeps: [], touched: '' }
+        { id: 'oria-senn', goal: 'steer back to the fee', feels: { shade: 'frustration', intensity: 3, reason: 'they keep asking about the case' }, pressure: 'pressing', keeps: ['oria-senn.the-case'], touched: 'sealed case', approach: 'deflect' },
+        { id: 'vex', goal: 'make Oria answer', pressure: 'background', keeps: [], touched: '' }
       ],
       moves: [
         { who: 'oria-senn', answers: 'player', move: 'dodge', uses: ['oria-senn.k1'], new: [] },
@@ -79,10 +80,10 @@ NARRATION: Brask turns his glass in a slow circle. Kesh checks the time.
     input: 'Fine. When do we go, and what does it pay?',
     plan: {
       player_action: { doing: 'asks when and for how much', uncertain: false },
-      checks: [],
+      checks: [{ id: 'read-brask', who: 'vex', skill: 'empathy', difficulty: 'trivial', target: 'brask', stakes: 'Vex sees how scared Brask really is' }],
       speakers: [
-        { id: 'oria-senn', goal: 'close the deal', mood: 'relieved', pressure: 'urgent', keeps: ['oria-senn.the-case'], touched: 'when do we go', approach: 'partial truth' },
-        { id: 'brask', goal: 'raise the practical problem', mood: 'worried', pressure: 'background', keeps: [], touched: '' }
+        { id: 'oria-senn', goal: 'close the deal', feels: { shade: 'relief', intensity: 3, reason: 'the deal is close' }, pressure: 'urgent', keeps: ['oria-senn.the-case'], touched: 'when do we go', approach: 'partial truth' },
+        { id: 'brask', goal: 'raise the practical problem', feels: { shade: 'panic', intensity: 5, reason: 'the lower level floods at midnight' }, pressure: 'background', keeps: [], touched: '' }
       ],
       moves: [
         { who: 'oria-senn', answers: 'player', move: 'answer', uses: ['oria-senn.k7', 'oria-senn.k3'], new: [] },

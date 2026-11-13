@@ -47,7 +47,7 @@ export function appearing(content: Pack, beats: Beat[]): Set<string> {
 /**
  * Which of the writer's tags count (milestone 3.6, task 6; decided 2026-11-12). Departures come only from the plan:
  * a `[LEAVES: Name]` tag moves no one, and one for someone the plan didn't send away is reported. When salvage cut
- * every beat a character appeared in, their `EXPRESSION`, `MOOD` and `COMFORT` tags are dropped too: they describe
+ * every beat a character appeared in, their `EXPRESSION` and `COMFORT` tags are dropped too: they describe
  * prose the player never sees. Tags about someone who was never in the prose apply as on any turn. `[END SCENE]` has
  * no effect either way: only the plan ends a scene. Returns the tags to apply and each one set aside, with why.
  */
@@ -68,7 +68,6 @@ export function acceptTags(content: Pack, plan: BeatPlan, tags: Tags, written: B
   return {
     tags: {
       expressions: keep('EXPRESSION', tags.expressions, (v) => v),
-      moods: keep('MOOD', tags.moods, (v) => v),
       comfort: keep('COMFORT', tags.comfort, (v) => `${v.level} ${v.reason}`.trim()),
       leaves: tags.leaves.filter((id) => plan.leaves.includes(id)),
       ended: tags.ended
@@ -92,7 +91,8 @@ export function showDepartures(content: Pack, plan: BeatPlan, beats: Beat[]): { 
 }
 
 /**
- * Applies a finished turn to the state. Tags only touch characters who are present; departures and the scene's end
+ * Applies a finished turn to the state. Felt moods come from the plan's `feels`; tags only touch characters who are
+ * present; departures and the scene's end
  * come from the plan alone (see `acceptTags` for which tags count).
  */
 export function applyTurn(content: Pack, state: GameState, written: TurnWritten): GameState {
@@ -113,7 +113,9 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
   const kept = written.plan.speakers.flatMap((s) => s.kept ?? [])
   if (kept.length > 0) turn.kept = kept
   if (written.details && written.details.length > 0) turn.details = written.details
-  const plannedMoods = Object.fromEntries(written.plan.speakers.filter((s) => s.mood.trim()).map((s) => [s.id, s.mood]))
+  if (written.plan.reads && written.plan.reads.length > 0) turn.reads = written.plan.reads
+  // What the director says they feel becomes their mood (milestone 4b); anyone it says nothing about keeps theirs.
+  const felt = Object.fromEntries([...written.plan.speakers, ...written.plan.reactions].flatMap((s) => (s.feels ? [[s.id, s.feels]] : [])))
   const comfort = Object.fromEntries(Object.entries(only(written.tags.comfort)).map(([id, c]) => [id, c.level]))
   const leaving = [...new Set(written.plan.leaves)].filter((id) => present.has(id))
 
@@ -148,7 +150,7 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
       ...scene,
       turns,
       summary,
-      moods: { ...scene.moods, ...only(plannedMoods), ...only(written.tags.moods) },
+      moods: { ...scene.moods, ...only(felt) },
       comfort: { ...scene.comfort, ...comfort },
       expressions: { ...scene.expressions, ...only(written.tags.expressions) },
       departed: [...scene.departed, ...leaving],

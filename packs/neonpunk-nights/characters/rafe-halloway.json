@@ -102,7 +102,7 @@
       ]
     }
   ],
-  "mood": "tired, proud, restless",
+  "mood": { "text": "tired, proud, restless", "shade": "pride", "intensity": 2 },
   "knowledge": [
     "His sister Jun works nights at the Wheel clinic; it's out of burn gel again",
     "Odile Marsh, his master, has the best hands on Glassblowers' Row and the worst temper",

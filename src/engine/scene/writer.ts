@@ -9,6 +9,7 @@ import { RECENT_TURNS, turnText } from './director'
 import { sceneFacts } from './facts'
 import { childGuard } from './guard'
 import { presentCast, type BeatPlan, type Move, type PlannedCheck } from './planShape'
+import { feelingsNow, feltWords, shown, shownWords } from './feelings'
 import { BEATS } from './style'
 import { recentlyUsed } from './repeats'
 import { writerStage } from '@engine/codex'
@@ -38,6 +39,7 @@ export const WRITER_STYLE = `How it should read:
 - People talk like people: complete, plain sentences that someone hearing them for the first time can follow.
 - Each line answers the line before it: what that person actually said and meant. A question gets an answer, or a dodge the reader can see, in its own terms.
 - People are in the moment. Their aims and secrets show in what they choose, avoid or notice, rarely in what they say outright.
+- A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - A move's facts are there to draw on if the line needs them, never to recite. A line can bring nothing new; what matters is that it answers. A fact marked new hasn't been said to the player yet: if it's used, say what it is.
 - Each character sounds like their voice card. The card wins over everything else.
 - Narration only for what happens: an action that matters, a reaction, at most one detail of the place. Show what can be seen; never write the plan's notes out as prose.
@@ -52,7 +54,7 @@ export const WRITER_FORMAT = `Output format, nothing else:
 - Each move is one dialogue beat by its speaker, in the order given. Narration goes between them only when something happens.
 - ${BEATS.target} beats, each under ${BEATS.targetWords} words.
 - Only the speakers and planned walk-ons speak. Everyone else stays silent: no quoted or reported speech.
-- Hidden tags at the end, one per line: [Name: EXPRESSION word] for each speaker; [Name: COMFORT 1-5 reason] when someone's comfort changes; [Name: MOOD words] when a mood shifts; [LEAVES: Name] for a planned departure; [END SCENE] only if the plan ends the scene.
+- Hidden tags at the end, one per line: [Name: EXPRESSION word] for each speaker, for what their face shows; [Name: COMFORT 1-5 reason] when someone's comfort changes; [LEAVES: Name] for a planned departure; [END SCENE] only if the plan ends the scene.
 - Never write the player's words, choices, thoughts or actions beyond what their input stated.
 - Honor every check result exactly: a failed roll means it does not happen.`
 
@@ -99,9 +101,19 @@ export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPla
     if (!goal || level <= 0) return ''
     return level >= words.length - 1 ? ` Tonight's aim drives what they do: ${goal}.` : ` Tonight's aim is on their mind and may come up if it fits: ${goal}.`
   }
+  // What each one feels and how much of it shows (npc design §7): worked out by the game, given in words with the card's
+  // display line; a reading check that succeeded lets the reader see through to it.
+  const felt = feelingsNow(state, plan)
+  const feltLine = (id: string) => {
+    const f = felt[id]
+    const s = f && shown(content, state, id, f)
+    if (!f || !s) return ''
+    const reads = (plan.reads ?? []).filter((x) => x.target === id).map((x) => (x.by === 'player' ? ' You see through to it.' : ` ${nameOf(x.by)} sees through to it and may say so.`))
+    return ` Feels ${feltWords(content.ruleset, f)}. ${shownWords(s)}.${[...new Set(reads)].join('')}`
+  }
   const speakerLine = (s: BeatPlan['speakers'][number]) =>
     [
-      `- ${nameOf(s.id)}: in this exchange, ${(s.intent || 'answer what was asked').replace(/[.\s]+$/, '')}. Mood: ${(s.mood || 'as before').replace(/[.\s]+$/, '')}.`,
+      `- ${nameOf(s.id)}: in this exchange, ${(s.intent || 'answer what was asked').replace(/[.\s]+$/, '')}.${feltLine(s.id)}`,
       s.framing ? ` What they say about the world comes with this view: ${s.framing.replace(/[.\s]+$/, '')}.` : '',
       aim(s.id, s.pressure),
       s.hiding && ` Keeping to themselves: ${s.hiding} (${s.approach ?? 'deflect'}).${s.tell ? ` It shows only as: ${s.tell}. Show it; nobody remarks on it unless their check to read them succeeded.` : ' It doesn\'t show.'}`
@@ -124,7 +136,7 @@ export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPla
     plan.lore && plan.lore.length > 0 && `# About the world, to draw on only if it fits (some, all or none; never recite)\n${plan.lore.map((l) => `- ${l.line}${l.who ? ` (only ${nameOf(l.who)} would say this)` : ''}`).join('\n')}`,
     plan.change && `# By the end of the turn\n${plan.change}`,
     plan.leaves.length > 0 && `# Leaving this turn\n${listed(plan.leaves.map(nameOf))} ${plan.leaves.length === 1 ? 'leaves' : 'leave'}. Show them going.`,
-    plan.reactions.length > 0 && `# Also present, silent\n${plan.reactions.map((r) => `- ${nameOf(r.id)}: ${r.beat}`).join('\n')}`,
+    plan.reactions.length > 0 && `# Also present, silent\n${plan.reactions.map((r) => `- ${nameOf(r.id)}: ${r.beat.replace(/[.\s]+$/, '')}.${feltLine(r.id)}`).join('\n')}`,
     plan.walk_ons.length > 0 && `# Walk-ons\n${plan.walk_ons.map((w) => `- ${nameOf(w.id)}: ${w.line}`).join('\n')}`,
     plan.texture.length > 0 && `# A detail of the place, if it fits\n${plan.texture.join('\n')}`,
     recent.length > 0 && `# Used in the last turns (don't repeat)\n${recent.join('\n')}`,

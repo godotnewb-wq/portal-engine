@@ -5,7 +5,7 @@
   "location": "sump-lantern",
   "cast": ["vex", "brask", "oria-senn", "dunmar"],
   "seed": 37,
-  "moods": { "vex": "irritable, spoiling for an argument" },
+  "moods": { "vex": { "text": "irritable, spoiling for an argument", "shade": "irritation", "intensity": 2 } },
   "turns": [
     "Brask, you know pump stations better than anyone. Should we take this job?",
     "Vex, back off him. Let him think.",

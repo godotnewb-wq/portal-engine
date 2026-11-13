@@ -6,6 +6,9 @@ import { packNames } from './checks'
 import { turnLore, type TurnLore } from './lore'
 import { canSay, sceneFacts, toldPlayer } from './facts'
 import { wouldDisclose } from './resolve'
+import { readFeeling, type Feeling } from '@engine/characters'
+import type { Ruleset } from '@engine/rules'
+import { feelingsNow, readingDifficulty } from './feelings'
 import type { Scene } from '@engine/state'
 import { locationById } from '@engine/pack'
 import {
@@ -26,6 +29,7 @@ import {
   type LoreLine,
   type Move,
   type PlannedCheck,
+  type Read,
   type Said
 } from './planShape'
 
@@ -43,6 +47,14 @@ export const NEW_FACT_WORDS = 25
 /** A lore line is a fact in plain words, at most this long (kept in the codex, whose summaries share the limit). */
 export { LORE_LINE_WORDS }
 
+/** A feeling as the director writes it (npc design §7): a shade, its family when the shade has several, an intensity, and why. */
+const RawFeelsSchema = z.object({
+  shade: text,
+  family: text.optional(),
+  intensity: z.union([z.number(), z.string()]).catch(0),
+  reason: text.optional()
+})
+
 const RawMoveSchema = z.object({
   who: z.string(),
   answers: z.union([z.number(), z.string()]).catch('player'),
@@ -54,11 +66,11 @@ const RawMoveSchema = z.object({
 
 export const RawPlanSchema = z.object({
   player_action: z.object({ doing: text, uncertain: z.boolean().catch(false) }).catch({ doing: '', uncertain: false }),
-  speakers: list(z.object({ id: z.string(), goal: text, mood: text, pressure: text, keeps: list(z.string()), touched: text, approach: text.optional(), framing: text.optional() })),
+  speakers: list(z.object({ id: z.string(), goal: text, feels: RawFeelsSchema.optional().catch(undefined), pressure: text, keeps: list(z.string()), touched: text, approach: text.optional(), framing: text.optional() })),
   moves: list(RawMoveSchema),
   lore: list(z.object({ entry: z.string(), who: z.string().optional().catch(undefined), line: text })),
   change: text,
-  reactions: list(z.object({ id: z.string(), beat: z.string() })),
+  reactions: list(z.object({ id: z.string(), beat: z.string(), feels: RawFeelsSchema.optional().catch(undefined) })),
   checks: list(PlannedCheckSchema),
   walk_ons: list(z.object({ id: z.string(), line: z.string() })),
   texture: list(z.string()),
@@ -117,6 +129,11 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan, inpu
   const words = content.ruleset.pressures
   const ground = justSaid(state, input)
   const early: string[] = []
+  const feels = (who: string, f: RawPlan['speakers'][number]['feels']) => {
+    const read = readFeels(content.ruleset, who, f)
+    if (read.problem) early.push(read.problem)
+    return read.feels ? { feels: read.feels } : {}
+  }
   const shared: SharedPlan = {
     speakers: raw.speakers.map((s) => {
       const who = presentId(content, scene, s.id) ?? s.id
@@ -137,14 +154,14 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan, inpu
       return {
         id: s.id,
         intent: s.goal,
-        mood: s.mood,
+        ...feels(who, s.feels),
         pressure: words[level]!,
         ...(s.framing?.trim() && { framing: s.framing.trim() }),
         ...(kept.length > 0 && { hiding: kept.length === 1 ? kept[0]!.text : kept.map((f, i) => `(${i + 1}) ${f.text}`).join(' '), approach: s.approach || 'deflect', kept: kept.map((f) => f.id) })
       }
     }),
     exchange: [],
-    reactions: raw.reactions,
+    reactions: raw.reactions.map((x) => ({ id: x.id, beat: x.beat, ...feels(presentId(content, scene, x.id) ?? x.id, x.feels) })),
     checks: raw.checks,
     walk_ons: raw.walk_ons,
     texture: raw.texture,
@@ -215,6 +232,16 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan, inpu
   }
 }
 
+/**
+ * A feeling from the plan, checked against the ruleset (npc design §7): an unknown shade, a family the shade isn't
+ * listed under, or no intensity is refused with a correction, and the character's feeling from before carries.
+ */
+function readFeels(r: Ruleset, who: string, raw: RawPlan['speakers'][number]['feels']): { feels?: Feeling; problem?: string } {
+  if (!raw || (!raw.shade.trim() && !raw.intensity)) return {}
+  const read = readFeeling(r, raw)
+  return 'feeling' in read ? { feels: read.feeling } : { problem: `${who}'s feeling: ${read.problem}; their feeling from before carries` }
+}
+
 /** Who a move is said to: the player, or the speaker of the move it answers. */
 const listenerOf = (answers: Move['answers'], moves: Move[]): string => (answers === 'player' ? 'player' : (moves[answers - 1]?.who ?? 'player'))
 
@@ -273,14 +300,29 @@ function validateShared(content: Pack, state: GameState, raw: SharedPlan): { pla
     const id = presentId(content, scene, r.id)
     if (!id) fix(`dropped reaction for "${r.id}": not present`)
     else if (speakers.some((s) => s.id === id)) fix(`dropped reaction for "${id}": they speak this beat`)
-    else if (!reactions.some((x) => x.id === id)) reactions.push({ id, beat: r.beat })
+    else if (!reactions.some((x) => x.id === id)) reactions.push({ ...r, id })
   }
 
   const checks: PlannedCheck[] = []
+  const r = content.ruleset
+  const felt = feelingsNow(state, { speakers, reactions })
   for (const c of raw.checks) {
     const who = normalize(c.who) === 'player' || normalize(c.who) === normalize(state.player.name) ? 'player' : presentId(content, scene, c.who)
-    const skill = skillNamed(content.ruleset, c.skill)
-    const difficulty = difficultyNamed(content.ruleset, c.difficulty)
+    const skill = skillNamed(r, c.skill)
+    let difficulty = difficultyNamed(r, c.difficulty)
+    // A reading check reads someone present (npc design §7): the game sets its difficulty from their masking.
+    const named = c.target?.trim()
+    let target = named ? presentId(content, scene, named) : undefined
+    if (named && !target) fix(`check "${c.id}": "${named}" can't be read here; it has no target`)
+    if (target && target === who) {
+      fix(`check "${c.id}": ${who} can't read themselves; it has no target`)
+      target = undefined
+    }
+    if (target && skill === r.people.reading.skill && difficulty) {
+      const set = readingDifficulty(r, characterById(content, target)!, felt[target])
+      if (set !== difficulty) fix(`check "${c.id}": reading ${target} is ${set}, not ${difficulty}, by their masking`)
+      difficulty = set
+    }
     if (!who) fix(`dropped check "${c.id}": "${c.who}" is not present`)
     else if (!skill) fix(`dropped check "${c.id}": no skill "${c.skill}"`)
     else if (!difficulty) fix(`dropped check "${c.id}": no difficulty "${c.difficulty}"`)
@@ -292,6 +334,7 @@ function validateShared(content: Pack, state: GameState, raw: SharedPlan): { pla
         who,
         skill,
         difficulty,
+        ...(target && { target }),
         stakes: c.stakes,
         ...(c.edge && { edge: c.edge })
       })
@@ -396,7 +439,13 @@ export function settlePlan(content: Pack, state: GameState, plan: BeatPlan): Bea
     return (first || watched) && tells.length > 0 ? { ...s, tell: tells.join('; ') } : s
   })
   const exchange = moves ? moves.map((m) => ({ who: m.who, answers: m.answers, point: moveText(m) })) : plan.exchange
-  return { ...plan, speakers, ...(moves && { moves }), exchange }
+  // A reading check that succeeded sees through to what the target feels (npc design §7): the writer may show the
+  // reader noticing it, and the reader's end-of-scene memory may hold it.
+  const felt = feelingsNow(state, plan)
+  const reads: Read[] = plan.checks.flatMap((c) =>
+    c.target && c.skill === content.ruleset.people.reading.skill && passed.has(c.id) && felt[c.target] ? [{ by: c.who, target: c.target, feeling: felt[c.target]! }] : []
+  )
+  return { ...plan, speakers, ...(moves && { moves }), exchange, ...(reads.length > 0 && { reads }) }
 }
 
 /** Location details not used in the last few turns, so description doesn't repeat. */
@@ -425,7 +474,7 @@ export function fallbackPlan(content: Pack, state: GameState, input: string): Be
   })
   const speaker = named ?? [...present].sort((a, b) => quiet[b]! - quiet[a]!)[0]
   return {
-    speakers: speaker ? [{ id: speaker, intent: 'Answer what the player just said, in character, pursuing their own aims.', mood: scene.moods[speaker] ?? '' }] : [],
+    speakers: speaker ? [{ id: speaker, intent: 'Answer what the player just said, in character, pursuing their own aims.' }] : [],
     exchange: speaker ? [{ who: speaker, answers: 'player', point: 'Answer what the player just said, directly.' }] : [],
     reactions: present.filter((id) => id !== speaker).map((id) => ({ id, beat: 'reacts in keeping with their mood' })),
     checks: [],

@@ -32,21 +32,24 @@ export const directorRules = (r: Ruleset, loreLines = r.codex.loreLines): string
 Return only this JSON object:
 {
   "player_action": {"doing", "uncertain"},
-  "checks": [{"id","who","skill","difficulty","stakes","edge","edge_reason"}],
-  "speakers": [{"id","goal","mood","pressure","keeps","touched","approach","framing"}],
+  "checks": [{"id","who","skill","difficulty","target","stakes","edge","edge_reason"}],
+  "speakers": [{"id","goal","feels","pressure","keeps","touched","approach","framing"}],
   "moves": [{"who","answers","move","uses","new","needs"}],
 ${loreLines > 0 ? '  "lore": [{"entry","who","line"}],\n' : ''}  "change": "...",
-  "reactions": [{"id","beat"}],
+  "reactions": [{"id","beat","feels"}],
   "walk_ons": [{"id","line"}],
   "texture": [], "avoid": [], "leaves": [], "end_scene": false
 }
 
 - The player leads. Start from what the player just said or did: move 1 answers it, in its own terms. A character's own aims come in after that, or in a later turn, unless something urgent cuts in.
 - player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking and asking are not uncertain.
-- checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most ${MAX_CHECKS}. who is "player" or a character id. skill is one of: ${r.skills.map((x) => x.id).join(', ')}. difficulty is one of: ${r.difficulties.map((d) => d.word).join(', ')}. stakes says what success means. Companions in the player's party help on their own when they are willing and trained; the game works it out.
+- checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most ${MAX_CHECKS}. who is "player" or a character id. skill is one of: ${r.skills.map((x) => x.id).join(', ')}. difficulty is one of: ${r.difficulties.map((d) => d.word).join(', ')}. target: the character being read, for a check that reads someone. stakes says what success means. Companions in the player's party help on their own when they are willing and trained; the game works it out.
 - People are in the moment. What they say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line.
 - Feelings on the sheets are words for each meter, toward the player and toward others here. ${r.meters.list.map((m) => `${m.name} (${m.id}): ${m.description}.`).join(' ')} Each is a separate feeling; when they pull apart, play the tension.
-- speakers: at most ${MAX_SPEAKERS} characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone. mood: how what just happened lands on them.
+- speakers: at most ${MAX_SPEAKERS} characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone.
+- feels: what the character really feels now, whatever they show: {"shade","family","intensity","reason"}. shade is one of the shades below. family only when the shade is listed under more than one. intensity is 1 to 5; the usual range is given, and the moment can go outside it. reason: what it's about, in a few words. Leave feels out to keep what they felt before. The game works out how much shows.
+- Shades by family (usual intensity): ${shadeList(r)}.
+- To see what someone really feels behind what they show, give the person looking a check with ${r.skills.find((s) => s.id === r.people.reading.skill)?.name ?? r.people.reading.skill} and the one being read as target. The game sets its difficulty. A companion can be the one looking; on success they may tell the player.
 - pressure: how hard their aim for tonight (on their sheet) presses on them right now, one of: ${r.pressures.join(', ')} (weakest first). Most of the time it is ${r.pressures[0]}. It rises when time runs short or events push, and moves at most one step a turn.
 - keeps: ids of their own secrets, only when what was just said or done touches one; touched: the words that touched it, as said. Most turns nobody keeps anything. approach: lie, deflect or partial truth. A secret marked "in short" is shown as a brief cue; keep it by its id all the same, and the writer will get the whole secret.
 - When someone lies or deflects about a kept secret and someone present could see through it, give the person reading them a check with the skill that fits. If a character is reading the speaker, set who to that character's id. Simply asking a question does not make the player the one reading the speaker. Put the check id in needs on the reader's move that sees through the dodge. They can still question the answer or show distrust without that move. Success lets them recognize the dodge, not learn the secret itself. Example: the player asks a question, Ada dodges, and Ben studies Ada. Set player_action.uncertain to false. Give the check id read-ada to who: ben. Leave needs blank on Ada's dodge. Put needs: read-ada on Ben's move where he realizes Ada dodged.
@@ -55,12 +58,20 @@ ${loreLines > 0 ? '  "lore": [{"entry","who","line"}],\n' : ''}  "change": "..."
 - framing: only when it matters, how a speaker colours what they say about the world (e.g. "bitter, street-level view").
 ${loreLines > 0 ? `- lore: at most ${loreLines} facts of world lore the writer may draw on this turn, when the conversation turns to the world; usually none. entry: the [id] of a lore entry given above. line: the fact in plain words, at most ${LORE_LINE_WORDS}, never dialogue. An insider entry needs who: a speaker it says knows it. A lore line is something to draw on, not a line to say.\n` : ''}- Don't repeat a fact already said unless someone asks again. A question asked and not answered gets an answer or a visible dodge.
 - change: what is different at the end of this turn: something decided, conceded, refused, revealed or learned. A check result that matters changes it.
-- reactions: only the people present who don't speak this turn: one silent beat each (a look, a gesture, a move). Anyone in speakers or moves is never listed here; a speaker's own gestures go in the writing, not in reactions.
+- reactions: only the people present who don't speak this turn: one silent beat each (a look, a gesture, a move), and feels when something lands on them. Anyone in speakers or moves is never listed here; a speaker's own gestures go in the writing, not in reactions.
 - walk_ons: only when the player speaks to them, or they have news that changes things.
 - texture: at most one detail from the location, as a plain fact, or none.
 - Quiet characters are listed with what they care about: if the conversation touches it, they have something to say.
 - leaves: characters who walk out. end_scene: true only at a natural close.
 - Never decide, say or do anything for the player.`
+
+/** The ruleset's shades by family with their usual intensity, for the director: "grief: mourning 3–5, sorrow 2–4; fear: …". */
+export function shadeList(r: Ruleset): string {
+  const range = ([lo, hi]: [number, number]) => (lo === hi ? `${lo}` : `${lo}–${hi}`)
+  return r.people.emotions.families
+    .map((f) => `${f.name.toLowerCase()}${f.moodOnly ? ' (in the moment only)' : ''}: ${r.people.emotions.shades.filter((s) => s.families.includes(f.id)).map((s) => `${s.word} ${range(s.intensity)}`).join(', ')}`)
+    .join('; ')
+}
 
 /**
  * Every present character's brief for this turn (director writer §7): the always-on part, the 3.5 secret display, and

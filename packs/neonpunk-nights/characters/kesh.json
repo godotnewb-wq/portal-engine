@@ -114,7 +114,7 @@
       "days": "weekdays"
     }
   ],
-  "mood": "calm on the surface, counting minutes",
+  "mood": { "text": "calm on the surface, counting minutes", "shade": "worry", "intensity": 2 },
   "knowledge": [
     "The roof hatch is unlocked, but procedure forbids using it on a dead span",
     "The drive coil can be restarted by hand from the cabin if someone knows the sequence, which she doesn't",

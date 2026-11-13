@@ -102,7 +102,7 @@
       "note": "the evening meal"
     }
   ],
-  "mood": "busy, warm, one eye on the gate",
+  "mood": { "text": "busy, warm, one eye on the gate", "shade": "worry", "intensity": 2 },
   "knowledge": [
     "Anyone can eat once a day at Kettle Court; the Korrath families there are most of the queue",
     "Wardens have come round twice this week asking about a family",

@@ -28,7 +28,7 @@ describe('startScene', () => {
   it('opens the bar scene with the cast’s moods, the walk-ons and a meter baseline', () => {
     const state = startScene(content, createInitialState(content, 1), 'sump-lantern', ['vex', 'brask', 'oria-senn'])
     expect(state.scene?.walkOns).toEqual(['card-player'])
-    expect(state.scene?.moods['brask']).toMatch(/anxious/)
+    expect(state.scene?.moods['brask']).toMatchObject({ shade: 'worry', family: 'fear', intensity: 3, text: expect.stringMatching(/anxious/) })
     expect(state.scene?.baseline['oria-senn']).toEqual(state.meters['oria-senn'])
     expect(GameStateSchema.parse(state)).toEqual(state)
   })

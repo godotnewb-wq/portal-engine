@@ -39,7 +39,8 @@ export function toScenario(log: SessionLog, n: number, flags = log.flags): Scena
     // The dice as they stood, so the turn's checks roll as they did in play (if the plan asks for the same ones).
     seed: turn.dice.before,
     meters: Object.fromEntries(present.flatMap((c) => (c.meters ? [[c.id, c.meters]] : []))),
-    moods: Object.fromEntries(present.map((c) => [c.id, c.mood])),
+    // A turn logged before milestone 4b has only the mood's words, which a scenario can't take; the card's default stands in.
+    moods: Object.fromEntries(present.flatMap((c) => (c.feeling ? [[c.id, { shade: c.feeling.shade, family: c.feeling.family, intensity: c.feeling.intensity, ...(c.feeling.text && { text: c.feeling.text }), ...(c.feeling.reason && { reason: c.feeling.reason }) }]] : []))),
     comfort: Object.fromEntries(present.map((c) => [c.id, c.comfort])),
     history: before.map(asTurn),
     turns: [turn.input],

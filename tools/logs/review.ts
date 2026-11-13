@@ -1,6 +1,6 @@
 import type { Pack } from '@engine/pack'
 import { currentFlags, type FlagRecord, type Rating } from '@engine/review'
-import { lineText, planLines } from '@engine/scene'
+import { lineText, moodOf, planLines } from '@engine/scene'
 import type { SessionLog, TurnRecord } from '@platform/logs'
 import { namer, sceneLocation } from './load'
 import { latestScores } from './transcript'
@@ -22,7 +22,7 @@ function brief(turn: TurnRecord, items: string[], nameOf: (id: string) => string
       const [kind, id] = item.split(':') as [string, string]
       if (kind === 'speaker') {
         const s = p.speakers.find((x) => x.id === id)
-        return s ? `${nameOf(id)}'s brief: ${s.intent}${s.mood ? ` (mood: ${s.mood})` : ''}${s.hiding ? `; hiding ${s.hiding}, ${s.approach ?? 'deflect'}` : ''}` : ''
+        return s ? `${nameOf(id)}'s brief: ${s.intent}${moodOf(s) ? ` (feels: ${moodOf(s)})` : ''}${s.hiding ? `; hiding ${s.hiding}, ${s.approach ?? 'deflect'}` : ''}` : ''
       }
       if (kind === 'line') {
         const lines = planLines(p)

@@ -26,6 +26,20 @@ describe('peopleProblems', () => {
     ])
   })
 
+  it('checks how feelings show and are read against the meters, tags, masking and its axis (milestone 4b)', () => {
+    const visibility = { ...P.visibility, trustMeter: 'trust', guardedTags: ['enemy'], bands: [{ word: 'hidden', max: 1, shows: 'x' }, { word: 'some', max: 1, shows: 'y' }, { word: 'all', max: 3, shows: 'z' }] }
+    const reading = { ...P.reading, difficulty: { bare: 'routine', thin: 'tough', bulky: 'grim' }, harder: ['shut'] }
+    expect(peopleProblems({ ...P, visibility, reading }, T, meters)).toEqual([
+      'visibility.trustMeter names unknown meter "trust"',
+      'visibility.guardedTags names unknown tag "enemy"',
+      'visibility band "some" must reach higher than the one before',
+      'the last visibility band "all" covers everything above; it takes no max',
+      'reading.difficulty has no word for masking "thick"',
+      'reading.difficulty names "bulky", not a masking level',
+      'reading.harder names "shut", not a stage of "guard"'
+    ])
+  })
+
   it('checks gate words, motive floors and links against the ladder, meters, axes and values', () => {
     const p: PeopleRules = {
       ...P,

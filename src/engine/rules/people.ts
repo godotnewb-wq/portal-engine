@@ -75,6 +75,28 @@ export const PeopleRulesSchema = z.object({
    */
   masking: z.object({ levels: z.array(word).min(2), axis: id, byStage: z.record(word, word) }),
   /**
+   * How much a feeling shows (§7, milestone 4b): visibility = intensity − masking + audience, with masking a level's
+   * position in `masking.levels`. The audience is `guarded` when anyone present is a stranger (no saved relation and no
+   * tag), someone they hold one of `guardedTags` toward, or a member of a faction whose stance toward theirs is among
+   * the coldest `hostileStances` stance levels; `trusted` when everyone present, the player included, is above `trust`
+   * on `trustMeter`; otherwise 0. `bands`: how each visibility shows, lowest first; each covers up to its `max`, and the
+   * last, with none, everything above.
+   */
+  visibility: z.object({
+    guarded: z.number().int(),
+    trusted: z.number().int(),
+    trust: z.number().int(),
+    trustMeter: id,
+    guardedTags: z.array(id).default([]),
+    hostileStances: z.number().int().min(0),
+    bands: z.array(z.object({ word, max: z.number().int().optional(), shows: word })).min(2)
+  }),
+  /**
+   * Reading through the mask (§7, milestone 4b): the skill for reading people, the difficulty word for each masking
+   * level, and the stages of the masking axis that make it one difficulty step harder.
+   */
+  reading: z.object({ skill: id, difficulty: z.record(word, word), harder: z.array(word).default([]) }),
+  /**
    * The requirement ladder (§6), loosest first: the first rung has no requirement (`min` left out), the last is
    * `blocked`, and the rungs between need a meter at `min` or above.
    */
@@ -161,6 +183,20 @@ export function peopleProblems(p: PeopleRules, t: TiesRules, meters: string[], c
       if (!p.masking.levels.includes(level)) problems.push(`masking.byStage gives "${stage}" the unknown level "${level}"`)
     }
   }
+
+  const v = p.visibility
+  if (!meters.includes(v.trustMeter)) problems.push(`visibility.trustMeter names unknown meter "${v.trustMeter}"`)
+  for (const g of v.guardedTags) if (!t.tags.some((x) => x.id === g)) problems.push(`visibility.guardedTags names unknown tag "${g}"`)
+  v.bands.forEach((b, i) => {
+    const last = i === v.bands.length - 1
+    if (last && b.max !== undefined) problems.push(`the last visibility band "${b.word}" covers everything above; it takes no max`)
+    if (!last && b.max === undefined) problems.push(`visibility band "${b.word}" needs a max`)
+    const before = v.bands[i - 1]?.max
+    if (!last && b.max !== undefined && before !== undefined && b.max <= before) problems.push(`visibility band "${b.word}" must reach higher than the one before`)
+  })
+  for (const level of p.masking.levels) if (!(level in p.reading.difficulty)) problems.push(`reading.difficulty has no word for masking "${level}"`)
+  for (const level of Object.keys(p.reading.difficulty)) if (!p.masking.levels.includes(level)) problems.push(`reading.difficulty names "${level}", not a masking level`)
+  if (axis) for (const s of p.reading.harder) if (!axis.stages.includes(s)) problems.push(`reading.harder names "${s}", not a stage of "${composure}"`)
 
   const ladder = p.ladder
   if (ladder[0]!.min !== undefined || ladder[0]!.blocked) problems.push('the ladder must start with a rung that has no requirement')

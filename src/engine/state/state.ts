@@ -1,6 +1,7 @@
 import type { GameState, Relation } from './schema'
 import type { Scene } from './scene'
 import { characterById, locationById, type Pack } from '@engine/pack'
+import { defaultFeeling, type Feeling } from '@engine/characters'
 
 /** A new game: the test player, everyone's starting feelings, the dice seeded. */
 export function createInitialState(content: Pack, seed: number): GameState {
@@ -41,7 +42,10 @@ export function startScene(content: Pack, state: GameState, locationId: string, 
     walkOns: location.walkOns.map((w) => w.id),
     turns: [],
     summary: '',
-    moods: Object.fromEntries(characters.map((c) => [c.id, c.mood])),
+    moods: Object.fromEntries(characters.flatMap((c): [string, Feeling][] => {
+      const f = defaultFeeling(content.ruleset, c)
+      return f ? [[c.id, f]] : []
+    })),
     comfort: Object.fromEntries(characters.map((c) => [c.id, 3])),
     expressions: Object.fromEntries(characters.map((c) => [c.id, 'neutral'])),
     departed: [],

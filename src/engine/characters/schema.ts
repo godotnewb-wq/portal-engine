@@ -107,6 +107,17 @@ export const ExpressionSchema = z.object({
   shades: z.record(z.string(), z.string().min(1)).default({})
 })
 
+/**
+ * A feeling in the ruleset's words (npc design §7): a shade, its core family when the shade belongs to more than one,
+ * and an intensity on 1–5. Checked against the ruleset where it is read (`readFeeling`).
+ */
+export const FeelingWordsSchema = z.object({ shade: z.string().min(1), family: z.string().min(1).optional(), intensity: z.number().int().min(1).max(5) })
+export type FeelingWords = z.infer<typeof FeelingWordsSchema>
+
+/** The mood a character walks in with (milestone 4b): a feeling the game can work with, and the card's words for it, kept for flavor. */
+export const DefaultMoodSchema = FeelingWordsSchema.extend({ text: z.string().min(1) })
+export type DefaultMood = z.infer<typeof DefaultMoodSchema>
+
 /** A gate profile's own words for one action (npc design §6): a base in place of the ruleset's, and requirements fixed outright. */
 export const GateSchema = z.object({ base: z.record(z.string(), z.string()).optional(), fixed: z.record(z.string(), z.string()).optional() })
 
@@ -165,8 +176,8 @@ export const CharacterSchema = z
     /** At least one internal tension. */
     contradictions: z.array(z.string()).min(1),
     voice: VoiceCardSchema,
-    /** The mood they walk in with; it persists across turns once play starts. */
-    mood: z.string(),
+    /** The mood they walk in with, as a feeling and in words; the director's `feels` takes over once play starts (milestone 4b). */
+    mood: DefaultMoodSchema,
     /** Age stage, from the ruleset (npc design §3); drives portrayal and the child guard. */
     age: z.string().optional(),
     /** Where they can be found, and when (npc design §2). */

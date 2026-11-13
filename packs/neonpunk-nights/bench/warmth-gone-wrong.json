@@ -6,7 +6,7 @@
   "cast": ["vex", "brask", "dunmar"],
   "seed": 51,
   "meters": { "vex": { "approval": 12, "trust": 15, "interest": 8 } },
-  "moods": { "vex": "loose, a drink in, enjoying herself" },
+  "moods": { "vex": { "text": "loose, a drink in, enjoying herself", "shade": "delight", "intensity": 2 } },
   "turns": [
     "Good to see you, Vex. How was the run tonight?",
     "Let me buy you something better than a lantern-pour.",

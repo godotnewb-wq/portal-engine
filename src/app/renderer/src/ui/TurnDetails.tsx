@@ -1,6 +1,6 @@
 import type { FlagRecord } from '@engine/review'
 import { RUBRIC } from '@engine/review'
-import { lineText, planLines, type CheckTrace } from '@engine/scene'
+import { lineText, moodOf, planLines, type CheckTrace } from '@engine/scene'
 import type { TurnDetails as Details } from '@platform/logs'
 import { Button } from './Button'
 
@@ -150,7 +150,7 @@ function Body({ details, nameOf, flags, onBeat }: { details: Details; nameOf: (i
           {plan.speakers.map((s) => (
             <li key={s.id}>
               <b>{nameOf(s.id)}</b> speaks: {s.intent}
-              {s.mood && <i> — {s.mood}</i>}
+              {moodOf(s) && <i> — {moodOf(s)}</i>}
               {s.framing && <span className="muted"> · view: {s.framing}</span>}
               {s.hiding && <span className="muted"> · hiding {s.hiding} ({s.approach ?? 'deflect'})</span>}
             </li>

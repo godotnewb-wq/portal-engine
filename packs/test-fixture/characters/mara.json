@@ -41,7 +41,7 @@
   "motives": [{ "type": "coin", "strength": "firm", "evidence": "the yard contract", "reason": "she is paid to keep the yard honest" }],
   "malleability": "set",
   "fieldLocks": { "guard": "shut" },
-  "mood": "busy, curious",
+  "mood": { "text": "busy, curious", "shade": "glum", "intensity": 1 },
   "knowledge": ["Tobin was in the yard after closing"],
   "secrets": [{ "id": "two-books", "codex": "faction.guild.second-ledger", "role": "she keeps the second ledger", "angle": "would rather lose her post than see it found", "tell": "Gives exact numbers", "disclose": { "bond": "fond", "warmth": "fair" } }],
   "meters": { "warmth": 2, "bond": 3 },

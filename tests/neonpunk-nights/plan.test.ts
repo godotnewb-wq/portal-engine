@@ -23,7 +23,7 @@ const ASKED = 'Who is the client?'
 
 const raw = (patch: Partial<RawPlan>): RawPlan => ({ ...parsePlan(WORKED)!, ...patch })
 /** A speaker with only an id, the rest left as the director might: empty. */
-const speaker = (id: string): RawPlan['speakers'][number] => ({ id, goal: '', mood: '', pressure: '', keeps: [], touched: '' })
+const speaker = (id: string): RawPlan['speakers'][number] => ({ id, goal: '', pressure: '', keeps: [], touched: '' })
 /** An attempt in doubt, so a player check stands. */
 const attempt = { player_action: { doing: 'presses Oria', uncertain: true } }
 

@@ -9,7 +9,7 @@ import { BEATS } from './style'
 const PLAN = JSON.stringify({
   speakers: [
     { id: 'tobin', goal: 'Avoid the question.', mood: 'uneasy', keeps: ['tobin.after-closing'], touched: 'after closing', approach: 'deflect' },
-    { id: 'mara', goal: 'Catch him out.', mood: 'sharp' }
+    { id: 'mara', goal: 'Catch him out.', feels: { shade: 'livid', intensity: 4, reason: 'he is hiding something' } }
   ],
   moves: [
     { who: 'tobin', answers: 'player', move: 'dodge' },
@@ -57,7 +57,7 @@ describe('the turn trace (milestone 2, A1)', () => {
     expect(t.calls[1]!.firstTextMs).toBeGreaterThan(0)
     expect(t.cost).toMatchObject({ calls: 2, tokens: { input: 400, output: 100 } })
     expect(t.cast.before.find((c) => c.id === 'mara')).toMatchObject({ expression: 'neutral' })
-    expect(t.cast.after.find((c) => c.id === 'mara')).toMatchObject({ expression: 'sly', mood: 'sharp' })
+    expect(t.cast.after.find((c) => c.id === 'mara')).toMatchObject({ expression: 'sly', mood: 'livid 4/5 (he is hiding something)', feeling: { shade: 'livid', family: 'mad', intensity: 4 } })
     expect(t.tags.dropped).toEqual(['[Nobody: MOOD odd]'])
     // The turn keeps its id and the session that logged it, so it can be flagged after a reload.
     expect(outcome.state.scene!.turns[0]).toMatchObject({ id: 'abc', log: 'session-1' })
@@ -134,12 +134,12 @@ describe('the turn trace (milestone 2, A1)', () => {
 describe('the writer’s tags', () => {
   const ASK = 'Whose seal was it?'
   const plan = (over: object = {}) =>
-    JSON.stringify({ speakers: [{ id: 'mara', goal: 'narrow it down', mood: 'careful' }], moves: [{ who: 'mara', answers: 'player', move: 'answer' }], reactions: [{ id: 'tobin', beat: 'looks at the ground' }], ...over })
+    JSON.stringify({ speakers: [{ id: 'mara', goal: 'narrow it down' }], moves: [{ who: 'mara', answers: 'player', move: 'answer' }], reactions: [{ id: 'tobin', beat: 'looks at the ground' }], ...over })
   const TAGS = '[Tobin: MOOD rattled]\n[Tobin: COMFORT 1 he said too much]\n[Tobin: EXPRESSION wide-eyed]\n[Mara: EXPRESSION thoughtful]'
   // Tobin speaks without being planned, in the draft and again in the rewrite, so salvage cuts his line.
   const cutTobin = `Mara: "Only clerks carry seals."\nNARRATION: Rain on the crates.\nTobin: "Seven, counting Pell."\n${TAGS}`
 
-  it('drops the mood, comfort and expression of someone salvage cut out of the turn, and says why', async () => {
+  it('drops the comfort and expression of someone salvage cut out of the turn, and says why; a MOOD tag is no longer read', async () => {
     const before = yardScene()
     const { state, trace } = await runTurn(fixture, before, ASK, scripted(plan(), cutTobin, cutTobin))
     expect(trace.rewrite?.salvage).toBeDefined()
@@ -148,16 +148,16 @@ describe('the writer’s tags', () => {
     expect(scene.comfort['tobin']).toBe(before.scene!.comfort['tobin'])
     expect(scene.expressions['tobin']).toBe(before.scene!.expressions['tobin'])
     expect(scene.expressions['mara']).toBe('thoughtful')
-    expect(trace.tags.dropped).toEqual(['[Tobin: EXPRESSION wide-eyed] (salvage cut their lines)', '[Tobin: MOOD rattled] (salvage cut their lines)', '[Tobin: COMFORT 1 he said too much] (salvage cut their lines)'])
+    expect(trace.tags.dropped).toEqual(['[Tobin: MOOD rattled]', '[Tobin: EXPRESSION wide-eyed] (salvage cut their lines)', '[Tobin: COMFORT 1 he said too much] (salvage cut their lines)'])
     // The parsed tags stay in the trace as the writer wrote them.
-    expect(trace.tags.parsed.moods['tobin']).toBe('rattled')
+    expect(trace.tags.parsed.expressions['tobin']).toBe('wide-eyed')
   })
 
   it('keeps the tags of someone still in the kept prose, and of anyone on a turn nothing was cut from', async () => {
     const reacted = `Mara: "Only clerks carry seals."\nNARRATION: Tobin looks at the ground.\nTobin: "Seven, counting Pell."\n${TAGS}`
     const salvaged = await runTurn(fixture, yardScene(), ASK, scripted(plan(), reacted, reacted))
-    expect(salvaged.state.scene!.moods['tobin']).toBe('rattled')
-    expect(salvaged.trace.tags.dropped).toEqual([])
+    expect(salvaged.state.scene!.expressions['tobin']).toBe('wide-eyed')
+    expect(salvaged.trace.tags.dropped).toEqual(['[Tobin: MOOD rattled]'])
     const clean = await runTurn(fixture, yardScene(), ASK, scripted(plan(), `Mara: "Only clerks carry seals."\nNARRATION: Rain on the crates.\n${TAGS}`))
     expect(clean.trace.rewrite).toBeUndefined()
     expect(clean.state.scene!.comfort['tobin']).toBe(1)

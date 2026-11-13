@@ -1,9 +1,9 @@
-import type { Character, Haunt } from '@engine/characters'
+import { feelingProblem, type Character, type Haunt } from '@engine/characters'
 import { GATED_ACTIONS, type Ruleset } from '@engine/rules'
 import type { CodexEntry } from '@engine/codex'
 
 /**
- * Checks a character card's milestone-4a fields against the ruleset's vocabularies (npc design §3–8): age, haunts,
+ * Checks a character card's milestone-4 fields against the ruleset's vocabularies (npc design §3–8): age, the default mood, haunts,
  * layers, expression, gates and blockers, motives, growth words, and per-secret disclosure minimums. Problems stop the
  * pack, as does a card incomplete for its tier (`cardFormProblems`).
  */
@@ -23,6 +23,8 @@ export function cardProblems(r: Ruleset, codex: CodexEntry[], c: Character): str
   }
 
   if (c.age !== undefined) bad('age', c.age, p.ages.stages)
+  const mood = feelingProblem(r, c.mood)
+  if (mood) problems.push(`${c.id}: default mood: ${mood}`)
 
   const places = new Set(codex.filter((e) => e.kind === 'location').map((e) => e.id))
   c.haunts.forEach((h, i) => {

@@ -148,7 +148,7 @@
       ]
     }
   ],
-  "mood": "anxious, ears back, wishes it were quieter",
+  "mood": { "text": "anxious, ears back, wishes it were quieter", "shade": "worry", "intensity": 3 },
   "knowledge": [
     "He has serviced the Drowned Saints' skim pump in Pump Station Nine's upper gallery for two years; the lower level floods with the tide around midnight",
     "The big wheel-valves can drain the lower level for about twenty minutes, if someone turns them in the right order and the seals hold; he knows the order",

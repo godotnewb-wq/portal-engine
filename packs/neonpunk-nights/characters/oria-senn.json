@@ -140,7 +140,7 @@
       "days": "weekdays"
     }
   ],
-  "mood": "composed, slightly too polished, impatient underneath",
+  "mood": { "text": "composed, slightly too polished, impatient underneath", "shade": "irritation", "intensity": 2 },
   "knowledge": [
     "The job: retrieve a sealed case from Pump Station Nine's flooded lower level before a rival crew does",
     "The lower level fills with the tide around midnight",

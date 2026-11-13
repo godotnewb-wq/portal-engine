@@ -94,7 +94,7 @@
       "note": "at the canteen under the platform, all night"
     }
   ],
-  "mood": "loud, busy, counting the book",
+  "mood": { "text": "loud, busy, counting the book", "shade": "excitement", "intensity": 2 },
   "knowledge": [
     "Kesh, the conductor of car 14, sits at the canteen after her shift every morning and never eats",
     "Tam Dace eats at the canteen after his rounds and argues about whose district goes dark next",

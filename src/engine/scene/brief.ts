@@ -1,6 +1,7 @@
 import { mentions, tokensOf } from '@engine/codex'
 import { firstName } from '@engine/core'
-import { caresAbout, nature, tagWord, type Character, type TieTag } from '@engine/characters'
+import { caresAbout, feelingWords, nature, tagWord, type Character, type TieTag } from '@engine/characters'
+import { shown } from './feelings'
 import { characterById, locationById, type Pack } from '@engine/pack'
 import { meterWords, type Ruleset } from '@engine/rules'
 import type { GameState, Relation } from '@engine/state'
@@ -317,6 +318,17 @@ export function closeTies(content: Pack, state: GameState, c: Character): string
 }
 
 /** The always-on part of a brief, before any optional detail. */
+/**
+ * What they feel now and how much of it shows (npc design §7, milestone 4b), with their comfort: the director plays the
+ * scene through the feeling and sees what others can see of it.
+ */
+function moodLine(content: Pack, state: GameState, id: string): string {
+  const scene = state.scene!
+  const f = scene.moods[id]
+  const s = f ? shown(content, state, id, f) : undefined
+  return `Mood now: ${feelingWords(content.ruleset, f)}${s ? `; it shows as: ${s.band}` : ''}. Comfort ${scene.comfort[id] ?? 3}/5.`
+}
+
 export function recurringLines(content: Pack, state: GameState, c: Character, tierWords: string): string[] {
   const r = content.ruleset
   const scene = state.scene!
@@ -336,7 +348,7 @@ export function recurringLines(content: Pack, state: GameState, c: Character, ti
     natureLine && `Nature: ${natureLine}`,
     cares && `Cares about: ${cares}`,
     `Tonight: ${c.agenda.current}`,
-    `Mood now: ${scene.moods[c.id] ?? c.mood}. Comfort ${scene.comfort[c.id] ?? 3}/5.`,
+    moodLine(content, state, c.id),
     meters && `Toward the player: ${meterWords(r, meters)}${playerTie ? ` · ${[tagsForDirector(r, playerTie.tags), playerTie.note].filter(Boolean).join(': ')}` : ''}`,
     others.length > 0 && `Toward others here: ${others.join('; ')}`,
     ties && `Close ties, not here: ${ties}`

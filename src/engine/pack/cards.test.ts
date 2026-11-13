@@ -47,6 +47,11 @@ describe('cardProblems', () => {
     ])
   })
 
+  it('holds the default mood to the ruleset’s shades (milestone 4b)', () => {
+    expect(check({ mood: { text: 'cheery', shade: 'happy', intensity: 2 } })).toEqual(['mara: default mood: "happy" isn\'t a shade'])
+    expect(check({ mood: { text: 'raw', shade: 'sore', intensity: 2 } })).toEqual(['mara: default mood: "sore" needs its family: sad or mad'])
+  })
+
   it('checks gates, blockers and disclosure minimums against the actions, meters and ladder', () => {
     const secret = { ...mara.secrets[0]!, disclose: { bond: 'besties', trust: 'fair' } }
     expect(check({ gates: { assist: { base: { bond: 'warm' } }, flirt: {} }, blockers: [{ action: 'marry', reason: 'x' }], secrets: [secret] })).toEqual([

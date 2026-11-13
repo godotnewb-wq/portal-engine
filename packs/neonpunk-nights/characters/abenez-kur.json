@@ -91,7 +91,7 @@
       "note": "in the clinic, every hour he isn't elsewhere"
     }
   ],
-  "mood": "calm, tired, careful",
+  "mood": { "text": "calm, tired, careful", "shade": "nervousness", "intensity": 1 },
   "knowledge": [
     "The clinic runs on donations, and the burn gel is out until Thursday",
     "Someone at the Grid leaves the clinic a note before every planned blackout",

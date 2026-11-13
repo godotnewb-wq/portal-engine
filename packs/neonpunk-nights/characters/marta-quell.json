@@ -107,7 +107,7 @@
       ]
     }
   ],
-  "mood": "dogged, polite, unconvinced",
+  "mood": { "text": "dogged, polite, unconvinced", "shade": "frustration", "intensity": 2 },
   "knowledge": [
     "A magistrate's warrant names a family of four the Council wants returned off-world",
     "The family was last seen near Kettle Court in the Seep",

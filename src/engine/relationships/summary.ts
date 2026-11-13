@@ -1,4 +1,4 @@
-import { caresAbout, type Character, type Meters } from '@engine/characters'
+import { caresAbout, feelingWords, type Character, type Meters } from '@engine/characters'
 import { meterWords, type Ruleset } from '@engine/rules'
 import { type GameState, type Memory, type Relation } from '@engine/state'
 import { characterById, locationById, type Pack } from '@engine/pack'
@@ -12,6 +12,15 @@ import { firstName } from '@engine/core'
  */
 export type MeterDelta = Record<string, number>
 const noChange = (r: Ruleset): MeterDelta => Object.fromEntries(r.meters.list.map((m) => [m.id, 0]))
+
+/**
+ * What a witness saw through to this scene (npc design §7, milestone 4b): the reading checks they won, latest per
+ * person, so their memory can hold what someone really felt rather than what showed.
+ */
+function reads(state: GameState, id: string): { target: string; feeling: NonNullable<GameState['scene']>['moods'][string] }[] {
+  const all = state.scene!.turns.flatMap((t) => t.reads ?? []).filter((x) => x.by === id)
+  return [...new Map(all.map((x) => [x.target, x])).values()]
+}
 
 /** Everyone who saw the scene: those still here and those who left part-way. */
 export function witnesses(state: GameState): string[] {
@@ -77,7 +86,8 @@ function about(r: Ruleset, state: GameState, c: Character, others: Character[]):
     `- Before this scene, toward ${state.player.name}: ${meterWords(r, meters)}`,
     ...relations,
     memories.length > 0 && `- Remembers: ${memories.map((m) => m.text).join(' ')}`,
-    `- Mood at the end: ${scene.moods[c.id] ?? c.mood}; comfort ${scene.comfort[c.id] ?? 3}/5.`,
+    `- Mood at the end: ${feelingWords(r, scene.moods[c.id])}; comfort ${scene.comfort[c.id] ?? 3}/5.`,
+    ...reads(state, c.id).map((x) => `- ${me} saw through to what ${firstName(others.find((o) => o.id === x.target)?.name ?? x.target)} really felt: ${feelingWords(r, x.feeling)}.`),
     scene.departed.includes(c.id) && `- ${me} left before the scene was over; the memory ends with leaving.`
   ]
     .filter(Boolean)

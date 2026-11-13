@@ -47,7 +47,7 @@ describe('the shipped scenarios', () => {
     const warm = scenarios.find((s) => s.id === 'warmth-gone-wrong')!
     const state = scenarioState(content, warm)
     expect(state.meters['vex']).toEqual({ approval: 12, trust: 15, interest: 8 })
-    expect(state.scene!.moods['vex']).toMatch(/a drink in/)
+    expect(state.scene!.moods['vex']).toMatchObject({ shade: 'delight', family: 'joy', intensity: 2, text: expect.stringMatching(/a drink in/) })
     expect(state.scene!.cast).toEqual(['vex', 'brask', 'dunmar'])
   })
 })

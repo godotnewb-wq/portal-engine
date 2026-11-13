@@ -1,5 +1,6 @@
 import { z } from 'zod'
 import type { CheckResult, Difficulty, Ruleset, Skill } from '@engine/rules'
+import { feelingLabel, type Feeling } from '@engine/characters'
 import type { Scene } from '@engine/state'
 import { characterById, type Pack } from '@engine/pack'
 
@@ -19,6 +20,8 @@ export const PlannedCheckSchema = z.object({
   who: z.string(),
   skill: z.string(),
   difficulty: z.string(),
+  /** Who is being read, for a check that reads someone (milestone 4b). */
+  target: z.string().optional().catch(undefined),
   stakes: text,
   /** Suggested with a reason; the game applies it, never stacked. */
   edge: z.enum(['advantage', 'disadvantage']).optional().catch(undefined),
@@ -30,6 +33,8 @@ export interface PlannedCheck {
   who: string
   skill: Skill
   difficulty: Difficulty
+  /** Who a reading check reads: a character present. Its difficulty is the game's, from their masking (npc design §7). */
+  target?: string
   stakes: string
   edge?: 'advantage' | 'disadvantage'
   /** Filled in by the game once rolled. */
@@ -41,14 +46,16 @@ export interface PlannedCheck {
 }
 
 /**
- * A speaker's brief after validation. The situation plan fills `pressure`, `hiding`, `approach`, `kept`, `tell` and
- * `framing`. `point`, `knows` and `depends_on_check` come only from turns logged by the retired line-plan director;
- * read-outs of older logs still read them.
+ * A speaker's brief after validation. The situation plan fills `feels`, `pressure`, `hiding`, `approach`, `kept`,
+ * `tell` and `framing`. `mood` (free text, before milestone 4b's `feels`), `point`, `knows` and `depends_on_check`
+ * come only from older logs; read-outs still read them.
  */
 export interface PlannedSpeaker {
   id: string
   intent: string
-  mood: string
+  /** What they feel now, checked against the ruleset (npc design §7). Left out, their feeling from before carries. */
+  feels?: Feeling
+  mood?: string
   /** How hard their aim for the scene presses this turn, as a ruleset pressure word. */
   pressure?: string
   /** The secrets they keep this turn, in full, for the writer. */
@@ -64,6 +71,9 @@ export interface PlannedSpeaker {
   knows?: string
   depends_on_check?: string
 }
+
+/** A speaker's or reaction's feeling for read-outs: `feels` as a label, or an older log's mood words. */
+export const moodOf = (s: { feels?: Feeling; mood?: string }): string => (s.feels ? feelingLabel(s.feels) : (s.mood ?? ''))
 
 /**
  * One line of the turn's conversation, for read-outs: who says it, what it answers (the player, or an earlier line
@@ -104,12 +114,22 @@ export interface LoreLine {
   who?: string
 }
 
+/** A reading check that succeeded (npc design §7): who saw through to what someone really feels, and what that was. */
+export interface Read {
+  by: string
+  target: string
+  feeling: Feeling
+}
+
 /** The validated plan. `exchange` is derived from `moves`, for read-outs and the beat trace. */
 export interface BeatPlan {
   speakers: PlannedSpeaker[]
   exchange: ExchangeLine[]
-  reactions: { id: string; beat: string }[]
+  /** Silent beats; `feels` when something lands on them (milestone 4b). */
+  reactions: { id: string; beat: string; feels?: Feeling }[]
   checks: PlannedCheck[]
+  /** Reading checks that succeeded this turn, once rolled (`settlePlan`). */
+  reads?: Read[]
   walk_ons: { id: string; line: string }[]
   texture: string[]
   avoid: string[]

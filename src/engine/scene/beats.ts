@@ -4,7 +4,8 @@ import { plainName } from '@engine/core'
 /**
  * The writer's output format: one beat per line, `NARRATION: …` or `Name: …`, with hidden tags in square brackets
  * anywhere (director writer §5). Tag grammar:
- *   [Name: EXPRESSION smirk]   [Name: COMFORT 2 too loud]   [Name: MOOD wary]   [LEAVES: Name]   [END SCENE]
+ *   [Name: EXPRESSION smirk]   [Name: COMFORT 2 too loud]   [LEAVES: Name]   [END SCENE]
+ * The `MOOD` tag was retired in milestone 4b (the director's `feels` owns felt emotion); one written anyway is dropped.
  */
 export const NARRATION = 'NARRATION'
 
@@ -20,7 +21,6 @@ export interface Speaker {
 export interface Tags {
   expressions: Record<string, string>
   comfort: Record<string, { level: number; reason: string }>
-  moods: Record<string, string>
   leaves: string[]
   ended: boolean
 }
@@ -67,7 +67,7 @@ function parseTag(body: string, speakers: Speaker[], tags: Tags, dropped: string
     else dropped.push(raw)
     return
   }
-  const named = body.match(/^\s*([^:]+?)\s*:\s*(EXPRESSION|COMFORT|MOOD)\s*:?\s*(.*?)\s*$/i)
+  const named = body.match(/^\s*([^:]+?)\s*:\s*(EXPRESSION|COMFORT)\s*:?\s*(.*?)\s*$/i)
   const s = named ? who(named[1]!, speakers) : undefined
   if (!named || s?.kind !== 'cast') {
     dropped.push(raw)
@@ -76,7 +76,6 @@ function parseTag(body: string, speakers: Speaker[], tags: Tags, dropped: string
   const kind = named[2]!.toUpperCase()
   const value = named[3]!
   if (kind === 'EXPRESSION' && value) tags.expressions[s.id] = value.toLowerCase().split(/[\s,;]+/)[0]!
-  else if (kind === 'MOOD' && value) tags.moods[s.id] = value
   else if (kind === 'COMFORT') {
     const m = value.match(/^([1-5])\b\s*(.*)$/)
     if (m) tags.comfort[s.id] = { level: Number(m[1]), reason: m[2]!.replace(/^[-–—,:]\s*/, '') }
@@ -148,7 +147,7 @@ function dialogueBeats(raw: string, s: Speaker): Beat[] {
 
 /** Reads the writer's reply into beats and tags. Lenient: an unlabelled line is narration. */
 export function parseReply(reply: string, speakers: Speaker[]): ParsedReply {
-  const tags: Tags = { expressions: {}, comfort: {}, moods: {}, leaves: [], ended: false }
+  const tags: Tags = { expressions: {}, comfort: {}, leaves: [], ended: false }
   const droppedTags: string[] = []
   const unknownSpeakers: string[] = []
   const reshaped: number[] = []

@@ -107,7 +107,7 @@
       ]
     }
   ],
-  "mood": "sharp, tired, braced for an argument",
+  "mood": { "text": "sharp, tired, braced for an argument", "shade": "frustration", "intensity": 2 },
   "knowledge": [
     "The Grid's load-shedding schedules go out to its crews in sealed Courier packets, and the Wheelhouse carries them",
     "Vex has saved a little over half the fee for a route license and takes every night run to get there",

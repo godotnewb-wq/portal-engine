@@ -2,6 +2,7 @@ import { z } from 'zod'
 import type { Prompt } from '@engine/core'
 import { firstName } from '@engine/core'
 import { characterById, locationById, type Pack } from '@engine/pack'
+import { moodOf } from '@engine/scene'
 import { FLAG_REASONS, RATINGS, type FlagReason, type Rating } from './flags'
 import { itemsFor, type ScorableTurn } from './rubric'
 
@@ -86,8 +87,8 @@ export function buildScorerPrompt(content: Pack, turn: ScorableTurn, locationId:
     .join('\n\n')
 
   const planLines = [
-    ...plan.speakers.map((s) => `- ${nameOf(s.id)} speaks. Intent: ${s.intent}${s.mood ? `; mood: ${s.mood}` : ''}${s.hiding ? `; hiding: ${s.hiding} (${s.approach ?? 'deflect'})` : ''}${s.depends_on_check ? `; depends on check ${s.depends_on_check}` : ''}`),
-    ...plan.reactions.map((r) => `- ${nameOf(r.id)} reacts (no dialogue): ${r.beat}`),
+    ...plan.speakers.map((s) => `- ${nameOf(s.id)} speaks. Intent: ${s.intent}${moodOf(s) ? `; feels: ${moodOf(s)}` : ''}${s.hiding ? `; hiding: ${s.hiding} (${s.approach ?? 'deflect'})` : ''}${s.depends_on_check ? `; depends on check ${s.depends_on_check}` : ''}`),
+    ...plan.reactions.map((r) => `- ${nameOf(r.id)} reacts (no dialogue): ${r.beat}${r.feels ? `; feels: ${moodOf(r)}` : ''}`),
     ...plan.walk_ons.map((w) => `- Walk-on ${nameOf(w.id)}: ${w.line}`),
     plan.texture.length > 0 && `- Texture: ${plan.texture.join('; ')}`,
     plan.contrast && `- Contrast: ${plan.contrast}`,

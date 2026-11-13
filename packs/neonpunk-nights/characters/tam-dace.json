@@ -106,7 +106,7 @@
       "days": "weekdays"
     }
   ],
-  "mood": "cheerful, defensive the moment his sister speaks",
+  "mood": { "text": "cheerful, defensive the moment his sister speaks", "shade": "delight", "intensity": 2 },
   "knowledge": [
     "The Kiln substation's load-shedding schedule says which Bulk districts go dark, and when; it comes in a sealed packet",
     "The Wheel goes dark next on Thursday night, for six hours",

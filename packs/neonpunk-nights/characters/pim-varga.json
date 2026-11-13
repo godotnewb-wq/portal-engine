@@ -93,7 +93,7 @@
       "note": "on her stoop, collecting rent and gossip"
     }
   ],
-  "mood": "nosy, cheerful, guilty underneath",
+  "mood": { "text": "nosy, cheerful, guilty underneath", "shade": "guilt", "intensity": 2 },
   "knowledge": [
     "Brask's workshop lease is up at the end of the season",
     "A Grid surveyor, Corvin Hale, has made her an offer for the building; it's more than she'll ever see otherwise",

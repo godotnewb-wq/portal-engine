@@ -103,7 +103,7 @@
       ]
     }
   ],
-  "mood": "watchful, wiping glasses, pretending not to listen",
+  "mood": { "text": "watchful, wiping glasses, pretending not to listen", "shade": "worry", "intensity": 1 },
   "knowledge": [
     "He worked Pump Station Nine for the Spire Council as a young man, before the lower levels flooded; that's where the burns came from",
     "The Drowned Saints raised the tithe on the lower stairs this month",

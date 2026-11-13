@@ -1,6 +1,6 @@
 import type { Usage } from './repeats'
 import type { CallTrace } from '@engine/core'
-import type { Meters } from '@engine/characters'
+import { feelingLabel, type Feeling, type Meters } from '@engine/characters'
 import type { Beat, GameState } from '@engine/state'
 import type { Degree, Edge } from '@engine/rules'
 import { characterById, type Pack } from '@engine/pack'
@@ -62,7 +62,9 @@ export interface TurnTrace {
 /** How someone in the scene stood, before or after a turn. */
 export interface CastSnapshot {
   id: string
+  /** What they feel, as a label; `feeling` holds it whole (milestone 4b; older logs have the mood's words only). */
   mood: string
+  feeling?: Feeling
   comfort: number
   expression: string
   /** Toward the player. */
@@ -114,7 +116,8 @@ export function castSnapshot(state: GameState): CastSnapshot[] {
   if (!scene) return []
   return scene.cast.map((id) => ({
     id,
-    mood: scene.moods[id] ?? '',
+    mood: feelingLabel(scene.moods[id]),
+    ...(scene.moods[id] && { feeling: scene.moods[id] }),
     comfort: scene.comfort[id] ?? 3,
     expression: scene.expressions[id] ?? 'neutral',
     ...(state.meters[id] && { meters: state.meters[id] }),

@@ -57,7 +57,7 @@ Each pack keeps its own in `bench/*.json`:
 | `location`, `cast` | Where, and who is present (ids from the pack). |
 | `seed` | Dice seed. |
 | `forceNatural` | Every check's die shows this number (e.g. 18 to make a check succeed, 3 to make it fail). |
-| `meters`, `moods`, `comfort` | Starting feelings toward the player (in the ruleset's meters), moods and comfort, overriding the character files. |
+| `meters`, `moods`, `comfort` | Starting feelings toward the player (in the ruleset's meters), moods and comfort, overriding the character files. A mood is a feeling in the ruleset's words (milestone 4b): `shade`, `family` when the shade has several, `intensity` 1–5, and optional `text` or `reason`. |
 | `history` | Turns already played in the scene, verbatim (scenarios made from logs carry these). |
 | `turns` | The player's lines, in order. |
 | `expectedCheck` | Optional `turn` (1-based), `who`, and `skill`. Reports flag the scenario if that roll does not happen. |

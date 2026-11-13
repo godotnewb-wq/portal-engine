@@ -16,7 +16,7 @@ describe('game state', () => {
   it('opens a scene with the cast’s moods, the walk-ons and a meter baseline', () => {
     const state = yardScene()
     expect(state.scene).toMatchObject({ locationId: 'the-yard', cast: ['mara', 'tobin'], walkOns: ['clerk'] })
-    expect(state.scene!.moods['tobin']).toBe('uneasy')
+    expect(state.scene!.moods['tobin']).toEqual({ shade: 'sore', family: 'sad', intensity: 2, text: 'uneasy' })
     expect(state.scene!.baseline['mara']).toEqual({ warmth: 2, bond: 3 })
     expect(() => startScene(fixture, state, 'nowhere', [])).toThrow(/nowhere/)
   })

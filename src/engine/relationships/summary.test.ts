@@ -13,6 +13,18 @@ function played(): GameState {
   return state
 }
 
+describe('feelings in the summary (milestone 4b)', () => {
+  it('gives each witness their mood in words, and what they saw through to with a reading check', () => {
+    const state = played()
+    state.scene!.moods['tobin'] = { shade: 'sore', family: 'mad', intensity: 4, reason: 'she keeps asking' }
+    state.scene!.turns[0]!.reads = [{ by: 'mara', target: 'tobin', feeling: { shade: 'sore', family: 'mad', intensity: 4, reason: 'she keeps asking' } }]
+    expect(buildSummaryPrompt(fixture, state, 'mara').user).toContain('- Mara saw through to what Tobin really felt: sore (mad), 4 of 5: she keeps asking.')
+    const tobin = buildSummaryPrompt(fixture, state, 'tobin').user
+    expect(tobin).toContain('- Mood at the end: sore (mad), 4 of 5: she keeps asking; comfort 3/5.')
+    expect(tobin).not.toContain('saw through')
+  })
+})
+
 describe('summaries in the pack’s meters and words', () => {
   it('asks for the ruleset’s meters, in its scale words, with what each meter means', () => {
     const { system, user } = buildSummaryPrompt(fixture, played(), 'mara')
