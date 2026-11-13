@@ -1,6 +1,6 @@
 // Adapted from Breedhaven University, src/main/saves/store.ts (GPL-3.0-only). See NOTICE.md.
 
-import { existsSync, mkdirSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs'
+import { closeSync, existsSync, fsyncSync, mkdirSync, openSync, readFileSync, renameSync, rmSync, statSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { GameState } from '@engine/state'
 import { SaveFileSchema, SAVE_VERSION, SLOT_IDS, slotLabel, type SaveFile, type SavePack, type SaveSummary, type SlotId } from '@engine/state'
@@ -17,6 +17,7 @@ export class SaveStore {
   ) {}
 
   list(): SaveSummary[] {
+    this.sweep()
     return SLOT_IDS.flatMap((slotId): SaveSummary[] => {
       const path = this.path(slotId)
       if (!existsSync(path)) return []
@@ -33,9 +34,16 @@ export class SaveStore {
     const kept = name ?? this.nameOf(slotId)
     const file: SaveFile = { version: SAVE_VERSION, pack: this.pack, savedAt: now.toISOString(), ...(kept ? { name: kept } : {}), state }
     mkdirSync(this.dir, { recursive: true })
-    // Write to a temporary file first so a crash mid-write can't destroy the existing save.
+    // Write to a temporary file first so a crash mid-write can't destroy the existing save, and flush it to disk before
+    // the rename, so a crash just after can't leave the slot pointing at a file whose contents never reached the disk.
     const path = this.path(slotId)
-    writeFileSync(`${path}.tmp`, JSON.stringify(file))
+    const fd = openSync(`${path}.tmp`, 'w')
+    try {
+      writeFileSync(fd, JSON.stringify(file))
+      fsyncSync(fd)
+    } finally {
+      closeSync(fd)
+    }
     renameSync(`${path}.tmp`, path)
     return summarize(slotId, file)
   }
@@ -63,6 +71,11 @@ export class SaveStore {
     } catch {
       return undefined
     }
+  }
+
+  /** Removes the temporary file a write interrupted before its rename left behind; the slot's last save is untouched. */
+  private sweep(): void {
+    for (const slotId of SLOT_IDS) rmSync(`${this.path(slotId)}.tmp`, { force: true })
   }
 
   private path(slotId: SlotId): string {
