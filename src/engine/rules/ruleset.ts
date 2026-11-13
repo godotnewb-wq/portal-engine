@@ -138,7 +138,21 @@ export const RulesetSchema = z.object({
       /** An authored character starting with more secrets than this gets an authoring warning. */
       startingSecrets: z.number().int().min(0).default(3)
     })
-    .default({ fullWords: 120, sceneTokens: 1200, triggeredTokens: 800, loreLines: 3, linkedSecretTokens: 200, personalSecretTokens: 100, startingSecrets: 3 })
+    .default({ fullWords: 120, sceneTokens: 1200, triggeredTokens: 800, loreLines: 3, linkedSecretTokens: 200, personalSecretTokens: 100, startingSecrets: 3 }),
+  /**
+   * Director briefs (director writer §7, milestone 4a; *tune*): the rough token budget the whole scene's optional
+   * detail shares (knowledge, goals, contradictions, history notes, ties to people who aren't here), how many absent
+   * people one character and the scene may bring in (relationships §3), and how many names a Major Character's
+   * close-ties line holds.
+   */
+  briefs: z
+    .object({
+      detailTokens: z.number().int().min(0).default(500),
+      absentPerCharacter: z.number().int().min(0).default(3),
+      absentPerScene: z.number().int().min(0).default(6),
+      closeTies: z.number().int().min(0).default(3)
+    })
+    .default({ detailTokens: 500, absentPerCharacter: 3, absentPerScene: 6, closeTies: 3 })
 })
 export type Ruleset = z.infer<typeof RulesetSchema>
 

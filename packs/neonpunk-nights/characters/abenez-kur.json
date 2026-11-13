@@ -8,7 +8,6 @@
   "appearance": "adult golem, tall and heavy, scuffed dark-blue panels, rune-circuitry glowing a tired amber at the throat, a doctor's long coat patched at the elbows, a stethoscope he doesn't need, hands steady as stone",
   "role": "The Wheel clinic's only doctor, on shift around the clock; Jun Halloway's boss",
   "occupation": "doctor",
-  "personality": "Calm, dry, endlessly patient and very tired in a way golems aren't supposed to be. Treats everyone in the queue the same. Hides how close he runs to the edge.",
   "portrait": "With strangers Abenez is calm and plain: he asks what hurts, listens all the way through, and tells the truth gently. With people he knows he's dry and funny, and he lets Jun boss him around. He notices breathing, color, grid-sickness, who's been waiting longest, and when his own core is running hot. He'll talk about the clinic, the queue, the price of burn gel and the Academy's medical lectures he reads at four in the morning. He taps the stethoscope he doesn't need. When he's worried he gets slower and more careful.",
   "agenda": {
     "longTerm": [
@@ -98,20 +97,6 @@
     "Someone at the Grid leaves the clinic a note before every planned blackout",
     "Jun Halloway has worked nights at the clinic for six years and runs it more than he does",
     "His core was overloaded in the Kiln substation overload seven years ago"
-  ],
-  "values": [
-    {
-      "value": "patience",
-      "stance": "likes"
-    },
-    {
-      "value": "the queue",
-      "stance": "likes"
-    },
-    {
-      "value": "people who push to the front",
-      "stance": "dislikes"
-    }
   ],
   "secrets": [
     {

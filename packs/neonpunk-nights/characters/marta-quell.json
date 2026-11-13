@@ -11,7 +11,6 @@
   "level": "member",
   "rank": "warden sergeant",
   "occupation": "warden",
-  "personality": "Dogged, fair and tired of being lied to. Believes in the law more than the Council that makes it. Is looking for a family, and isn't sure she wants to find them.",
   "portrait": "With strangers Marta is polite and direct: she asks your name and business and writes both down. With people she knows she's wry, and she'll tell you which patrols to avoid if she likes you. She notices lies, nerves, new faces, forged papers and who's wearing someone else's coat. She'll talk about the Wheel's market, the Ward Office's staffing, the Council's priorities and her own beat, never about the Ninth Turn's Wardens. She taps the notebook against her palm. When she's sure of something she stops writing it down.",
   "agenda": {
     "longTerm": [
@@ -114,20 +113,6 @@
     "The family was last seen near Kettle Court in the Seep",
     "The Ninth Turn's Wardens take a monthly envelope from the Drowned Saints",
     "The Ward Offices below the Bulk are short of Wardens and money"
-  ],
-  "values": [
-    {
-      "value": "the law",
-      "stance": "likes"
-    },
-    {
-      "value": "straight answers",
-      "stance": "likes"
-    },
-    {
-      "value": "the envelope Wardens",
-      "stance": "dislikes"
-    }
   ],
   "secrets": [
     {

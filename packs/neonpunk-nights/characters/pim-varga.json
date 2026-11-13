@@ -8,7 +8,6 @@
   "appearance": "adult goblin woman in her sixties, small and wiry, grey-green skin, large ears weighed down with old brass rings, a shawl over a mechanic's coverall, a ring of keys at her belt",
   "role": "Owns Brask's workshop and three flats on the lower stairs; has lived on the Turn all her life",
   "occupation": "landlady",
-  "personality": "Sharp, sentimental and broke. Loves the lower stairs and is tired of them. Collects rent in person and gossip on the side.",
   "portrait": "With strangers Pim is sharp and nosy: she asks who you are, who you're seeing and what you're paying, and remembers all three. With people she knows she's sentimental and sly, and tells stories about the Turn before the water came. She notices whose rent is late, whose light is on, who's new, and which pipes are bleeding into her walls. She'll talk about the old days, her late husband's pumps, her tenants' business and what a flat on the stairs used to cost. She jingles the key ring. When she's guilty she brings people food.",
   "agenda": {
     "longTerm": [
@@ -100,20 +99,6 @@
     "A Grid surveyor, Corvin Hale, has made her an offer for the building; it's more than she'll ever see otherwise",
     "Her late husband, Arvo, kept the lower stairs' pumps running for forty years",
     "The Drowned Saints raised the tithe this month"
-  ],
-  "values": [
-    {
-      "value": "the old Turn",
-      "stance": "likes"
-    },
-    {
-      "value": "rent on time",
-      "stance": "likes"
-    },
-    {
-      "value": "the Grid",
-      "stance": "dislikes"
-    }
   ],
   "secrets": [
     {

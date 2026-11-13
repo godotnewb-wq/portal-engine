@@ -222,6 +222,34 @@
       }
     ]
   },
+  "brief": {
+    "budget": 500,
+    "used": 30,
+    "selected": [
+      {
+        "id": "mara.k1",
+        "owner": "mara",
+        "kind": "knows",
+        "rank": "answer",
+        "trigger": "player's words: yard",
+        "tokens": 12
+      },
+      {
+        "id": "mara.motive1",
+        "owner": "mara",
+        "kind": "motive",
+        "rank": "answer",
+        "trigger": "player's words: yard",
+        "tokens": 18
+      }
+    ],
+    "cut": [],
+    "dropped": [],
+    "recurring": {
+      "mara": 162,
+      "tobin": 124
+    }
+  },
   "findings": [],
   "remaining": [],
   "beats": [
@@ -522,6 +550,42 @@
       }
     ]
   },
+  "brief": {
+    "budget": 500,
+    "used": 44,
+    "selected": [
+      {
+        "id": "mara.k1",
+        "owner": "mara",
+        "kind": "knows",
+        "rank": "answer",
+        "trigger": "player's words: yard, clos",
+        "tokens": 12
+      },
+      {
+        "id": "mara.motive1",
+        "owner": "mara",
+        "kind": "motive",
+        "rank": "answer",
+        "trigger": "player's words: yard",
+        "tokens": 18
+      },
+      {
+        "id": "note.mara.tobin",
+        "owner": "mara",
+        "kind": "note",
+        "rank": "choice",
+        "trigger": "the pair spoke last turn",
+        "tokens": 14
+      }
+    ],
+    "cut": [],
+    "dropped": [],
+    "recurring": {
+      "mara": 160,
+      "tobin": 125
+    }
+  },
   "findings": [
     {
       "kind": "unplanned-speaker",
@@ -765,6 +829,17 @@
         "expansionTokens": 0
       }
     ]
+  },
+  "brief": {
+    "budget": 500,
+    "used": 0,
+    "selected": [],
+    "cut": [],
+    "dropped": [],
+    "recurring": {
+      "mara": 198,
+      "tobin": 124
+    }
   },
   "findings": [
     {
@@ -1026,6 +1101,42 @@
       }
     ]
   },
+  "brief": {
+    "budget": 500,
+    "used": 36,
+    "selected": [
+      {
+        "id": "mara.k1",
+        "owner": "mara",
+        "kind": "knows",
+        "rank": "answer",
+        "trigger": "named: Tobin",
+        "tokens": 12
+      },
+      {
+        "id": "note.mara.tobin",
+        "owner": "mara",
+        "kind": "note",
+        "rank": "answer",
+        "trigger": "named: Tobin",
+        "tokens": 14
+      },
+      {
+        "id": "mara.goal1",
+        "owner": "mara",
+        "kind": "goal",
+        "rank": "answer",
+        "trigger": "player's words: clerk",
+        "tokens": 10
+      }
+    ],
+    "cut": [],
+    "dropped": [],
+    "recurring": {
+      "mara": 198,
+      "tobin": 123
+    }
+  },
   "findings": [],
   "remaining": [],
   "beats": [
@@ -1248,6 +1359,33 @@
         "expansionTokens": 38
       }
     ]
+  },
+  "brief": {
+    "budget": 500,
+    "used": 35,
+    "selected": [
+      {
+        "id": "mara.motive1",
+        "owner": "mara",
+        "kind": "motive",
+        "rank": "choice",
+        "trigger": "addressed",
+        "tokens": 18
+      },
+      {
+        "id": "tie.mara.tobin",
+        "owner": "mara",
+        "kind": "absent",
+        "rank": "choice",
+        "trigger": "named last turn: Tobin",
+        "tokens": 17
+      }
+    ],
+    "cut": [],
+    "dropped": [],
+    "recurring": {
+      "mara": 192
+    }
   },
   "findings": [],
   "remaining": [],

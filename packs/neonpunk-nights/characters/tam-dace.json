@@ -11,7 +11,6 @@
   "level": "member",
   "rank": "meter-man",
   "occupation": "meter-man",
-  "personality": "Easygoing, likable, good at being liked. Wants to be taken seriously by exactly one person, his sister. Thinks he's working the Grid from the inside; might be right. Quietly braver than anyone gives him credit for.",
   "portrait": "With strangers Tam is friendly and chatty: he asks your name, remembers it, and has a story about your street. With people he knows he jokes, borrows things and gives them back better. With his sister he gets defensive in under a minute, every time. He notices meters, wiring, who's behind on a bill and who's stealing current, and he lets the poor ones slide. He'll talk about the Bulk, the substation's hum, the noodle shop under his flat and his flatmate Teo's exam long before he talks about the Grid. He fiddles with his scarf. When he's cornered he jokes, and when he's proud of something he doesn't tell anyone.",
   "agenda": {
     "longTerm": [
@@ -115,20 +114,6 @@
     "His sister Ilse dispatches for the Couriers at the Wheelhouse and thinks the Grid is killing their mother",
     "Their mother has been grid-sick since the Kiln substation's last overload",
     "He still owes about a third of his apprenticeship debt"
-  ],
-  "values": [
-    {
-      "value": "the lights on",
-      "stance": "likes"
-    },
-    {
-      "value": "his sister",
-      "stance": "likes"
-    },
-    {
-      "value": "being talked down to",
-      "stance": "dislikes"
-    }
   ],
   "secrets": [
     {

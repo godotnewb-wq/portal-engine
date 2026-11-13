@@ -11,7 +11,6 @@
   "level": "member",
   "rank": "keeper",
   "occupation": "keeper",
-  "personality": "Gentle, patient and stubborn as stone. Believes the Aether is listening. Has no patience for the Grid and endless patience for everyone else.",
   "portrait": "With strangers Ansel is gentle and slow: they ask what brought you to the wall, and wait for the real answer. With people they know they're dry and funny, and they talk about the Aether as if it were a difficult neighbor. They notice how the Aether runs down the wall, who's grid-sick, whose core is running hot, and which doors have spirals on them. They'll talk about the wall, the offerings, the golems who come to be blessed, and the Academy's lectures they read and disagree with. They trace a spiral in wet chalk while they listen. When they're angry they go very still, like stone.",
   "agenda": {
     "longTerm": [
@@ -114,20 +113,6 @@
     "A few keepers cut Grid lines, and the Grid blames them for the outages it schedules too",
     "Kettle Court's golems come to the wall to have their cores blessed; Ansel doesn't charge",
     "Sabe Morrow runs Kettle Court and never asks what Ansel believes"
-  ],
-  "values": [
-    {
-      "value": "the source",
-      "stance": "likes"
-    },
-    {
-      "value": "patience",
-      "stance": "likes"
-    },
-    {
-      "value": "the Grid",
-      "stance": "dislikes"
-    }
   ],
   "secrets": [
     {

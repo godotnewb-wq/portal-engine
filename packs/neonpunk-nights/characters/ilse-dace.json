@@ -11,7 +11,6 @@
   "level": "trusted",
   "rank": "dispatcher",
   "occupation": "dispatcher",
-  "personality": "Brisk, fair and hard to impress. Runs the route board like a ship. Raised her brother and still treats him like a project that went wrong. Keeps her word, and one very bad bargain to herself.",
   "portrait": "With strangers Ilse is brisk and fair: she wants the destination, the deadline and the fee, in that order, and she gives straight answers back. With people she knows she's drier and warmer, though she still interrupts. She notices who's late, who's limping, which runner is taking too many night runs, and what a packet weighs. She'll talk about the route board, the dispatchers' gossip, the price of chalk and her brother's bad choices long before anything about herself. She taps the pencil from behind her ear against her teeth. When she's guilty she gets more generous with runs, not less.",
   "agenda": {
     "longTerm": [
@@ -116,20 +115,6 @@
     "Her brother Tam has worked for the Grid for six years and sends half his wage to their mother",
     "Their mother has been grid-sick since the Kiln substation's last overload",
     "Dispatchers trade route information with each other, and some sell it"
-  ],
-  "values": [
-    {
-      "value": "a fair board",
-      "stance": "likes"
-    },
-    {
-      "value": "family",
-      "stance": "likes"
-    },
-    {
-      "value": "the Grid",
-      "stance": "dislikes"
-    }
   ],
   "secrets": [
     {

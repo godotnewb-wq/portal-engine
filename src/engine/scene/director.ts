@@ -1,9 +1,10 @@
 import type { Prompt } from '@engine/core'
 import type { Character } from '@engine/characters'
 import type { GameState, Turn } from '@engine/state'
-import { meterWords, type Ruleset } from '@engine/rules'
+import { type Ruleset } from '@engine/rules'
 import { characterById, locationById, type Pack } from '@engine/pack'
 import { recall } from '@engine/memory'
+import { tokensOf } from '@engine/codex'
 import { tierById } from '@engine/world'
 import { sceneFacts } from './facts'
 import { MAX_CHECKS, MAX_LINES, MAX_SPEAKERS, QUIET_TURNS, presentCast, silence } from './planShape'
@@ -12,6 +13,7 @@ import { turnLore, type TurnLore } from './lore'
 import { cueSecretLine, fullSecretLine, type SecretShown } from './secrets'
 import { willingHelpers, wouldDisclose } from './resolve'
 import { childGuard } from './guard'
+import { recurringLines, selectDetails, type BriefDetail, type Briefs } from './brief'
 
 /** How many past turns go into prompts verbatim; older ones live in the running summary. */
 export const RECENT_TURNS = 3
@@ -53,14 +55,33 @@ ${loreLines > 0 ? '  "lore": [{"entry","who","line"}],\n' : ''}  "change": "..."
 - framing: only when it matters, how a speaker colours what they say about the world (e.g. "bitter, street-level view").
 ${loreLines > 0 ? `- lore: at most ${loreLines} facts of world lore the writer may draw on this turn, when the conversation turns to the world; usually none. entry: the [id] of a lore entry given above. line: the fact in plain words, at most ${LORE_LINE_WORDS}, never dialogue. An insider entry needs who: a speaker it says knows it. A lore line is something to draw on, not a line to say.\n` : ''}- Don't repeat a fact already said unless someone asks again. A question asked and not answered gets an answer or a visible dodge.
 - change: what is different at the end of this turn: something decided, conceded, refused, revealed or learned. A check result that matters changes it.
-- reactions: everyone else present: silent, one line each (a look, a gesture, a move).
+- reactions: only the people present who don't speak this turn: one silent beat each (a look, a gesture, a move). Anyone in speakers or moves is never listed here; a speaker's own gestures go in the writing, not in reactions.
 - walk_ons: only when the player speaks to them, or they have news that changes things.
 - texture: at most one detail from the location, as a plain fact, or none.
 - Quiet characters are listed with what they care about: if the conversation touches it, they have something to say.
 - leaves: characters who walk out. end_scene: true only at a natural close.
 - Never decide, say or do anything for the player.`
 
-export function buildDirectorPrompt(content: Pack, state: GameState, input: string, lore: TurnLore = turnLore(content, state, input)): Prompt {
+/**
+ * Every present character's brief for this turn (director writer §7): the always-on part, the 3.5 secret display, and
+ * the optional detail chosen for this turn under the shared budget, with the trace of what was chosen and why.
+ */
+export function buildBriefs(content: Pack, state: GameState, input: string, lore: TurnLore = turnLore(content, state, input)): Briefs {
+  const present = presentCast(state.scene!)
+  const { details, trace } = selectDetails(content, state, input)
+  const sheets: Record<string, string> = {}
+  const recurring: Record<string, number> = {}
+  for (const id of present) {
+    const c = characterById(content, id)
+    if (!c) continue
+    const own = details.filter((d) => d.owner === id)
+    sheets[id] = sheet(content, state, c, lore.secrets, own)
+    recurring[id] = tokensOf(sheet(content, state, c, lore.secrets, []))
+  }
+  return { sheets, details, trace: { ...trace, recurring } }
+}
+
+export function buildDirectorPrompt(content: Pack, state: GameState, input: string, lore: TurnLore = turnLore(content, state, input), briefs: Briefs = buildBriefs(content, state, input, lore)): Prompt {
   const scene = state.scene
   if (!scene) throw new Error('No scene in progress')
   const location = locationById(content, scene.locationId)!
@@ -83,7 +104,7 @@ export function buildDirectorPrompt(content: Pack, state: GameState, input: stri
     lore.layers.scene.text && `# Lore of this place and the people here (background, not things to recite)\n${lore.layers.scene.text}`,
     walkOns.length > 0 && `# Walk-ons\n${walkOns.map((w) => `- ${w.label}${w.name ? ` (${w.name})` : ''} [id: ${w.id}]: ${w.species}; ${w.look}; ${w.manner}; ${w.role}`).join('\n')}`,
     `# The player: ${player.name} (${player.species}, ${player.pronouns})\n${player.appearance}. ${player.background}`,
-    `# Characters present\n${cast.map((c) => sheet(content, state, c, present, lore.secrets)).join('\n\n')}`,
+    `# Characters present\n${cast.map((c) => briefs.sheets[c.id]).join('\n\n')}`,
     childGuard(content, state)
   ]
     .filter(Boolean)
@@ -120,26 +141,14 @@ export function buildDirectorPrompt(content: Pack, state: GameState, input: stri
 }
 
 /**
- * A character as the director sees them. Knowledge and secrets carry the fact ids moves refer to, and each secret
- * shows as its cue or in full, as worked out for the turn.
+ * A character as the director sees them (director writer §7): the always-on brief, each held secret as its cue or in
+ * full (lore injection.md §7.1), and this turn's optional detail. Knowledge and secrets carry the fact ids moves
+ * refer to. The four layers appear as plain words, never as the writer's material.
  */
-export function sheet(content: Pack, state: GameState, c: Character, present: string[], secrets: SecretShown[]): string {
-  const scene = state.scene!
-  const meters = state.meters[c.id]
+export function sheet(content: Pack, state: GameState, c: Character, secrets: SecretShown[], details: BriefDetail[]): string {
   const memories = recall(content.ruleset, state, c)
-  const relations = state.relations
-    .filter((r) => r.from === c.id && present.includes(r.to))
-    .map((r) => `${characterById(content, r.to)?.name ?? r.to}: ${meterWords(content.ruleset, r.meters)}${r.note ? ` (${r.note})` : ''}`)
   return [
-    `## ${c.name} [id: ${c.id}] — ${TIER_WORDS[c.tier]}${state.party.includes(c.id) ? ', in the player\'s party' : ''}${c.age && content.ruleset.people.ages.minors.includes(c.age) ? `, ${c.age}` : ''}, ${c.species}, ${c.pronouns}`,
-    `Role: ${c.role}`,
-    `Personality: ${c.personality}`,
-    `With others: ${c.portrait}`,
-    `Agenda: ${c.agenda.longTerm.join('; ')}. Tonight: ${c.agenda.current}`,
-    `Contradictions: ${c.contradictions.join('; ')}`,
-    `Mood now: ${scene.moods[c.id] ?? c.mood}. Comfort ${scene.comfort[c.id] ?? 3}/5.`,
-    c.knowledge.length > 0 && `Knows:\n${c.knowledge.map((k, i) => `- [${c.id}.k${i + 1}] ${k}`).join('\n')}`,
-    c.values.length > 0 && `Values: ${c.values.map((v) => `${v.stance} ${v.value}`).join(', ')}`,
+    ...recurringLines(content, state, c, TIER_WORDS[c.tier]),
     ...c.secrets.map((s) => {
       const id = `${c.id}.${s.id}`
       const line = secrets.find((x) => x.id === id)?.form === 'cue' ? cueSecretLine(content, c, s, id) : fullSecretLine(c, s, id)
@@ -148,10 +157,9 @@ export function sheet(content: Pack, state: GameState, c: Character, present: st
       return `${line} ${wouldDisclose(content, state, c.id, s.id, 'player') ? 'Would tell the player now, if it fits.' : "Won't tell the player yet."}`
     }),
     `Lying tell: ${c.voice.shifts.lying}`,
-    meters && `Toward the player: ${meterWords(content.ruleset, meters)}`,
     memories.length > 0 && `Remembers: ${memories.map((m) => `(${m.level}) ${m.text}`).join(' ')}`,
     (state.facts[c.id] ?? []).length > 0 && `The player already knows: ${state.facts[c.id]!.join(' ')}`,
-    relations.length > 0 && `Toward others here: ${relations.join('; ')}`
+    details.length > 0 && `Relevant now:\n${details.map((d) => `- ${d.text}`).join('\n')}`
   ]
     .filter(Boolean)
     .join('\n')

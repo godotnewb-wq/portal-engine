@@ -11,7 +11,6 @@
   "level": "member",
   "rank": "line tech",
   "occupation": "line technician",
-  "personality": "Earnest, anxious, too honest for his own comfort. Loves the work and hates the company. Talks fast when he's interested, goes quiet when he's afraid. Wants someone to tell him it's all right to help.",
   "portrait": "With strangers Teo is polite and a little too eager to be useful, then embarrassed by it. With people he knows he talks shop for as long as anyone lets him and makes bad jokes about the company. He notices sounds: the coil's tick, a panel's hum, a lamp about to go. He'd rather talk about how things work, or the Phoenix Academy's entrance exam, than about himself, and he asks people about their jobs because he likes knowing how the city runs. He taps out rhythms on whatever is near. When he's frightened he goes quiet and agrees with whoever spoke last.",
   "agenda": {
     "longTerm": [
@@ -127,32 +126,6 @@
     "The grid drops this month have hit the same three districts",
     "Car 14's panel is an older model, the kind he trained on as an apprentice",
     "He shares a flat above a noodle shop by the market stop with three other Grid technicians, Tam Dace among them"
-  ],
-  "values": [
-    {
-      "value": "craftsmanship",
-      "stance": "likes"
-    },
-    {
-      "value": "honesty",
-      "stance": "likes"
-    },
-    {
-      "value": "curiosity",
-      "stance": "likes"
-    },
-    {
-      "value": "greed",
-      "stance": "dislikes"
-    },
-    {
-      "value": "cruelty",
-      "stance": "dislikes"
-    },
-    {
-      "value": "people who make him feel stupid",
-      "stance": "dislikes"
-    }
   ],
   "secrets": [
     {

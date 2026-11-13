@@ -50,6 +50,7 @@ The engine supplies the mechanics; the ruleset their parameters and words. See `
 - `party`: `max`, how many companions the player can have at once (default 3).
 - `memory`: `recall`, how many memories a character brings to a scene by tier (`recurring`, `major`; defaults 4 and 8).
 - `codex`: `fullWords`, the most words a codex entry's text may have (default 120); `sceneTokens` and `triggeredTokens`, rough budgets for the scene-scoped and triggered lore layers (defaults 800 and 400).
+- `briefs`: the director's briefs (director writer §7): `detailTokens`, the rough token budget the scene's optional detail shares (knowledge, goals, contradictions, history notes, ties to people not here; default 500), `absentPerCharacter` and `absentPerScene`, how many people not here one character and the scene may bring in (defaults 3 and 6), and `closeTies`, how many names a Major Character's close-ties line holds (default 3).
 - `pressures`: words for how hard a character's aim for the scene presses on them, weakest first (at least two). The weakest keeps the aim out of the writer's brief; the strongest makes it what drives them.
 
 ## setting.json, primer.md, tone.md, phrases.json

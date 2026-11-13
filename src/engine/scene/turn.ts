@@ -19,6 +19,8 @@ export interface TurnWritten {
   tags: Tags
   /** The dice's state after the plan's checks were rolled. */
   dice: number
+  /** Brief detail to carry into the next turn (`carryDetails`). */
+  details?: string[]
 }
 
 export function rolledChecks(plan: BeatPlan): RolledCheck[] {
@@ -110,6 +112,7 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
   }
   const kept = written.plan.speakers.flatMap((s) => s.kept ?? [])
   if (kept.length > 0) turn.kept = kept
+  if (written.details && written.details.length > 0) turn.details = written.details
   const plannedMoods = Object.fromEntries(written.plan.speakers.filter((s) => s.mood.trim()).map((s) => [s.id, s.mood]))
   const comfort = Object.fromEntries(Object.entries(only(written.tags.comfort)).map(([id, c]) => [id, c.level]))
   const leaving = [...new Set(written.plan.leaves)].filter((id) => present.has(id))

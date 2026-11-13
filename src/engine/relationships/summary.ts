@@ -1,4 +1,4 @@
-import type { Character, Meters } from '@engine/characters'
+import { caresAbout, type Character, type Meters } from '@engine/characters'
 import { meterWords, type Ruleset } from '@engine/rules'
 import { type GameState, type Memory, type Relation } from '@engine/state'
 import { characterById, locationById, type Pack } from '@engine/pack'
@@ -70,9 +70,9 @@ function about(r: Ruleset, state: GameState, c: Character, others: Character[]):
   const scene = state.scene!
   return [
     `About ${me} (${c.species}, ${c.pronouns}):`,
-    `- ${c.personality}`,
+    `- ${c.portrait}`,
     `- Wants: ${c.agenda.longTerm.join('; ')}. Tonight: ${c.agenda.current}`,
-    c.values.length > 0 && `- Values: ${c.values.map((v) => `${v.stance} ${v.value}`).join(', ')}`,
+    caresAbout(r, c) && `- Values: ${caresAbout(r, c)}`,
     ...c.secrets.map((s) => `- Secret [${s.id}]: ${s.text}`),
     `- Before this scene, toward ${state.player.name}: ${meterWords(r, meters)}`,
     ...relations,

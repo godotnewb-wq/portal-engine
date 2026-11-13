@@ -8,7 +8,6 @@
   "appearance": "teenage human boy of fifteen, gangly and still growing, untidy dark hair, his sister's tired brown eyes, burn-scarred apprentice's gloves tucked in his belt, a soot-streaked smock several sizes too big",
   "role": "Glassblower's apprentice on Glassblowers' Row; Jun Halloway's younger brother",
   "occupation": "apprentice",
-  "personality": "Restless, proud and kind. Hates the early starts and loves the glass. Wants to be useful to his sister and hates being looked after by her.",
   "portrait": "With strangers Rafe is shy for a minute and then can't stop talking, mostly about glass and the Coil Line. With people he knows he's cheeky and loud, and protective of his sister in a way he'd never admit. He notices color, heat, how things are made, and who's looking down on him for his age. He'll talk about the furnaces, the floats in the windows, his master's temper, the Couriers he'd like to run with and Jun's clinic, which he's proud of. He picks at the burn scars on his gloves. When he's caught out he gets loud.",
   "agenda": {
     "longTerm": [
@@ -109,20 +108,6 @@
     "Odile Marsh, his master, has the best hands on Glassblowers' Row and the worst temper",
     "The Wheelhouse pays a few cinders for short packets across the Wheel, and doesn't ask a runner's age",
     "Teo Varrin studies for the Phoenix Academy from borrowed books; Rafe thinks that's brave"
-  ],
-  "values": [
-    {
-      "value": "good glass",
-      "stance": "likes"
-    },
-    {
-      "value": "his sister",
-      "stance": "likes"
-    },
-    {
-      "value": "being treated like a kid",
-      "stance": "dislikes"
-    }
   ],
   "secrets": [
     {

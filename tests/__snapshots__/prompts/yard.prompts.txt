@@ -30,7 +30,7 @@ Return only this JSON object:
 - lore: at most 3 facts of world lore the writer may draw on this turn, when the conversation turns to the world; usually none. entry: the [id] of a lore entry given above. line: the fact in plain words, at most 30, never dialogue. An insider entry needs who: a speaker it says knows it. A lore line is something to draw on, not a line to say.
 - Don't repeat a fact already said unless someone asks again. A question asked and not answered gets an answer or a visible dodge.
 - change: what is different at the end of this turn: something decided, conceded, refused, revealed or learned. A check result that matters changes it.
-- reactions: everyone else present: silent, one line each (a look, a gesture, a move).
+- reactions: only the people present who don't speak this turn: one silent beat each (a look, a gesture, a move). Anyone in speakers or moves is never listed here; a speaker's own gestures go in the writing, not in reactions.
 - walk_ons: only when the player speaks to them, or they have news that changes things.
 - texture: at most one detail from the location, as a plain fact, or none.
 - Quiet characters are listed with what they care about: if the conversation touches it, they have something to say.
@@ -75,30 +75,30 @@ adult, travel-worn. A newcomer looking for work.
 
 # Characters present
 ## Mara Quill [id: mara] — major character, in the player's party, person, she/her
-Role: Guild tally-keeper who knows everyone in the yard
-Personality: Precise, wry, quietly kind; keeps lists of everything.
-With others: With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
-Agenda: Become the Guild's chief clerk. Tonight: Find out who keeps skimming the tallies
-Contradictions: Values honesty, and keeps two sets of books
+Who: Guild tally-keeper who knows everyone in the yard
+Cue: With strangers Mara is brisk; with friends she teases.
+Nature: closed, aloof
+Cares about: a ledger that balances (much) · rages: law
+Tonight: Find out who keeps skimming the tallies
 Mood now: busy, curious. Comfort 3/5.
-Knows:
-- [mara.k1] Tobin was in the yard after closing
-Values: likes honesty
+Toward the player: warmth: civil; bond: loose
+Toward others here: Tobin: rival · warmth: civil; bond: loose
 Secret [mara.two-books] (in short): Mara's part: she keeps the second ledger. The Guild keeps a second set of books. Won't tell the player yet.
 Lying tell: Gives exact numbers
-Toward the player: warmth: civil; bond: loose
-Toward others here: Tobin: warmth: civil; bond: loose (has known him since the guild took him on)
+Relevant now:
+- [mara.k1] Tobin was in the yard after closing
+- Bound to the player (coin, firm): she is paid to keep the yard honest
 
 ## Tobin [id: tobin] — recurring character, automaton, he/him
-Role: Night porter in the yard
-Personality: Slow, polite, literal; hums when nervous.
-With others: With strangers Tobin is shy; with friends he talks about the yard horses.
-Agenda: Earn his own key to the gate. Tonight: Keep anyone from asking about last night
-Contradictions: Never lies, and avoids every question
+Who: Night porter in the yard
+Cue: With strangers Tobin is shy; with friends he talks about the yard horses.
+Nature: soft
+Cares about: kin (some)
+Tonight: Keep anyone from asking about last night
 Mood now: uneasy. Comfort 3/5.
+Toward the player: warmth: civil; bond: loose · employer: took him on for the night shift last month
 Secret [tobin.after-closing] (in short): Tobin let someone into the yard after closing.
 Lying tell: Hums
-Toward the player: warmth: civil; bond: loose
 ----- user -----
 # The scene opens now.
 
@@ -155,7 +155,7 @@ With strangers Tobin is shy; with friends he talks about the yard horses.
 Rhythm: Slow, formal
 Vocabulary: Old-fashioned
 Sample lines: "I could not say, miss."
-When angry: Goes silent. Warm: Polishes his plates. Lying: Hums.
+When angry: Goes silent. Warm: Polishes his plates. Lying: Hums. Afraid: Repeats the rules.
 
 ## Mara
 With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
@@ -165,7 +165,7 @@ Rhythm: Short, exact sentences
 Vocabulary: Ledger words
 Words they might use, rarely: by the book
 Sample lines: "That doesn't add up." "Count it again."
-When angry: Lists your mistakes. Warm: Rounds in your favor. Lying: Gives exact numbers.
+When angry: Lists your mistakes. Warm: Rounds in your favor. Lying: Gives exact numbers. Afraid: Counts under her breath.
 ----- user -----
 # Where you are
 The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
@@ -182,6 +182,10 @@ Who was in the yard last night?
 # Who speaks
 - Tobin: in this exchange, change the subject. Mood: cornered. Tonight's aim is on their mind and may come up if it fits: Keep anyone from asking about last night. Keeping to themselves: Tobin let someone into the yard after closing. (deflect). It shows only as: Hums. Show it; nobody remarks on it unless their check to read them succeeded.
 - Mara: in this exchange, find out what Tobin knows. Mood: sharp. Tonight's aim is on their mind and may come up if it fits: Find out who keeps skimming the tallies.
+
+# How the speakers stand with the others here (facts about them, not how to play them)
+- Tobin → you: employer; took him on for the night shift last month
+- Mara → Tobin: rival; has known him since the guild took him on
 
 # The conversation, in order
 1. Tobin, answering the player: dodge
@@ -228,7 +232,7 @@ Return only this JSON object:
 - lore: at most 3 facts of world lore the writer may draw on this turn, when the conversation turns to the world; usually none. entry: the [id] of a lore entry given above. line: the fact in plain words, at most 30, never dialogue. An insider entry needs who: a speaker it says knows it. A lore line is something to draw on, not a line to say.
 - Don't repeat a fact already said unless someone asks again. A question asked and not answered gets an answer or a visible dodge.
 - change: what is different at the end of this turn: something decided, conceded, refused, revealed or learned. A check result that matters changes it.
-- reactions: everyone else present: silent, one line each (a look, a gesture, a move).
+- reactions: only the people present who don't speak this turn: one silent beat each (a look, a gesture, a move). Anyone in speakers or moves is never listed here; a speaker's own gestures go in the writing, not in reactions.
 - walk_ons: only when the player speaks to them, or they have news that changes things.
 - texture: at most one detail from the location, as a plain fact, or none.
 - Quiet characters are listed with what they care about: if the conversation touches it, they have something to say.
@@ -273,30 +277,31 @@ adult, travel-worn. A newcomer looking for work.
 
 # Characters present
 ## Mara Quill [id: mara] — major character, in the player's party, person, she/her
-Role: Guild tally-keeper who knows everyone in the yard
-Personality: Precise, wry, quietly kind; keeps lists of everything.
-With others: With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
-Agenda: Become the Guild's chief clerk. Tonight: Find out who keeps skimming the tallies
-Contradictions: Values honesty, and keeps two sets of books
+Who: Guild tally-keeper who knows everyone in the yard
+Cue: With strangers Mara is brisk; with friends she teases.
+Nature: closed, aloof
+Cares about: a ledger that balances (much) · rages: law
+Tonight: Find out who keeps skimming the tallies
 Mood now: sharp. Comfort 2/5.
-Knows:
-- [mara.k1] Tobin was in the yard after closing
-Values: likes honesty
+Toward the player: warmth: civil; bond: loose
+Toward others here: Tobin: rival · warmth: civil; bond: loose
 Secret [mara.two-books] (in short): Mara's part: she keeps the second ledger. The Guild keeps a second set of books. Won't tell the player yet.
 Lying tell: Gives exact numbers
-Toward the player: warmth: civil; bond: loose
-Toward others here: Tobin: warmth: civil; bond: loose (has known him since the guild took him on)
+Relevant now:
+- [mara.k1] Tobin was in the yard after closing
+- Bound to the player (coin, firm): she is paid to keep the yard honest
+- With Tobin: has known him since the guild took him on
 
 ## Tobin [id: tobin] — recurring character, automaton, he/him
-Role: Night porter in the yard
-Personality: Slow, polite, literal; hums when nervous.
-With others: With strangers Tobin is shy; with friends he talks about the yard horses.
-Agenda: Earn his own key to the gate. Tonight: Keep anyone from asking about last night
-Contradictions: Never lies, and avoids every question
+Who: Night porter in the yard
+Cue: With strangers Tobin is shy; with friends he talks about the yard horses.
+Nature: soft
+Cares about: kin (some)
+Tonight: Keep anyone from asking about last night
 Mood now: cornered. Comfort 3/5.
+Toward the player: warmth: civil; bond: loose · employer: took him on for the night shift last month
 Secret [tobin.after-closing]: Tobin let someone into the yard after closing. Tell: Hums.
 Lying tell: Hums
-Toward the player: warmth: civil; bond: loose
 ----- user -----
 # Last turns
 Kit: Who was in the yard last night?
@@ -369,7 +374,7 @@ With strangers Tobin is shy; with friends he talks about the yard horses.
 Rhythm: Slow, formal
 Vocabulary: Old-fashioned
 Sample lines: "I could not say, miss."
-When angry: Goes silent. Warm: Polishes his plates. Lying: Hums.
+When angry: Goes silent. Warm: Polishes his plates. Lying: Hums. Afraid: Repeats the rules.
 ----- user -----
 # Where you are
 The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
@@ -392,6 +397,9 @@ I'm not the Watch. Tell me who you let into the yard after closing, and I'll kee
 
 # Who speaks
 - Tobin: in this exchange, decide whether to trust Kit. Mood: torn. Tonight's aim is on their mind and may come up if it fits: Keep anyone from asking about last night. Keeping to themselves: Tobin let someone into the yard after closing. (partial truth). It shows only as: Hums. Show it; nobody remarks on it unless their check to read them succeeded.
+
+# How the speakers stand with the others here (facts about them, not how to play them)
+- Tobin → you: employer; took him on for the night shift last month
 
 # The conversation, in order
 1. Tobin, answering the player: concede (may draw on: Someone with a Guild seal knocked after closing. [new to the player]) (the check succeeded)
@@ -447,7 +455,7 @@ With strangers Tobin is shy; with friends he talks about the yard horses.
 Rhythm: Slow, formal
 Vocabulary: Old-fashioned
 Sample lines: "I could not say, miss."
-When angry: Goes silent. Warm: Polishes his plates. Lying: Hums.
+When angry: Goes silent. Warm: Polishes his plates. Lying: Hums. Afraid: Repeats the rules.
 ----- user -----
 # Where you are
 The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
@@ -470,6 +478,9 @@ I'm not the Watch. Tell me who you let into the yard after closing, and I'll kee
 
 # Who speaks
 - Tobin: in this exchange, decide whether to trust Kit. Mood: torn. Tonight's aim is on their mind and may come up if it fits: Keep anyone from asking about last night. Keeping to themselves: Tobin let someone into the yard after closing. (partial truth). It shows only as: Hums. Show it; nobody remarks on it unless their check to read them succeeded.
+
+# How the speakers stand with the others here (facts about them, not how to play them)
+- Tobin → you: employer; took him on for the night shift last month
 
 # The conversation, in order
 1. Tobin, answering the player: concede (may draw on: Someone with a Guild seal knocked after closing. [new to the player]) (the check succeeded)
@@ -526,7 +537,7 @@ Return only this JSON object:
 - lore: at most 3 facts of world lore the writer may draw on this turn, when the conversation turns to the world; usually none. entry: the [id] of a lore entry given above. line: the fact in plain words, at most 30, never dialogue. An insider entry needs who: a speaker it says knows it. A lore line is something to draw on, not a line to say.
 - Don't repeat a fact already said unless someone asks again. A question asked and not answered gets an answer or a visible dodge.
 - change: what is different at the end of this turn: something decided, conceded, refused, revealed or learned. A check result that matters changes it.
-- reactions: everyone else present: silent, one line each (a look, a gesture, a move).
+- reactions: only the people present who don't speak this turn: one silent beat each (a look, a gesture, a move). Anyone in speakers or moves is never listed here; a speaker's own gestures go in the writing, not in reactions.
 - walk_ons: only when the player speaks to them, or they have news that changes things.
 - texture: at most one detail from the location, as a plain fact, or none.
 - Quiet characters are listed with what they care about: if the conversation touches it, they have something to say.
@@ -571,30 +582,27 @@ adult, travel-worn. A newcomer looking for work.
 
 # Characters present
 ## Mara Quill [id: mara] — major character, in the player's party, person, she/her
-Role: Guild tally-keeper who knows everyone in the yard
-Personality: Precise, wry, quietly kind; keeps lists of everything.
-With others: With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
-Agenda: Become the Guild's chief clerk. Tonight: Find out who keeps skimming the tallies
-Contradictions: Values honesty, and keeps two sets of books
+Who: Guild tally-keeper who knows everyone in the yard
+Cue: With strangers Mara is brisk; with friends she teases.
+Nature: closed, aloof
+Cares about: a ledger that balances (much) · rages: law
+Tonight: Find out who keeps skimming the tallies
 Mood now: sharp. Comfort 2/5.
-Knows:
-- [mara.k1] Tobin was in the yard after closing
-Values: likes honesty
+Toward the player: warmth: civil; bond: loose
+Toward others here: Tobin: rival · warmth: civil; bond: loose
 Secret [mara.two-books]: Mara's part: she keeps the second ledger. A second ledger records what the yard really takes in. It is kept in the tally office, under the floor. How Mara feels about it: would rather lose her post than see it found. Tell: Gives exact numbers. Won't tell the player yet.
 Lying tell: Gives exact numbers
-Toward the player: warmth: civil; bond: loose
-Toward others here: Tobin: warmth: civil; bond: loose (has known him since the guild took him on)
 
 ## Tobin [id: tobin] — recurring character, automaton, he/him
-Role: Night porter in the yard
-Personality: Slow, polite, literal; hums when nervous.
-With others: With strangers Tobin is shy; with friends he talks about the yard horses.
-Agenda: Earn his own key to the gate. Tonight: Keep anyone from asking about last night
-Contradictions: Never lies, and avoids every question
+Who: Night porter in the yard
+Cue: With strangers Tobin is shy; with friends he talks about the yard horses.
+Nature: soft
+Cares about: kin (some)
+Tonight: Keep anyone from asking about last night
 Mood now: torn. Comfort 3/5.
+Toward the player: warmth: civil; bond: loose · employer: took him on for the night shift last month
 Secret [tobin.after-closing]: Tobin let someone into the yard after closing. Tell: Hums.
 Lying tell: Hums
-Toward the player: warmth: civil; bond: loose
 ----- user -----
 # Last turns
 Kit: Who was in the yard last night?
@@ -674,7 +682,7 @@ Rhythm: Short, exact sentences
 Vocabulary: Ledger words
 Words they might use, rarely: by the book
 Sample lines: "That doesn't add up." "Count it again."
-When angry: Lists your mistakes. Warm: Rounds in your favor. Lying: Gives exact numbers.
+When angry: Lists your mistakes. Warm: Rounds in your favor. Lying: Gives exact numbers. Afraid: Counts under her breath.
 ----- user -----
 # Where you are
 The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
@@ -700,6 +708,9 @@ Whose seal was it?
 
 # Who speaks
 - Mara: in this exchange, narrow it down without naming herself. Mood: careful. Tonight's aim drives what they do: Find out who keeps skimming the tallies.
+
+# How the speakers stand with the others here (facts about them, not how to play them)
+- Mara → Tobin: rival
 
 # The conversation, in order
 1. Mara, answering the player: answer (may draw on: Only clerks carry Guild seals. [new to the player])
@@ -759,7 +770,7 @@ Rhythm: Short, exact sentences
 Vocabulary: Ledger words
 Words they might use, rarely: by the book
 Sample lines: "That doesn't add up." "Count it again."
-When angry: Lists your mistakes. Warm: Rounds in your favor. Lying: Gives exact numbers.
+When angry: Lists your mistakes. Warm: Rounds in your favor. Lying: Gives exact numbers. Afraid: Counts under her breath.
 ----- user -----
 # Where you are
 The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
@@ -785,6 +796,9 @@ Whose seal was it?
 
 # Who speaks
 - Mara: in this exchange, narrow it down without naming herself. Mood: careful. Tonight's aim drives what they do: Find out who keeps skimming the tallies.
+
+# How the speakers stand with the others here (facts about them, not how to play them)
+- Mara → Tobin: rival
 
 # The conversation, in order
 1. Mara, answering the player: answer (may draw on: Only clerks carry Guild seals. [new to the player])
@@ -845,7 +859,7 @@ Return only this JSON object:
 - lore: at most 3 facts of world lore the writer may draw on this turn, when the conversation turns to the world; usually none. entry: the [id] of a lore entry given above. line: the fact in plain words, at most 30, never dialogue. An insider entry needs who: a speaker it says knows it. A lore line is something to draw on, not a line to say.
 - Don't repeat a fact already said unless someone asks again. A question asked and not answered gets an answer or a visible dodge.
 - change: what is different at the end of this turn: something decided, conceded, refused, revealed or learned. A check result that matters changes it.
-- reactions: everyone else present: silent, one line each (a look, a gesture, a move).
+- reactions: only the people present who don't speak this turn: one silent beat each (a look, a gesture, a move). Anyone in speakers or moves is never listed here; a speaker's own gestures go in the writing, not in reactions.
 - walk_ons: only when the player speaks to them, or they have news that changes things.
 - texture: at most one detail from the location, as a plain fact, or none.
 - Quiet characters are listed with what they care about: if the conversation touches it, they have something to say.
@@ -890,30 +904,31 @@ adult, travel-worn. A newcomer looking for work.
 
 # Characters present
 ## Mara Quill [id: mara] — major character, in the player's party, person, she/her
-Role: Guild tally-keeper who knows everyone in the yard
-Personality: Precise, wry, quietly kind; keeps lists of everything.
-With others: With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
-Agenda: Become the Guild's chief clerk. Tonight: Find out who keeps skimming the tallies
-Contradictions: Values honesty, and keeps two sets of books
+Who: Guild tally-keeper who knows everyone in the yard
+Cue: With strangers Mara is brisk; with friends she teases.
+Nature: closed, aloof
+Cares about: a ledger that balances (much) · rages: law
+Tonight: Find out who keeps skimming the tallies
 Mood now: careful. Comfort 2/5.
-Knows:
-- [mara.k1] Tobin was in the yard after closing
-Values: likes honesty
+Toward the player: warmth: civil; bond: loose
+Toward others here: Tobin: rival · warmth: civil; bond: loose
 Secret [mara.two-books]: Mara's part: she keeps the second ledger. A second ledger records what the yard really takes in. It is kept in the tally office, under the floor. How Mara feels about it: would rather lose her post than see it found. Tell: Gives exact numbers. Won't tell the player yet.
 Lying tell: Gives exact numbers
-Toward the player: warmth: civil; bond: loose
-Toward others here: Tobin: warmth: civil; bond: loose (has known him since the guild took him on)
+Relevant now:
+- [mara.k1] Tobin was in the yard after closing
+- With Tobin: has known him since the guild took him on
+- Wants: Become the Guild's chief clerk
 
 ## Tobin [id: tobin] — recurring character, automaton, he/him
-Role: Night porter in the yard
-Personality: Slow, polite, literal; hums when nervous.
-With others: With strangers Tobin is shy; with friends he talks about the yard horses.
-Agenda: Earn his own key to the gate. Tonight: Keep anyone from asking about last night
-Contradictions: Never lies, and avoids every question
+Who: Night porter in the yard
+Cue: With strangers Tobin is shy; with friends he talks about the yard horses.
+Nature: soft
+Cares about: kin (some)
+Tonight: Keep anyone from asking about last night
 Mood now: torn. Comfort 3/5.
+Toward the player: warmth: civil; bond: loose · employer: took him on for the night shift last month
 Secret [tobin.after-closing] (in short): Tobin let someone into the yard after closing.
 Lying tell: Hums
-Toward the player: warmth: civil; bond: loose
 ----- user -----
 # Last turns
 Kit: Who was in the yard last night?
@@ -996,7 +1011,7 @@ With strangers Tobin is shy; with friends he talks about the yard horses.
 Rhythm: Slow, formal
 Vocabulary: Old-fashioned
 Sample lines: "I could not say, miss."
-When angry: Goes silent. Warm: Polishes his plates. Lying: Hums.
+When angry: Goes silent. Warm: Polishes his plates. Lying: Hums. Afraid: Repeats the rules.
 ----- user -----
 # Where you are
 The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
@@ -1026,6 +1041,9 @@ Tobin, you should go before the clerk sees you.
 
 # Who speaks
 - Tobin: in this exchange, get out of sight. Mood: grateful.
+
+# How the speakers stand with the others here (facts about them, not how to play them)
+- Tobin → you: employer; took him on for the night shift last month
 
 # The conversation, in order
 1. Tobin, answering the player: agree
@@ -1079,7 +1097,7 @@ Return only this JSON object:
 - lore: at most 3 facts of world lore the writer may draw on this turn, when the conversation turns to the world; usually none. entry: the [id] of a lore entry given above. line: the fact in plain words, at most 30, never dialogue. An insider entry needs who: a speaker it says knows it. A lore line is something to draw on, not a line to say.
 - Don't repeat a fact already said unless someone asks again. A question asked and not answered gets an answer or a visible dodge.
 - change: what is different at the end of this turn: something decided, conceded, refused, revealed or learned. A check result that matters changes it.
-- reactions: everyone else present: silent, one line each (a look, a gesture, a move).
+- reactions: only the people present who don't speak this turn: one silent beat each (a look, a gesture, a move). Anyone in speakers or moves is never listed here; a speaker's own gestures go in the writing, not in reactions.
 - walk_ons: only when the player speaks to them, or they have news that changes things.
 - texture: at most one detail from the location, as a plain fact, or none.
 - Quiet characters are listed with what they care about: if the conversation touches it, they have something to say.
@@ -1120,18 +1138,19 @@ adult, travel-worn. A newcomer looking for work.
 
 # Characters present
 ## Mara Quill [id: mara] — major character, in the player's party, person, she/her
-Role: Guild tally-keeper who knows everyone in the yard
-Personality: Precise, wry, quietly kind; keeps lists of everything.
-With others: With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
-Agenda: Become the Guild's chief clerk. Tonight: Find out who keeps skimming the tallies
-Contradictions: Values honesty, and keeps two sets of books
+Who: Guild tally-keeper who knows everyone in the yard
+Cue: With strangers Mara is brisk; with friends she teases.
+Nature: closed, aloof
+Cares about: a ledger that balances (much) · rages: law
+Tonight: Find out who keeps skimming the tallies
 Mood now: careful. Comfort 2/5.
-Knows:
-- [mara.k1] Tobin was in the yard after closing
-Values: likes honesty
+Toward the player: warmth: civil; bond: loose
+Close ties, not here: rival: Tobin
 Secret [mara.two-books]: Mara's part: she keeps the second ledger. A second ledger records what the yard really takes in. It is kept in the tally office, under the floor. How Mara feels about it: would rather lose her post than see it found. Tell: Gives exact numbers. Won't tell the player yet.
 Lying tell: Gives exact numbers
-Toward the player: warmth: civil; bond: loose
+Relevant now:
+- Bound to the player (coin, firm): she is paid to keep the yard honest
+- Not here: Tobin (rival): has known him since the guild took him on
 ----- user -----
 # Earlier in the scene
 Kit: Who was in the yard last night?
@@ -1222,7 +1241,7 @@ Rhythm: Short, exact sentences
 Vocabulary: Ledger words
 Words they might use, rarely: by the book
 Sample lines: "That doesn't add up." "Count it again."
-When angry: Lists your mistakes. Warm: Rounds in your favor. Lying: Gives exact numbers.
+When angry: Lists your mistakes. Warm: Rounds in your favor. Lying: Gives exact numbers. Afraid: Counts under her breath.
 ----- user -----
 # Where you are
 The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
@@ -1285,9 +1304,9 @@ Reply with only a JSON object:
 - others: how Mara's feelings toward Tobin [tobin] changed in this scene, same words; leave someone out if nothing changed.
 ----- user -----
 About Mara (person, she/her):
-- Precise, wry, quietly kind; keeps lists of everything.
+- With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
 - Wants: Become the Guild's chief clerk. Tonight: Find out who keeps skimming the tallies
-- Values: likes honesty
+- Values: a ledger that balances (much) · rages: law
 - Secret [two-books]: Mara's part: she keeps the second ledger. A second ledger records what the yard really takes in. It is kept in the tally office, under the floor. How Mara feels about it: would rather lose her post than see it found.
 - Before this scene, toward Kit: warmth: civil; bond: loose
 - Toward Tobin: warmth: civil; bond: loose (has known him since the guild took him on)
@@ -1336,8 +1355,9 @@ Reply with only a JSON object:
 - others: how Tobin's feelings toward Mara [mara] changed in this scene, same words; leave someone out if nothing changed.
 ----- user -----
 About Tobin (automaton, he/him):
-- Slow, polite, literal; hums when nervous.
+- With strangers Tobin is shy; with friends he talks about the yard horses.
 - Wants: Earn his own key to the gate. Tonight: Keep anyone from asking about last night
+- Values: kin (some)
 - Secret [after-closing]: Tobin let someone into the yard after closing.
 - Before this scene, toward Kit: warmth: civil; bond: loose
 - Mood at the end: grateful; comfort 3/5.

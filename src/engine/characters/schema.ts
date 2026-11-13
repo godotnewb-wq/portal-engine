@@ -70,8 +70,6 @@ export const SecretSchema = z
 /** After loading every secret has its text: written, or resolved from the codex. */
 export type Secret = z.infer<typeof SecretSchema> & { text: string }
 
-export const ValueSchema = z.object({ value: z.string(), stance: z.enum(['likes', 'dislikes']) })
-
 /**
  * A schedule entry (npc design §2): a codex location, a time window ("16:00"–"20:00"; a window may cross midnight),
  * which days (left out, every day: "weekdays", "weekends" or day names), and a line in words. Used from milestone 6.
@@ -157,8 +155,6 @@ export const CharacterSchema = z
     rank: z.string().min(1).optional(),
     /** Their trade, lower case ("courier", "nurse"); entries can open to people by occupation. */
     occupation: z.string().min(1).optional(),
-    /** Specific details, never an archetype label. */
-    personality: z.string(),
     /**
      * How they are with others, in prose: with strangers and with people they know, what they notice, what they'd talk
      * about anyway, small habits. The writer's main picture of the person, so goals and secrets don't stand in for one
@@ -188,7 +184,6 @@ export const CharacterSchema = z
     fieldLocks: z.record(z.string(), z.string()).default({}),
     /** What they know that could matter: about the city, the player, the others. */
     knowledge: z.array(z.string()).default([]),
-    values: z.array(ValueSchema).default([]),
     secrets: z.array(SecretSchema).default([]),
     /** How they start out toward the player. */
     meters: MetersSchema,

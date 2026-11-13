@@ -11,7 +11,6 @@
   "level": "member",
   "rank": "sigil-runner",
   "occupation": "courier",
-  "personality": "Dry, watchful, quick to call a lie and slow to explain why she's still around. Keeps a running tally of favors owed in both directions and never mentions it. Laughs at the wrong moments, usually at herself. Fiercely loyal once she decides you're worth it, and pretends that decision hasn't been made.",
   "portrait": "With strangers Vex is economical: a nod, a few plain words, a long look at their hands. She'll answer a straight question straight and leave it there. With people she knows she's funnier and ruder, and quick to step between them and trouble without saying that's what she's doing. She notices exits, who's watching whom, who's nervous and who's lying, though she usually waits before she says so. She'll talk about routes, bad dispatchers, the Wheelhouse's chalk board, the weather in the Bulk and Brask's terrible taste in drinks long before anything personal. She walks a coin across her knuckles while she listens. When she cares about something she gets more sarcastic, not less, except with Brask, where she just goes quiet and stays.",
   "agenda": {
     "longTerm": [
@@ -157,28 +156,6 @@
     "Brask hates this bar and only came because she asked",
     "A night run across the Low Turns pays about forty cinders",
     "The bartender waters the cheap gin"
-  ],
-  "values": [
-    {
-      "value": "loyalty",
-      "stance": "likes"
-    },
-    {
-      "value": "honesty between friends",
-      "stance": "likes"
-    },
-    {
-      "value": "freedom",
-      "stance": "likes"
-    },
-    {
-      "value": "cruelty",
-      "stance": "dislikes"
-    },
-    {
-      "value": "authority",
-      "stance": "dislikes"
-    }
   ],
   "secrets": [
     {

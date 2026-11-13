@@ -9,6 +9,7 @@ import type { Tags } from './beats'
 import type { Problem } from './checks'
 import type { BeatPlan } from './planShape'
 import type { LoreTrace } from './lore'
+import type { BriefTrace } from './brief'
 
 /**
  * Everything one turn did, for the logs (milestone 2, A1): the engine builds it, the platform writes it. Calls are
@@ -35,6 +36,8 @@ export interface TurnTrace {
   checks: CheckTrace[]
   /** Which codex entries reached the director, layer by layer, and their rough size (milestone 3); older logs have none. */
   lore?: LoreTrace
+  /** What the director's briefs carried: always-on cost per character, optional detail chosen and why, and cuts (milestone 4a); older logs have none. */
+  brief?: BriefTrace
   /** `reshaped`: lines of the shown reply where code split speech from action (round 0 F1). */
   writer: { callId: string; reshaped?: number[] }
   /** What the code checks found in the draft; the rewrite was asked to fix these. */

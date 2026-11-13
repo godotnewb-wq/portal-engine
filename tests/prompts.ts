@@ -61,6 +61,7 @@ export async function playScene(content: Pack, start: GameState, turns: Scripted
         plan: outcome.trace.director.plan,
         checks: outcome.trace.checks,
         lore: outcome.trace.lore,
+        brief: outcome.trace.brief,
         findings: outcome.problems,
         remaining: outcome.remaining,
         salvage: outcome.trace.rewrite?.salvage,

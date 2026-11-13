@@ -1,7 +1,8 @@
 import type { Beat, GameState } from '@engine/state'
 import { parseReply, type ParsedReply } from './beats'
 import type { Pack } from '@engine/pack'
-import { buildDirectorPrompt } from './director'
+import { buildBriefs, buildDirectorPrompt } from './director'
+import { carryDetails } from './brief'
 import { traced, TracedError, type CallTrace, type LlmReply, type Prompt } from '@engine/core'
 import { checkReply, droppedBeats, loreProblems, salvaged, withoutSpeech, type Problem } from './checks'
 import { fallbackPlan, parsePlan, settlePlan, validatePlan } from './plan'
@@ -87,7 +88,8 @@ export async function runTurn(
   try {
     // Call 1: the director.
     const lore = turnLore(content, state, input, options.loreBudgets)
-    const directorPrompt = buildDirectorPrompt(content, state, input, lore)
+    const briefs = buildBriefs(content, state, input, lore)
+    const directorPrompt = buildDirectorPrompt(content, state, input, lore, briefs)
     const directorReply = await call('director', directorPrompt, () => llm.direct(directorPrompt))
     const directed = parsePlan(directorReply)
     const validated: { plan: BeatPlan; corrections: string[] } = directed ? validatePlan(content, state, directed, input, lore) : { plan: fallbackPlan(content, state, input), corrections: [] }
@@ -138,7 +140,7 @@ export async function runTurn(
     const departures = showDepartures(content, plan, kept.map((i) => parsed.beats[i]!))
     const beats = departures.beats
 
-    const next = applyTurn(content, state, { id: turnId, ...(options.log && { log: options.log }), input, plan, beats, tags: accepted.tags, dice })
+    const next = applyTurn(content, state, { id: turnId, ...(options.log && { log: options.log }), input, plan, beats, tags: accepted.tags, dice, details: carryDetails(briefs.details, plan) })
     const rewritten = problems.length > 0
     const salvage = rewritten && remaining.length > 0
     const dropped = salvage ? droppedBeats(remaining).filter((n) => n <= parsed.beats.length) : []
@@ -164,6 +166,7 @@ export async function runTurn(
       dice: { before: state.dice, after: dice },
       checks: checkTraces(plan),
       lore: loreTrace(lore),
+      brief: briefs.trace,
       writer: { callId: `${turnId}:writer`, ...(parsed.reshaped.length > 0 && { reshaped: parsed.reshaped }) },
       findings: problems,
       ...(rewritten && {

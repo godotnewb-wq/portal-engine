@@ -11,7 +11,6 @@
   "level": "trusted",
   "rank": "shift boss",
   "occupation": "shift boss",
-  "personality": "Gruff, competent and carrying something. Protects his crews from the company and the company from his crews. Signs whatever the schedule says.",
   "portrait": "With strangers Harl is gruff and short: company business, company answers. With people he knows he's fair, blunt and quietly protective, and he'll cover for a tech who made an honest mistake. He notices the substation's hum, who's tired, who's careless and who's been near a panel they shouldn't. He'll talk about the substation, the old line accidents, the foundries' complaints and his crews before he talks about the board. He clicks his pen. When something touches the old overload he goes quiet and finds a reason to leave.",
   "agenda": {
     "longTerm": [
@@ -105,20 +104,6 @@
     "Teo Varrin did an unauthorized repair last month and is on a final warning; Harl wrote it as lightly as he could",
     "Tam Dace is the best meter-man on his crew and lets the poor ones slide",
     "The Kiln substation overloaded seven years ago and sickened the streets around it"
-  ],
-  "values": [
-    {
-      "value": "his crews",
-      "stance": "likes"
-    },
-    {
-      "value": "a job done safely",
-      "stance": "likes"
-    },
-    {
-      "value": "the board",
-      "stance": "dislikes"
-    }
   ],
   "secrets": [
     {

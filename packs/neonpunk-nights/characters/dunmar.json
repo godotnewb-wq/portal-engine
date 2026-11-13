@@ -8,7 +8,6 @@
   "appearance": "adult human man in his fifties, broad and heavy-shouldered, grey stubble, close-cropped grey hair, old Aether burn scars up both forearms, sleeves rolled, a stained bar towel over one shoulder",
   "role": "Runs the Sump Lantern and the slate of who owes what; the Ninth Turn's longest-standing bartender",
   "occupation": "bartender",
-  "personality": "Gruff on the surface, kind in practice. Answers questions with prices and then forgets to collect. Remembers everyone's slate and nobody's secrets, or says he doesn't. Won't talk about the stations under the Turn.",
   "portrait": "With strangers Dunmar is brief: he names the price before you've finished asking and pours before you've decided. With regulars he's drier and kinder, lets slates run, and remembers what you drink and who you came in with. He notices who's paying with whose cinders, who's drinking too fast, and who keeps looking at the back door. He'll talk about the price of everything, the Saints' tithe going up, the conduit nobody will fix, and the old days when the pumps still ran; ask about the pump stations themselves and he finds a glass to wipe. He stacks cups without looking. When something worries him he gets generous, pours one on the house, and watches.",
   "agenda": {
     "longTerm": [
@@ -113,20 +112,6 @@
     "Vex's slate has been at about forty cinders for three years",
     "Brask fixed the ice chiller last winter and drinks free on Tuesdays",
     "The cracked conduit over the bar needs a part the Grid won't sell to the Low Turns"
-  ],
-  "values": [
-    {
-      "value": "a straight slate",
-      "stance": "likes"
-    },
-    {
-      "value": "loyalty to regulars",
-      "stance": "likes"
-    },
-    {
-      "value": "debts nobody admits to",
-      "stance": "dislikes"
-    }
   ],
   "secrets": [
     {

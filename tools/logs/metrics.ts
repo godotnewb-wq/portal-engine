@@ -104,7 +104,14 @@ export interface Metrics {
   sessions: number
   turns: number
   beats: number
-  director: { unreadableRate: number; jsonRetried: number; correctionsPerTurn: number }
+  /**
+   * `speakerReactionsPerTurn`: speakers the director also listed under `reactions`, dropped by validation; reported
+   * apart (milestone 4a task 7) because they were most of all corrections and hid the ones that matter.
+   * `otherCorrectionsPerTurn`: every other correction. `correctionsPerTurn` stays the total, for comparing older runs.
+   */
+  director: { unreadableRate: number; jsonRetried: number; correctionsPerTurn: number; speakerReactionsPerTurn: number; otherCorrectionsPerTurn: number }
+  /** What the director's briefs cost a turn, in estimated tokens: always-on, and optional detail chosen (milestone 4a); absent from older logs. */
+  briefs?: { recurringTokens: number; detailTokens: number; detailsPerTurn: number; cutPerTurn: number }
   writer: { rewriteRate: number; rewriteReasons: Record<string, number>; salvageRate: number; tagErrorsPerTurn: number; reshapedPerTurn: number; fallbackProfileRate: number }
   /**
    * `answeredBackPerTurn`: a speaker answered by someone who then gets answered in turn (A, B, A), the sign of a
@@ -164,8 +171,12 @@ export function gestureRepeats(turns: Omit<TurnTrace, 'calls'>[]): number {
 }
 
 /** The automatic metrics (milestone 2, B2), over one or more sessions. */
+/** A correction for a speaker the director also listed as a silent reaction (`validatePlan`'s wording). */
+const isSpeakerReaction = (c: string) => /^dropped reaction for .*: they speak this beat$/.test(c)
+
 export function metrics(inputs: MetricInput[]): Metrics {
   const turns = inputs.flatMap((i) => i.turns.map((t) => ({ ...t, session: i.session })))
+  const briefed = turns.flatMap((t) => (t.brief ? [t.brief] : []))
   const calls = inputs.flatMap((i) => i.calls)
   const beats = turns.flatMap((t) => t.beats.map((b) => ({ ...b, turn: t })))
   const dialogue = beats.filter((b) => b.beat.kind === 'dialogue')
@@ -220,8 +231,18 @@ export function metrics(inputs: MetricInput[]): Metrics {
     director: {
       unreadableRate: share(turns.filter((t) => t.director.read === 'unreadable').length, turns.length),
       jsonRetried: turns.filter((t) => t.director.read === 'json-retried').length,
-      correctionsPerTurn: avg(turns.map((t) => t.director.corrections.length))
+      correctionsPerTurn: avg(turns.map((t) => t.director.corrections.length)),
+      speakerReactionsPerTurn: avg(turns.map((t) => t.director.corrections.filter(isSpeakerReaction).length)),
+      otherCorrectionsPerTurn: avg(turns.map((t) => t.director.corrections.filter((c) => !isSpeakerReaction(c)).length))
     },
+    ...(briefed.length > 0 && {
+      briefs: {
+        recurringTokens: avg(briefed.map((b) => Object.values(b.recurring).reduce((n, x) => n + x, 0))),
+        detailTokens: avg(briefed.map((b) => b.used)),
+        detailsPerTurn: avg(briefed.map((b) => b.selected.length)),
+        cutPerTurn: avg(briefed.map((b) => b.cut.length))
+      }
+    }),
     writer: {
       rewriteRate: share(turns.filter((t) => t.rewrite).length, turns.length),
       rewriteReasons: count(turns.flatMap((t) => [...new Set(t.findings.map((p) => p.kind))])),
@@ -328,6 +349,16 @@ export function headline(m: Metrics): [string, number, 'lower' | 'higher' | 'inf
     ['turns', m.turns, 'info'],
     ['director unreadable rate', m.director.unreadableRate, 'lower'],
     ['corrections / turn', m.director.correctionsPerTurn, 'lower'],
+    ['speakers listed as reactions / turn', m.director.speakerReactionsPerTurn, 'lower'],
+    ['other corrections / turn', m.director.otherCorrectionsPerTurn, 'lower'],
+    ...(m.briefs
+      ? ([
+          ['brief always-on tokens / turn', m.briefs.recurringTokens, 'info'],
+          ['brief detail tokens / turn', m.briefs.detailTokens, 'info'],
+          ['brief details / turn', m.briefs.detailsPerTurn, 'info'],
+          ['brief details cut / turn', m.briefs.cutPerTurn, 'info']
+        ] as [string, number, 'info'][])
+      : []),
     ['rewrite rate', m.writer.rewriteRate, 'lower'],
     ['salvage rate', m.writer.salvageRate, 'lower'],
     ['tag errors / turn', m.writer.tagErrorsPerTurn, 'lower'],

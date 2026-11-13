@@ -1,6 +1,6 @@
 import type { Prompt } from '@engine/core'
 import { firstName } from '@engine/core'
-import type { VoiceCard } from '@engine/characters'
+import { tagWord, type VoiceCard } from '@engine/characters'
 import type { GameState } from '@engine/state'
 import type { Degree } from '@engine/rules'
 import { characterById, locationById, type Pack } from '@engine/pack'
@@ -106,6 +106,7 @@ export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPla
       aim(s.id, s.pressure),
       s.hiding && ` Keeping to themselves: ${s.hiding} (${s.approach ?? 'deflect'}).${s.tell ? ` It shows only as: ${s.tell}. Show it; nobody remarks on it unless their check to read them succeeded.` : ' It doesn\'t show.'}`
     ].join('')
+  const ties = speakerTies(content, state, plan)
   const recent = Object.entries(recentlyUsed(content, scene)).map(([id, u]) =>
     `- ${nameOf(id)}: ${[...u.slang.map((t) => `"${t}"`), ...u.gestures].join('; ')}`
   )
@@ -118,6 +119,7 @@ export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPla
     `# The player says or does\n${input}`,
     plan.checks.some((c) => c.result) && `# Check results (decided; honor them)\n${plan.checks.filter((c) => c.result).map((c) => checkLine(content, state, c)).join('\n')}`,
     plan.speakers.length > 0 && `# Who speaks\n${plan.speakers.map(speakerLine).join('\n')}`,
+    ties.length > 0 && `# How the speakers stand with the others here (facts about them, not how to play them)\n${ties.join('\n')}`,
     moves.length > 0 && `# The conversation, in order\n${moves.map((m, i) => `${i + 1}. ${nameOf(m.who)}, answering ${answering(m)}: ${m.move}${m.says.length > 0 ? ` (may draw on: ${said(m)})` : ''}${m.needs ? ' (the check succeeded)' : ''}`).join('\n')}`,
     plan.lore && plan.lore.length > 0 && `# About the world, to draw on only if it fits (some, all or none; never recite)\n${plan.lore.map((l) => `- ${l.line}${l.who ? ` (only ${nameOf(l.who)} would say this)` : ''}`).join('\n')}`,
     plan.change && `# By the end of the turn\n${plan.change}`,
@@ -135,6 +137,30 @@ export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPla
   return { system, user }
 }
 
+/**
+ * This turn's speakers toward the others present and toward the player (relationships §3, director writer §7): the
+ * tags in the card's words and, between two speakers or toward the player, the line of history, so delivery fits who they are to each other. No meter bands (the
+ * plan carries how they feel) and no private tags: the director has no way to keep one yet, so none reaches the writer.
+ */
+export function speakerTies(content: Pack, state: GameState, plan: BeatPlan): string[] {
+  const r = content.ruleset
+  const present = new Set(presentCast(state.scene!))
+  const name = (id: string) => firstName(characterById(content, id)?.name ?? id)
+  const line = (from: string, to: string, tags: { tag: string; word?: string; private?: boolean }[], note?: string) => {
+    const words = tags.filter((t) => !t.private).map((t) => tagWord(r, t))
+    return words.length > 0 || note ? [`- ${from} → ${to}: ${[words.join(', '), note].filter(Boolean).join('; ')}`] : []
+  }
+  const speaking = new Set(plan.speakers.map((s) => s.id))
+  return plan.speakers.flatMap((s) => {
+    const toPlayer = state.playerTies[s.id]
+    return [
+      ...(toPlayer ? line(name(s.id), 'you', toPlayer.tags, toPlayer.note) : []),
+      // The history line only between two people speaking this turn; toward a silent bystander, what they are is enough.
+      ...state.relations.filter((x) => x.from === s.id && present.has(x.to)).flatMap((x) => line(name(s.id), name(x.to), x.tags, speaking.has(x.to) ? x.note : undefined))
+    ]
+  })
+}
+
 /** A speaker as the writer sees them: the person first, then how they talk. */
 export function voiceCard(name: string, v: VoiceCard, portrait?: string): string {
   return [
@@ -144,7 +170,7 @@ export function voiceCard(name: string, v: VoiceCard, portrait?: string): string
     v.slang.length > 0 && `Words they might use, rarely: ${v.slang.join(', ')}`,
     v.avoids.length > 0 && `Avoids: ${v.avoids.join('; ')}`,
     `Sample lines: ${v.sampleLines.map((l) => `"${l}"`).join(' ')}`,
-    `When angry: ${v.shifts.angry}. Warm: ${v.shifts.warm}. Lying: ${v.shifts.lying}.`
+    `When angry: ${v.shifts.angry}. Warm: ${v.shifts.warm}. Lying: ${v.shifts.lying}.${v.shifts.afraid ? ` Afraid: ${v.shifts.afraid}.` : ''}`
   ]
     .filter(Boolean)
     .join('\n')

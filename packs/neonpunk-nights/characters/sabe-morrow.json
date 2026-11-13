@@ -11,7 +11,6 @@
   "level": "trusted",
   "rank": "organiser",
   "occupation": "organiser",
-  "personality": "Warm, bossy and immovable. Feeds anyone who turns up and argues with everyone who doesn't help. Keeps the network's harder work behind a kitchen door.",
   "portrait": "With strangers Sabe is warm and practical: she asks if you've eaten before she asks your name, and puts you to work if you stay. With people she knows she's bossy and funny, and she remembers every child's name in the court. She notices who's hungry, who's hiding, who's new to the Seep, and which Wardens are on shift. She'll talk about the kitchen, the job board, the price of flour, the Seep before the refugees came and the families who came after, and she won't hear a word against either. She wipes flour off her hands onto her apron. When she's worried she cooks more.",
   "agenda": {
     "longTerm": [
@@ -110,20 +109,6 @@
     "Some network circles forge papers and move people the Wardens are looking for; hers is one",
     "Keeper Ansel Rowe at the Spiral Wall blesses the court's golems for free",
     "The job board is mostly foundry shifts, and the foundries pay late"
-  ],
-  "values": [
-    {
-      "value": "feeding people",
-      "stance": "likes"
-    },
-    {
-      "value": "the Seep",
-      "stance": "likes"
-    },
-    {
-      "value": "Wardens asking questions",
-      "stance": "dislikes"
-    }
   ],
   "secrets": [
     {

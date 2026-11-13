@@ -89,6 +89,20 @@ function loreLines(turn: TurnTrace, budgets?: BenchRun['loreBudgets']): string[]
   return lines
 }
 
+/** What the director's briefs carried this turn (milestone 4a): always-on cost, the detail chosen and why, and cuts. */
+function briefLines(turn: TurnTrace): string[] {
+  const b = turn.brief
+  if (!b) return []
+  const always = Object.values(b.recurring).reduce((n, x) => n + x, 0)
+  return [
+    `Always-on: ≈${always} tokens (${Object.entries(b.recurring).map(([id, n]) => `${id} ${n}`).join(', ')}).`,
+    `Optional detail: ≈${b.used} / ${b.budget} tokens, ${b.selected.length} chosen.`,
+    ...b.selected.map((d) => `+ ${d.id} (${d.rank}; ${d.trigger}; ≈${d.tokens})`),
+    ...b.cut.map((d) => `− ${d.id} (${d.rank}; ${d.trigger}; cut: ${d.why})`),
+    ...(b.dropped.length > 0 ? [`Topic changed; let go: ${b.dropped.join(', ')}.`] : [])
+  ]
+}
+
 function scenarioSection(names: Names, run: ScenarioRun, repeats: boolean, budgets?: BenchRun['loreBudgets']): string {
   const name = (id: string) => names(run.location, id)
   const lines = [`## ${run.title} (\`${run.id}\`${repeats ? `, #${run.repeat}, seed ${run.seed}` : ''})`, '', `> ${run.watchFor}`, '']
@@ -112,6 +126,8 @@ function scenarioSection(names: Names, run: ScenarioRun, repeats: boolean, budge
     lines.push('<details><summary>Plan</summary>', '', ...plan, '', '</details>', '')
     const lore = loreLines(t, budgets)
     if (lore.length > 0) lines.push('<details><summary>Lore</summary>', '', ...lore.map((line) => '- ' + line), '', '</details>', '')
+    const brief = briefLines(t)
+    if (brief.length > 0) lines.push('<details><summary>Briefs</summary>', '', ...brief.map((line) => '- ' + line), '', '</details>', '')
     lines.push(...shown(t).map((b, n) => `${n + 1}. ${beatLine(names, run, b)}`), '')
     if (fixes(t).length > 0) lines.push(`Rewrite asked to fix: ${fixes(t).map((f) => `"${f}"`).join(' ')}`, '')
     if (left(t).length > 0) lines.push(`Still wrong after the rewrite (salvaged): ${left(t).map((f) => `"${f}"`).join(' ')}`, '')

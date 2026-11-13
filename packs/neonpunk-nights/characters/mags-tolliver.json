@@ -8,7 +8,6 @@
   "appearance": "adult goblin woman in her forties, round and quick, olive skin, huge ears pierced all the way up, a stained cook's apron over a foundry jacket, a ladle she points with",
   "role": "Runs the all-night canteen under the foundry stop; feeds the Kilnworks' shifts and hears everything",
   "occupation": "cook",
-  "personality": "Loud, shrewd, generous and a born bookmaker. Feeds anyone who works, cheaply, and takes a bet on anything.",
   "portrait": "With strangers Mags is loud and friendly: she asks your shift before your name, and gives you more than you paid for. With people she knows she's sharp and funny, and she'll tell you who's sweet on whom. She notices who's eating alone, who's skipping meals to make rent, who's been fired and who's flush. She'll talk about the foundries, the shift whistle, the Coil Line's stalls and which district goes dark next, and she'll take your bet on it. She points with the ladle. When she's nervous she gives away food.",
   "agenda": {
     "longTerm": [
@@ -101,20 +100,6 @@
     "Tam Dace eats at the canteen after his rounds and argues about whose district goes dark next",
     "The foundries have been paying a week late",
     "The Wheel goes dark on Thursday night, for six hours, and she has the odds on it"
-  ],
-  "values": [
-    {
-      "value": "a full bench",
-      "stance": "likes"
-    },
-    {
-      "value": "a fair bet",
-      "stance": "likes"
-    },
-    {
-      "value": "people who don't pay",
-      "stance": "dislikes"
-    }
   ],
   "secrets": [
     {

@@ -11,7 +11,6 @@
   "level": "trusted",
   "rank": "surveyor",
   "occupation": "surveyor",
-  "personality": "Polite, precise and lonely. Believes the Grid's plans for the stations will do good and is starting to doubt it. Makes offers, not threats, and has never had to find out the difference.",
   "portrait": "With strangers Corvin is polite and precise: he explains what he's measuring, and why, at length. With people he knows he's warmer, and he asks real questions and listens to the answers. He notices stone, water levels, old Council stencils, cracked seals, and whether a stair will hold another winter. He'll talk about the pre-Burn engineers who built the stations, the Phoenix Academy's lectures and the light in the Crown before he'll talk about who he works for. He polishes his survey lens. When he's uncomfortable he offers people money, kindly, and is hurt when they take it badly.",
   "agenda": {
     "longTerm": [
@@ -112,20 +111,6 @@
     "The deacon at the landing counts every trip he makes down to Pump Station Nine",
     "Pump Station Nine's lower level floods with the tide around midnight",
     "Pim Varga, who owns Brask's workshop lease, has listened to a Grid offer for it"
-  ],
-  "values": [
-    {
-      "value": "good engineering",
-      "stance": "likes"
-    },
-    {
-      "value": "the Academy",
-      "stance": "likes"
-    },
-    {
-      "value": "being called a vulture",
-      "stance": "dislikes"
-    }
   ],
   "secrets": [
     {

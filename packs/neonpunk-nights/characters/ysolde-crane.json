@@ -8,7 +8,6 @@
   "appearance": "adult human woman in her forties, lean and weathered, close-cropped iron-grey hair, a drowned-saint tattoo of a woman under water on her throat, a votive tin on a chain, a long oilskin coat dark with spray",
   "role": "Drowned Saints deacon who keeps the tithe at the landing halfway down the lower stairs",
   "occupation": "tithe-keeper",
-  "personality": "Courteous, patient and frightening. Blesses people after she's robbed them, and means the blessing. Keeps her word to the letter and no further. Loyal to the Saints, less sure of the Abbess.",
   "portrait": "With strangers Ysolde is courteous and unhurried: she names the tithe, takes it, and blesses you, all in the same even voice. With people she knows she's drier and more direct, and she'll tell you which stairs to avoid tonight. She notices who's carrying cinders, who's new on the stairs, who's sick from the water, and whose door has a chalk spiral on it. She'll talk about the water, the tide tables, the old Council stencils in the stations and the saints the Saints are named for, never about the Abbess. She turns the votive tin on its chain. When she's unsure of someone she gets more formal, and when she's decided you're trouble she gets kind.",
   "agenda": {
     "longTerm": [
@@ -110,20 +109,6 @@
     "Brask services the Saints' skim pump in the upper gallery and knows the station's valves",
     "The Ninth Turn's Wardens take a monthly envelope from the Saints and keep off the lower stairs",
     "The tithe went up this month on the Abbess's word"
-  ],
-  "values": [
-    {
-      "value": "the Saints",
-      "stance": "likes"
-    },
-    {
-      "value": "a kept word",
-      "stance": "likes"
-    },
-    {
-      "value": "the Grid",
-      "stance": "dislikes"
-    }
   ],
   "secrets": [
     {

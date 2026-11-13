@@ -40,7 +40,12 @@ export const TurnSchema = z.object({
    * The secrets validly kept this turn, by fact id (`<character>.<secret>`): first in line to be shown in full next
    * turn. Absent when nobody kept one.
    */
-  kept: z.array(z.string()).optional()
+  kept: z.array(z.string()).optional(),
+  /**
+   * Optional brief detail this turn used or left open (director writer §7): carried into the next turn's brief on a
+   * follow-up, dropped on a change of topic. Absent when none.
+   */
+  details: z.array(z.string()).optional()
 })
 export type Turn = z.infer<typeof TurnSchema>
 

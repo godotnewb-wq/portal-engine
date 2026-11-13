@@ -8,7 +8,6 @@
   "appearance": "adult light elf woman, tall and elegant, long pointed ears with a fine silver cuff, luminous pale gold eyes, faint shimmering glyph-like markings at her temples, ash-blonde hair pinned up with two lacquered sticks, high-collared midnight-blue coat with embroidered cuffs, gloves she never takes off",
   "role": "Fixer who brokers jobs between the High Turns and the Low; keeps a standing booth at the Sump Lantern on nights she wants to be found",
   "occupation": "fixer",
-  "personality": "Unhurried, warm on the surface, counts everything. Enjoys the Low Turns more than she admits and makes a show of slumming it. Pays exactly what she promised, on time, every time, and treats that as proof she's a good person. Dislikes being rushed more than being lied to.",
   "portrait": "With strangers Oria is gracious and unhurried: she asks about them, remembers what they say, and makes them feel they're the reason she came. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She'll talk about High Turns gossip, the Sump Lantern's dumplings, which she praises too much, a play she saw last week, and her rich clients' small vanities long before business; when business comes, she names a price clearly and keeps it. She turns her glass by the stem while she listens. When she's cornered she gets warmer and slower, as if she has all night, and when someone surprises her she laughs, genuinely, and likes them more for it.",
   "agenda": {
     "longTerm": [
@@ -151,28 +150,6 @@
     "Brask is Vex's friend and a mechanic who keeps half the Ninth Turn's pumps running; she has heard his work is good",
     "Her network passes along all kinds of information, and she doesn't ask every buyer what it's for",
     "The Sump Lantern's dumplings are the best thing in the Low Turns, and she says so to anyone"
-  ],
-  "values": [
-    {
-      "value": "keeping promises",
-      "stance": "likes"
-    },
-    {
-      "value": "discretion",
-      "stance": "likes"
-    },
-    {
-      "value": "ambition",
-      "stance": "likes"
-    },
-    {
-      "value": "rudeness",
-      "stance": "dislikes"
-    },
-    {
-      "value": "sentimentality",
-      "stance": "dislikes"
-    }
   ],
   "secrets": [
     {

@@ -327,6 +327,84 @@
       }
     ]
   },
+  "brief": {
+    "budget": 500,
+    "used": 212,
+    "selected": [
+      {
+        "id": "oria-senn.k3",
+        "owner": "oria-senn",
+        "kind": "knows",
+        "rank": "answer",
+        "trigger": "player's words: client",
+        "tokens": 23
+      },
+      {
+        "id": "brask.k5",
+        "owner": "brask",
+        "kind": "knows",
+        "rank": "answer",
+        "trigger": "named: Oria",
+        "tokens": 30
+      },
+      {
+        "id": "note.brask.oria-senn",
+        "owner": "brask",
+        "kind": "note",
+        "rank": "answer",
+        "trigger": "named: Oria",
+        "tokens": 27
+      },
+      {
+        "id": "note.vex.oria-senn",
+        "owner": "vex",
+        "kind": "note",
+        "rank": "answer",
+        "trigger": "named: Oria",
+        "tokens": 30
+      },
+      {
+        "id": "vex.k1",
+        "owner": "vex",
+        "kind": "knows",
+        "rank": "answer",
+        "trigger": "named: Oria",
+        "tokens": 29
+      },
+      {
+        "id": "tie.oria-senn.dunmar",
+        "owner": "oria-senn",
+        "kind": "absent",
+        "rank": "texture",
+        "trigger": "a haunt of theirs",
+        "tokens": 24
+      },
+      {
+        "id": "tie.brask.dunmar",
+        "owner": "brask",
+        "kind": "absent",
+        "rank": "texture",
+        "trigger": "a haunt of theirs",
+        "tokens": 27
+      },
+      {
+        "id": "tie.vex.dunmar",
+        "owner": "vex",
+        "kind": "absent",
+        "rank": "texture",
+        "trigger": "a haunt of theirs",
+        "tokens": 22
+      }
+    ],
+    "cut": [],
+    "dropped": [],
+    "recurring": {
+      "vex": 365,
+      "brask": 393,
+      "oria-senn": 422,
+      "kesh": 240
+    }
+  },
   "findings": [],
   "remaining": [],
   "beats": [
@@ -692,6 +770,140 @@
       }
     ]
   },
+  "brief": {
+    "budget": 500,
+    "used": 418,
+    "selected": [
+      {
+        "id": "oria-senn.k1",
+        "owner": "oria-senn",
+        "kind": "knows",
+        "rank": "answer",
+        "trigger": "player's words: seal, case",
+        "tokens": 29
+      },
+      {
+        "id": "oria-senn.k3",
+        "owner": "oria-senn",
+        "kind": "knows",
+        "rank": "answer",
+        "trigger": "player's words: client",
+        "tokens": 23
+      },
+      {
+        "id": "brask.k2",
+        "owner": "brask",
+        "kind": "knows",
+        "rank": "answer",
+        "trigger": "player's words: seal",
+        "tokens": 41
+      },
+      {
+        "id": "brask.k3",
+        "owner": "brask",
+        "kind": "knows",
+        "rank": "answer",
+        "trigger": "player's words: seal",
+        "tokens": 23
+      },
+      {
+        "id": "note.oria-senn.vex",
+        "owner": "oria-senn",
+        "kind": "note",
+        "rank": "answer",
+        "trigger": "player's words: seal",
+        "tokens": 32
+      },
+      {
+        "id": "note.vex.oria-senn",
+        "owner": "vex",
+        "kind": "note",
+        "rank": "answer",
+        "trigger": "player's words: seal",
+        "tokens": 30
+      },
+      {
+        "id": "oria-senn.k5",
+        "owner": "oria-senn",
+        "kind": "knows",
+        "rank": "answer",
+        "trigger": "player's words: seal",
+        "tokens": 19
+      },
+      {
+        "id": "note.brask.oria-senn",
+        "owner": "brask",
+        "kind": "note",
+        "rank": "choice",
+        "trigger": "the pair spoke last turn",
+        "tokens": 27
+      },
+      {
+        "id": "note.brask.vex",
+        "owner": "brask",
+        "kind": "note",
+        "rank": "choice",
+        "trigger": "the pair spoke last turn",
+        "tokens": 32
+      },
+      {
+        "id": "note.oria-senn.brask",
+        "owner": "oria-senn",
+        "kind": "note",
+        "rank": "choice",
+        "trigger": "the pair spoke last turn",
+        "tokens": 24
+      },
+      {
+        "id": "note.vex.brask",
+        "owner": "vex",
+        "kind": "note",
+        "rank": "choice",
+        "trigger": "the pair spoke last turn",
+        "tokens": 36
+      },
+      {
+        "id": "vex.k1",
+        "owner": "vex",
+        "kind": "knows",
+        "rank": "choice",
+        "trigger": "carried",
+        "tokens": 29
+      },
+      {
+        "id": "tie.brask.dunmar",
+        "owner": "brask",
+        "kind": "absent",
+        "rank": "texture",
+        "trigger": "a haunt of theirs",
+        "tokens": 27
+      },
+      {
+        "id": "tie.oria-senn.dunmar",
+        "owner": "oria-senn",
+        "kind": "absent",
+        "rank": "texture",
+        "trigger": "a haunt of theirs",
+        "tokens": 24
+      },
+      {
+        "id": "tie.vex.dunmar",
+        "owner": "vex",
+        "kind": "absent",
+        "rank": "texture",
+        "trigger": "a haunt of theirs",
+        "tokens": 22
+      }
+    ],
+    "cut": [],
+    "dropped": [],
+    "recurring": {
+      "vex": 354,
+      "brask": 384,
+      "oria-senn": 414,
+      "kesh": 240
+    }
+  },
   "findings": [],
   "remaining": [],
   "beats": [
@@ -1051,6 +1263,116 @@
         "expansionTokens": 0
       }
     ]
+  },
+  "brief": {
+    "budget": 500,
+    "used": 328,
+    "selected": [
+      {
+        "id": "oria-senn.k1",
+        "owner": "oria-senn",
+        "kind": "knows",
+        "rank": "choice",
+        "trigger": "last turn: seal, case, pump, station, rival, crew",
+        "tokens": 29
+      },
+      {
+        "id": "oria-senn.k4",
+        "owner": "oria-senn",
+        "kind": "knows",
+        "rank": "choice",
+        "trigger": "last turn: rival, crew, station",
+        "tokens": 17
+      },
+      {
+        "id": "brask.k1",
+        "owner": "brask",
+        "kind": "knows",
+        "rank": "choice",
+        "trigger": "last turn: pump, station",
+        "tokens": 41
+      },
+      {
+        "id": "note.oria-senn.vex",
+        "owner": "oria-senn",
+        "kind": "note",
+        "rank": "choice",
+        "trigger": "the pair spoke last turn",
+        "tokens": 32
+      },
+      {
+        "id": "note.vex.oria-senn",
+        "owner": "vex",
+        "kind": "note",
+        "rank": "choice",
+        "trigger": "the pair spoke last turn",
+        "tokens": 30
+      },
+      {
+        "id": "brask.k2",
+        "owner": "brask",
+        "kind": "knows",
+        "rank": "choice",
+        "trigger": "carried",
+        "tokens": 41
+      },
+      {
+        "id": "brask.k3",
+        "owner": "brask",
+        "kind": "knows",
+        "rank": "choice",
+        "trigger": "carried",
+        "tokens": 23
+      },
+      {
+        "id": "oria-senn.k3",
+        "owner": "oria-senn",
+        "kind": "knows",
+        "rank": "choice",
+        "trigger": "carried",
+        "tokens": 23
+      },
+      {
+        "id": "oria-senn.k5",
+        "owner": "oria-senn",
+        "kind": "knows",
+        "rank": "choice",
+        "trigger": "carried",
+        "tokens": 19
+      },
+      {
+        "id": "tie.brask.dunmar",
+        "owner": "brask",
+        "kind": "absent",
+        "rank": "texture",
+        "trigger": "a haunt of theirs",
+        "tokens": 27
+      },
+      {
+        "id": "tie.oria-senn.dunmar",
+        "owner": "oria-senn",
+        "kind": "absent",
+        "rank": "texture",
+        "trigger": "a haunt of theirs",
+        "tokens": 24
+      },
+      {
+        "id": "tie.vex.dunmar",
+        "owner": "vex",
+        "kind": "absent",
+        "rank": "texture",
+        "trigger": "a haunt of theirs",
+        "tokens": 22
+      }
+    ],
+    "cut": [],
+    "dropped": [],
+    "recurring": {
+      "vex": 353,
+      "brask": 384,
+      "oria-senn": 555,
+      "kesh": 240
+    }
   },
   "findings": [],
   "remaining": [],
