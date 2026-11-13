@@ -405,7 +405,6 @@
     },
     "departed": [],
     "ended": false,
-    "nsfw": false,
     "baseline": {
       "vex": {
         "approval": 5,
@@ -756,7 +755,6 @@
     },
     "departed": [],
     "ended": false,
-    "nsfw": false,
     "baseline": {
       "vex": {
         "approval": 5,
@@ -1119,7 +1117,6 @@
     },
     "departed": [],
     "ended": false,
-    "nsfw": false,
     "baseline": {
       "vex": {
         "approval": 5,

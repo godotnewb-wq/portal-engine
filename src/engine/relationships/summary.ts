@@ -52,7 +52,7 @@ Reply with only a JSON object:
 {"memory": "...", "level": "core|normal|fleeting", "reason": "...", ${meterFields}, "learned": [], "others": [{"with": "id", ${meterFields}, "reason": "..."}]}
 
 - memory: one or two sentences, past tense, third person, from ${me}'s point of view: what ${me} said, did, noticed and felt, and how ${player} treated ${me}. End on what stayed with ${me} most.
-- level: "core" for a moment that defines them (a confession, a betrayal, a first kiss, a promise made or broken; rare), "normal" for time that meant something, "fleeting" when little happened.
+- level: "core" for a moment that changed something lasting for them (a first betrayal or first real job, a loss, a secret of theirs coming out, a promise made or broken, real danger to their life; rare), "normal" for time that meant something, "fleeting" when little happened.
 - ${meterNames}: how each CHANGED toward ${player} because of this scene, each one of: ${words}. Meters move slowly; nothing is owed for turning up. Toward someone, ${meaning}.
 - Judge as ${me}: by ${me}'s values, agenda and how things stood before. Values ${me} likes, shown by ${player}, raise regard; values ${me} dislikes lower it.
 - reason: one short sentence on what moved ${me}, and which way.

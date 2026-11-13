@@ -42,7 +42,7 @@ export function sourceRevision(root: string): RunInputs['source'] {
 export function roleSettings(settings: Settings, roles: readonly ('director' | 'writer' | 'summary' | 'scorer')[]): Record<string, RoleSettings> {
   const out: Record<string, RoleSettings> = {}
   for (const role of roles) {
-    const profile = profileFor(settings, role, false)
+    const profile = profileFor(settings, role)
     const { apiKey: _key, baseUrl, ...rest } = settings[profile]
     if (!isConfigured(settings[profile])) continue
     let host = ''

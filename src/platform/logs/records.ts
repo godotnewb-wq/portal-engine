@@ -109,7 +109,7 @@ export function sessionName(at: Date, random: string): string {
 export function roleModels(settings: Settings, roles: readonly LlmRole[] = ['director', 'writer', 'summary']): Record<string, RoleModel> {
   const models: Record<string, RoleModel> = {}
   for (const role of roles) {
-    const id = profileFor(settings, role, false)
+    const id = profileFor(settings, role)
     if (isConfigured(settings[id])) models[role] = { profile: id, model: settings[id].model, temperature: settings[id].temperature }
   }
   if (isConfigured(settings.nsfw)) models['nsfw'] = { profile: 'nsfw', model: settings.nsfw.model, temperature: settings.nsfw.temperature }

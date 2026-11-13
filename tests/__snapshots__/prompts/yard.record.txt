@@ -284,7 +284,6 @@
     },
     "departed": [],
     "ended": false,
-    "nsfw": false,
     "baseline": {
       "mara": {
         "warmth": 2,
@@ -578,7 +577,6 @@
     },
     "departed": [],
     "ended": false,
-    "nsfw": false,
     "baseline": {
       "mara": {
         "warmth": 2,
@@ -838,7 +836,6 @@
     },
     "departed": [],
     "ended": false,
-    "nsfw": false,
     "baseline": {
       "mara": {
         "warmth": 2,
@@ -1077,7 +1074,6 @@
       "tobin"
     ],
     "ended": false,
-    "nsfw": false,
     "baseline": {
       "mara": {
         "warmth": 2,
@@ -1307,7 +1303,6 @@
       "tobin"
     ],
     "ended": false,
-    "nsfw": false,
     "baseline": {
       "mara": {
         "warmth": 2,

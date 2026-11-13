@@ -125,15 +125,10 @@ export function isConfigured(profile: { baseUrl: string; model: string }): boole
 
 /**
  * The profile a role is sent to. A role left unset borrows the writer's, so one endpoint is enough to play; the
- * scorer, a judge like the summaries, borrows the summary profile first. An NSFW scene goes to the NSFW profile
- * first when it is set up.
+ * scorer, a judge like the summaries, borrows the summary profile first. (The `nsfw` profile is only the fallback for a
+ * model that declines; see the router.)
  */
-export function profileFor(
-  settings: Record<LlmProfileId, { baseUrl: string; model: string }>,
-  role: LlmRole,
-  nsfw: boolean
-): LlmProfileId {
-  if (nsfw && isConfigured(settings.nsfw)) return 'nsfw'
+export function profileFor(settings: Record<LlmProfileId, { baseUrl: string; model: string }>, role: LlmRole): LlmProfileId {
   if (isConfigured(settings[role])) return role
   if (role === 'scorer' && isConfigured(settings.summary)) return 'summary'
   return 'writer'

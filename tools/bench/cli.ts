@@ -89,7 +89,7 @@ async function main(): Promise<void> {
   } else {
     const settings = benchSettings(option('--config') ?? join(root, 'bench.config.json'), process.env)
     if (!isConfigured(settings.writer)) throw new Error('No model set up for the bench. Create bench.config.json (same shape as the app settings) or set BENCH_BASE_URL and BENCH_MODEL. Or run with --mock.')
-    llm = { turn: turnLlm(settings, false), summarize: summaryLlm(settings, false) }
+    llm = { turn: turnLlm(settings), summarize: summaryLlm(settings) }
     models = modelsOf(settings)
     sessionModels = roleModels(settings, ['director', 'writer', 'summary', ...(flag('--score') ? (['scorer'] as const) : [])])
     roles = roleSettings(settings, ['director', 'writer', 'summary', ...(flag('--score') ? (['scorer'] as const) : [])])

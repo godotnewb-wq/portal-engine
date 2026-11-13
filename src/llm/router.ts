@@ -34,8 +34,8 @@ async function attempt(run: () => Promise<string>): Promise<Attempt> {
 }
 
 /** Tries the role's profile, then the NSFW profile if the first declined. */
-async function routed(settings: Settings, role: LlmRole, nsfw: boolean, run: (id: LlmProfileId) => Promise<string>): Promise<RoutedReply> {
-  const first = profileFor(settings, role, nsfw)
+async function routed(settings: Settings, role: LlmRole, run: (id: LlmProfileId) => Promise<string>): Promise<RoutedReply> {
+  const first = profileFor(settings, role)
   if (!isConfigured(settings[first])) throw new Error(NOT_CONFIGURED)
   const tried = await attempt(() => run(first))
   if ('reply' in tried) return { reply: tried.reply, profileId: first }
@@ -48,11 +48,10 @@ async function routed(settings: Settings, role: LlmRole, nsfw: boolean, run: (id
 export function complete(
   settings: Settings,
   role: LlmRole,
-  nsfw: boolean,
   input: CompletionInput,
   impl: typeof chatCompletion = chatCompletion
 ): Promise<RoutedReply> {
-  return routed(settings, role, nsfw, (id) => impl(settings[id], input))
+  return routed(settings, role, (id) => impl(settings[id], input))
 }
 
 /**
@@ -62,14 +61,13 @@ export function complete(
 export function stream(
   settings: Settings,
   role: LlmRole,
-  nsfw: boolean,
   input: Omit<CompletionInput, 'tools'>,
   onDelta: (text: string) => void,
   onRestart: () => void,
   impl: typeof streamCompletion = streamCompletion
 ): Promise<RoutedReply> {
   let started = false
-  return routed(settings, role, nsfw, (id) => {
+  return routed(settings, role, (id) => {
     if (started) onRestart()
     started = true
     return impl(settings[id], input, onDelta)

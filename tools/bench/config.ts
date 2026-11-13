@@ -36,7 +36,7 @@ export function benchLoreBudgets(configPath: string | undefined): { budgets: Lor
 /** Which model each role will really use, for the report: unset roles borrow the writer's. */
 export function modelsOf(settings: Settings): Record<string, string> {
   const roles = ['director', 'writer', 'summary'] as const
-  const models: Record<string, string> = Object.fromEntries(roles.map((role) => [role, settings[profileFor(settings, role, false)].model || '(none)']))
+  const models: Record<string, string> = Object.fromEntries(roles.map((role) => [role, settings[profileFor(settings, role)].model || '(none)']))
   if (isConfigured(settings.nsfw)) models['nsfw fallback'] = settings.nsfw.model
   return models
 }

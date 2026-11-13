@@ -38,31 +38,31 @@ export const SUMMARY_MIN_TOKENS = 2000
 export const SCORER_MIN_TOKENS = 3000
 
 /** A JSON call through a role's profile, with its metadata. `minTokens` raises the profile's reply limit if it is lower. */
-async function judged(settings: Settings, role: LlmRole, nsfw: boolean, prompt: Prompt, minTokens?: number) {
+async function judged(settings: Settings, role: LlmRole, prompt: Prompt, minTokens?: number) {
   const { info, onInfo } = collector()
   const maxTokens = minTokens ? Math.max(settings[role].maxTokens, minTokens) : undefined
-  const routed = await complete(settings, role, nsfw, { system: prompt.system, messages: [{ role: 'user', content: prompt.user }], json: true, onInfo, ...(maxTokens && { maxTokens }) })
+  const routed = await complete(settings, role, { system: prompt.system, messages: [{ role: 'user', content: prompt.user }], json: true, onInfo, ...(maxTokens && { maxTokens }) })
   return { text: routed.reply, meta: metaOf(settings, routed, info) }
 }
 
 /** The scene pipeline's calls through the configured profiles: the director asks for JSON, the writer streams. */
-export function turnLlm(settings: Settings, nsfw: boolean): TurnLlm {
+export function turnLlm(settings: Settings): TurnLlm {
   return {
-    direct: (prompt) => judged(settings, 'director', nsfw, prompt, DIRECTOR_MIN_TOKENS),
+    direct: (prompt) => judged(settings, 'director', prompt, DIRECTOR_MIN_TOKENS),
     async write(prompt, onDelta, onRestart) {
       const { info, onInfo } = collector()
-      const routed = await stream(settings, 'writer', nsfw, { system: prompt.system, messages: [{ role: 'user', content: prompt.user }], onInfo }, onDelta, onRestart)
+      const routed = await stream(settings, 'writer', { system: prompt.system, messages: [{ role: 'user', content: prompt.user }], onInfo }, onDelta, onRestart)
       return { text: routed.reply, meta: metaOf(settings, routed, info) }
     }
   }
 }
 
 /** The end-of-scene summary call: low temperature, JSON. */
-export function summaryLlm(settings: Settings, nsfw: boolean): Summarize {
-  return (prompt) => judged(settings, 'summary', nsfw, prompt, SUMMARY_MIN_TOKENS)
+export function summaryLlm(settings: Settings): Summarize {
+  return (prompt) => judged(settings, 'summary', prompt, SUMMARY_MIN_TOKENS)
 }
 
 /** The AI scorer's call (milestone 2, A5): JSON, after play only. */
 export function scorerLlm(settings: Settings): (prompt: Prompt) => Promise<{ text: string; meta: CallMeta }> {
-  return (prompt) => judged(settings, 'scorer', false, prompt, SCORER_MIN_TOKENS)
+  return (prompt) => judged(settings, 'scorer', prompt, SCORER_MIN_TOKENS)
 }

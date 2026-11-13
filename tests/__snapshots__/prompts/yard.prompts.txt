@@ -1262,7 +1262,7 @@ Reply with only a JSON object:
 {"memory": "...", "level": "core|normal|fleeting", "reason": "...", "warmth": "...", "bond": "...", "learned": [], "others": [{"with": "id", "warmth": "...", "bond": "...", "reason": "..."}]}
 
 - memory: one or two sentences, past tense, third person, from Mara's point of view: what Mara said, did, noticed and felt, and how Kit treated Mara. End on what stayed with Mara most.
-- level: "core" for a moment that defines them (a confession, a betrayal, a first kiss, a promise made or broken; rare), "normal" for time that meant something, "fleeting" when little happened.
+- level: "core" for a moment that changed something lasting for them (a first betrayal or first real job, a loss, a secret of theirs coming out, a promise made or broken, real danger to their life; rare), "normal" for time that meant something, "fleeting" when little happened.
 - warmth, bond: how each CHANGED toward Kit because of this scene, each one of: "colder", "same", "warmer". Meters move slowly; nothing is owed for turning up. Toward someone, warmth is how much they like the other; bond is how much they would do for the other.
 - Judge as Mara: by Mara's values, agenda and how things stood before. Values Mara likes, shown by Kit, raise regard; values Mara dislikes lower it.
 - reason: one short sentence on what moved Mara, and which way.
@@ -1313,7 +1313,7 @@ Reply with only a JSON object:
 {"memory": "...", "level": "core|normal|fleeting", "reason": "...", "warmth": "...", "bond": "...", "learned": [], "others": [{"with": "id", "warmth": "...", "bond": "...", "reason": "..."}]}
 
 - memory: one or two sentences, past tense, third person, from Tobin's point of view: what Tobin said, did, noticed and felt, and how Kit treated Tobin. End on what stayed with Tobin most.
-- level: "core" for a moment that defines them (a confession, a betrayal, a first kiss, a promise made or broken; rare), "normal" for time that meant something, "fleeting" when little happened.
+- level: "core" for a moment that changed something lasting for them (a first betrayal or first real job, a loss, a secret of theirs coming out, a promise made or broken, real danger to their life; rare), "normal" for time that meant something, "fleeting" when little happened.
 - warmth, bond: how each CHANGED toward Kit because of this scene, each one of: "colder", "same", "warmer". Meters move slowly; nothing is owed for turning up. Toward someone, warmth is how much they like the other; bond is how much they would do for the other.
 - Judge as Tobin: by Tobin's values, agenda and how things stood before. Values Tobin likes, shown by Kit, raise regard; values Tobin dislikes lower it.
 - reason: one short sentence on what moved Tobin, and which way.

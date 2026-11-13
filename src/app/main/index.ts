@@ -157,7 +157,7 @@ app.whenReady().then(() => {
       // Scene ids are random and unique; the number makes the turn id read in order.
       const turnId = scene ? `${scene.id}-${scene.turns.length + 1}` : undefined
       try {
-        const outcome = await runTurn(pack, state, input.trim(), turnLlm(settings.get(), scene?.nsfw ?? false), send, { ...(turnId && { turnId }), ...(session && { log: session }), loreBudgets: settings.getLoreBudgets() })
+        const outcome = await runTurn(pack, state, input.trim(), turnLlm(settings.get()), send, { ...(turnId && { turnId }), ...(session && { log: session }), loreBudgets: settings.getLoreBudgets() })
         const details = logs.turn(outcome.trace, { location: scene!.locationId, cast: scene!.cast }) ?? detailsOf('', outcome.trace)
         return {
           ok: true,
@@ -187,7 +187,7 @@ app.whenReady().then(() => {
       const { pack, logs } = current()
       const state = GameStateSchema.parse(raw)
       try {
-        const { state: next, reports, trace } = await endScene(pack, state, summaryLlm(settings.get(), state.scene?.nsfw ?? false))
+        const { state: next, reports, trace } = await endScene(pack, state, summaryLlm(settings.get()))
         logs.sceneEnd(trace)
         return { ok: true, state: next, reports }
       } catch (error) {
