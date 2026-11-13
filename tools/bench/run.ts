@@ -1,15 +1,17 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
-import { characterById, locationById, type Pack } from '@engine/pack'
-import { firstName, TracedError, type CallTrace } from '@engine/core'
+import type { Pack } from '@engine/pack'
+import { TracedError, type CallTrace } from '@engine/core'
 import { endScene, type SceneEndTrace, type Summarize } from '@engine/relationships'
 import { promptSources, runTurn, type TurnLlm, type TurnTrace } from '@engine/scene'
 import { callTrace, LogSession, promptVersion, readSession, type SessionRecord } from '@platform/logs'
 import type { FlagRecord, ScoreRecord } from '@engine/review'
 import { loreBudgets, type LoreBudgetOverrides, type LoreBudgets } from '@engine/rules'
 import { scenarioProblems, scenarioState, type ExpectedCheck, type Scenario } from './scenario'
+import { runInputs, type RunInputs } from './inputs'
 
 export { mockLlm } from './mock'
+export { nameIn } from './names'
 
 /**
  * One play of one scenario, as the turn traces recorded it (milestone 2, A1): the same traces play logs are made of,
@@ -52,6 +54,8 @@ export interface BenchRun {
   options: { repeat: number; summaries: boolean; score?: boolean }
   /** The lore budgets every turn ran with, and which came from the config; absent in runs from before they could be set. */
   loreBudgets?: LoreBudgets
+  /** What the run was given, so comparisons can match inputs (milestone 3.6); absent in older runs. */
+  inputs?: RunInputs
   scenarios: ScenarioRun[]
 }
 
@@ -71,6 +75,10 @@ export interface BenchOptions {
   log?: (line: string) => void
   /** Lore budgets over the pack's (`bench.config.json`'s `loreBudgets`), as the app's Settings give them. */
   loreBudgets?: LoreBudgetOverrides
+  /** The code's git revision (`sourceRevision`), for the run's inputs. */
+  source?: RunInputs['source']
+  /** Each role's model settings without keys (`roleSettings`), for the run's inputs. */
+  roles?: RunInputs['roles']
 }
 
 /** The seed of a repeat: the scenario's own for the first, then the next ones, so repeats roll differently. */
@@ -134,6 +142,7 @@ export async function runBench(content: Pack, scenarios: Scenario[], llm: BenchL
     models,
     options: { repeat, summaries: scenarios.some((s) => s.summaries) },
     loreBudgets: loreBudgets(content.ruleset, options.loreBudgets),
+    inputs: runInputs(content, scenarios, { ...(options.source && { source: options.source }), roles: options.roles ?? {} }),
     scenarios: []
   }
   const log = options.log ?? (() => {})
@@ -216,12 +225,4 @@ export function readRun(dir: string): BenchRun {
     }
   })
   return { ...file, scenarios }
-}
-
-/** A display name for an id in a scenario's place: a character's first name, a walk-on's name, or the id. */
-export function nameIn(content: Pack, location: string, id: string): string {
-  const c = characterById(content, id)
-  if (c) return firstName(c.name)
-  const w = locationById(content, location)?.walkOns.find((x) => x.id === id)
-  return w?.name ?? w?.label ?? id
 }
