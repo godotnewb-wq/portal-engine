@@ -1,6 +1,6 @@
 import { z } from 'zod'
 import { IdSchema } from '@engine/core'
-import { MetersSchema } from '@engine/characters'
+import { MetersSchema, TieTagSchema } from '@engine/characters'
 import { PlayerSchema } from '@engine/characters'
 import { SceneSchema } from './scene'
 
@@ -20,8 +20,8 @@ export const MemorySchema = z.object({
 export type Memory = z.infer<typeof MemorySchema>
 
 /** One direction of a relationship between two characters (A's feelings for B need not match B's for A). */
-/** `note`: the authored line of history between them, if any (relationships §3). */
-export const RelationSchema = z.object({ from: IdSchema, to: IdSchema, note: z.string().optional(), meters: MetersSchema })
+/** `tags`: what they are to each other; `note`: the line of history between them, if any (relationships §3). */
+export const RelationSchema = z.object({ from: IdSchema, to: IdSchema, tags: z.array(TieTagSchema).default([]), note: z.string().optional(), meters: MetersSchema })
 export type Relation = z.infer<typeof RelationSchema>
 
 export const GameStateSchema = z.object({
@@ -33,6 +33,8 @@ export const GameStateSchema = z.object({
   /** Each character's meters toward the player. */
   meters: z.record(IdSchema, MetersSchema),
   relations: z.array(RelationSchema).default([]),
+  /** What the player is to each character who holds tags toward them, with the note (relationships §3). */
+  playerTies: z.record(IdSchema, z.object({ tags: z.array(TieTagSchema), note: z.string().optional() })).default({}),
   /** Major Characters in the player's party (companions), separate from their tier (npc design §2). */
   party: z.array(IdSchema),
   memories: z.array(MemorySchema).default([]),

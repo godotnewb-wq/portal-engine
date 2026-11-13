@@ -96,6 +96,35 @@ export function cardProblems(r: Ruleset, codex: CodexEntry[], c: Character): str
   return problems
 }
 
+/**
+ * Relationship tags across the cast (relationships §3): only the ruleset's tags, at most its limit per direction, no tag
+ * twice, and every tag that isn't one-sided mirrored by its counterpart on the other side. Tags toward the player
+ * aren't mirrored: the player holds none.
+ */
+export function tieProblems(r: Ruleset, characters: Character[]): string[] {
+  const t = r.ties
+  const problems: string[] = []
+  const byId = new Map(t.tags.map((x) => [x.id, x]))
+  const direction = (where: string, tags: { tag: string }[]) => {
+    for (const x of tags) if (!byId.has(x.tag)) problems.push(`${where} uses unknown tag "${x.tag}"`)
+    if (tags.length > t.max) problems.push(`${where} holds ${tags.length} tags; at most ${t.max}`)
+    for (const x of tags.filter((x, i) => tags.findIndex((y) => y.tag === x.tag) !== i)) problems.push(`${where} holds "${x.tag}" twice`)
+  }
+  for (const c of characters) {
+    if (c.playerTie) direction(`${c.id} toward the player`, c.playerTie.tags)
+    for (const rel of c.relations) {
+      direction(`${c.id} toward ${rel.to}`, rel.tags)
+      const back = characters.find((o) => o.id === rel.to)?.relations.find((x) => x.to === c.id)
+      for (const x of rel.tags) {
+        const def = byId.get(x.tag)
+        if (!def || def.oneSided) continue
+        if (!back?.tags.some((y) => y.tag === def.counterpart)) problems.push(`${c.id} holds "${x.tag}" toward ${rel.to}, who doesn't hold "${def.counterpart}" back`)
+      }
+    }
+  }
+  return problems
+}
+
 /** Authoring warnings: a card missing what its tier's form expects (the ruleset's `people.forms`). Task 6 makes them problems. */
 export function cardWarnings(r: Ruleset, c: Character): string[] {
   const form = r.people.forms[c.tier]

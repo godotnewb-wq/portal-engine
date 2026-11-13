@@ -5,7 +5,7 @@ import { characterById, locationById, type Pack } from '@engine/pack'
 /** A new game: the test player, everyone's starting feelings, the dice seeded. */
 export function createInitialState(content: Pack, seed: number): GameState {
   const relations: Relation[] = content.characters.flatMap((c) =>
-    c.relations.map((r) => ({ from: c.id, to: r.to, note: r.note, meters: r.meters }))
+    c.relations.map((r) => ({ from: c.id, to: r.to, tags: r.tags, note: r.note, meters: r.meters }))
   )
   return {
     player: content.player,
@@ -14,6 +14,7 @@ export function createInitialState(content: Pack, seed: number): GameState {
     dice: seed >>> 0,
     meters: Object.fromEntries(content.characters.map((c) => [c.id, c.meters])),
     relations,
+    playerTies: Object.fromEntries(content.characters.flatMap((c) => (c.playerTie ? [[c.id, { tags: c.playerTie.tags, note: c.playerTie.note }]] : []))),
     party: [...content.manifest.start.party],
     memories: [],
     facts: {},
@@ -79,6 +80,11 @@ export function stateProblems(content: Pack, state: GameState): string[] {
     unknown('the party', id)
     const c = characterById(content, id)
     if (c && c.tier !== 'major') problems.push(`the party has "${id}", who isn't a Major Character`)
+  }
+  const tags = content.ruleset.ties.tags.map((t) => t.id)
+  for (const id of Object.keys(state.playerTies)) unknown('a tie to the player', id)
+  for (const t of [...state.relations.flatMap((r) => r.tags), ...Object.values(state.playerTies).flatMap((p) => p.tags)]) {
+    if (!tags.includes(t.tag)) problems.push(`a relationship uses unknown tag "${t.tag}"`)
   }
   for (const r of state.relations) {
     unknown('a relation', r.from)

@@ -23,6 +23,7 @@
   "expression": { "display": { "sad": "stands very still", "mad": "slams the gate" } },
   "blockers": [{ "action": "recruit", "reason": "bound to the yard by his maker's oath" }],
   "malleability": "loose",
+  "playerTie": { "tags": [{ "tag": "master", "word": "employer" }], "note": "took him on for the night shift last month" },
   "mood": "uneasy",
   "secrets": [{ "id": "after-closing", "text": "Tobin let someone into the yard after closing.", "tell": "Hums" }],
   "meters": { "warmth": -2, "bond": -2 }

@@ -47,6 +47,6 @@
   "values": [{ "value": "honesty", "stance": "likes" }],
   "secrets": [{ "id": "two-books", "codex": "faction.guild.second-ledger", "role": "she keeps the second ledger", "angle": "would rather lose her post than see it found", "tell": "Gives exact numbers", "disclose": { "bond": "fond", "warmth": "fair" } }],
   "meters": { "warmth": 2, "bond": 3 },
-  "relations": [{ "to": "tobin", "note": "has known him since the guild took him on", "meters": { "warmth": 1, "bond": -1 } }],
+  "relations": [{ "to": "tobin", "tags": [{ "tag": "foe", "word": "rival" }], "note": "has known him since the guild took him on", "meters": { "warmth": 1, "bond": -1 } }],
   "stats": { "level": 2, "attributes": { "brawn": 3, "wits": 7, "nerve": 5 }, "skills": { "notice": 1, "talk": 1 } }
 }

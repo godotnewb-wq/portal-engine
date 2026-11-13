@@ -8,7 +8,8 @@ describe('game state', () => {
     const state = createInitialState(fixture, 9)
     expect(state.meters['mara']).toEqual({ warmth: 2, bond: 3 })
     expect(state.party).toEqual(['mara'])
-    expect(state.relations).toEqual([{ from: 'mara', to: 'tobin', note: 'has known him since the guild took him on', meters: { warmth: 1, bond: -1 } }])
+    expect(state.relations).toEqual([{ from: 'mara', to: 'tobin', tags: [{ tag: 'foe', word: 'rival' }], note: 'has known him since the guild took him on', meters: { warmth: 1, bond: -1 } }])
+    expect(state.playerTies).toEqual({ tobin: { tags: [{ tag: 'master', word: 'employer' }], note: 'took him on for the night shift last month' } })
     expect(GameStateSchema.parse(state)).toEqual(state)
   })
 

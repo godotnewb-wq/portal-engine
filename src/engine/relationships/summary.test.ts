@@ -44,7 +44,7 @@ describe('summaries in the pack’s meters and words', () => {
     expect(next.meters['tobin']).toEqual({ warmth: -5, bond: -2 })
     expect(next.facts['tobin']).toEqual(['Tobin let someone into the yard after closing.'])
     // Tobin had no relation to Mara: it starts at the ruleset's 8 / 5 and moves from there.
-    expect(next.relations.find((r) => r.from === 'tobin' && r.to === 'mara')).toEqual({ from: 'tobin', to: 'mara', meters: { warmth: 3, bond: 0 } })
+    expect(next.relations.find((r) => r.from === 'tobin' && r.to === 'mara')).toEqual({ from: 'tobin', to: 'mara', tags: [], meters: { warmth: 3, bond: 0 } })
     expect(reports[0]!.after).toEqual({ warmth: -5, bond: -2 })
     expect(GameStateSchema.parse(next)).toEqual(next)
   })

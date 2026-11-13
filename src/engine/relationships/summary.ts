@@ -223,7 +223,7 @@ export function applySummaries(content: Pack, state: GameState, summaries: { id:
       const existing = relations.find((r) => r.from === id && r.to === other)
       // Relations are created where there's a reason; sharing a scene is one.
       const fresh = { ...r.relations.start }
-      const start: Relation = existing ?? { from: id, to: other, meters: fresh }
+      const start: Relation = existing ?? { from: id, to: other, tags: [], meters: fresh }
       const moved = addMeters(r, start.meters, o.delta)
       const next = { ...start, meters: moved }
       relations = existing ? relations.map((r) => (r === existing ? next : r)) : [...relations, next]

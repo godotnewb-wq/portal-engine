@@ -5,7 +5,7 @@ import { buildCodex, codexProblems, codexWarnings, entryById, mayHold, type Code
 import { LocationSchema, SettingSchema, settingProblems, speciesById, factionById, tierById, STANCE_LEVEL_COUNT, type Location, type Setting } from '@engine/world'
 import { firstName } from '@engine/core'
 import { ENGINE_VERSION, PackManifestSchema, satisfies, type PackManifest } from './manifest'
-import { cardProblems, cardWarnings } from './cards'
+import { cardProblems, cardWarnings, tieProblems } from './cards'
 
 /**
  * The pack's own words for things the engine says to the LLM or the player (`setting/phrases.json`): phrases its prose
@@ -213,6 +213,7 @@ export function packProblems(pack: Pack): string[] {
       problems.push(...meterProblems(r, `${c.id}'s relation to ${rel.to}`, rel.meters))
     }
   }
+  problems.push(...tieProblems(r, pack.characters))
   for (const l of pack.locations) {
     if (!tierById(s, l.tier)) problems.push(`${l.id} is in unknown tier "${l.tier}"`)
     for (const w of l.walkOns) species(`walk-on ${w.id} in ${l.id}`, w.species)

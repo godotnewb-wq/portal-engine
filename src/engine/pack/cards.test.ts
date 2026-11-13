@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { fixture } from '@tests/fixture'
 import type { Character } from '@engine/characters'
-import { cardProblems, cardWarnings, hauntsOverlap } from './cards'
+import { cardProblems, cardWarnings, hauntsOverlap, tieProblems } from './cards'
 import { characterById } from './content'
 
 const R = fixture.ruleset
@@ -113,6 +113,33 @@ describe('cardWarnings', () => {
       'mara (major) has no Harm sensitivity',
       'mara (major) has no Law sensitivity',
       'mara has no display line for sad, mad'
+    ])
+  })
+})
+
+describe('tieProblems', () => {
+  const cast = fixture.characters
+  const withTies = (maraTags: { tag: string }[], tobinRelations: Character['relations'] = []) =>
+    tieProblems(R, cast.map((c) => (c.id === 'mara' ? { ...c, relations: [{ ...c.relations[0]!, tags: maraTags }] } : { ...c, relations: tobinRelations })))
+
+  it('accepts the fixture: a one-sided tag needs no counterpart, and tags toward the player aren’t mirrored', () => {
+    expect(tieProblems(R, cast)).toEqual([])
+  })
+
+  it('allows only listed tags, up to the limit, each once', () => {
+    expect(withTies([{ tag: 'foe' }, { tag: 'foe' }, { tag: 'pal' }])).toEqual([
+      'mara toward tobin uses unknown tag "pal"',
+      'mara toward tobin holds 3 tags; at most 2',
+      'mara toward tobin holds "foe" twice'
+    ])
+  })
+
+  it('needs a mirrored counterpart for every tag that isn’t one-sided', () => {
+    expect(withTies([{ tag: 'master' }])).toEqual(['mara holds "master" toward tobin, who doesn\'t hold "hand" back'])
+    expect(withTies([{ tag: 'master' }], [{ to: 'mara', tags: [{ tag: 'hand' }], note: 'x', meters: tobin.meters }])).toEqual([])
+    expect(withTies([{ tag: 'elder' }], [{ to: 'mara', tags: [{ tag: 'elder' }], note: 'x', meters: tobin.meters }])).toEqual([
+      'mara holds "elder" toward tobin, who doesn\'t hold "younger" back',
+      'tobin holds "elder" toward mara, who doesn\'t hold "younger" back'
     ])
   })
 })

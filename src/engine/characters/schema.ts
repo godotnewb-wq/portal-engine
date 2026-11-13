@@ -117,14 +117,27 @@ export const MotiveSchema = z.object({ type: z.string(), strength: z.string(), e
 export type Motive = z.infer<typeof MotiveSchema>
 
 /**
- * How a character starts out toward someone else in the cast: how they feel (meters) and one line of specific
- * history between them (relationships §3, the relationship note). Relationship tags replace the old derived label.
+ * A relationship tag one character holds toward another (relationships §3): a tag from the ruleset's list, the word it
+ * reads as on this card ("stepbrother" for a sibling tag), and whether it is private (a secret lover, a hidden
+ * informant), which keeps it from the writer unless the director keeps it like a secret.
+ */
+export const TieTagSchema = z.object({ tag: id, word: z.string().min(1).optional(), private: z.boolean().optional() })
+export type TieTag = z.infer<typeof TieTagSchema>
+
+/**
+ * How a character starts out toward someone else in the cast: what they are to each other (up to the ruleset's limit
+ * of tags; none means acquaintances), how they feel (meters), and one line of specific history between them (the
+ * relationship note).
  */
 export const RelationSeedSchema = z.object({
   to: id,
+  tags: z.array(TieTagSchema).default([]),
   note: z.string().min(1),
   meters: MetersSchema
 })
+
+/** What the player is to them, if anything (tags and a note); their feelings toward the player are `meters`. The player holds no tags. */
+export const PlayerTieSchema = z.object({ tags: z.array(TieTagSchema).default([]), note: z.string().min(1) })
 
 export const CharacterSchema = z
   .object({
@@ -180,6 +193,7 @@ export const CharacterSchema = z
     /** How they start out toward the player. */
     meters: MetersSchema,
     relations: z.array(RelationSeedSchema).default([]),
+    playerTie: PlayerTieSchema.optional(),
     /** A full stat block. Party members need one; others get one from a tier template when first needed. */
     stats: StatBlockSchema.optional(),
     /** Placeholder sprite path relative to the content folder, until art generation exists. */
