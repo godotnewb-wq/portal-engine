@@ -1,0 +1,158 @@
+{
+  "id": "pim-varga",
+  "name": "Pim Varga",
+  "tier": "recurring",
+  "age": "adult",
+  "species": "goblin",
+  "pronouns": "she/her",
+  "appearance": "adult goblin woman in her sixties, small and wiry, grey-green skin, large ears weighed down with old brass rings, a shawl over a mechanic's coverall, a ring of keys at her belt",
+  "role": "Owns Brask's workshop and three flats on the lower stairs; has lived on the Turn all her life",
+  "occupation": "landlady",
+  "personality": "Sharp, sentimental and broke. Loves the lower stairs and is tired of them. Collects rent in person and gossip on the side.",
+  "portrait": "With strangers Pim is sharp and nosy: she asks who you are, who you're seeing and what you're paying, and remembers all three. With people she knows she's sentimental and sly, and tells stories about the Turn before the water came. She notices whose rent is late, whose light is on, who's new, and which pipes are bleeding into her walls. She'll talk about the old days, her late husband's pumps, her tenants' business and what a flat on the stairs used to cost. She jingles the key ring. When she's guilty she brings people food.",
+  "agenda": {
+    "longTerm": [
+      "Retire somewhere dry before her knees give out",
+      "Leave the building to someone who'll keep it, if anyone will"
+    ],
+    "current": "Collect the rent and avoid Brask until she's decided about the Grid's offer"
+  },
+  "contradictions": [
+    "Says she'll never sell to the Grid, and has their offer folded in her shawl",
+    "Loves Brask like a son and charges him full rent"
+  ],
+  "voice": {
+    "rhythm": "Quick, gossipy, loops back to the point",
+    "vocabulary": "Old Ninth Turn speech, pump talk from her husband",
+    "slang": [
+      "bleeding (leaking Aether)",
+      "the old Council days"
+    ],
+    "avoids": [
+      "the Grid's offer",
+      "her knees"
+    ],
+    "sampleLines": [
+      "Rent's on the first, love. It's the third.",
+      "My Arvo kept those pumps forty years. Brask keeps them better. Don't tell him I said so.",
+      "Who's your friend? Do they eat? I made too much.",
+      "The Grid wants everything on these stairs. They can want."
+    ],
+    "shifts": {
+      "angry": "Goes quiet and very precise about the rent",
+      "warm": "Brings you food and pretends it's leftovers",
+      "lying": "Jingles her keys and changes the subject to her husband",
+      "afraid": "Talks about the old days faster and faster"
+    }
+  },
+  "tells": [
+    "Jingles her keys and changes the subject"
+  ],
+  "layers": {
+    "axes": {
+      "compassion": "kind",
+      "scruples": "pragmatic",
+      "outlook": "gloomy"
+    },
+    "values": [
+      {
+        "value": "security",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "somewhere dry, finally"
+      },
+      {
+        "value": "tradition",
+        "strength": "mild",
+        "stance": "likes",
+        "personal": "the stairs as they were"
+      }
+    ],
+    "foundations": {
+      "loyalty": "strong",
+      "care": "mild"
+    }
+  },
+  "expression": {
+    "display": {
+      "grief": "talks about her late husband all evening",
+      "fear": "talks about the old days, faster",
+      "anger": "gets precise about the rent",
+      "shame": "brings food and won't sit down",
+      "hurt": "raises the rent and regrets it",
+      "affection": "brings food and gossip",
+      "joy": "tells a long story about the Turn before the water",
+      "gratitude": "remembers it at rent time"
+    }
+  },
+  "malleability": "average",
+  "haunts": [
+    {
+      "location": "location.low-turns.ninth-turn.lower-stairs",
+      "from": "08:00",
+      "to": "12:00",
+      "note": "on her stoop, collecting rent and gossip"
+    }
+  ],
+  "mood": "nosy, cheerful, guilty underneath",
+  "knowledge": [
+    "Brask's workshop lease is up at the end of the season",
+    "A Grid surveyor, Corvin Hale, has made her an offer for the building; it's more than she'll ever see otherwise",
+    "Her late husband, Arvo, kept the lower stairs' pumps running for forty years",
+    "The Drowned Saints raised the tithe this month"
+  ],
+  "values": [
+    {
+      "value": "the old Turn",
+      "stance": "likes"
+    },
+    {
+      "value": "rent on time",
+      "stance": "likes"
+    },
+    {
+      "value": "the Grid",
+      "stance": "dislikes"
+    }
+  ],
+  "secrets": [
+    {
+      "id": "took-the-offer",
+      "text": "She's signed the Grid's offer for the building, to take effect at the end of the season unless someone matches it. She hasn't told Brask, and she can't look at him.",
+      "summary": "Has signed the Grid's offer for Brask's building.",
+      "keywords": [
+        "the lease",
+        "the building",
+        "the offer",
+        "end of the season"
+      ],
+      "tell": "Jingles her keys and changes the subject",
+      "revealWhen": "Brask asks her straight out",
+      "disclose": {
+        "trust": "moderate",
+        "approval": "low"
+      }
+    }
+  ],
+  "meters": {
+    "approval": 5,
+    "trust": 5,
+    "interest": 5
+  },
+  "relations": [
+    {
+      "to": "brask",
+      "tags": [
+        {
+          "tag": "tenant"
+        }
+      ],
+      "note": "her tenant for nine years and the closest thing to a son she has; she charges him full rent",
+      "meters": {
+        "approval": 25,
+        "trust": 30,
+        "interest": 10
+      }
+    }
+  ]
+}

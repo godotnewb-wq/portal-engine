@@ -206,6 +206,21 @@
         "trust": 20,
         "interest": 5
       }
+    },
+    {
+      "to": "harl-brennick",
+      "tags": [
+        {
+          "tag": "boss",
+          "word": "shift boss"
+        }
+      ],
+      "note": "his shift boss, who wrote up the final warning as lightly as he could",
+      "meters": {
+        "approval": 10,
+        "trust": 15,
+        "interest": 0
+      }
     }
   ],
   "stats": {

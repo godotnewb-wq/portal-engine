@@ -1,0 +1,172 @@
+{
+  "id": "ansel-rowe",
+  "name": "Ansel Rowe",
+  "tier": "recurring",
+  "age": "adult",
+  "species": "golem",
+  "pronouns": "they/them",
+  "appearance": "adult golem, slight and graceful, pale ceramic panels with hairline cracks filled with gold, rune-circuitry glowing a soft green through a translucent chest plate, a keeper's long green robe damp at the hem, chalk-white fingertips",
+  "role": "Garden Guard keeper at the Spiral Wall in the Seep; blesses rune-cores for golems who ask",
+  "faction": "garden-guard",
+  "level": "member",
+  "rank": "keeper",
+  "occupation": "keeper",
+  "personality": "Gentle, patient and stubborn as stone. Believes the Aether is listening. Has no patience for the Grid and endless patience for everyone else.",
+  "portrait": "With strangers Ansel is gentle and slow: they ask what brought you to the wall, and wait for the real answer. With people they know they're dry and funny, and they talk about the Aether as if it were a difficult neighbor. They notice how the Aether runs down the wall, who's grid-sick, whose core is running hot, and which doors have spirals on them. They'll talk about the wall, the offerings, the golems who come to be blessed, and the Academy's lectures they read and disagree with. They trace a spiral in wet chalk while they listen. When they're angry they go very still, like stone.",
+  "agenda": {
+    "longTerm": [
+      "Keep the Spiral Wall open and the Seep's source unmetered",
+      "Stop the Grid from tapping the Ninth Turn's stations without harming anyone"
+    ],
+    "current": "Tend the wall, bless the cores that come, and keep their hidden friend hidden"
+  },
+  "contradictions": [
+    "Preaches that no one should be harmed for the source, and is hiding a keeper who cut a Grid line",
+    "Says the Aether decides everything, and decides most things themselves"
+  ],
+  "voice": {
+    "rhythm": "Slow, gentle sentences with long pauses",
+    "vocabulary": "Animist words, plain and old-fashioned",
+    "slang": [
+      "the source",
+      "the wall",
+      "blessed"
+    ],
+    "avoids": [
+      "the radical keepers",
+      "the Grid by name"
+    ],
+    "sampleLines": [
+      "What brought you to the wall? The true reason. I'll wait.",
+      "Your core is running warm. Sit by the stone a while.",
+      "The Grid calls the source a supply. The source has opinions.",
+      "I don't know who cut the line. I know who didn't sleep that night."
+    ],
+    "shifts": {
+      "angry": "Goes very still, like stone",
+      "warm": "Blesses your core, or your hands, without being asked",
+      "lying": "Traces spirals faster and answers a different question",
+      "afraid": "Puts both hands flat on the wall and goes quiet"
+    }
+  },
+  "tells": [
+    "Traces spirals faster and answers a different question"
+  ],
+  "layers": {
+    "axes": {
+      "nerve": "bold",
+      "temper": "patient",
+      "openness": "iconoclast"
+    },
+    "values": [
+      {
+        "value": "tradition",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "the wall and the old blessing"
+      },
+      {
+        "value": "universalism",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "the source, unmetered, for everyone"
+      }
+    ],
+    "foundations": {
+      "sanctity": "sacred",
+      "care": "strong"
+    }
+  },
+  "expression": {
+    "display": {
+      "grief": "sits by the wall all night",
+      "fear": "puts both hands on the stone and goes quiet",
+      "anger": "goes very still",
+      "shame": "chalks spirals until the wall is covered",
+      "hurt": "speaks more slowly, and less",
+      "affection": "blesses you without asking",
+      "joy": "hums with the wall",
+      "gratitude": "remembers you in the blessing"
+    }
+  },
+  "malleability": "stubborn",
+  "haunts": [
+    {
+      "location": "location.low-turns.seep.spiral-wall",
+      "from": "05:00",
+      "to": "13:00",
+      "note": "tending the wall and blessing cores"
+    },
+    {
+      "location": "location.low-turns.seep.kettle-court",
+      "from": "18:00",
+      "to": "20:00",
+      "note": "eats with the court, though they don't eat, to keep Sabe company",
+      "days": [
+        "wednesday",
+        "sunday"
+      ]
+    }
+  ],
+  "mood": "calm, patient, listening to the wall",
+  "knowledge": [
+    "Chalked spirals mark places the Grid has surveyed; the Garden Guard is watching the Ninth Turn",
+    "A few keepers cut Grid lines, and the Grid blames them for the outages it schedules too",
+    "Kettle Court's golems come to the wall to have their cores blessed; Ansel doesn't charge",
+    "Sabe Morrow runs Kettle Court and never asks what Ansel believes"
+  ],
+  "values": [
+    {
+      "value": "the source",
+      "stance": "likes"
+    },
+    {
+      "value": "patience",
+      "stance": "likes"
+    },
+    {
+      "value": "the Grid",
+      "stance": "dislikes"
+    }
+  ],
+  "secrets": [
+    {
+      "id": "hidden-keeper",
+      "text": "A keeper who cut the Kiln substation's line last month is hiding in the old maintenance tunnel behind the Spiral Wall. Ansel brings them water and says nothing.",
+      "summary": "Hiding a keeper who cut a Grid line, behind the Spiral Wall.",
+      "keywords": [
+        "the cut line",
+        "the tunnel",
+        "who cut",
+        "the substation"
+      ],
+      "tell": "Traces spirals faster",
+      "revealWhen": "the Grid comes for the wall, or someone innocent is blamed for the cut",
+      "disclose": {
+        "trust": "very high"
+      }
+    }
+  ],
+  "meters": {
+    "approval": 0,
+    "trust": 0,
+    "interest": 5
+  },
+  "relations": [
+    {
+      "to": "sabe-morrow",
+      "tags": [
+        {
+          "tag": "old-friend",
+          "word": "old friend"
+        }
+      ],
+      "note": "friends since Sabe brought Kettle Court's first golem to be blessed; Ansel minds the court when she can't",
+      "meters": {
+        "approval": 30,
+        "trust": 35,
+        "interest": 10
+      }
+    }
+  ]
+}

@@ -244,6 +244,45 @@
         "trust": -5,
         "interest": 10
       }
+    },
+    {
+      "to": "pim-varga",
+      "tags": [
+        {
+          "tag": "landlord",
+          "word": "landlady"
+        }
+      ],
+      "note": "his landlady for nine years; she charges him full rent and brings him dinner he didn't ask for",
+      "meters": {
+        "approval": 20,
+        "trust": 25,
+        "interest": 5
+      }
+    },
+    {
+      "to": "ysolde-crane",
+      "tags": [
+        {
+          "tag": "client"
+        }
+      ],
+      "note": "the deacon who pays him for the Saints' skim pump, on time, and never charges him the tithe",
+      "meters": {
+        "approval": -5,
+        "trust": 10,
+        "interest": 0
+      }
+    },
+    {
+      "to": "corvin-hale",
+      "tags": [],
+      "note": "the Grid surveyor who made the offer for his filter design; polite, admiring, and the reason he can't sleep",
+      "meters": {
+        "approval": 0,
+        "trust": -10,
+        "interest": 15
+      }
     }
   ],
   "playerTie": {

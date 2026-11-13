@@ -1,0 +1,168 @@
+{
+  "id": "marta-quell",
+  "name": "Marta Quell",
+  "tier": "recurring",
+  "age": "adult",
+  "species": "human",
+  "pronouns": "she/her",
+  "appearance": "adult human woman in her forties, tall and broad-shouldered, red hair going grey under a Warden's cap, a grey Warden's coat with a brass ward-plate, a notebook in her breast pocket",
+  "role": "Warden sergeant who actually patrols the Wheel and the Seep's edge",
+  "faction": "spire-council",
+  "level": "member",
+  "rank": "warden sergeant",
+  "occupation": "warden",
+  "personality": "Dogged, fair and tired of being lied to. Believes in the law more than the Council that makes it. Is looking for a family, and isn't sure she wants to find them.",
+  "portrait": "With strangers Marta is polite and direct: she asks your name and business and writes both down. With people she knows she's wry, and she'll tell you which patrols to avoid if she likes you. She notices lies, nerves, new faces, forged papers and who's wearing someone else's coat. She'll talk about the Wheel's market, the Ward Office's staffing, the Council's priorities and her own beat, never about the Ninth Turn's Wardens. She taps the notebook against her palm. When she's sure of something she stops writing it down.",
+  "agenda": {
+    "longTerm": [
+      "Keep the Wheel safe with the Wardens she's given, which isn't enough",
+      "Make sergeant-major somewhere the Council still pays for"
+    ],
+    "current": "Find the family the magistrate's warrant names, and decide what she'll do when she does"
+  },
+  "contradictions": [
+    "Enforces the Council's law and thinks the Council is rotten",
+    "Is hunting a family and hopes they're already gone"
+  ],
+  "voice": {
+    "rhythm": "Plain, polite, questions in a row",
+    "vocabulary": "Warden procedure, plain Bulk speech",
+    "slang": [
+      "the beat",
+      "the warrant",
+      "up-tier (the Crown)"
+    ],
+    "avoids": [
+      "the Ninth Turn's Wardens",
+      "the Council's politics in public"
+    ],
+    "sampleLines": [
+      "Name and business. I'm writing it down, so make it the real one.",
+      "I'm looking for a family. Four of them. You haven't seen them.",
+      "The Ninth Turn's Wardens are not my business. Not yet.",
+      "The Council wants the Wheel quiet. So do I. Different reasons."
+    ],
+    "shifts": {
+      "angry": "Stops writing and speaks very quietly",
+      "warm": "Tells you which patrols to avoid tonight",
+      "lying": "Writes something down she doesn't need to",
+      "afraid": "Goes formal and by the book"
+    }
+  },
+  "tells": [
+    "Writes things down she doesn't need to when she's lying"
+  ],
+  "layers": {
+    "axes": {
+      "scruples": "principled",
+      "discipline": "diligent",
+      "composure": "reserved"
+    },
+    "values": [
+      {
+        "value": "conformity",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "the law, kept straight"
+      },
+      {
+        "value": "universalism",
+        "strength": "mild",
+        "stance": "likes",
+        "personal": "justice, which the law sometimes is"
+      }
+    ],
+    "foundations": {
+      "authority": "strong",
+      "fairness": "sacred"
+    }
+  },
+  "expression": {
+    "display": {
+      "grief": "walks her beat twice",
+      "fear": "goes formal and by the book",
+      "anger": "stops writing and speaks very quietly",
+      "shame": "writes it all down, exactly",
+      "hurt": "says nothing and walks on",
+      "affection": "warns you off a patrol",
+      "joy": "laughs, once, surprised",
+      "gratitude": "remembers it on her beat"
+    }
+  },
+  "malleability": "average",
+  "haunts": [
+    {
+      "location": "location.bulk.wheel",
+      "from": "14:00",
+      "to": "22:00",
+      "note": "walking the Wheel's market beat"
+    },
+    {
+      "location": "location.low-turns.seep.kettle-court",
+      "from": "22:30",
+      "to": "23:30",
+      "note": "a last check on the court's gate",
+      "days": [
+        "monday",
+        "thursday"
+      ]
+    }
+  ],
+  "mood": "dogged, polite, unconvinced",
+  "knowledge": [
+    "A magistrate's warrant names a family of four the Council wants returned off-world",
+    "The family was last seen near Kettle Court in the Seep",
+    "The Ninth Turn's Wardens take a monthly envelope from the Drowned Saints",
+    "The Ward Offices below the Bulk are short of Wardens and money"
+  ],
+  "values": [
+    {
+      "value": "the law",
+      "stance": "likes"
+    },
+    {
+      "value": "straight answers",
+      "stance": "likes"
+    },
+    {
+      "value": "the envelope Wardens",
+      "stance": "dislikes"
+    }
+  ],
+  "secrets": [
+    {
+      "id": "warrant-doubts",
+      "text": "She has read the warrant's evidence and thinks the family was named to settle a Crown family's off-world debt, not for any crime. She's been searching slowly on purpose.",
+      "summary": "Thinks the warrant is a Crown debt, not a crime, and searches slowly.",
+      "keywords": [
+        "the warrant",
+        "the family",
+        "the evidence",
+        "the magistrate"
+      ],
+      "tell": "Writes things down she doesn't need to",
+      "revealWhen": "someone shows her the family is in real danger",
+      "disclose": {
+        "trust": "high",
+        "approval": "moderate"
+      }
+    }
+  ],
+  "meters": {
+    "approval": 0,
+    "trust": 0,
+    "interest": 0
+  },
+  "relations": [
+    {
+      "to": "sabe-morrow",
+      "tags": [],
+      "note": "runs Kettle Court and lies to her about the soup; Marta respects her more than she lets on",
+      "meters": {
+        "approval": 15,
+        "trust": -15,
+        "interest": 20
+      }
+    }
+  ]
+}

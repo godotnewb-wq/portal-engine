@@ -112,6 +112,7 @@ export function tieProblems(r: Ruleset, characters: Character[]): string[] {
   }
   for (const c of characters) {
     if (c.playerTie) direction(`${c.id} toward the player`, c.playerTie.tags)
+    for (const to of c.relations.map((r) => r.to).filter((to, i, all) => all.indexOf(to) !== i)) problems.push(`${c.id} has two relations toward ${to}`)
     for (const rel of c.relations) {
       direction(`${c.id} toward ${rel.to}`, rel.tags)
       const back = characters.find((o) => o.id === rel.to)?.relations.find((x) => x.to === c.id)

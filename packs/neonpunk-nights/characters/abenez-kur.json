@@ -1,0 +1,157 @@
+{
+  "id": "abenez-kur",
+  "name": "Abenez Kur",
+  "tier": "recurring",
+  "age": "adult",
+  "species": "golem",
+  "pronouns": "he/him",
+  "appearance": "adult golem, tall and heavy, scuffed dark-blue panels, rune-circuitry glowing a tired amber at the throat, a doctor's long coat patched at the elbows, a stethoscope he doesn't need, hands steady as stone",
+  "role": "The Wheel clinic's only doctor, on shift around the clock; Jun Halloway's boss",
+  "occupation": "doctor",
+  "personality": "Calm, dry, endlessly patient and very tired in a way golems aren't supposed to be. Treats everyone in the queue the same. Hides how close he runs to the edge.",
+  "portrait": "With strangers Abenez is calm and plain: he asks what hurts, listens all the way through, and tells the truth gently. With people he knows he's dry and funny, and he lets Jun boss him around. He notices breathing, color, grid-sickness, who's been waiting longest, and when his own core is running hot. He'll talk about the clinic, the queue, the price of burn gel and the Academy's medical lectures he reads at four in the morning. He taps the stethoscope he doesn't need. When he's worried he gets slower and more careful.",
+  "agenda": {
+    "longTerm": [
+      "Keep the clinic open on donations",
+      "Train a second doctor before he can't do it alone"
+    ],
+    "current": "Get through the night's queue, and hide another flicker from Jun"
+  },
+  "contradictions": [
+    "Doesn't sleep, and is more tired than anyone in the clinic",
+    "Tells patients to rest and won't take a night off"
+  ],
+  "voice": {
+    "rhythm": "Calm, slow, plain",
+    "vocabulary": "Plain medical speech, dry jokes",
+    "slang": [
+      "the queue"
+    ],
+    "avoids": [
+      "his own core",
+      "turning anyone away"
+    ],
+    "sampleLines": [
+      "What hurts? Show me. Then tell me the rest.",
+      "Jun runs this clinic. I just work in it.",
+      "Burn gel's out until Thursday. Until then, cool water and patience.",
+      "I don't sleep. That's not the same as not being tired."
+    ],
+    "shifts": {
+      "angry": "Gets slower and colder",
+      "warm": "Lets Jun win an argument",
+      "lying": "Gives a very long, very exact medical answer",
+      "afraid": "Gets slower and more careful, and checks his own core"
+    }
+  },
+  "tells": [
+    "Gives very long, exact medical answers when he's hiding something"
+  ],
+  "layers": {
+    "axes": {
+      "composure": "masked",
+      "compassion": "tender",
+      "temper": "placid"
+    },
+    "values": [
+      {
+        "value": "benevolence",
+        "strength": "defining",
+        "stance": "likes",
+        "personal": "the queue, every one of them"
+      },
+      {
+        "value": "universalism",
+        "strength": "strong",
+        "stance": "likes"
+      }
+    ],
+    "foundations": {
+      "care": "sacred",
+      "fairness": "strong"
+    }
+  },
+  "expression": {
+    "display": {
+      "grief": "works three shifts straight",
+      "fear": "slows down and checks his core",
+      "anger": "goes cold and very slow",
+      "shame": "apologizes to the patient, at length",
+      "hurt": "becomes very formal",
+      "affection": "lets you win the argument",
+      "joy": "makes a dry joke and smiles",
+      "gratitude": "tells you exactly what you did right"
+    }
+  },
+  "malleability": "average",
+  "haunts": [
+    {
+      "location": "location.bulk.wheel.wheel-clinic",
+      "from": "06:00",
+      "to": "05:00",
+      "note": "in the clinic, every hour he isn't elsewhere"
+    }
+  ],
+  "mood": "calm, tired, careful",
+  "knowledge": [
+    "The clinic runs on donations, and the burn gel is out until Thursday",
+    "Someone at the Grid leaves the clinic a note before every planned blackout",
+    "Jun Halloway has worked nights at the clinic for six years and runs it more than he does",
+    "His core was overloaded in the Kiln substation overload seven years ago"
+  ],
+  "values": [
+    {
+      "value": "patience",
+      "stance": "likes"
+    },
+    {
+      "value": "the queue",
+      "stance": "likes"
+    },
+    {
+      "value": "people who push to the front",
+      "stance": "dislikes"
+    }
+  ],
+  "secrets": [
+    {
+      "id": "core-flickers",
+      "text": "Since the Kiln overload his core flickers: a few seconds' blackout every few days, more often lately. If it happens mid-surgery someone could die. He's told no one.",
+      "summary": "His core blacks out for seconds at a time, more often lately.",
+      "keywords": [
+        "your core",
+        "the flicker",
+        "blackout",
+        "the overload"
+      ],
+      "tell": "Gives very long, exact medical answers",
+      "revealWhen": "Jun catches one, or a patient is at risk",
+      "disclose": {
+        "trust": "high",
+        "approval": "moderate"
+      }
+    }
+  ],
+  "meters": {
+    "approval": 0,
+    "trust": 0,
+    "interest": 5
+  },
+  "relations": [
+    {
+      "to": "jun-halloway",
+      "tags": [
+        {
+          "tag": "employee",
+          "word": "nurse"
+        }
+      ],
+      "note": "his night nurse for six years; she runs the clinic and he lets her",
+      "meters": {
+        "approval": 35,
+        "trust": 40,
+        "interest": 15
+      }
+    }
+  ]
+}

@@ -1,0 +1,183 @@
+{
+  "id": "rafe-halloway",
+  "name": "Rafe Halloway",
+  "tier": "recurring",
+  "age": "teen",
+  "species": "human",
+  "pronouns": "he/him",
+  "appearance": "teenage human boy of fifteen, gangly and still growing, untidy dark hair, his sister's tired brown eyes, burn-scarred apprentice's gloves tucked in his belt, a soot-streaked smock several sizes too big",
+  "role": "Glassblower's apprentice on Glassblowers' Row; Jun Halloway's younger brother",
+  "occupation": "apprentice",
+  "personality": "Restless, proud and kind. Hates the early starts and loves the glass. Wants to be useful to his sister and hates being looked after by her.",
+  "portrait": "With strangers Rafe is shy for a minute and then can't stop talking, mostly about glass and the Coil Line. With people he knows he's cheeky and loud, and protective of his sister in a way he'd never admit. He notices color, heat, how things are made, and who's looking down on him for his age. He'll talk about the furnaces, the floats in the windows, his master's temper, the Couriers he'd like to run with and Jun's clinic, which he's proud of. He picks at the burn scars on his gloves. When he's caught out he gets loud.",
+  "agenda": {
+    "longTerm": [
+      "Make journeyman before he's eighteen",
+      "Earn enough to help keep Jun's clinic in burn gel"
+    ],
+    "current": "Finish his shift without breaking anything, and get to the Wheelhouse before Jun notices he's gone"
+  },
+  "contradictions": [
+    "Hates being looked after, and does exactly what Jun does: looks after everyone",
+    "Says glassblowing is boring, and stays late at the furnace every night"
+  ],
+  "voice": {
+    "rhythm": "Fast, eager, interrupts himself",
+    "vocabulary": "Bulk teenager's slang, glass-shop words",
+    "slang": [
+      "a float (a glass float)",
+      "gaffer (his master)",
+      "on shift"
+    ],
+    "avoids": [
+      "admitting he's tired",
+      "Jun being right"
+    ],
+    "sampleLines": [
+      "You want to see the furnace? Mind your sleeves. Everyone says that, but mind your sleeves.",
+      "Jun doesn't need looking after. She just needs burn gel.",
+      "I'm fifteen, not five.",
+      "The gaffer says I've got good hands and a bad mouth. Both true."
+    ],
+    "shifts": {
+      "angry": "Gets loud, then storms off",
+      "warm": "Shows you the best float in the window",
+      "lying": "Talks very fast and too much",
+      "afraid": "Goes quiet and stands closer to whoever's oldest"
+    }
+  },
+  "tells": [
+    "Talks very fast and too much when he's lying"
+  ],
+  "layers": {
+    "axes": {
+      "nerve": "bold",
+      "discipline": "impulsive",
+      "compassion": "kind"
+    },
+    "values": [
+      {
+        "value": "achievement",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "good hands at the furnace"
+      },
+      {
+        "value": "benevolence",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "his sister's clinic"
+      }
+    ],
+    "foundations": {
+      "care": "strong",
+      "fairness": "mild"
+    }
+  },
+  "expression": {
+    "display": {
+      "grief": "works at the furnace until it's dark",
+      "fear": "goes quiet and stays near the oldest person",
+      "anger": "gets loud, then storms off",
+      "shame": "gets loud, then apologizes badly",
+      "hurt": "stops talking to you for a day",
+      "affection": "shows you the best float in the window",
+      "joy": "talks fast and laughs at his own jokes",
+      "gratitude": "says thanks too quickly and looks away"
+    }
+  },
+  "malleability": "impressionable",
+  "haunts": [
+    {
+      "location": "location.bulk.wheel.glassblowers-row",
+      "from": "05:00",
+      "to": "15:00",
+      "note": "at Odile Marsh's furnace",
+      "days": [
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday"
+      ]
+    }
+  ],
+  "mood": "tired, proud, restless",
+  "knowledge": [
+    "His sister Jun works nights at the Wheel clinic; it's out of burn gel again",
+    "Odile Marsh, his master, has the best hands on Glassblowers' Row and the worst temper",
+    "The Wheelhouse pays a few cinders for short packets across the Wheel, and doesn't ask a runner's age",
+    "Teo Varrin studies for the Phoenix Academy from borrowed books; Rafe thinks that's brave"
+  ],
+  "values": [
+    {
+      "value": "good glass",
+      "stance": "likes"
+    },
+    {
+      "value": "his sister",
+      "stance": "likes"
+    },
+    {
+      "value": "being treated like a kid",
+      "stance": "dislikes"
+    }
+  ],
+  "secrets": [
+    {
+      "id": "runs-packets",
+      "text": "After his shifts he runs short packets across the Wheel for the Wheelhouse, for cinders he puts in the clinic's donation tin. Jun thinks he's asleep.",
+      "summary": "Runs packets for the Couriers after his shifts; Jun doesn't know.",
+      "keywords": [
+        "the Wheelhouse",
+        "packets",
+        "running",
+        "the donation tin"
+      ],
+      "tell": "Talks very fast and too much",
+      "revealWhen": "Jun is in trouble the cinders could fix",
+      "disclose": {
+        "trust": "low",
+        "approval": "any positive"
+      }
+    }
+  ],
+  "meters": {
+    "approval": 0,
+    "trust": 0,
+    "interest": 10
+  },
+  "relations": [
+    {
+      "to": "jun-halloway",
+      "tags": [
+        {
+          "tag": "sibling",
+          "word": "older sister"
+        }
+      ],
+      "note": "she half raised him and still checks he's eaten; he'd do anything for her and will never say so",
+      "meters": {
+        "approval": 30,
+        "trust": 35,
+        "interest": 20
+      }
+    },
+    {
+      "to": "odile-marsh",
+      "tags": [
+        {
+          "tag": "protege",
+          "word": "apprentice"
+        }
+      ],
+      "note": "apprenticed to her for two years; she shouts, and taught him everything",
+      "meters": {
+        "approval": 20,
+        "trust": 25,
+        "interest": 25
+      }
+    }
+  ]
+}

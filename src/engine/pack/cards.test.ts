@@ -134,6 +134,11 @@ describe('tieProblems', () => {
     ])
   })
 
+  it('refuses two relations toward the same person on one card', () => {
+    const twice = cast.map((c) => (c.id === 'mara' ? { ...c, relations: [c.relations[0]!, c.relations[0]!] } : c))
+    expect(tieProblems(R, twice)).toEqual(['mara has two relations toward tobin'])
+  })
+
   it('needs a mirrored counterpart for every tag that isn’t one-sided', () => {
     expect(withTies([{ tag: 'master' }])).toEqual(['mara holds "master" toward tobin, who doesn\'t hold "hand" back'])
     expect(withTies([{ tag: 'master' }], [{ to: 'mara', tags: [{ tag: 'hand' }], note: 'x', meters: tobin.meters }])).toEqual([])

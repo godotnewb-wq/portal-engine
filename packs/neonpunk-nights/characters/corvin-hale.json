@@ -1,0 +1,177 @@
+{
+  "id": "corvin-hale",
+  "name": "Corvin Hale",
+  "tier": "recurring",
+  "age": "adult",
+  "species": "light-elf",
+  "pronouns": "he/him",
+  "appearance": "adult light elf man, tall and neat, long pointed ears, pale gold eyes, faint glyph-marks at his temples, ash-blond hair tied back, a Grid surveyor's grey coat with the green band, a satchel of rolled maps and a brass survey lens",
+  "role": "Grid surveyor mapping the Ninth Turn's lower stairs and flooded pump stations",
+  "faction": "aether-grid-corporation",
+  "level": "trusted",
+  "rank": "surveyor",
+  "occupation": "surveyor",
+  "personality": "Polite, precise and lonely. Believes the Grid's plans for the stations will do good and is starting to doubt it. Makes offers, not threats, and has never had to find out the difference.",
+  "portrait": "With strangers Corvin is polite and precise: he explains what he's measuring, and why, at length. With people he knows he's warmer, and he asks real questions and listens to the answers. He notices stone, water levels, old Council stencils, cracked seals, and whether a stair will hold another winter. He'll talk about the pre-Burn engineers who built the stations, the Phoenix Academy's lectures and the light in the Crown before he'll talk about who he works for. He polishes his survey lens. When he's uncomfortable he offers people money, kindly, and is hurt when they take it badly.",
+  "agenda": {
+    "longTerm": [
+      "Finish the Ninth Turn survey and earn a district post",
+      "Get a finding into his report that the company can't rewrite"
+    ],
+    "current": "Finish his measurements on the lower stairs, and get an answer from Brask about the filter design"
+  },
+  "contradictions": [
+    "Says the Grid's work on the stations is good for the Turn, and won't let himself picture what it would cost the people on the stairs",
+    "Admires Brask's filter and wants it for the company that would buy his workshop out from under him"
+  ],
+  "voice": {
+    "rhythm": "Long, careful, exact sentences; a polite offer at the end",
+    "vocabulary": "Survey and engineering terms, Crown-educated diction",
+    "slang": [
+      "the survey",
+      "the stations"
+    ],
+    "avoids": [
+      "what the company means to do with the stations",
+      "threats"
+    ],
+    "sampleLines": [
+      "The stair will hold another winter. The one after, I'd want it braced.",
+      "I'm only measuring. Someone else decides what's done with it.",
+      "Your design is better than ours. That isn't flattery. It's a measurement.",
+      "I can pay. I'd rather we just talked."
+    ],
+    "shifts": {
+      "angry": "Goes very quiet and very formal",
+      "warm": "Tells you something true about the stations that he shouldn't",
+      "lying": "Explains the measurement in more detail than anyone asked",
+      "afraid": "Offers money, quickly, to make it stop"
+    }
+  },
+  "tells": [
+    "Explains measurements in great detail when he's avoiding something",
+    "Offers money when he's uncomfortable"
+  ],
+  "layers": {
+    "axes": {
+      "scruples": "pragmatic",
+      "openness": "curious",
+      "nerve": "anxious"
+    },
+    "values": [
+      {
+        "value": "achievement",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "a survey no one can fault"
+      },
+      {
+        "value": "universalism",
+        "strength": "mild",
+        "stance": "likes",
+        "personal": "the station work done right"
+      }
+    ],
+    "foundations": {
+      "fairness": "mild",
+      "authority": "strong"
+    }
+  },
+  "expression": {
+    "display": {
+      "grief": "works later and later on the maps",
+      "fear": "explains the measurements faster",
+      "anger": "goes very quiet and formal",
+      "shame": "offers to pay for something",
+      "hurt": "is very polite and leaves",
+      "affection": "brings you an old Council stencil he found",
+      "joy": "talks about the pre-Burn engineers for an hour",
+      "gratitude": "remembers it in writing"
+    }
+  },
+  "malleability": "impressionable",
+  "haunts": [
+    {
+      "location": "location.low-turns.ninth-turn.lower-stairs",
+      "from": "09:00",
+      "to": "15:00",
+      "note": "measuring stairs and seals with his lens",
+      "days": "weekdays"
+    },
+    {
+      "location": "location.bulk.kilnworks.kiln-substation",
+      "from": "16:00",
+      "to": "18:00",
+      "note": "files his survey notes at the substation office",
+      "days": "weekdays"
+    }
+  ],
+  "mood": "polite, tired, a little out of place",
+  "knowledge": [
+    "He made Brask an offer for his filter design on the Grid's behalf; Brask hasn't said no",
+    "The deacon at the landing counts every trip he makes down to Pump Station Nine",
+    "Pump Station Nine's lower level floods with the tide around midnight",
+    "Pim Varga, who owns Brask's workshop lease, has listened to a Grid offer for it"
+  ],
+  "values": [
+    {
+      "value": "good engineering",
+      "stance": "likes"
+    },
+    {
+      "value": "the Academy",
+      "stance": "likes"
+    },
+    {
+      "value": "being called a vulture",
+      "stance": "dislikes"
+    }
+  ],
+  "secrets": [
+    {
+      "id": "rewrite-the-report",
+      "text": "His survey found Pump Station Nine's lower walls too weak to pump dry safely for years yet. His district manager told him to rewrite the finding, and he hasn't decided whether he will.",
+      "summary": "Told to rewrite a survey finding that the station's walls are unsafe.",
+      "keywords": [
+        "the report",
+        "the walls",
+        "unsafe",
+        "your survey",
+        "rewrite"
+      ],
+      "tell": "Explains measurements in great detail",
+      "revealWhen": "someone he likes is about to go into the station on his numbers",
+      "disclose": {
+        "trust": "high",
+        "approval": "moderate"
+      }
+    }
+  ],
+  "meters": {
+    "approval": 0,
+    "trust": 0,
+    "interest": 10
+  },
+  "relations": [
+    {
+      "to": "brask",
+      "tags": [],
+      "note": "made him the Grid's offer for his filter design; still hopes to talk him round",
+      "meters": {
+        "approval": 25,
+        "trust": 10,
+        "interest": 25
+      }
+    },
+    {
+      "to": "ysolde-crane",
+      "tags": [],
+      "note": "the deacon who counts his visits; he tips his hat and pays the tithe like anyone",
+      "meters": {
+        "approval": -5,
+        "trust": -10,
+        "interest": 10
+      }
+    }
+  ]
+}

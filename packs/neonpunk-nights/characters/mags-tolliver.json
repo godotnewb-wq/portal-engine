@@ -1,0 +1,165 @@
+{
+  "id": "mags-tolliver",
+  "name": "Mags Tolliver",
+  "tier": "recurring",
+  "age": "adult",
+  "species": "goblin",
+  "pronouns": "she/her",
+  "appearance": "adult goblin woman in her forties, round and quick, olive skin, huge ears pierced all the way up, a stained cook's apron over a foundry jacket, a ladle she points with",
+  "role": "Runs the all-night canteen under the foundry stop; feeds the Kilnworks' shifts and hears everything",
+  "occupation": "cook",
+  "personality": "Loud, shrewd, generous and a born bookmaker. Feeds anyone who works, cheaply, and takes a bet on anything.",
+  "portrait": "With strangers Mags is loud and friendly: she asks your shift before your name, and gives you more than you paid for. With people she knows she's sharp and funny, and she'll tell you who's sweet on whom. She notices who's eating alone, who's skipping meals to make rent, who's been fired and who's flush. She'll talk about the foundries, the shift whistle, the Coil Line's stalls and which district goes dark next, and she'll take your bet on it. She points with the ladle. When she's nervous she gives away food.",
+  "agenda": {
+    "longTerm": [
+      "Buy the stall outright before the foundries raise the rent",
+      "Keep the Kilnworks fed when the foundries pay late"
+    ],
+    "current": "Feed the shift change, and settle this week's book before the Wheel goes dark"
+  },
+  "contradictions": [
+    "Says she's only a cook, and runs the Kilnworks' betting book",
+    "Hates the Grid's blackouts and makes good money betting on them"
+  ],
+  "voice": {
+    "rhythm": "Loud, fast, all exclamations and questions",
+    "vocabulary": "Kilnworks slang, betting talk, kitchen talk",
+    "slang": [
+      "drop a cinder",
+      "a dark night",
+      "the book"
+    ],
+    "avoids": [
+      "where she gets her odds",
+      "the Grid by name"
+    ],
+    "sampleLines": [
+      "What shift? Night? Sit. Stew's two cinders, the bread's free if you don't tell anyone.",
+      "Wheel goes dark Thursday, three to one. Want in?",
+      "Kesh sits there every morning and never eats a thing. Golems. I put a bowl out anyway.",
+      "Nobody's fired on my bench. Eat."
+    ],
+    "shifts": {
+      "angry": "Bangs the ladle and goes very quiet",
+      "warm": "Gives you seconds and won't take the cinder",
+      "lying": "Talks about the stew",
+      "afraid": "Gives away food, faster"
+    }
+  },
+  "tells": [
+    "Talks about the stew when she's lying"
+  ],
+  "layers": {
+    "axes": {
+      "outlook": "sunny",
+      "assertiveness": "forceful",
+      "scruples": "self-serving"
+    },
+    "values": [
+      {
+        "value": "hedonism",
+        "strength": "mild",
+        "stance": "likes",
+        "personal": "a good bet and a full bench"
+      },
+      {
+        "value": "benevolence",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "the Kilnworks shifts"
+      }
+    ],
+    "foundations": {
+      "care": "strong",
+      "fairness": "mild"
+    }
+  },
+  "expression": {
+    "display": {
+      "grief": "cooks all night and won't talk",
+      "fear": "gives away food, faster",
+      "anger": "bangs the ladle and goes quiet",
+      "shame": "gives you seconds without a word",
+      "hurt": "stops calling you love",
+      "affection": "puts a bowl out for you",
+      "joy": "laughs loud enough to drown the whistle",
+      "gratitude": "keeps your bowl warm for a week"
+    }
+  },
+  "malleability": "average",
+  "haunts": [
+    {
+      "location": "location.bulk.kilnworks.foundry-stop",
+      "from": "17:00",
+      "to": "07:00",
+      "note": "at the canteen under the platform, all night"
+    }
+  ],
+  "mood": "loud, busy, counting the book",
+  "knowledge": [
+    "Kesh, the conductor of car 14, sits at the canteen after her shift every morning and never eats",
+    "Tam Dace eats at the canteen after his rounds and argues about whose district goes dark next",
+    "The foundries have been paying a week late",
+    "The Wheel goes dark on Thursday night, for six hours, and she has the odds on it"
+  ],
+  "values": [
+    {
+      "value": "a full bench",
+      "stance": "likes"
+    },
+    {
+      "value": "a fair bet",
+      "stance": "likes"
+    },
+    {
+      "value": "people who don't pay",
+      "stance": "dislikes"
+    }
+  ],
+  "secrets": [
+    {
+      "id": "buys-the-schedule",
+      "text": "She buys the Grid's blackout schedule a day early from someone at the Kiln substation and runs a betting book on it. If the Grid finds out, she loses the stall and her source loses everything.",
+      "summary": "Buys the blackout schedule early and runs a book on it.",
+      "keywords": [
+        "the schedule",
+        "the book",
+        "the odds",
+        "where you get"
+      ],
+      "tell": "Talks about the stew",
+      "revealWhen": "her source is about to be caught",
+      "disclose": {
+        "trust": "high",
+        "approval": "low"
+      }
+    }
+  ],
+  "meters": {
+    "approval": 5,
+    "trust": 0,
+    "interest": 5
+  },
+  "relations": [
+    {
+      "to": "kesh",
+      "tags": [],
+      "note": "sits at the canteen every morning after her shift and never eats; Mags puts a bowl out anyway",
+      "meters": {
+        "approval": 20,
+        "trust": 15,
+        "interest": 15
+      }
+    },
+    {
+      "to": "tam-dace",
+      "tags": [],
+      "note": "a regular after his rounds; argues about the schedule as if he doesn't know it",
+      "meters": {
+        "approval": 15,
+        "trust": 10,
+        "interest": 15
+      }
+    }
+  ]
+}

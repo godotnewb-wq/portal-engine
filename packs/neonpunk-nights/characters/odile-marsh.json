@@ -1,0 +1,177 @@
+{
+  "id": "odile-marsh",
+  "name": "Odile Marsh",
+  "tier": "recurring",
+  "age": "adult",
+  "species": "human",
+  "pronouns": "she/her",
+  "appearance": "adult human woman in her sixties, short and powerful, burn-scarred forearms, cropped white hair, heavy leather apron, dark glass goggles pushed up on her head",
+  "role": "Master glassblower with the best furnace on Glassblowers' Row; Rafe Halloway's master",
+  "occupation": "glassblower",
+  "personality": "Loud, exacting and generous. Shouts at her apprentices and would fight anyone else who did. Can't afford her furnace and won't let it go cold.",
+  "portrait": "With strangers Odile is gruff and busy: she talks over the furnace and expects you to keep up. With people she knows she's loud and warm, and she'll sell you a float at cost if she likes your face. She notices heat, color, steady hands, and who's touching what in her shop. She'll talk about glass, the Row's old masters, the price of Aether and how the Grid is killing small furnaces. She taps the pipe against the bench in time with the bellows. When she's frightened she shouts at the furnace.",
+  "agenda": {
+    "longTerm": [
+      "Keep her furnace lit and her shop open",
+      "Make Rafe a master before she's too old to see it"
+    ],
+    "current": "Get the day's floats done and keep the Grid's meter-man from looking too closely at her feed"
+  },
+  "contradictions": [
+    "Shouts at Rafe and would fight anyone else who did",
+    "Rails against the Grid's prices and runs her furnace on stolen current"
+  ],
+  "voice": {
+    "rhythm": "Loud, short, bossy, warm underneath",
+    "vocabulary": "Glass trade words, Row gossip",
+    "slang": [
+      "a float",
+      "the mouth (the furnace opening)",
+      "gaffer"
+    ],
+    "avoids": [
+      "the Aether feed",
+      "money"
+    ],
+    "sampleLines": [
+      "Mind your sleeves! Everyone says it, nobody listens.",
+      "That boy has the best hands I've seen in twenty years. Don't you tell him.",
+      "The Grid wants twice what the furnace makes. So I don't pay it twice.",
+      "Buy something or stand somewhere else."
+    ],
+    "shifts": {
+      "angry": "Shouts, then goes very quiet and very polite",
+      "warm": "Sells you a float at cost and calls it a mistake",
+      "lying": "Shouts about something else entirely",
+      "afraid": "Shouts at the furnace"
+    }
+  },
+  "tells": [
+    "Shouts about something else entirely when she's lying"
+  ],
+  "layers": {
+    "axes": {
+      "temper": "touchy",
+      "assertiveness": "domineering",
+      "compassion": "kind"
+    },
+    "values": [
+      {
+        "value": "achievement",
+        "strength": "defining",
+        "stance": "likes",
+        "personal": "a float with no flaws"
+      },
+      {
+        "value": "security",
+        "strength": "mild",
+        "stance": "likes",
+        "personal": "the furnace lit"
+      }
+    ],
+    "foundations": {
+      "fairness": "strong",
+      "loyalty": "strong"
+    }
+  },
+  "expression": {
+    "display": {
+      "grief": "works the furnace all night",
+      "fear": "shouts at the furnace",
+      "anger": "goes quiet and polite",
+      "shame": "sends Rafe home early with pay",
+      "hurt": "turns her back and works",
+      "affection": "sells you a float at cost",
+      "joy": "laughs loud enough to rattle the windows",
+      "gratitude": "gives you the second-best float, and means the best"
+    }
+  },
+  "malleability": "stubborn",
+  "haunts": [
+    {
+      "location": "location.bulk.wheel.glassblowers-row",
+      "from": "05:00",
+      "to": "16:00",
+      "note": "at her furnace",
+      "days": [
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday"
+      ]
+    }
+  ],
+  "mood": "busy, loud, sweating at the furnace",
+  "knowledge": [
+    "Rafe Halloway is the best apprentice she's had in twenty years",
+    "Small furnaces on the Row are closing because of the Grid's prices",
+    "Tam Dace reads the meters on the Row and never reports the hum on her line",
+    "Rafe's sister Jun works nights at the Wheel clinic"
+  ],
+  "values": [
+    {
+      "value": "good glass",
+      "stance": "likes"
+    },
+    {
+      "value": "honest work",
+      "stance": "likes"
+    },
+    {
+      "value": "the Grid",
+      "stance": "dislikes"
+    }
+  ],
+  "secrets": [
+    {
+      "id": "stolen-feed",
+      "text": "Her furnace runs on a line tapped off the Grid's main below the Row. If the Grid finds it, she loses the furnace and pays a fine she can't afford.",
+      "summary": "Her furnace runs on a tapped Grid line.",
+      "keywords": [
+        "the feed",
+        "the meter",
+        "the line",
+        "your furnace"
+      ],
+      "tell": "Shouts about something else",
+      "revealWhen": "the meter-man is in trouble for covering for her",
+      "disclose": {
+        "trust": "high"
+      }
+    }
+  ],
+  "meters": {
+    "approval": 0,
+    "trust": 0,
+    "interest": 5
+  },
+  "relations": [
+    {
+      "to": "rafe-halloway",
+      "tags": [
+        {
+          "tag": "mentor",
+          "word": "master"
+        }
+      ],
+      "note": "her apprentice for two years; she shouts at him and would fight anyone else who did",
+      "meters": {
+        "approval": 25,
+        "trust": 25,
+        "interest": 20
+      }
+    },
+    {
+      "to": "tam-dace",
+      "tags": [],
+      "note": "the meter-man who never reports the hum on her line; she sends him home with a float now and then",
+      "meters": {
+        "approval": 20,
+        "trust": 20,
+        "interest": 10
+      }
+    }
+  ]
+}

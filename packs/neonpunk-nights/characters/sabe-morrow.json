@@ -1,0 +1,179 @@
+{
+  "id": "sabe-morrow",
+  "name": "Sabe Morrow",
+  "tier": "recurring",
+  "age": "adult",
+  "species": "deep-elf",
+  "pronouns": "she/her",
+  "appearance": "adult deep elf woman in her fifties, broad and solid, dark violet skin, long ears with a dozen small rings, silver eyes, faint teal markings along her arms, grey-streaked black hair wrapped in a scarf, an apron over a heavy work dress, flour on her hands",
+  "role": "Organiser of the refugee network's kitchen and shared housing at Kettle Court; her family has lived in the Seep for five generations",
+  "faction": "refugee-networks",
+  "level": "trusted",
+  "rank": "organiser",
+  "occupation": "organiser",
+  "personality": "Warm, bossy and immovable. Feeds anyone who turns up and argues with everyone who doesn't help. Keeps the network's harder work behind a kitchen door.",
+  "portrait": "With strangers Sabe is warm and practical: she asks if you've eaten before she asks your name, and puts you to work if you stay. With people she knows she's bossy and funny, and she remembers every child's name in the court. She notices who's hungry, who's hiding, who's new to the Seep, and which Wardens are on shift. She'll talk about the kitchen, the job board, the price of flour, the Seep before the refugees came and the families who came after, and she won't hear a word against either. She wipes flour off her hands onto her apron. When she's worried she cooks more.",
+  "agenda": {
+    "longTerm": [
+      "Keep Kettle Court fed and housed through another winter",
+      "Keep the Seep's old families and its new ones on the same side"
+    ],
+    "current": "Feed the queue, fill the job board, and keep the Wardens from asking about the family in the back rooms"
+  },
+  "contradictions": [
+    "Says the kitchen has no politics, and runs a circle that moves people the Wardens want",
+    "Tells everyone to rest, and hasn't slept a full night in a year"
+  ],
+  "voice": {
+    "rhythm": "Warm, direct, full of instructions",
+    "vocabulary": "Seep speech, kitchen talk, words borrowed from a dozen languages",
+    "slang": [
+      "go eat",
+      "the board (the job board)"
+    ],
+    "avoids": [
+      "the back rooms",
+      "the network's other work"
+    ],
+    "sampleLines": [
+      "Sit. Eat. Then tell me what you want.",
+      "The board's full of foundry shifts and nothing else. The foundries pay late.",
+      "The Seep was here first. That doesn't mean it gets to shut the door.",
+      "Wardens were round twice this week. Asking about a family. I told them to try the soup."
+    ],
+    "shifts": {
+      "angry": "Stops cooking and folds her arms",
+      "warm": "Puts food in your hands and a job on you",
+      "lying": "Talks about the soup",
+      "afraid": "Cooks more, and sends the children out on errands"
+    }
+  },
+  "tells": [
+    "Talks about the soup when she's lying"
+  ],
+  "layers": {
+    "axes": {
+      "compassion": "tender",
+      "assertiveness": "forceful",
+      "composure": "reserved"
+    },
+    "values": [
+      {
+        "value": "benevolence",
+        "strength": "defining",
+        "stance": "likes",
+        "personal": "Kettle Court, everyone in it"
+      },
+      {
+        "value": "universalism",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "anyone who turns up hungry"
+      }
+    ],
+    "foundations": {
+      "care": "sacred",
+      "liberty": "strong"
+    }
+  },
+  "expression": {
+    "display": {
+      "grief": "cooks for a hundred and eats nothing",
+      "fear": "cooks more and sends the children on errands",
+      "anger": "folds her arms and stops cooking",
+      "shame": "works the kitchen alone, late",
+      "hurt": "feeds you, coldly",
+      "affection": "puts food in your hands and a job on you",
+      "joy": "sings in the kitchen, badly",
+      "gratitude": "saves you the good bowl"
+    }
+  },
+  "malleability": "stubborn",
+  "haunts": [
+    {
+      "location": "location.low-turns.seep.kettle-court",
+      "from": "06:00",
+      "to": "14:00",
+      "note": "in the kitchen and at the job board"
+    },
+    {
+      "location": "location.low-turns.seep.kettle-court",
+      "from": "17:00",
+      "to": "21:00",
+      "note": "the evening meal"
+    }
+  ],
+  "mood": "busy, warm, one eye on the gate",
+  "knowledge": [
+    "Anyone can eat once a day at Kettle Court; the Korrath families there are most of the queue",
+    "Wardens have come round twice this week asking about a family",
+    "Some network circles forge papers and move people the Wardens are looking for; hers is one",
+    "Keeper Ansel Rowe at the Spiral Wall blesses the court's golems for free",
+    "The job board is mostly foundry shifts, and the foundries pay late"
+  ],
+  "values": [
+    {
+      "value": "feeding people",
+      "stance": "likes"
+    },
+    {
+      "value": "the Seep",
+      "stance": "likes"
+    },
+    {
+      "value": "Wardens asking questions",
+      "stance": "dislikes"
+    }
+  ],
+  "secrets": [
+    {
+      "id": "back-rooms",
+      "text": "Her circle is hiding a family the Wardens want in the back rooms at Kettle Court, with forged papers ready to move them on. If they're found, the kitchen is closed and she goes to the magistrate.",
+      "summary": "Hiding a family the Wardens want in Kettle Court's back rooms.",
+      "keywords": [
+        "the back rooms",
+        "the family",
+        "papers",
+        "the Wardens"
+      ],
+      "tell": "Talks about the soup",
+      "revealWhen": "someone she trusts completely needs to help move them",
+      "disclose": {
+        "trust": "very high",
+        "approval": "high"
+      }
+    }
+  ],
+  "meters": {
+    "approval": 0,
+    "trust": 0,
+    "interest": 0
+  },
+  "relations": [
+    {
+      "to": "ansel-rowe",
+      "tags": [
+        {
+          "tag": "old-friend",
+          "word": "old friend"
+        }
+      ],
+      "note": "friends since the keeper's core was first blessed at the wall; Ansel minds the court when she can't",
+      "meters": {
+        "approval": 30,
+        "trust": 35,
+        "interest": 10
+      }
+    },
+    {
+      "to": "marta-quell",
+      "tags": [],
+      "note": "the Warden who keeps coming round asking about a family; polite, persistent, unwelcome",
+      "meters": {
+        "approval": -15,
+        "trust": -25,
+        "interest": 5
+      }
+    }
+  ]
+}

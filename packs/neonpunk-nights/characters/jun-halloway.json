@@ -126,7 +126,7 @@
     "The market stop is about four hundred meters along the rail",
     "She has a first-aid kit in her bag",
     "She has worked nights at the clinic for six years",
-    "Her younger brother is apprenticed to a glassblower in the market and hates the early starts",
+    "Her younger brother Rafe, fifteen, is apprenticed to Odile Marsh on Glassblowers' Row and hates the early starts",
     "The clinic ran out of burn gel last week and is waiting on a donation",
     "She hasn't eaten since noon",
     "Someone at the Grid slips the clinic a note a day before each planned blackout; she's never asked who"
@@ -199,6 +199,36 @@
         "approval": 0,
         "trust": 0,
         "interest": 0
+      }
+    },
+    {
+      "to": "rafe-halloway",
+      "tags": [
+        {
+          "tag": "sibling",
+          "word": "younger brother"
+        }
+      ],
+      "note": "half raised him after their parents left for off-world work; checks he's eaten, every day, and he hates it",
+      "meters": {
+        "approval": 15,
+        "trust": 20,
+        "interest": 15
+      }
+    },
+    {
+      "to": "abenez-kur",
+      "tags": [
+        {
+          "tag": "boss",
+          "word": "doctor"
+        }
+      ],
+      "note": "the only doctor, and the only person who lets her run the clinic; she bullies him into resting and he never does",
+      "meters": {
+        "approval": 35,
+        "trust": 30,
+        "interest": 10
       }
     }
   ],

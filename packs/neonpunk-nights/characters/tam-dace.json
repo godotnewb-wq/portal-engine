@@ -190,6 +190,21 @@
         "trust": 20,
         "interest": 10
       }
+    },
+    {
+      "to": "harl-brennick",
+      "tags": [
+        {
+          "tag": "boss",
+          "word": "shift boss"
+        }
+      ],
+      "note": "his shift boss; covers for Tam's soft meters and is hunting whoever leaks the schedule",
+      "meters": {
+        "approval": 15,
+        "trust": 15,
+        "interest": 5
+      }
     }
   ]
 }

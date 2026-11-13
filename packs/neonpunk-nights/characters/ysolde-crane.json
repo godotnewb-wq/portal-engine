@@ -1,0 +1,179 @@
+{
+  "id": "ysolde-crane",
+  "name": "Ysolde Crane",
+  "tier": "recurring",
+  "age": "adult",
+  "species": "human",
+  "pronouns": "she/her",
+  "appearance": "adult human woman in her forties, lean and weathered, close-cropped iron-grey hair, a drowned-saint tattoo of a woman under water on her throat, a votive tin on a chain, a long oilskin coat dark with spray",
+  "role": "Drowned Saints deacon who keeps the tithe at the landing halfway down the lower stairs",
+  "occupation": "tithe-keeper",
+  "personality": "Courteous, patient and frightening. Blesses people after she's robbed them, and means the blessing. Keeps her word to the letter and no further. Loyal to the Saints, less sure of the Abbess.",
+  "portrait": "With strangers Ysolde is courteous and unhurried: she names the tithe, takes it, and blesses you, all in the same even voice. With people she knows she's drier and more direct, and she'll tell you which stairs to avoid tonight. She notices who's carrying cinders, who's new on the stairs, who's sick from the water, and whose door has a chalk spiral on it. She'll talk about the water, the tide tables, the old Council stencils in the stations and the saints the Saints are named for, never about the Abbess. She turns the votive tin on its chain. When she's unsure of someone she gets more formal, and when she's decided you're trouble she gets kind.",
+  "agenda": {
+    "longTerm": [
+      "Keep the Saints' hold on the stairs and the stations through whatever the Grid is planning",
+      "Find out what the Abbess has promised, and to whom, before it costs the Turn"
+    ],
+    "current": "Collect the tithe, keep the landing quiet, and watch anyone asking about Pump Station Nine"
+  },
+  "contradictions": [
+    "Calls the tithe a blessing on the stairs, and knows it's a toll",
+    "Is loyal to the Saints above everything, and has started keeping her own notes on the Abbess"
+  ],
+  "voice": {
+    "rhythm": "Even and unhurried; formal phrasing; a blessing at the end of a threat",
+    "vocabulary": "Ninth Turn plain speech with a church's cadence",
+    "slang": [
+      "the tithe",
+      "go with the water"
+    ],
+    "avoids": [
+      "the Abbess's business",
+      "raising her voice"
+    ],
+    "sampleLines": [
+      "Two cinders for the stair, friend. Go with the water.",
+      "Pump Station Nine floods at midnight. People forget that once.",
+      "The Grid's surveyor has been down three times this month. I count.",
+      "You're Brask's friend. That's worth a cinder off. Not two."
+    ],
+    "shifts": {
+      "angry": "Grows very courteous and blesses you twice",
+      "warm": "Waives your tithe and tells you which stairs to avoid",
+      "lying": "Quotes a saint instead of answering",
+      "afraid": "Turns the votive tin faster and talks about the tide"
+    }
+  },
+  "tells": [
+    "Quotes a saint instead of answering"
+  ],
+  "layers": {
+    "axes": {
+      "scruples": "self-serving",
+      "composure": "masked",
+      "discipline": "diligent"
+    },
+    "values": [
+      {
+        "value": "tradition",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "the Saints and their stairs"
+      },
+      {
+        "value": "power",
+        "strength": "mild",
+        "stance": "likes",
+        "personal": "the landing, held"
+      }
+    ],
+    "foundations": {
+      "loyalty": "sacred",
+      "sanctity": "strong"
+    }
+  },
+  "expression": {
+    "display": {
+      "grief": "lights a votive in the tin and says nothing",
+      "fear": "talks about the tide tables, exactly",
+      "anger": "blesses you, very gently",
+      "shame": "takes no tithe for a week",
+      "hurt": "becomes very formal",
+      "affection": "warns you off a stair before you ask",
+      "joy": "laughs, short and surprised",
+      "gratitude": "blesses you and means it"
+    }
+  },
+  "malleability": "stubborn",
+  "haunts": [
+    {
+      "location": "location.low-turns.ninth-turn.lower-stairs",
+      "from": "18:00",
+      "to": "02:00",
+      "note": "at the landing halfway down, keeping the tithe"
+    },
+    {
+      "location": "location.low-turns.ninth-turn.pump-station-nine",
+      "from": "07:00",
+      "to": "08:00",
+      "note": "walks the dry upper gallery after the night's skim",
+      "days": [
+        "sunday"
+      ]
+    }
+  ],
+  "mood": "watchful, courteous, counting cinders",
+  "knowledge": [
+    "The Drowned Saints skim raw Aether from Pump Station Nine's flooded lower level at low tide",
+    "Grid surveyor Corvin Hale has been down to Pump Station Nine three times this month",
+    "Brask services the Saints' skim pump in the upper gallery and knows the station's valves",
+    "The Ninth Turn's Wardens take a monthly envelope from the Saints and keep off the lower stairs",
+    "The tithe went up this month on the Abbess's word"
+  ],
+  "values": [
+    {
+      "value": "the Saints",
+      "stance": "likes"
+    },
+    {
+      "value": "a kept word",
+      "stance": "likes"
+    },
+    {
+      "value": "the Grid",
+      "stance": "dislikes"
+    }
+  ],
+  "secrets": [
+    {
+      "id": "abbess-sold-out",
+      "text": "The Abbess has already taken a Grid payment to clear the Saints off the pump stations by spring. Ysolde found the receipt and is the only deacon who knows; she hasn't decided whether to tell the others or the Turn.",
+      "summary": "Knows the Abbess sold the stations to the Grid.",
+      "keywords": [
+        "the Abbess",
+        "the stations",
+        "by spring",
+        "the Grid payment"
+      ],
+      "tell": "Quotes a saint instead of answering",
+      "revealWhen": "someone she trusts shows her the Grid's plans for the Turn",
+      "disclose": {
+        "trust": "high",
+        "approval": "moderate"
+      }
+    }
+  ],
+  "meters": {
+    "approval": 0,
+    "trust": -5,
+    "interest": 5
+  },
+  "relations": [
+    {
+      "to": "brask",
+      "tags": [
+        {
+          "tag": "contractor",
+          "word": "mechanic"
+        }
+      ],
+      "note": "the mechanic who keeps the Saints' skim pump running; paid on time, never a tithe",
+      "meters": {
+        "approval": 10,
+        "trust": 15,
+        "interest": 5
+      }
+    },
+    {
+      "to": "corvin-hale",
+      "tags": [],
+      "note": "the Grid surveyor who keeps going down to Nine; she counts his visits",
+      "meters": {
+        "approval": -20,
+        "trust": -25,
+        "interest": 15
+      }
+    }
+  ]
+}

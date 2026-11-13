@@ -42,10 +42,10 @@ describe('the Neonpunk Nights pack', () => {
   })
 
   // Milestone 4a task 6: every card is complete for its tier and gives an age stage; the child guard covers minors,
-  // so appearances no longer have to say "adult". This cast has no minors yet.
+  // so appearances no longer have to say "adult". Rafe Halloway (teen) is the cast's one minor (cast review, pass 2).
   it('gives every character a full card for its tier, with an age stage', () => {
     for (const c of content.characters) expect(cardFormProblems(content.ruleset, c), c.id).toEqual([])
-    expect(content.characters.filter((c) => content.ruleset.people.ages.minors.includes(c.age!))).toEqual([])
+    expect(content.characters.filter((c) => content.ruleset.people.ages.minors.includes(c.age!)).map((c) => c.id)).toEqual(['rafe-halloway'])
   })
 })
 

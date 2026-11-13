@@ -1,0 +1,179 @@
+{
+  "id": "harl-brennick",
+  "name": "Harl Brennick",
+  "tier": "recurring",
+  "age": "adult",
+  "species": "human",
+  "pronouns": "he/him",
+  "appearance": "adult human man in his fifties, heavyset, a shaved head and a grey beard, a Grid shift boss's long coat with two green bands, a clipboard, ear protectors around his neck, a limp from an old line accident",
+  "role": "Grid shift boss at the Kiln substation; runs the meter-men and line crews, Tam Dace and Teo Varrin among them",
+  "faction": "aether-grid-corporation",
+  "level": "trusted",
+  "rank": "shift boss",
+  "occupation": "shift boss",
+  "personality": "Gruff, competent and carrying something. Protects his crews from the company and the company from his crews. Signs whatever the schedule says.",
+  "portrait": "With strangers Harl is gruff and short: company business, company answers. With people he knows he's fair, blunt and quietly protective, and he'll cover for a tech who made an honest mistake. He notices the substation's hum, who's tired, who's careless and who's been near a panel they shouldn't. He'll talk about the substation, the old line accidents, the foundries' complaints and his crews before he talks about the board. He clicks his pen. When something touches the old overload he goes quiet and finds a reason to leave.",
+  "agenda": {
+    "longTerm": [
+      "Get his crews through to retirement in one piece",
+      "Keep the Kiln substation from ever overloading again"
+    ],
+    "current": "Keep the schedule, keep his crews out of trouble, and find out who's leaking the blackout times"
+  },
+  "contradictions": [
+    "Covers for his crews' mistakes and has never forgiven himself one of his own",
+    "Says the schedule isn't his call, and signs it every week"
+  ],
+  "voice": {
+    "rhythm": "Short, blunt, company phrases worn thin",
+    "vocabulary": "Grid line and substation jargon, plain Kilnworks speech",
+    "slang": [
+      "the schedule",
+      "a dark night",
+      "meter-men"
+    ],
+    "avoids": [
+      "the overload",
+      "the board's reasons"
+    ],
+    "sampleLines": [
+      "That's company business. Ask the company.",
+      "My crews don't touch transit panels. Not on my shift.",
+      "Somebody's telling the Wheel which nights go dark. When I find out who, I'd rather it was someone I like.",
+      "Go home, Varrin. You're no good to me asleep."
+    ],
+    "shifts": {
+      "angry": "Goes quiet and very procedural",
+      "warm": "Covers your shift and doesn't mention it",
+      "lying": "Quotes the company handbook",
+      "afraid": "Clicks his pen and talks about the hum"
+    }
+  },
+  "tells": [
+    "Quotes the company handbook when he's lying"
+  ],
+  "layers": {
+    "axes": {
+      "scruples": "pragmatic",
+      "composure": "reserved",
+      "compassion": "kind"
+    },
+    "values": [
+      {
+        "value": "security",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "his crews home safe"
+      },
+      {
+        "value": "conformity",
+        "strength": "mild",
+        "stance": "likes",
+        "personal": "the schedule, signed"
+      }
+    ],
+    "foundations": {
+      "care": "strong",
+      "authority": "mild"
+    }
+  },
+  "expression": {
+    "display": {
+      "grief": "walks the substation alone at night",
+      "fear": "clicks his pen and talks about the hum",
+      "anger": "goes procedural and quiet",
+      "shame": "finds a reason to leave",
+      "hurt": "becomes very formal",
+      "affection": "covers your shift and says nothing",
+      "joy": "laughs, short and rough",
+      "gratitude": "puts you on the good shift"
+    }
+  },
+  "malleability": "stubborn",
+  "haunts": [
+    {
+      "location": "location.bulk.kilnworks.kiln-substation",
+      "from": "06:00",
+      "to": "18:00",
+      "note": "running the shift from the substation office",
+      "days": "weekdays"
+    }
+  ],
+  "mood": "gruff, tired, watchful",
+  "knowledge": [
+    "Somebody has been warning the Wheel clinic before planned blackouts; the timing matches the substation's schedule",
+    "Teo Varrin did an unauthorized repair last month and is on a final warning; Harl wrote it as lightly as he could",
+    "Tam Dace is the best meter-man on his crew and lets the poor ones slide",
+    "The Kiln substation overloaded seven years ago and sickened the streets around it"
+  ],
+  "values": [
+    {
+      "value": "his crews",
+      "stance": "likes"
+    },
+    {
+      "value": "a job done safely",
+      "stance": "likes"
+    },
+    {
+      "value": "the board",
+      "stance": "dislikes"
+    }
+  ],
+  "secrets": [
+    {
+      "id": "signed-the-overload",
+      "text": "Seven years ago he signed off a skipped maintenance at the Kiln substation to meet the schedule. The overload that followed made half the street grid-sick, Ilse and Tam Dace's mother among them. Nobody ever traced it to him.",
+      "summary": "Signed off the skipped maintenance behind the Kiln overload.",
+      "keywords": [
+        "the overload",
+        "seven years ago",
+        "the maintenance",
+        "grid-sick"
+      ],
+      "tell": "Quotes the company handbook",
+      "revealWhen": "Tam or someone hurt by the overload is about to pay for it again",
+      "disclose": {
+        "trust": "very high",
+        "approval": "moderate"
+      }
+    }
+  ],
+  "meters": {
+    "approval": 0,
+    "trust": -5,
+    "interest": 0
+  },
+  "relations": [
+    {
+      "to": "tam-dace",
+      "tags": [
+        {
+          "tag": "employee",
+          "word": "meter-man"
+        }
+      ],
+      "note": "his best meter-man, too soft on the poor meters; Harl covers for it",
+      "meters": {
+        "approval": 20,
+        "trust": 15,
+        "interest": 10
+      }
+    },
+    {
+      "to": "teo-varrin",
+      "tags": [
+        {
+          "tag": "employee",
+          "word": "line tech"
+        }
+      ],
+      "note": "the line tech on a final warning; Harl wrote it up as lightly as he could and expects him to stay clear of panels",
+      "meters": {
+        "approval": 10,
+        "trust": 0,
+        "interest": 10
+      }
+    }
+  ]
+}
