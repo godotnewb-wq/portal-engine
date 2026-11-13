@@ -1,5 +1,5 @@
 import type { Prompt } from '@engine/core'
-import type { Character } from '@engine/characters'
+import { shadeList, type Character } from '@engine/characters'
 import type { GameState, Turn } from '@engine/state'
 import { type Ruleset } from '@engine/rules'
 import { characterById, locationById, type Pack } from '@engine/pack'
@@ -64,14 +64,6 @@ ${loreLines > 0 ? `- lore: at most ${loreLines} facts of world lore the writer m
 - Quiet characters are listed with what they care about: if the conversation touches it, they have something to say.
 - leaves: characters who walk out. end_scene: true only at a natural close.
 - Never decide, say or do anything for the player.`
-
-/** The ruleset's shades by family with their usual intensity, for the director: "grief: mourning 3–5, sorrow 2–4; fear: …". */
-export function shadeList(r: Ruleset): string {
-  const range = ([lo, hi]: [number, number]) => (lo === hi ? `${lo}` : `${lo}–${hi}`)
-  return r.people.emotions.families
-    .map((f) => `${f.name.toLowerCase()}${f.moodOnly ? ' (in the moment only)' : ''}: ${r.people.emotions.shades.filter((s) => s.families.includes(f.id)).map((s) => `${s.word} ${range(s.intensity)}`).join(', ')}`)
-    .join('; ')
-}
 
 /**
  * Every present character's brief for this turn (director writer §7): the always-on part, the 3.5 secret display, and

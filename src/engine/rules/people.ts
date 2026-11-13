@@ -97,6 +97,28 @@ export const PeopleRulesSchema = z.object({
    */
   reading: z.object({ skill: id, difficulty: z.record(word, word), harder: z.array(word).default([]) }),
   /**
+   * Aftermath (§7, milestone 4b; all *tune*): a feeling at scene end of at least `minIntensity`, or one with a Core
+   * memory, lingers; it loses 1 intensity every `fadeDays` in-game days and ends at 0. A character carries at most `max`
+   * general aftermath entries and `towardMax` feelings toward any one person; one more replaces the weakest. **Repeats**:
+   * when a feeling toward someone comes back in a family that ended toward them within `historyDays`, the game adds
+   * `repeat[n − 1]` (n: how many ended before, capped at the list's end) to the meter `meters` maps the family to, in
+   * its direction (`sign`). A family with no meter moves none.
+   */
+  aftermath: z.object({
+    minIntensity: z.number().int().min(1).max(5),
+    fadeDays: z.number().int().min(1),
+    max: z.number().int().min(0),
+    towardMax: z.number().int().min(0),
+    historyDays: z.number().int().min(0),
+    repeat: z.array(z.number().int().min(0)).min(1),
+    meters: z.record(id, z.object({ meter: id, sign: z.union([z.literal(1), z.literal(-1)]) })).default({})
+  }),
+  /**
+   * Noticing absence (§7, milestone 4b): who notices how long it has been since they shared a scene with the player:
+   * characters holding one of `tags` toward the player, or any family tag when `family` is set.
+   */
+  absence: z.object({ family: z.boolean().default(true), tags: z.array(id).default([]) }),
+  /**
    * The requirement ladder (§6), loosest first: the first rung has no requirement (`min` left out), the last is
    * `blocked`, and the rungs between need a meter at `min` or above.
    */
@@ -194,6 +216,11 @@ export function peopleProblems(p: PeopleRules, t: TiesRules, meters: string[], c
     const before = v.bands[i - 1]?.max
     if (!last && b.max !== undefined && before !== undefined && b.max <= before) problems.push(`visibility band "${b.word}" must reach higher than the one before`)
   })
+  for (const [f, m] of Object.entries(p.aftermath.meters)) {
+    if (!families.includes(f)) problems.push(`aftermath.meters names unknown family "${f}"`)
+    if (!meters.includes(m.meter)) problems.push(`aftermath.meters gives "${f}" the unknown meter "${m.meter}"`)
+  }
+  for (const g of p.absence.tags) if (!t.tags.some((x) => x.id === g)) problems.push(`absence.tags names unknown tag "${g}"`)
   for (const level of p.masking.levels) if (!(level in p.reading.difficulty)) problems.push(`reading.difficulty has no word for masking "${level}"`)
   for (const level of Object.keys(p.reading.difficulty)) if (!p.masking.levels.includes(level)) problems.push(`reading.difficulty names "${level}", not a masking level`)
   if (axis) for (const s of p.reading.harder) if (!axis.stages.includes(s)) problems.push(`reading.harder names "${s}", not a stage of "${composure}"`)

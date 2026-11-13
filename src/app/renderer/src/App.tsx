@@ -3,7 +3,7 @@ import type { GameState } from '@engine/state'
 import { locationById, type Pack } from '@engine/pack'
 import { seedFrom } from '@engine/core'
 import { createInitialState, startScene } from '@engine/state'
-import type { WitnessReport } from '@engine/relationships'
+import { nextDay, type WitnessReport } from '@engine/relationships'
 import { AUTO_SLOT_ID, latestSave, type SaveSummary } from '@engine/state'
 import { Button } from './ui/Button'
 import { PackPicker } from './ui/PackPicker'
@@ -130,7 +130,7 @@ export function App() {
   }
   if (screen === 'summary' && content && state) {
     const again = locationById(content, content.manifest.start.location)?.name ?? ''
-    return <SummaryView content={content} reports={reports} againLabel={`Back to ${again}`} onAgain={() => enterScene(state)} onTitle={() => setScreen('title')} />
+    return <SummaryView content={content} reports={reports} againLabel={`Back to ${again}`} onAgain={() => enterScene(state)} onNextDay={() => enterScene(nextDay(content, state))} onTitle={() => setScreen('title')} />
   }
   if (screen === 'scene' && content && state?.scene) {
     return <SceneView content={content} state={state} onState={setState} onEnd={endScene} onSave={() => openSaves('save')} endError={error} />

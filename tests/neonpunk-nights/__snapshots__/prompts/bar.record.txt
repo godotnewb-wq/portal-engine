@@ -1664,7 +1664,16 @@
             },
             "reason": "she lied again"
           }
-        ]
+        ],
+        "toward": [
+          {
+            "who": "oria-senn",
+            "shade": "contempt",
+            "intensity": 3,
+            "reason": "she lied about the client again"
+          }
+        ],
+        "resolved": []
       },
       "report": {
         "id": "vex",
@@ -1697,7 +1706,23 @@
             },
             "reason": "she lied again"
           }
-        ]
+        ],
+        "carried": {
+          "toward": [
+            {
+              "toward": "oria-senn",
+              "feeling": {
+                "shade": "contempt",
+                "family": "anger",
+                "intensity": 3,
+                "reason": "she lied about the client again"
+              },
+              "renewed": false
+            }
+          ],
+          "resolved": [],
+          "dropped": []
+        }
       }
     },
     {
@@ -1712,7 +1737,9 @@
           "interest": 0
         },
         "learned": [],
-        "others": []
+        "others": [],
+        "toward": [],
+        "resolved": []
       },
       "report": {
         "id": "brask",
@@ -1730,7 +1757,18 @@
           "interest": 5
         },
         "learned": [],
-        "others": []
+        "others": [],
+        "carried": {
+          "toward": [],
+          "resolved": [],
+          "dropped": [],
+          "aftermath": {
+            "shade": "panic",
+            "family": "fear",
+            "intensity": 5,
+            "reason": "the lower level floods at midnight"
+          }
+        }
       }
     },
     {
@@ -1745,7 +1783,16 @@
           "interest": 0
         },
         "learned": [],
-        "others": []
+        "others": [],
+        "toward": [
+          {
+            "who": "player",
+            "shade": "resentment",
+            "intensity": 2,
+            "reason": "Rook kept asking about the client"
+          }
+        ],
+        "resolved": []
       },
       "report": {
         "id": "oria-senn",
@@ -1763,7 +1810,23 @@
           "interest": 15
         },
         "learned": [],
-        "others": []
+        "others": [],
+        "carried": {
+          "toward": [
+            {
+              "toward": "player",
+              "feeling": {
+                "shade": "resentment",
+                "family": "anger",
+                "intensity": 2,
+                "reason": "Rook kept asking about the client"
+              },
+              "renewed": false
+            }
+          ],
+          "resolved": [],
+          "dropped": []
+        }
       }
     },
     {
@@ -1778,7 +1841,9 @@
           "interest": 0
         },
         "learned": [],
-        "others": []
+        "others": [],
+        "toward": [],
+        "resolved": []
       },
       "report": {
         "id": "kesh",
@@ -1796,7 +1861,12 @@
           "interest": 0
         },
         "learned": [],
-        "others": []
+        "others": [],
+        "carried": {
+          "toward": [],
+          "resolved": [],
+          "dropped": []
+        }
       }
     }
   ]

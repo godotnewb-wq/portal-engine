@@ -103,6 +103,16 @@
       ]
     },
     "reading": { "skill": "notice", "difficulty": { "bare": "routine", "thin": "tough", "thick": "grim" }, "harder": ["closed"] },
+    "aftermath": {
+      "minIntensity": 4,
+      "fadeDays": 2,
+      "max": 2,
+      "towardMax": 2,
+      "historyDays": 30,
+      "repeat": [1, 2],
+      "meters": { "mad": { "meter": "warmth", "sign": -1 }, "sad": { "meter": "bond", "sign": -1 } }
+    },
+    "absence": { "family": true, "tags": ["master"] },
     "ladder": [
       { "word": "any" },
       { "word": "cool", "min": -4 },
@@ -136,5 +146,6 @@
     ]
   },
   "pressures": ["idle", "keen", "driven"],
-  "narration": { "departure": "{name} heads off across the yard." }
+  "narration": { "departure": "{name} heads off across the yard." },
+  "clock": { "morning": 360 }
 }

@@ -4,7 +4,7 @@ import { caresAbout, feelingWords, nature, tagWord, type Character, type TieTag 
 import { shown } from './feelings'
 import { characterById, locationById, type Pack } from '@engine/pack'
 import { meterWords, type Ruleset } from '@engine/rules'
-import type { GameState, Relation } from '@engine/state'
+import { absenceWords, carrying, type GameState, type Relation } from '@engine/state'
 import { presentCast, type BeatPlan } from './planShape'
 
 /**
@@ -329,6 +329,20 @@ function moodLine(content: Pack, state: GameState, id: string): string {
   return `Mood now: ${feelingWords(content.ruleset, f)}${s ? `; it shows as: ${s.band}` : ''}. Comfort ${scene.comfort[id] ?? 3}/5.`
 }
 
+/**
+ * What they carry into the scene (npc design §7, milestone 4b): aftermath, feelings toward the people here and the
+ * player, and how long since they saw the player when they would notice. Feelings toward people not here stay out.
+ */
+function carriedLines(content: Pack, state: GameState, id: string, present: string[]): string[] {
+  const { general, toward } = carrying(content, state, id, [...present, 'player'])
+  const absence = absenceWords(content, state, id)
+  return [
+    general.length > 0 ? `Carrying: ${general.join('; ')}.` : '',
+    toward.length > 0 ? `Feelings toward people here: ${toward.join('; ')}.` : '',
+    absence ? `${absence[0]!.toUpperCase()}${absence.slice(1)} before this scene.` : ''
+  ].filter(Boolean)
+}
+
 export function recurringLines(content: Pack, state: GameState, c: Character, tierWords: string): string[] {
   const r = content.ruleset
   const scene = state.scene!
@@ -349,6 +363,7 @@ export function recurringLines(content: Pack, state: GameState, c: Character, ti
     cares && `Cares about: ${cares}`,
     `Tonight: ${c.agenda.current}`,
     moodLine(content, state, c.id),
+    ...carriedLines(content, state, c.id, present),
     meters && `Toward the player: ${meterWords(r, meters)}${playerTie ? ` · ${[tagsForDirector(r, playerTie.tags), playerTie.note].filter(Boolean).join(': ')}` : ''}`,
     others.length > 0 && `Toward others here: ${others.join('; ')}`,
     ties && `Close ties, not here: ${ties}`

@@ -33,7 +33,7 @@ function Meter({ ruleset, id, label, before, after }: { ruleset: Ruleset; id: st
 }
 
 /** After a scene: what each witness remembers, and how their feelings moved (milestone-1 acceptance 7). */
-export function SummaryView({ content, reports, againLabel, onAgain, onTitle }: { content: Pack; reports: WitnessReport[]; againLabel: string; onAgain: () => void; onTitle: () => void }) {
+export function SummaryView({ content, reports, againLabel, onAgain, onNextDay, onTitle }: { content: Pack; reports: WitnessReport[]; againLabel: string; onAgain: () => void; onNextDay: () => void; onTitle: () => void }) {
   const name = (id: string) => firstName(characterById(content, id)?.name ?? id)
   // The pack's relationship meters, in its order.
   const meters = content.ruleset.meters.list
@@ -87,6 +87,8 @@ export function SummaryView({ content, reports, againLabel, onAgain, onTitle }: 
         <Button variant="primary" onClick={onAgain}>
           {againLabel}
         </Button>
+        {/* Between scenes only (milestone 4b): the clock moves to the next morning and the daily upkeep runs. */}
+        <Button onClick={onNextDay}>Next day</Button>
         <Button variant="ghost" onClick={onTitle}>
           Title
         </Button>

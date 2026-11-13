@@ -97,6 +97,11 @@ export const RulesetSchema = z.object({
   people: PeopleRulesSchema,
   /** Relationship tags (relationships §3). */
   ties: TiesRulesSchema,
+  /**
+   * The day (milestone 4b, until milestone 6's clock): the minute of the day a new day starts (08:00 is 480, *tune*).
+   * Next day moves the clock to it, and the daily upkeep runs at each rollover.
+   */
+  clock: z.object({ morning: z.number().int().min(0).max(1439) }).default({ morning: 480 }),
   /** The party (party §4): how many companions the player can have at once. */
   party: z.object({ max: z.number().int().min(0) }).default({ max: 3 }),
   /**

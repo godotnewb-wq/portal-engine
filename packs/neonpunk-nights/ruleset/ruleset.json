@@ -288,6 +288,22 @@
       "difficulty": { "none": "easy", "light": "easy", "moderate": "moderate", "heavy": "hard" },
       "harder": ["masked"]
     },
+    "aftermath": {
+      "minIntensity": 4,
+      "fadeDays": 2,
+      "max": 2,
+      "towardMax": 2,
+      "historyDays": 90,
+      "repeat": [1, 2, 4],
+      "meters": {
+        "anger": { "meter": "approval", "sign": -1 },
+        "hurt": { "meter": "approval", "sign": -1 },
+        "fear": { "meter": "trust", "sign": -1 },
+        "affection": { "meter": "approval", "sign": 1 },
+        "gratitude": { "meter": "trust", "sign": 1 }
+      }
+    },
+    "absence": { "family": true, "tags": ["partner", "lover", "fiance", "spouse", "friend", "old-friend"] },
     "ladder": [
       { "word": "none" },
       { "word": "grudging", "min": -35 },
@@ -473,5 +489,6 @@
   "party": { "max": 3 },
   "memory": { "recall": { "recurring": 4, "major": 8 } },
   "pressures": ["background", "pressing", "urgent"],
-  "narration": { "departure": "{name} leaves." }
+  "narration": { "departure": "{name} leaves." },
+  "clock": { "morning": 480 }
 }

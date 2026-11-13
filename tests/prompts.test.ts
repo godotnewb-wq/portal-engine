@@ -6,7 +6,8 @@ import { playScene, type ScriptedTurn } from './prompts'
  * Prompt snapshots on the test-fixture pack (milestone 3.6, task 2). Five turns cover: a lie with a reading check and
  * a move gated on it, a move gated on a check that doesn't exist, a fact planned for a move nobody voiced, a player
  * check, a rewrite, a salvaged rewrite whose dropped speaker left tags behind, a planned departure, an unplanned
- * LEAVES tag, the running summary once turns leave the verbatim window, and the end-of-scene summaries.
+ * LEAVES tag, the running summary once turns leave the verbatim window, and the end-of-scene summaries, with a
+ * feeling toward someone and a general aftermath carried out of the scene (milestone 4b).
  */
 const TURNS: ScriptedTurn[] = [
   {
@@ -143,8 +144,8 @@ NARRATION: She glances at the gate Tobin left by.
 ]
 
 const SUMMARIES = {
-  mara: { memory: 'Tobin let someone with a Guild seal into the yard after closing; Kit got it out of him.', level: 'normal', reason: 'Kit kept it quiet', warmth: 'warmer', bond: 'same', learned: [], others: [{ with: 'tobin', warmth: 'colder', bond: 'same', reason: 'he lied to her' }] },
-  tobin: { memory: 'I told Kit about the seal. Mara heard.', level: 'core', reason: 'Kit let him leave', warmth: 'warmer', bond: 'warmer', learned: [], others: [] }
+  mara: { memory: 'Tobin let someone with a Guild seal into the yard after closing; Kit got it out of him.', level: 'normal', reason: 'Kit kept it quiet', warmth: 'warmer', bond: 'same', learned: [], others: [{ with: 'tobin', warmth: 'colder', bond: 'same', reason: 'he lied to her' }], toward: [{ who: 'tobin', shade: 'sore', family: 'mad', intensity: 3, reason: 'he lied to her' }] },
+  tobin: { feels: { shade: 'glum', intensity: 4, reason: 'he gave the seal away' }, memory: 'I told Kit about the seal. Mara heard.', level: 'core', reason: 'Kit let him leave', warmth: 'warmer', bond: 'warmer', learned: [], others: [] }
 }
 
 describe('prompt snapshots: test fixture', () => {

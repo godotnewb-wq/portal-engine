@@ -2,6 +2,7 @@ import type { GameState, Relation } from './schema'
 import type { Scene } from './scene'
 import { characterById, locationById, type Pack } from '@engine/pack'
 import { defaultFeeling, type Feeling } from '@engine/characters'
+import { openingMood } from './days'
 
 /** A new game: the test player, everyone's starting feelings, the dice seeded. */
 export function createInitialState(content: Pack, seed: number): GameState {
@@ -18,13 +19,18 @@ export function createInitialState(content: Pack, seed: number): GameState {
     playerTies: Object.fromEntries(content.characters.flatMap((c) => (c.playerTie ? [[c.id, { tags: c.playerTie.tags, note: c.playerTie.note }]] : []))),
     party: [...content.manifest.start.party],
     memories: [],
+    aftermath: [],
+    endedFeelings: [],
+    lastSeen: {},
     facts: {},
     scene: null
   }
 }
 
 /**
- * Opens a scene at a location with the given cast; moods and comfort start from the characters' files. `id` names the
+ * Opens a scene at a location with the given cast. Each mood is the strongest active aftermath or feeling toward someone
+ * here (`openingMood`), else the card's default; comfort starts afresh, since it is about the place and the company
+ * (milestone 4b). `id` names the
  * scene in logs; the app passes a unique one, and the default (from the game clock) is enough for tests and the bench.
  */
 export function startScene(content: Pack, state: GameState, locationId: string, cast: string[], id = `scene-${state.time}`): GameState {
@@ -43,7 +49,7 @@ export function startScene(content: Pack, state: GameState, locationId: string, 
     turns: [],
     summary: '',
     moods: Object.fromEntries(characters.flatMap((c): [string, Feeling][] => {
-      const f = defaultFeeling(content.ruleset, c)
+      const f = openingMood(content, state, c.id, cast) ?? defaultFeeling(content.ruleset, c)
       return f ? [[c.id, f]] : []
     })),
     comfort: Object.fromEntries(characters.map((c) => [c.id, 3])),
@@ -96,6 +102,11 @@ export function stateProblems(content: Pack, state: GameState): string[] {
     unknown('a relation', r.to)
   }
   for (const m of state.memories) unknown('a memory', m.owner)
+  for (const a of state.aftermath) {
+    unknown('a feeling', a.owner)
+    if (a.toward && a.toward !== 'player') unknown('a feeling', a.toward)
+  }
+  for (const id of Object.keys(state.lastSeen)) unknown('last seen', id)
   for (const id of Object.keys(state.facts)) unknown('facts', id)
   const scene = state.scene
   if (scene) {

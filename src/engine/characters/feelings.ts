@@ -66,6 +66,17 @@ export function feelingLabel(f: Feeling | undefined): string {
   return `${f.text ? `${f.text}; ` : ''}${f.shade} ${f.intensity}/5${f.reason ? ` (${f.reason})` : ''}`
 }
 
+/** The ruleset's shades by family with their usual intensity, for prompts: "grief: mourning 3–5, sorrow 2–4; fear: …". */
+export function shadeList(r: Ruleset): string {
+  const range = ([lo, hi]: [number, number]) => (lo === hi ? `${lo}` : `${lo}–${hi}`)
+  return r.people.emotions.families
+    .map((f) => `${f.name.toLowerCase()}${f.moodOnly ? ' (in the moment only)' : ''}: ${r.people.emotions.shades.filter((s) => s.families.includes(f.id)).map((s) => `${s.word} ${range(s.intensity)}`).join(', ')}`)
+    .join('; ')
+}
+
+/** Whether a family is mood only (surprise): felt in the moment, never carried as aftermath. */
+export const moodOnly = (r: Ruleset, family: string): boolean => r.people.emotions.families.find((f) => f.id === family)?.moodOnly ?? false
+
 /** Whether a written feeling is one of the ruleset's, for checking cards and scenarios. */
 export function feelingProblem(r: Ruleset, f: FeelingWords): string | undefined {
   const read = readFeeling(r, f)

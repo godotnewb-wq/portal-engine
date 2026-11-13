@@ -1579,7 +1579,17 @@
             },
             "reason": "he lied to her"
           }
-        ]
+        ],
+        "toward": [
+          {
+            "who": "tobin",
+            "shade": "sore",
+            "family": "mad",
+            "intensity": 3,
+            "reason": "he lied to her"
+          }
+        ],
+        "resolved": []
       },
       "report": {
         "id": "mara",
@@ -1608,7 +1618,23 @@
             },
             "reason": "he lied to her"
           }
-        ]
+        ],
+        "carried": {
+          "toward": [
+            {
+              "toward": "tobin",
+              "feeling": {
+                "shade": "sore",
+                "family": "mad",
+                "intensity": 3,
+                "reason": "he lied to her"
+              },
+              "renewed": false
+            }
+          ],
+          "resolved": [],
+          "dropped": []
+        }
       }
     },
     {
@@ -1622,7 +1648,14 @@
           "bond": 3
         },
         "learned": [],
-        "others": []
+        "others": [],
+        "feels": {
+          "shade": "glum",
+          "intensity": 4,
+          "reason": "he gave the seal away"
+        },
+        "toward": [],
+        "resolved": []
       },
       "report": {
         "id": "tobin",
@@ -1638,7 +1671,19 @@
           "bond": 1
         },
         "learned": [],
-        "others": []
+        "others": [],
+        "carried": {
+          "toward": [],
+          "resolved": [],
+          "dropped": [],
+          "aftermath": {
+            "shade": "glum",
+            "family": "sad",
+            "intensity": 4,
+            "reason": "he gave the seal away",
+            "atypical": true
+          }
+        }
       }
     }
   ]

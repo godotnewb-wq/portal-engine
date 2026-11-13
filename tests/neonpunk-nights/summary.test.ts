@@ -85,7 +85,9 @@ describe('applySummaries', () => {
           reason: 'Pressed in public.',
           delta: { approval: -4, trust: -1, interest: 1 },
           learned: ['client-is-grid-corporation', 'made-up-secret'],
-          others: [{ with: 'Vex', delta: { approval: -8, trust: -4, interest: 0 }, reason: 'She exposed me.' }]
+          others: [{ with: 'Vex', delta: { approval: -8, trust: -4, interest: 0 }, reason: 'She exposed me.' }],
+          toward: [],
+          resolved: []
         }
       },
       { id: 'brask', summary: plainSummary(content, state, 'brask'), error: 'timeout' }
