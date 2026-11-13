@@ -897,7 +897,7 @@ Personality: Slow, polite, literal; hums when nervous.
 With others: With strangers Tobin is shy; with friends he talks about the yard horses.
 Agenda: Earn his own key to the gate. Tonight: Keep anyone from asking about last night
 Contradictions: Never lies, and avoids every question
-Mood now: rattled. Comfort 1/5.
+Mood now: torn. Comfort 3/5.
 Secret [tobin.after-closing] (in short): Tobin let someone into the yard after closing.
 Lying tell: Hums
 Toward the player: warmth 6, bond 3 (0–20)
@@ -1269,7 +1269,6 @@ About Mara (person, she/her):
 - Before this scene, toward Kit: warmth 10, bond 8 (0–20)
 - Toward Tobin: known; warmth 9, bond 4
 - Mood at the end: resolved; comfort 2/5.
-- Mara left before the scene was over; the memory ends with leaving.
 
 Place: The Guild Yard, east gate.
 
@@ -1318,7 +1317,7 @@ About Tobin (automaton, he/him):
 - Wants: Earn his own key to the gate. Tonight: Keep anyone from asking about last night
 - Secret [after-closing]: Tobin let someone into the yard after closing.
 - Before this scene, toward Kit: warmth 6, bond 3 (0–20)
-- Mood at the end: grateful; comfort 1/5.
+- Mood at the end: grateful; comfort 3/5.
 - Tobin left before the scene was over; the memory ends with leaving.
 
 Place: The Guild Yard, east gate.

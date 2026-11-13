@@ -8,7 +8,7 @@ import { fallbackPlan, parsePlan, settlePlan, validatePlan } from './plan'
 import type { BeatPlan } from './planShape'
 import { resolvePlan, type ResolveOptions } from './resolve'
 import { castSnapshot, checkTraces, planItems, type BeatTrace, type TurnTrace } from './trace'
-import { applyTurn } from './turn'
+import { acceptTags, applyTurn } from './turn'
 import { buildRewritePrompt, buildWriterPrompt, sceneSpeakers } from './writer'
 import { recentlyUsed, repeatProblems, usageOf } from './repeats'
 import { loreTrace, turnLore } from './lore'
@@ -135,8 +135,9 @@ export async function runTurn(
       }
     }
     const beats = kept.map((i) => parsed.beats[i]!)
+    const accepted = acceptTags(content, plan, parsed.tags, parsed.beats, beats)
 
-    const next = applyTurn(content, state, { id: turnId, ...(options.log && { log: options.log }), input, plan, beats, tags: parsed.tags, dice })
+    const next = applyTurn(content, state, { id: turnId, ...(options.log && { log: options.log }), input, plan, beats, tags: accepted.tags, dice })
     const rewritten = problems.length > 0
     const salvage = rewritten && remaining.length > 0
     const dropped = salvage ? droppedBeats(remaining).filter((n) => n <= parsed.beats.length) : []
@@ -172,7 +173,7 @@ export async function runTurn(
       }),
       beats: beatTraces,
       usage: usageOf(content, beats),
-      tags: { parsed: parsed.tags, dropped: parsed.droppedTags },
+      tags: { parsed: parsed.tags, dropped: [...parsed.droppedTags, ...accepted.rejected] },
       cost: {
         calls: calls.length,
         ms: now() - started,

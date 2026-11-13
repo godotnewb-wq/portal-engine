@@ -808,7 +808,10 @@
       "leaves": [],
       "ended": false
     },
-    "dropped": []
+    "dropped": [
+      "[Tobin: MOOD rattled] (salvage cut their lines)",
+      "[Tobin: COMFORT 1 he said too much] (salvage cut their lines)"
+    ]
   },
   "scene": {
     "id": "scene-1200",
@@ -823,11 +826,11 @@
     "summary": "",
     "moods": {
       "mara": "careful",
-      "tobin": "rattled"
+      "tobin": "torn"
     },
     "comfort": {
       "mara": 2,
-      "tobin": 1
+      "tobin": 3
     },
     "expressions": {
       "mara": "thoughtful",
@@ -1064,7 +1067,7 @@
     },
     "comfort": {
       "mara": 2,
-      "tobin": 1
+      "tobin": 3
     },
     "expressions": {
       "mara": "thoughtful",
@@ -1273,7 +1276,9 @@
       ],
       "ended": false
     },
-    "dropped": []
+    "dropped": [
+      "[LEAVES: Mara] (not in the plan)"
+    ]
   },
   "scene": {
     "id": "scene-1200",
@@ -1292,15 +1297,14 @@
     },
     "comfort": {
       "mara": 2,
-      "tobin": 1
+      "tobin": 3
     },
     "expressions": {
       "mara": "determined",
       "tobin": "relieved"
     },
     "departed": [
-      "tobin",
-      "mara"
+      "tobin"
     ],
     "ended": false,
     "nsfw": false,

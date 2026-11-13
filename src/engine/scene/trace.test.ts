@@ -129,3 +129,52 @@ describe('the turn trace (milestone 2, A1)', () => {
     expect((error as TracedError).calls.map((c) => [c.role, c.error ?? 'ok'])).toEqual([['director', 'ok'], ['writer', 'rate limited']])
   })
 })
+
+// Milestone 3.6, task 6 (decided 2026-11-12): which of the writer's tags count.
+describe('the writer’s tags', () => {
+  const ASK = 'Whose seal was it?'
+  const plan = (over: object = {}) =>
+    JSON.stringify({ speakers: [{ id: 'mara', goal: 'narrow it down', mood: 'careful' }], moves: [{ who: 'mara', answers: 'player', move: 'answer' }], reactions: [{ id: 'tobin', beat: 'looks at the ground' }], ...over })
+  const TAGS = '[Tobin: MOOD rattled]\n[Tobin: COMFORT 1 he said too much]\n[Tobin: EXPRESSION wide-eyed]\n[Mara: EXPRESSION thoughtful]'
+  // Tobin speaks without being planned, in the draft and again in the rewrite, so salvage cuts his line.
+  const cutTobin = `Mara: "Only clerks carry seals."\nNARRATION: Rain on the crates.\nTobin: "Seven, counting Pell."\n${TAGS}`
+
+  it('drops the mood, comfort and expression of someone salvage cut out of the turn, and says why', async () => {
+    const before = yardScene()
+    const { state, trace } = await runTurn(fixture, before, ASK, scripted(plan(), cutTobin, cutTobin))
+    expect(trace.rewrite?.salvage).toBeDefined()
+    const scene = state.scene!
+    expect(scene.moods['tobin']).toBe(before.scene!.moods['tobin'])
+    expect(scene.comfort['tobin']).toBe(before.scene!.comfort['tobin'])
+    expect(scene.expressions['tobin']).toBe(before.scene!.expressions['tobin'])
+    expect(scene.expressions['mara']).toBe('thoughtful')
+    expect(trace.tags.dropped).toEqual(['[Tobin: EXPRESSION wide-eyed] (salvage cut their lines)', '[Tobin: MOOD rattled] (salvage cut their lines)', '[Tobin: COMFORT 1 he said too much] (salvage cut their lines)'])
+    // The parsed tags stay in the trace as the writer wrote them.
+    expect(trace.tags.parsed.moods['tobin']).toBe('rattled')
+  })
+
+  it('keeps the tags of someone still in the kept prose, and of anyone on a turn nothing was cut from', async () => {
+    const reacted = `Mara: "Only clerks carry seals."\nNARRATION: Tobin looks at the ground.\nTobin: "Seven, counting Pell."\n${TAGS}`
+    const salvaged = await runTurn(fixture, yardScene(), ASK, scripted(plan(), reacted, reacted))
+    expect(salvaged.state.scene!.moods['tobin']).toBe('rattled')
+    expect(salvaged.trace.tags.dropped).toEqual([])
+    const clean = await runTurn(fixture, yardScene(), ASK, scripted(plan(), `Mara: "Only clerks carry seals."\nNARRATION: Rain on the crates.\n${TAGS}`))
+    expect(clean.trace.rewrite).toBeUndefined()
+    expect(clean.state.scene!.comfort['tobin']).toBe(1)
+  })
+
+  it('sends no one away on a LEAVES tag alone, and lets the plan send someone away without one', async () => {
+    const tagged = await runTurn(fixture, yardScene(), ASK, scripted(plan(), `Mara: "Only clerks carry seals."\nNARRATION: Tobin slips out.\n[LEAVES: Tobin]`))
+    expect(tagged.state.scene!.departed).toEqual([])
+    expect(tagged.trace.tags.dropped).toEqual(['[LEAVES: Tobin] (not in the plan)'])
+    const planned = await runTurn(fixture, yardScene(), ASK, scripted(plan({ leaves: ['tobin'] }), 'Mara: "Only clerks carry seals."\nNARRATION: Tobin slips out.'))
+    expect(planned.state.scene!.departed).toEqual(['tobin'])
+    expect(planned.trace.tags.dropped).toEqual([])
+  })
+
+  it('ends the scene only when the plan does, whatever the tag says', async () => {
+    const reply = 'Mara: "Only clerks carry seals."\nNARRATION: Rain on the crates.\n[END SCENE]'
+    expect((await runTurn(fixture, yardScene(), ASK, scripted(plan(), reply))).state.scene!.ended).toBe(false)
+    expect((await runTurn(fixture, yardScene(), ASK, scripted(plan({ end_scene: true }), reply))).state.scene!.ended).toBe(true)
+  })
+})

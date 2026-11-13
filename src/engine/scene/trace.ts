@@ -50,6 +50,7 @@ export interface TurnTrace {
   beats: BeatTrace[]
   /** Slang, aim words and gestures in the beats shown (claude/scene-system-redesign.md §11); older logs have none. */
   usage?: Usage
+  /** `dropped`: tags that didn't parse or named no one here, then tags that parsed but don't count (`acceptTags`), each with why. */
   tags: { parsed: Tags; dropped: string[] }
   cost: { calls: number; ms: number; tokens?: { input: number; output: number } }
   calls: CallTrace[]
