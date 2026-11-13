@@ -23,7 +23,11 @@
       "the ozone tang of raw Aether bleeding from the pipes",
       "spilled fermented root beer and wet wool"
     ],
-    "slang": ["a lantern-pour (the cheapest drink)", "grid-sick", "drop a cinder (pay up)"],
+    "slang": [
+      "a lantern-pour (the cheapest drink)",
+      "grid-sick",
+      "drop a cinder (pay up)"
+    ],
     "current": [
       "Grid Corporation surveyors were seen on the lower stairs this week",
       "Someone chalked an Animist spiral on the back door"
@@ -31,14 +35,18 @@
   },
   "walkOns": [
     {
-      "id": "bartender",
-      "label": "the bartender",
-      "name": "Dunmar",
-      "species": "human",
-      "look": "broad, grey-stubbled man with Aether burn scars up both forearms",
-      "manner": "answers questions with prices; kinder than he sounds",
-      "role": "runs the bar and the slate of who owes what"
+      "id": "card-player",
+      "label": "a card player at the next table",
+      "name": "Hollis",
+      "species": "goblin",
+      "look": "wiry goblin woman with a Drowned Saints votive tin pinned to her collar, cards fanned close to her chest",
+      "manner": "loses loudly and talks over everyone; knows every rumor on the stairs and wants a drink for each one",
+      "role": "a Drowned Saint off duty, losing at cards"
     }
   ],
-  "extras": ["dockworkers coming off shift", "a pair of off-duty Couriers arguing about routes", "a card table of goblin salvagers"]
+  "extras": [
+    "dockworkers coming off shift",
+    "a pair of off-duty Couriers arguing about routes",
+    "a card table of goblin salvagers"
+  ]
 }

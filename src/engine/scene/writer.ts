@@ -7,6 +7,7 @@ import { characterById, locationById, type Pack } from '@engine/pack'
 import type { Speaker } from './beats'
 import { RECENT_TURNS, turnText } from './director'
 import { sceneFacts } from './facts'
+import { childGuard } from './guard'
 import { presentCast, type BeatPlan, type Move, type PlannedCheck } from './planShape'
 import { BEATS } from './style'
 import { recentlyUsed } from './repeats'
@@ -76,7 +77,8 @@ export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPla
     writerStage(content.tone, content.codex).text,
     WRITER_FORMAT,
     `The player is ${state.player.name} (${state.player.pronouns}), addressed as "you".`,
-    ...speakers.map((c) => voiceCard(firstName(c.name), c.voice, c.portrait))
+    ...speakers.map((c) => voiceCard(firstName(c.name), c.voice, c.portrait)),
+    childGuard(content, state)
   ]
     .filter(Boolean)
     .join('\n\n')

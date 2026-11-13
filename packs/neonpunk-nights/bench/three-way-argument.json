@@ -3,7 +3,7 @@
   "title": "A three-way argument",
   "watchFor": "Three people with different stakes: Vex distrusts Oria, Brask wants to leave and fears the Aether Grid Corporation, Oria wants the job taken. At most two speak per turn, but over three turns all three should get a speaking slot (rotating focus), with distinct voices. Brask's low comfort should surface. NPC-to-NPC exchanges are welcome.",
   "location": "sump-lantern",
-  "cast": ["vex", "brask", "oria-senn"],
+  "cast": ["vex", "brask", "oria-senn", "dunmar"],
   "seed": 37,
   "moods": { "vex": "irritable, spoiling for an argument" },
   "turns": [

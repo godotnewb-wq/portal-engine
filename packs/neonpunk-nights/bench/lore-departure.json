@@ -5,7 +5,8 @@
   "location": "sump-lantern",
   "cast": [
     "vex",
-    "brask"
+    "brask",
+    "dunmar"
   ],
   "seed": 38,
   "turns": [

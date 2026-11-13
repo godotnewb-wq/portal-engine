@@ -2,6 +2,7 @@
   "id": "jun-halloway",
   "name": "Jun Halloway",
   "tier": "recurring",
+  "age": "adult",
   "species": "human",
   "pronouns": "she/her",
   "appearance": "adult human woman, mid-thirties, sturdy, tired brown eyes, dark hair pulled into a hasty knot, a clinic's grey scrubs under a worn quilted jacket, a canvas bag of supplies over one shoulder, flat practical shoes",
@@ -12,7 +13,7 @@
   "agenda": {
     "longTerm": [
       "Keep the clinic open; it runs on donations and one tired doctor",
-      "Get her younger brother through his apprenticeship"
+      "Get her younger brother through his glassblowing apprenticeship"
     ],
     "current": "Get off this car and to the clinic before the shift change; if the doors won't open, she'll use the roof hatch"
   },
@@ -36,14 +37,89 @@
       "Thirty minutes. Then my night nurse goes home and nobody's on the ward.",
       "How long have you been sitting like that? Your foot's gone white.",
       "My brother would love this. He thinks I never have adventures.",
-      "I don't need you to agree. I need you to move."
+      "I don't need you to agree. I need you to move.",
+      "Somebody at the Grid sends us a note before every blackout. I've never asked who. I'm not going to."
     ],
     "shifts": {
       "angry": "Gets calmer and more clinical",
       "warm": "Teases, then quietly checks you've eaten",
-      "lying": "Over-explains, like reading a chart"
+      "lying": "Over-explains, like reading a chart",
+      "afraid": "Gets bossier, and finds someone else to look after"
     }
   },
+  "tells": [
+    "Over-explains, like reading a chart, when she's lying",
+    "Keeps her back to the windows"
+  ],
+  "layers": {
+    "axes": {
+      "discipline": "diligent",
+      "temper": "touchy",
+      "compassion": "kind",
+      "composure": "open"
+    },
+    "values": [
+      {
+        "value": "benevolence",
+        "strength": "defining",
+        "stance": "likes",
+        "personal": "the clinic and whoever is in the queue tonight"
+      },
+      {
+        "value": "conformity",
+        "strength": "mild",
+        "stance": "dislikes",
+        "personal": "red tape"
+      },
+      {
+        "value": "security",
+        "strength": "mild",
+        "stance": "likes",
+        "personal": "her brother's apprenticeship"
+      }
+    ],
+    "foundations": {
+      "care": "sacred",
+      "fairness": "strong"
+    }
+  },
+  "expression": {
+    "masking": {
+      "fear": "moderate"
+    },
+    "display": {
+      "grief": "works through it and snaps at anyone who asks",
+      "fear": "gets bossier, and finds someone to look after",
+      "anger": "goes calm and clinical",
+      "shame": "jokes about it before anyone else can",
+      "hurt": "stops teasing you",
+      "affection": "teases you, then checks you've eaten",
+      "joy": "laughs loudly and complains about something",
+      "gratitude": "brings you food later and pretends it was spare"
+    }
+  },
+  "malleability": "average",
+  "haunts": [
+    {
+      "location": "location.bulk.wheel.wheel-clinic",
+      "from": "22:00",
+      "to": "06:00",
+      "note": "night shift",
+      "days": [
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "saturday"
+      ]
+    },
+    {
+      "location": "location.bulk.wheel.glassblowers-row",
+      "from": "06:30",
+      "to": "07:00",
+      "note": "walks past her brother's glassworks on the way home, to see he made it in"
+    }
+  ],
   "mood": "impatient, watching the clock",
   "knowledge": [
     "The clinic has one other nurse tonight, and she leaves at the shift change",
@@ -52,7 +128,8 @@
     "She has worked nights at the clinic for six years",
     "Her younger brother is apprenticed to a glassblower in the market and hates the early starts",
     "The clinic ran out of burn gel last week and is waiting on a donation",
-    "She hasn't eaten since noon"
+    "She hasn't eaten since noon",
+    "Someone at the Grid slips the clinic a note a day before each planned blackout; she's never asked who"
   ],
   "values": [
     {
@@ -85,9 +162,17 @@
       "id": "afraid-of-heights",
       "text": "She's terrified of the drop under the rail and has been trying not to look out the windows.",
       "summary": "Terrified of the drop under the rail.",
-      "keywords": ["heights", "the drop", "look down", "roof hatch"],
+      "keywords": [
+        "heights",
+        "the drop",
+        "look down",
+        "roof hatch"
+      ],
       "tell": "Keeps her back to the windows",
-      "revealWhen": "the roof hatch is actually opened"
+      "revealWhen": "the roof hatch is actually opened",
+      "disclose": {
+        "trust": "low"
+      }
     }
   ],
   "meters": {
@@ -98,10 +183,21 @@
   "relations": [
     {
       "to": "kesh",
-      "note": "impatient with the conductor's rulebook",
+      "tags": [],
+      "note": "rides car 14 most nights; trusts her driving and resents her rulebook",
       "meters": {
         "approval": -10,
-        "trust": 5,
+        "trust": 10,
+        "interest": 0
+      }
+    },
+    {
+      "to": "teo-varrin",
+      "tags": [],
+      "note": "a Grid tech she's seen on the night car; looks like he needs a meal",
+      "meters": {
+        "approval": 0,
+        "trust": 0,
         "interest": 0
       }
     }

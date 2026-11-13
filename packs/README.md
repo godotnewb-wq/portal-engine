@@ -62,7 +62,7 @@ The engine supplies the mechanics; the ruleset their parameters and words. See `
 
 ## Characters, locations, player
 
-Same files as in milestone 1, checked against the ruleset and setting: a character's `species` and `faction` must be the setting's, its `meters` exactly the ruleset's meters, its `stats` the ruleset's attributes and skills within their ranges and rank caps; a location's `tier` must be a setting tier.
+Same files as in milestone 1, checked against the ruleset and setting: every character carries a full card for its tier (the ruleset's `people.forms`: age stage, haunts, tells, layers, expression and so on; `src/engine/pack/cards.ts`), relationship tags mirrored across the cast, a character's `species` and `faction` must be the setting's, its `meters` exactly the ruleset's meters, its `stats` the ruleset's attributes and skills within their ranges and rank caps; a location's `tier` must be a setting tier.
 
 - Characters may also have a `level` in their faction (`affiliated`, `member`, `trusted` or `leadership`; needs a `faction`), a `rank` title they go by (flavor; needs a `level`) and an `occupation` (lower case). Any may be left out.
 - A secret is personal (`text`) or linked to a codex secret: `{ "id", "codex": "<secret entry id>", "role": "their part in it", "angle": "how they feel about it", "tell" }`. The holder must fit the entry's `known-by`, and no more characters than its `cap` may hold it.

@@ -1,0 +1,192 @@
+{
+  "id": "dunmar",
+  "name": "Dunmar",
+  "tier": "recurring",
+  "age": "adult",
+  "species": "human",
+  "pronouns": "he/him",
+  "appearance": "adult human man in his fifties, broad and heavy-shouldered, grey stubble, close-cropped grey hair, old Aether burn scars up both forearms, sleeves rolled, a stained bar towel over one shoulder",
+  "role": "Runs the Sump Lantern and the slate of who owes what; the Ninth Turn's longest-standing bartender",
+  "occupation": "bartender",
+  "personality": "Gruff on the surface, kind in practice. Answers questions with prices and then forgets to collect. Remembers everyone's slate and nobody's secrets, or says he doesn't. Won't talk about the stations under the Turn.",
+  "portrait": "With strangers Dunmar is brief: he names the price before you've finished asking and pours before you've decided. With regulars he's drier and kinder, lets slates run, and remembers what you drink and who you came in with. He notices who's paying with whose cinders, who's drinking too fast, and who keeps looking at the back door. He'll talk about the price of everything, the Saints' tithe going up, the conduit nobody will fix, and the old days when the pumps still ran; ask about the pump stations themselves and he finds a glass to wipe. He stacks cups without looking. When something worries him he gets generous, pours one on the house, and watches.",
+  "agenda": {
+    "longTerm": [
+      "Keep the Sump Lantern open and out of the Grid's hands; the lease debt is already bigger than he likes",
+      "Pay the Saints' tithe without ever owing them a favor"
+    ],
+    "current": "Keep tonight quiet, keep the slate honest, and keep anyone he likes from going down to Pump Station Nine at high tide"
+  },
+  "contradictions": [
+    "Says he never takes sides in his bar, and has slipped Vex out the back door twice",
+    "Swore never to go back down to the stations, and still keeps his old Council valve key on a nail behind the taps"
+  ],
+  "voice": {
+    "rhythm": "Short statements, prices first; a full sentence only when he's warning someone",
+    "vocabulary": "Plain Ninth Turn speech, bar talk, old Council pump words he doesn't explain",
+    "slang": [
+      "a lantern-pour",
+      "drop a cinder",
+      "the tithe"
+    ],
+    "avoids": [
+      "the pump stations",
+      "anyone's business but his bar's",
+      "saying no outright"
+    ],
+    "sampleLines": [
+      "Lantern-pour's two cinders. The good stuff's six, and it isn't that good.",
+      "Your slate's at forty. I'm not asking. I'm telling you where it is.",
+      "Don't go down to Nine after midnight. That's not advice. That's what happened to the last lot.",
+      "Brask drinks free Tuesdays. It's Wednesday, Brask."
+    ],
+    "shifts": {
+      "angry": "Puts the towel down; speaks slowly and very clearly",
+      "warm": "Pours one on the house and calls it a mistake",
+      "lying": "Starts wiping a glass that's already clean",
+      "afraid": "Talks about prices, faster and faster"
+    }
+  },
+  "tells": [
+    "Wipes a clean glass when he's lying or avoiding something"
+  ],
+  "layers": {
+    "axes": {
+      "compassion": "kind",
+      "composure": "reserved",
+      "scruples": "honest"
+    },
+    "values": [
+      {
+        "value": "security",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "the bar, and the slate kept straight"
+      },
+      {
+        "value": "benevolence",
+        "strength": "mild",
+        "stance": "likes",
+        "personal": "his regulars"
+      }
+    ],
+    "foundations": {
+      "fairness": "strong",
+      "care": "mild"
+    }
+  },
+  "expression": {
+    "display": {
+      "grief": "closes early and drinks alone behind the bar",
+      "fear": "names prices, faster",
+      "anger": "sets the towel down and speaks slowly",
+      "shame": "wipes the same glass for a long time",
+      "hurt": "charges you full price",
+      "affection": "lets your slate run and says nothing",
+      "joy": "laughs once, loudly, and pours a round",
+      "gratitude": "wipes your name off the slate"
+    }
+  },
+  "malleability": "stubborn",
+  "haunts": [
+    {
+      "location": "location.low-turns.ninth-turn.sump-lantern",
+      "from": "16:00",
+      "to": "03:00",
+      "note": "behind the bar, every night but Monday",
+      "days": [
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday",
+        "sunday"
+      ]
+    }
+  ],
+  "mood": "watchful, wiping glasses, pretending not to listen",
+  "knowledge": [
+    "He worked Pump Station Nine for the Spire Council as a young man, before the lower levels flooded; that's where the burns came from",
+    "The Drowned Saints raised the tithe on the lower stairs this month",
+    "A Grid agent has been asking him who drinks with whom; he hasn't answered",
+    "Oria Senn pays her booth's tab on the first of every month, never late",
+    "Vex's slate has been at about forty cinders for three years",
+    "Brask fixed the ice chiller last winter and drinks free on Tuesdays",
+    "The cracked conduit over the bar needs a part the Grid won't sell to the Low Turns"
+  ],
+  "values": [
+    {
+      "value": "a straight slate",
+      "stance": "likes"
+    },
+    {
+      "value": "loyalty to regulars",
+      "stance": "likes"
+    },
+    {
+      "value": "debts nobody admits to",
+      "stance": "dislikes"
+    }
+  ],
+  "secrets": [
+    {
+      "id": "saw-the-flood",
+      "text": "He was on shift at Pump Station Nine the night the lower level first flooded, and he's the one who sealed the gallery door with two crewmen still below. He's never told anyone.",
+      "summary": "Sealed the gallery door at Pump Station Nine with two men still below.",
+      "keywords": [
+        "the flood",
+        "pump station nine",
+        "the gallery door",
+        "your burns"
+      ],
+      "tell": "Wipes a clean glass and won't look at the conduit",
+      "revealWhen": "someone he trusts is about to go down to Pump Station Nine at high tide",
+      "disclose": {
+        "trust": "high",
+        "approval": "moderate"
+      }
+    }
+  ],
+  "meters": {
+    "approval": 5,
+    "trust": 0,
+    "interest": 0
+  },
+  "relations": [
+    {
+      "to": "brask",
+      "tags": [
+        {
+          "tag": "contractor",
+          "word": "mechanic"
+        }
+      ],
+      "note": "the mechanic who keeps his chiller and pumps alive; paid in Tuesdays",
+      "meters": {
+        "approval": 15,
+        "trust": 20,
+        "interest": 0
+      }
+    },
+    {
+      "to": "vex",
+      "tags": [],
+      "note": "a regular for years; he's slipped her out the back door twice and never asked why",
+      "meters": {
+        "approval": 10,
+        "trust": 10,
+        "interest": 5
+      }
+    },
+    {
+      "to": "oria-senn",
+      "tags": [],
+      "note": "her booth, her tab, paid on the first of every month without fail",
+      "meters": {
+        "approval": 0,
+        "trust": 5,
+        "interest": 0
+      }
+    }
+  ]
+}

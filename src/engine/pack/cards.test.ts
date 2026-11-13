@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { fixture } from '@tests/fixture'
 import type { Character } from '@engine/characters'
-import { cardProblems, cardWarnings, hauntsOverlap, tieProblems } from './cards'
+import { cardProblems, cardFormProblems, hauntsOverlap, tieProblems } from './cards'
 import { characterById } from './content'
 
 const R = fixture.ruleset
@@ -93,15 +93,15 @@ describe('hauntsOverlap', () => {
   })
 })
 
-describe('cardWarnings', () => {
+describe('cardFormProblems', () => {
   it('is silent for cards complete for their tier', () => {
-    expect(cardWarnings(R, mara)).toEqual([])
-    expect(cardWarnings(R, tobin)).toEqual([])
+    expect(cardFormProblems(R, mara)).toEqual([])
+    expect(cardFormProblems(R, tobin)).toEqual([])
   })
 
   it('names what a card lacks for its tier’s form', () => {
     const bare = { ...mara, age: undefined, malleability: undefined, haunts: [], tells: [], layers: undefined, expression: undefined, voice: { ...mara.voice, shifts: { ...mara.voice.shifts, afraid: undefined } } } as Character
-    expect(cardWarnings(R, bare)).toEqual([
+    expect(cardFormProblems(R, bare)).toEqual([
       'mara has no age stage',
       'mara has no malleability',
       "mara's voice card has no afraid shift",

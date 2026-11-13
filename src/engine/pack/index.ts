@@ -1,3 +1,3 @@
 export * from './content'
 export * from './manifest'
-export { cardProblems, cardWarnings, hauntsOverlap, tieProblems } from './cards'
+export { cardProblems, cardFormProblems, hauntsOverlap, tieProblems } from './cards'

@@ -11,6 +11,7 @@ import { LORE_LINE_WORDS, MOVE_KINDS, NEW_FACT_WORDS } from './plan'
 import { turnLore, type TurnLore } from './lore'
 import { cueSecretLine, fullSecretLine, type SecretShown } from './secrets'
 import { willingHelpers, wouldDisclose } from './resolve'
+import { childGuard } from './guard'
 
 /** How many past turns go into prompts verbatim; older ones live in the running summary. */
 export const RECENT_TURNS = 3
@@ -82,7 +83,8 @@ export function buildDirectorPrompt(content: Pack, state: GameState, input: stri
     lore.layers.scene.text && `# Lore of this place and the people here (background, not things to recite)\n${lore.layers.scene.text}`,
     walkOns.length > 0 && `# Walk-ons\n${walkOns.map((w) => `- ${w.label}${w.name ? ` (${w.name})` : ''} [id: ${w.id}]: ${w.species}; ${w.look}; ${w.manner}; ${w.role}`).join('\n')}`,
     `# The player: ${player.name} (${player.species}, ${player.pronouns})\n${player.appearance}. ${player.background}`,
-    `# Characters present\n${cast.map((c) => sheet(content, state, c, present, lore.secrets)).join('\n\n')}`
+    `# Characters present\n${cast.map((c) => sheet(content, state, c, present, lore.secrets)).join('\n\n')}`,
+    childGuard(content, state)
   ]
     .filter(Boolean)
     .join('\n\n')
@@ -129,7 +131,7 @@ export function sheet(content: Pack, state: GameState, c: Character, present: st
     .filter((r) => r.from === c.id && present.includes(r.to))
     .map((r) => `${characterById(content, r.to)?.name ?? r.to}: ${meterWords(content.ruleset, r.meters)}${r.note ? ` (${r.note})` : ''}`)
   return [
-    `## ${c.name} [id: ${c.id}] — ${TIER_WORDS[c.tier]}${state.party.includes(c.id) ? ', in the player\'s party' : ''}, ${c.species}, ${c.pronouns}`,
+    `## ${c.name} [id: ${c.id}] — ${TIER_WORDS[c.tier]}${state.party.includes(c.id) ? ', in the player\'s party' : ''}${c.age && content.ruleset.people.ages.minors.includes(c.age) ? `, ${c.age}` : ''}, ${c.species}, ${c.pronouns}`,
     `Role: ${c.role}`,
     `Personality: ${c.personality}`,
     `With others: ${c.portrait}`,

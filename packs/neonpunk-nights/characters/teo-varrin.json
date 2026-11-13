@@ -2,6 +2,7 @@
   "id": "teo-varrin",
   "name": "Teo Varrin",
   "tier": "recurring",
+  "age": "adult",
   "species": "light-elf",
   "pronouns": "he/him",
   "appearance": "adult light elf man, late twenties in look, tall and thin, long pointed ears, pale golden eyes, faint shimmering glyph-marks at his temples, ash-brown hair cut short, a Grid Corporation line-technician's jacket with the patch unpicked, a tool case on his knees",
@@ -40,14 +41,82 @@
       "It's a cold start. Probably. If the coil's not cracked— sorry, if it's not damaged.",
       "What do you do? Sorry. I like knowing what people do.",
       "Those lamps will last a couple of hours. They're older than me.",
-      "The company says maintenance. Three times this month isn't maintenance."
+      "The company says maintenance. Three times this month isn't maintenance.",
+      "I could do it. I'm not allowed to. Those are both true."
     ],
     "shifts": {
       "angry": "Precise and cold, all the technical terms and none of the translations",
       "warm": "Explains how something works at length, as a gift, and forgets to stop",
-      "lying": "He can't; he goes quiet instead"
+      "lying": "He can't; he goes quiet instead",
+      "afraid": "Goes quiet and agrees with whoever spoke last"
     }
   },
+  "tells": [
+    "Touches the unpicked patch on his jacket",
+    "Goes quiet instead of lying"
+  ],
+  "layers": {
+    "axes": {
+      "scruples": "principled",
+      "nerve": "anxious",
+      "openness": "curious",
+      "assertiveness": "deferential"
+    },
+    "values": [
+      {
+        "value": "achievement",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "getting into the Phoenix Academy"
+      },
+      {
+        "value": "universalism",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "an honest grid that lights everyone"
+      },
+      {
+        "value": "security",
+        "strength": "mild",
+        "stance": "likes",
+        "personal": "keeping the job until the debt is paid"
+      }
+    ],
+    "foundations": {
+      "fairness": "strong",
+      "care": "strong",
+      "authority": "mild"
+    }
+  },
+  "expression": {
+    "display": {
+      "grief": "stops tapping rhythms and goes very quiet",
+      "fear": "agrees with whoever spoke last",
+      "anger": "precise and cold, all jargon, no translations",
+      "shame": "apologizes before anyone accuses him",
+      "hurt": "explains himself at length",
+      "affection": "explains how something works, as a gift",
+      "joy": "talks fast and forgets to stop",
+      "gratitude": "offers to fix something, right now"
+    }
+  },
+  "malleability": "impressionable",
+  "haunts": [
+    {
+      "location": "location.bulk.kilnworks.kiln-substation",
+      "from": "08:00",
+      "to": "20:00",
+      "note": "line crew shifts out of the substation",
+      "days": "weekdays"
+    },
+    {
+      "location": "location.bulk.wheel.market-stop",
+      "from": "20:30",
+      "to": "21:30",
+      "note": "the noodle shop under his flat, studying from borrowed books",
+      "days": "weekdays"
+    }
+  ],
   "mood": "exhausted, guilty, half-hoping someone asks",
   "knowledge": [
     "The stall is a grid drop, not a fault in the car",
@@ -55,9 +124,9 @@
     "The Aether Grid Corporation logs who touches a transit panel",
     "He has been awake for twenty hours",
     "The Phoenix Academy's entrance exam is in the spring; he studies from borrowed books",
-    "He shares a flat above a noodle shop with three other technicians",
     "The grid drops this month have hit the same three districts",
-    "Car 14's panel is an older model, the kind he trained on as an apprentice"
+    "Car 14's panel is an older model, the kind he trained on as an apprentice",
+    "He shares a flat above a noodle shop by the market stop with three other Grid technicians, Tam Dace among them"
   ],
   "values": [
     {
@@ -90,9 +159,17 @@
       "id": "already-flagged",
       "text": "He's on a final warning at work for an unauthorized repair last month; one more and he's out, with the apprenticeship debt still owed.",
       "summary": "On a final warning at work; one more slip and he's out.",
-      "keywords": ["warning", "cold start", "fired", "sacked"],
+      "keywords": [
+        "warning",
+        "cold start",
+        "fired",
+        "sacked"
+      ],
       "tell": "Touches the unpicked patch on his jacket",
-      "revealWhen": "someone asks him outright to do the cold start"
+      "revealWhen": "someone asks him outright to do the cold start",
+      "disclose": {
+        "trust": "low"
+      }
     }
   ],
   "meters": {
@@ -103,11 +180,31 @@
   "relations": [
     {
       "to": "jun-halloway",
-      "note": "awkward; wants her to make her shift",
+      "tags": [],
+      "note": "has seen her on the night car for months; awkward; wants her to make her shift",
       "meters": {
         "approval": 5,
         "trust": 10,
-        "interest": 0
+        "interest": 5
+      }
+    },
+    {
+      "to": "tam-dace",
+      "tags": [
+        {
+          "tag": "roommate",
+          "word": "flatmate"
+        },
+        {
+          "tag": "colleague",
+          "word": "coworker"
+        }
+      ],
+      "note": "flatmate and coworker; Tam lent him the Academy books and never asks for them back",
+      "meters": {
+        "approval": 15,
+        "trust": 20,
+        "interest": 5
       }
     }
   ],

@@ -27,7 +27,7 @@ describe('reading the scene', () => {
   it('names a beat by first name, walk-on name, or not at all for narration', () => {
     const state = barScene()
     expect(nameplate(content, state, { kind: 'dialogue', speaker: 'oria-senn', text: '' })).toBe('Oria')
-    expect(nameplate(content, state, { kind: 'dialogue', speaker: 'bartender', text: '' })).toBe('Dunmar')
+    expect(nameplate(content, state, { kind: 'dialogue', speaker: 'card-player', text: '' })).toBe('Hollis')
     expect(nameplate(content, state, { kind: 'narration', text: '' })).toBeUndefined()
   })
 

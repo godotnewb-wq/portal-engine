@@ -34,7 +34,7 @@
       {
         "who": "oria-senn",
         "answers": "player",
-        "point": "dodge: The client wants the case badly enough to pay triple"
+        "point": "dodge: The client will pay triple the usual rate, and has told her nothing about why"
       },
       {
         "who": "vex",
@@ -44,7 +44,7 @@
       {
         "who": "brask",
         "answers": 2,
-        "point": "warn: The cooled pipe over the corner table is leaking and will drip on whoever sits there"
+        "point": "warn: He has serviced the Drowned Saints' skim pump in Pump Station Nine's upper gallery for two years; the lower level floods with the tide around midnight"
       }
     ],
     "reactions": [
@@ -71,13 +71,13 @@
           "natural": 11,
           "edge": "none",
           "modifier": 2,
-          "rank": 1,
+          "rank": 2,
           "bonus": 0,
-          "total": 14,
-          "degree": "cost",
+          "total": 15,
+          "degree": "success",
           "critical": null
         },
-        "line": "Vex — Empathy 14 vs 15: success at a cost"
+        "line": "Vex — Empathy 15 vs 15: success"
       }
     ],
     "walk_ons": [],
@@ -94,7 +94,7 @@
         "move": "dodge",
         "says": [
           {
-            "text": "The client wants the case badly enough to pay triple",
+            "text": "The client will pay triple the usual rate, and has told her nothing about why",
             "id": "oria-senn.k3",
             "unheard": true
           }
@@ -119,7 +119,7 @@
         "move": "warn",
         "says": [
           {
-            "text": "The cooled pipe over the corner table is leaking and will drip on whoever sits there",
+            "text": "He has serviced the Drowned Saints' skim pump in Pump Station Nine's upper gallery for two years; the lower level floods with the tide around midnight",
             "id": "brask.k1",
             "unheard": true
           }
@@ -153,12 +153,12 @@
       "natural": 11,
       "edge": "none",
       "modifier": 2,
-      "rank": 1,
+      "rank": 2,
       "bonus": 0,
-      "total": 14,
-      "degree": "cost",
+      "total": 15,
+      "degree": "success",
       "critical": null,
-      "line": "Vex — Empathy 14 vs 15: success at a cost",
+      "line": "Vex — Empathy 15 vs 15: success",
       "stakes": "Vex sees that Oria is lying"
     }
   ],
@@ -382,7 +382,7 @@
       "kesh"
     ],
     "walkOns": [
-      "bartender"
+      "card-player"
     ],
     "summary": "",
     "moods": {
@@ -474,7 +474,7 @@
       {
         "who": "oria-senn",
         "answers": "player",
-        "point": "dodge: The job: retrieve a sealed case from a flooded pump station in the Low Turns before a rival crew does"
+        "point": "dodge: The job: retrieve a sealed case from Pump Station Nine's flooded lower level before a rival crew does"
       },
       {
         "who": "vex",
@@ -507,7 +507,7 @@
         "move": "dodge",
         "says": [
           {
-            "text": "The job: retrieve a sealed case from a flooded pump station in the Low Turns before a rival crew does",
+            "text": "The job: retrieve a sealed case from Pump Station Nine's flooded lower level before a rival crew does",
             "id": "oria-senn.k1",
             "unheard": true
           }
@@ -732,7 +732,7 @@
       "kesh"
     ],
     "walkOns": [
-      "bartender"
+      "card-player"
     ],
     "summary": "",
     "moods": {
@@ -822,12 +822,12 @@
       {
         "who": "oria-senn",
         "answers": "player",
-        "point": "answer: The flooded pump station's lower level fills at high tide, around midnight; The client wants the case badly enough to pay triple"
+        "point": "answer: Her network passes along all kinds of information, and she doesn't ask every buyer what it's for; The client will pay triple the usual rate, and has told her nothing about why"
       },
       {
         "who": "brask",
         "answers": 1,
-        "point": "warn: Three pumps on the lower stairs are overdue for new seals"
+        "point": "warn: He has never met Oria Senn but has heard that she always gets paid, and that nobody says what the jobs were"
       }
     ],
     "reactions": [
@@ -855,12 +855,12 @@
         "move": "answer",
         "says": [
           {
-            "text": "The flooded pump station's lower level fills at high tide, around midnight",
+            "text": "Her network passes along all kinds of information, and she doesn't ask every buyer what it's for",
             "id": "oria-senn.k7",
             "unheard": true
           },
           {
-            "text": "The client wants the case badly enough to pay triple",
+            "text": "The client will pay triple the usual rate, and has told her nothing about why",
             "id": "oria-senn.k3",
             "unheard": false
           }
@@ -872,7 +872,7 @@
         "move": "warn",
         "says": [
           {
-            "text": "Three pumps on the lower stairs are overdue for new seals",
+            "text": "He has never met Oria Senn but has heard that she always gets paid, and that nobody says what the jobs were",
             "id": "brask.k5",
             "unheard": true
           }
@@ -1094,7 +1094,7 @@
       "kesh"
     ],
     "walkOns": [
-      "bartender"
+      "card-player"
     ],
     "summary": "",
     "moods": {
@@ -1209,12 +1209,12 @@
             "before": {
               "approval": -20,
               "trust": -25,
-              "interest": 5
+              "interest": 10
             },
             "after": {
               "approval": -24,
               "trust": -29,
-              "interest": 5
+              "interest": 10
             },
             "reason": "she lied again"
           }

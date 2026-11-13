@@ -1,0 +1,13 @@
+{
+  "id": "siblings-on-the-car",
+  "title": "Siblings who see each other differently",
+  "watchFor": "Ilse and Tam Dace are sister and brother on the stalled car, and the tie runs differently each way. Ilse disapproves of his Grid job, is wary of him and keeps close tabs on him: sharp, protective, keeping score. Tam trusts and admires her completely and counts her a rival he has to beat: defensive, eager, joking. The asymmetry should show in how each talks to and about the other, in their own voices, without flattening into 'protective big sister' and 'annoying little brother'. Their history (their mother's grid-sickness, his apprenticeship debt) may surface; their secrets shouldn't come out unprompted. Kesh stays the conductor.",
+  "location": "coil-line-car-14",
+  "cast": ["kesh", "ilse-dace", "tam-dace"],
+  "seed": 47,
+  "turns": [
+    "I look between the two of them. \"You two know each other?\"",
+    "I ask Tam, \"So what's it like, working for the Grid?\"",
+    "I turn to Ilse. \"Is he any good at it?\""
+  ]
+}

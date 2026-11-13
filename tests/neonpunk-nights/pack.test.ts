@@ -2,27 +2,28 @@ import { cpSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { cardWarnings, characterById, locationById, packProblems, packWarnings } from '@engine/pack'
+import { cardFormProblems, characterById, locationById, packProblems, packWarnings } from '@engine/pack'
 import { readPack } from '@platform/packs'
 import { content, PACK_DIR } from './support'
 
 describe('the Neonpunk Nights pack', () => {
-  it('has the milestone 1 bar scene: Vex and Brask as Major Characters in the party, Oria Senn with her secret, a bartender walk-on', () => {
+  it('has the milestone 1 bar scene: Vex and Brask as Major Characters in the party, Oria Senn with her secret, Dunmar behind the bar, a card player walk-on', () => {
     expect(characterById(content, 'vex')?.tier).toBe('major')
     expect(characterById(content, 'brask')?.tier).toBe('major')
     expect(content.manifest.start.party).toEqual(['vex', 'brask'])
     const oria = characterById(content, 'oria-senn')!
-    expect(oria.tier).toBe('recurring')
+    expect(oria.tier).toBe('major')
     expect(oria.secrets.map((s) => s.id)).toContain('client-is-grid-corporation')
     expect(oria.voice.shifts.lying).toMatch(/darling/)
     const bar = locationById(content, 'sump-lantern')!
     expect(bar.tier).toBe('low-turns')
-    expect(bar.walkOns.map((w) => w.id)).toEqual(['bartender'])
+    expect(bar.walkOns.map((w) => w.id)).toEqual(['card-player'])
+    expect(characterById(content, 'dunmar')?.tier).toBe('recurring')
     expect(bar.texture.sights.length).toBeGreaterThanOrEqual(3)
   })
 
   it('opens on the Sump Lantern with everyone, and carries its ruleset, setting, primer and tone', () => {
-    expect(content.manifest.start).toEqual({ location: 'sump-lantern', cast: ['vex', 'brask', 'oria-senn'], party: ['vex', 'brask'] })
+    expect(content.manifest.start).toEqual({ location: 'sump-lantern', cast: ['vex', 'brask', 'oria-senn', 'dunmar'], party: ['vex', 'brask'] })
     expect(content.ruleset.skills).toHaveLength(19)
     expect(content.ruleset.difficulties.map((d) => d.dc)).toEqual([5, 10, 15, 20, 25, 30])
     expect(content.setting.tiers.map((t) => t.id)).toEqual(['crown', 'high-turns', 'bulk', 'low-turns', 'deepwell'])
@@ -37,14 +38,14 @@ describe('the Neonpunk Nights pack', () => {
   })
 
   it('gives the author no warnings: no stance words in codex text, no character crowded with secrets', () => {
-    // Until the cast is rewritten on the full card (milestone 4a task 6), its cards are incomplete for their tier.
-    const forms = content.characters.flatMap((c) => cardWarnings(content.ruleset, c))
-    expect(packWarnings(content).filter((w) => !forms.includes(w))).toEqual([])
+    expect(packWarnings(content)).toEqual([])
   })
 
-  it('describes every character as an adult', () => {
-    for (const c of content.characters) expect(c.appearance, c.id).toMatch(/^adult\b/)
-    expect(content.player.appearance).toMatch(/^adult\b/)
+  // Milestone 4a task 6: every card is complete for its tier and gives an age stage; the child guard covers minors,
+  // so appearances no longer have to say "adult". This cast has no minors yet.
+  it('gives every character a full card for its tier, with an age stage', () => {
+    for (const c of content.characters) expect(cardFormProblems(content.ruleset, c), c.id).toEqual([])
+    expect(content.characters.filter((c) => content.ruleset.people.ages.minors.includes(c.age!))).toEqual([])
   })
 })
 

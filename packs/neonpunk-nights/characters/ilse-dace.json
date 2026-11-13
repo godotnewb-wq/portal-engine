@@ -1,0 +1,191 @@
+{
+  "id": "ilse-dace",
+  "name": "Ilse Dace",
+  "tier": "recurring",
+  "age": "adult",
+  "species": "human",
+  "pronouns": "she/her",
+  "appearance": "adult human woman in her mid-thirties, compact and upright, sharp grey eyes, dark hair cropped short, chalk dust on her sleeves, a Courier dispatcher's sash worn over a heavy cardigan, a pencil behind one ear",
+  "role": "Night dispatcher at the Wheelhouse, the Couriers' Bulk dispatch; decides which runner gets which run",
+  "faction": "couriers",
+  "level": "trusted",
+  "rank": "dispatcher",
+  "occupation": "dispatcher",
+  "personality": "Brisk, fair and hard to impress. Runs the route board like a ship. Raised her brother and still treats him like a project that went wrong. Keeps her word, and one very bad bargain to herself.",
+  "portrait": "With strangers Ilse is brisk and fair: she wants the destination, the deadline and the fee, in that order, and she gives straight answers back. With people she knows she's drier and warmer, though she still interrupts. She notices who's late, who's limping, which runner is taking too many night runs, and what a packet weighs. She'll talk about the route board, the dispatchers' gossip, the price of chalk and her brother's bad choices long before anything about herself. She taps the pencil from behind her ear against her teeth. When she's guilty she gets more generous with runs, not less.",
+  "agenda": {
+    "longTerm": [
+      "Keep the Wheelhouse running fair, so no runner gets sold out on her board again",
+      "Get her brother out of the Grid before the company eats him the way it ate their mother's lungs"
+    ],
+    "current": "Get her brother to admit the Grid is using him, without saying anything she'd have to take back"
+  },
+  "contradictions": [
+    "Tells every runner the board is fair, and once sold a runner's route to cover a debt",
+    "Disapproves of everything her brother does, and keeps every letter he's ever sent"
+  ],
+  "voice": {
+    "rhythm": "Quick, clipped questions; full sentences only for instructions",
+    "vocabulary": "Dispatch shorthand, route names, plain Bulk speech",
+    "slang": [
+      "a run",
+      "a drop",
+      "a burned route",
+      "on the board"
+    ],
+    "avoids": [
+      "apologizing",
+      "talking about the past",
+      "praising anyone to their face"
+    ],
+    "sampleLines": [
+      "Where to, by when, and who's paying.",
+      "You took the Grid's coin again. I can tell. You stand differently.",
+      "Mum asked after you. I told her you were busy. You were, weren't you.",
+      "I'm not angry. I'm keeping score. It's different."
+    ],
+    "shifts": {
+      "angry": "Stops interrupting; lets you finish every sentence",
+      "warm": "Gives you the good run without saying it's the good run",
+      "lying": "Answers before the question is finished",
+      "afraid": "Starts organizing everyone around her"
+    }
+  },
+  "tells": [
+    "Answers before the question is finished when she's lying"
+  ],
+  "layers": {
+    "axes": {
+      "assertiveness": "forceful",
+      "discipline": "diligent",
+      "composure": "reserved"
+    },
+    "values": [
+      {
+        "value": "benevolence",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "her brother, whether he likes it or not"
+      },
+      {
+        "value": "conformity",
+        "strength": "mild",
+        "stance": "likes",
+        "personal": "the board, kept fair"
+      }
+    ],
+    "foundations": {
+      "fairness": "sacred",
+      "loyalty": "strong"
+    }
+  },
+  "expression": {
+    "display": {
+      "grief": "works the board all night and doesn't go home",
+      "fear": "organizes everyone around her",
+      "anger": "stops interrupting, which is worse",
+      "shame": "gives runners the good runs and won't say why",
+      "hurt": "gets formal and calls you by your full name",
+      "affection": "nags you about eating and your coat",
+      "joy": "laughs once, short, and pretends she didn't",
+      "gratitude": "remembers it on the board, months later"
+    }
+  },
+  "malleability": "stubborn",
+  "haunts": [
+    {
+      "location": "location.bulk.wheel.wheelhouse",
+      "from": "16:00",
+      "to": "04:00",
+      "note": "at the route board, every night but Sunday",
+      "days": [
+        "monday",
+        "tuesday",
+        "wednesday",
+        "thursday",
+        "friday",
+        "saturday"
+      ]
+    }
+  ],
+  "mood": "sharp, tired, braced for an argument",
+  "knowledge": [
+    "The Grid's load-shedding schedules go out to its crews in sealed Courier packets, and the Wheelhouse carries them",
+    "Vex has saved a little over half the fee for a route license and takes every night run to get there",
+    "Two years ago a sigil-runner named Sef was stopped at a Drowned Saints checkpoint on a tip",
+    "Her brother Tam has worked for the Grid for six years and sends half his wage to their mother",
+    "Their mother has been grid-sick since the Kiln substation's last overload",
+    "Dispatchers trade route information with each other, and some sell it"
+  ],
+  "values": [
+    {
+      "value": "a fair board",
+      "stance": "likes"
+    },
+    {
+      "value": "family",
+      "stance": "likes"
+    },
+    {
+      "value": "the Grid",
+      "stance": "dislikes"
+    }
+  ],
+  "secrets": [
+    {
+      "id": "sold-the-route",
+      "text": "Two years ago she sold Sef's route to a buyer in Oria Senn's network to cover a payment on her brother's apprenticeship debt. Sef was stopped at a Saints checkpoint because of it. Nobody knows, Tam least of all.",
+      "summary": "Sold a runner's route to Oria's network to pay her brother's debt.",
+      "keywords": [
+        "Sef",
+        "sold out",
+        "the tip",
+        "his route",
+        "checkpoint"
+      ],
+      "tell": "Answers before the question is finished",
+      "revealWhen": "Vex comes close to the truth, or Tam is in danger because of the Grid",
+      "disclose": {
+        "trust": "very high",
+        "approval": "high"
+      }
+    }
+  ],
+  "meters": {
+    "approval": 0,
+    "trust": 0,
+    "interest": 0
+  },
+  "relations": [
+    {
+      "to": "tam-dace",
+      "tags": [
+        {
+          "tag": "sibling",
+          "word": "younger brother"
+        }
+      ],
+      "note": "raised him from twelve, when their mother went grid-sick; paid his first Grid exam fee herself and has regretted it ever since",
+      "meters": {
+        "approval": -15,
+        "trust": 5,
+        "interest": 20
+      }
+    },
+    {
+      "to": "vex",
+      "tags": [
+        {
+          "tag": "employee",
+          "word": "runner"
+        }
+      ],
+      "note": "her steadiest night runner for three years; Ilse gives her the hard runs because she trusts her with them",
+      "meters": {
+        "approval": 15,
+        "trust": 20,
+        "interest": 10
+      }
+    }
+  ]
+}

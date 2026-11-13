@@ -21,7 +21,7 @@ const { plan } = validatePlan(content, state, parsePlan(JSON.stringify({
   ],
   reactions: [{ id: 'brask', beat: 'fidgets with his glass, ears flat' }],
   checks: [{ id: 'vex_empathy', who: 'vex', skill: 'empathy', difficulty: 'moderate', stakes: 'notices Oria is lying' }],
-  walk_ons: [{ id: 'bartender', line: 'slides a lantern-pour across without being asked' }],
+  walk_ons: [{ id: 'card-player', line: 'slaps down a losing hand and swears' }],
   texture: ['condensation dripping from an Aether-cooled pipe overhead'],
   avoid: ['darling, darling']
 }))!, INPUT)
@@ -47,14 +47,14 @@ describe('parseReply', () => {
 
   it('reads bold names, unlabelled narration, a colon in narration, walk-ons, departures and the scene end', () => {
     const parsed = parseReply(
-      '**Vex:** Let\'s go.\nThe card game collapses into shouting.\nOne rule down here: nobody asks.\nDunmar: "Two cinders."\n[LEAVES: Brask]\n[END SCENE]\n[Ghost: MOOD sad]',
+      '**Vex:** Let\'s go.\nThe card game collapses into shouting.\nOne rule down here: nobody asks.\nHollis: "Two cinders."\n[LEAVES: Brask]\n[END SCENE]\n[Ghost: MOOD sad]',
       speakers
     )
     expect(parsed.beats).toEqual([
       { kind: 'dialogue', speaker: 'vex', text: "Let's go." },
       { kind: 'narration', text: 'The card game collapses into shouting.' },
       { kind: 'narration', text: 'One rule down here: nobody asks.' },
-      { kind: 'dialogue', speaker: 'bartender', text: 'Two cinders.' }
+      { kind: 'dialogue', speaker: 'card-player', text: 'Two cinders.' }
     ])
     expect(parsed.tags.leaves).toEqual(['brask'])
     expect(parsed.tags.ended).toBe(true)
@@ -65,22 +65,22 @@ describe('parseReply', () => {
   it('splits a line that mixes speech and action into beats, in order, naming whoever acts', () => {
     const parsed = parseReply(
       [
-        'Dunmar: Wipes the slate with his thumb, erasing nothing. "Surveyors on the lower stairs again. Drink up before the grid does."',
+        'Hollis: Wipes the table with her sleeve, erasing nothing. "Surveyors on the lower stairs again. Drink up before the grid does."',
         'Vex: "Say who\'s paying." She turns her cup a quarter turn. "Not what. Who."',
         'Oria: "Because you\'re discreet," she says, "and the work wants doing before dawn."',
-        'Dunmar: He sets three cups down before anyone asks.',
+        'Hollis: She sets three cards down before anyone asks.',
         'Vex: *scrambles up the wall*'
       ].join('\n'),
       speakers
     )
     expect(parsed.beats).toEqual([
-      { kind: 'narration', text: 'Dunmar wipes the slate with his thumb, erasing nothing.' },
-      { kind: 'dialogue', speaker: 'bartender', text: 'Surveyors on the lower stairs again. Drink up before the grid does.' },
+      { kind: 'narration', text: 'Hollis wipes the table with her sleeve, erasing nothing.' },
+      { kind: 'dialogue', speaker: 'card-player', text: 'Surveyors on the lower stairs again. Drink up before the grid does.' },
       { kind: 'dialogue', speaker: 'vex', text: "Say who's paying." },
       { kind: 'narration', text: 'Vex turns her cup a quarter turn.' },
       { kind: 'dialogue', speaker: 'vex', text: 'Not what. Who.' },
       { kind: 'dialogue', speaker: 'oria-senn', text: "Because you're discreet, and the work wants doing before dawn." },
-      { kind: 'narration', text: 'Dunmar sets three cups down before anyone asks.' },
+      { kind: 'narration', text: 'Hollis sets three cards down before anyone asks.' },
       { kind: 'narration', text: 'Vex scrambles up the wall' }
     ])
     expect(parsed.lines).toEqual([1, 1, 2, 2, 2, 3, 4, 5])
@@ -116,7 +116,7 @@ describe('checkReply', () => {
   })
 
   it('lets a planned walk-on speak', () => {
-    expect(kinds(`${GOOD}\nDunmar: "On the slate."`)).toEqual([])
+    expect(kinds(`${GOOD}\nHollis: "On the slate."`)).toEqual([])
   })
 
   it('catches speaking or acting for the player, unless the player said they did it', () => {
@@ -169,7 +169,7 @@ describe('buildWriterPrompt', () => {
 
   it('carries the reactions, the walk-on and the texture, and ends on the player’s words', () => {
     expect(prompt.user).toMatch(/# Also present, silent\n- Brask: fidgets/)
-    expect(prompt.user).toMatch(/# Walk-ons\n- Dunmar: slides a lantern-pour/)
+    expect(prompt.user).toMatch(/# Walk-ons\n- Hollis: slaps down a losing hand/)
     expect(prompt.user).toMatch(/condensation dripping/)
     expect(prompt.user.trim().endsWith('Write the beats.')).toBe(true)
   })

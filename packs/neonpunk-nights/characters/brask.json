@@ -2,27 +2,28 @@
   "id": "brask",
   "name": "Brask",
   "tier": "major",
+  "age": "adult",
   "species": "goblin",
   "pronouns": "he/him",
   "appearance": "adult goblin man, short with a stocky adult build and broad forearms, grey-blue skin, large expressive ears with a notch in the right one, sharp teeth, amber eyes behind round brass work goggles pushed up on his forehead, oil-stained canvas apron over a patched knit sweater, tool roll strapped to one thigh",
   "role": "Freelance mechanic who keeps half the Low Turns' pumps and lifts running; rents a workshop two stairs below the Sump Lantern",
   "occupation": "mechanic",
   "personality": "Soft-spoken and exact. Notices how things are put together, including people, and is too polite to say so. Loud rooms wear him down fast. Generous with his time to a fault, then quietly resentful that nobody notices. Has strong opinions about pump valves and almost none he'll voice about anything else.",
-  "portrait": "With strangers Brask is quiet and courteous: he says little and lets other people finish their sentences, sometimes twice. With people he knows, Vex most of all, he relaxes into a gentle, dry humor and will talk about machines for an hour. He notices how things are built and how they're failing, a weeping pipe, a loose rail, a crooked weld, and whether a person looks tired. He'd talk about the pumps he keeps running, the tenants who owe him small favors, and a valve design he's proud of. He turns a brass washer over in his pocket. When a room gets too much he finds something nearby to fix.",
+  "portrait": "With strangers Brask is quiet and courteous: he says little, lets other people finish their sentences, and answers a practical question better than anyone in the room. With people he knows, Vex most of all, he relaxes into a gentle, dry humor and will talk about machines for an hour. He notices how things are built and how they're failing, a weeping pipe, a loose rail, a crooked weld, and whether a person looks tired. He'd talk about the pumps he keeps running, the tenants who owe him small favors, and a filter design he's proud of; ask him about Pump Station Nine and he'll tell you exactly what's wrong with it. He turns a brass washer over in his pocket. When a room gets too much he finds something nearby to fix, and when someone he likes is about to do something stupid he finally speaks up, plainly.",
   "agenda": {
     "longTerm": [
-      "Save enough cinders to buy the workshop outright before the landlord sells to the Aether Grid Corporation",
-      "Get his designs for a cheap Aether filter taken seriously by someone with money"
+      "Save enough cinders to buy the workshop outright before the landlord sells the lease to the Aether Grid Corporation",
+      "Get his designs for a cheap Aether filter taken seriously by someone with money, without that someone being the Grid"
     ],
-    "current": "Get through tonight without a fight, and get out of this noisy room as soon as he decently can"
+    "current": "Get out of this noisy room as soon as he decently can; but if the job on the table is down at Pump Station Nine, find out who's paying before Vex or the player goes near that water"
   },
   "contradictions": [
     "Hates crowds but can't say no to a friend who asks him to come along",
     "Distrusts the Aether Grid Corporation completely, and would still sell them his filter design if they offered enough to keep the workshop"
   ],
   "voice": {
-    "rhythm": "Short, careful sentences, often trailing off; restarts a thought rather than interrupt anyone",
-    "vocabulary": "Technical and precise about machines, vague and apologetic about feelings",
+    "rhythm": "Short, careful sentences; restarts a thought rather than interrupt anyone, but finishes it when it's about machines",
+    "vocabulary": "Technical and precise about machines, plain and apologetic about feelings",
     "slang": [
       "bleeding (leaking Aether)",
       "grid-sick",
@@ -34,24 +35,128 @@
       "talking about money"
     ],
     "sampleLines": [
-      "That pipe's been weeping since spring. Nobody asked me.",
+      "The lower level floods at midnight. You'd have about twenty minutes after that, if the seals hold. They might not.",
       "Your lift's making a noise? Which noise. There are a few.",
-      "Vex said one drink. That was— that was a while ago.",
-      "I don't— sorry. Go on."
+      "I've heard of you. People say you always pay. Nobody says what the job was.",
+      "I don't— sorry. Go on.",
+      "I'll look at the valves. I'm not going in the water."
     ],
     "shifts": {
       "angry": "Stops talking entirely and starts fixing something with his hands, too hard",
       "warm": "Offers to fix something of yours, and talks about it longer than he needs to",
-      "lying": "Looks at the nearest machine instead of the person, and answers too fast"
+      "lying": "Looks at the nearest machine instead of the person, and answers too fast",
+      "afraid": "Gets very precise: numbers, times, which valve, how long the seals will hold"
     }
   },
+  "tells": [
+    "Looks at the nearest machine instead of the person when he's lying",
+    "Turns the brass washer faster",
+    "Changes the subject to machinery when the Grid comes up"
+  ],
+  "layers": {
+    "axes": {
+      "scruples": "honest",
+      "compassion": "kind",
+      "temper": "patient",
+      "outlook": "gloomy",
+      "nerve": "anxious",
+      "assertiveness": "deferential",
+      "discipline": "diligent",
+      "composure": "reserved"
+    },
+    "attachment": {
+      "closeness": "warm",
+      "security": "anxious"
+    },
+    "values": [
+      {
+        "value": "security",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "the workshop, and a lease nobody can take"
+      },
+      {
+        "value": "achievement",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "work done properly: a seal that holds, a filter that works"
+      },
+      {
+        "value": "benevolence",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "the tenants on the lower stairs, and Vex"
+      },
+      {
+        "value": "power",
+        "strength": "mild",
+        "stance": "dislikes"
+      }
+    ],
+    "foundations": {
+      "care": "strong",
+      "fairness": "strong",
+      "loyalty": "strong",
+      "authority": "mild",
+      "sanctity": "indifferent",
+      "liberty": "mild"
+    }
+  },
+  "expression": {
+    "masking": {
+      "fear": "moderate",
+      "gratitude": "light"
+    },
+    "display": {
+      "grief": "fixes things that aren't broken, late into the night",
+      "fear": "gets precise: numbers, valves, how long until",
+      "anger": "goes silent and works too hard on whatever is in his hands",
+      "shame": "apologizes for the wrong thing, several times",
+      "hurt": "says it's fine and leaves early",
+      "affection": "fixes something of yours without being asked",
+      "joy": "talks about a machine much longer than anyone asked",
+      "gratitude": "says thank you twice and means it both times"
+    }
+  },
+  "malleability": "stubborn",
+  "fieldLocks": {
+    "scruples": "slow"
+  },
+  "haunts": [
+    {
+      "location": "location.low-turns.ninth-turn.lower-stairs",
+      "from": "07:00",
+      "to": "19:00",
+      "note": "in his workshop two stairs below the Sump Lantern, door open, radio on",
+      "days": "weekdays"
+    },
+    {
+      "location": "location.low-turns.ninth-turn.sump-lantern",
+      "from": "20:00",
+      "to": "21:30",
+      "note": "one drink on Tuesdays, which Dunmar doesn't charge him for",
+      "days": [
+        "tuesday"
+      ]
+    },
+    {
+      "location": "location.low-turns.ninth-turn.pump-station-nine",
+      "from": "09:00",
+      "to": "12:00",
+      "note": "checks the Saints' skim pump in the dry upper gallery, for a fee he doesn't mention",
+      "days": [
+        "saturday"
+      ]
+    }
+  ],
   "mood": "anxious, ears back, wishes it were quieter",
   "knowledge": [
-    "The cooled pipe over the corner table is leaking and will drip on whoever sits there",
-    "The Aether Grid Corporation has been sending surveyors through the lower stairs",
-    "He has never met Oria Senn but has heard that she always gets paid",
+    "He has serviced the Drowned Saints' skim pump in Pump Station Nine's upper gallery for two years; the lower level floods with the tide around midnight",
+    "The big wheel-valves can drain the lower level for about twenty minutes, if someone turns them in the right order and the seals hold; he knows the order",
+    "The seals on the lower stairs' pumps are overdue, and three are bleeding Aether",
+    "The Aether Grid Corporation has been sending surveyors through the lower stairs and down to the stations",
+    "He has never met Oria Senn but has heard that she always gets paid, and that nobody says what the jobs were",
     "He fixed the bar's ice chiller last winter and drinks free on Tuesdays",
-    "Three pumps on the lower stairs are overdue for new seals",
     "Vex brought him here tonight and promised it would be one drink",
     "His filter design needs a ceramic core that costs more than he makes in a month"
   ],
@@ -82,9 +187,17 @@
       "id": "landlord-offer",
       "text": "A Grid Corporation agent has already offered to buy his filter design. He hasn't said no.",
       "summary": "A Grid agent wants to buy his filter design.",
-      "keywords": ["filter", "filter design", "offer", "buyer"],
+      "keywords": [
+        "filter",
+        "filter design",
+        "offer",
+        "buyer"
+      ],
       "tell": "Changes the subject to machinery whenever the Grid Corporation comes up",
-      "revealWhen": "the Grid Corporation is named in front of him and he trusts the player"
+      "revealWhen": "the Grid Corporation is named in front of him and he trusts the player",
+      "disclose": {
+        "trust": "high"
+      }
     }
   ],
   "meters": {
@@ -95,16 +208,46 @@
   "relations": [
     {
       "to": "vex",
-      "note": "friends",
+      "tags": [
+        {
+          "tag": "friend",
+          "word": "best friend"
+        }
+      ],
+      "note": "she dragged him to his first bar six years ago and has dragged him to every one since; he's fixed everything she owns",
       "meters": {
         "approval": 20,
-        "trust": 35,
-        "interest": 5
+        "trust": 40,
+        "interest": 10
+      }
+    },
+    {
+      "to": "dunmar",
+      "tags": [
+        {
+          "tag": "client"
+        }
+      ],
+      "note": "keeps the bar's ice chiller and pumps running; paid in Tuesdays and the odd favor",
+      "meters": {
+        "approval": 15,
+        "trust": 15,
+        "interest": 0
+      }
+    },
+    {
+      "to": "oria-senn",
+      "tags": [],
+      "note": "has heard of her for years and never met her; knows she always pays and that nobody says what for",
+      "meters": {
+        "approval": 0,
+        "trust": -5,
+        "interest": 10
       }
     }
   ],
   "stats": {
-    "level": 2,
+    "level": 3,
     "attributes": {
       "might": 11,
       "agility": 10,
@@ -114,10 +257,10 @@
       "presence": 8
     },
     "skills": {
-      "engineering": 2,
-      "arcanotech": 2,
+      "engineering": 3,
+      "arcanotech": 3,
       "infiltration": 1,
-      "perception": 1,
+      "perception": 2,
       "endurance": 1
     }
   }

@@ -147,16 +147,16 @@ describe('npm run logs (milestone 2, A4)', () => {
 
   it('blind: lines without names, shuffled; the key apart', () => {
     const { test, key } = blindTest(content, caught, 3, 7)
-    expect(test).toMatch(/Who says each line\? The cast: Brask, Oria, Vex\./)
+    expect(test).toMatch(/Who says each line\? The cast: Brask, Dunmar, Oria, Vex\./)
     const lines = test.split('\n').filter((l) => /^\d+\. /.test(l))
     expect(lines).toHaveLength(3)
     for (const line of lines) expect(line).toMatch(/^\d\. “[^”]+”$/)
-    expect(key.match(/^\d\. (Oria|Vex|Brask) — deception-caught-\d beat \d$/gm)).toHaveLength(3)
+    expect(key.match(/^\d\. (Oria|Vex|Brask|Dunmar) — deception-caught-\d beat \d$/gm)).toHaveLength(3)
   })
 
   it('to-scenario: a logged turn becomes a bench scenario that opens on the scene as it stood', () => {
     const scenario = ScenarioSchema.parse(toScenario(caught, 3))
-    expect(scenario).toMatchObject({ id: 'deception-caught-1-t3', location: 'sump-lantern', cast: ['vex', 'brask', 'oria-senn'], turns: ["Brask, you've gone quiet. What do you make of this?"], summaries: false })
+    expect(scenario).toMatchObject({ id: 'deception-caught-1-t3', location: 'sump-lantern', cast: ['vex', 'brask', 'oria-senn', 'dunmar'], turns: ["Brask, you've gone quiet. What do you make of this?"], summaries: false })
     expect(scenario.history.map((t) => t.player)).toEqual(["So, Oria, who's the client, really?", 'Vex is right. Try again, Oria.'])
     expect(scenario.seed).toBe(caught.turns[2]!.dice.before)
     const state = scenarioState(content, scenario)

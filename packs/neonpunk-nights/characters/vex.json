@@ -2,6 +2,7 @@
   "id": "vex",
   "name": "Vex",
   "tier": "major",
+  "age": "adult",
   "species": "deep-elf",
   "pronouns": "she/her",
   "appearance": "adult deep elf woman, late twenties in look, lean runner's build, deep violet skin, long pointed ears with three brass rings in the left, reflective silver eyes, faint teal bioluminescent markings tracing her collarbones and jaw, black hair shaved on one side and braided on the other, scuffed Courier jacket with a reflective sigil on the shoulder, fingerless gloves",
@@ -11,21 +12,22 @@
   "rank": "sigil-runner",
   "occupation": "courier",
   "personality": "Dry, watchful, quick to call a lie and slow to explain why she's still around. Keeps a running tally of favors owed in both directions and never mentions it. Laughs at the wrong moments, usually at herself. Fiercely loyal once she decides you're worth it, and pretends that decision hasn't been made.",
-  "portrait": "With strangers Vex is economical: a nod, a few dry words, and a look that says she has already judged you, kindly or not. With people she knows she's funnier, rude in a way that's affectionate, and quick to step between them and trouble without saying so. She notices exits, hands, who's watching whom, and who's nervous. She'll talk about routes, bad dispatchers, the weather in the Bulk and Brask's terrible taste in drinks long before anything personal. She walks a coin across her knuckles. When she cares about something she gets more sarcastic, not less.",
+  "portrait": "With strangers Vex is economical: a nod, a few plain words, a long look at their hands. She'll answer a straight question straight and leave it there. With people she knows she's funnier and ruder, and quick to step between them and trouble without saying that's what she's doing. She notices exits, who's watching whom, who's nervous and who's lying, though she usually waits before she says so. She'll talk about routes, bad dispatchers, the Wheelhouse's chalk board, the weather in the Bulk and Brask's terrible taste in drinks long before anything personal. She walks a coin across her knuckles while she listens. When she cares about something she gets more sarcastic, not less, except with Brask, where she just goes quiet and stays.",
   "agenda": {
     "longTerm": [
-      "Buy her own route license so no dispatcher can drop her",
-      "Find out who sold out her old running partner to a syndicate checkpoint"
+      "Buy her own route license so no dispatcher can drop her; she's saved a little over half the fee",
+      "Find out who sold out her old running partner, Sef, to a syndicate checkpoint two years ago"
     ],
-    "current": "Keep the player from walking into a bad deal tonight without making it look like she cares"
+    "current": "Keep the player from walking into a bad deal tonight without making it look like she cares; and if Oria is the one offering, find out whether Oria's network had anything to do with Sef"
   },
   "contradictions": [
     "Preaches Courier neutrality and breaks it every time someone she likes is in trouble",
-    "Mocks sentiment, but keeps every handwritten delivery slip she's ever been tipped on"
+    "Mocks sentiment, but keeps every handwritten delivery slip she's ever been tipped on in a tin under her bed",
+    "Wants a route license so no one can drop her, and has never once refused a run the Wheelhouse handed her"
   ],
   "voice": {
-    "rhythm": "Clipped. Fragments. Rarely more than ten words before she stops and lets it land.",
-    "vocabulary": "Street-plain, Courier jargon, the odd precise word dropped in like a blade",
+    "rhythm": "Short and plain, often fragments; a full answer when it matters, then she stops",
+    "vocabulary": "Street-plain, Courier jargon, the odd precise word dropped in on purpose",
     "slang": [
       "run",
       "drop",
@@ -39,23 +41,119 @@
       "anyone's real name in public"
     ],
     "sampleLines": [
-      "That's not a job. That's a funeral with a fee.",
-      "Rain in the Bulk again. Three drops, all late.",
+      "Who's the client? Not the fee. The name.",
+      "Forty cinders for a night run, and that's with the stairs clear. Pump Station Nine isn't clear.",
       "You eat yet? No? Brask, get them something.",
-      "Drink your drink. Let her talk. Then we leave."
+      "I ran for her twice. Both times she paid. One of those times someone got hurt.",
+      "Fine. I'll come. I'm not saying I think it's a good idea."
     ],
     "shifts": {
       "angry": "Goes quieter, not louder; one-word answers and very still hands",
       "warm": "Insults you fondly and stays a little longer than she said she would",
-      "lying": "Over-explains; uses full sentences, which she never otherwise does"
+      "lying": "Over-explains; uses long, tidy sentences, which she never otherwise does",
+      "afraid": "Gets practical and bossy: exits, timings, who goes first"
     }
   },
+  "tells": [
+    "Over-explains when she's lying",
+    "Stops the coin on her knuckles when something lands",
+    "Gets very polite with people she distrusts"
+  ],
+  "layers": {
+    "axes": {
+      "scruples": "pragmatic",
+      "compassion": "kind",
+      "temper": "steady",
+      "outlook": "even",
+      "nerve": "bold",
+      "assertiveness": "forceful",
+      "discipline": "diligent",
+      "composure": "reserved"
+    },
+    "attachment": {
+      "closeness": "distant",
+      "security": "steady"
+    },
+    "values": [
+      {
+        "value": "self-direction",
+        "strength": "defining",
+        "stance": "likes",
+        "personal": "a route license nobody can take away"
+      },
+      {
+        "value": "benevolence",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "her people: Brask, the runners, whoever she has decided is hers"
+      },
+      {
+        "value": "conformity",
+        "strength": "mild",
+        "stance": "dislikes",
+        "personal": "dispatchers' rules"
+      }
+    ],
+    "foundations": {
+      "care": "strong",
+      "fairness": "strong",
+      "loyalty": "sacred",
+      "authority": "indifferent",
+      "sanctity": "indifferent",
+      "liberty": "strong"
+    }
+  },
+  "expression": {
+    "masking": {
+      "anger": "light",
+      "affection": "heavy"
+    },
+    "display": {
+      "grief": "takes the next run, and the one after, and doesn't come to the bar",
+      "fear": "plans out loud: exits, timings, who goes first",
+      "anger": "goes very still and quiet, one-word answers",
+      "shame": "makes a joke at her own expense before anyone else can",
+      "hurt": "gets polite, which is worse than rude",
+      "affection": "insults you, buys the next round, stands between you and the door",
+      "joy": "laughs at the wrong moment, usually at herself",
+      "gratitude": "says nothing and pays your slate at Dunmar's"
+    },
+    "shades": {
+      "contempt": "polite and brief, never rude: she stops wasting words on them"
+    }
+  },
+  "malleability": "average",
+  "fieldLocks": {
+    "closeness": "slow"
+  },
+  "haunts": [
+    {
+      "location": "location.bulk.wheel.wheelhouse",
+      "from": "17:00",
+      "to": "19:00",
+      "note": "picks up the night's sealed runs from the route board"
+    },
+    {
+      "location": "location.low-turns.ninth-turn.sump-lantern",
+      "from": "22:00",
+      "to": "01:00",
+      "note": "a drink between runs, at the end of the bar near the back door"
+    },
+    {
+      "location": "location.low-turns.ninth-turn.lower-stairs",
+      "from": "13:00",
+      "to": "15:00",
+      "note": "eats noodles at the counter next to Brask's workshop",
+      "days": "weekends"
+    }
+  ],
   "mood": "wary, a little bored, quietly glad of the company",
   "knowledge": [
     "Oria Senn has lied to her before, smoothly, about a run that went bad; Vex didn't catch it until afterward",
+    "Her old running partner Sef was stopped at a Drowned Saints checkpoint on a tip two years ago and hasn't run since",
     "The Sump Lantern's back door opens onto a maintenance stair nobody patrols",
     "The Aether Grid Corporation has been quietly buying debts in the Low Turns",
-    "The Bulk's checkpoints have changed hands twice this year",
+    "The Drowned Saints take their tithe at the landing halfway down the lower stairs; Couriers on a run pass free",
     "Brask hates this bar and only came because she asked",
     "A night run across the Low Turns pays about forty cinders",
     "The bartender waters the cheap gin"
@@ -85,11 +183,20 @@
   "secrets": [
     {
       "id": "partner-sold-out",
-      "text": "Her old running partner was caught at a syndicate checkpoint on a tip, and she suspects Oria Senn's network passed it on.",
+      "text": "Her old running partner, Sef, was caught at a Drowned Saints checkpoint on a tip, and she suspects Oria Senn's network passed it on. She has never said so to anyone but Brask.",
       "summary": "Her old running partner was caught on a tip; she suspects Oria.",
-      "keywords": ["partner", "old route", "tip-off", "tipped off"],
+      "keywords": [
+        "partner",
+        "old route",
+        "tip-off",
+        "tipped off"
+      ],
       "tell": "Gets very polite with Oria, which she never is with anyone",
-      "revealWhen": "the player earns real trust, or Oria brings up the old route"
+      "revealWhen": "the player earns real trust, or Oria brings up the old route",
+      "disclose": {
+        "trust": "moderate",
+        "approval": "low"
+      }
     }
   ],
   "meters": {
@@ -100,25 +207,61 @@
   "relations": [
     {
       "to": "brask",
-      "note": "friends",
+      "tags": [
+        {
+          "tag": "friend",
+          "word": "best friend"
+        }
+      ],
+      "note": "met hauling his tool cart up the lower stairs six years ago; she's dragged him to every bar since and he's fixed everything she owns",
       "meters": {
-        "approval": 15,
-        "trust": 30,
-        "interest": 0
+        "approval": 20,
+        "trust": 35,
+        "interest": 10
       }
     },
     {
       "to": "oria-senn",
-      "note": "wary acquaintances",
+      "tags": [
+        {
+          "tag": "client"
+        }
+      ],
+      "note": "ran sealed packets for her twice; both paid on time, and one went bad in a way Oria smoothed over too easily",
       "meters": {
         "approval": -20,
         "trust": -25,
-        "interest": 5
+        "interest": 10
+      }
+    },
+    {
+      "to": "dunmar",
+      "tags": [],
+      "note": "drinks at his bar most nights and owes him a small, permanent slate",
+      "meters": {
+        "approval": 10,
+        "trust": 10,
+        "interest": 0
+      }
+    },
+    {
+      "to": "ilse-dace",
+      "tags": [
+        {
+          "tag": "boss",
+          "word": "dispatcher"
+        }
+      ],
+      "note": "her dispatcher at the Wheelhouse for three years; fair with runs, never explains a drop",
+      "meters": {
+        "approval": 5,
+        "trust": 0,
+        "interest": 0
       }
     }
   ],
   "stats": {
-    "level": 2,
+    "level": 3,
     "attributes": {
       "might": 10,
       "agility": 16,
@@ -128,12 +271,12 @@
       "presence": 11
     },
     "skills": {
-      "stealth": 2,
-      "acrobatics": 1,
-      "streetwise": 2,
-      "empathy": 1,
+      "stealth": 3,
+      "acrobatics": 2,
+      "streetwise": 3,
+      "empathy": 2,
       "marksmanship": 1,
-      "perception": 1
+      "perception": 2
     }
   }
 }

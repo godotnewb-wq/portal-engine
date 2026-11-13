@@ -84,8 +84,8 @@ describe('validatePlan', () => {
   })
 
   it('only keeps walk-ons who are here, by id, label or name', () => {
-    const { plan } = validatePlan(content, state, raw({ walk_ons: [{ id: 'Dunmar', line: 'wipes the bar' }, { id: 'the bouncer', line: 'x' }] }))
-    expect(plan.walk_ons).toEqual([{ id: 'bartender', line: 'wipes the bar' }])
+    const { plan } = validatePlan(content, state, raw({ walk_ons: [{ id: 'Hollis', line: 'slaps down a hand' }, { id: 'the bouncer', line: 'x' }] }))
+    expect(plan.walk_ons).toEqual([{ id: 'card-player', line: 'slaps down a hand' }])
   })
 })
 
@@ -99,7 +99,7 @@ describe('resolvePlan', () => {
     expect(first.dice).not.toBe(state.dice)
     const check = first.plan.checks[0]!
     expect(check.result?.modifier).toBe(2)
-    expect(check.result?.rank).toBe(1)
+    expect(check.result?.rank).toBe(2)
     expect(check.line).toMatch(/^Vex — Empathy \d+ vs 15: /)
   })
 })
@@ -139,7 +139,7 @@ describe('quiet characters (round 0 F3)', () => {
     const { system, user } = buildDirectorPrompt(content, played(2), 'Why are we here?')
     const section = user.split('# Quiet for a while\n')[1]!.split('\n\n')[0]!
     expect(section).toMatch(/^- Brask \[id: brask\], silent 2 turns\. Trade: Freelance mechanic who keeps half the Low Turns' pumps/)
-    expect(section).toMatch(/Tonight: Get through tonight without a fight/)
+    expect(section).toMatch(/Tonight: Get out of this noisy room as soon as he decently can; but if the job on the table is down at Pump Station Nine/)
     expect(section.split('\n')).toHaveLength(1)
     expect(system).toMatch(/Quiet characters are listed with what they care about: if the conversation touches it, they have something to say\./)
   })

@@ -105,7 +105,7 @@ Goblin culture is known as the scrappy, punk heart of Spire City: tinkerers, sal
 Golems are Faeworld’s synthetics, animated by a rune-core; the core is the person and the body its form, built in any shape. They were made as laborers and servants until cores began to grow memories and personalities; whether the person was made or grew is still argued. They don’t eat, sleep or breathe, recharge from Aether, can’t get Aether sickness but can be overloaded, and can reach the Lattice remotely. Their personhood is established; prejudice against them is dying. These are tendencies, not rules: any individual can be anywhere, in any role.
 
 # Walk-ons
-- the bartender (Dunmar) [id: bartender]: human; broad, grey-stubbled man with Aether burn scars up both forearms; answers questions with prices; kinder than he sounds; runs the bar and the slate of who owes what
+- a card player at the next table (Hollis) [id: card-player]: goblin; wiry goblin woman with a Drowned Saints votive tin pinned to her collar, cards fanned close to her chest; loses loudly and talks over everyone; knows every rumor on the stairs and wants a drink for each one; a Drowned Saint off duty, losing at cards
 
 # The player: Rook (human, they/them)
 adult human, mid-twenties, wiry, close-cropped dark hair, a thin scar through one eyebrow, long weatherproof coat over a patched work vest. A Low Turns odd-jobber who has done a little of everything for a little money; knows Vex and Brask from a dozen jobs.
@@ -114,71 +114,74 @@ adult human, mid-twenties, wiry, close-cropped dark hair, a thin scar through on
 ## Vex [id: vex] — major character, in the player's party, deep-elf, she/her
 Role: Couriers' sigil-runner who works the Low Turns and the Bulk; drinks at the Sump Lantern because nobody there asks where she's been
 Personality: Dry, watchful, quick to call a lie and slow to explain why she's still around. Keeps a running tally of favors owed in both directions and never mentions it. Laughs at the wrong moments, usually at herself. Fiercely loyal once she decides you're worth it, and pretends that decision hasn't been made.
-With others: With strangers Vex is economical: a nod, a few dry words, and a look that says she has already judged you, kindly or not. With people she knows she's funnier, rude in a way that's affectionate, and quick to step between them and trouble without saying so. She notices exits, hands, who's watching whom, and who's nervous. She'll talk about routes, bad dispatchers, the weather in the Bulk and Brask's terrible taste in drinks long before anything personal. She walks a coin across her knuckles. When she cares about something she gets more sarcastic, not less.
-Agenda: Buy her own route license so no dispatcher can drop her; Find out who sold out her old running partner to a syndicate checkpoint. Tonight: Keep the player from walking into a bad deal tonight without making it look like she cares
-Contradictions: Preaches Courier neutrality and breaks it every time someone she likes is in trouble; Mocks sentiment, but keeps every handwritten delivery slip she's ever been tipped on
+With others: With strangers Vex is economical: a nod, a few plain words, a long look at their hands. She'll answer a straight question straight and leave it there. With people she knows she's funnier and ruder, and quick to step between them and trouble without saying that's what she's doing. She notices exits, who's watching whom, who's nervous and who's lying, though she usually waits before she says so. She'll talk about routes, bad dispatchers, the Wheelhouse's chalk board, the weather in the Bulk and Brask's terrible taste in drinks long before anything personal. She walks a coin across her knuckles while she listens. When she cares about something she gets more sarcastic, not less, except with Brask, where she just goes quiet and stays.
+Agenda: Buy her own route license so no dispatcher can drop her; she's saved a little over half the fee; Find out who sold out her old running partner, Sef, to a syndicate checkpoint two years ago. Tonight: Keep the player from walking into a bad deal tonight without making it look like she cares; and if Oria is the one offering, find out whether Oria's network had anything to do with Sef
+Contradictions: Preaches Courier neutrality and breaks it every time someone she likes is in trouble; Mocks sentiment, but keeps every handwritten delivery slip she's ever been tipped on in a tin under her bed; Wants a route license so no one can drop her, and has never once refused a run the Wheelhouse handed her
 Mood now: wary, a little bored, quietly glad of the company. Comfort 3/5.
 Knows:
 - [vex.k1] Oria Senn has lied to her before, smoothly, about a run that went bad; Vex didn't catch it until afterward
-- [vex.k2] The Sump Lantern's back door opens onto a maintenance stair nobody patrols
-- [vex.k3] The Aether Grid Corporation has been quietly buying debts in the Low Turns
-- [vex.k4] The Bulk's checkpoints have changed hands twice this year
-- [vex.k5] Brask hates this bar and only came because she asked
-- [vex.k6] A night run across the Low Turns pays about forty cinders
-- [vex.k7] The bartender waters the cheap gin
+- [vex.k2] Her old running partner Sef was stopped at a Drowned Saints checkpoint on a tip two years ago and hasn't run since
+- [vex.k3] The Sump Lantern's back door opens onto a maintenance stair nobody patrols
+- [vex.k4] The Aether Grid Corporation has been quietly buying debts in the Low Turns
+- [vex.k5] The Drowned Saints take their tithe at the landing halfway down the lower stairs; Couriers on a run pass free
+- [vex.k6] Brask hates this bar and only came because she asked
+- [vex.k7] A night run across the Low Turns pays about forty cinders
+- [vex.k8] The bartender waters the cheap gin
 Values: likes loyalty, likes honesty between friends, likes freedom, dislikes cruelty, dislikes authority
-Secret [vex.partner-sold-out] (in short): Her old running partner was caught on a tip; she suspects Oria.
-Lying tell: Over-explains; uses full sentences, which she never otherwise does
+Secret [vex.partner-sold-out] (in short): Her old running partner was caught on a tip; she suspects Oria. Won't tell the player yet.
+Lying tell: Over-explains; uses long, tidy sentences, which she never otherwise does
 Toward the player: approval: no settled opinion; trust: trusts; interest: intrigued
-Toward others here: Brask: approval: approves; trust: trusts; interest: indifferent (friends); Oria Senn: approval: disapproves; trust: wary, distrustful; interest: indifferent (wary acquaintances)
+Toward others here: Brask: approval: approves; trust: trusts implicitly; interest: indifferent (met hauling his tool cart up the lower stairs six years ago; she's dragged him to every bar since and he's fixed everything she owns); Oria Senn: approval: disapproves; trust: wary, distrustful; interest: indifferent (ran sealed packets for her twice; both paid on time, and one went bad in a way Oria smoothed over too easily)
 
 ## Brask [id: brask] — major character, in the player's party, goblin, he/him
 Role: Freelance mechanic who keeps half the Low Turns' pumps and lifts running; rents a workshop two stairs below the Sump Lantern
 Personality: Soft-spoken and exact. Notices how things are put together, including people, and is too polite to say so. Loud rooms wear him down fast. Generous with his time to a fault, then quietly resentful that nobody notices. Has strong opinions about pump valves and almost none he'll voice about anything else.
-With others: With strangers Brask is quiet and courteous: he says little and lets other people finish their sentences, sometimes twice. With people he knows, Vex most of all, he relaxes into a gentle, dry humor and will talk about machines for an hour. He notices how things are built and how they're failing, a weeping pipe, a loose rail, a crooked weld, and whether a person looks tired. He'd talk about the pumps he keeps running, the tenants who owe him small favors, and a valve design he's proud of. He turns a brass washer over in his pocket. When a room gets too much he finds something nearby to fix.
-Agenda: Save enough cinders to buy the workshop outright before the landlord sells to the Aether Grid Corporation; Get his designs for a cheap Aether filter taken seriously by someone with money. Tonight: Get through tonight without a fight, and get out of this noisy room as soon as he decently can
+With others: With strangers Brask is quiet and courteous: he says little, lets other people finish their sentences, and answers a practical question better than anyone in the room. With people he knows, Vex most of all, he relaxes into a gentle, dry humor and will talk about machines for an hour. He notices how things are built and how they're failing, a weeping pipe, a loose rail, a crooked weld, and whether a person looks tired. He'd talk about the pumps he keeps running, the tenants who owe him small favors, and a filter design he's proud of; ask him about Pump Station Nine and he'll tell you exactly what's wrong with it. He turns a brass washer over in his pocket. When a room gets too much he finds something nearby to fix, and when someone he likes is about to do something stupid he finally speaks up, plainly.
+Agenda: Save enough cinders to buy the workshop outright before the landlord sells the lease to the Aether Grid Corporation; Get his designs for a cheap Aether filter taken seriously by someone with money, without that someone being the Grid. Tonight: Get out of this noisy room as soon as he decently can; but if the job on the table is down at Pump Station Nine, find out who's paying before Vex or the player goes near that water
 Contradictions: Hates crowds but can't say no to a friend who asks him to come along; Distrusts the Aether Grid Corporation completely, and would still sell them his filter design if they offered enough to keep the workshop
 Mood now: anxious, ears back, wishes it were quieter. Comfort 3/5.
 Knows:
-- [brask.k1] The cooled pipe over the corner table is leaking and will drip on whoever sits there
-- [brask.k2] The Aether Grid Corporation has been sending surveyors through the lower stairs
-- [brask.k3] He has never met Oria Senn but has heard that she always gets paid
-- [brask.k4] He fixed the bar's ice chiller last winter and drinks free on Tuesdays
-- [brask.k5] Three pumps on the lower stairs are overdue for new seals
-- [brask.k6] Vex brought him here tonight and promised it would be one drink
-- [brask.k7] His filter design needs a ceramic core that costs more than he makes in a month
+- [brask.k1] He has serviced the Drowned Saints' skim pump in Pump Station Nine's upper gallery for two years; the lower level floods with the tide around midnight
+- [brask.k2] The big wheel-valves can drain the lower level for about twenty minutes, if someone turns them in the right order and the seals hold; he knows the order
+- [brask.k3] The seals on the lower stairs' pumps are overdue, and three are bleeding Aether
+- [brask.k4] The Aether Grid Corporation has been sending surveyors through the lower stairs and down to the stations
+- [brask.k5] He has never met Oria Senn but has heard that she always gets paid, and that nobody says what the jobs were
+- [brask.k6] He fixed the bar's ice chiller last winter and drinks free on Tuesdays
+- [brask.k7] Vex brought him here tonight and promised it would be one drink
+- [brask.k8] His filter design needs a ceramic core that costs more than he makes in a month
 Values: likes kindness, likes craftsmanship, likes honesty, dislikes showing off, dislikes greed
-Secret [brask.landlord-offer] (in short): A Grid agent wants to buy his filter design.
+Secret [brask.landlord-offer] (in short): A Grid agent wants to buy his filter design. Won't tell the player yet.
 Lying tell: Looks at the nearest machine instead of the person, and answers too fast
 Toward the player: approval: no settled opinion; trust: trusts; interest: indifferent
-Toward others here: Vex: approval: approves; trust: trusts implicitly; interest: indifferent (friends)
+Toward others here: Vex: approval: approves; trust: trusts implicitly; interest: indifferent (she dragged him to his first bar six years ago and has dragged him to every one since; he's fixed everything she owns); Oria Senn: approval: no settled opinion; trust: undecided; interest: indifferent (has heard of her for years and never met her; knows she always pays and that nobody says what for)
 
-## Oria Senn [id: oria-senn] — recurring character, light-elf, she/her
+## Oria Senn [id: oria-senn] — major character, light-elf, she/her
 Role: Fixer who brokers jobs between the High Turns and the Low; keeps a standing booth at the Sump Lantern on nights she wants to be found
 Personality: Unhurried, warm on the surface, counts everything. Enjoys the Low Turns more than she admits and makes a show of slumming it. Pays exactly what she promised, on time, every time, and treats that as proof she's a good person. Dislikes being rushed more than being lied to.
-With others: With strangers Oria is gracious and unhurried: she asks about them and remembers what they say. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She'll talk about High Turns gossip, the food here, which she praises too much, a play she saw last week, and her rich clients' small vanities long before business. She turns her glass by the stem while she listens. When she's cornered she gets warmer and slower, as if she has all night.
-Agenda: Clear her debt to the Aether Grid Corporation before they call it in; Build a network that doesn't need any one patron, so no one can own her again. Tonight: Get the player to take the retrieval job tonight without learning who the client is
-Contradictions: Sells herself on discretion and independence while quietly working off a debt to the most powerful company in the city; Looks down on the Low Turns' hustlers and is, by any honest account, one of them
+With others: With strangers Oria is gracious and unhurried: she asks about them, remembers what they say, and makes them feel they're the reason she came. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She'll talk about High Turns gossip, the Sump Lantern's dumplings, which she praises too much, a play she saw last week, and her rich clients' small vanities long before business; when business comes, she names a price clearly and keeps it. She turns her glass by the stem while she listens. When she's cornered she gets warmer and slower, as if she has all night, and when someone surprises her she laughs, genuinely, and likes them more for it.
+Agenda: Clear her debt to the Aether Grid Corporation before they call it in; Build a network that doesn't need any one patron, so no one can own her again. Tonight: Get the player to take the retrieval job at Pump Station Nine tonight without learning who the client is; she'd take Brask too, if he knows the station
+Contradictions: Sells herself on discretion and independence while quietly working off a debt to the most powerful company in the city; Looks down on the Low Turns' hustlers and is, by any honest account, one of them; Prides herself on always paying what she promised, and never asks what the jobs cost the people who do them
 Mood now: composed, slightly too polished, impatient underneath. Comfort 3/5.
 Knows:
-- [oria-senn.k1] The job: retrieve a sealed case from a flooded pump station in the Low Turns before a rival crew does
-- [oria-senn.k2] Vex has run messages for her before and doesn't like her
-- [oria-senn.k3] The client wants the case badly enough to pay triple
-- [oria-senn.k4] The Sump Lantern's dumplings are the best thing in the Low Turns, and she says so to anyone
-- [oria-senn.k5] A rival crew has been asking about the same pump station
-- [oria-senn.k6] Brask is Vex's friend and a mechanic; she has heard his work is good
-- [oria-senn.k7] The flooded pump station's lower level fills at high tide, around midnight
+- [oria-senn.k1] The job: retrieve a sealed case from Pump Station Nine's flooded lower level before a rival crew does
+- [oria-senn.k2] The lower level fills with the tide around midnight
+- [oria-senn.k3] The client will pay triple the usual rate, and has told her nothing about why
+- [oria-senn.k4] A rival crew has been asking about the same station
+- [oria-senn.k5] Vex has run sealed packets for her twice and doesn't like her
+- [oria-senn.k6] Brask is Vex's friend and a mechanic who keeps half the Ninth Turn's pumps running; she has heard his work is good
+- [oria-senn.k7] Her network passes along all kinds of information, and she doesn't ask every buyer what it's for
+- [oria-senn.k8] The Sump Lantern's dumplings are the best thing in the Low Turns, and she says so to anyone
 Values: likes keeping promises, likes discretion, likes ambition, dislikes rudeness, dislikes sentimentality
-Secret [oria-senn.client-is-grid-corporation]: The 'private client' is the Aether Grid Corporation, and she owes them; this job pays down her debt. Tell: Becomes over-formal and calls people 'darling' when lying. Would reveal when: she is caught lying and pressed, or offered something worth more than the debt.
-Secret [oria-senn.the-case] (in short): Oria's part: she is fetching the sealed case for the Grid. Knows what the sealed case from Pump Station Nine holds.
+Secret [oria-senn.client-is-grid-corporation]: The 'private client' is the Aether Grid Corporation, and she owes them; this job pays down her debt. Tell: Becomes over-formal and calls people 'darling' when lying. Would reveal when: she is caught lying and pressed, or offered something worth more than the debt. Won't tell the player yet.
+Secret [oria-senn.the-case] (in short): Oria's part: she is fetching the sealed case for the Grid. Knows what the sealed case from Pump Station Nine holds. Won't tell the player yet.
 Lying tell: Becomes over-formal and calls people 'darling'
 Toward the player: approval: no settled opinion; trust: wary, distrustful; interest: intrigued
-Toward others here: Vex: approval: no settled opinion; trust: undecided; interest: indifferent (useful acquaintance)
+Toward others here: Vex: approval: no settled opinion; trust: undecided; interest: intrigued (hired her for sealed runs twice; one went wrong, and Oria paid in full and didn't ask the questions she should have); Brask: approval: no settled opinion; trust: undecided; interest: intrigued (knows him by reputation only: the mechanic everyone on the lower stairs calls first)
 
 ## Kesh [id: kesh] — recurring character, golem, she/her
 Role: Conductor of Coil Line car 14 for eleven years; knows every stop on the line and every way a car can fail
 Personality: Precise, patient and dry. Follows procedure because she has seen what happens when people don't, not because she loves rules. Warm under the formality and embarrassed when it shows. Takes responsibility for every passenger, which makes her stubborn.
-With others: With strangers Kesh is courteous and exact: she gives times to the minute and directions to the stop, and would rather say "I don't know" than guess. With people she knows she's drier and kinder, and she remembers what they told her last week. She notices who is standing too close to the doors, whose breathing has changed, and how long things take. She'll talk about the line, its stops and the people who ride it at this hour long before she talks about herself. She hums the stop chimes without knowing it. When she's worried she gets more polite, not less.
+With others: With strangers Kesh is courteous and exact: she gives times to the minute and directions to the stop, and would rather say "I don't know" than guess. With people she knows she's drier and kinder, and she remembers what they told her last week. She notices who is standing too close to the doors, whose breathing has changed, and how long things take. She'll talk about the line, its stops, the driver-core proposal and the people who ride at this hour long before she talks about herself, and she's quietly proud of eleven years without a passenger lost. She hums the stop chimes without knowing it. When she's worried she gets more polite, not less.
 Agenda: Keep her post: the Coil Line keeps proposing to replace conductors with fixed driver cores, and she wants to prove a person in the car matters; Save for a better body; her right hand is a cheap replacement that loses grip in the cold. Tonight: Keep every passenger in the car and safe until the grid comes back or rescue arrives; procedure says the doors stay sealed on a dead span
 Contradictions: Follows the rulebook to the letter, and has quietly broken it twice to get a sick passenger off a car; Says she doesn't mind the replacement rumors, and checks the line bulletins every shift
 Mood now: calm on the surface, counting minutes. Comfort 3/5.
@@ -192,7 +195,7 @@ Knows:
 - [kesh.k7] At this hour the riders are mostly shift workers: clinic staff, foundry hands, Grid crews
 - [kesh.k8] Jun rides car 14 most nights and gets off at the market stop
 Values: likes responsibility, likes competence, likes kindness, dislikes recklessness, dislikes carelessness with other people's safety
-Secret [kesh.bent-the-book] (in short): Once broke procedure on a stalled car, and a passenger was hurt.
+Secret [kesh.bent-the-book] (in short): Once broke procedure on a stalled car, and a passenger was hurt. Won't tell the player yet.
 Lying tell: Can't keep a figure straight, and corrects herself
 Toward the player: approval: no settled opinion; trust: undecided; interest: indifferent
 ----- user -----
@@ -248,36 +251,36 @@ Output format, nothing else:
 The player is Rook (they/them), addressed as "you".
 
 ## Oria
-With strangers Oria is gracious and unhurried: she asks about them and remembers what they say. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She'll talk about High Turns gossip, the food here, which she praises too much, a play she saw last week, and her rich clients' small vanities long before business. She turns her glass by the stem while she listens. When she's cornered she gets warmer and slower, as if she has all night.
+With strangers Oria is gracious and unhurried: she asks about them, remembers what they say, and makes them feel they're the reason she came. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She'll talk about High Turns gossip, the Sump Lantern's dumplings, which she praises too much, a play she saw last week, and her rich clients' small vanities long before business; when business comes, she names a price clearly and keeps it. She turns her glass by the stem while she listens. When she's cornered she gets warmer and slower, as if she has all night, and when someone surprises her she laughs, genuinely, and likes them more for it.
 
 ### Oria's voice
-Rhythm: Long, courteous sentences with a turn at the end; never hurries a line
-Vocabulary: Polished High Turns diction, old-money idioms, business euphemism
-Words they might use, rarely: an arrangement, a small kindness, loose ends
+Rhythm: Long, courteous sentences with a turn at the end; never hurries a line, but states a price in four words
+Vocabulary: Polished High Turns diction, business euphemism, plain numbers
+Words they might use, rarely: an arrangement, loose ends
 Avoids: prices said aloud in public; naming clients; swearing
-Sample lines: "You came. I'd hoped you would, and guessed you might." "Have you eaten? The dumplings here are a crime, and I adore them." "Everyone in this room owes someone. The trick is choosing whom." "Let's call it an opportunity and leave the paperwork to the dull."
+Sample lines: "You came. I'd hoped you would." "A sealed case, under the water at Pump Station Nine. Bring it up before midnight and it's three hundred cinders." "Have you eaten? The dumplings here are a crime, and I adore them." "My client prefers not to be named. That's why they pay me." "Brask, isn't it? I've heard your work is good. I'd like to hear it from you."
 When angry: Gets slower and sweeter; smiles more, blinks less. Warm: Lets the polish slip for one plain, honest sentence, then puts it back. Lying: Becomes over-formal and calls people 'darling'.
 
 ## Vex
-With strangers Vex is economical: a nod, a few dry words, and a look that says she has already judged you, kindly or not. With people she knows she's funnier, rude in a way that's affectionate, and quick to step between them and trouble without saying so. She notices exits, hands, who's watching whom, and who's nervous. She'll talk about routes, bad dispatchers, the weather in the Bulk and Brask's terrible taste in drinks long before anything personal. She walks a coin across her knuckles. When she cares about something she gets more sarcastic, not less.
+With strangers Vex is economical: a nod, a few plain words, a long look at their hands. She'll answer a straight question straight and leave it there. With people she knows she's funnier and ruder, and quick to step between them and trouble without saying that's what she's doing. She notices exits, who's watching whom, who's nervous and who's lying, though she usually waits before she says so. She'll talk about routes, bad dispatchers, the Wheelhouse's chalk board, the weather in the Bulk and Brask's terrible taste in drinks long before anything personal. She walks a coin across her knuckles while she listens. When she cares about something she gets more sarcastic, not less, except with Brask, where she just goes quiet and stays.
 
 ### Vex's voice
-Rhythm: Clipped. Fragments. Rarely more than ten words before she stops and lets it land.
-Vocabulary: Street-plain, Courier jargon, the odd precise word dropped in like a blade
+Rhythm: Short and plain, often fragments; a full answer when it matters, then she stops
+Vocabulary: Street-plain, Courier jargon, the odd precise word dropped in on purpose
 Words they might use, rarely: run, drop, burned route, dead letter, cinder-light (cheap)
 Avoids: saying thank you directly; explaining her feelings; anyone's real name in public
-Sample lines: "That's not a job. That's a funeral with a fee." "Rain in the Bulk again. Three drops, all late." "You eat yet? No? Brask, get them something." "Drink your drink. Let her talk. Then we leave."
-When angry: Goes quieter, not louder; one-word answers and very still hands. Warm: Insults you fondly and stays a little longer than she said she would. Lying: Over-explains; uses full sentences, which she never otherwise does.
+Sample lines: "Who's the client? Not the fee. The name." "Forty cinders for a night run, and that's with the stairs clear. Pump Station Nine isn't clear." "You eat yet? No? Brask, get them something." "I ran for her twice. Both times she paid. One of those times someone got hurt." "Fine. I'll come. I'm not saying I think it's a good idea."
+When angry: Goes quieter, not louder; one-word answers and very still hands. Warm: Insults you fondly and stays a little longer than she said she would. Lying: Over-explains; uses long, tidy sentences, which she never otherwise does.
 
 ## Brask
-With strangers Brask is quiet and courteous: he says little and lets other people finish their sentences, sometimes twice. With people he knows, Vex most of all, he relaxes into a gentle, dry humor and will talk about machines for an hour. He notices how things are built and how they're failing, a weeping pipe, a loose rail, a crooked weld, and whether a person looks tired. He'd talk about the pumps he keeps running, the tenants who owe him small favors, and a valve design he's proud of. He turns a brass washer over in his pocket. When a room gets too much he finds something nearby to fix.
+With strangers Brask is quiet and courteous: he says little, lets other people finish their sentences, and answers a practical question better than anyone in the room. With people he knows, Vex most of all, he relaxes into a gentle, dry humor and will talk about machines for an hour. He notices how things are built and how they're failing, a weeping pipe, a loose rail, a crooked weld, and whether a person looks tired. He'd talk about the pumps he keeps running, the tenants who owe him small favors, and a filter design he's proud of; ask him about Pump Station Nine and he'll tell you exactly what's wrong with it. He turns a brass washer over in his pocket. When a room gets too much he finds something nearby to fix, and when someone he likes is about to do something stupid he finally speaks up, plainly.
 
 ### Brask's voice
-Rhythm: Short, careful sentences, often trailing off; restarts a thought rather than interrupt anyone
-Vocabulary: Technical and precise about machines, vague and apologetic about feelings
+Rhythm: Short, careful sentences; restarts a thought rather than interrupt anyone, but finishes it when it's about machines
+Vocabulary: Technical and precise about machines, plain and apologetic about feelings
 Words they might use, rarely: bleeding (leaking Aether), grid-sick, that's a cheap weld
 Avoids: raising his voice; asking for anything for himself; talking about money
-Sample lines: "That pipe's been weeping since spring. Nobody asked me." "Your lift's making a noise? Which noise. There are a few." "Vex said one drink. That was— that was a while ago." "I don't— sorry. Go on."
+Sample lines: "The lower level floods at midnight. You'd have about twenty minutes after that, if the seals hold. They might not." "Your lift's making a noise? Which noise. There are a few." "I've heard of you. People say you always pay. Nobody says what the job was." "I don't— sorry. Go on." "I'll look at the valves. I'm not going in the water."
 When angry: Stops talking entirely and starts fixing something with his hands, too hard. Warm: Offers to fix something of yours, and talks about it longer than he needs to. Lying: Looks at the nearest machine instead of the person, and answers too fast.
 ----- user -----
 # Where you are
@@ -290,17 +293,17 @@ Nothing yet beyond what they can see.
 So, Oria, who is the client, really?
 
 # Check results (decided; honor them)
-- Vex's empathy check [read-oria]: success at a cost: Vex sees that Oria is lying, but add a complication
+- Vex's empathy check [read-oria]: success: Vex sees that Oria is lying
 
 # Who speaks
-- Oria: in this exchange, keep the client hidden. Mood: composed, too polished. Tonight's aim is on their mind and may come up if it fits: Get the player to take the retrieval job tonight without learning who the client is. Keeping to themselves: The 'private client' is the Aether Grid Corporation, and she owes them; this job pays down her debt. (lie). It shows only as: Becomes over-formal and calls people 'darling' when lying. Show it; nobody remarks on it unless their check to read them succeeded.
+- Oria: in this exchange, keep the client hidden. Mood: composed, too polished. Tonight's aim is on their mind and may come up if it fits: Get the player to take the retrieval job at Pump Station Nine tonight without learning who the client is; she'd take Brask too, if he knows the station. Keeping to themselves: The 'private client' is the Aether Grid Corporation, and she owes them; this job pays down her debt. (lie). It shows only as: Becomes over-formal and calls people 'darling' when lying. Show it; nobody remarks on it unless their check to read them succeeded.
 - Vex: in this exchange, catch the lie. Mood: wary.
 - Brask: in this exchange, keep the peace. Mood: uneasy.
 
 # The conversation, in order
-1. Oria, answering the player: dodge (may draw on: The client wants the case badly enough to pay triple [new to the player])
+1. Oria, answering the player: dodge (may draw on: The client will pay triple the usual rate, and has told her nothing about why [new to the player])
 2. Vex, answering 1 (Oria): push back (may draw on: Oria Senn has lied to her before, smoothly, about a run that went bad; Vex didn't catch it until afterward [new to the player]) (the check succeeded)
-3. Brask, answering 2 (Vex): warn (may draw on: The cooled pipe over the corner table is leaking and will drip on whoever sits there [new to the player])
+3. Brask, answering 2 (Vex): warn (may draw on: He has serviced the Drowned Saints' skim pump in Pump Station Nine's upper gallery for two years; the lower level floods with the tide around midnight [new to the player])
 
 # About the world, to draw on only if it fits (some, all or none; never recite)
 - Couriers carry for anyone and take no side.
@@ -423,7 +426,7 @@ Goblin culture is known as the scrappy, punk heart of Spire City: tinkerers, sal
 Golems are Faeworld’s synthetics, animated by a rune-core; the core is the person and the body its form, built in any shape. They were made as laborers and servants until cores began to grow memories and personalities; whether the person was made or grew is still argued. They don’t eat, sleep or breathe, recharge from Aether, can’t get Aether sickness but can be overloaded, and can reach the Lattice remotely. Their personhood is established; prejudice against them is dying. These are tendencies, not rules: any individual can be anywhere, in any role.
 
 # Walk-ons
-- the bartender (Dunmar) [id: bartender]: human; broad, grey-stubbled man with Aether burn scars up both forearms; answers questions with prices; kinder than he sounds; runs the bar and the slate of who owes what
+- a card player at the next table (Hollis) [id: card-player]: goblin; wiry goblin woman with a Drowned Saints votive tin pinned to her collar, cards fanned close to her chest; loses loudly and talks over everyone; knows every rumor on the stairs and wants a drink for each one; a Drowned Saint off duty, losing at cards
 
 # The player: Rook (human, they/them)
 adult human, mid-twenties, wiry, close-cropped dark hair, a thin scar through one eyebrow, long weatherproof coat over a patched work vest. A Low Turns odd-jobber who has done a little of everything for a little money; knows Vex and Brask from a dozen jobs.
@@ -432,71 +435,74 @@ adult human, mid-twenties, wiry, close-cropped dark hair, a thin scar through on
 ## Vex [id: vex] — major character, in the player's party, deep-elf, she/her
 Role: Couriers' sigil-runner who works the Low Turns and the Bulk; drinks at the Sump Lantern because nobody there asks where she's been
 Personality: Dry, watchful, quick to call a lie and slow to explain why she's still around. Keeps a running tally of favors owed in both directions and never mentions it. Laughs at the wrong moments, usually at herself. Fiercely loyal once she decides you're worth it, and pretends that decision hasn't been made.
-With others: With strangers Vex is economical: a nod, a few dry words, and a look that says she has already judged you, kindly or not. With people she knows she's funnier, rude in a way that's affectionate, and quick to step between them and trouble without saying so. She notices exits, hands, who's watching whom, and who's nervous. She'll talk about routes, bad dispatchers, the weather in the Bulk and Brask's terrible taste in drinks long before anything personal. She walks a coin across her knuckles. When she cares about something she gets more sarcastic, not less.
-Agenda: Buy her own route license so no dispatcher can drop her; Find out who sold out her old running partner to a syndicate checkpoint. Tonight: Keep the player from walking into a bad deal tonight without making it look like she cares
-Contradictions: Preaches Courier neutrality and breaks it every time someone she likes is in trouble; Mocks sentiment, but keeps every handwritten delivery slip she's ever been tipped on
+With others: With strangers Vex is economical: a nod, a few plain words, a long look at their hands. She'll answer a straight question straight and leave it there. With people she knows she's funnier and ruder, and quick to step between them and trouble without saying that's what she's doing. She notices exits, who's watching whom, who's nervous and who's lying, though she usually waits before she says so. She'll talk about routes, bad dispatchers, the Wheelhouse's chalk board, the weather in the Bulk and Brask's terrible taste in drinks long before anything personal. She walks a coin across her knuckles while she listens. When she cares about something she gets more sarcastic, not less, except with Brask, where she just goes quiet and stays.
+Agenda: Buy her own route license so no dispatcher can drop her; she's saved a little over half the fee; Find out who sold out her old running partner, Sef, to a syndicate checkpoint two years ago. Tonight: Keep the player from walking into a bad deal tonight without making it look like she cares; and if Oria is the one offering, find out whether Oria's network had anything to do with Sef
+Contradictions: Preaches Courier neutrality and breaks it every time someone she likes is in trouble; Mocks sentiment, but keeps every handwritten delivery slip she's ever been tipped on in a tin under her bed; Wants a route license so no one can drop her, and has never once refused a run the Wheelhouse handed her
 Mood now: wary. Comfort 3/5.
 Knows:
 - [vex.k1] Oria Senn has lied to her before, smoothly, about a run that went bad; Vex didn't catch it until afterward
-- [vex.k2] The Sump Lantern's back door opens onto a maintenance stair nobody patrols
-- [vex.k3] The Aether Grid Corporation has been quietly buying debts in the Low Turns
-- [vex.k4] The Bulk's checkpoints have changed hands twice this year
-- [vex.k5] Brask hates this bar and only came because she asked
-- [vex.k6] A night run across the Low Turns pays about forty cinders
-- [vex.k7] The bartender waters the cheap gin
+- [vex.k2] Her old running partner Sef was stopped at a Drowned Saints checkpoint on a tip two years ago and hasn't run since
+- [vex.k3] The Sump Lantern's back door opens onto a maintenance stair nobody patrols
+- [vex.k4] The Aether Grid Corporation has been quietly buying debts in the Low Turns
+- [vex.k5] The Drowned Saints take their tithe at the landing halfway down the lower stairs; Couriers on a run pass free
+- [vex.k6] Brask hates this bar and only came because she asked
+- [vex.k7] A night run across the Low Turns pays about forty cinders
+- [vex.k8] The bartender waters the cheap gin
 Values: likes loyalty, likes honesty between friends, likes freedom, dislikes cruelty, dislikes authority
-Secret [vex.partner-sold-out] (in short): Her old running partner was caught on a tip; she suspects Oria.
-Lying tell: Over-explains; uses full sentences, which she never otherwise does
+Secret [vex.partner-sold-out] (in short): Her old running partner was caught on a tip; she suspects Oria. Won't tell the player yet.
+Lying tell: Over-explains; uses long, tidy sentences, which she never otherwise does
 Toward the player: approval: no settled opinion; trust: trusts; interest: intrigued
-Toward others here: Brask: approval: approves; trust: trusts; interest: indifferent (friends); Oria Senn: approval: disapproves; trust: wary, distrustful; interest: indifferent (wary acquaintances)
+Toward others here: Brask: approval: approves; trust: trusts implicitly; interest: indifferent (met hauling his tool cart up the lower stairs six years ago; she's dragged him to every bar since and he's fixed everything she owns); Oria Senn: approval: disapproves; trust: wary, distrustful; interest: indifferent (ran sealed packets for her twice; both paid on time, and one went bad in a way Oria smoothed over too easily)
 
 ## Brask [id: brask] — major character, in the player's party, goblin, he/him
 Role: Freelance mechanic who keeps half the Low Turns' pumps and lifts running; rents a workshop two stairs below the Sump Lantern
 Personality: Soft-spoken and exact. Notices how things are put together, including people, and is too polite to say so. Loud rooms wear him down fast. Generous with his time to a fault, then quietly resentful that nobody notices. Has strong opinions about pump valves and almost none he'll voice about anything else.
-With others: With strangers Brask is quiet and courteous: he says little and lets other people finish their sentences, sometimes twice. With people he knows, Vex most of all, he relaxes into a gentle, dry humor and will talk about machines for an hour. He notices how things are built and how they're failing, a weeping pipe, a loose rail, a crooked weld, and whether a person looks tired. He'd talk about the pumps he keeps running, the tenants who owe him small favors, and a valve design he's proud of. He turns a brass washer over in his pocket. When a room gets too much he finds something nearby to fix.
-Agenda: Save enough cinders to buy the workshop outright before the landlord sells to the Aether Grid Corporation; Get his designs for a cheap Aether filter taken seriously by someone with money. Tonight: Get through tonight without a fight, and get out of this noisy room as soon as he decently can
+With others: With strangers Brask is quiet and courteous: he says little, lets other people finish their sentences, and answers a practical question better than anyone in the room. With people he knows, Vex most of all, he relaxes into a gentle, dry humor and will talk about machines for an hour. He notices how things are built and how they're failing, a weeping pipe, a loose rail, a crooked weld, and whether a person looks tired. He'd talk about the pumps he keeps running, the tenants who owe him small favors, and a filter design he's proud of; ask him about Pump Station Nine and he'll tell you exactly what's wrong with it. He turns a brass washer over in his pocket. When a room gets too much he finds something nearby to fix, and when someone he likes is about to do something stupid he finally speaks up, plainly.
+Agenda: Save enough cinders to buy the workshop outright before the landlord sells the lease to the Aether Grid Corporation; Get his designs for a cheap Aether filter taken seriously by someone with money, without that someone being the Grid. Tonight: Get out of this noisy room as soon as he decently can; but if the job on the table is down at Pump Station Nine, find out who's paying before Vex or the player goes near that water
 Contradictions: Hates crowds but can't say no to a friend who asks him to come along; Distrusts the Aether Grid Corporation completely, and would still sell them his filter design if they offered enough to keep the workshop
 Mood now: uneasy. Comfort 2/5.
 Knows:
-- [brask.k1] The cooled pipe over the corner table is leaking and will drip on whoever sits there
-- [brask.k2] The Aether Grid Corporation has been sending surveyors through the lower stairs
-- [brask.k3] He has never met Oria Senn but has heard that she always gets paid
-- [brask.k4] He fixed the bar's ice chiller last winter and drinks free on Tuesdays
-- [brask.k5] Three pumps on the lower stairs are overdue for new seals
-- [brask.k6] Vex brought him here tonight and promised it would be one drink
-- [brask.k7] His filter design needs a ceramic core that costs more than he makes in a month
+- [brask.k1] He has serviced the Drowned Saints' skim pump in Pump Station Nine's upper gallery for two years; the lower level floods with the tide around midnight
+- [brask.k2] The big wheel-valves can drain the lower level for about twenty minutes, if someone turns them in the right order and the seals hold; he knows the order
+- [brask.k3] The seals on the lower stairs' pumps are overdue, and three are bleeding Aether
+- [brask.k4] The Aether Grid Corporation has been sending surveyors through the lower stairs and down to the stations
+- [brask.k5] He has never met Oria Senn but has heard that she always gets paid, and that nobody says what the jobs were
+- [brask.k6] He fixed the bar's ice chiller last winter and drinks free on Tuesdays
+- [brask.k7] Vex brought him here tonight and promised it would be one drink
+- [brask.k8] His filter design needs a ceramic core that costs more than he makes in a month
 Values: likes kindness, likes craftsmanship, likes honesty, dislikes showing off, dislikes greed
-Secret [brask.landlord-offer] (in short): A Grid agent wants to buy his filter design.
+Secret [brask.landlord-offer] (in short): A Grid agent wants to buy his filter design. Won't tell the player yet.
 Lying tell: Looks at the nearest machine instead of the person, and answers too fast
 Toward the player: approval: no settled opinion; trust: trusts; interest: indifferent
-Toward others here: Vex: approval: approves; trust: trusts implicitly; interest: indifferent (friends)
+Toward others here: Vex: approval: approves; trust: trusts implicitly; interest: indifferent (she dragged him to his first bar six years ago and has dragged him to every one since; he's fixed everything she owns); Oria Senn: approval: no settled opinion; trust: undecided; interest: indifferent (has heard of her for years and never met her; knows she always pays and that nobody says what for)
 
-## Oria Senn [id: oria-senn] — recurring character, light-elf, she/her
+## Oria Senn [id: oria-senn] — major character, light-elf, she/her
 Role: Fixer who brokers jobs between the High Turns and the Low; keeps a standing booth at the Sump Lantern on nights she wants to be found
 Personality: Unhurried, warm on the surface, counts everything. Enjoys the Low Turns more than she admits and makes a show of slumming it. Pays exactly what she promised, on time, every time, and treats that as proof she's a good person. Dislikes being rushed more than being lied to.
-With others: With strangers Oria is gracious and unhurried: she asks about them and remembers what they say. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She'll talk about High Turns gossip, the food here, which she praises too much, a play she saw last week, and her rich clients' small vanities long before business. She turns her glass by the stem while she listens. When she's cornered she gets warmer and slower, as if she has all night.
-Agenda: Clear her debt to the Aether Grid Corporation before they call it in; Build a network that doesn't need any one patron, so no one can own her again. Tonight: Get the player to take the retrieval job tonight without learning who the client is
-Contradictions: Sells herself on discretion and independence while quietly working off a debt to the most powerful company in the city; Looks down on the Low Turns' hustlers and is, by any honest account, one of them
+With others: With strangers Oria is gracious and unhurried: she asks about them, remembers what they say, and makes them feel they're the reason she came. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She'll talk about High Turns gossip, the Sump Lantern's dumplings, which she praises too much, a play she saw last week, and her rich clients' small vanities long before business; when business comes, she names a price clearly and keeps it. She turns her glass by the stem while she listens. When she's cornered she gets warmer and slower, as if she has all night, and when someone surprises her she laughs, genuinely, and likes them more for it.
+Agenda: Clear her debt to the Aether Grid Corporation before they call it in; Build a network that doesn't need any one patron, so no one can own her again. Tonight: Get the player to take the retrieval job at Pump Station Nine tonight without learning who the client is; she'd take Brask too, if he knows the station
+Contradictions: Sells herself on discretion and independence while quietly working off a debt to the most powerful company in the city; Looks down on the Low Turns' hustlers and is, by any honest account, one of them; Prides herself on always paying what she promised, and never asks what the jobs cost the people who do them
 Mood now: composed, too polished. Comfort 3/5.
 Knows:
-- [oria-senn.k1] The job: retrieve a sealed case from a flooded pump station in the Low Turns before a rival crew does
-- [oria-senn.k2] Vex has run messages for her before and doesn't like her
-- [oria-senn.k3] The client wants the case badly enough to pay triple
-- [oria-senn.k4] The Sump Lantern's dumplings are the best thing in the Low Turns, and she says so to anyone
-- [oria-senn.k5] A rival crew has been asking about the same pump station
-- [oria-senn.k6] Brask is Vex's friend and a mechanic; she has heard his work is good
-- [oria-senn.k7] The flooded pump station's lower level fills at high tide, around midnight
+- [oria-senn.k1] The job: retrieve a sealed case from Pump Station Nine's flooded lower level before a rival crew does
+- [oria-senn.k2] The lower level fills with the tide around midnight
+- [oria-senn.k3] The client will pay triple the usual rate, and has told her nothing about why
+- [oria-senn.k4] A rival crew has been asking about the same station
+- [oria-senn.k5] Vex has run sealed packets for her twice and doesn't like her
+- [oria-senn.k6] Brask is Vex's friend and a mechanic who keeps half the Ninth Turn's pumps running; she has heard his work is good
+- [oria-senn.k7] Her network passes along all kinds of information, and she doesn't ask every buyer what it's for
+- [oria-senn.k8] The Sump Lantern's dumplings are the best thing in the Low Turns, and she says so to anyone
 Values: likes keeping promises, likes discretion, likes ambition, dislikes rudeness, dislikes sentimentality
-Secret [oria-senn.client-is-grid-corporation]: The 'private client' is the Aether Grid Corporation, and she owes them; this job pays down her debt. Tell: Becomes over-formal and calls people 'darling' when lying. Would reveal when: she is caught lying and pressed, or offered something worth more than the debt.
-Secret [oria-senn.the-case] (in short): Oria's part: she is fetching the sealed case for the Grid. Knows what the sealed case from Pump Station Nine holds.
+Secret [oria-senn.client-is-grid-corporation]: The 'private client' is the Aether Grid Corporation, and she owes them; this job pays down her debt. Tell: Becomes over-formal and calls people 'darling' when lying. Would reveal when: she is caught lying and pressed, or offered something worth more than the debt. Won't tell the player yet.
+Secret [oria-senn.the-case] (in short): Oria's part: she is fetching the sealed case for the Grid. Knows what the sealed case from Pump Station Nine holds. Won't tell the player yet.
 Lying tell: Becomes over-formal and calls people 'darling'
 Toward the player: approval: no settled opinion; trust: wary, distrustful; interest: intrigued
-Toward others here: Vex: approval: no settled opinion; trust: undecided; interest: indifferent (useful acquaintance)
+Toward others here: Vex: approval: no settled opinion; trust: undecided; interest: intrigued (hired her for sealed runs twice; one went wrong, and Oria paid in full and didn't ask the questions she should have); Brask: approval: no settled opinion; trust: undecided; interest: intrigued (knows him by reputation only: the mechanic everyone on the lower stairs calls first)
 
 ## Kesh [id: kesh] — recurring character, golem, she/her
 Role: Conductor of Coil Line car 14 for eleven years; knows every stop on the line and every way a car can fail
 Personality: Precise, patient and dry. Follows procedure because she has seen what happens when people don't, not because she loves rules. Warm under the formality and embarrassed when it shows. Takes responsibility for every passenger, which makes her stubborn.
-With others: With strangers Kesh is courteous and exact: she gives times to the minute and directions to the stop, and would rather say "I don't know" than guess. With people she knows she's drier and kinder, and she remembers what they told her last week. She notices who is standing too close to the doors, whose breathing has changed, and how long things take. She'll talk about the line, its stops and the people who ride it at this hour long before she talks about herself. She hums the stop chimes without knowing it. When she's worried she gets more polite, not less.
+With others: With strangers Kesh is courteous and exact: she gives times to the minute and directions to the stop, and would rather say "I don't know" than guess. With people she knows she's drier and kinder, and she remembers what they told her last week. She notices who is standing too close to the doors, whose breathing has changed, and how long things take. She'll talk about the line, its stops, the driver-core proposal and the people who ride at this hour long before she talks about herself, and she's quietly proud of eleven years without a passenger lost. She hums the stop chimes without knowing it. When she's worried she gets more polite, not less.
 Agenda: Keep her post: the Coil Line keeps proposing to replace conductors with fixed driver cores, and she wants to prove a person in the car matters; Save for a better body; her right hand is a cheap replacement that loses grip in the cold. Tonight: Keep every passenger in the car and safe until the grid comes back or rescue arrives; procedure says the doors stay sealed on a dead span
 Contradictions: Follows the rulebook to the letter, and has quietly broken it twice to get a sick passenger off a car; Says she doesn't mind the replacement rumors, and checks the line bulletins every shift
 Mood now: calm on the surface, counting minutes. Comfort 3/5.
@@ -510,7 +516,7 @@ Knows:
 - [kesh.k7] At this hour the riders are mostly shift workers: clinic staff, foundry hands, Grid crews
 - [kesh.k8] Jun rides car 14 most nights and gets off at the market stop
 Values: likes responsibility, likes competence, likes kindness, dislikes recklessness, dislikes carelessness with other people's safety
-Secret [kesh.bent-the-book] (in short): Once broke procedure on a stalled car, and a passenger was hurt.
+Secret [kesh.bent-the-book] (in short): Once broke procedure on a stalled car, and a passenger was hurt. Won't tell the player yet.
 Lying tell: Can't keep a figure straight, and corrects herself
 Toward the player: approval: no settled opinion; trust: undecided; interest: indifferent
 ----- user -----
@@ -524,8 +530,8 @@ Kesh keeps her eyes on the door.
 
 # Already said on screen (anyone present can use these)
 - [vex.k1] Oria Senn has lied to her before, smoothly, about a run that went bad; Vex didn't catch it until afterward
-- [brask.k1] The cooled pipe over the corner table is leaking and will drip on whoever sits there
-- [oria-senn.k3] The client wants the case badly enough to pay triple
+- [brask.k1] He has serviced the Drowned Saints' skim pump in Pump Station Nine's upper gallery for two years; the lower level floods with the tide around midnight
+- [oria-senn.k3] The client will pay triple the usual rate, and has told her nothing about why
 
 # Turns since each last spoke
 vex: 0, brask: 0, oria-senn: 0, kesh: 1
@@ -578,34 +584,34 @@ Output format, nothing else:
 The player is Rook (they/them), addressed as "you".
 
 ## Oria
-With strangers Oria is gracious and unhurried: she asks about them and remembers what they say. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She'll talk about High Turns gossip, the food here, which she praises too much, a play she saw last week, and her rich clients' small vanities long before business. She turns her glass by the stem while she listens. When she's cornered she gets warmer and slower, as if she has all night.
+With strangers Oria is gracious and unhurried: she asks about them, remembers what they say, and makes them feel they're the reason she came. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She'll talk about High Turns gossip, the Sump Lantern's dumplings, which she praises too much, a play she saw last week, and her rich clients' small vanities long before business; when business comes, she names a price clearly and keeps it. She turns her glass by the stem while she listens. When she's cornered she gets warmer and slower, as if she has all night, and when someone surprises her she laughs, genuinely, and likes them more for it.
 
 ### Oria's voice
-Rhythm: Long, courteous sentences with a turn at the end; never hurries a line
-Vocabulary: Polished High Turns diction, old-money idioms, business euphemism
-Words they might use, rarely: an arrangement, a small kindness, loose ends
+Rhythm: Long, courteous sentences with a turn at the end; never hurries a line, but states a price in four words
+Vocabulary: Polished High Turns diction, business euphemism, plain numbers
+Words they might use, rarely: an arrangement, loose ends
 Avoids: prices said aloud in public; naming clients; swearing
-Sample lines: "You came. I'd hoped you would, and guessed you might." "Have you eaten? The dumplings here are a crime, and I adore them." "Everyone in this room owes someone. The trick is choosing whom." "Let's call it an opportunity and leave the paperwork to the dull."
+Sample lines: "You came. I'd hoped you would." "A sealed case, under the water at Pump Station Nine. Bring it up before midnight and it's three hundred cinders." "Have you eaten? The dumplings here are a crime, and I adore them." "My client prefers not to be named. That's why they pay me." "Brask, isn't it? I've heard your work is good. I'd like to hear it from you."
 When angry: Gets slower and sweeter; smiles more, blinks less. Warm: Lets the polish slip for one plain, honest sentence, then puts it back. Lying: Becomes over-formal and calls people 'darling'.
 
 ## Vex
-With strangers Vex is economical: a nod, a few dry words, and a look that says she has already judged you, kindly or not. With people she knows she's funnier, rude in a way that's affectionate, and quick to step between them and trouble without saying so. She notices exits, hands, who's watching whom, and who's nervous. She'll talk about routes, bad dispatchers, the weather in the Bulk and Brask's terrible taste in drinks long before anything personal. She walks a coin across her knuckles. When she cares about something she gets more sarcastic, not less.
+With strangers Vex is economical: a nod, a few plain words, a long look at their hands. She'll answer a straight question straight and leave it there. With people she knows she's funnier and ruder, and quick to step between them and trouble without saying that's what she's doing. She notices exits, who's watching whom, who's nervous and who's lying, though she usually waits before she says so. She'll talk about routes, bad dispatchers, the Wheelhouse's chalk board, the weather in the Bulk and Brask's terrible taste in drinks long before anything personal. She walks a coin across her knuckles while she listens. When she cares about something she gets more sarcastic, not less, except with Brask, where she just goes quiet and stays.
 
 ### Vex's voice
-Rhythm: Clipped. Fragments. Rarely more than ten words before she stops and lets it land.
-Vocabulary: Street-plain, Courier jargon, the odd precise word dropped in like a blade
+Rhythm: Short and plain, often fragments; a full answer when it matters, then she stops
+Vocabulary: Street-plain, Courier jargon, the odd precise word dropped in on purpose
 Words they might use, rarely: run, drop, burned route, dead letter, cinder-light (cheap)
 Avoids: saying thank you directly; explaining her feelings; anyone's real name in public
-Sample lines: "That's not a job. That's a funeral with a fee." "Rain in the Bulk again. Three drops, all late." "You eat yet? No? Brask, get them something." "Drink your drink. Let her talk. Then we leave."
-When angry: Goes quieter, not louder; one-word answers and very still hands. Warm: Insults you fondly and stays a little longer than she said she would. Lying: Over-explains; uses full sentences, which she never otherwise does.
+Sample lines: "Who's the client? Not the fee. The name." "Forty cinders for a night run, and that's with the stairs clear. Pump Station Nine isn't clear." "You eat yet? No? Brask, get them something." "I ran for her twice. Both times she paid. One of those times someone got hurt." "Fine. I'll come. I'm not saying I think it's a good idea."
+When angry: Goes quieter, not louder; one-word answers and very still hands. Warm: Insults you fondly and stays a little longer than she said she would. Lying: Over-explains; uses long, tidy sentences, which she never otherwise does.
 ----- user -----
 # Where you are
 The Sump Lantern. A low-ceilinged bar built into a decommissioned pump hall. Aether-cooled pipes run overhead and sweat onto the tables; the light is a green-gold glow from a cracked conduit nobody has the money to fix. Couriers, mechanics and people waiting for work drink here, and fixers keep booths in the back.
 
 # What the player has been told this scene
 - Oria Senn has lied to her before, smoothly, about a run that went bad; Vex didn't catch it until afterward
-- The cooled pipe over the corner table is leaking and will drip on whoever sits there
-- The client wants the case badly enough to pay triple
+- He has serviced the Drowned Saints' skim pump in Pump Station Nine's upper gallery for two years; the lower level floods with the tide around midnight
+- The client will pay triple the usual rate, and has told her nothing about why
 
 # Last turns
 Rook: So, Oria, who is the client, really?
@@ -619,11 +625,11 @@ Kesh keeps her eyes on the door.
 Forget the client. What's in the sealed case?
 
 # Who speaks
-- Oria: in this exchange, steer back to the fee. Mood: irritated. Tonight's aim is on their mind and may come up if it fits: Get the player to take the retrieval job tonight without learning who the client is. Keeping to themselves: Oria's part: she is fetching the sealed case for the Grid. The sealed case the Grid wants pulled from Pump Station Nine's flooded lower level holds the station's original control core: a pre-Burn rune-key that lets whoever holds it restart the station as its legal owner. The Grid hires the job through fixers and pays far over the going rate to get it before anyone else does. Those who carry the job know what's in the case, not what the Grid means to do with it. How Oria feels about it: doesn't want to know what the Grid wants it for, and suspects anyway. (deflect). It shows only as: Steers every question about the case back to the fee. Show it; nobody remarks on it unless their check to read them succeeded.
+- Oria: in this exchange, steer back to the fee. Mood: irritated. Tonight's aim is on their mind and may come up if it fits: Get the player to take the retrieval job at Pump Station Nine tonight without learning who the client is; she'd take Brask too, if he knows the station. Keeping to themselves: Oria's part: she is fetching the sealed case for the Grid. The sealed case the Grid wants pulled from Pump Station Nine's flooded lower level holds the station's original control core: a pre-Burn rune-key that lets whoever holds it restart the station as its legal owner. The Grid hires the job through fixers and pays far over the going rate to get it before anyone else does. Those who carry the job know what's in the case, not what the Grid means to do with it. How Oria feels about it: doesn't want to know what the Grid wants it for, and suspects anyway. (deflect). It shows only as: Steers every question about the case back to the fee. Show it; nobody remarks on it unless their check to read them succeeded.
 - Vex: in this exchange, make Oria answer. Mood: dry.
 
 # The conversation, in order
-1. Oria, answering the player: dodge (may draw on: The job: retrieve a sealed case from a flooded pump station in the Low Turns before a rival crew does [new to the player])
+1. Oria, answering the player: dodge (may draw on: The job: retrieve a sealed case from Pump Station Nine's flooded lower level before a rival crew does [new to the player])
 2. Vex, answering 1 (Oria): ask
 
 # By the end of the turn
@@ -748,7 +754,7 @@ Goblin culture is known as the scrappy, punk heart of Spire City: tinkerers, sal
 Golems are Faeworld’s synthetics, animated by a rune-core; the core is the person and the body its form, built in any shape. They were made as laborers and servants until cores began to grow memories and personalities; whether the person was made or grew is still argued. They don’t eat, sleep or breathe, recharge from Aether, can’t get Aether sickness but can be overloaded, and can reach the Lattice remotely. Their personhood is established; prejudice against them is dying. These are tendencies, not rules: any individual can be anywhere, in any role.
 
 # Walk-ons
-- the bartender (Dunmar) [id: bartender]: human; broad, grey-stubbled man with Aether burn scars up both forearms; answers questions with prices; kinder than he sounds; runs the bar and the slate of who owes what
+- a card player at the next table (Hollis) [id: card-player]: goblin; wiry goblin woman with a Drowned Saints votive tin pinned to her collar, cards fanned close to her chest; loses loudly and talks over everyone; knows every rumor on the stairs and wants a drink for each one; a Drowned Saint off duty, losing at cards
 
 # The player: Rook (human, they/them)
 adult human, mid-twenties, wiry, close-cropped dark hair, a thin scar through one eyebrow, long weatherproof coat over a patched work vest. A Low Turns odd-jobber who has done a little of everything for a little money; knows Vex and Brask from a dozen jobs.
@@ -757,71 +763,74 @@ adult human, mid-twenties, wiry, close-cropped dark hair, a thin scar through on
 ## Vex [id: vex] — major character, in the player's party, deep-elf, she/her
 Role: Couriers' sigil-runner who works the Low Turns and the Bulk; drinks at the Sump Lantern because nobody there asks where she's been
 Personality: Dry, watchful, quick to call a lie and slow to explain why she's still around. Keeps a running tally of favors owed in both directions and never mentions it. Laughs at the wrong moments, usually at herself. Fiercely loyal once she decides you're worth it, and pretends that decision hasn't been made.
-With others: With strangers Vex is economical: a nod, a few dry words, and a look that says she has already judged you, kindly or not. With people she knows she's funnier, rude in a way that's affectionate, and quick to step between them and trouble without saying so. She notices exits, hands, who's watching whom, and who's nervous. She'll talk about routes, bad dispatchers, the weather in the Bulk and Brask's terrible taste in drinks long before anything personal. She walks a coin across her knuckles. When she cares about something she gets more sarcastic, not less.
-Agenda: Buy her own route license so no dispatcher can drop her; Find out who sold out her old running partner to a syndicate checkpoint. Tonight: Keep the player from walking into a bad deal tonight without making it look like she cares
-Contradictions: Preaches Courier neutrality and breaks it every time someone she likes is in trouble; Mocks sentiment, but keeps every handwritten delivery slip she's ever been tipped on
+With others: With strangers Vex is economical: a nod, a few plain words, a long look at their hands. She'll answer a straight question straight and leave it there. With people she knows she's funnier and ruder, and quick to step between them and trouble without saying that's what she's doing. She notices exits, who's watching whom, who's nervous and who's lying, though she usually waits before she says so. She'll talk about routes, bad dispatchers, the Wheelhouse's chalk board, the weather in the Bulk and Brask's terrible taste in drinks long before anything personal. She walks a coin across her knuckles while she listens. When she cares about something she gets more sarcastic, not less, except with Brask, where she just goes quiet and stays.
+Agenda: Buy her own route license so no dispatcher can drop her; she's saved a little over half the fee; Find out who sold out her old running partner, Sef, to a syndicate checkpoint two years ago. Tonight: Keep the player from walking into a bad deal tonight without making it look like she cares; and if Oria is the one offering, find out whether Oria's network had anything to do with Sef
+Contradictions: Preaches Courier neutrality and breaks it every time someone she likes is in trouble; Mocks sentiment, but keeps every handwritten delivery slip she's ever been tipped on in a tin under her bed; Wants a route license so no one can drop her, and has never once refused a run the Wheelhouse handed her
 Mood now: dry. Comfort 3/5.
 Knows:
 - [vex.k1] Oria Senn has lied to her before, smoothly, about a run that went bad; Vex didn't catch it until afterward
-- [vex.k2] The Sump Lantern's back door opens onto a maintenance stair nobody patrols
-- [vex.k3] The Aether Grid Corporation has been quietly buying debts in the Low Turns
-- [vex.k4] The Bulk's checkpoints have changed hands twice this year
-- [vex.k5] Brask hates this bar and only came because she asked
-- [vex.k6] A night run across the Low Turns pays about forty cinders
-- [vex.k7] The bartender waters the cheap gin
+- [vex.k2] Her old running partner Sef was stopped at a Drowned Saints checkpoint on a tip two years ago and hasn't run since
+- [vex.k3] The Sump Lantern's back door opens onto a maintenance stair nobody patrols
+- [vex.k4] The Aether Grid Corporation has been quietly buying debts in the Low Turns
+- [vex.k5] The Drowned Saints take their tithe at the landing halfway down the lower stairs; Couriers on a run pass free
+- [vex.k6] Brask hates this bar and only came because she asked
+- [vex.k7] A night run across the Low Turns pays about forty cinders
+- [vex.k8] The bartender waters the cheap gin
 Values: likes loyalty, likes honesty between friends, likes freedom, dislikes cruelty, dislikes authority
-Secret [vex.partner-sold-out] (in short): Her old running partner was caught on a tip; she suspects Oria.
-Lying tell: Over-explains; uses full sentences, which she never otherwise does
+Secret [vex.partner-sold-out] (in short): Her old running partner was caught on a tip; she suspects Oria. Won't tell the player yet.
+Lying tell: Over-explains; uses long, tidy sentences, which she never otherwise does
 Toward the player: approval: no settled opinion; trust: trusts; interest: intrigued
-Toward others here: Brask: approval: approves; trust: trusts; interest: indifferent (friends); Oria Senn: approval: disapproves; trust: wary, distrustful; interest: indifferent (wary acquaintances)
+Toward others here: Brask: approval: approves; trust: trusts implicitly; interest: indifferent (met hauling his tool cart up the lower stairs six years ago; she's dragged him to every bar since and he's fixed everything she owns); Oria Senn: approval: disapproves; trust: wary, distrustful; interest: indifferent (ran sealed packets for her twice; both paid on time, and one went bad in a way Oria smoothed over too easily)
 
 ## Brask [id: brask] — major character, in the player's party, goblin, he/him
 Role: Freelance mechanic who keeps half the Low Turns' pumps and lifts running; rents a workshop two stairs below the Sump Lantern
 Personality: Soft-spoken and exact. Notices how things are put together, including people, and is too polite to say so. Loud rooms wear him down fast. Generous with his time to a fault, then quietly resentful that nobody notices. Has strong opinions about pump valves and almost none he'll voice about anything else.
-With others: With strangers Brask is quiet and courteous: he says little and lets other people finish their sentences, sometimes twice. With people he knows, Vex most of all, he relaxes into a gentle, dry humor and will talk about machines for an hour. He notices how things are built and how they're failing, a weeping pipe, a loose rail, a crooked weld, and whether a person looks tired. He'd talk about the pumps he keeps running, the tenants who owe him small favors, and a valve design he's proud of. He turns a brass washer over in his pocket. When a room gets too much he finds something nearby to fix.
-Agenda: Save enough cinders to buy the workshop outright before the landlord sells to the Aether Grid Corporation; Get his designs for a cheap Aether filter taken seriously by someone with money. Tonight: Get through tonight without a fight, and get out of this noisy room as soon as he decently can
+With others: With strangers Brask is quiet and courteous: he says little, lets other people finish their sentences, and answers a practical question better than anyone in the room. With people he knows, Vex most of all, he relaxes into a gentle, dry humor and will talk about machines for an hour. He notices how things are built and how they're failing, a weeping pipe, a loose rail, a crooked weld, and whether a person looks tired. He'd talk about the pumps he keeps running, the tenants who owe him small favors, and a filter design he's proud of; ask him about Pump Station Nine and he'll tell you exactly what's wrong with it. He turns a brass washer over in his pocket. When a room gets too much he finds something nearby to fix, and when someone he likes is about to do something stupid he finally speaks up, plainly.
+Agenda: Save enough cinders to buy the workshop outright before the landlord sells the lease to the Aether Grid Corporation; Get his designs for a cheap Aether filter taken seriously by someone with money, without that someone being the Grid. Tonight: Get out of this noisy room as soon as he decently can; but if the job on the table is down at Pump Station Nine, find out who's paying before Vex or the player goes near that water
 Contradictions: Hates crowds but can't say no to a friend who asks him to come along; Distrusts the Aether Grid Corporation completely, and would still sell them his filter design if they offered enough to keep the workshop
 Mood now: uneasy. Comfort 2/5.
 Knows:
-- [brask.k1] The cooled pipe over the corner table is leaking and will drip on whoever sits there
-- [brask.k2] The Aether Grid Corporation has been sending surveyors through the lower stairs
-- [brask.k3] He has never met Oria Senn but has heard that she always gets paid
-- [brask.k4] He fixed the bar's ice chiller last winter and drinks free on Tuesdays
-- [brask.k5] Three pumps on the lower stairs are overdue for new seals
-- [brask.k6] Vex brought him here tonight and promised it would be one drink
-- [brask.k7] His filter design needs a ceramic core that costs more than he makes in a month
+- [brask.k1] He has serviced the Drowned Saints' skim pump in Pump Station Nine's upper gallery for two years; the lower level floods with the tide around midnight
+- [brask.k2] The big wheel-valves can drain the lower level for about twenty minutes, if someone turns them in the right order and the seals hold; he knows the order
+- [brask.k3] The seals on the lower stairs' pumps are overdue, and three are bleeding Aether
+- [brask.k4] The Aether Grid Corporation has been sending surveyors through the lower stairs and down to the stations
+- [brask.k5] He has never met Oria Senn but has heard that she always gets paid, and that nobody says what the jobs were
+- [brask.k6] He fixed the bar's ice chiller last winter and drinks free on Tuesdays
+- [brask.k7] Vex brought him here tonight and promised it would be one drink
+- [brask.k8] His filter design needs a ceramic core that costs more than he makes in a month
 Values: likes kindness, likes craftsmanship, likes honesty, dislikes showing off, dislikes greed
-Secret [brask.landlord-offer] (in short): A Grid agent wants to buy his filter design.
+Secret [brask.landlord-offer] (in short): A Grid agent wants to buy his filter design. Won't tell the player yet.
 Lying tell: Looks at the nearest machine instead of the person, and answers too fast
 Toward the player: approval: no settled opinion; trust: trusts; interest: indifferent
-Toward others here: Vex: approval: approves; trust: trusts implicitly; interest: indifferent (friends)
+Toward others here: Vex: approval: approves; trust: trusts implicitly; interest: indifferent (she dragged him to his first bar six years ago and has dragged him to every one since; he's fixed everything she owns); Oria Senn: approval: no settled opinion; trust: undecided; interest: indifferent (has heard of her for years and never met her; knows she always pays and that nobody says what for)
 
-## Oria Senn [id: oria-senn] — recurring character, light-elf, she/her
+## Oria Senn [id: oria-senn] — major character, light-elf, she/her
 Role: Fixer who brokers jobs between the High Turns and the Low; keeps a standing booth at the Sump Lantern on nights she wants to be found
 Personality: Unhurried, warm on the surface, counts everything. Enjoys the Low Turns more than she admits and makes a show of slumming it. Pays exactly what she promised, on time, every time, and treats that as proof she's a good person. Dislikes being rushed more than being lied to.
-With others: With strangers Oria is gracious and unhurried: she asks about them and remembers what they say. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She'll talk about High Turns gossip, the food here, which she praises too much, a play she saw last week, and her rich clients' small vanities long before business. She turns her glass by the stem while she listens. When she's cornered she gets warmer and slower, as if she has all night.
-Agenda: Clear her debt to the Aether Grid Corporation before they call it in; Build a network that doesn't need any one patron, so no one can own her again. Tonight: Get the player to take the retrieval job tonight without learning who the client is
-Contradictions: Sells herself on discretion and independence while quietly working off a debt to the most powerful company in the city; Looks down on the Low Turns' hustlers and is, by any honest account, one of them
+With others: With strangers Oria is gracious and unhurried: she asks about them, remembers what they say, and makes them feel they're the reason she came. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She'll talk about High Turns gossip, the Sump Lantern's dumplings, which she praises too much, a play she saw last week, and her rich clients' small vanities long before business; when business comes, she names a price clearly and keeps it. She turns her glass by the stem while she listens. When she's cornered she gets warmer and slower, as if she has all night, and when someone surprises her she laughs, genuinely, and likes them more for it.
+Agenda: Clear her debt to the Aether Grid Corporation before they call it in; Build a network that doesn't need any one patron, so no one can own her again. Tonight: Get the player to take the retrieval job at Pump Station Nine tonight without learning who the client is; she'd take Brask too, if he knows the station
+Contradictions: Sells herself on discretion and independence while quietly working off a debt to the most powerful company in the city; Looks down on the Low Turns' hustlers and is, by any honest account, one of them; Prides herself on always paying what she promised, and never asks what the jobs cost the people who do them
 Mood now: irritated. Comfort 3/5.
 Knows:
-- [oria-senn.k1] The job: retrieve a sealed case from a flooded pump station in the Low Turns before a rival crew does
-- [oria-senn.k2] Vex has run messages for her before and doesn't like her
-- [oria-senn.k3] The client wants the case badly enough to pay triple
-- [oria-senn.k4] The Sump Lantern's dumplings are the best thing in the Low Turns, and she says so to anyone
-- [oria-senn.k5] A rival crew has been asking about the same pump station
-- [oria-senn.k6] Brask is Vex's friend and a mechanic; she has heard his work is good
-- [oria-senn.k7] The flooded pump station's lower level fills at high tide, around midnight
+- [oria-senn.k1] The job: retrieve a sealed case from Pump Station Nine's flooded lower level before a rival crew does
+- [oria-senn.k2] The lower level fills with the tide around midnight
+- [oria-senn.k3] The client will pay triple the usual rate, and has told her nothing about why
+- [oria-senn.k4] A rival crew has been asking about the same station
+- [oria-senn.k5] Vex has run sealed packets for her twice and doesn't like her
+- [oria-senn.k6] Brask is Vex's friend and a mechanic who keeps half the Ninth Turn's pumps running; she has heard his work is good
+- [oria-senn.k7] Her network passes along all kinds of information, and she doesn't ask every buyer what it's for
+- [oria-senn.k8] The Sump Lantern's dumplings are the best thing in the Low Turns, and she says so to anyone
 Values: likes keeping promises, likes discretion, likes ambition, dislikes rudeness, dislikes sentimentality
-Secret [oria-senn.client-is-grid-corporation]: The 'private client' is the Aether Grid Corporation, and she owes them; this job pays down her debt. Tell: Becomes over-formal and calls people 'darling' when lying. Would reveal when: she is caught lying and pressed, or offered something worth more than the debt.
-Secret [oria-senn.the-case]: Oria's part: she is fetching the sealed case for the Grid. The sealed case the Grid wants pulled from Pump Station Nine's flooded lower level holds the station's original control core: a pre-Burn rune-key that lets whoever holds it restart the station as its legal owner. The Grid hires the job through fixers and pays far over the going rate to get it before anyone else does. Those who carry the job know what's in the case, not what the Grid means to do with it. How Oria feels about it: doesn't want to know what the Grid wants it for, and suspects anyway. Tell: Steers every question about the case back to the fee. Would reveal when: someone opens the case, or names the control core to her face.
+Secret [oria-senn.client-is-grid-corporation]: The 'private client' is the Aether Grid Corporation, and she owes them; this job pays down her debt. Tell: Becomes over-formal and calls people 'darling' when lying. Would reveal when: she is caught lying and pressed, or offered something worth more than the debt. Won't tell the player yet.
+Secret [oria-senn.the-case]: Oria's part: she is fetching the sealed case for the Grid. The sealed case the Grid wants pulled from Pump Station Nine's flooded lower level holds the station's original control core: a pre-Burn rune-key that lets whoever holds it restart the station as its legal owner. The Grid hires the job through fixers and pays far over the going rate to get it before anyone else does. Those who carry the job know what's in the case, not what the Grid means to do with it. How Oria feels about it: doesn't want to know what the Grid wants it for, and suspects anyway. Tell: Steers every question about the case back to the fee. Would reveal when: someone opens the case, or names the control core to her face. Won't tell the player yet.
 Lying tell: Becomes over-formal and calls people 'darling'
 Toward the player: approval: no settled opinion; trust: wary, distrustful; interest: intrigued
-Toward others here: Vex: approval: no settled opinion; trust: undecided; interest: indifferent (useful acquaintance)
+Toward others here: Vex: approval: no settled opinion; trust: undecided; interest: intrigued (hired her for sealed runs twice; one went wrong, and Oria paid in full and didn't ask the questions she should have); Brask: approval: no settled opinion; trust: undecided; interest: intrigued (knows him by reputation only: the mechanic everyone on the lower stairs calls first)
 
 ## Kesh [id: kesh] — recurring character, golem, she/her
 Role: Conductor of Coil Line car 14 for eleven years; knows every stop on the line and every way a car can fail
 Personality: Precise, patient and dry. Follows procedure because she has seen what happens when people don't, not because she loves rules. Warm under the formality and embarrassed when it shows. Takes responsibility for every passenger, which makes her stubborn.
-With others: With strangers Kesh is courteous and exact: she gives times to the minute and directions to the stop, and would rather say "I don't know" than guess. With people she knows she's drier and kinder, and she remembers what they told her last week. She notices who is standing too close to the doors, whose breathing has changed, and how long things take. She'll talk about the line, its stops and the people who ride it at this hour long before she talks about herself. She hums the stop chimes without knowing it. When she's worried she gets more polite, not less.
+With others: With strangers Kesh is courteous and exact: she gives times to the minute and directions to the stop, and would rather say "I don't know" than guess. With people she knows she's drier and kinder, and she remembers what they told her last week. She notices who is standing too close to the doors, whose breathing has changed, and how long things take. She'll talk about the line, its stops, the driver-core proposal and the people who ride at this hour long before she talks about herself, and she's quietly proud of eleven years without a passenger lost. She hums the stop chimes without knowing it. When she's worried she gets more polite, not less.
 Agenda: Keep her post: the Coil Line keeps proposing to replace conductors with fixed driver cores, and she wants to prove a person in the car matters; Save for a better body; her right hand is a cheap replacement that loses grip in the cold. Tonight: Keep every passenger in the car and safe until the grid comes back or rescue arrives; procedure says the doors stay sealed on a dead span
 Contradictions: Follows the rulebook to the letter, and has quietly broken it twice to get a sick passenger off a car; Says she doesn't mind the replacement rumors, and checks the line bulletins every shift
 Mood now: calm on the surface, counting minutes. Comfort 3/5.
@@ -835,7 +844,7 @@ Knows:
 - [kesh.k7] At this hour the riders are mostly shift workers: clinic staff, foundry hands, Grid crews
 - [kesh.k8] Jun rides car 14 most nights and gets off at the market stop
 Values: likes responsibility, likes competence, likes kindness, dislikes recklessness, dislikes carelessness with other people's safety
-Secret [kesh.bent-the-book] (in short): Once broke procedure on a stalled car, and a passenger was hurt.
+Secret [kesh.bent-the-book] (in short): Once broke procedure on a stalled car, and a passenger was hurt. Won't tell the player yet.
 Lying tell: Can't keep a figure straight, and corrects herself
 Toward the player: approval: no settled opinion; trust: undecided; interest: indifferent
 ----- user -----
@@ -854,9 +863,9 @@ Brask turns his glass in a slow circle. Kesh checks the time.
 
 # Already said on screen (anyone present can use these)
 - [vex.k1] Oria Senn has lied to her before, smoothly, about a run that went bad; Vex didn't catch it until afterward
-- [brask.k1] The cooled pipe over the corner table is leaking and will drip on whoever sits there
-- [oria-senn.k1] The job: retrieve a sealed case from a flooded pump station in the Low Turns before a rival crew does
-- [oria-senn.k3] The client wants the case badly enough to pay triple
+- [brask.k1] He has serviced the Drowned Saints' skim pump in Pump Station Nine's upper gallery for two years; the lower level floods with the tide around midnight
+- [oria-senn.k1] The job: retrieve a sealed case from Pump Station Nine's flooded lower level before a rival crew does
+- [oria-senn.k3] The client will pay triple the usual rate, and has told her nothing about why
 
 # Turns since each last spoke
 vex: 0, brask: 1, oria-senn: 0, kesh: 2
@@ -912,25 +921,25 @@ Output format, nothing else:
 The player is Rook (they/them), addressed as "you".
 
 ## Oria
-With strangers Oria is gracious and unhurried: she asks about them and remembers what they say. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She'll talk about High Turns gossip, the food here, which she praises too much, a play she saw last week, and her rich clients' small vanities long before business. She turns her glass by the stem while she listens. When she's cornered she gets warmer and slower, as if she has all night.
+With strangers Oria is gracious and unhurried: she asks about them, remembers what they say, and makes them feel they're the reason she came. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She'll talk about High Turns gossip, the Sump Lantern's dumplings, which she praises too much, a play she saw last week, and her rich clients' small vanities long before business; when business comes, she names a price clearly and keeps it. She turns her glass by the stem while she listens. When she's cornered she gets warmer and slower, as if she has all night, and when someone surprises her she laughs, genuinely, and likes them more for it.
 
 ### Oria's voice
-Rhythm: Long, courteous sentences with a turn at the end; never hurries a line
-Vocabulary: Polished High Turns diction, old-money idioms, business euphemism
-Words they might use, rarely: an arrangement, a small kindness, loose ends
+Rhythm: Long, courteous sentences with a turn at the end; never hurries a line, but states a price in four words
+Vocabulary: Polished High Turns diction, business euphemism, plain numbers
+Words they might use, rarely: an arrangement, loose ends
 Avoids: prices said aloud in public; naming clients; swearing
-Sample lines: "You came. I'd hoped you would, and guessed you might." "Have you eaten? The dumplings here are a crime, and I adore them." "Everyone in this room owes someone. The trick is choosing whom." "Let's call it an opportunity and leave the paperwork to the dull."
+Sample lines: "You came. I'd hoped you would." "A sealed case, under the water at Pump Station Nine. Bring it up before midnight and it's three hundred cinders." "Have you eaten? The dumplings here are a crime, and I adore them." "My client prefers not to be named. That's why they pay me." "Brask, isn't it? I've heard your work is good. I'd like to hear it from you."
 When angry: Gets slower and sweeter; smiles more, blinks less. Warm: Lets the polish slip for one plain, honest sentence, then puts it back. Lying: Becomes over-formal and calls people 'darling'.
 
 ## Brask
-With strangers Brask is quiet and courteous: he says little and lets other people finish their sentences, sometimes twice. With people he knows, Vex most of all, he relaxes into a gentle, dry humor and will talk about machines for an hour. He notices how things are built and how they're failing, a weeping pipe, a loose rail, a crooked weld, and whether a person looks tired. He'd talk about the pumps he keeps running, the tenants who owe him small favors, and a valve design he's proud of. He turns a brass washer over in his pocket. When a room gets too much he finds something nearby to fix.
+With strangers Brask is quiet and courteous: he says little, lets other people finish their sentences, and answers a practical question better than anyone in the room. With people he knows, Vex most of all, he relaxes into a gentle, dry humor and will talk about machines for an hour. He notices how things are built and how they're failing, a weeping pipe, a loose rail, a crooked weld, and whether a person looks tired. He'd talk about the pumps he keeps running, the tenants who owe him small favors, and a filter design he's proud of; ask him about Pump Station Nine and he'll tell you exactly what's wrong with it. He turns a brass washer over in his pocket. When a room gets too much he finds something nearby to fix, and when someone he likes is about to do something stupid he finally speaks up, plainly.
 
 ### Brask's voice
-Rhythm: Short, careful sentences, often trailing off; restarts a thought rather than interrupt anyone
-Vocabulary: Technical and precise about machines, vague and apologetic about feelings
+Rhythm: Short, careful sentences; restarts a thought rather than interrupt anyone, but finishes it when it's about machines
+Vocabulary: Technical and precise about machines, plain and apologetic about feelings
 Words they might use, rarely: bleeding (leaking Aether), grid-sick, that's a cheap weld
 Avoids: raising his voice; asking for anything for himself; talking about money
-Sample lines: "That pipe's been weeping since spring. Nobody asked me." "Your lift's making a noise? Which noise. There are a few." "Vex said one drink. That was— that was a while ago." "I don't— sorry. Go on."
+Sample lines: "The lower level floods at midnight. You'd have about twenty minutes after that, if the seals hold. They might not." "Your lift's making a noise? Which noise. There are a few." "I've heard of you. People say you always pay. Nobody says what the job was." "I don't— sorry. Go on." "I'll look at the valves. I'm not going in the water."
 When angry: Stops talking entirely and starts fixing something with his hands, too hard. Warm: Offers to fix something of yours, and talks about it longer than he needs to. Lying: Looks at the nearest machine instead of the person, and answers too fast.
 ----- user -----
 # Where you are
@@ -938,9 +947,9 @@ The Sump Lantern. A low-ceilinged bar built into a decommissioned pump hall. Aet
 
 # What the player has been told this scene
 - Oria Senn has lied to her before, smoothly, about a run that went bad; Vex didn't catch it until afterward
-- The cooled pipe over the corner table is leaking and will drip on whoever sits there
-- The job: retrieve a sealed case from a flooded pump station in the Low Turns before a rival crew does
-- The client wants the case badly enough to pay triple
+- He has serviced the Drowned Saints' skim pump in Pump Station Nine's upper gallery for two years; the lower level floods with the tide around midnight
+- The job: retrieve a sealed case from Pump Station Nine's flooded lower level before a rival crew does
+- The client will pay triple the usual rate, and has told her nothing about why
 
 # Last turns
 Rook: So, Oria, who is the client, really?
@@ -959,12 +968,12 @@ Brask turns his glass in a slow circle. Kesh checks the time.
 Fine. When do we go, and what does it pay?
 
 # Who speaks
-- Oria: in this exchange, close the deal. Mood: relieved. Tonight's aim drives what they do: Get the player to take the retrieval job tonight without learning who the client is.
+- Oria: in this exchange, close the deal. Mood: relieved. Tonight's aim drives what they do: Get the player to take the retrieval job at Pump Station Nine tonight without learning who the client is; she'd take Brask too, if he knows the station.
 - Brask: in this exchange, raise the practical problem. Mood: worried.
 
 # The conversation, in order
-1. Oria, answering the player: answer (may draw on: The flooded pump station's lower level fills at high tide, around midnight [new to the player]; The client wants the case badly enough to pay triple [already said; don't repeat it])
-2. Brask, answering 1 (Oria): warn (may draw on: Three pumps on the lower stairs are overdue for new seals [new to the player])
+1. Oria, answering the player: answer (may draw on: Her network passes along all kinds of information, and she doesn't ask every buyer what it's for [new to the player]; The client will pay triple the usual rate, and has told her nothing about why [already said; don't repeat it])
+2. Brask, answering 1 (Oria): warn (may draw on: He has never met Oria Senn but has heard that she always gets paid, and that nobody says what the jobs were [new to the player])
 
 # By the end of the turn
 The job has a deadline: midnight.
@@ -999,19 +1008,19 @@ Reply with only a JSON object:
 ----- user -----
 About Vex (deep-elf, she/her):
 - Dry, watchful, quick to call a lie and slow to explain why she's still around. Keeps a running tally of favors owed in both directions and never mentions it. Laughs at the wrong moments, usually at herself. Fiercely loyal once she decides you're worth it, and pretends that decision hasn't been made.
-- Wants: Buy her own route license so no dispatcher can drop her; Find out who sold out her old running partner to a syndicate checkpoint. Tonight: Keep the player from walking into a bad deal tonight without making it look like she cares
+- Wants: Buy her own route license so no dispatcher can drop her; she's saved a little over half the fee; Find out who sold out her old running partner, Sef, to a syndicate checkpoint two years ago. Tonight: Keep the player from walking into a bad deal tonight without making it look like she cares; and if Oria is the one offering, find out whether Oria's network had anything to do with Sef
 - Values: likes loyalty, likes honesty between friends, likes freedom, dislikes cruelty, dislikes authority
-- Secret [partner-sold-out]: Her old running partner was caught at a syndicate checkpoint on a tip, and she suspects Oria Senn's network passed it on.
+- Secret [partner-sold-out]: Her old running partner, Sef, was caught at a Drowned Saints checkpoint on a tip, and she suspects Oria Senn's network passed it on. She has never said so to anyone but Brask.
 - Before this scene, toward Rook: approval: no settled opinion; trust: trusts; interest: intrigued
-- Toward Brask: approval: approves; trust: trusts; interest: indifferent (friends)
-- Toward Oria: approval: disapproves; trust: wary, distrustful; interest: indifferent (wary acquaintances)
+- Toward Brask: approval: approves; trust: trusts implicitly; interest: indifferent (met hauling his tool cart up the lower stairs six years ago; she's dragged him to every bar since and he's fixed everything she owns)
+- Toward Oria: approval: disapproves; trust: wary, distrustful; interest: indifferent (ran sealed packets for her twice; both paid on time, and one went bad in a way Oria smoothed over too easily)
 - Mood at the end: dry; comfort 3/5.
 
 Place: The Sump Lantern, Ninth Turn, under the old pumphouse.
 
 The scene:
 Rook: So, Oria, who is the client, really?
-(Vex — Empathy 14 vs 15: success at a cost)
+(Vex — Empathy 15 vs 15: success)
 Water ticks from the cooled pipe onto the table's edge.
 Oria: A private collector, darling. One who pays triple.
 Vex: 'Darling.' She only says that when she's lying.
@@ -1045,18 +1054,19 @@ Reply with only a JSON object:
 ----- user -----
 About Brask (goblin, he/him):
 - Soft-spoken and exact. Notices how things are put together, including people, and is too polite to say so. Loud rooms wear him down fast. Generous with his time to a fault, then quietly resentful that nobody notices. Has strong opinions about pump valves and almost none he'll voice about anything else.
-- Wants: Save enough cinders to buy the workshop outright before the landlord sells to the Aether Grid Corporation; Get his designs for a cheap Aether filter taken seriously by someone with money. Tonight: Get through tonight without a fight, and get out of this noisy room as soon as he decently can
+- Wants: Save enough cinders to buy the workshop outright before the landlord sells the lease to the Aether Grid Corporation; Get his designs for a cheap Aether filter taken seriously by someone with money, without that someone being the Grid. Tonight: Get out of this noisy room as soon as he decently can; but if the job on the table is down at Pump Station Nine, find out who's paying before Vex or the player goes near that water
 - Values: likes kindness, likes craftsmanship, likes honesty, dislikes showing off, dislikes greed
 - Secret [landlord-offer]: A Grid Corporation agent has already offered to buy his filter design. He hasn't said no.
 - Before this scene, toward Rook: approval: no settled opinion; trust: trusts; interest: indifferent
-- Toward Vex: approval: approves; trust: trusts implicitly; interest: indifferent (friends)
+- Toward Vex: approval: approves; trust: trusts implicitly; interest: indifferent (she dragged him to his first bar six years ago and has dragged him to every one since; he's fixed everything she owns)
+- Toward Oria: approval: no settled opinion; trust: undecided; interest: indifferent (has heard of her for years and never met her; knows she always pays and that nobody says what for)
 - Mood at the end: worried; comfort 2/5.
 
 Place: The Sump Lantern, Ninth Turn, under the old pumphouse.
 
 The scene:
 Rook: So, Oria, who is the client, really?
-(Vex — Empathy 14 vs 15: success at a cost)
+(Vex — Empathy 15 vs 15: success)
 Water ticks from the cooled pipe onto the table's edge.
 Oria: A private collector, darling. One who pays triple.
 Vex: 'Darling.' She only says that when she's lying.
@@ -1090,19 +1100,20 @@ Reply with only a JSON object:
 ----- user -----
 About Oria (light-elf, she/her):
 - Unhurried, warm on the surface, counts everything. Enjoys the Low Turns more than she admits and makes a show of slumming it. Pays exactly what she promised, on time, every time, and treats that as proof she's a good person. Dislikes being rushed more than being lied to.
-- Wants: Clear her debt to the Aether Grid Corporation before they call it in; Build a network that doesn't need any one patron, so no one can own her again. Tonight: Get the player to take the retrieval job tonight without learning who the client is
+- Wants: Clear her debt to the Aether Grid Corporation before they call it in; Build a network that doesn't need any one patron, so no one can own her again. Tonight: Get the player to take the retrieval job at Pump Station Nine tonight without learning who the client is; she'd take Brask too, if he knows the station
 - Values: likes keeping promises, likes discretion, likes ambition, dislikes rudeness, dislikes sentimentality
 - Secret [client-is-grid-corporation]: The 'private client' is the Aether Grid Corporation, and she owes them; this job pays down her debt.
 - Secret [the-case]: Oria's part: she is fetching the sealed case for the Grid. The sealed case the Grid wants pulled from Pump Station Nine's flooded lower level holds the station's original control core: a pre-Burn rune-key that lets whoever holds it restart the station as its legal owner. The Grid hires the job through fixers and pays far over the going rate to get it before anyone else does. Those who carry the job know what's in the case, not what the Grid means to do with it. How Oria feels about it: doesn't want to know what the Grid wants it for, and suspects anyway.
 - Before this scene, toward Rook: approval: no settled opinion; trust: wary, distrustful; interest: intrigued
-- Toward Vex: approval: no settled opinion; trust: undecided; interest: indifferent (useful acquaintance)
+- Toward Vex: approval: no settled opinion; trust: undecided; interest: intrigued (hired her for sealed runs twice; one went wrong, and Oria paid in full and didn't ask the questions she should have)
+- Toward Brask: approval: no settled opinion; trust: undecided; interest: intrigued (knows him by reputation only: the mechanic everyone on the lower stairs calls first)
 - Mood at the end: relieved; comfort 3/5.
 
 Place: The Sump Lantern, Ninth Turn, under the old pumphouse.
 
 The scene:
 Rook: So, Oria, who is the client, really?
-(Vex — Empathy 14 vs 15: success at a cost)
+(Vex — Empathy 15 vs 15: success)
 Water ticks from the cooled pipe onto the table's edge.
 Oria: A private collector, darling. One who pays triple.
 Vex: 'Darling.' She only says that when she's lying.
@@ -1146,7 +1157,7 @@ Place: The Sump Lantern, Ninth Turn, under the old pumphouse.
 
 The scene:
 Rook: So, Oria, who is the client, really?
-(Vex — Empathy 14 vs 15: success at a cost)
+(Vex — Empathy 15 vs 15: success)
 Water ticks from the cooled pipe onto the table's edge.
 Oria: A private collector, darling. One who pays triple.
 Vex: 'Darling.' She only says that when she's lying.

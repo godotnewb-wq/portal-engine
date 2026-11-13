@@ -3,7 +3,7 @@
   "title": "Deception, uncaught",
   "watchFor": "Same opening as deception-caught, but every check is forced low. Vex must NOT notice the lie: she believes Oria or stays quiet. Oria's lie still shows her tell on the page, so a reader could catch it even though Vex didn't. Compare side by side with deception-caught.",
   "location": "sump-lantern",
-  "cast": ["vex", "brask", "oria-senn"],
+  "cast": ["vex", "brask", "oria-senn", "dunmar"],
   "seed": 11,
   "forceNatural": 3,
   "expectedCheck": { "turn": 1, "who": "vex", "skill": "empathy" },

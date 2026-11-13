@@ -1,0 +1,195 @@
+{
+  "id": "tam-dace",
+  "name": "Tam Dace",
+  "tier": "recurring",
+  "age": "adult",
+  "species": "human",
+  "pronouns": "he/him",
+  "appearance": "adult human man in his late twenties, tall and loose-limbed, an easy grin, dark hair falling in his eyes, a Grid meter-man's coat with the green band on the sleeve, a satchel of meter tags, a scarf his sister knitted",
+  "role": "Grid meter-man working out of the Kiln substation; reads and cuts meters across the Kilnworks and the Wheel",
+  "faction": "aether-grid-corporation",
+  "level": "member",
+  "rank": "meter-man",
+  "occupation": "meter-man",
+  "personality": "Easygoing, likable, good at being liked. Wants to be taken seriously by exactly one person, his sister. Thinks he's working the Grid from the inside; might be right. Quietly braver than anyone gives him credit for.",
+  "portrait": "With strangers Tam is friendly and chatty: he asks your name, remembers it, and has a story about your street. With people he knows he jokes, borrows things and gives them back better. With his sister he gets defensive in under a minute, every time. He notices meters, wiring, who's behind on a bill and who's stealing current, and he lets the poor ones slide. He'll talk about the Bulk, the substation's hum, the noodle shop under his flat and his flatmate Teo's exam long before he talks about the Grid. He fiddles with his scarf. When he's cornered he jokes, and when he's proud of something he doesn't tell anyone.",
+  "agenda": {
+    "longTerm": [
+      "Pay off his apprenticeship debt and make shift boss, so his sister has to admit he made something of it",
+      "Keep the lights on where it matters, whatever the schedule says"
+    ],
+    "current": "Get through this without his sister finding out about the notes; and, for once, win an argument with her"
+  },
+  "contradictions": [
+    "Says he's only in it for the wage, and risks the job every month for strangers",
+    "Wants his sister's approval more than anything, and does everything she'd disapprove of"
+  ],
+  "voice": {
+    "rhythm": "Easy, chatty, runs on; snaps short when his sister's involved",
+    "vocabulary": "Bulk street talk, Grid meter jargon, a joke for everything",
+    "slang": [
+      "meter-men",
+      "the schedule",
+      "a dark night (a planned blackout)"
+    ],
+    "avoids": [
+      "the schedule",
+      "admitting his sister's right",
+      "his debt"
+    ],
+    "sampleLines": [
+      "Name's Tam. Your meter's the one that hums, third floor, by the stair. I let it hum.",
+      "Six years and she still introduces me as 'the one who works for them.'",
+      "I'm not going to tell you which district goes dark next week. I'm going to tell you to charge your lamps.",
+      "She's right about the company. Don't tell her I said that."
+    ],
+    "shifts": {
+      "angry": "Stops joking; short sentences, very polite",
+      "warm": "Lends you something and forgets to ask for it back",
+      "lying": "Jokes too fast, one after another",
+      "afraid": "Keeps talking, cheerfully, about nothing"
+    }
+  },
+  "tells": [
+    "Fiddles with his scarf and jokes too fast when he's lying"
+  ],
+  "layers": {
+    "axes": {
+      "outlook": "cheerful",
+      "nerve": "bold",
+      "composure": "open"
+    },
+    "values": [
+      {
+        "value": "universalism",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "the lights on where people need them"
+      },
+      {
+        "value": "achievement",
+        "strength": "mild",
+        "stance": "likes",
+        "personal": "making shift boss before his sister expects it"
+      }
+    ],
+    "foundations": {
+      "care": "strong",
+      "authority": "indifferent"
+    }
+  },
+  "expression": {
+    "display": {
+      "grief": "stops joking for days",
+      "fear": "talks cheerfully about nothing",
+      "anger": "goes short and very polite",
+      "shame": "jokes at his own expense, a little too hard",
+      "hurt": "laughs it off and leaves soon after",
+      "affection": "lends you things and fixes your meter",
+      "joy": "tells everyone, loudly, except his sister",
+      "gratitude": "slips you a favor on your bill"
+    }
+  },
+  "malleability": "average",
+  "haunts": [
+    {
+      "location": "location.bulk.kilnworks.kiln-substation",
+      "from": "07:00",
+      "to": "16:00",
+      "note": "meter rounds out of the substation",
+      "days": "weekdays"
+    },
+    {
+      "location": "location.bulk.kilnworks.foundry-stop",
+      "from": "16:30",
+      "to": "17:30",
+      "note": "a bowl at the canteen under the platform, arguing about whose district goes dark next",
+      "days": "weekdays"
+    }
+  ],
+  "mood": "cheerful, defensive the moment his sister speaks",
+  "knowledge": [
+    "The Kiln substation's load-shedding schedule says which Bulk districts go dark, and when; it comes in a sealed packet",
+    "The Wheel goes dark next on Thursday night, for six hours",
+    "He shares a flat above a noodle shop by the market stop with three other Grid technicians, including Teo Varrin",
+    "His sister Ilse dispatches for the Couriers at the Wheelhouse and thinks the Grid is killing their mother",
+    "Their mother has been grid-sick since the Kiln substation's last overload",
+    "He still owes about a third of his apprenticeship debt"
+  ],
+  "values": [
+    {
+      "value": "the lights on",
+      "stance": "likes"
+    },
+    {
+      "value": "his sister",
+      "stance": "likes"
+    },
+    {
+      "value": "being talked down to",
+      "stance": "dislikes"
+    }
+  ],
+  "secrets": [
+    {
+      "id": "warns-the-clinic",
+      "text": "He leaves an unsigned note at the Wheel clinic a day before every planned blackout, copied from the schedule he isn't allowed to share. If the Grid finds out, he's fired with his debt still owed.",
+      "summary": "Warns the Wheel clinic of blackouts from the schedule he can't share.",
+      "keywords": [
+        "the schedule",
+        "blackout",
+        "the notes",
+        "the clinic"
+      ],
+      "tell": "Fiddles with his scarf and jokes too fast",
+      "revealWhen": "someone he trusts would be hurt by not knowing, or his sister calls him a company man once too often",
+      "disclose": {
+        "trust": "high"
+      }
+    }
+  ],
+  "meters": {
+    "approval": 5,
+    "trust": 0,
+    "interest": 5
+  },
+  "relations": [
+    {
+      "to": "ilse-dace",
+      "tags": [
+        {
+          "tag": "sibling",
+          "word": "older sister"
+        },
+        {
+          "tag": "rival"
+        }
+      ],
+      "note": "keeps score of every time she was right; sends half his wage to their mother so Ilse can't say he doesn't",
+      "meters": {
+        "approval": 30,
+        "trust": 40,
+        "interest": 35
+      }
+    },
+    {
+      "to": "teo-varrin",
+      "tags": [
+        {
+          "tag": "roommate",
+          "word": "flatmate"
+        },
+        {
+          "tag": "colleague",
+          "word": "coworker"
+        }
+      ],
+      "note": "flatmate and coworker; lent Teo his old Academy books and pretends he never wanted them",
+      "meters": {
+        "approval": 20,
+        "trust": 20,
+        "interest": 10
+      }
+    }
+  ]
+}

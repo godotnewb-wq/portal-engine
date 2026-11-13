@@ -31,6 +31,7 @@ describe('the shipped scenarios', () => {
       'lore-species-stereotype',
       'secret-dormant',
       'secret-touched',
+      'siblings-on-the-car',
       'tense-negotiation',
       'three-way-argument',
       'tram-attempt',
@@ -46,7 +47,7 @@ describe('the shipped scenarios', () => {
     const state = scenarioState(content, warm)
     expect(state.meters['vex']).toEqual({ approval: 12, trust: 15, interest: 8 })
     expect(state.scene!.moods['vex']).toMatch(/a drink in/)
-    expect(state.scene!.cast).toEqual(['vex', 'brask'])
+    expect(state.scene!.cast).toEqual(['vex', 'brask', 'dunmar'])
   })
 })
 
@@ -118,7 +119,7 @@ describe('runScenario', () => {
 
   it('forces the scenario’s rolls', async () => {
     const run = await runScenario(content, { ...caught, turns: [caught.turns[0]!], summaries: false }, scripted())
-    expect(run.turns[0]!.checks.map((c) => c.line)).toEqual(['Vex — Empathy 21 vs 15: strong success'])
+    expect(run.turns[0]!.checks.map((c) => c.line)).toEqual(['Vex — Empathy 22 vs 15: strong success'])
     const bench = await runBench(content, [{ ...caught, turns: [caught.turns[0]!], summaries: false }], scripted(), 'test', { all: 'scripted' })
     expect(renderReport(content, bench)).not.toContain('Expected check not exercised')
     const missed = await runScenario(content, { ...caught, forceNatural: 3, turns: [caught.turns[0]!], summaries: false }, scripted())
@@ -174,7 +175,7 @@ describe('run inputs and comparability', () => {
     const bench = await run('A', { source: { commit: 'abc1234def', dirty: true } })
     expect(bench.inputs).toMatchObject({ source: { commit: 'abc1234def', dirty: true }, pack: fingerprint(content), roles: {} })
     expect(Object.keys(bench.inputs!.scenarios)).toEqual(['deception-caught', 'deception-uncaught'])
-    expect(bench.inputs!.names).toMatchObject({ vex: 'Vex', 'oria-senn': 'Oria', bartender: 'Dunmar' })
+    expect(bench.inputs!.names).toMatchObject({ vex: 'Vex', 'oria-senn': 'Oria', dunmar: 'Dunmar', 'card-player': 'Hollis' })
     expect(renderReport(content, bench)).toContain('Inputs: source `abc1234` with uncommitted changes, pack content `' + fingerprint(content) + '`.')
     // Line ends don't change a fingerprint.
     expect(fingerprint({ text: 'a\r\nb' })).toBe(fingerprint({ text: 'a\nb' }))

@@ -1,31 +1,32 @@
 {
   "id": "oria-senn",
   "name": "Oria Senn",
-  "tier": "recurring",
+  "tier": "major",
+  "age": "adult",
   "species": "light-elf",
   "pronouns": "she/her",
   "appearance": "adult light elf woman, tall and elegant, long pointed ears with a fine silver cuff, luminous pale gold eyes, faint shimmering glyph-like markings at her temples, ash-blonde hair pinned up with two lacquered sticks, high-collared midnight-blue coat with embroidered cuffs, gloves she never takes off",
   "role": "Fixer who brokers jobs between the High Turns and the Low; keeps a standing booth at the Sump Lantern on nights she wants to be found",
   "occupation": "fixer",
   "personality": "Unhurried, warm on the surface, counts everything. Enjoys the Low Turns more than she admits and makes a show of slumming it. Pays exactly what she promised, on time, every time, and treats that as proof she's a good person. Dislikes being rushed more than being lied to.",
-  "portrait": "With strangers Oria is gracious and unhurried: she asks about them and remembers what they say. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She'll talk about High Turns gossip, the food here, which she praises too much, a play she saw last week, and her rich clients' small vanities long before business. She turns her glass by the stem while she listens. When she's cornered she gets warmer and slower, as if she has all night.",
+  "portrait": "With strangers Oria is gracious and unhurried: she asks about them, remembers what they say, and makes them feel they're the reason she came. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She'll talk about High Turns gossip, the Sump Lantern's dumplings, which she praises too much, a play she saw last week, and her rich clients' small vanities long before business; when business comes, she names a price clearly and keeps it. She turns her glass by the stem while she listens. When she's cornered she gets warmer and slower, as if she has all night, and when someone surprises her she laughs, genuinely, and likes them more for it.",
   "agenda": {
     "longTerm": [
       "Clear her debt to the Aether Grid Corporation before they call it in",
       "Build a network that doesn't need any one patron, so no one can own her again"
     ],
-    "current": "Get the player to take the retrieval job tonight without learning who the client is"
+    "current": "Get the player to take the retrieval job at Pump Station Nine tonight without learning who the client is; she'd take Brask too, if he knows the station"
   },
   "contradictions": [
     "Sells herself on discretion and independence while quietly working off a debt to the most powerful company in the city",
-    "Looks down on the Low Turns' hustlers and is, by any honest account, one of them"
+    "Looks down on the Low Turns' hustlers and is, by any honest account, one of them",
+    "Prides herself on always paying what she promised, and never asks what the jobs cost the people who do them"
   ],
   "voice": {
-    "rhythm": "Long, courteous sentences with a turn at the end; never hurries a line",
-    "vocabulary": "Polished High Turns diction, old-money idioms, business euphemism",
+    "rhythm": "Long, courteous sentences with a turn at the end; never hurries a line, but states a price in four words",
+    "vocabulary": "Polished High Turns diction, business euphemism, plain numbers",
     "slang": [
       "an arrangement",
-      "a small kindness",
       "loose ends"
     ],
     "avoids": [
@@ -34,26 +35,122 @@
       "swearing"
     ],
     "sampleLines": [
-      "You came. I'd hoped you would, and guessed you might.",
+      "You came. I'd hoped you would.",
+      "A sealed case, under the water at Pump Station Nine. Bring it up before midnight and it's three hundred cinders.",
       "Have you eaten? The dumplings here are a crime, and I adore them.",
-      "Everyone in this room owes someone. The trick is choosing whom.",
-      "Let's call it an opportunity and leave the paperwork to the dull."
+      "My client prefers not to be named. That's why they pay me.",
+      "Brask, isn't it? I've heard your work is good. I'd like to hear it from you."
     ],
     "shifts": {
       "angry": "Gets slower and sweeter; smiles more, blinks less",
       "warm": "Lets the polish slip for one plain, honest sentence, then puts it back",
-      "lying": "Becomes over-formal and calls people 'darling'"
+      "lying": "Becomes over-formal and calls people 'darling'",
+      "afraid": "Talks about money, quickly and exactly, as if numbers were solid ground"
     }
   },
+  "tells": [
+    "Calls people 'darling' when she's lying",
+    "Steers every question about the case back to the fee",
+    "Turns her glass by the stem, faster"
+  ],
+  "layers": {
+    "axes": {
+      "scruples": "self-serving",
+      "compassion": "even",
+      "temper": "placid",
+      "outlook": "cheerful",
+      "nerve": "steady",
+      "assertiveness": "forceful",
+      "discipline": "diligent",
+      "composure": "masked"
+    },
+    "attachment": {
+      "closeness": "avoidant",
+      "security": "secure"
+    },
+    "values": [
+      {
+        "value": "self-direction",
+        "strength": "defining",
+        "stance": "likes",
+        "personal": "owing no one"
+      },
+      {
+        "value": "achievement",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "a promise kept to the cinder"
+      },
+      {
+        "value": "power",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "a network that answers to her"
+      },
+      {
+        "value": "benevolence",
+        "strength": "mild",
+        "stance": "likes"
+      }
+    ],
+    "foundations": {
+      "care": "mild",
+      "fairness": "sacred",
+      "loyalty": "mild",
+      "authority": "mild",
+      "sanctity": "indifferent",
+      "liberty": "strong"
+    }
+  },
+  "expression": {
+    "masking": {
+      "anger": "heavy",
+      "fear": "heavy",
+      "joy": "light"
+    },
+    "display": {
+      "grief": "is charming to everyone, for slightly too long",
+      "fear": "talks money, quickly and exactly",
+      "anger": "gets slower and sweeter",
+      "shame": "pays for everything, generously, and won't say why",
+      "hurt": "becomes very formal and very polite",
+      "affection": "drops the polish for one plain sentence",
+      "joy": "laughs, genuinely, and leans in",
+      "gratitude": "remembers it, and repays it with interest, later"
+    }
+  },
+  "malleability": "stubborn",
+  "fieldLocks": {},
+  "haunts": [
+    {
+      "location": "location.low-turns.ninth-turn.sump-lantern",
+      "from": "21:00",
+      "to": "23:30",
+      "note": "her booth in the back, on nights she wants to be found",
+      "days": [
+        "tuesday",
+        "thursday",
+        "friday"
+      ]
+    },
+    {
+      "location": "location.bulk.wheel",
+      "from": "12:00",
+      "to": "14:00",
+      "note": "lunch at a different stall each day, meeting people who don't want to be seen in the High Turns",
+      "days": "weekdays"
+    }
+  ],
   "mood": "composed, slightly too polished, impatient underneath",
   "knowledge": [
-    "The job: retrieve a sealed case from a flooded pump station in the Low Turns before a rival crew does",
-    "Vex has run messages for her before and doesn't like her",
-    "The client wants the case badly enough to pay triple",
-    "The Sump Lantern's dumplings are the best thing in the Low Turns, and she says so to anyone",
-    "A rival crew has been asking about the same pump station",
-    "Brask is Vex's friend and a mechanic; she has heard his work is good",
-    "The flooded pump station's lower level fills at high tide, around midnight"
+    "The job: retrieve a sealed case from Pump Station Nine's flooded lower level before a rival crew does",
+    "The lower level fills with the tide around midnight",
+    "The client will pay triple the usual rate, and has told her nothing about why",
+    "A rival crew has been asking about the same station",
+    "Vex has run sealed packets for her twice and doesn't like her",
+    "Brask is Vex's friend and a mechanic who keeps half the Ninth Turn's pumps running; she has heard his work is good",
+    "Her network passes along all kinds of information, and she doesn't ask every buyer what it's for",
+    "The Sump Lantern's dumplings are the best thing in the Low Turns, and she says so to anyone"
   ],
   "values": [
     {
@@ -82,9 +179,18 @@
       "id": "client-is-grid-corporation",
       "text": "The 'private client' is the Aether Grid Corporation, and she owes them; this job pays down her debt.",
       "summary": "Her private client is the Grid, and she owes them.",
-      "keywords": ["client", "who's paying", "debt", "owe"],
+      "keywords": [
+        "client",
+        "who's paying",
+        "debt",
+        "owe"
+      ],
       "tell": "Becomes over-formal and calls people 'darling' when lying",
-      "revealWhen": "she is caught lying and pressed, or offered something worth more than the debt"
+      "revealWhen": "she is caught lying and pressed, or offered something worth more than the debt",
+      "disclose": {
+        "trust": "high",
+        "approval": "moderate"
+      }
     },
     {
       "id": "the-case",
@@ -92,7 +198,10 @@
       "role": "she is fetching the sealed case for the Grid",
       "angle": "doesn't want to know what the Grid wants it for, and suspects anyway",
       "tell": "Steers every question about the case back to the fee",
-      "revealWhen": "someone opens the case, or names the control core to her face"
+      "revealWhen": "someone opens the case, or names the control core to her face",
+      "disclose": {
+        "trust": "very high"
+      }
     }
   ],
   "meters": {
@@ -103,11 +212,37 @@
   "relations": [
     {
       "to": "vex",
-      "note": "useful acquaintance",
+      "tags": [
+        {
+          "tag": "contractor",
+          "word": "runner"
+        }
+      ],
+      "note": "hired her for sealed runs twice; one went wrong, and Oria paid in full and didn't ask the questions she should have",
       "meters": {
         "approval": -10,
-        "trust": -10,
-        "interest": 10
+        "trust": -5,
+        "interest": 20
+      }
+    },
+    {
+      "to": "brask",
+      "tags": [],
+      "note": "knows him by reputation only: the mechanic everyone on the lower stairs calls first",
+      "meters": {
+        "approval": 5,
+        "trust": 0,
+        "interest": 15
+      }
+    },
+    {
+      "to": "dunmar",
+      "tags": [],
+      "note": "keeps her standing booth and her tab; she pays it on the first of every month",
+      "meters": {
+        "approval": 10,
+        "trust": 10,
+        "interest": 0
       }
     }
   ]

@@ -5,7 +5,7 @@ import type { CodexEntry } from '@engine/codex'
 /**
  * Checks a character card's milestone-4a fields against the ruleset's vocabularies (npc design §3–8): age, haunts,
  * layers, expression, gates and blockers, motives, growth words, and per-secret disclosure minimums. Problems stop the
- * pack; whether a card is complete for its tier is a warning (`cardWarnings`).
+ * pack, as does a card incomplete for its tier (`cardFormProblems`).
  */
 export function cardProblems(r: Ruleset, codex: CodexEntry[], c: Character): string[] {
   const p = r.people
@@ -125,8 +125,8 @@ export function tieProblems(r: Ruleset, characters: Character[]): string[] {
   return problems
 }
 
-/** Authoring warnings: a card missing what its tier's form expects (the ruleset's `people.forms`). Task 6 makes them problems. */
-export function cardWarnings(r: Ruleset, c: Character): string[] {
+/** A card missing what its tier's form expects (the ruleset's `people.forms`; npc design §3). Problems since the cast was rewritten (milestone 4a task 6). */
+export function cardFormProblems(r: Ruleset, c: Character): string[] {
   const form = r.people.forms[c.tier]
   if (!form) return []
   const out: string[] = []

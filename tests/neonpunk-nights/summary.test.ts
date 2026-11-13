@@ -42,7 +42,7 @@ describe('summary prompt', () => {
     expect(system).toMatch(/Vex \[vex\]/)
     expect(user).toMatch(/Secret \[client-is-grid-corporation\]/)
     expect(user).toMatch(/toward Rook: approval: no settled opinion; trust: wary, distrustful; interest: intrigued/)
-    expect(user).toMatch(/Toward Vex: approval: no settled opinion; trust: undecided; interest: indifferent \(useful acquaintance\)/)
+    expect(user).toMatch(/Toward Vex: approval: no settled opinion; trust: undecided; interest: intrigued \(hired her for sealed runs twice;/)
     expect(user).not.toMatch(/-?\d+–-?\d+|approval -?\d/)
     expect(buildSummaryPrompt(content, playedScene(), 'brask').user).toMatch(/left before the scene was over/)
   })
@@ -97,14 +97,16 @@ describe('applySummaries', () => {
     expect(next.memories[0]!.about).toEqual(expect.arrayContaining(['player', 'vex', 'brask']))
     // Oria → Vex moves; the authored note stays (relationship notes change only through story developments, 4b).
     const toVex = next.relations.find((r) => r.from === 'oria-senn' && r.to === 'vex')!
-    expect(toVex.meters).toEqual({ approval: -18, trust: -14, interest: 10 })
-    expect(toVex.note).toBe('useful acquaintance')
+    expect(toVex.meters).toEqual({ approval: -18, trust: -9, interest: 20 })
+    expect(toVex.note).toMatch(/^hired her for sealed runs twice/)
     expect(reports.find((r) => r.id === 'brask')).toMatchObject({ error: 'timeout', level: 'fleeting' })
     expect(GameStateSchema.parse(next)).toEqual(next)
   })
 
   it('creates a relation between witnesses who had none, starting from strangers (0/0/0), with no note', () => {
     const state = playedScene()
+    // The cast seeds every pair at the bar, so this takes Brask's tie to Oria out to start from none.
+    state.relations = state.relations.filter((r) => !(r.from === 'brask' && r.to === 'oria-senn'))
     const { state: next } = applySummaries(content, state, [
       { id: 'brask', summary: { ...plainSummary(content, state, 'brask'), others: [{ with: 'oria-senn', delta: { approval: -8, trust: -8, interest: 0 }, reason: '' }] } }
     ])

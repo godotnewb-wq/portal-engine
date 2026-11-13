@@ -2,6 +2,7 @@
   "id": "kesh",
   "name": "Kesh",
   "tier": "recurring",
+  "age": "adult",
   "species": "golem",
   "pronouns": "she/her",
   "appearance": "adult golem, tall and narrow, matte grey synthetic skin with visible seams at the jaw and wrists, rune-circuitry glowing pale blue beneath a translucent panel at her throat, eyes with a steady inner rune-light, a Coil Line conductor's coat with a brass number plate, one hand slightly mismatched in color, an older replacement",
@@ -11,7 +12,7 @@
   "rank": "conductor",
   "occupation": "conductor",
   "personality": "Precise, patient and dry. Follows procedure because she has seen what happens when people don't, not because she loves rules. Warm under the formality and embarrassed when it shows. Takes responsibility for every passenger, which makes her stubborn.",
-  "portrait": "With strangers Kesh is courteous and exact: she gives times to the minute and directions to the stop, and would rather say \"I don't know\" than guess. With people she knows she's drier and kinder, and she remembers what they told her last week. She notices who is standing too close to the doors, whose breathing has changed, and how long things take. She'll talk about the line, its stops and the people who ride it at this hour long before she talks about herself. She hums the stop chimes without knowing it. When she's worried she gets more polite, not less.",
+  "portrait": "With strangers Kesh is courteous and exact: she gives times to the minute and directions to the stop, and would rather say \"I don't know\" than guess. With people she knows she's drier and kinder, and she remembers what they told her last week. She notices who is standing too close to the doors, whose breathing has changed, and how long things take. She'll talk about the line, its stops, the driver-core proposal and the people who ride at this hour long before she talks about herself, and she's quietly proud of eleven years without a passenger lost. She hums the stop chimes without knowing it. When she's worried she gets more polite, not less.",
   "agenda": {
     "longTerm": [
       "Keep her post: the Coil Line keeps proposing to replace conductors with fixed driver cores, and she wants to prove a person in the car matters",
@@ -38,15 +39,82 @@
     "sampleLines": [
       "Nineteen minutes since the drop. Dispatch said ten.",
       "The market stop is four hundred meters on. It will still be there when we move.",
-      "You get off at the market stop, most nights. I remember the regulars by their stop.",
-      "The book says we wait. The book has been right more often than I have."
+      "You get off at the market stop, most nights. How was the shift?",
+      "No. The doors stay shut on a dead span. I'm sorry; I mean that.",
+      "The roof hatch isn't locked. That isn't the same as safe."
     ],
     "shifts": {
       "angry": "Very quiet, very formal, every word exact",
       "warm": "Gives you the exact time of something you once mentioned, and asks how it went",
-      "lying": "Can't keep a figure straight, and corrects herself"
+      "lying": "Can't keep a figure straight, and corrects herself",
+      "afraid": "Recites procedure aloud, step by step, a little too evenly"
     }
   },
+  "tells": [
+    "Can't keep a figure straight when she's lying, and corrects herself",
+    "Goes still when anyone mentions climbing out"
+  ],
+  "layers": {
+    "axes": {
+      "discipline": "rigid",
+      "compassion": "kind",
+      "composure": "reserved",
+      "nerve": "steady"
+    },
+    "values": [
+      {
+        "value": "security",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "every passenger off the car in one piece"
+      },
+      {
+        "value": "conformity",
+        "strength": "strong",
+        "stance": "likes",
+        "personal": "the book"
+      },
+      {
+        "value": "achievement",
+        "strength": "mild",
+        "stance": "likes",
+        "personal": "eleven years on car 14"
+      }
+    ],
+    "foundations": {
+      "care": "strong",
+      "authority": "strong"
+    }
+  },
+  "expression": {
+    "display": {
+      "grief": "works a double shift and doesn't mention why",
+      "fear": "recites procedure aloud, very evenly",
+      "anger": "gets very quiet and very formal",
+      "shame": "apologizes in exact, complete sentences",
+      "hurt": "goes back to her panel and checks it twice",
+      "affection": "remembers your stop and your news, and asks",
+      "joy": "hums the stop chimes out loud",
+      "gratitude": "writes your name in her logbook as the reason something went well"
+    }
+  },
+  "malleability": "stubborn",
+  "haunts": [
+    {
+      "location": "location.bulk.kilnworks.foundry-stop",
+      "from": "21:00",
+      "to": "05:00",
+      "note": "car 14's night run, Kilnworks to the Wheel and back",
+      "days": "weekdays"
+    },
+    {
+      "location": "location.bulk.kilnworks.foundry-stop",
+      "from": "05:00",
+      "to": "05:45",
+      "note": "the canteen under the platform after her shift; she doesn't eat, she sits",
+      "days": "weekdays"
+    }
+  ],
   "mood": "calm on the surface, counting minutes",
   "knowledge": [
     "The roof hatch is unlocked, but procedure forbids using it on a dead span",
@@ -85,9 +153,17 @@
       "id": "bent-the-book",
       "text": "She broke procedure once to get a passenger off a stalled car, and the passenger was hurt on the rail. That's why she won't open the doors. She won't volunteer it, but she won't lie about it either.",
       "summary": "Once broke procedure on a stalled car, and a passenger was hurt.",
-      "keywords": ["procedure", "open the doors", "climb out", "the rule book"],
+      "keywords": [
+        "procedure",
+        "open the doors",
+        "climb out",
+        "the rule book"
+      ],
       "tell": "Goes still when anyone mentions climbing out",
-      "revealWhen": "someone pushes hard to leave and she trusts them"
+      "revealWhen": "someone pushes hard to leave and she trusts them",
+      "disclose": {
+        "trust": "moderate"
+      }
     }
   ],
   "meters": {
@@ -98,11 +174,22 @@
   "relations": [
     {
       "to": "teo-varrin",
-      "note": "wary of an uncertified hand on her panel",
+      "tags": [],
+      "note": "has seen him on the night car for months; wary of an uncertified hand anywhere near her panel",
       "meters": {
         "approval": -5,
         "trust": -10,
-        "interest": 0
+        "interest": 5
+      }
+    },
+    {
+      "to": "jun-halloway",
+      "tags": [],
+      "note": "a regular on the night car for six years, off at the market stop; Kesh knows her shift times better than Jun does",
+      "meters": {
+        "approval": 10,
+        "trust": 10,
+        "interest": 5
       }
     }
   ],
