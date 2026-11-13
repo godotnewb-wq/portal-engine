@@ -111,6 +111,343 @@
   "relations": {
     "start": { "approval": 0, "trust": 0, "interest": 0 }
   },
+  "people": {
+    "ages": { "stages": ["child", "teen", "adult", "elder"], "minors": ["child", "teen"] },
+    "axes": [
+      {
+        "id": "scruples",
+        "name": "Scruples",
+        "stages": ["ruthless", "self-serving", "pragmatic", "honest", "principled"],
+        "drives": "willingness to lie, cheat, exploit, betray; bribes; villainy"
+      },
+      {
+        "id": "compassion",
+        "name": "Compassion",
+        "stages": ["callous", "hard", "even", "kind", "tender"],
+        "drives": "response to suffering; mercy; help"
+      },
+      {
+        "id": "temper",
+        "name": "Temper",
+        "stages": ["placid", "patient", "steady", "touchy", "explosive"],
+        "drives": "anger, irritability, how fast conflicts escalate"
+      },
+      {
+        "id": "outlook",
+        "name": "Outlook",
+        "stages": ["despairing", "gloomy", "even", "cheerful", "sunny"],
+        "drives": "warmth of mood, humor, hope"
+      },
+      {
+        "id": "nerve",
+        "name": "Nerve",
+        "stages": ["fearful", "anxious", "steady", "bold", "reckless"],
+        "drives": "fear response, risk-taking"
+      },
+      {
+        "id": "assertiveness",
+        "name": "Assertiveness",
+        "stages": ["meek", "deferential", "balanced", "forceful", "domineering"],
+        "drives": "leading vs. following, pushing for what they want"
+      },
+      {
+        "id": "discipline",
+        "name": "Discipline",
+        "stages": ["chaotic", "impulsive", "balanced", "diligent", "rigid"],
+        "drives": "reliability, self-control, planning"
+      },
+      {
+        "id": "openness",
+        "name": "Openness",
+        "stages": ["rigidly conventional", "conventional", "balanced", "curious", "iconoclast"],
+        "drives": "novelty, unconventional ideas and lifestyles, breaking norms"
+      },
+      {
+        "id": "composure",
+        "name": "Composure",
+        "stages": ["unfiltered", "open", "balanced", "reserved", "masked"],
+        "drives": "how much feeling shows"
+      }
+    ],
+    "attachment": [
+      {
+        "id": "closeness",
+        "name": "Closeness",
+        "stages": ["avoidant", "distant", "balanced", "warm", "seeks closeness"],
+        "drives": "how fast trust can grow; comfort with closeness and commitment; withdrawing under pressure"
+      },
+      {
+        "id": "security",
+        "name": "Security",
+        "stages": ["clinging", "anxious", "steady", "secure", "unshakable"],
+        "drives": "fear of rejection; reassurance seeking; jealousy; reactions to absence"
+      }
+    ],
+    "values": {
+      "list": [
+        { "id": "self-direction", "name": "Self-direction", "group": "openness" },
+        { "id": "stimulation", "name": "Stimulation", "group": "openness" },
+        { "id": "achievement", "name": "Achievement", "group": "enhancement" },
+        { "id": "power", "name": "Power", "group": "enhancement" },
+        { "id": "hedonism", "name": "Hedonism", "group": "between" },
+        { "id": "security", "name": "Security", "group": "conservation" },
+        { "id": "conformity", "name": "Conformity", "group": "conservation" },
+        { "id": "tradition", "name": "Tradition", "group": "conservation" },
+        { "id": "benevolence", "name": "Benevolence", "group": "transcendence" },
+        { "id": "universalism", "name": "Universalism", "group": "transcendence" }
+      ],
+      "strengths": ["mild", "strong", "defining"]
+    },
+    "foundations": {
+      "list": [
+        { "id": "care", "name": "Care" },
+        { "id": "fairness", "name": "Fairness" },
+        { "id": "loyalty", "name": "Loyalty" },
+        { "id": "authority", "name": "Authority" },
+        { "id": "sanctity", "name": "Sanctity" },
+        { "id": "liberty", "name": "Liberty" }
+      ],
+      "sensitivities": ["indifferent", "mild", "strong", "sacred"]
+    },
+    "emotions": {
+      "families": [
+        { "id": "grief", "name": "Grief" },
+        { "id": "fear", "name": "Fear" },
+        { "id": "anger", "name": "Anger" },
+        { "id": "shame", "name": "Shame" },
+        { "id": "hurt", "name": "Hurt" },
+        { "id": "affection", "name": "Affection" },
+        { "id": "joy", "name": "Joy" },
+        { "id": "gratitude", "name": "Gratitude" },
+        { "id": "surprise", "name": "Surprise", "moodOnly": true }
+      ],
+      "shades": [
+        { "word": "mourning", "families": ["grief"], "intensity": [3, 5] },
+        { "word": "sorrow", "families": ["grief"], "intensity": [2, 4] },
+        { "word": "loss", "families": ["grief"], "intensity": [2, 4] },
+        { "word": "regret", "families": ["grief", "shame"], "intensity": [1, 3] },
+        { "word": "longing", "families": ["grief", "affection"], "intensity": [1, 4] },
+        { "word": "nervousness", "families": ["fear"], "intensity": [1, 2] },
+        { "word": "worry", "families": ["fear"], "intensity": [2, 3] },
+        { "word": "dread", "families": ["fear"], "intensity": [3, 4] },
+        { "word": "panic", "families": ["fear"], "intensity": [4, 5] },
+        { "word": "jealousy", "families": ["fear", "anger", "hurt"], "intensity": [2, 4] },
+        { "word": "irritation", "families": ["anger"], "intensity": [1, 2] },
+        { "word": "frustration", "families": ["anger"], "intensity": [2, 3] },
+        { "word": "resentment", "families": ["anger"], "intensity": [2, 4] },
+        { "word": "bitterness", "families": ["anger", "hurt"], "intensity": [2, 4] },
+        { "word": "contempt", "families": ["anger"], "intensity": [2, 4] },
+        { "word": "disgust", "families": ["anger", "shame"], "intensity": [2, 4] },
+        { "word": "feeling betrayed", "families": ["anger", "hurt"], "intensity": [3, 5] },
+        { "word": "rage", "families": ["anger"], "intensity": [4, 5] },
+        { "word": "embarrassment", "families": ["shame"], "intensity": [1, 2] },
+        { "word": "guilt", "families": ["shame"], "intensity": [2, 4] },
+        { "word": "humiliation", "families": ["shame"], "intensity": [3, 5] },
+        { "word": "slighted", "families": ["hurt"], "intensity": [1, 2] },
+        { "word": "disappointment", "families": ["hurt"], "intensity": [2, 3] },
+        { "word": "rejected", "families": ["hurt"], "intensity": [3, 4] },
+        { "word": "fondness", "families": ["affection"], "intensity": [1, 2] },
+        { "word": "admiration", "families": ["affection"], "intensity": [1, 3] },
+        { "word": "tenderness", "families": ["affection"], "intensity": [2, 4] },
+        { "word": "protectiveness", "families": ["affection"], "intensity": [2, 4] },
+        { "word": "relief", "families": ["joy"], "intensity": [1, 3] },
+        { "word": "delight", "families": ["joy"], "intensity": [2, 3] },
+        { "word": "hope", "families": ["joy"], "intensity": [1, 3] },
+        { "word": "pride", "families": ["joy"], "intensity": [2, 4] },
+        { "word": "excitement", "families": ["joy"], "intensity": [2, 4] },
+        { "word": "elation", "families": ["joy"], "intensity": [4, 5] },
+        { "word": "appreciation", "families": ["gratitude"], "intensity": [1, 2] },
+        { "word": "thankfulness", "families": ["gratitude"], "intensity": [2, 4] },
+        { "word": "indebtedness", "families": ["gratitude"], "intensity": [3, 5] },
+        { "word": "startle", "families": ["surprise"], "intensity": [1, 3] },
+        { "word": "amazement", "families": ["surprise"], "intensity": [2, 4] },
+        { "word": "shock", "families": ["surprise"], "intensity": [3, 5] }
+      ]
+    },
+    "masking": {
+      "levels": ["none", "light", "moderate", "heavy"],
+      "axis": "composure",
+      "byStage": { "unfiltered": "none", "open": "light", "balanced": "moderate", "reserved": "heavy", "masked": "heavy" }
+    },
+    "ladder": [
+      { "word": "none" },
+      { "word": "grudging", "min": -35 },
+      { "word": "tolerates", "min": -20 },
+      { "word": "not hostile", "min": -10 },
+      { "word": "any positive", "min": 1 },
+      { "word": "low", "min": 10 },
+      { "word": "moderate", "min": 20 },
+      { "word": "high", "min": 35 },
+      { "word": "very high", "min": 45 },
+      { "word": "never", "blocked": true }
+    ],
+    "gates": { "assist": {"trust": "low", "approval": "not hostile"} },
+    "links": [{ "value": "stimulation", "strength": "defining", "action": "recruit", "meter": "trust", "shift": -1 }],
+    "motives": {
+      "types": [
+        { "id": "bond" },
+        { "id": "cause", "floors": {"trust": "tolerates", "approval": "grudging"} },
+        { "id": "debt", "floors": {"trust": "not hostile", "approval": "tolerates"} },
+        { "id": "necessity", "floors": {"trust": "grudging", "approval": "grudging"} },
+        { "id": "assignment", "floors": {"trust": "none", "approval": "none"} },
+        { "id": "leverage", "floors": {"trust": "none", "approval": "none"}, "shiftsAssist": false }
+      ],
+      "strengths": [
+        { "word": "weak", "steps": 1 },
+        { "word": "real", "steps": 2 },
+        { "word": "strong", "steps": 3 },
+        { "word": "desperate", "steps": 4 }
+      ],
+      "max": 3
+    },
+    "malleability": ["stubborn", "average", "impressionable"],
+    "fieldLocks": ["free", "slow", "locked"],
+    "haunts": { "recurring": {"min": 1, "max": 3}, "major": {"min": 2, "max": 5} }
+  },
+  "ties": {
+    "max": 3,
+    "groups": [
+      { "id": "family", "name": "Family" },
+      { "id": "partners", "name": "Partners" },
+      { "id": "work", "name": "Work and faction" },
+      { "id": "home", "name": "Home" },
+      { "id": "teaching", "name": "Teaching" },
+      { "id": "social", "name": "Social" }
+    ],
+    "tags": [
+      {
+        "id": "parent",
+        "group": "family",
+        "counterpart": "child",
+        "words": ["mother", "father", "parent", "adoptive mother", "stepmother", "stepfather"],
+        "family": true
+      },
+      {
+        "id": "child",
+        "group": "family",
+        "counterpart": "parent",
+        "words": ["daughter", "son", "child", "stepdaughter", "stepson"],
+        "family": true
+      },
+      {
+        "id": "sibling",
+        "group": "family",
+        "counterpart": "sibling",
+        "words": ["sister", "brother", "sibling", "half-sister", "half-brother", "stepsister", "stepbrother"],
+        "family": true
+      },
+      {
+        "id": "grandparent",
+        "group": "family",
+        "counterpart": "grandchild",
+        "words": ["grandmother", "grandfather", "grandparent"],
+        "family": true
+      },
+      {
+        "id": "grandchild",
+        "group": "family",
+        "counterpart": "grandparent",
+        "words": ["granddaughter", "grandson", "grandchild"],
+        "family": true
+      },
+      {
+        "id": "aunt-uncle",
+        "group": "family",
+        "counterpart": "niece-nephew",
+        "words": ["aunt", "uncle"],
+        "family": true
+      },
+      {
+        "id": "niece-nephew",
+        "group": "family",
+        "counterpart": "aunt-uncle",
+        "words": ["niece", "nephew"],
+        "family": true
+      },
+      { "id": "cousin", "group": "family", "counterpart": "cousin", "words": ["cousin"], "family": true },
+      {
+        "id": "in-law",
+        "group": "family",
+        "counterpart": "in-law",
+        "words": ["mother-in-law", "father-in-law", "sister-in-law", "brother-in-law", "in-law"],
+        "family": true
+      },
+      {
+        "id": "guardian",
+        "group": "family",
+        "counterpart": "ward",
+        "words": ["guardian", "foster mother", "foster father"],
+        "family": true
+      },
+      {
+        "id": "ward",
+        "group": "family",
+        "counterpart": "guardian",
+        "words": ["ward", "foster daughter", "foster son"],
+        "family": true
+      },
+      {
+        "id": "relative",
+        "group": "family",
+        "counterpart": "relative",
+        "words": ["relative", "distant cousin", "clan elder", "kin"],
+        "family": true
+      },
+      {
+        "id": "partner",
+        "group": "partners",
+        "counterpart": "partner",
+        "words": ["girlfriend", "boyfriend", "partner"]
+      },
+      { "id": "lover", "group": "partners", "counterpart": "lover", "words": ["lover"] },
+      { "id": "fiance", "group": "partners", "counterpart": "fiance", "words": ["fiancée", "fiancé"] },
+      { "id": "spouse", "group": "partners", "counterpart": "spouse", "words": ["wife", "husband", "spouse"] },
+      {
+        "id": "ex",
+        "group": "partners",
+        "counterpart": "ex",
+        "words": ["ex-girlfriend", "ex-boyfriend", "ex-wife", "ex-husband", "ex"]
+      },
+      { "id": "boss", "group": "work", "counterpart": "employee", "words": ["boss", "captain", "foreman"] },
+      { "id": "employee", "group": "work", "counterpart": "boss", "words": ["worker", "employee", "lieutenant"] },
+      { "id": "colleague", "group": "work", "counterpart": "colleague", "words": ["coworker", "colleague"] },
+      {
+        "id": "business-partner",
+        "group": "work",
+        "counterpart": "business-partner",
+        "words": ["business partner", "co-owner"]
+      },
+      { "id": "client", "group": "work", "counterpart": "contractor", "words": ["client", "regular"] },
+      { "id": "contractor", "group": "work", "counterpart": "client", "words": ["fixer", "fence", "contractor"] },
+      { "id": "handler", "group": "work", "counterpart": "informant", "words": ["handler"] },
+      { "id": "informant", "group": "work", "counterpart": "handler", "words": ["informant", "asset"] },
+      { "id": "creditor", "group": "work", "counterpart": "debtor", "words": ["creditor", "loan shark"] },
+      { "id": "debtor", "group": "work", "counterpart": "creditor", "words": ["debtor"] },
+      {
+        "id": "comrade",
+        "group": "work",
+        "counterpart": "comrade",
+        "words": ["crewmate", "comrade", "sister-in-arms", "brother-in-arms"]
+      },
+      { "id": "landlord", "group": "home", "counterpart": "tenant", "words": ["landlord", "landlady"] },
+      { "id": "tenant", "group": "home", "counterpart": "landlord", "words": ["tenant", "lodger"] },
+      { "id": "roommate", "group": "home", "counterpart": "roommate", "words": ["roommate", "flatmate"] },
+      { "id": "neighbor", "group": "home", "counterpart": "neighbor", "words": ["neighbor"] },
+      { "id": "mentor", "group": "teaching", "counterpart": "protege", "words": ["mentor", "master"] },
+      { "id": "protege", "group": "teaching", "counterpart": "mentor", "words": ["protégé", "apprentice"] },
+      { "id": "teacher", "group": "teaching", "counterpart": "student", "words": ["teacher"] },
+      { "id": "student", "group": "teaching", "counterpart": "teacher", "words": ["student", "pupil"] },
+      {
+        "id": "friend",
+        "group": "social",
+        "counterpart": "friend",
+        "words": ["friend", "best friend", "childhood friend"]
+      },
+      { "id": "old-friend", "group": "social", "counterpart": "old-friend", "words": ["old friend"] },
+      { "id": "rival", "group": "social", "counterpart": "rival", "words": ["rival"], "oneSided": true },
+      { "id": "enemy", "group": "social", "counterpart": "enemy", "words": ["enemy", "sworn enemy"], "oneSided": true }
+    ]
+  },
   "party": { "max": 3 },
   "memory": { "recall": { "recurring": 4, "major": 8 } },
   "pressures": ["background", "pressing", "urgent"],

@@ -1,4 +1,5 @@
 import { z } from 'zod'
+import { PeopleRulesSchema, TiesRulesSchema, peopleProblems } from './people'
 
 /**
  * A pack's rules as data (architecture §5): the engine supplies the mechanics, the ruleset their parameters and
@@ -95,6 +96,10 @@ export const RulesetSchema = z.object({
     /** Where a relation starts when two characters first share a scene: a true stranger. */
     start: z.record(id, z.number())
   }),
+  /** How a pack describes people: layers, emotions, gates, motives, growth words, haunt limits (npc design §11). */
+  people: PeopleRulesSchema,
+  /** Relationship tags (relationships §3). */
+  ties: TiesRulesSchema,
   /** The party (party §4): how many companions the player can have at once. */
   party: z.object({ max: z.number().int().min(0) }).default({ max: 3 }),
   /**
@@ -171,6 +176,8 @@ export function rulesetProblems(r: Ruleset): string[] {
   }
   if (!r.wordScale.some((w) => w.value === 0)) problems.push('the word scale needs a word worth 0 (no change)')
   if (r.attributes.min > r.attributes.max) problems.push('attributes.min is above attributes.max')
+  problems.push(...peopleProblems(r.people, r.ties, meters))
+  for (const tier of Object.keys(r.people.haunts)) if (!['recurring', 'major'].includes(tier)) problems.push(`people.haunts names unknown tier "${tier}"`)
   if (!r.narration.departure.includes('{name}')) problems.push('narration.departure needs {name}, for who leaves')
   return problems
 }
