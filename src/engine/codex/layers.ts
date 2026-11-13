@@ -5,7 +5,7 @@ import { locationChain } from './load'
 import type { CodexEntry, CodexKind } from './schema'
 
 /**
- * The three lore layers (claude/lore-injection.md §5): the stage, always on and cached; the scene-scoped layer, from
+ * The three lore layers (lore injection.md §5): the stage, always on and cached; the scene-scoped layer, from
  * where the scene is and who is in it, rebuilt every turn; and the triggered layer, from what was just said. Pure
  * lookups: no LLM call, and the same inputs always give the same text, so an unchanged layer stays in the cache.
  */
@@ -15,7 +15,7 @@ export const tokensOf = (text: string) => Math.ceil(text.length / 4)
 
 /**
  * Kinds in the order the scene and triggered layers list them, and (reversed) the order they give way under budget
- * pressure: background before history, history before what's going on now (claude/lore-injection.md §5).
+ * pressure: background before history, history before what's going on now (lore injection.md §5).
  */
 const KIND_ORDER: CodexKind[] = ['location', 'faction', 'species-culture', 'philosophy', 'current', 'concept', 'history', 'background', 'species-drawable']
 /** Kinds in the order the stage lists them: how things are and what happened first, what's going on now last. */

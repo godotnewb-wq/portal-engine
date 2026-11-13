@@ -1,5 +1,5 @@
 /**
- * Phrases LLM prose falls back on, in any world; a pack adds its own. A hit in the writer's output triggers the one rewrite (narrator-scene-engine §8).
+ * Phrases LLM prose falls back on, in any world; a pack adds its own. A hit in the writer's output triggers the one rewrite (director writer §8).
  * Matched case-insensitively as substrings.
  */
 export const OVERUSED_PHRASES = [
@@ -35,7 +35,7 @@ export const OVERUSED_PHRASES = [
 ]
 
 /**
- * The beat budget for a turn (narrator-scene-engine §2, tune). Speech and action are separate beats (milestone 2,
+ * The beat budget for a turn (director writer §2, tune). Speech and action are separate beats (milestone 2,
  * round 0 F1), so a turn needs more of them than when one beat could hold both.
  */
 export const BEATS = { min: 2, max: 12, target: '4–8', maxWords: 60, targetWords: 40 } as const

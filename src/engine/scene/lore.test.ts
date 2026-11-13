@@ -5,7 +5,7 @@ import { turnLore } from './lore'
 import { LORE_LINE_WORDS, parsePlan, validatePlan } from './plan'
 import { buildWriterPrompt } from './writer'
 
-// Lore lines and framing on the situation plan (claude/lore-injection.md §8, option B).
+// Lore lines and framing on the situation plan (lore injection.md §8, option B).
 const ASK = 'What do the tallies say about the Guild?'
 const raw = (lore: object[], speakers?: object[]) =>
   parsePlan(

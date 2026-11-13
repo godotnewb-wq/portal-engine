@@ -8,7 +8,7 @@ import { parsePlan, settlePlan, validatePlan } from './plan'
 import { runTurn, type TurnLlm } from './runTurn'
 import { buildWriterPrompt } from './writer'
 
-// The situation plan (director-writer review, option B, 2026-11-07).
+// The situation plan (director writer review, option B, 2026-11-07).
 const plan = (over: object = {}) =>
   JSON.stringify({
     player_action: { doing: 'asks Tobin who came by', uncertain: false },

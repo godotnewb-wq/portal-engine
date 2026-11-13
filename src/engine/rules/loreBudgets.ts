@@ -2,7 +2,7 @@ import { z } from 'zod'
 import type { Ruleset } from './ruleset'
 
 /**
- * The lore budgets a player may override in Settings (claude/milestone-3-plan.md, task 10): the scene-scoped and
+ * The lore budgets a player may override in Settings (milestone-3-plan.md, task 10): the scene-scoped and
  * triggered layers' token budgets and the lore lines a turn. One set for every pack; a field left out uses the pack's
  * ruleset. The stage isn't here: it's built once per session and only reported.
  */

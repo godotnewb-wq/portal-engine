@@ -72,7 +72,7 @@ export function withoutSpeech(text: string): string {
 }
 
 /**
- * Everything wrong with a reply that one rewrite should fix (narrator-scene-engine §3, code checks). `phrases` are the
+ * Everything wrong with a reply that one rewrite should fix (director writer §3, code checks). `phrases` are the
  * pack's own over-used phrases, checked with the engine's.
  */
 export function checkReply(parsed: ParsedReply, plan: BeatPlan, speakers: Speaker[], input: string, phrases: string[] = []): Problem[] {
@@ -155,7 +155,7 @@ export function packNames(content: Pack, extraPeople: string[] = []): NameIndex 
 }
 
 /**
- * The lore checks on a reply (claude/lore-injection.md §11): names of groups and places that aren't canon (a near
+ * The lore checks on a reply (lore injection.md §11): names of groups and places that aren't canon (a near
  * miss is told the right name; anything else new is told to use a description). There is no secret-leak check
  * (removed 2026-11-12): the writer sees a secret only when its holder keeps it, and what the story establishes about
  * secrets otherwise is the lore audit's to sort out at scene end (milestone 8).

@@ -4,7 +4,7 @@ import { packNames } from '@engine/scene'
 import { characterById, knowerOf } from '@engine/pack'
 import { content } from './support'
 
-/** How the pack is written, checked here rather than in the engine (claude/lore-injection.md §2.1). */
+/** How the pack is written, checked here rather than in the engine (lore injection.md §2.1). */
 describe('the Neonpunk Nights codex', () => {
   it('loads with no stance words in its prose', () => {
     expect(content.codex.length).toBeGreaterThan(50)
@@ -38,7 +38,7 @@ describe('the Neonpunk Nights codex', () => {
     expect(entryById(content.codex, 'location.bulk.kilnworks.coil-line-car-14')?.related).toContain('concept.the-coil-line')
   })
 
-  it('says where in claude/lore.md every entry comes from', () => {
+  it('says where in lore.md every entry comes from', () => {
     expect(content.codex.filter((e) => !e.source).map((e) => e.file)).toEqual([])
   })
 
@@ -92,7 +92,7 @@ describe('the Neonpunk Nights codex', () => {
   })
 })
 
-describe('the Neonpunk Nights lore layers (the worked example, claude/lore-injection.md §12)', () => {
+describe('the Neonpunk Nights lore layers (the worked example, lore injection.md §12)', () => {
   it('at the Sump Lantern: the place, the Ninth Turn and the Low Turns, the Couriers for Vex, and the peoples present', async () => {
     const { createInitialState, startScene } = await import('@engine/state')
     const { turnLore } = await import('@engine/scene')

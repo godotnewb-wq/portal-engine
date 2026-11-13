@@ -10,7 +10,7 @@ import { parsePlan, validatePlan } from './plan'
 import { runTurn, type TurnLlm } from './runTurn'
 import { secretDisplay } from './secrets'
 
-// Secrets on the director's situation sheet (claude/lore-injection.md §7.1, milestone 3.5 task 5).
+// Secrets on the director's situation sheet (lore injection.md §7.1, milestone 3.5 task 5).
 
 /** The fixture with Tobin carrying extra personal secrets, and the secret budgets set. */
 function pack(secrets: Partial<Character['secrets'][number]>[] = [], budgets: { linked?: number; personal?: number } = {}): Pack {

@@ -1,6 +1,6 @@
 # Portal Engine
 
-A game-agnostic engine for single-player LLM visual novel RPGs (Electron, React 19, TypeScript, zod, Vitest), run with game packs. The first pack is Neonpunk Nights. Design docs live in the claude.ai project "RPG Game": `architecture.md` (this layout), `project-outline.md` (milestones), `narrator-scene-engine.md`, `core-rules.md`, `lore.md`, and the rest.
+A game-agnostic engine for single-player LLM visual novel RPGs (Electron, React 19, TypeScript, zod, Vitest), run with game packs. The first pack is Neonpunk Nights. Design docs live in the `RPG Game Docs` folder beside this repository (`D:\RPG\RPG Game Docs`; the claude.ai project "RPG Game" points there). Start with `Developer Handoff.md` and `project outline.md` (milestones), then `architecture.md` (this layout), `director writer.md` (the turn), `core rules.md`, `lore.md` and the rest. Code comments cite them by name and section, e.g. "(director writer §3)".
 
 ## Commands
 - `npm run typecheck` and `npm test` after every change; report what they said.

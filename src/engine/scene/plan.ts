@@ -29,7 +29,7 @@ import {
 } from './planShape'
 
 /**
- * The director's plan, the situation plan (director-writer review, option B, 2026-11-07; the only plan since
+ * The director's plan, the situation plan (director writer review, option B, 2026-11-07; the only plan since
  * milestone 3.6 retired the line plan). The director decides what is true, wanted and at
  * stake; the writer writes the conversation. A move is a kind of move and the facts it says, not wording, so there is
  * no planner prose for the writer to paraphrase, and facts are checked against who may say them.
@@ -105,7 +105,7 @@ function justSaid(state: GameState, input: string): string {
  * earlier move, and every fact it uses must be one its speaker can say. A fact the speaker can't say is dropped from
  * the move and counted: that is a character saying what only someone else knows.
  *
- * Relevance (claude/scene-system-redesign.md §5): a secret is kept only when something just said touches it, named
+ * Relevance (scene system redesign.md §5): a secret is kept only when something just said touches it, named
  * in `touched` and found in the player's words or the last turn, so a secret isn't in play every turn (round 0: 96–100%
  * of speaker slots). An aim's pressure moves at most one step a turn. A move's facts are a pool it may draw on, so a
  * move with none is fine.
@@ -311,7 +311,7 @@ function validateShared(content: Pack, state: GameState, raw: SharedPlan): { pla
 }
 
 /**
- * The plan's lore lines, checked the way `canSay` checks facts (claude/lore-injection.md §8): the entry must be one
+ * The plan's lore lines, checked the way `canSay` checks facts (lore injection.md §8): the entry must be one
  * the director was given this turn, never a secret; an insider entry's line needs a `who`, a speaker who knows it,
  * and only they would say it; a common entry's line may be said by anyone, or used in narration. A line that fails
  * is dropped and counted as a correction. At most the turn's `loreLines` budget (the ruleset's, or the player's setting),

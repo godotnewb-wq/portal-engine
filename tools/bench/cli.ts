@@ -1,4 +1,4 @@
-// The scene test bench (narrator-scene-engine §10): plays fixed scenarios through the real turn pipeline and writes
+// The scene test bench (director writer §10): plays fixed scenarios through the real turn pipeline and writes
 // what happened, so prompt and model changes can be compared side by side.
 //
 //   npm run bench                                  every scenario of the default pack (neonpunk-nights), models from

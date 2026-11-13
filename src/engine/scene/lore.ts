@@ -7,14 +7,14 @@ import { RECENT_TURNS } from './director'
 import { presentCast } from './planShape'
 import { secretDisplay, type SecretShown } from './secrets'
 
-/** The lore one turn's prompts carry (claude/lore-injection.md §5), worked out once and shared by both calls. */
+/** The lore one turn's prompts carry (lore injection.md §5), worked out once and shared by both calls. */
 export interface TurnLore {
   stage: Stage
   writerStage: Stage
   layers: LoreLayers
   /** The budgets this turn ran with: the pack's, with any the player set in Settings. */
   budgets: LoreBudgets
-  /** How each held secret shows on the director's situation sheet: a cue or in full (claude/lore-injection.md §7.1). */
+  /** How each held secret shows on the director's situation sheet: a cue or in full (lore injection.md §7.1). */
   secrets: SecretShown[]
 }
 

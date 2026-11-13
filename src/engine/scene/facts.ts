@@ -4,7 +4,7 @@ import { characterById, locationById } from '@engine/pack'
 import { presentCast } from './planShape'
 
 /**
- * Something a line can say, with who may say it (director-writer review, option B). Characters' knowledge and
+ * Something a line can say, with who may say it (director writer review, option B). Characters' knowledge and
  * secrets belong to them; the place's current news belongs to anyone there; what has been said on screen this scene
  * belongs to everyone present. A move may use only facts its speaker has, so one character can't say what only
  * another knows (session 2026-11-07_1246_b4db: the nurse quoting the conductor's own record).

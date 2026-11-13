@@ -5,4 +5,4 @@ Places and the setting they belong to. A location has a tier, a description, a t
 **Public API** (`@engine/world`): `LocationSchema`, `SceneCardSchema`, `TextureCardSchema`, `SettingSchema`, `settingProblems`, `tierById`, `speciesById`, `factionById`, `factionChain`, `FACTION_LEVELS`, `FactionLevelSchema`, `levelRank`, `parentLevel`, `STANCE_LEVEL_COUNT`.
 
 **Depends on:** core.
-**Design:** `claude/architecture.md` §5 (setting), `claude/narrator-scene-engine.md` §8 (texture cards).
+**Design:** `architecture.md` §5 (setting), `director writer.md` §8 (texture cards).

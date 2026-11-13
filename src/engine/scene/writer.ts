@@ -29,7 +29,7 @@ export function sceneSpeakers(content: Pack, state: GameState): Speaker[] {
 
 
 /**
- * How the conversation should read (director-writer review, option B). A few principles and one example in place of
+ * How the conversation should read (director writer review, option B). A few principles and one example in place of
  * a long rule list: what code checks (who knows what, what's new to the player, who may speak) arrives as data in
  * the brief instead. Examples use made-up people, as engine text must.
  */
@@ -89,7 +89,7 @@ export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPla
   // A fact already said is marked, so it isn't said again in other words (session 2026-11-07_1949_ffec: "a crew is on
   // its way" three times, "five minutes" four).
   const said = (m: Move) => m.says.map((s) => `${s.text} ${s.unheard ? '[new to the player]' : "[already said; don't repeat it]"}`).join('; ')
-  // An aim reaches the writer only when it presses (claude/scene-system-redesign.md §5.3): the weakest word keeps it out.
+  // An aim reaches the writer only when it presses (scene system redesign.md §5.3): the weakest word keeps it out.
   const words = content.ruleset.pressures
   const aim = (id: string, pressure?: string) => {
     const level = pressure ? words.indexOf(pressure) : 0

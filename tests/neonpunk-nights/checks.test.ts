@@ -3,7 +3,7 @@ import type { StatBlock } from '@engine/rules'
 import { assistFrom, combineEdges, degreeOf, describeCheck, modifier, rankCap, rollCheck } from '@engine/rules'
 import { content } from './support'
 
-/** The Neonpunk Nights ruleset, as the pack ships it (core-rules.md). */
+/** The Neonpunk Nights ruleset, as the pack ships it (core rules.md). */
 const R = content.ruleset
 import { dice, type Dice } from '@engine/core'
 import { draws } from '@engine/core'

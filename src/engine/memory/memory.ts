@@ -5,7 +5,7 @@ import type { GameState, Memory } from '@engine/state'
 
 const LEVELS = ['core', 'normal', 'fleeting'] as const
 
-/** How many memories a character brings to a scene, by tier (quests-relationships-npcs §5, tune). */
+/** How many memories a character brings to a scene, by tier (memory §3, tune). */
 export const RECALL = { recurring: 4, companion: 8 } as const
 
 /** A character's memories worth bringing to a scene: core first, then the most recent. */

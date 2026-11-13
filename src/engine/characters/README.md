@@ -7,4 +7,4 @@ What a character file holds: tier (recurring or companion), species, look, role,
 Species, factions, skills and meters are the pack's; `engine/pack` checks a character against them.
 
 **Depends on:** core, rules.
-**Design:** `claude/narrator-scene-engine.md` §7, `claude/quests-relationships-npcs.md` §5.
+**Design:** `director writer.md` §7, `npc design.md` §2.

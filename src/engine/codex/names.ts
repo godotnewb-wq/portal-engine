@@ -2,7 +2,7 @@ import type { Setting } from '@engine/world'
 import type { CodexEntry } from './schema'
 
 /**
- * The strict name check (claude/lore-injection.md §11): every name the writer gives a group or place must be canon.
+ * The strict name check (lore injection.md §11): every name the writer gives a group or place must be canon.
  * A name close to a canon one is a wrong name (the rewrite is told the right one); any other new name for a group or
  * place is an invented one. Personal names aren't checked: a one-word name that isn't close to a canon word passes.
  */

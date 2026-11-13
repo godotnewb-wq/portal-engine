@@ -12,7 +12,7 @@ export interface StageFigure {
 
 /**
  * Who is here, standing side by side. While someone has the line they are lit and the others dimmed; during narration
- * nobody is (narrator-scene-engine §6, sprites). Placeholder figures until the art pipeline exists.
+ * nobody is (director writer §6, sprites). Placeholder figures until the art pipeline exists.
  */
 export function SpriteStage({ figures }: { figures: StageFigure[] }) {
   const anyone = figures.some((f) => f.speaking)

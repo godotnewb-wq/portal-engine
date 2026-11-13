@@ -3,7 +3,7 @@ import { plainName } from '@engine/core'
 
 /**
  * The writer's output format: one beat per line, `NARRATION: …` or `Name: …`, with hidden tags in square brackets
- * anywhere (narrator-scene-engine §5). Tag grammar:
+ * anywhere (director writer §5). Tag grammar:
  *   [Name: EXPRESSION smirk]   [Name: COMFORT 2 too loud]   [Name: MOOD wary]   [LEAVES: Name]   [END SCENE]
  */
 export const NARRATION = 'NARRATION'

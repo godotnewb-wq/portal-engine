@@ -48,7 +48,7 @@ export interface TurnTrace {
   }
   /** The beats as shown, each traced to its line in the reply it came from and to the plan item it carries out. */
   beats: BeatTrace[]
-  /** Slang, aim words and gestures in the beats shown (claude/scene-system-redesign.md §11); older logs have none. */
+  /** Slang, aim words and gestures in the beats shown (scene system redesign.md §11); older logs have none. */
   usage?: Usage
   /** `dropped`: tags that didn't parse or named no one here, then tags that parsed but don't count (`acceptTags`), each with why. */
   tags: { parsed: Tags; dropped: string[] }

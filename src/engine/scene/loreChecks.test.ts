@@ -5,7 +5,7 @@ import { parseReply } from './beats'
 import { loreProblems, packNames } from './checks'
 import { sceneSpeakers } from './writer'
 
-// The writer's lore checks (claude/lore-injection.md §11): canon names. The secret-leak check was removed 2026-11-12.
+// The writer's lore checks (lore injection.md §11): canon names. The secret-leak check was removed 2026-11-12.
 const state = yardScene()
 const names = (text: string) => checkNames(text, packNames(fixture, [state.player.name])).map((f) => [f.kind, f.name])
 const problems = (prose: string) => loreProblems(fixture, state, parseReply(prose, sceneSpeakers(fixture, state)))

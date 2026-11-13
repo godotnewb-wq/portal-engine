@@ -5,4 +5,4 @@ A game pack, loaded and checked. `buildPack(files)` is the one step that turns a
 **Public API** (`@engine/pack`): `Pack`, `PackFiles`, `buildPack`, `packProblems`, `packWarnings` (authoring warnings: stance words in codex text, a character starting with more secrets than `codex.startingSecrets`), `characterById`, `locationById`, `withSecretTexts` (a linked secret's text from the codex), `knowerOf`, `PhrasesSchema`, `Vocabulary`; `PackManifestSchema`, `ENGINE_VERSION`, `satisfies` (engine version ranges such as `^0.2.0`).
 
 **Depends on:** core, rules, characters, world, codex.
-**Design:** `claude/architecture.md` §5, §12.
+**Design:** `architecture.md` §5, §12.

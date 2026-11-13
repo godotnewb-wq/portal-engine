@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { IdSchema } from '@engine/core'
 
 /**
- * Everyone's standing in a faction is one of four levels, the same in every pack (lore-injection §7): connected but not
+ * Everyone's standing in a faction is one of four levels, the same in every pack (lore injection §7): connected but not
  * inside, a member, senior and relied on, or leading. Titles ("handler", "deacon") are free text on the character.
  */
 export const FACTION_LEVELS = ['affiliated', 'member', 'trusted', 'leadership'] as const

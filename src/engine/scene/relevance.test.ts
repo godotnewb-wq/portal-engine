@@ -10,7 +10,7 @@ import { applyTurn } from './turn'
 import { sceneSpeakers } from './writer'
 import { buildWriterPrompt } from './writer'
 
-// Redesign step 2 (claude/scene-system-redesign.md §5): what is live each turn, and how strongly.
+// Redesign step 2 (scene system redesign.md §5): what is live each turn, and how strongly.
 const ASK = 'Tobin, who came by?'
 const plan = (speakers: object[], over: object = {}) =>
   parsePlan(

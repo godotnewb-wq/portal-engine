@@ -85,7 +85,7 @@ export interface Said {
   unheard: boolean
 }
 
-/** A move after validation (director-writer review, option B): who, what it answers, what kind of move, and what it says. */
+/** A move after validation (director writer review, option B): who, what it answers, what kind of move, and what it says. */
 export interface Move {
   who: string
   answers: 'player' | number
@@ -96,7 +96,7 @@ export interface Move {
 }
 
 /**
- * A line of world lore the writer may draw on this turn (claude/lore-injection.md §8): the codex entry it comes from,
+ * A line of world lore the writer may draw on this turn (lore injection.md §8): the codex entry it comes from,
  * the fact in plain words, and, for insider knowledge, the one speaker who would say it.
  */
 export interface LoreLine {
@@ -138,7 +138,7 @@ export const MAX_CHECKS = 2
 export const MAX_LINES = 5
 /**
  * After this many turns without a line, the director is shown what a character cares about (round 0 F3). A reminder
- * to look, never a quota: whether they speak stays the director's call (director-writer §6).
+ * to look, never a quota: whether they speak stays the director's call (director writer §6).
  */
 export const QUIET_TURNS = 2
 

@@ -177,7 +177,7 @@ export function renderReport(content: Pack, bench: BenchRun): string {
 const cell = (text: string) => text.replace(/\|/g, '\\|').replace(/\n/g, '<br>')
 
 /**
- * Two runs side by side (narrator-scene-engine §10): what differs in their inputs, their numbers, metrics over the
+ * Two runs side by side (director writer §10): what differs in their inputs, their numbers, metrics over the
  * scenario plays whose inputs match (milestone 3.6: same scenario, repeat and seed, and the same scenario content when
  * both runs recorded it), then each scenario they share, turn by turn, with the beats in two columns. Each run is
  * named as it recorded, not from whichever pack is loaded now.

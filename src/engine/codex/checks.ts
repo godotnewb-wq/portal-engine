@@ -2,7 +2,7 @@ import { factionById, factionChain, tierById, type Location, type Setting } from
 import { MAX_LOCATION_LAYER, selectorText, type CodexEntry, type Selector } from './schema'
 
 /**
- * The most words in a lore line the director writes for the writer: one fact in plain words (claude/lore-injection.md §8).
+ * The most words in a lore line the director writes for the writer: one fact in plain words (lore injection.md §8).
  * An entry's summary keeps to it too, because the summary stands in for a line that runs long.
  */
 export const LORE_LINE_WORDS = 30
@@ -44,7 +44,7 @@ function selectorProblems(s: Selector, ctx: CodexContext): string[] {
 }
 
 /**
- * Problems across the codex that stop a pack loading (claude/lore-injection.md §4, Content check): duplicate ids and
+ * Problems across the codex that stop a pack loading (lore injection.md §4, Content check): duplicate ids and
  * keywords, clashing aliases, oversized text, secrets the writer could see, misplaced stage lines and selectors, names
  * of things that don't exist, and a map tree that doesn't fit the setting. Warnings are in `codexWarnings`.
  */

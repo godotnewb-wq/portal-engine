@@ -20,7 +20,7 @@ export const meterWords = (r: Ruleset, m: Meters): string =>
 
 
 /**
- * The director's rules (director-writer review, option B, the situation plan). It plans what is true, wanted and at stake, as
+ * The director's rules (director writer review, option B, the situation plan). It plans what is true, wanted and at stake, as
  * choices and fact ids, and writes no prose and no dialogue. Short on purpose: what code can check (who knows what,
  * what's been said, who may speak) is checked in code, not asked for here.
  */

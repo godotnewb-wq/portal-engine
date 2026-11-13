@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { IdSchema } from '@engine/core'
 import { MetersSchema } from '@engine/characters'
 
-/** One click of the VN text box: a line of narration, or one character's line (narrator-scene-engine §2). */
+/** One click of the VN text box: a line of narration, or one character's line (director writer §2). */
 export const BeatSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('narration'), text: z.string() }),
   z.object({ kind: z.literal('dialogue'), speaker: z.string(), text: z.string() })

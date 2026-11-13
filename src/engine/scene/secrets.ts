@@ -6,7 +6,7 @@ import type { GameState } from '@engine/state'
 import { presentCast } from './planShape'
 
 /**
- * How each held secret appears on the director's situation sheet (claude/lore-injection.md §7.1, milestone 3.5): every
+ * How each held secret appears on the director's situation sheet (lore injection.md §7.1, milestone 3.5): every
  * secret as a short cue, and some in full. Linked and personal secrets are ranked separately for full display: a secret
  * validly kept last turn first, then one whose own keywords were just said, then one whose subject the conversation
  * brought up (background lore of the place and the people present doesn't count: decided 2026-11-12). Within a

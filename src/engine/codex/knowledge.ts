@@ -1,7 +1,7 @@
 import { factionChain, levelRank, parentLevel, type FactionLevel, type Setting } from '@engine/world'
 import type { CodexEntry, Selector } from './schema'
 
-/** Who someone is, as far as the knowledge filter cares (claude/lore-injection.md §7). Any field may be blank. */
+/** Who someone is, as far as the knowledge filter cares (lore injection.md §7). Any field may be blank. */
 export interface Knower {
   id: string
   name: string

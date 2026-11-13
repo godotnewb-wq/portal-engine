@@ -62,7 +62,7 @@ export interface TurnOptions extends ResolveOptions {
 }
 
 /**
- * One player turn (narrator-scene-engine §3): director → game resolves mechanics → streamed writer → code checks →
+ * One player turn (director writer §3): director → game resolves mechanics → streamed writer → code checks →
  * one targeted rewrite if a check fails. At most three calls; anything still wrong after the rewrite is salvaged by
  * code rather than costing a fourth. A failed call throws a `TracedError` carrying the calls made so far.
  */
