@@ -43,6 +43,21 @@ describe('the always-on brief', () => {
     expect(sheets.tobin).toMatch(/Toward the player: .* · employer: took him on for the night shift last month/)
   })
 
+  it('gives a Major Character the close-ties line for people not here, leaving out private tags; never a Recurring one', () => {
+    const alone = (state: GameState): GameState => ({ ...state, scene: { ...state.scene!, cast: ['mara'] } })
+    expect(buildBriefs(fixture, alone(yardScene()), 'Evening.').sheets.mara).toContain('Close ties, not here: rival: Tobin')
+    const hidden = yardScene()
+    hidden.relations = hidden.relations.map((r) => ({ ...r, tags: r.tags.map((t) => ({ ...t, private: true })) }))
+    expect(buildBriefs(fixture, alone(hidden), 'Evening.').sheets.mara).not.toContain('Close ties')
+    expect(buildBriefs(fixture, yardScene(), 'Evening.').sheets.tobin).not.toContain('Close ties')
+  })
+
+  it('shows the director a private tag between people here, marked as private', () => {
+    const hidden = yardScene()
+    hidden.relations = hidden.relations.map((r) => ({ ...r, tags: r.tags.map((t) => ({ ...t, private: true })) }))
+    expect(buildBriefs(fixture, hidden, 'Evening.').sheets.mara).toMatch(/Tobin: rival \(private\) · /)
+  })
+
   it('records each character’s always-on cost in the trace', () => {
     const { trace } = buildBriefs(fixture, yardScene(), 'Evening.')
     expect(Object.keys(trace.recurring).sort()).toEqual(['mara', 'tobin'])
@@ -92,6 +107,28 @@ describe('choosing optional detail', () => {
     const alone: GameState = { ...yardScene(), scene: { ...yardScene().scene!, cast: ['mara'] } }
     expect(selectDetails(fixture, alone, 'How is your rival these days?').details.find((d) => d.id === 'tie.mara.tobin')?.trigger).toContain('said: rival')
     expect(ids(alone, 'Everyone needs a rival.')).not.toContain('tie.mara.tobin')
+  })
+
+  it('caps ties to people who aren’t here across the whole scene, too', () => {
+    const alone: GameState = { ...yardScene(), scene: { ...yardScene().scene!, cast: ['mara'] } }
+    const capped = selectDetails(withBriefs({ absentPerScene: 0 }), alone, 'Is Tobin about?')
+    expect(capped.trace.cut).toContainEqual(expect.objectContaining({ id: 'tie.mara.tobin', why: 'absent cap' }))
+  })
+
+  it('brings in someone not here when the place is one of their haunts, as texture', () => {
+    // Tobin, alone in the yard, with a tie to Mara, whose card puts her at the yard's tally desk.
+    const state = yardScene()
+    const alone: GameState = {
+      ...state,
+      relations: [...state.relations, { from: 'tobin', to: 'mara', tags: [{ tag: 'foe' }], note: 'she counts his tallies twice', meters: { warmth: 0, bond: 0 } }],
+      scene: { ...state.scene!, cast: ['tobin'] }
+    }
+    expect(selectDetails(fixture, alone, 'Evening.').details.find((d) => d.id === 'tie.tobin.mara')).toMatchObject({ rank: 'texture', trigger: 'a haunt of theirs' })
+  })
+
+  it('brings in someone not here who was named last turn', () => {
+    const alone: GameState = withTurns({ ...yardScene(), scene: { ...yardScene().scene!, cast: ['mara'] } }, turn({ player: 'Seen Tobin?', speakers: ['mara'] }))
+    expect(selectDetails(fixture, alone, 'Go on.').details.find((d) => d.id === 'tie.mara.tobin')).toMatchObject({ rank: 'choice', trigger: 'named last turn: Tobin' })
   })
 
   it('needs no model call and gives the same answer twice', () => {
@@ -191,5 +228,30 @@ describe('the writer prompt', () => {
 describe('content words', () => {
   it('leaves out short and stop words and names, and roughly stems', () => {
     expect([...contentWords('Tobin was waiting in the yards after closing', new Set(['tobin']))].sort()).toEqual(['clos', 'wait', 'yard'])
+  })
+})
+
+describe('two characters at the same stages', () => {
+  // npc design §13: two characters with the same layers must stay distinguishable. The stages are only a line of the
+  // director's brief; the cue, what they care about in their own words, their aims and their voice are the card's own.
+  const twin = { ...fixture.characters.find((c) => c.id === 'tobin')!, layers: fixture.characters.find((c) => c.id === 'mara')!.layers }
+  const pack: Pack = { ...fixture, characters: fixture.characters.map((c) => (c.id === 'tobin' ? twin : c)) }
+
+  it('get the same nature line and different briefs otherwise', () => {
+    const { sheets } = buildBriefs(pack, yardScene(), 'Evening.')
+    const line = (id: string, label: string) => sheets[id]!.split('\n').find((l) => l.startsWith(label))
+    expect(line('mara', 'Nature:')).toBe(line('tobin', 'Nature:'))
+    for (const label of ['Who:', 'Cue:', 'Tonight:', 'Lying tell:']) expect(line('mara', label)).not.toBe(line('tobin', label))
+  })
+
+  it('reach the writer through their own portraits and voices, never the stages', () => {
+    const plan = { speakers: [{ id: 'mara', intent: 'answer', mood: 'flat' }, { id: 'tobin', intent: 'answer', mood: 'flat' }], exchange: [], reactions: [], checks: [], walk_ons: [], texture: [], avoid: [], leaves: [], end_scene: false } as unknown as BeatPlan
+    const system = buildWriterPrompt(pack, yardScene(), plan, 'Well?').system
+    const mara = fixture.characters.find((c) => c.id === 'mara')!
+    expect(system).toContain(mara.portrait)
+    expect(system).toContain(twin.portrait)
+    expect(system).toContain(mara.voice.sampleLines[0]!)
+    expect(system).toContain(twin.voice.sampleLines[0]!)
+    for (const stage of Object.values(mara.layers?.axes ?? {})) expect(system).not.toMatch(new RegExp(`\\b${stage}\\b`))
   })
 })

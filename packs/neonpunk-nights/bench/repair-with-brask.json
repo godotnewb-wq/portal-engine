@@ -1,0 +1,15 @@
+{
+  "id": "repair-with-brask",
+  "title": "Brask backs up a repair",
+  "watchFor": "The player tries to fix the Sump Lantern's rattling ice chiller with Brask, a rank-3 mechanic in the party, beside them. The director should plan an Engineering check for the player and must not plan Brask's help itself: the game adds it, and the check line should end \"(+2: Brask)\". Brask helps the way he would: quiet, precise, pointing at the right valve rather than taking over. Dunmar cares about his chiller and his slate, not about who gets the credit. Vex stays herself and doesn't help with a skill she lacks.",
+  "location": "sump-lantern",
+  "cast": ["vex", "brask", "dunmar"],
+  "seed": 53,
+  "forceNatural": 12,
+  "expectedCheck": { "turn": 2, "who": "player", "skill": "engineering" },
+  "turns": [
+    "Dunmar, your chiller's rattling again. Want me to look at it?",
+    "I get down behind the bar, pull the chiller's back panel and try to fix whatever's knocking.",
+    "Brask, was that the valve you meant?"
+  ]
+}

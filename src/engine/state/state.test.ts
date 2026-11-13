@@ -35,6 +35,18 @@ describe('game state', () => {
     ])
   })
 
+  it('refuses relationship tags the ruleset doesn’t list, or more than its limit toward one person', () => {
+    const state = yardScene()
+    const max = fixture.ruleset.ties.max
+    state.relations = [{ ...state.relations[0]!, tags: [{ tag: 'ghost-tag' }, ...Array.from({ length: max }, () => ({ tag: fixture.ruleset.ties.tags[0]!.id }))] }]
+    state.playerTies = { tobin: { tags: [{ tag: 'nemesis' }] } }
+    expect(stateProblems(fixture, state)).toEqual([
+      'a relationship uses unknown tag "ghost-tag"',
+      'a relationship uses unknown tag "nemesis"',
+      `mara holds ${max + 1} tags toward tobin; the most is ${max}`
+    ])
+  })
+
   it('refuses a party that names someone unknown or not a Major Character', () => {
     const state = yardScene()
     state.party = ['tobin', 'ghost']

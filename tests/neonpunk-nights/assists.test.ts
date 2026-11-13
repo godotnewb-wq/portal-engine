@@ -29,9 +29,15 @@ describe('assists', () => {
     expect(c.line).toMatch(/\(\+3: Vex, Brask\)$/)
   })
 
-  it('a companion below rank 3 never assists, and nobody does in the pack as shipped (both rank 1–2)', () => {
+  it('a companion below rank 3 never assists: as shipped, nobody helps with Empathy (both rank 2)', () => {
     expect(roll(ranks({ vex: 3, brask: 2 }), barScene()).helpers).toEqual(['vex'])
     expect(roll(content, barScene()).helpers).toBeUndefined()
+  })
+
+  it('as shipped, Brask backs the player on Engineering and Vex on Stealth (each rank 3, both willing)', () => {
+    const on = (skill: string) => resolvePlan(content, barScene(), { ...check(), checks: [{ ...check().checks[0]!, skill: skill as never }] }, { forceNatural: 10 }).plan.checks[0]!
+    expect(on('engineering')).toMatchObject({ helpers: ['brask'], result: expect.objectContaining({ bonus: 2 }) })
+    expect(on('stealth')).toMatchObject({ helpers: ['vex'], result: expect.objectContaining({ bonus: 2 }) })
   })
 
   it('a companion whose gate isn’t met adds nothing and never hinders', () => {

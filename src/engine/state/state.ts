@@ -85,6 +85,8 @@ export function stateProblems(content: Pack, state: GameState): string[] {
   for (const t of [...state.relations.flatMap((r) => r.tags), ...Object.values(state.playerTies).flatMap((p) => p.tags)]) {
     if (!tags.includes(t.tag)) problems.push(`a relationship uses unknown tag "${t.tag}"`)
   }
+  // The same limit the pack check holds authored ties to (relationships §3), so a save can't carry more.
+  for (const r of state.relations) if (r.tags.length > content.ruleset.ties.max) problems.push(`${r.from} holds ${r.tags.length} tags toward ${r.to}; the most is ${content.ruleset.ties.max}`)
   for (const r of state.relations) {
     unknown('a relation', r.from)
     unknown('a relation', r.to)

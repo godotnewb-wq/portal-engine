@@ -29,6 +29,7 @@ describe('the shipped scenarios', () => {
       'lore-paraphrase',
       'lore-secret-fishing',
       'lore-species-stereotype',
+      'repair-with-brask',
       'secret-dormant',
       'secret-touched',
       'siblings-on-the-car',
