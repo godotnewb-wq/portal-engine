@@ -5,6 +5,7 @@ import { buildCodex, codexProblems, codexWarnings, entryById, mayHold, type Code
 import { LocationSchema, SettingSchema, settingProblems, speciesById, factionById, tierById, STANCE_LEVEL_COUNT, type Location, type Setting } from '@engine/world'
 import { firstName } from '@engine/core'
 import { ENGINE_VERSION, PackManifestSchema, satisfies, type PackManifest } from './manifest'
+import { cardProblems, cardWarnings } from './cards'
 
 /**
  * The pack's own words for things the engine says to the LLM or the player (`setting/phrases.json`): phrases its prose
@@ -164,7 +165,8 @@ export function packWarnings(pack: Pack): string[] {
   const most = pack.ruleset.codex.startingSecrets
   return [
     ...codexWarnings(pack.codex, pack.vocabulary),
-    ...pack.characters.filter((c) => c.secrets.length > most).map((c) => `${c.id} starts with ${c.secrets.length} secrets; more than ${most} crowds the director's sheet`)
+    ...pack.characters.filter((c) => c.secrets.length > most).map((c) => `${c.id} starts with ${c.secrets.length} secrets; more than ${most} crowds the director's sheet`),
+    ...pack.characters.flatMap((c) => cardWarnings(pack.ruleset, c))
   ]
 }
 
@@ -203,6 +205,7 @@ export function packProblems(pack: Pack): string[] {
       else if (!mayHold(s, e, knowerOf(c))) problems.push(`${c.id} can't hold "${sec.codex}": not among who may know it`)
     }
     problems.push(...meterProblems(r, c.id, c.meters))
+    problems.push(...cardProblems(r, pack.codex, c))
     if (c.stats) problems.push(...statProblems(r, c.id, c.stats))
     for (const rel of c.relations) {
       if (!characters.has(rel.to)) problems.push(`${c.id} has a relation to unknown character "${rel.to}"`)

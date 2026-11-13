@@ -28,7 +28,8 @@ export const VoiceCardSchema = z.object({
   avoids: z.array(z.string()).default([]),
   sampleLines: z.array(z.string()).min(1),
   /** How the voice changes: angry, warm toward someone they like, and lying. */
-  shifts: z.object({ angry: z.string(), warm: z.string(), lying: z.string() })
+  /** How the voice changes: angry, warm toward someone they like, lying, and (the full card) afraid. */
+  shifts: z.object({ angry: z.string(), warm: z.string(), lying: z.string(), afraid: z.string().min(1).optional() })
 })
 export type VoiceCard = z.infer<typeof VoiceCardSchema>
 
@@ -49,8 +50,13 @@ export const SecretSchema = z
     angle: z.string().min(1).optional(),
     /** How they behave when guarding it, so deception reads on the page. */
     tell: z.string(),
-    /** When they would let it go (free text for the director, until reveal conditions are built). */
+    /** When they would let it go: prose the director weighs, alongside the minimums below. */
     revealWhen: z.string().optional(),
+    /**
+     * Voluntary disclosure (npc design §6, milestone 4a): ladder words per meter that the holder's feelings toward the
+     * listener must all meet before they choose to share it. A meter left out asks nothing.
+     */
+    disclose: z.record(z.string(), z.string().min(1)).optional(),
     /**
      * Personal: the short form the director sees until the secret is expanded (lore injection.md §7.1); without
      * one, the text's first sentence. A linked secret's short form is its codex entry's summary.
@@ -65,6 +71,50 @@ export const SecretSchema = z
 export type Secret = z.infer<typeof SecretSchema> & { text: string }
 
 export const ValueSchema = z.object({ value: z.string(), stance: z.enum(['likes', 'dislikes']) })
+
+/**
+ * A schedule entry (npc design §2): a codex location, a time window ("16:00"–"20:00"; a window may cross midnight),
+ * which days (left out, every day: "weekdays", "weekends" or day names), and a line in words. Used from milestone 6.
+ */
+export const HauntSchema = z.object({
+  location: z.string().min(1),
+  from: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'a time is HH:MM'),
+  to: z.string().regex(/^([01]\d|2[0-3]):[0-5]\d$/, 'a time is HH:MM'),
+  days: z.union([z.enum(['weekdays', 'weekends']), z.array(z.string().min(1)).min(1)]).optional(),
+  note: z.string().min(1)
+})
+export type Haunt = z.infer<typeof HauntSchema>
+
+/**
+ * The four layers of a person (npc design §4), in the ruleset's words: the axes and attachment stages that matter for
+ * them, their values (each one of the ruleset's, with a strength and liked or disliked, and optionally in their own
+ * words), and their foundation sensitivities. Never shown to the writer as labels.
+ */
+export const LayersSchema = z.object({
+  axes: z.record(z.string(), z.string()).default({}),
+  attachment: z.record(z.string(), z.string()).default({}),
+  values: z.array(z.object({ value: z.string(), strength: z.string(), stance: z.enum(['likes', 'dislikes']), personal: z.string().min(1).optional() })).default([]),
+  foundations: z.record(z.string(), z.string()).default({})
+})
+export type Layers = z.infer<typeof LayersSchema>
+
+/**
+ * How feelings show on them (npc design §7): masking per emotion family where it differs from their Composure's
+ * default, one display line per family (how it looks when it does show), and optional lines for shades that look
+ * different from their family.
+ */
+export const ExpressionSchema = z.object({
+  masking: z.record(z.string(), z.string()).default({}),
+  display: z.record(z.string(), z.string().min(1)).default({}),
+  shades: z.record(z.string(), z.string().min(1)).default({})
+})
+
+/** A gate profile's own words for one action (npc design §6): a base in place of the ruleset's, and requirements fixed outright. */
+export const GateSchema = z.object({ base: z.record(z.string(), z.string()).optional(), fixed: z.record(z.string(), z.string()).optional() })
+
+/** A tie to the player that isn't about feelings (npc design §6): its type, strength, what makes it valid, and why, as they see it. */
+export const MotiveSchema = z.object({ type: z.string(), strength: z.string(), evidence: z.string().min(1), reason: z.string().min(1) })
+export type Motive = z.infer<typeof MotiveSchema>
 
 /**
  * How a character starts out toward someone else in the cast: how they feel (meters) and one line of specific
@@ -108,6 +158,21 @@ export const CharacterSchema = z
     voice: VoiceCardSchema,
     /** The mood they walk in with; it persists across turns once play starts. */
     mood: z.string(),
+    /** Age stage, from the ruleset (npc design §3); drives portrayal and the child guard. */
+    age: z.string().optional(),
+    /** Where they can be found, and when (npc design §2). */
+    haunts: z.array(HauntSchema).default([]),
+    /** How they behave when lying or hiding something (npc design §3). */
+    tells: z.array(z.string().min(1)).default([]),
+    layers: LayersSchema.optional(),
+    expression: ExpressionSchema.optional(),
+    /** Their own gate words per action, and what blocks an action outright regardless of feelings. */
+    gates: z.record(z.string(), GateSchema).default({}),
+    blockers: z.array(z.object({ action: z.string(), reason: z.string().min(1) })).default([]),
+    motives: z.array(MotiveSchema).default([]),
+    /** How easily they change, and per-field growth locks (npc design §8); used from milestone 9. */
+    malleability: z.string().optional(),
+    fieldLocks: z.record(z.string(), z.string()).default({}),
     /** What they know that could matter: about the city, the player, the others. */
     knowledge: z.array(z.string()).default([]),
     values: z.array(ValueSchema).default([]),

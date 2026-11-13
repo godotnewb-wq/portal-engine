@@ -15,8 +15,14 @@
     "rhythm": "Slow, formal",
     "vocabulary": "Old-fashioned",
     "sampleLines": ["I could not say, miss."],
-    "shifts": { "angry": "Goes silent", "warm": "Polishes his plates", "lying": "Hums" }
+    "shifts": { "angry": "Goes silent", "warm": "Polishes his plates", "lying": "Hums", "afraid": "Repeats the rules" }
   },
+  "age": "grown",
+  "tells": ["Hums"],
+  "layers": { "axes": { "grit": "soft" }, "values": [{ "value": "kin", "strength": "some", "stance": "likes" }] },
+  "expression": { "display": { "sad": "stands very still", "mad": "slams the gate" } },
+  "blockers": [{ "action": "recruit", "reason": "bound to the yard by his maker's oath" }],
+  "malleability": "loose",
   "mood": "uneasy",
   "secrets": [{ "id": "after-closing", "text": "Tobin let someone into the yard after closing.", "tell": "Hums" }],
   "meters": { "warmth": -2, "bond": -2 }

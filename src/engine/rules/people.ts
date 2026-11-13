@@ -8,6 +8,13 @@ import { z } from 'zod'
 
 const id = z.string().regex(/^[a-z0-9]+(?:-[a-z0-9]+)*$/, 'ids are lower-case words joined by hyphens')
 const word = z.string().min(1)
+const Range = z.tuple([z.number().int().min(0), z.number().int().min(0)])
+
+/**
+ * The actions a gate profile can set requirements for (npc design §6): an assist, joining the party, the party
+ * tolerance's warning and leave thresholds, and bond talents. Voluntary secret disclosure uses per-secret minimums.
+ */
+export const GATED_ACTIONS = ['assist', 'recruit', 'warning', 'leave', 'bond'] as const
 
 /** A scale of named stages between two poles, lowest first, e.g. five stages from "ruthless" to "principled". */
 export const AxisSchema = z.object({
@@ -88,8 +95,11 @@ export const PeopleRulesSchema = z.object({
   /** Growth words (§8): how easily a character changes, and per-field locks. Their numbers come with growth (milestone 9). */
   malleability: z.array(word).min(1),
   fieldLocks: z.array(word).min(1),
-  /** How many haunts a card may list, by tier (§3). */
-  haunts: z.record(id, z.object({ min: z.number().int().min(0), max: z.number().int().min(0) })).default({})
+  /**
+   * What a full card holds by tier (§3, *tune*): ranges for haunts, listed axes, values and tells, and whether
+   * attachment and every foundation are expected. A card outside its tier's form gets an authoring warning.
+   */
+  forms: z.record(id, z.object({ haunts: Range, axes: Range, values: Range, tells: Range, attachment: z.boolean(), allFoundations: z.boolean() })).default({})
 })
 export type PeopleRules = z.infer<typeof PeopleRulesSchema>
 
@@ -166,12 +176,16 @@ export function peopleProblems(p: PeopleRules, t: TiesRules, meters: string[], c
       if (!rungs.includes(w)) problems.push(`${where} uses "${w}", which isn't on the ladder`)
     }
   }
-  for (const [action, m] of Object.entries(p.gates)) meterWords(`gates.${action}`, m)
+  for (const [action, m] of Object.entries(p.gates)) {
+    if (!(GATED_ACTIONS as readonly string[]).includes(action)) problems.push(`gates names unknown action "${action}"`)
+    meterWords(`gates.${action}`, m)
+  }
   for (const t of p.motives.types) if (t.floors) meterWords(`motive "${t.id}"'s floors`, t.floors)
 
   const values = p.values.list.map((v) => v.id)
   p.links.forEach((l, i) => {
     const where = `link ${i + 1}`
+    if (!(GATED_ACTIONS as readonly string[]).includes(l.action)) problems.push(`${where} names unknown action "${l.action}"`)
     if (!meters.includes(l.meter)) problems.push(`${where} names unknown meter "${l.meter}"`)
     if (l.axis) {
       const a = axes.find((x) => x.id === l.axis)

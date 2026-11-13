@@ -105,7 +105,10 @@
     },
     "malleability": ["set", "loose"],
     "fieldLocks": ["open", "shut"],
-    "haunts": { "recurring": { "min": 0, "max": 1 }, "major": { "min": 1, "max": 2 } }
+    "forms": {
+      "recurring": { "haunts": [0, 1], "axes": [1, 1], "values": [1, 1], "tells": [0, 1], "attachment": false, "allFoundations": false },
+      "major": { "haunts": [1, 2], "axes": [2, 2], "values": [1, 2], "tells": [1, 2], "attachment": true, "allFoundations": true }
+    }
   },
   "ties": {
     "max": 2,

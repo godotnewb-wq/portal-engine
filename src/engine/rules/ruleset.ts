@@ -177,7 +177,10 @@ export function rulesetProblems(r: Ruleset): string[] {
   if (!r.wordScale.some((w) => w.value === 0)) problems.push('the word scale needs a word worth 0 (no change)')
   if (r.attributes.min > r.attributes.max) problems.push('attributes.min is above attributes.max')
   problems.push(...peopleProblems(r.people, r.ties, meters))
-  for (const tier of Object.keys(r.people.haunts)) if (!['recurring', 'major'].includes(tier)) problems.push(`people.haunts names unknown tier "${tier}"`)
+  for (const [tier, f] of Object.entries(r.people.forms)) {
+    if (!['recurring', 'major'].includes(tier)) problems.push(`people.forms names unknown tier "${tier}"`)
+    for (const [k, [lo, hi]] of Object.entries({ haunts: f.haunts, axes: f.axes, values: f.values, tells: f.tells })) if (lo > hi) problems.push(`people.forms.${tier}.${k} must be low first`)
+  }
   if (!r.narration.departure.includes('{name}')) problems.push('narration.departure needs {name}, for who leaves')
   return problems
 }
