@@ -81,6 +81,8 @@
     {
       "id": "landlord-offer",
       "text": "A Grid Corporation agent has already offered to buy his filter design. He hasn't said no.",
+      "summary": "A Grid agent wants to buy his filter design.",
+      "keywords": ["filter", "filter design", "offer", "buyer"],
       "tell": "Changes the subject to machinery whenever the Grid Corporation comes up",
       "revealWhen": "the Grid Corporation is named in front of him and he trusts the player"
     }

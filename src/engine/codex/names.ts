@@ -193,34 +193,6 @@ export function checkNames(text: string, index: NameIndex): NameFinding[] {
   })
 }
 
-const shingles = (text: string, n: number) => {
-  const w = text.toLowerCase().replace(/’/g, "'").match(WORD) ?? []
-  return w.length < n ? [] : w.slice(0, w.length - n + 1).map((_, i) => w.slice(i, i + n).join(' '))
-}
-
-/** How many words in a row from a secret's text count as the secret leaking. */
-export const LEAK_WORDS = 6
-
-/**
- * Codex secrets whose words show in a text (claude/lore-injection.md §11): their name or a multi-word keyword, or
- * `LEAK_WORDS` words in a row from their text. `allowed` are secrets someone in the scene is keeping this turn, whose
- * holder may let them slip.
- */
-export function secretLeaks(text: string, codex: CodexEntry[], allowed: Set<string> = new Set()): { entry: CodexEntry; words: string }[] {
-  const lower = ` ${(text.toLowerCase().replace(/’/g, "'").match(WORD) ?? []).join(' ')} `
-  const found: { entry: CodexEntry; words: string }[] = []
-  for (const e of codex) {
-    if (e.knowledge !== 'secret' || allowed.has(e.id)) continue
-    // Its title, label and keywords say what it's about whether or not it has an in-world name.
-    const phrase = [e.title, ...namesOf(e), ...e.keywords]
-      .map((k) => lowerWords(k).join(' '))
-      .find((k) => k.split(' ').length >= 2 && lower.includes(` ${k} `))
-    const run = phrase ?? shingles(e.full, LEAK_WORDS).find((s) => lower.includes(` ${s} `))
-    if (run) found.push({ entry: e, words: run })
-  }
-  return found
-}
-
 /**
  * The index with the new-looking names the pack's own prose uses ("the yard's Tally Desk"), since what the pack
  * writes is canon even without an entry of its own.

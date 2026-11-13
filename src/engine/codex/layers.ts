@@ -156,6 +156,11 @@ const namesOf = (e: CodexEntry) => [...(e.label ? [e.label] : []), ...e.aliases]
  */
 const termsOf = (e: CodexEntry) => [...new Set([...e.keywords, e.title, ...namesOf(e)].map((t) => normalize(t).replace(/^the /, '')).filter((t) => t.length > 1))]
 /** Whole words, any case, with simple plurals. */
+/** Whether a term (keyword or name) is in a text: whole words, any case, simple plurals, a leading "the" ignored. */
+export const mentions = (text: string, term: string): boolean => {
+  const t = normalize(term).trim().replace(/^the /, '')
+  return t.length > 1 && matches(normalize(text), t)
+}
 const matches = (text: string, term: string) => new RegExp(`(?<![\\w-])${escape(term).replace(/ /g, '\\s+')}(?:s|es)?(?![\\w-])`).test(text)
 
 /** Removes character names, so a keyword inside a name never triggers an entry. Case is kept for the strict match. */

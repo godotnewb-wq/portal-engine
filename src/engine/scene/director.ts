@@ -7,6 +7,7 @@ import { characterById, locationById, type Pack } from '@engine/pack'
 import { MAX_CHECKS, MAX_LINES, MAX_SPEAKERS, QUIET_TURNS, presentCast, silence } from './plan'
 import { recall } from '@engine/memory'
 import { tierById } from '@engine/world'
+import { cueSecretLine, fullSecretLine, type SecretShown } from './secrets'
 
 /** How many past turns go into prompts verbatim; older ones live in the running summary. */
 export const RECENT_TURNS = 3
@@ -56,8 +57,12 @@ Rules:
 - Quiet characters are listed each turn with what they care about. If what is being said touches their trade, aims or knowledge, they have a point: give them a slot. If nothing does, silence is fine.
 - Never decide, say or do anything for the player.`
 
-/** A character as the director sees them. With `ids`, knowledge and secrets carry the fact ids moves refer to. */
-export function sheet(content: Pack, state: GameState, c: Character, present: string[], ids = false): string {
+/**
+ * A character as the director sees them. With `ids`, knowledge and secrets carry the fact ids moves refer to. With
+ * `secrets` (the situation pipeline), each secret shows as its cue or in full as worked out for the turn; without, every
+ * secret shows in full, as the older pipeline always had it.
+ */
+export function sheet(content: Pack, state: GameState, c: Character, present: string[], ids = false, secrets?: SecretShown[]): string {
   const scene = state.scene!
   const meters = state.meters[c.id]
   const relations = state.relations
@@ -73,7 +78,10 @@ export function sheet(content: Pack, state: GameState, c: Character, present: st
     `Mood now: ${scene.moods[c.id] ?? c.mood}. Comfort ${scene.comfort[c.id] ?? 3}/5.`,
     c.knowledge.length > 0 && (ids ? `Knows:\n${c.knowledge.map((k, i) => `- [${c.id}.k${i + 1}] ${k}`).join('\n')}` : `Knows: ${c.knowledge.join('; ')}`),
     c.values.length > 0 && `Values: ${c.values.map((v) => `${v.stance} ${v.value}`).join(', ')}`,
-    ...c.secrets.map((s) => `Secret [${ids ? `${c.id}.` : ''}${s.id}]: ${s.text} Tell: ${s.tell}.${s.revealWhen ? ` Would reveal when: ${s.revealWhen}.` : ''}`),
+    ...c.secrets.map((s) => {
+      const id = ids ? `${c.id}.${s.id}` : s.id
+      return secrets?.find((x) => x.id === `${c.id}.${s.id}`)?.form === 'cue' ? cueSecretLine(content, c, s, id) : fullSecretLine(c, s, id)
+    }),
     `Lying tell: ${c.voice.shifts.lying}`,
     meters && `Toward the player: ${meterWords(content.ruleset, meters)}`,
     recall(state, c).length > 0 && `Remembers: ${recall(state, c).map((m) => `(${m.level}) ${m.text}`).join(' ')}`,

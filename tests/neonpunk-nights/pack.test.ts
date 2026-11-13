@@ -2,7 +2,7 @@ import { cpSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { characterById, locationById, packProblems } from '@engine/pack'
+import { characterById, locationById, packProblems, packWarnings } from '@engine/pack'
 import { readPack } from '@platform/packs'
 import { content, PACK_DIR } from './support'
 
@@ -33,6 +33,10 @@ describe('the Neonpunk Nights pack', () => {
     const all = JSON.stringify(content)
     expect(all).not.toMatch(/consortium|middle turns|dark.elf/i)
     expect(characterById(content, 'vex')?.species).toBe('deep-elf')
+  })
+
+  it('gives the author no warnings: no stance words in codex text, no character crowded with secrets', () => {
+    expect(packWarnings(content)).toEqual([])
   })
 
   it('describes every character as an adult', () => {

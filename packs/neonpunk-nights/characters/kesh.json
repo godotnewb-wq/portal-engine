@@ -84,6 +84,8 @@
     {
       "id": "bent-the-book",
       "text": "She broke procedure once to get a passenger off a stalled car, and the passenger was hurt on the rail. That's why she won't open the doors. She won't volunteer it, but she won't lie about it either.",
+      "summary": "Once broke procedure on a stalled car, and a passenger was hurt.",
+      "keywords": ["procedure", "open the doors", "climb out", "the rule book"],
       "tell": "Goes still when anyone mentions climbing out",
       "revealWhen": "someone pushes hard to leave and she trusts them"
     }

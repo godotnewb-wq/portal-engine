@@ -47,6 +47,8 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
     speakers: written.plan.speakers.map((s) => s.id),
     texture: written.plan.texture
   }
+  const kept = written.plan.speakers.flatMap((s) => s.kept ?? [])
+  if (kept.length > 0) turn.kept = kept
   const plannedMoods = Object.fromEntries(written.plan.speakers.filter((s) => s.mood.trim()).map((s) => [s.id, s.mood]))
   const comfort = Object.fromEntries(Object.entries(only(written.tags.comfort)).map(([id, c]) => [id, c.level]))
   const leaving = [...new Set([...written.plan.leaves, ...written.tags.leaves])].filter((id) => present.has(id))

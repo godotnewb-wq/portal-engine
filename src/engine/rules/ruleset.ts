@@ -101,9 +101,17 @@ export const RulesetSchema = z.object({
       fullWords: z.number().int().positive().default(120),
       sceneTokens: z.number().int().min(0).default(1200),
       triggeredTokens: z.number().int().min(0).default(800),
-      loreLines: z.number().int().min(0).default(3)
+      loreLines: z.number().int().min(0).default(3),
+      /**
+       * Per character, the extra estimated tokens the director's sheet may spend showing secrets in full rather than as
+       * short cues: one budget for secrets linked to the codex, one for personal secrets (claude/lore-injection.md §7.1).
+       */
+      linkedSecretTokens: z.number().int().min(0).default(200),
+      personalSecretTokens: z.number().int().min(0).default(100),
+      /** An authored character starting with more secrets than this gets an authoring warning. */
+      startingSecrets: z.number().int().min(0).default(3)
     })
-    .default({ fullWords: 120, sceneTokens: 1200, triggeredTokens: 800, loreLines: 3 })
+    .default({ fullWords: 120, sceneTokens: 1200, triggeredTokens: 800, loreLines: 3, linkedSecretTokens: 200, personalSecretTokens: 100, startingSecrets: 3 })
 })
 export type Ruleset = z.infer<typeof RulesetSchema>
 

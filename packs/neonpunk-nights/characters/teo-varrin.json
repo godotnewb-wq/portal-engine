@@ -89,6 +89,8 @@
     {
       "id": "already-flagged",
       "text": "He's on a final warning at work for an unauthorized repair last month; one more and he's out, with the apprenticeship debt still owed.",
+      "summary": "On a final warning at work; one more slip and he's out.",
+      "keywords": ["warning", "cold start", "fired", "sacked"],
       "tell": "Touches the unpicked patch on his jacket",
       "revealWhen": "someone asks him outright to do the cold start"
     }

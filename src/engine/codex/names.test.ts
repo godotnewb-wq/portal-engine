@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { fixture, fixtureCodex } from '@tests/fixture'
 import { buildCodex } from './load'
-import { candidates, checkNames, nameIndex, secretLeaks } from './names'
+import { candidates, checkNames, nameIndex } from './names'
 
 /** The fixture's codex plus some entries written here, and its name index. */
 function indexWith(...files: [string, string][]) {
@@ -68,15 +68,5 @@ describe('possessives in names (milestone 3.5, task 2)', () => {
     expect(candidates("Keeper's Hall of the Lamps")[0]?.withNext).toBe("Keeper's Hall of the Lamps")
     expect(candidates('the Hall of the Lamps of the')[0]?.name).toBe('Hall of the Lamps')
     expect(found("They waited in Keeper's Hall of the Lamps.", halls)).toEqual([])
-  })
-})
-
-describe('secret leaks (milestone 3.5, task 2)', () => {
-  it('sees a secret by its title, label or a multi-word keyword, whether or not it has a label', () => {
-    const { codex } = indexWith(['factions/guild/vault.md', 'title: The quiet vault\nlabel: The Strongroom Under Ash\nkind: faction\nknowledge: secret\nknown-by: [guild]\nkeywords: [false floor]\nsummary: x'])
-    const leaked = (text: string) => secretLeaks(text, codex).map((l) => l.entry.id)
-    expect(leaked('Nobody mentions the quiet vault.')).toContain('faction.guild.vault')
-    expect(leaked('They say the Strongroom Under Ash is real.')).toContain('faction.guild.vault')
-    expect(leaked('There is a false floor in the back.')).toContain('faction.guild.vault')
   })
 })

@@ -49,9 +49,17 @@ export const SecretSchema = z
     /** How they behave when guarding it, so deception reads on the page. */
     tell: z.string(),
     /** When they would let it go (free text for the director, until reveal conditions are built). */
-    revealWhen: z.string().optional()
+    revealWhen: z.string().optional(),
+    /**
+     * Personal: the short form the director sees until the secret is expanded (claude/lore-injection.md §7.1); without
+     * one, the text's first sentence. A linked secret's short form is its codex entry's summary.
+     */
+    summary: z.string().min(1).optional(),
+    /** Personal: words that, said in the scene, put the secret first in line to be shown in full. Linked: the codex entry's. */
+    keywords: z.array(z.string().min(1)).optional()
   })
   .refine((s) => (s.codex ? !!s.role && !!s.angle : !!s.text), { message: 'a secret needs its text, or a codex pointer with a role and an angle' })
+  .refine((s) => !s.codex || (!s.summary && !s.keywords), { message: 'a linked secret takes its summary and keywords from its codex entry' })
 /** After loading every secret has its text: written, or resolved from the codex. */
 export type Secret = z.infer<typeof SecretSchema> & { text: string }
 

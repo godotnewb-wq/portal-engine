@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { canonNames, checkNames, codexWarnings, triggeredEntries, entryById, locationChain, secretLeaks } from '@engine/codex'
+import { canonNames, checkNames, codexWarnings, triggeredEntries, entryById, locationChain } from '@engine/codex'
 import { packNames } from '@engine/scene'
 import { characterById, knowerOf } from '@engine/pack'
 import { content } from './support'
@@ -181,11 +181,6 @@ describe('the name check on Neonpunk prose', () => {
     const prose = [...content.codex.flatMap((e) => [e.summary, e.full]), ...content.locations.map((l) => l.description)]
     expect(prose.flatMap(names)).toEqual([])
   })
-
-  it('sees a codex secret named in prose', () => {
-    const secret = content.codex.find((e) => e.knowledge === 'secret')!
-    expect(secretLeaks(`They spoke of ${secret.title.toLowerCase()} in whispers.`, content.codex).map((l) => l.entry.id)).toContain(secret.id)
-  })
 })
 
 describe('Oria’s linked secret', () => {
@@ -196,12 +191,6 @@ describe('Oria’s linked secret', () => {
     expect(linked.text).toMatch(/^Oria's part: she is fetching the sealed case for the Grid\. The sealed case /)
     expect(linked.text).toMatch(/How Oria feels about it: doesn[’']t want to know .*anyway\.$/)
     expect(knowerOf(oria).holds).toEqual(['faction.aether-grid-corporation.control-core'])
-  })
-
-  it('lets her slip about the core while she guards it, and cuts it otherwise', () => {
-    const line = 'Oria lets it drop: the control core is in there.'
-    expect(secretLeaks(line, content.codex).map((l) => l.entry.id)).toEqual(['faction.aether-grid-corporation.control-core'])
-    expect(secretLeaks(line, content.codex, new Set(['faction.aether-grid-corporation.control-core']))).toEqual([])
   })
 
   it('leaves the reclamation itself held by nobody', () => {

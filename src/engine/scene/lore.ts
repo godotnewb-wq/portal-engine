@@ -1,10 +1,11 @@
-import { directorStage, loreLayers, writerStage, type LayerEntry, type LoreLayers, type Stage } from '@engine/codex'
+import { directorStage, loreLayers, triggeredEntries, writerStage, type LayerEntry, type LoreLayers, type Stage } from '@engine/codex'
 import { firstName } from '@engine/core'
 import { characterById, knowerOf, locationById, type Pack } from '@engine/pack'
 import { loreBudgets, type LoreBudgetOverrides, type LoreBudgets } from '@engine/rules'
 import type { GameState } from '@engine/state'
 import { RECENT_TURNS } from './director'
 import { presentCast } from './plan'
+import { secretDisplay, type SecretShown } from './secrets'
 
 /** The lore one turn's prompts carry (claude/lore-injection.md §5), worked out once and shared by both calls. */
 export interface TurnLore {
@@ -13,6 +14,8 @@ export interface TurnLore {
   layers: LoreLayers
   /** The budgets this turn ran with: the pack's, with any the player set in Settings. */
   budgets: LoreBudgets
+  /** How each held secret shows on the director's situation sheet: a cue or in full (claude/lore-injection.md §7.1). */
+  secrets: SecretShown[]
 }
 
 /** What the turn's lore was, for the trace: entry ids per layer and their rough size. */
@@ -27,6 +30,8 @@ export interface LoreTrace {
   budgets?: LoreBudgets
   /** Budget decisions, absent from older logs. */
   budgetCuts?: Record<'scene' | 'triggered', { shortened: string[]; dropped: string[] }>
+  /** How each held secret showed on the director's sheet; absent from logs before milestone 3.5. */
+  secrets?: SecretShown[]
 }
 
 export function turnLore(content: Pack, state: GameState, input: string, overrides: LoreBudgetOverrides = {}): TurnLore {
@@ -43,16 +48,19 @@ export function turnLore(content: Pack, state: GameState, input: string, overrid
   const texts = [input, ...recent.map((t) => t.player)]
   const written = [...recent.flatMap((t) => t.beats.map((b) => b.text)), scene.summary]
   const budgets = loreBudgets(content.ruleset, overrides)
+  const layers = loreLayers(
+    content.codex,
+    content.setting,
+    { ...(location && { location: { id: location.id, ...(location.parent && { parent: location.parent }) } }), present, texts, written, ignore },
+    { sceneTokens: budgets.sceneTokens, triggeredTokens: budgets.triggeredTokens, stanceWords: content.vocabulary.stanceWords }
+  )
   return {
     budgets,
     stage: directorStage(content.primer, content.codex, content.setting),
     writerStage: writerStage(content.tone, content.codex),
-    layers: loreLayers(
-      content.codex,
-      content.setting,
-      { ...(location && { location: { id: location.id, ...(location.parent && { parent: location.parent }) } }), present, texts, written, ignore },
-      { sceneTokens: budgets.sceneTokens, triggeredTokens: budgets.triggeredTokens, stanceWords: content.vocabulary.stanceWords }
-    )
+    layers,
+    // Secrets read the same scan as the triggered layer, so a keyword or a name just said counts the same way.
+    secrets: secretDisplay(content, state, { texts: [...texts, ...written], mentioned: new Set(triggeredEntries(content.codex, texts, ignore, written).map((e) => e.id)) })
   }
 }
 
@@ -66,5 +74,6 @@ export const loreTrace = (lore: TurnLore): LoreTrace => ({
   budgetCuts: {
     scene: { shortened: lore.layers.scene.shortened, dropped: lore.layers.scene.dropped },
     triggered: { shortened: lore.layers.triggered.shortened, dropped: lore.layers.triggered.dropped }
-  }
+  },
+  secrets: lore.secrets
 })

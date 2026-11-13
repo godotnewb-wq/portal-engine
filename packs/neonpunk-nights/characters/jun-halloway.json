@@ -84,6 +84,8 @@
     {
       "id": "afraid-of-heights",
       "text": "She's terrified of the drop under the rail and has been trying not to look out the windows.",
+      "summary": "Terrified of the drop under the rail.",
+      "keywords": ["heights", "the drop", "look down", "roof hatch"],
       "tell": "Keeps her back to the windows",
       "revealWhen": "the roof hatch is actually opened"
     }

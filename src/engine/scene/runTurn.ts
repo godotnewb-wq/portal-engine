@@ -133,7 +133,7 @@ export async function runTurn(
     let parsed: ParsedReply = parseReply(draft, speakers)
     // The repetition tracker runs for the situation pipeline only, so the older one stays a fixed baseline.
     const recent = situation ? recentlyUsed(content, scene) : {}
-    const check = (reply: ParsedReply) => [...checkReply(reply, plan, speakers, input, content.phrases), ...repeatProblems(content, reply, recent), ...loreProblems(content, state, plan, reply)]
+    const check = (reply: ParsedReply) => [...checkReply(reply, plan, speakers, input, content.phrases), ...repeatProblems(content, reply, recent), ...loreProblems(content, state, reply)]
     const problems = check(parsed)
     let remaining: Problem[] = []
     let kept = parsed.beats.map((_, i) => i)
