@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { dice, draws, type Dice } from '@engine/core'
 import { fixture } from '@tests/fixture'
-import { assistFrom, averageStats, combineEdges, degreeOf, describeCheck, modifier, rankCap, rollCheck } from './checks'
+import { assistBonus, averageStats, combineEdges, degreeOf, describeCheck, modifier, rankCap, rollCheck } from './checks'
 import type { StatBlock } from './schema'
 
 const R = fixture.ruleset
@@ -45,12 +45,9 @@ describe('rollCheck', () => {
   })
 })
 
-describe('assists (meter bond: +1 from 1, advantage from 7, rank 1 needed)', () => {
-  it('reads the threshold meter and values from the ruleset', () => {
-    expect(assistFrom(R, { stats: sharp, meter: 10 }, 'fight')).toEqual({ bonus: 0, edge: 'none' })
-    expect(assistFrom(R, { stats: sharp, meter: 0 }, 'notice')).toEqual({ bonus: 0, edge: 'none' })
-    expect(assistFrom(R, { stats: sharp, meter: 1 }, 'notice')).toEqual({ bonus: 1, edge: 'none' })
-    expect(assistFrom(R, { stats: sharp, meter: 7 }, 'notice')).toEqual({ bonus: 0, edge: 'advantage' })
+describe('assists (bonus by helpers: 0, 1, 2 and more)', () => {
+  it('reads the bonus by how many help from the ruleset, capped at its last entry', () => {
+    expect([0, 1, 2, 3, 7].map((n) => assistBonus(R, n))).toEqual([0, 1, 2, 2, 2])
   })
 
   it('never stacks advantages, and cancels advantage against disadvantage', () => {

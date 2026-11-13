@@ -26,7 +26,7 @@ const signed = (n: number) => (n >= 0 ? `+${n}` : `${n}`)
 function checkSum(c: CheckTrace, nameOf: (id: string) => string): string {
   const dice = c.rolls.length > 1 ? `d20 ${c.rolls.join('/')} (${c.edge}) → ${c.natural}` : `d20 ${c.natural}`
   const parts = [dice, `${c.attribute} ${signed(c.modifier)}`, `rank ${signed(c.rank)}`, ...(c.bonus ? [`bonus ${signed(c.bonus)}`] : [])]
-  const assist = c.assist ? ` · assist ${nameOf(c.assist.by)} (meter ${c.assist.meter}): ${c.assist.bonus ? `+${c.assist.bonus}` : c.assist.edge !== 'none' ? c.assist.edge : 'no help'}` : ''
+  const assist = c.helpers?.length ? ` · helped by ${c.helpers.map(nameOf).join(', ')} (+${c.bonus})` : ''
   return `${parts.join(' ')} = ${c.total} vs DC ${c.dc} (${c.difficulty}) → ${c.degree}${c.critical ? `, critical ${c.critical}` : ''}${assist}`
 }
 

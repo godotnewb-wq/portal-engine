@@ -20,7 +20,7 @@ const PLAN = {
     { who: 'tobin', answers: 'player', move: 'dodge' },
     { who: 'mara', answers: 1, move: 'push back', needs: 'see' }
   ],
-  checks: [{ id: 'see', who: 'Mara', skill: 'Notice', difficulty: 'tough', stakes: 'notices Tobin humming', assist: 'tobin' }]
+  checks: [{ id: 'see', who: 'Mara', skill: 'Notice', difficulty: 'tough', stakes: 'notices Tobin humming' }]
 }
 
 describe('plans in the pack’s vocabulary', () => {
@@ -28,18 +28,18 @@ describe('plans in the pack’s vocabulary', () => {
     const state = yardScene()
     const { plan, corrections } = validatePlan(fixture, state, parsePlan(JSON.stringify(PLAN))!)
     expect(plan.speakers.map((s) => s.id)).toEqual(['tobin', 'mara'])
-    expect(plan.checks).toEqual([expect.objectContaining({ who: 'mara', skill: 'notice', difficulty: 'tough', assist: 'tobin' })])
+    expect(plan.checks).toEqual([expect.objectContaining({ who: 'mara', skill: 'notice', difficulty: 'tough' })])
     expect(corrections).toEqual([])
     const other = validatePlan(fixture, state, parsePlan(JSON.stringify({ ...PLAN, checks: [{ id: 'x', who: 'mara', skill: 'empathy', difficulty: 'moderate', stakes: '' }] }))!)
     expect(other.plan.checks).toEqual([])
     expect(other.corrections).toContain('dropped check "x": no skill "empathy"')
   })
 
-  it('resolves checks with the ruleset’s numbers, and an assist through its assist meter', () => {
+  it('resolves checks with the ruleset’s numbers; no one helps a roll when no other companion is present', () => {
     const state = yardScene()
     const { plan } = validatePlan(fixture, state, parsePlan(JSON.stringify(PLAN))!)
     const check = resolvePlan(fixture, state, plan, { forceNatural: 9 }).plan.checks[0]!
-    // Wits 7 (+3), Notice 1; Tobin's bond toward Mara is 0 (no relation), so no help.
+    // Wits 7 (+3), Notice 1. Mara is the only companion, and Tobin isn't one, so no help.
     expect(check.result).toMatchObject({ modifier: 3, rank: 1, bonus: 0, total: 13, dc: 13, degree: 'success' })
     expect(check.line).toBe('Mara — Notice 13 vs 13: success')
   })

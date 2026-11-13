@@ -27,7 +27,7 @@
   ],
   "degrees": { "strongMargin": 4, "costMargin": 2 },
   "criticals": { "hit": 20, "miss": 1 },
-  "assists": { "meter": "bond", "minRank": 1, "bonusFrom": 1, "bonus": 1, "advantageFrom": 7 },
+  "assists": { "minRank": 1, "bonus": [0, 1, 2] },
   "meters": {
     "list": [
       {

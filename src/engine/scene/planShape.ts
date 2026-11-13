@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import type { CheckResult, Difficulty, Edge, Ruleset, Skill } from '@engine/rules'
+import type { CheckResult, Difficulty, Ruleset, Skill } from '@engine/rules'
 import type { Scene } from '@engine/state'
 import { characterById, type Pack } from '@engine/pack'
 
@@ -20,8 +20,6 @@ export const PlannedCheckSchema = z.object({
   skill: z.string(),
   difficulty: z.string(),
   stakes: text,
-  /** A character present who helps. The game decides what their help is worth. */
-  assist: z.string().optional().catch(undefined),
   /** Suggested with a reason; the game applies it, never stacked. */
   edge: z.enum(['advantage', 'disadvantage']).optional().catch(undefined),
   edge_reason: text.optional()
@@ -33,12 +31,11 @@ export interface PlannedCheck {
   skill: Skill
   difficulty: Difficulty
   stakes: string
-  assist?: string
   edge?: 'advantage' | 'disadvantage'
   /** Filled in by the game once rolled. */
   result?: CheckResult
-  /** What the assist was worth, once rolled: a bonus, an edge, or nothing (no skill, or not enough of the assist meter). */
-  assisted?: { by: string; bonus: number; edge: Edge; meter: number }
+  /** Companions who helped, once rolled (core rules §1); the result's bonus is what they added. */
+  helpers?: string[]
   /** The line shown to the player, e.g. "Ada — Search 17 vs 15: success". */
   line?: string
 }

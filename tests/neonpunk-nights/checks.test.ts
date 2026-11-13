@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { StatBlock } from '@engine/rules'
-import { assistFrom, combineEdges, degreeOf, describeCheck, modifier, rankCap, rollCheck } from '@engine/rules'
+import { assistBonus, combineEdges, degreeOf, describeCheck, modifier, rankCap, rollCheck } from '@engine/rules'
 import { content } from './support'
 
 /** The Neonpunk Nights ruleset, as the pack ships it (core rules.md). */
@@ -63,11 +63,9 @@ describe('edges and assists', () => {
     expect(combineEdges([])).toBe('none')
   })
 
-  it('gives help by trust only when the helper has the skill', () => {
-    expect(assistFrom(R, { stats: vex, meter: 45 }, 'medicine')).toEqual({ bonus: 0, edge: 'none' })
-    expect(assistFrom(R, { stats: vex, meter: 5 }, 'empathy')).toEqual({ bonus: 0, edge: 'none' })
-    expect(assistFrom(R, { stats: vex, meter: 20 }, 'empathy')).toEqual({ bonus: 2, edge: 'none' })
-    expect(assistFrom(R, { stats: vex, meter: 40 }, 'empathy')).toEqual({ bonus: 0, edge: 'advantage' })
+  it('gives +2 for one helper and +3 for two or more (core rules §1), never more', () => {
+    expect([0, 1, 2, 3].map((n) => assistBonus(R, n))).toEqual([0, 2, 3, 3])
+    expect(R.assists.minRank).toBe(3)
   })
 })
 

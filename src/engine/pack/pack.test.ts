@@ -111,13 +111,13 @@ describe('buildPack', () => {
   })
 
   it('finds problems inside a ruleset: references between its own lists', () => {
-    const r = RulesetSchema.parse({ ...structuredClone(fixture.ruleset), assists: { ...fixture.ruleset.assists, meter: 'love' } })
+    const r = RulesetSchema.parse({ ...structuredClone(fixture.ruleset), assists: { ...fixture.ruleset.assists, bonus: [1, 2] } })
     r.skills.push({ id: 'cook', name: 'Cook', attribute: 'taste', description: '' })
     r.wordScale = r.wordScale.filter((w) => w.value !== 0)
     r.narration.departure = 'Someone leaves.'
     expect(rulesetProblems(r)).toEqual([
       'skill "cook" uses unknown attribute "taste"',
-      'assists use unknown meter "love"',
+      'assists.bonus[0] is for no helpers and must be 0',
       'the word scale needs a word worth 0 (no change)',
       'narration.departure needs {name}, for who leaves'
     ])

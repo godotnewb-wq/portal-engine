@@ -366,12 +366,15 @@
           "edge": "none",
           "modifier": 2,
           "rank": 1,
-          "bonus": 0,
-          "total": 11,
+          "bonus": 1,
+          "total": 12,
           "degree": "cost",
           "critical": null
         },
-        "line": "Kit — Talk 11 vs 13: success at a cost"
+        "line": "Kit — Talk 12 vs 13: success at a cost (+1: Mara)",
+        "helpers": [
+          "mara"
+        ]
       }
     ],
     "walk_ons": [],
@@ -416,11 +419,14 @@
       "edge": "none",
       "modifier": 2,
       "rank": 1,
-      "bonus": 0,
-      "total": 11,
+      "bonus": 1,
+      "helpers": [
+        "mara"
+      ],
+      "total": 12,
       "degree": "cost",
       "critical": null,
-      "line": "Kit — Talk 11 vs 13: success at a cost",
+      "line": "Kit — Talk 12 vs 13: success at a cost (+1: Mara)",
       "stakes": "Tobin says who he let in"
     }
   ],

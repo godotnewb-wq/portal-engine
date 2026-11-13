@@ -41,7 +41,7 @@ The engine supplies the mechanics; the ruleset their parameters and words. See `
 - `ranks` (max and cap by level), `levels`.
 - `difficulties`: the words the director may use, and each one's target number.
 - `degrees` (`strongMargin`, `costMargin`), `criticals` (`hit`, `miss`).
-- `assists`: which relationship meter decides how much a helper adds, and the thresholds (milestone 4a task 5 replaces this with per-companion assist gates).
+- `assists`: `minRank`, the skill rank a companion needs to help, and `bonus`, what helpers add by how many help (`[0, 2, 3]`: none, one, two or more). Whether a companion is willing is their assist gate (`people.gates.assist`, shifted by their layers and motives).
 - `meters`: the relationship meters every character keeps toward the player and each other (`id`, `name`, `description` used in the director and summary prompts, and `bands`: word bands lowest first, the first starting at `min`), their signed range (`min`, `max`) and `neutral` point. Prompts and the summary screen show bands, never numbers.
 - `wordScale`: the words summaries judge a change in, worst to best, each with its value; one must be worth 0.
 - `relations`: where a new relation starts (`start`: a stranger, normally neutral).

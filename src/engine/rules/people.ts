@@ -15,6 +15,7 @@ const Range = z.tuple([z.number().int().min(0), z.number().int().min(0)])
  * tolerance's warning and leave thresholds, and bond talents. Voluntary secret disclosure uses per-secret minimums.
  */
 export const GATED_ACTIONS = ['assist', 'recruit', 'warning', 'leave', 'bond'] as const
+export type GatedAction = (typeof GATED_ACTIONS)[number]
 
 /** A scale of named stages between two poles, lowest first, e.g. five stages from "ruthless" to "principled". */
 export const AxisSchema = z.object({

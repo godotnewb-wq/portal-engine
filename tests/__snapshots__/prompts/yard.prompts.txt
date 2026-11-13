@@ -5,7 +5,7 @@ You are the director of a visual-novel RPG scene. You don't write prose or dialo
 Return only this JSON object:
 {
   "player_action": {"doing", "uncertain"},
-  "checks": [{"id","who","skill","difficulty","stakes","assist","edge","edge_reason"}],
+  "checks": [{"id","who","skill","difficulty","stakes","edge","edge_reason"}],
   "speakers": [{"id","goal","mood","pressure","keeps","touched","approach","framing"}],
   "moves": [{"who","answers","move","uses","new","needs"}],
   "lore": [{"entry","who","line"}],
@@ -17,7 +17,7 @@ Return only this JSON object:
 
 - The player leads. Start from what the player just said or did: move 1 answers it, in its own terms. A character's own aims come in after that, or in a later turn, unless something urgent cuts in.
 - player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking and asking are not uncertain.
-- checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim. stakes says what success means. assist: a character present who helps.
+- checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim. stakes says what success means. Companions in the player's party help on their own when they are willing and trained; the game works it out.
 - People are in the moment. What they say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line.
 - Feelings on the sheets are words for each meter, toward the player and toward others here. Warmth (warmth): how much they like the other. Bond (bond): how much they would do for the other. Each is a separate feeling; when they pull apart, play the tension.
 - speakers: at most 3 characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone. mood: how what just happened lands on them.
@@ -84,7 +84,7 @@ Mood now: busy, curious. Comfort 3/5.
 Knows:
 - [mara.k1] Tobin was in the yard after closing
 Values: likes honesty
-Secret [mara.two-books] (in short): Mara's part: she keeps the second ledger. The Guild keeps a second set of books.
+Secret [mara.two-books] (in short): Mara's part: she keeps the second ledger. The Guild keeps a second set of books. Won't tell the player yet.
 Lying tell: Gives exact numbers
 Toward the player: warmth: civil; bond: loose
 Toward others here: Tobin: warmth: civil; bond: loose (has known him since the guild took him on)
@@ -106,6 +106,9 @@ Toward the player: warmth: civil; bond: loose
 
 # Turns since each last spoke
 mara: 0, tobin: 0
+
+# Help with the player's checks
+Mara would back the player up.
 
 # The player says or does
 Who was in the yard last night?
@@ -200,7 +203,7 @@ You are the director of a visual-novel RPG scene. You don't write prose or dialo
 Return only this JSON object:
 {
   "player_action": {"doing", "uncertain"},
-  "checks": [{"id","who","skill","difficulty","stakes","assist","edge","edge_reason"}],
+  "checks": [{"id","who","skill","difficulty","stakes","edge","edge_reason"}],
   "speakers": [{"id","goal","mood","pressure","keeps","touched","approach","framing"}],
   "moves": [{"who","answers","move","uses","new","needs"}],
   "lore": [{"entry","who","line"}],
@@ -212,7 +215,7 @@ Return only this JSON object:
 
 - The player leads. Start from what the player just said or did: move 1 answers it, in its own terms. A character's own aims come in after that, or in a later turn, unless something urgent cuts in.
 - player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking and asking are not uncertain.
-- checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim. stakes says what success means. assist: a character present who helps.
+- checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim. stakes says what success means. Companions in the player's party help on their own when they are willing and trained; the game works it out.
 - People are in the moment. What they say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line.
 - Feelings on the sheets are words for each meter, toward the player and toward others here. Warmth (warmth): how much they like the other. Bond (bond): how much they would do for the other. Each is a separate feeling; when they pull apart, play the tension.
 - speakers: at most 3 characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone. mood: how what just happened lands on them.
@@ -279,7 +282,7 @@ Mood now: sharp. Comfort 2/5.
 Knows:
 - [mara.k1] Tobin was in the yard after closing
 Values: likes honesty
-Secret [mara.two-books] (in short): Mara's part: she keeps the second ledger. The Guild keeps a second set of books.
+Secret [mara.two-books] (in short): Mara's part: she keeps the second ledger. The Guild keeps a second set of books. Won't tell the player yet.
 Lying tell: Gives exact numbers
 Toward the player: warmth: civil; bond: loose
 Toward others here: Tobin: warmth: civil; bond: loose (has known him since the guild took him on)
@@ -307,6 +310,9 @@ Mara: "You were here after closing, Tobin. I saw the lamp."
 
 # Turns since each last spoke
 mara: 0, tobin: 0
+
+# Help with the player's checks
+Mara would back the player up.
 
 # Pressure now
 mara: keen, tobin: keen
@@ -495,7 +501,7 @@ You are the director of a visual-novel RPG scene. You don't write prose or dialo
 Return only this JSON object:
 {
   "player_action": {"doing", "uncertain"},
-  "checks": [{"id","who","skill","difficulty","stakes","assist","edge","edge_reason"}],
+  "checks": [{"id","who","skill","difficulty","stakes","edge","edge_reason"}],
   "speakers": [{"id","goal","mood","pressure","keeps","touched","approach","framing"}],
   "moves": [{"who","answers","move","uses","new","needs"}],
   "lore": [{"entry","who","line"}],
@@ -507,7 +513,7 @@ Return only this JSON object:
 
 - The player leads. Start from what the player just said or did: move 1 answers it, in its own terms. A character's own aims come in after that, or in a later turn, unless something urgent cuts in.
 - player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking and asking are not uncertain.
-- checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim. stakes says what success means. assist: a character present who helps.
+- checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim. stakes says what success means. Companions in the player's party help on their own when they are willing and trained; the game works it out.
 - People are in the moment. What they say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line.
 - Feelings on the sheets are words for each meter, toward the player and toward others here. Warmth (warmth): how much they like the other. Bond (bond): how much they would do for the other. Each is a separate feeling; when they pull apart, play the tension.
 - speakers: at most 3 characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone. mood: how what just happened lands on them.
@@ -574,7 +580,7 @@ Mood now: sharp. Comfort 2/5.
 Knows:
 - [mara.k1] Tobin was in the yard after closing
 Values: likes honesty
-Secret [mara.two-books]: Mara's part: she keeps the second ledger. A second ledger records what the yard really takes in. It is kept in the tally office, under the floor. How Mara feels about it: would rather lose her post than see it found. Tell: Gives exact numbers.
+Secret [mara.two-books]: Mara's part: she keeps the second ledger. A second ledger records what the yard really takes in. It is kept in the tally office, under the floor. How Mara feels about it: would rather lose her post than see it found. Tell: Gives exact numbers. Won't tell the player yet.
 Lying tell: Gives exact numbers
 Toward the player: warmth: civil; bond: loose
 Toward others here: Tobin: warmth: civil; bond: loose (has known him since the guild took him on)
@@ -608,6 +614,9 @@ Mara's pen stops over the tally.
 
 # Turns since each last spoke
 mara: 1, tobin: 0
+
+# Help with the player's checks
+Mara would back the player up.
 
 # Pressure now
 mara: keen, tobin: keen
@@ -811,7 +820,7 @@ You are the director of a visual-novel RPG scene. You don't write prose or dialo
 Return only this JSON object:
 {
   "player_action": {"doing", "uncertain"},
-  "checks": [{"id","who","skill","difficulty","stakes","assist","edge","edge_reason"}],
+  "checks": [{"id","who","skill","difficulty","stakes","edge","edge_reason"}],
   "speakers": [{"id","goal","mood","pressure","keeps","touched","approach","framing"}],
   "moves": [{"who","answers","move","uses","new","needs"}],
   "lore": [{"entry","who","line"}],
@@ -823,7 +832,7 @@ Return only this JSON object:
 
 - The player leads. Start from what the player just said or did: move 1 answers it, in its own terms. A character's own aims come in after that, or in a later turn, unless something urgent cuts in.
 - player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking and asking are not uncertain.
-- checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim. stakes says what success means. assist: a character present who helps.
+- checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim. stakes says what success means. Companions in the player's party help on their own when they are willing and trained; the game works it out.
 - People are in the moment. What they say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line.
 - Feelings on the sheets are words for each meter, toward the player and toward others here. Warmth (warmth): how much they like the other. Bond (bond): how much they would do for the other. Each is a separate feeling; when they pull apart, play the tension.
 - speakers: at most 3 characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone. mood: how what just happened lands on them.
@@ -890,7 +899,7 @@ Mood now: careful. Comfort 2/5.
 Knows:
 - [mara.k1] Tobin was in the yard after closing
 Values: likes honesty
-Secret [mara.two-books]: Mara's part: she keeps the second ledger. A second ledger records what the yard really takes in. It is kept in the tally office, under the floor. How Mara feels about it: would rather lose her post than see it found. Tell: Gives exact numbers.
+Secret [mara.two-books]: Mara's part: she keeps the second ledger. A second ledger records what the yard really takes in. It is kept in the tally office, under the floor. How Mara feels about it: would rather lose her post than see it found. Tell: Gives exact numbers. Won't tell the player yet.
 Lying tell: Gives exact numbers
 Toward the player: warmth: civil; bond: loose
 Toward others here: Tobin: warmth: civil; bond: loose (has known him since the guild took him on)
@@ -928,6 +937,9 @@ Mara: "Only clerks carry Guild seals. That makes it six people."
 
 # Turns since each last spoke
 mara: 0, tobin: 1
+
+# Help with the player's checks
+Mara would back the player up.
 
 # Pressure now
 mara: driven, tobin: keen
@@ -1042,7 +1054,7 @@ You are the director of a visual-novel RPG scene. You don't write prose or dialo
 Return only this JSON object:
 {
   "player_action": {"doing", "uncertain"},
-  "checks": [{"id","who","skill","difficulty","stakes","assist","edge","edge_reason"}],
+  "checks": [{"id","who","skill","difficulty","stakes","edge","edge_reason"}],
   "speakers": [{"id","goal","mood","pressure","keeps","touched","approach","framing"}],
   "moves": [{"who","answers","move","uses","new","needs"}],
   "lore": [{"entry","who","line"}],
@@ -1054,7 +1066,7 @@ Return only this JSON object:
 
 - The player leads. Start from what the player just said or did: move 1 answers it, in its own terms. A character's own aims come in after that, or in a later turn, unless something urgent cuts in.
 - player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking and asking are not uncertain.
-- checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim. stakes says what success means. assist: a character present who helps.
+- checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim. stakes says what success means. Companions in the player's party help on their own when they are willing and trained; the game works it out.
 - People are in the moment. What they say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line.
 - Feelings on the sheets are words for each meter, toward the player and toward others here. Warmth (warmth): how much they like the other. Bond (bond): how much they would do for the other. Each is a separate feeling; when they pull apart, play the tension.
 - speakers: at most 3 characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone. mood: how what just happened lands on them.
@@ -1117,7 +1129,7 @@ Mood now: careful. Comfort 2/5.
 Knows:
 - [mara.k1] Tobin was in the yard after closing
 Values: likes honesty
-Secret [mara.two-books]: Mara's part: she keeps the second ledger. A second ledger records what the yard really takes in. It is kept in the tally office, under the floor. How Mara feels about it: would rather lose her post than see it found. Tell: Gives exact numbers.
+Secret [mara.two-books]: Mara's part: she keeps the second ledger. A second ledger records what the yard really takes in. It is kept in the tally office, under the floor. How Mara feels about it: would rather lose her post than see it found. Tell: Gives exact numbers. Won't tell the player yet.
 Lying tell: Gives exact numbers
 Toward the player: warmth: civil; bond: loose
 ----- user -----
@@ -1148,6 +1160,9 @@ Tobin ducks out through the gate.
 
 # Turns since each last spoke
 mara: 1
+
+# Help with the player's checks
+Mara would back the player up.
 
 # Pressure now
 mara: driven
@@ -1288,7 +1303,7 @@ Tobin: The horses were restless. I sang to them.
 Mara: You were here after closing, Tobin. I saw the lamp.
 
 Kit: I'm not the Watch. Tell me who you let into the yard after closing, and I'll keep it quiet.
-(Kit — Talk 11 vs 13: success at a cost)
+(Kit — Talk 12 vs 13: success at a cost (+1: Mara))
 Tobin hums, then stops himself.
 Tobin: Someone with a Guild seal knocked. I couldn't say no to the seal.
 Mara's pen stops over the tally.
@@ -1338,7 +1353,7 @@ Tobin: The horses were restless. I sang to them.
 Mara: You were here after closing, Tobin. I saw the lamp.
 
 Kit: I'm not the Watch. Tell me who you let into the yard after closing, and I'll keep it quiet.
-(Kit — Talk 11 vs 13: success at a cost)
+(Kit — Talk 12 vs 13: success at a cost (+1: Mara))
 Tobin hums, then stops himself.
 Tobin: Someone with a Guild seal knocked. I couldn't say no to the seal.
 Mara's pen stops over the tally.

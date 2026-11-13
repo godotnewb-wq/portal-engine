@@ -32,16 +32,8 @@ export const isSuccess = (degree: Degree): boolean => degree === 'strong' || deg
 
 export type Edge = 'advantage' | 'disadvantage' | 'none'
 
-/**
- * What a helper adds to a check: nothing without the skill or enough of the assist meter, a bonus from the first
- * threshold, advantage from the second.
- */
-export function assistFrom(r: Ruleset, helper: { stats: StatBlock; meter: number }, skill: string): { bonus: number; edge: Edge } {
-  const a = r.assists
-  if (rankOf(helper.stats, skill) < a.minRank || helper.meter < a.bonusFrom) return { bonus: 0, edge: 'none' }
-  if (helper.meter < a.advantageFrom) return { bonus: a.bonus, edge: 'none' }
-  return { bonus: 0, edge: 'advantage' }
-}
+/** What helpers add to a check (core rules §1): by how many help, capped at the table's last entry. Never an edge. */
+export const assistBonus = (r: Ruleset, helpers: number): number => r.assists.bonus[Math.min(helpers, r.assists.bonus.length - 1)]!
 
 /** Advantages never stack, and an advantage and a disadvantage cancel out. */
 export function combineEdges(edges: Edge[]): Edge {

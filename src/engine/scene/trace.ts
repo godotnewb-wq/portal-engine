@@ -83,7 +83,8 @@ export interface CheckTrace {
   modifier: number
   rank: number
   bonus: number
-  assist?: { by: string; bonus: number; edge: Edge; meter: number }
+  /** Companions who helped; `bonus` is what they added. */
+  helpers?: string[]
   total: number
   degree: Degree
   critical: 'hit' | 'miss' | null
@@ -136,7 +137,7 @@ export function checkTraces(plan: BeatPlan): CheckTrace[] {
       modifier: r.modifier,
       rank: r.rank,
       bonus: r.bonus,
-      ...(c.assisted && { assist: c.assisted }),
+      ...(c.helpers && { helpers: c.helpers }),
       total: r.total,
       degree: r.degree,
       critical: r.critical,

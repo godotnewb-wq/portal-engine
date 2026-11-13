@@ -4,7 +4,7 @@ Story checks, read entirely from the pack's ruleset: attributes and their modifi
 
 **Public API** (`@engine/rules`)
 - `RulesetSchema`, `Ruleset`, `rulesetProblems`, `skillById`, `difficultyDc`, `meterIds`, `neutralWord`, `PeopleRulesSchema`, `TiesRulesSchema`, `peopleProblems`, `GATED_ACTIONS`, `rungIndex` (the people and tie vocabularies, `people.ts`), `bandWord` (a meter value's word band) and `meterWords` (a character's meters as prompts show them, in bands).
-- `rollCheck(ruleset, stats, request, dice)`, `describeCheck`, `degreeOf`, `modifier`, `rankCap`, `assistFrom`, `combineEdges`, `averageStats`.
+- `rollCheck(ruleset, stats, request, dice)`, `describeCheck`, `degreeOf`, `modifier`, `rankCap`, `rankOf`, `assistBonus` (the bonus for n helpers), `combineEdges`, `averageStats`.
 - `StatBlockSchema`: attributes and skill ranks by the ruleset's ids.
 - `LORE_BUDGET_FIELDS`, `LORE_BUDGET_BOUNDS`, `LoreBudgetOverridesSchema`, `cleanLoreBudgets`, `loreBudgets`, `LoreBudgets`.
 

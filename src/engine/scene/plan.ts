@@ -5,6 +5,7 @@ import { checkNames, entryById, knows, LORE_LINE_WORDS } from '@engine/codex'
 import { packNames } from './checks'
 import { turnLore, type TurnLore } from './lore'
 import { canSay, sceneFacts, toldPlayer } from './facts'
+import { wouldDisclose } from './resolve'
 import type { Scene } from '@engine/state'
 import { locationById } from '@engine/pack'
 import {
@@ -192,6 +193,8 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan, inpu
       const fact = facts.get(id.trim())
       if (!fact) fix(`move ${n}: no fact "${id}"`)
       else if (!canSay(scene, fact, who)) fix(`move ${n}: ${who} can't know ${fact.id}`)
+      else if (fact.kind === 'secret' && fact.owner === who && !scene.told.includes(fact.id) && !disclosureAllowed(content, state, fact, who, answers, moves))
+        fix(`move ${n}: ${who} won't share ${fact.id} with ${listenerOf(answers, moves)} yet`)
       else says.push({ text: fact.text, id: fact.id, unheard: !toldPlayer(scene, fact) })
     }
     for (const t of m.new.map((x) => x.trim()).filter(Boolean)) {
@@ -210,6 +213,20 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan, inpu
     plan: { ...plan, exchange, moves, player_action: raw.player_action, change: raw.change, ...(loreLines.length > 0 && { lore: loreLines }) },
     corrections
   }
+}
+
+/** Who a move is said to: the player, or the speaker of the move it answers. */
+const listenerOf = (answers: Move['answers'], moves: Move[]): string => (answers === 'player' ? 'player' : (moves[answers - 1]?.who ?? 'player'))
+
+/**
+ * A speaker sharing their own secret on purpose (npc design §6, milestone 4a): checked against the secret's disclosure
+ * minimums toward whoever the move is said to, before the writer is told to portray it. A secret the player already
+ * knows passes.
+ */
+function disclosureAllowed(content: Pack, state: GameState, fact: { id: string; text: string }, who: string, answers: Move['answers'], moves: Move[]): boolean {
+  const listener = listenerOf(answers, moves)
+  if (listener === 'player' && (state.facts[who] ?? []).includes(fact.text)) return true
+  return wouldDisclose(content, state, who, fact.id.slice(who.length + 1), listener)
 }
 
 /** The plan's speakers once read from the director's fields, and the fields checked the same way for everyone. */
@@ -270,15 +287,12 @@ function validateShared(content: Pack, state: GameState, raw: SharedPlan): { pla
     else if (checks.length >= MAX_CHECKS) fix(`dropped check "${c.id}": at most ${MAX_CHECKS}`)
     else if (checks.some((x) => x.id === c.id)) fix(`dropped duplicate check "${c.id}"`)
     else {
-      const assist = c.assist ? presentId(content, scene, c.assist) : undefined
-      if (c.assist && (!assist || assist === who)) fix(`dropped assist "${c.assist}" on check "${c.id}"`)
       checks.push({
         id: c.id,
         who,
         skill,
         difficulty,
         stakes: c.stakes,
-        ...(assist && assist !== who && { assist }),
         ...(c.edge && { edge: c.edge })
       })
     }

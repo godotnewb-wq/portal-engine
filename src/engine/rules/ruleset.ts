@@ -55,17 +55,14 @@ export const RulesetSchema = z.object({
     /** …and this, one step down. */
     miss: z.number().int()
   }),
-  /** How much a helper's feelings toward the one rolling make their help worth. */
+  /**
+   * Assists (core rules §1): only companions present help, each when their assist gate (people.gates.assist, shifted
+   * by their layers and motives) is met toward whoever rolls and they have at least `minRank` in the skill. The bonus
+   * goes by how many help: `bonus[n]` for n helpers, the last entry for more. Never advantage.
+   */
   assists: z.object({
-    /** The relationship meter that decides it, e.g. trust. */
-    meter: id,
-    /** The helper needs at least this rank in the skill. */
     minRank: z.number().int().nonnegative(),
-    /** From this meter value, help adds `bonus`… */
-    bonusFrom: z.number(),
-    bonus: z.number().int(),
-    /** …and from this one, it gives advantage instead. */
-    advantageFrom: z.number()
+    bonus: z.array(z.number().int().min(0)).min(2)
   }),
   meters: z.object({
     /**
@@ -160,7 +157,7 @@ export function rulesetProblems(r: Ruleset): string[] {
   unique('scale word', r.wordScale.map((w) => w.word))
   unique('pressure word', r.pressures)
   for (const s of r.skills) if (!attributes.includes(s.attribute)) problems.push(`skill "${s.id}" uses unknown attribute "${s.attribute}"`)
-  if (!meters.includes(r.assists.meter)) problems.push(`assists use unknown meter "${r.assists.meter}"`)
+  if (r.assists.bonus[0] !== 0) problems.push('assists.bonus[0] is for no helpers and must be 0')
   for (const m of meters) if (!(m in r.relations.start)) problems.push(`relations.start has no value for meter "${m}"`)
   for (const m of Object.keys(r.relations.start)) if (!meters.includes(m)) problems.push(`relations.start names unknown meter "${m}"`)
   const inRange = (v: number) => v >= r.meters.min && v <= r.meters.max

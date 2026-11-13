@@ -102,16 +102,6 @@ describe('resolvePlan', () => {
     expect(check.result?.rank).toBe(1)
     expect(check.line).toMatch(/^Vex — Empathy \d+ vs 15: /)
   })
-
-  it('gives an assist by the helper’s trust', () => {
-    const state = barScene(3)
-    const { plan } = validatePlan(content, state, raw({
-      ...attempt,
-      checks: [{ id: 'p', who: 'player', skill: 'streetwise', difficulty: 'hard', stakes: '', assist: 'vex' }]
-    }))
-    // Vex trusts the player 60 and has Streetwise 2: +2.
-    expect(resolvePlan(content, state, plan).plan.checks[0]!.result?.bonus).toBe(2)
-  })
 })
 
 describe('focus and fallback', () => {

@@ -5,7 +5,7 @@ import { loadPack, readPackFiles } from '@platform/packs'
 
 /**
  * The test-fixture pack, which engine tests run against. Its ruleset is deliberately unlike any game's (other
- * attribute and skill names, another difficulty table, two meters on 0–20), so an engine test that only passes with
+ * attribute and skill names, another difficulty table, two signed meters on −10 … +10), so an engine test that only passes with
  * one game's numbers fails here.
  */
 export const FIXTURE_DIR = join(__dirname, '../packs/test-fixture')

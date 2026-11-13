@@ -10,6 +10,7 @@ import { MAX_CHECKS, MAX_LINES, MAX_SPEAKERS, QUIET_TURNS, presentCast, silence 
 import { LORE_LINE_WORDS, MOVE_KINDS, NEW_FACT_WORDS } from './plan'
 import { turnLore, type TurnLore } from './lore'
 import { cueSecretLine, fullSecretLine, type SecretShown } from './secrets'
+import { willingHelpers, wouldDisclose } from './resolve'
 
 /** How many past turns go into prompts verbatim; older ones live in the running summary. */
 export const RECENT_TURNS = 3
@@ -28,7 +29,7 @@ export const directorRules = (r: Ruleset, loreLines = r.codex.loreLines): string
 Return only this JSON object:
 {
   "player_action": {"doing", "uncertain"},
-  "checks": [{"id","who","skill","difficulty","stakes","assist","edge","edge_reason"}],
+  "checks": [{"id","who","skill","difficulty","stakes","edge","edge_reason"}],
   "speakers": [{"id","goal","mood","pressure","keeps","touched","approach","framing"}],
   "moves": [{"who","answers","move","uses","new","needs"}],
 ${loreLines > 0 ? '  "lore": [{"entry","who","line"}],\n' : ''}  "change": "...",
@@ -39,7 +40,7 @@ ${loreLines > 0 ? '  "lore": [{"entry","who","line"}],\n' : ''}  "change": "..."
 
 - The player leads. Start from what the player just said or did: move 1 answers it, in its own terms. A character's own aims come in after that, or in a later turn, unless something urgent cuts in.
 - player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking and asking are not uncertain.
-- checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most ${MAX_CHECKS}. who is "player" or a character id. skill is one of: ${r.skills.map((x) => x.id).join(', ')}. difficulty is one of: ${r.difficulties.map((d) => d.word).join(', ')}. stakes says what success means. assist: a character present who helps.
+- checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most ${MAX_CHECKS}. who is "player" or a character id. skill is one of: ${r.skills.map((x) => x.id).join(', ')}. difficulty is one of: ${r.difficulties.map((d) => d.word).join(', ')}. stakes says what success means. Companions in the player's party help on their own when they are willing and trained; the game works it out.
 - People are in the moment. What they say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line.
 - Feelings on the sheets are words for each meter, toward the player and toward others here. ${r.meters.list.map((m) => `${m.name} (${m.id}): ${m.description}.`).join(' ')} Each is a separate feeling; when they pull apart, play the tension.
 - speakers: at most ${MAX_SPEAKERS} characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone. mood: how what just happened lands on them.
@@ -92,11 +93,17 @@ export function buildDirectorPrompt(content: Pack, state: GameState, input: stri
     .filter((c) => quiet[c.id]! >= QUIET_TURNS)
     .map((c) => `- ${c.name} [id: ${c.id}], silent ${quiet[c.id]} turns. Trade: ${c.role}. Tonight: ${c.agenda.current}. Wants: ${c.agenda.longTerm.join('; ')}.`)
   const said = facts.filter((f) => f.kind === 'said' || scene.told.includes(f.id))
+  // The assist gate in words (core rules §1): which companions present would back the player up, never the numbers.
+  const willing = willingHelpers(content, state, 'player')
+  const backing = state.party
+    .filter((id) => present.includes(id))
+    .map((id) => `${speakerName(content, id)} ${willing.includes(id) ? 'would back the player up.' : "won't lift a finger."}`)
   const user = [
     scene.summary && `# Earlier in the scene\n${scene.summary}`,
     recent.length > 0 ? `# Last turns\n${recent.map((t) => turnText(content, player.name, t)).join('\n\n')}` : '# The scene opens now.',
     said.length > 0 ? `# Already said on screen (anyone present can use these)\n${said.map((f) => `- [${f.id}] ${f.text}`).join('\n')}` : '# Nothing has been said on screen yet.',
     `# Turns since each last spoke\n${present.map((id) => `${id}: ${quiet[id]}`).join(', ')}`,
+    backing.length > 0 && `# Help with the player's checks\n${backing.join(' ')}`,
     Object.keys(scene.pressures).length > 0 && `# Pressure now\n${present.filter((id) => scene.pressures[id] !== undefined).map((id) => `${id}: ${content.ruleset.pressures[scene.pressures[id]!]}`).join(', ')}`,
     quietOnes.length > 0 && `# Quiet for a while\n${quietOnes.join('\n')}`,
     lore.layers.triggered.text && `# Lore that has come up (background, not things to recite)\n${lore.layers.triggered.text}`,
@@ -133,7 +140,10 @@ export function sheet(content: Pack, state: GameState, c: Character, present: st
     c.values.length > 0 && `Values: ${c.values.map((v) => `${v.stance} ${v.value}`).join(', ')}`,
     ...c.secrets.map((s) => {
       const id = `${c.id}.${s.id}`
-      return secrets.find((x) => x.id === id)?.form === 'cue' ? cueSecretLine(content, c, s, id) : fullSecretLine(c, s, id)
+      const line = secrets.find((x) => x.id === id)?.form === 'cue' ? cueSecretLine(content, c, s, id) : fullSecretLine(c, s, id)
+      // Its disclosure minimums in words (npc design §6), so the director doesn't plan a telling the game will refuse.
+      if (!s.disclose) return line
+      return `${line} ${wouldDisclose(content, state, c.id, s.id, 'player') ? 'Would tell the player now, if it fits.' : "Won't tell the player yet."}`
     }),
     `Lying tell: ${c.voice.shifts.lying}`,
     meters && `Toward the player: ${meterWords(content.ruleset, meters)}`,
