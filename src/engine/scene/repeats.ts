@@ -4,10 +4,10 @@ import type { Beat, Scene } from '@engine/state'
 import { characterById, type Pack } from '@engine/pack'
 import type { ParsedReply } from './beats'
 import type { Problem } from './checks'
-import { presentCast } from './plan'
+import { presentCast } from './planShape'
 
 /**
- * The repetition tracker (claude/director-writer.md §8; claude/scene-system-redesign.md §5.4). Round 0 found slang in
+ * The repetition tracker (director writer.md §8; scene system redesign.md §5.4). Round 0 found slang in
  * a third to a half of some characters' lines and the same gesture in most turns (one character's jacket patch in ~60% of tram
  * turns), so code keeps a short list of what each character has used lately and gives it to the writer to avoid.
  */

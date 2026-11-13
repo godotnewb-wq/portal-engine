@@ -1,6 +1,6 @@
 ---
-name: Spirals on doors
-kind: event
+title: Spirals on doors
+kind: current
 keywords: [spiral on the door, spirals on doors]
 summary: Chalked spirals are turning up on doors in the Ninth Turn.
 source: Everyday Spire City > Current tensions

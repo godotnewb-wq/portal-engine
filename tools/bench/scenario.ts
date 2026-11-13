@@ -12,7 +12,7 @@ export const ExpectedCheckSchema = z.object({ turn: z.number().int().positive(),
 export type ExpectedCheck = z.infer<typeof ExpectedCheckSchema>
 
 /**
- * A fixed scene for the test bench (narrator-scene-engine §10): who is where, how they feel going in, and the lines
+ * A fixed scene for the test bench (director writer §10): who is where, how they feel going in, and the lines
  * the player says. Run against a prompt or model change, the same scenarios show whether characters got better.
  */
 export const ScenarioSchema = z.object({

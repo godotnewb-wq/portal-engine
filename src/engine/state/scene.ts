@@ -2,7 +2,7 @@ import { z } from 'zod'
 import { IdSchema } from '@engine/core'
 import { MetersSchema } from '@engine/characters'
 
-/** One click of the VN text box: a line of narration, or one character's line (narrator-scene-engine §2). */
+/** One click of the VN text box: a line of narration, or one character's line (director writer §2). */
 export const BeatSchema = z.discriminatedUnion('kind', [
   z.object({ kind: z.literal('narration'), text: z.string() }),
   z.object({ kind: z.literal('dialogue'), speaker: z.string(), text: z.string() })
@@ -35,7 +35,12 @@ export const TurnSchema = z.object({
   /** Who had a speaking slot, for rotating focus. */
   speakers: z.array(z.string()).default([]),
   /** Location details the director used, so the next turns pick fresh ones. */
-  texture: z.array(z.string()).default([])
+  texture: z.array(z.string()).default([]),
+  /**
+   * The secrets validly kept this turn, by fact id (`<character>.<secret>`): first in line to be shown in full next
+   * turn. Absent when nobody kept one.
+   */
+  kept: z.array(z.string()).optional()
 })
 export type Turn = z.infer<typeof TurnSchema>
 

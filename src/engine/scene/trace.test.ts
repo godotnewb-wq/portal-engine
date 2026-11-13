@@ -3,13 +3,17 @@ import { TracedError, type Prompt } from '@engine/core'
 import { fixture, yardScene } from '@tests/fixture'
 import { runTurn, type TurnLlm } from './runTurn'
 import { planItems } from './trace'
-import type { BeatPlan } from './plan'
+import type { BeatPlan } from './planShape'
 import { BEATS } from './style'
 
 const PLAN = JSON.stringify({
   speakers: [
-    { id: 'tobin', point: 'Says he locked up at the usual hour.', intent: 'Avoid the question.', mood: 'uneasy', hiding: 'let someone in after closing', approach: 'deflect' },
-    { id: 'mara', point: 'Asks why the gate was warm at midnight.', intent: 'Catch him out.', mood: 'sharp', depends_on_check: 'see' }
+    { id: 'tobin', goal: 'Avoid the question.', mood: 'uneasy', keeps: ['tobin.after-closing'], touched: 'after closing', approach: 'deflect' },
+    { id: 'mara', goal: 'Catch him out.', mood: 'sharp' }
+  ],
+  moves: [
+    { who: 'tobin', answers: 'player', move: 'dodge' },
+    { who: 'mara', answers: 1, move: 'push back', needs: 'see' }
   ],
   reactions: [],
   walk_ons: [{ id: 'clerk', line: 'stamps a ledger, loudly' }],
@@ -43,7 +47,7 @@ const clock = () => {
 describe('the turn trace (milestone 2, A1)', () => {
   it('records the turn: identity, cast before and after, plan, rolls, calls and cost', async () => {
     const state = yardScene(3)
-    const outcome = await runTurn(fixture, state, 'Tobin, who came by after closing?', scripted(PLAN, CLEAN), () => {}, { pipeline: 'lines', forceNatural: 11, turnId: 'abc', log: 'session-1', now: clock() })
+    const outcome = await runTurn(fixture, state, 'Tobin, who came by after closing?', scripted(PLAN, CLEAN), () => {}, { forceNatural: 11, turnId: 'abc', log: 'session-1', now: clock() })
     const t = outcome.trace
     expect(t).toMatchObject({ turnId: 'abc', sceneId: state.scene!.id, turn: 1, input: 'Tobin, who came by after closing?' })
     expect(t.at).toBe(new Date(1_700_000_000_010).toISOString())
@@ -61,7 +65,7 @@ describe('the turn trace (milestone 2, A1)', () => {
 
   it('breaks each check down: dice, edge asked and applied, modifier, rank, total, degree', async () => {
     const state = yardScene(3)
-    const { trace } = await runTurn(fixture, state, 'Tobin?', scripted(PLAN, CLEAN), () => {}, { pipeline: 'lines', forceNatural: 11 })
+    const { trace } = await runTurn(fixture, state, 'Tobin?', scripted(PLAN, CLEAN), () => {}, { forceNatural: 11 })
     expect(trace.checks).toEqual([
       expect.objectContaining({ id: 'see', who: 'mara', skill: 'notice', difficulty: 'tough', dc: 13, rolls: [11, 11], natural: 11, edgeAsked: 'advantage', edge: 'advantage', modifier: 3, rank: 1, total: 15, degree: 'success' })
     ])
@@ -69,7 +73,7 @@ describe('the turn trace (milestone 2, A1)', () => {
   })
 
   it('traces each beat to its line in the reply and to the plan item it carries out', async () => {
-    const { trace } = await runTurn(fixture, yardScene(), 'Tobin?', scripted(PLAN, CLEAN), () => {}, { pipeline: 'lines', forceNatural: 11 })
+    const { trace } = await runTurn(fixture, yardScene(), 'Tobin?', scripted(PLAN, CLEAN), () => {}, { forceNatural: 11 })
     expect(trace.beats.map((b) => [b.index, b.source, b.line, b.plan])).toEqual([
       [1, 'draft', 1, ['walk-on:clerk']],
       [2, 'draft', 3, ['speaker:tobin', 'line:1']],
@@ -81,7 +85,7 @@ describe('the turn trace (milestone 2, A1)', () => {
     const unplanned = 'Tobin: "Usual hour."\nMara: "Humming."\nClerk: "Next!"'
     // Still wrong after the rewrite: a line by no one in the scene (beat 2), then enough narration to go one beat over the budget once it is dropped.
     const stillWrong = ['Tobin: "Usual hour."', 'You say: "Fine."', 'Mara: "Humming."', ...Array.from({ length: BEATS.max - 1 }, (_, i) => `NARRATION: Rain ${i + 1}.`)].join('\n')
-    const { trace, beats } = await runTurn(fixture, yardScene(), 'Tobin?', scripted(JSON.stringify({ speakers: [{ id: 'tobin', intent: 'x', mood: '' }, { id: 'mara', intent: 'y', mood: '' }] }), unplanned, stillWrong), () => {}, { pipeline: 'lines', now: clock() })
+    const { trace, beats } = await runTurn(fixture, yardScene(), 'Tobin?', scripted(JSON.stringify({ speakers: [{ id: 'tobin', goal: 'x' }, { id: 'mara', goal: 'y' }], moves: [{ who: 'tobin', answers: 'player', move: 'answer' }, { who: 'mara', answers: 1, move: 'ask' }] }), unplanned, stillWrong), () => {}, { now: clock() })
     expect(trace.findings).toEqual([expect.objectContaining({ kind: 'unplanned-speaker', beat: 3, text: 'Next!' })])
     expect(trace.rewrite).toMatchObject({ callId: expect.stringMatching(/:rewrite$/), salvage: { dropped: [2], cut: 1 } })
     expect(trace.rewrite!.remaining.map((p) => p.kind)).toContain('unknown-speaker')
@@ -94,7 +98,7 @@ describe('the turn trace (milestone 2, A1)', () => {
   // Session 2026-11-07_0039_e46a, t2b5: a silent reaction given words, which ended up in quotes inside narration.
   it('sends speech in narration to the rewrite, and cuts the words but keeps the action if it is still there', async () => {
     const speaking = `${CLEAN}\nNARRATION: Pell doesn't look up. "Gate's been warm all week, if anyone asked me."`
-    const { beats, trace } = await runTurn(fixture, yardScene(), 'Was the gate warm?', scripted(PLAN, speaking, speaking), () => {}, { pipeline: 'lines', now: clock() })
+    const { beats, trace } = await runTurn(fixture, yardScene(), 'Was the gate warm?', scripted(PLAN, speaking, speaking), () => {}, { forceNatural: 11, now: clock() })
     expect(trace.findings.map((p) => p.kind)).toEqual(['speech-in-narration'])
     expect(trace.findings[0]!.fix).toMatch(/^Beat 4 puts spoken words in narration \("Gate's been warm all week, if anyone asked me\."\)\./)
     expect(beats.at(-1)).toEqual({ kind: 'narration', text: "Pell doesn't look up." })
@@ -123,5 +127,94 @@ describe('the turn trace (milestone 2, A1)', () => {
     expect(error).toBeInstanceOf(TracedError)
     expect((error as TracedError).message).toBe('rate limited')
     expect((error as TracedError).calls.map((c) => [c.role, c.error ?? 'ok'])).toEqual([['director', 'ok'], ['writer', 'rate limited']])
+  })
+})
+
+// Milestone 3.6, task 6 (decided 2026-11-12): which of the writer's tags count.
+describe('the writer’s tags', () => {
+  const ASK = 'Whose seal was it?'
+  const plan = (over: object = {}) =>
+    JSON.stringify({ speakers: [{ id: 'mara', goal: 'narrow it down', mood: 'careful' }], moves: [{ who: 'mara', answers: 'player', move: 'answer' }], reactions: [{ id: 'tobin', beat: 'looks at the ground' }], ...over })
+  const TAGS = '[Tobin: MOOD rattled]\n[Tobin: COMFORT 1 he said too much]\n[Tobin: EXPRESSION wide-eyed]\n[Mara: EXPRESSION thoughtful]'
+  // Tobin speaks without being planned, in the draft and again in the rewrite, so salvage cuts his line.
+  const cutTobin = `Mara: "Only clerks carry seals."\nNARRATION: Rain on the crates.\nTobin: "Seven, counting Pell."\n${TAGS}`
+
+  it('drops the mood, comfort and expression of someone salvage cut out of the turn, and says why', async () => {
+    const before = yardScene()
+    const { state, trace } = await runTurn(fixture, before, ASK, scripted(plan(), cutTobin, cutTobin))
+    expect(trace.rewrite?.salvage).toBeDefined()
+    const scene = state.scene!
+    expect(scene.moods['tobin']).toBe(before.scene!.moods['tobin'])
+    expect(scene.comfort['tobin']).toBe(before.scene!.comfort['tobin'])
+    expect(scene.expressions['tobin']).toBe(before.scene!.expressions['tobin'])
+    expect(scene.expressions['mara']).toBe('thoughtful')
+    expect(trace.tags.dropped).toEqual(['[Tobin: EXPRESSION wide-eyed] (salvage cut their lines)', '[Tobin: MOOD rattled] (salvage cut their lines)', '[Tobin: COMFORT 1 he said too much] (salvage cut their lines)'])
+    // The parsed tags stay in the trace as the writer wrote them.
+    expect(trace.tags.parsed.moods['tobin']).toBe('rattled')
+  })
+
+  it('keeps the tags of someone still in the kept prose, and of anyone on a turn nothing was cut from', async () => {
+    const reacted = `Mara: "Only clerks carry seals."\nNARRATION: Tobin looks at the ground.\nTobin: "Seven, counting Pell."\n${TAGS}`
+    const salvaged = await runTurn(fixture, yardScene(), ASK, scripted(plan(), reacted, reacted))
+    expect(salvaged.state.scene!.moods['tobin']).toBe('rattled')
+    expect(salvaged.trace.tags.dropped).toEqual([])
+    const clean = await runTurn(fixture, yardScene(), ASK, scripted(plan(), `Mara: "Only clerks carry seals."\nNARRATION: Rain on the crates.\n${TAGS}`))
+    expect(clean.trace.rewrite).toBeUndefined()
+    expect(clean.state.scene!.comfort['tobin']).toBe(1)
+  })
+
+  it('sends no one away on a LEAVES tag alone, and lets the plan send someone away without one', async () => {
+    const tagged = await runTurn(fixture, yardScene(), ASK, scripted(plan(), `Mara: "Only clerks carry seals."\nNARRATION: Tobin slips out.\n[LEAVES: Tobin]`))
+    expect(tagged.state.scene!.departed).toEqual([])
+    expect(tagged.trace.tags.dropped).toEqual(['[LEAVES: Tobin] (not in the plan)'])
+    const planned = await runTurn(fixture, yardScene(), ASK, scripted(plan({ leaves: ['tobin'] }), 'Mara: "Only clerks carry seals."\nNARRATION: Tobin slips out.'))
+    expect(planned.state.scene!.departed).toEqual(['tobin'])
+    expect(planned.trace.tags.dropped).toEqual([])
+  })
+
+  it('ends the scene only when the plan does, whatever the tag says', async () => {
+    const reply = 'Mara: "Only clerks carry seals."\nNARRATION: Rain on the crates.\n[END SCENE]'
+    expect((await runTurn(fixture, yardScene(), ASK, scripted(plan(), reply))).state.scene!.ended).toBe(false)
+    expect((await runTurn(fixture, yardScene(), ASK, scripted(plan({ end_scene: true }), reply))).state.scene!.ended).toBe(true)
+  })
+})
+
+// Milestone 3.6, task 6a: the writer is told who leaves, and the game narrates a departure the kept prose doesn't show.
+describe('planned departures', () => {
+  const ASK = 'Tobin, you should go.'
+  const LEAVE = JSON.stringify({
+    speakers: [{ id: 'tobin', goal: 'get out of sight', mood: 'grateful' }],
+    moves: [{ who: 'tobin', answers: 'player', move: 'agree' }],
+    reactions: [{ id: 'mara', beat: 'watches him go' }],
+    leaves: ['tobin']
+  })
+  const recorded = (...writes: string[]) => {
+    const prompts: Prompt[] = []
+    const llm = scripted(LEAVE, ...writes)
+    return { prompts, llm: { direct: llm.direct, write: (p: Prompt, d: (t: string) => void, r: () => void) => (prompts.push(p), llm.write(p, d, r)) } as TurnLlm }
+  }
+
+  it('tells the writer who leaves, and adds nothing when the prose shows them', async () => {
+    const { prompts, llm } = recorded('Tobin: "Yes. The horses need water."\nNARRATION: Tobin ducks out through the gate.')
+    const { state, beats, trace } = await runTurn(fixture, yardScene(), ASK, llm)
+    expect(prompts[0]!.user).toMatch(/# Leaving this turn\nTobin leaves\. Show them going\./)
+    expect(beats.map((b) => b.text)).toEqual(['Yes. The horses need water.', 'Tobin ducks out through the gate.'])
+    expect(trace.beats.map((b) => b.source)).toEqual(['draft', 'draft'])
+    expect(state.scene!.departed).toEqual(['tobin'])
+  })
+
+  it('narrates the departure in the pack’s words when the writer never shows the one leaving', async () => {
+    const { beats, trace, state } = await runTurn(fixture, yardScene(), ASK, recorded('NARRATION: Rain on the crates.\nMara: "Go, then."').llm)
+    expect(beats.at(-1)).toEqual({ kind: 'narration', text: 'Tobin heads off across the yard.' })
+    expect(trace.beats.at(-1)).toMatchObject({ index: beats.length, source: 'game', line: 0, plan: ['leaves:tobin'] })
+    expect(state.scene!.turns[0]!.beats).toEqual(beats)
+  })
+
+  it('narrates it too when salvage cut every line that showed them', async () => {
+    // Pell speaks without being planned, in the draft and the rewrite; salvage drops the beat, and with it Tobin.
+    const wrong = 'NARRATION: Rain on the crates.\nPell: "Tobin, out you go."'
+    const { beats, trace } = await runTurn(fixture, yardScene(), ASK, recorded(wrong, wrong).llm)
+    expect(trace.rewrite?.salvage).toBeDefined()
+    expect(beats.map((b) => b.text)).toEqual(['Rain on the crates.', 'Tobin heads off across the yard.'])
   })
 })

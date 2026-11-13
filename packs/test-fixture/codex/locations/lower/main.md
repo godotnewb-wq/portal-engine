@@ -1,5 +1,6 @@
 ---
-name: The Lower Ward
+title: The Lower Ward
+label: The Lower Ward
 kind: location
 keywords: [lower ward, the mud]
 summary: The muddy half of Testhold, all markets and carts.

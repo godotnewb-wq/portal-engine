@@ -1,5 +1,5 @@
 ---
-name: Light elf culture
+title: Light elf culture
 kind: species-culture
 keywords: [light elf, light elves]
 summary: Often old money, old crafts and long memories.

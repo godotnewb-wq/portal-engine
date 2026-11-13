@@ -1,10 +1,10 @@
 # engine/characters
 
-What a character file holds: tier (recurring or companion), species, look, role, faction (with an optional `level` on the engine's four levels, a free-text `rank` title and an `occupation`; any may be blank), personality, portrait (how they are with strangers and people they know, what they notice, habits: the writer's picture of them), agenda, contradictions, voice card (rhythm, vocabulary, slang, what they avoid, sample lines, and how they sound angry, warm and lying), mood, knowledge, values, secrets with tells (personal, in free text, or linked: a `codex` pointer to a codex secret with the holder's `role` and `angle`, whose text is filled in when the pack loads), starting meters toward the player, relations, and a stat block for companions. Also the player.
+What a character file holds: tier (recurring or companion), species, look, role, faction (with an optional `level` on the engine's four levels, a free-text `rank` title and an `occupation`; any may be blank), personality, portrait (how they are with strangers and people they know, what they notice, habits: the writer's picture of them), agenda, contradictions, voice card (rhythm, vocabulary, slang, what they avoid, sample lines, and how they sound angry, warm and lying), mood, knowledge, values, secrets with tells (personal, in free text, or linked: a `codex` pointer to a codex secret with the holder's `role` and `angle`, whose text is filled in when the pack loads; a personal secret may add a short `summary` and `keywords` for the director's sheet), starting meters toward the player, relations, and a stat block for companions. Also the player.
 
 **Public API** (`@engine/characters`): `CharacterSchema`, `PlayerSchema`, `VoiceCardSchema`, `SecretSchema`, `MetersSchema` (meters by the ruleset's ids), and their types.
 
 Species, factions, skills and meters are the pack's; `engine/pack` checks a character against them.
 
 **Depends on:** core, rules.
-**Design:** `claude/narrator-scene-engine.md` §7, `claude/quests-relationships-npcs.md` §5.
+**Design:** `director writer.md` §7, `npc design.md` §2.

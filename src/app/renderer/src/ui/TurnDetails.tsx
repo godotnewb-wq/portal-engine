@@ -58,6 +58,9 @@ export function TurnDetails({ nameOf, details, loading, flags, flaggable, onFlag
   )
 }
 
+/** Why a secret was first in line to be shown in full (milestone 3.5). */
+const SECRET_PRIORITY = { kept: 'kept last turn', keyword: 'its words came up', context: 'its subject is in play' } as const
+
 /** Which codex entries reached the director this turn, layer by layer (milestone 3). */
 function Lore({ lore }: { lore: NonNullable<Details['turn']['lore']> }) {
   const total = lore.tokens.stage + lore.tokens.scene + lore.tokens.triggered
@@ -70,7 +73,7 @@ function Lore({ lore }: { lore: NonNullable<Details['turn']['lore']> }) {
       <ul>
         {entries.map((e) => (
           <li key={e.id} title={e.id}>
-            {e.name}
+            {e.title}
             {e.form === 'summary' && <span className="muted"> · summary only</span>}
           </li>
         ))}
@@ -93,6 +96,31 @@ function Lore({ lore }: { lore: NonNullable<Details['turn']['lore']> }) {
           <ul>
             {lore.stances.map((s) => (
               <li key={s}>{s.replace(/^- /, '')}</li>
+            ))}
+          </ul>
+        </>
+      )}
+      {lore.secrets && lore.secrets.length > 0 && (
+        <>
+          <div className="muted layer">
+            Secrets on the director’s sheet (≈{lore.secrets.reduce((n, s) => n + s.cueTokens + s.expansionTokens, 0)} tok)
+          </div>
+          <ul>
+            {lore.secrets.map((s) => (
+              <li key={s.id} title={s.id}>
+                {s.id} <span className="muted">· {s.kind}</span>
+                {s.form === 'full' ? (
+                  <span className="muted">
+                    {' '}
+                    · in full{s.priority && ` (${SECRET_PRIORITY[s.priority]})`}: cue ≈{s.cueTokens} + ≈{s.expansionTokens} tok
+                  </span>
+                ) : (
+                  <span className="muted">
+                    {' '}
+                    · cue only{s.priority && ` (${SECRET_PRIORITY[s.priority]}, didn’t fit the budget)`}: ≈{s.cueTokens} tok
+                  </span>
+                )}
+              </li>
             ))}
           </ul>
         </>
@@ -139,7 +167,7 @@ function Body({ details, nameOf, flags, onBeat }: { details: Details; nameOf: (i
           ))}
           {plan.lore?.map((l) => (
             <li key={l.entry + l.line} title={l.entry}>
-              Lore ({l.name}){l.who && <> for <b>{nameOf(l.who)}</b></>}: {l.line}
+              Lore ({l.title}){l.who && <> for <b>{nameOf(l.who)}</b></>}: {l.line}
             </li>
           ))}
           {plan.texture.length > 0 && <li className="muted">Texture: {plan.texture.join('; ')}</li>}

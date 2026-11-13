@@ -4,7 +4,7 @@ import { StatBlockSchema } from '@engine/rules'
 import { FactionLevelSchema } from '@engine/world'
 
 /**
- * Persistent NPC tiers (quests-relationships-npcs §5). Extras are narration only and walk-ons live on a scene card,
+ * Persistent NPC tiers (npc design §2). Extras are narration only and walk-ons live on a scene card,
  * so neither has a character file.
  */
 export const CHARACTER_TIERS = ['recurring', 'companion'] as const
@@ -17,7 +17,7 @@ const id = IdSchema
 export const MetersSchema = z.record(z.string(), z.number())
 export type Meters = z.infer<typeof MetersSchema>
 
-/** How a character talks, kept apart so the writer can be given only this beat's speakers (narrator-scene-engine §7). */
+/** How a character talks, kept apart so the writer can be given only this beat's speakers (director writer §7). */
 export const VoiceCardSchema = z.object({
   /** Sentence length and rhythm, e.g. "clipped; fragments; rarely more than ten words". */
   rhythm: z.string(),
@@ -34,7 +34,7 @@ export type VoiceCard = z.infer<typeof VoiceCardSchema>
 /**
  * A secret is personal (free text about their own life, which may name factions and places) or linked: a pointer to
  * a codex secret, with their part in it and how they feel about it, so faction canon is written once, in the codex
- * (claude/lore-injection.md §7.1). A linked secret's text is filled in from the codex when the pack loads.
+ * (lore injection.md §7.1). A linked secret's text is filled in from the codex when the pack loads.
  */
 export const SecretSchema = z
   .object({
@@ -49,9 +49,17 @@ export const SecretSchema = z
     /** How they behave when guarding it, so deception reads on the page. */
     tell: z.string(),
     /** When they would let it go (free text for the director, until reveal conditions are built). */
-    revealWhen: z.string().optional()
+    revealWhen: z.string().optional(),
+    /**
+     * Personal: the short form the director sees until the secret is expanded (lore injection.md §7.1); without
+     * one, the text's first sentence. A linked secret's short form is its codex entry's summary.
+     */
+    summary: z.string().min(1).optional(),
+    /** Personal: words that, said in the scene, put the secret first in line to be shown in full. Linked: the codex entry's. */
+    keywords: z.array(z.string().min(1)).optional()
   })
   .refine((s) => (s.codex ? !!s.role && !!s.angle : !!s.text), { message: 'a secret needs its text, or a codex pointer with a role and an angle' })
+  .refine((s) => !s.codex || (!s.summary && !s.keywords), { message: 'a linked secret takes its summary and keywords from its codex entry' })
 /** After loading every secret has its text: written, or resolved from the codex. */
 export type Secret = z.infer<typeof SecretSchema> & { text: string }
 
@@ -87,7 +95,7 @@ export const CharacterSchema = z
     /**
      * How they are with others, in prose: with strangers and with people they know, what they notice, what they'd talk
      * about anyway, small habits. The writer's main picture of the person, so goals and secrets don't stand in for one
-     * (claude/scene-system-redesign.md §7; the short form of milestone 4's portrait).
+     * (scene system redesign.md §7; the short form of milestone 4's portrait).
      */
     portrait: z.string(),
     agenda: z.object({ longTerm: z.array(z.string()).min(1), current: z.string() }),

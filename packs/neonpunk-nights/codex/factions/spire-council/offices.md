@@ -1,5 +1,5 @@
 ---
-name: The Council’s public offices
+title: The Council’s public offices
 kind: faction
 keywords: [transit office, magistrate, councillor]
 summary: Ward Offices, the Wardens, the transit office and the courts.

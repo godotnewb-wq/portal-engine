@@ -1,10 +1,11 @@
 # Portal Engine
 
-A game-agnostic engine for single-player LLM visual novel RPGs (Electron, React 19, TypeScript, zod, Vitest), run with game packs. The first pack is Neonpunk Nights. Design docs live in the claude.ai project "RPG Game": `architecture.md` (this layout), `project-outline.md` (milestones), `narrator-scene-engine.md`, `core-rules.md`, `lore.md`, and the rest.
+A game-agnostic engine for single-player LLM visual novel RPGs (Electron, React 19, TypeScript, zod, Vitest), run with game packs. The first pack is Neonpunk Nights. Design docs live in the `RPG Game Docs` folder beside this repository (`D:\RPG\RPG Game Docs`; the claude.ai project "RPG Game" points there). Start with `Developer Handoff.md` and `project outline.md` (milestones), then `architecture.md` (this layout), `director writer.md` (the turn), `core rules.md`, `lore.md` and the rest. Code comments cite them by name and section, e.g. "(director writer §3)".
 
 ## Commands
 - `npm run typecheck` and `npm test` after every change; report what they said.
 - After changing a prompt, the style guide, output checks or pack content, run `npm run bench` (needs a model; see `tools/bench/README.md`) and compare against the previous run with `--compare`. `npm run bench -- --mock` checks the harness without a model.
+- Prompt snapshots (`tests/prompts.test.ts`, `tests/neonpunk-nights/prompts.test.ts`) save every prompt and decision of two scripted scenes. A refactor must leave them unchanged. When a change is meant to alter prompts or behavior, update them with `npx vitest run -u` and commit the snapshot diff with the change, saying why it changed.
 - `npm run preview:scene` shows the screens in a browser with a mock API, without Electron.
 - `npm run logs -- <command>` reads play logs and bench runs: transcripts, flags, stats, blind tests, scenarios from logged turns, AI scoring (see `tools/logs/README.md`).
 

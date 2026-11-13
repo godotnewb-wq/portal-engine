@@ -48,6 +48,21 @@ describe('SaveStore', () => {
     expect(loaded.facts['oria-senn']).toHaveLength(1)
   })
 
+  // Milestone 3.6, task 8: the write is flushed before the rename, and a write cut off before its rename leaves nothing behind.
+  it('clears a temporary file an interrupted write left, and keeps the slot’s last save', () => {
+    const dir = tempDir()
+    const store = new SaveStore(dir, PACK)
+    const state = barScene(5)
+    store.save('slot1', state)
+    writeFileSync(join(dir, 'slot1.json.tmp'), '{"cut off')
+    writeFileSync(join(dir, 'auto.json.tmp'), '')
+    expect(store.list().map((s) => s.slotId)).toEqual(['slot1'])
+    expect(readdirSync(dir).sort()).toEqual(['slot1.json'])
+    expect(store.load('slot1')).toEqual(state)
+    store.save('slot1', barScene(6))
+    expect(readdirSync(dir)).toEqual(['slot1.json'])
+  })
+
   it('round-trips a scene still in progress, dice included, so play resumes mid-scene', () => {
     const store = new SaveStore(tempDir(), PACK)
     const state = barScene(77)

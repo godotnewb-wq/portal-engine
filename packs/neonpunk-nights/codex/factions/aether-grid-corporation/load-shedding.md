@@ -1,5 +1,5 @@
 ---
-name: How the grid really runs
+title: How the grid really runs
 kind: faction
 keywords: [load-shedding, shedding load, the schedule]
 summary: The Bulk’s outages are scheduled load-shedding.

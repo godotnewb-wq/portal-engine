@@ -1,5 +1,6 @@
 ---
-name: Mechanist
+title: Mechanist
+label: Mechanist
 kind: philosophy
 keywords: [mechanists]
 summary: The Aether is a natural force with laws, to be engineered.

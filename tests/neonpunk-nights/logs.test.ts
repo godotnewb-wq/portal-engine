@@ -181,7 +181,7 @@ describe('bench metrics (milestone 2, B4)', () => {
     expect(back.scenarios[0]!.flags).toHaveLength(3)
     const other = await runBench(content, scenarios.slice(0, 1), mockLlm(), 'B', { all: 'mock' })
     const md = compareRuns(content, back, other)
-    expect(md).toMatch(/## Metrics \(scenarios both ran\)\n\n\| Metric \| A \| B \| Change \|/)
+    expect(md).toMatch(/## Metrics \(matching scenario plays\)\n\n\| Metric \| A \| B \| Change \|/)
     expect(md).toMatch(/\| beats flagged bad \| 17% \| 0% \| -17 pts ✓ \|/)
     expect(readFileSync(join(out, 'run.json'), 'utf8')).not.toMatch(/"turns":/)
   })

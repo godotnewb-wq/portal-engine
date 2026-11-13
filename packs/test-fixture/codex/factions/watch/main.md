@@ -1,5 +1,6 @@
 ---
-name: The Ward Watch
+title: The Ward Watch
+label: The Ward Watch
 kind: faction
 aliases: [the watch]
 keywords: [watchmen]

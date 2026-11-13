@@ -1,5 +1,6 @@
 ---
-name: The Spiral Wall
+title: The Spiral Wall
+label: The Spiral Wall
 kind: location
 keywords: [the shrine]
 summary: A Garden Guard shrine where raw Aether weeps down a cracked wall.

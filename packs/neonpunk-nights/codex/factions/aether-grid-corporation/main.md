@@ -1,5 +1,6 @@
 ---
-name: The Aether Grid Corporation
+title: The Aether Grid Corporation
+label: The Aether Grid Corporation
 kind: faction
 aliases: [the Grid, Grid Corporation, Grid Corp]
 keywords: [meter-men, meter-man, line crews, Grid bills, outages]

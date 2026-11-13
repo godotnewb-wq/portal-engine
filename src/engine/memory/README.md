@@ -4,4 +4,4 @@ Which memories a character brings to a scene: core first, then the most recent, 
 
 **Public API** (`@engine/memory`): `recall(state, character)`, `selectMemories`, `RECALL`.
 
-**Depends on:** characters, state. **Design:** `claude/quests-relationships-npcs.md` §1, §5. Adapted from Breedhaven.
+**Depends on:** characters, state. **Design:** `memory.md`. Adapted from Breedhaven.

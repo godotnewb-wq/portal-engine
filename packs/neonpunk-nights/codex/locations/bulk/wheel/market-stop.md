@@ -1,5 +1,6 @@
 ---
-name: The Market Stop
+title: The Market Stop
+label: The Market Stop
 kind: location
 summary: The Coil Line platform on the Wheel’s rim.
 source: The fixed sandbox > The Wheel > The market stop

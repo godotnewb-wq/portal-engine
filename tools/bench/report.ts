@@ -4,10 +4,15 @@ import type { Meters } from '@engine/characters'
 import type { Pack } from '@engine/pack'
 import { lineText, planLines, type TurnTrace } from '@engine/scene'
 import { callsOf, metricInputOf, nameIn, type BenchRun, type ScenarioRun } from './run'
+import { comparability } from './inputs'
 import { compareMetrics, metrics, renderMetrics } from '../logs/metrics'
 
-const beatLine = (content: Pack, run: ScenarioRun, beat: Beat): string =>
-  beat.kind === 'narration' ? `*${beat.text}*` : `**${nameIn(content, run.location, beat.speaker)}:** ${beat.text}`
+/** How a run names people: as recorded when it ran, else from the pack loaded now (runs from before names were recorded). */
+type Names = (location: string, id: string) => string
+export const namesOf = (content: Pack, bench: BenchRun): Names => (location, id) => bench.inputs?.names[id] ?? nameIn(content, location, id)
+
+const beatLine = (names: Names, run: ScenarioRun, beat: Beat): string =>
+  beat.kind === 'narration' ? `*${beat.text}*` : `**${names(run.location, beat.speaker)}:** ${beat.text}`
 
 const delta = (before: Meters, after: Meters): string =>
   Object.keys(after)
@@ -84,8 +89,8 @@ function loreLines(turn: TurnTrace, budgets?: BenchRun['loreBudgets']): string[]
   return lines
 }
 
-function scenarioSection(content: Pack, run: ScenarioRun, repeats: boolean, budgets?: BenchRun['loreBudgets']): string {
-  const name = (id: string) => nameIn(content, run.location, id)
+function scenarioSection(names: Names, run: ScenarioRun, repeats: boolean, budgets?: BenchRun['loreBudgets']): string {
+  const name = (id: string) => names(run.location, id)
   const lines = [`## ${run.title} (\`${run.id}\`${repeats ? `, #${run.repeat}, seed ${run.seed}` : ''})`, '', `> ${run.watchFor}`, '']
   if (run.forceNatural !== undefined) lines.push(`Checks forced to a natural ${run.forceNatural}.`, '')
   const missed = missedCheck(run)
@@ -107,7 +112,7 @@ function scenarioSection(content: Pack, run: ScenarioRun, repeats: boolean, budg
     lines.push('<details><summary>Plan</summary>', '', ...plan, '', '</details>', '')
     const lore = loreLines(t, budgets)
     if (lore.length > 0) lines.push('<details><summary>Lore</summary>', '', ...lore.map((line) => '- ' + line), '', '</details>', '')
-    lines.push(...shown(t).map((b, n) => `${n + 1}. ${beatLine(content, run, b)}`), '')
+    lines.push(...shown(t).map((b, n) => `${n + 1}. ${beatLine(names, run, b)}`), '')
     if (fixes(t).length > 0) lines.push(`Rewrite asked to fix: ${fixes(t).map((f) => `"${f}"`).join(' ')}`, '')
     if (left(t).length > 0) lines.push(`Still wrong after the rewrite (salvaged): ${left(t).map((f) => `"${f}"`).join(' ')}`, '')
     lines.push(`*${t.cost.calls} calls, ${t.cost.ms} ms*`, '')
@@ -137,13 +142,24 @@ const budgetsLine = (bench: BenchRun): string => {
   return ` Lore budgets: scene ${mark('sceneTokens', b.sceneTokens)}, triggered ${mark('triggeredTokens', b.triggeredTokens)}, lines ${mark('loreLines', b.loreLines)}.`
 }
 
+/** Where a run's code and content came from, as far as it recorded. */
+const inputsLine = (bench: BenchRun): string => {
+  const i = bench.inputs
+  if (!i) return 'Inputs: not recorded (a run from before milestone 3.6), so comparisons can match it on scenario, repeat and seed only.'
+  const source = i.source ? `source \`${i.source.commit.slice(0, 7)}\`${i.source.dirty ? ' with uncommitted changes' : ''}` : 'source unknown (no git)'
+  return `Inputs: ${source}, pack content \`${i.pack}\`.`
+}
+
 /** A run as a readable report: the numbers first, then every scenario's turns, plans, beats and summaries. */
 export function renderReport(content: Pack, bench: BenchRun): string {
   const repeats = bench.options.repeat > 1
+  const names = namesOf(content, bench)
   return [
     `# Scene test bench — ${bench.label}`,
     '',
-    `Run ${bench.startedAt}, pack \`${bench.pack}\` ${bench.packVersion}, prompts \`${bench.prompts}\`${bench.options.pipeline ? `, pipeline \`${bench.options.pipeline}\`` : ''}${repeats ? `, ${bench.options.repeat} repeats` : ''}. Models: ${Object.entries(bench.models).map(([role, model]) => `${role} \`${model}\``).join(', ')}.${budgetsLine(bench)}`,
+    `Run ${bench.startedAt}, pack \`${bench.pack}\` ${bench.packVersion}, prompts \`${bench.prompts}\`${repeats ? `, ${bench.options.repeat} repeats` : ''}. Models: ${Object.entries(bench.models).map(([role, model]) => `${role} \`${model}\``).join(', ')}.${budgetsLine(bench)}`,
+    '',
+    inputsLine(bench),
     '',
     `| ${STAT_HEADS.join(' | ')} |`,
     `|${STAT_HEADS.map(() => '---').join('|')}|`,
@@ -151,9 +167,9 @@ export function renderReport(content: Pack, bench: BenchRun): string {
     '',
     '## Metrics',
     '',
-    renderMetrics(metrics(bench.scenarios.map(metricInputOf)), (id) => nameIn(content, bench.scenarios[0]?.location ?? '', id)),
+    renderMetrics(metrics(bench.scenarios.map(metricInputOf)), (id) => names(bench.scenarios[0]?.location ?? '', id)),
     '',
-    ...bench.scenarios.map((run) => scenarioSection(content, run, repeats, bench.loreBudgets))
+    ...bench.scenarios.map((run) => scenarioSection(names, run, repeats, bench.loreBudgets))
   ].join('\n')
 }
 
@@ -161,15 +177,29 @@ export function renderReport(content: Pack, bench: BenchRun): string {
 const cell = (text: string) => text.replace(/\|/g, '\\|').replace(/\n/g, '<br>')
 
 /**
- * Two runs side by side (narrator-scene-engine §10): their numbers, then each scenario they share, turn by turn, with
- * the beats in two columns. A scenario only one of them ran is listed but not compared.
+ * Two runs side by side (director writer §10): what differs in their inputs, their numbers, metrics over the
+ * scenario plays whose inputs match (milestone 3.6: same scenario, repeat and seed, and the same scenario content when
+ * both runs recorded it), then each scenario they share, turn by turn, with the beats in two columns. Each run is
+ * named as it recorded, not from whichever pack is loaded now.
  */
 export function compareRuns(content: Pack, a: BenchRun, b: BenchRun): string {
+  const namesA = namesOf(content, a)
+  const namesB = namesOf(content, b)
+  const c = comparability(a, b)
+  const plays = a.scenarios.length + b.scenarios.length
   const lines = [
     `# Bench comparison: ${a.label} vs ${b.label}`,
     '',
-    `- **A** — ${a.label} (${a.startedAt}): ${Object.entries(a.models).map(([r, m]) => `${r} \`${m}\``).join(', ')}.${budgetsLine(a)}`,
-    `- **B** — ${b.label} (${b.startedAt}): ${Object.entries(b.models).map(([r, m]) => `${r} \`${m}\``).join(', ')}.${budgetsLine(b)}`,
+    `- **A** — ${a.label} (${a.startedAt}): ${Object.entries(a.models).map(([r, m]) => `${r} \`${m}\``).join(', ')}.${budgetsLine(a)} ${inputsLine(a)}`,
+    `- **B** — ${b.label} (${b.startedAt}): ${Object.entries(b.models).map(([r, m]) => `${r} \`${m}\``).join(', ')}.${budgetsLine(b)} ${inputsLine(b)}`,
+    '',
+    '## What differs between the runs',
+    '',
+    ...(c.unknown.length > 0 ? [`⚠ Run ${c.unknown.join(' and ')} recorded no inputs, so differences in code, pack content, scenarios and model settings can't be shown, and plays are matched on scenario, repeat and seed alone.`, ''] : []),
+    ...(c.differences.length > 0 ? c.differences.map((d) => `- ${d}`) : ['- No recorded input differs.']),
+    '',
+    `Compared: ${c.matched.length} matching scenario plays.${c.left.length > 0 ? ` Left out of the shared metrics (${c.left.length} of ${plays} plays):` : ''}`,
+    ...c.left.map((l) => `- ${l}`),
     '',
     `| Run | ${STAT_HEADS.join(' | ')} |`,
     `|---|${STAT_HEADS.map(() => '---').join('|')}|`
@@ -180,9 +210,8 @@ export function compareRuns(content: Pack, a: BenchRun, b: BenchRun): string {
     for (const ra of a.scenarios.filter((s) => s.id === id)) lines.push(`| A ${statRow(ra, repeats)}`)
     for (const rb of b.scenarios.filter((s) => s.id === id)) lines.push(`| B ${statRow(rb, repeats)}`)
   }
-  // Metrics over the scenarios both runs played, so a scenario only one of them ran doesn't skew the difference.
-  const shared = (run: BenchRun) => run.scenarios.filter((s) => a.scenarios.some((x) => x.id === s.id) && b.scenarios.some((x) => x.id === s.id))
-  lines.push('', '## Metrics (scenarios both ran)', '', compareMetrics(metrics(shared(a).map(metricInputOf)), metrics(shared(b).map(metricInputOf))))
+  // Metrics over the plays whose inputs match, so a scenario only one run played, or one that changed, doesn't skew the difference.
+  lines.push('', '## Metrics (matching scenario plays)', '', compareMetrics(metrics(c.matched.map(([ra]) => metricInputOf(ra))), metrics(c.matched.map(([, rb]) => metricInputOf(rb)))))
   lines.push('')
   for (const id of ids) {
     const ra = a.scenarios.find((s) => s.id === id)
@@ -198,12 +227,12 @@ export function compareRuns(content: Pack, a: BenchRun, b: BenchRun): string {
       const ta = ra.turns[i]
       const tb = rb.turns[i]
       lines.push(`### Turn ${i + 1}: ${ta?.input ?? tb?.input}`, '', '| A | B |', '|---|---|')
-      const side = (run: ScenarioRun, t: typeof ta, budgets?: BenchRun['loreBudgets']) =>
-        t ? cell([...checkLines(t).map((c) => `🎲 ${c}`), ...shown(t).map((beat) => beatLine(content, run, beat)), ...loreLines(t, budgets), t.rewrite ? `↻ rewritten (${t.findings.length} fixes)` : ''].filter(Boolean).join('\n\n')) : '—'
-      lines.push(`| ${side(ra, ta, a.loreBudgets)} | ${side(rb, tb, b.loreBudgets)} |`, '')
+      const side = (names: Names, run: ScenarioRun, t: typeof ta, budgets?: BenchRun['loreBudgets']) =>
+        t ? cell([...checkLines(t).map((line) => `🎲 ${line}`), ...shown(t).map((beat) => beatLine(names, run, beat)), ...loreLines(t, budgets), t.rewrite ? `↻ rewritten (${t.findings.length} fixes)` : ''].filter(Boolean).join('\n\n')) : '—'
+      lines.push(`| ${side(namesA, ra, ta, a.loreBudgets)} | ${side(namesB, rb, tb, b.loreBudgets)} |`, '')
     }
-    const memories = (run: ScenarioRun) => cell(reportsOf(run).map((r) => `**${nameIn(content, run.location, r.id)}:** ${r.memory} (${delta(r.before, r.after)})`).join('\n\n') || '—')
-    lines.push('### After the scene', '', '| A | B |', '|---|---|', `| ${memories(ra)} | ${memories(rb)} |`, '')
+    const memories = (names: Names, run: ScenarioRun) => cell(reportsOf(run).map((r) => `**${names(run.location, r.id)}:** ${r.memory} (${delta(r.before, r.after)})`).join('\n\n') || '—')
+    lines.push('### After the scene', '', '| A | B |', '|---|---|', `| ${memories(namesA, ra)} | ${memories(namesB, rb)} |`, '')
   }
   return lines.join('\n')
 }

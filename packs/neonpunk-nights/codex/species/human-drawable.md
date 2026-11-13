@@ -1,5 +1,5 @@
 ---
-name: Human looks
+title: Human looks
 kind: species-drawable
 summary: No fixed traits.
 source: Peoples > The Fae (native to Faeworld) > Humans

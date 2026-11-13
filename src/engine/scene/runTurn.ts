@@ -4,15 +4,13 @@ import type { Pack } from '@engine/pack'
 import { buildDirectorPrompt } from './director'
 import { traced, TracedError, type CallTrace, type LlmReply, type Prompt } from '@engine/core'
 import { checkReply, droppedBeats, loreProblems, salvaged, withoutSpeech, type Problem } from './checks'
-import { fallbackPlan, parsePlan, validatePlan, type BeatPlan } from './plan'
+import { fallbackPlan, parsePlan, settlePlan, validatePlan } from './plan'
+import type { BeatPlan } from './planShape'
 import { resolvePlan, type ResolveOptions } from './resolve'
 import { castSnapshot, checkTraces, planItems, type BeatTrace, type TurnTrace } from './trace'
-import { applyTurn } from './turn'
+import { acceptTags, applyTurn, showDepartures } from './turn'
 import { buildRewritePrompt, buildWriterPrompt, sceneSpeakers } from './writer'
-import { buildDirector2Prompt } from './director2'
-import { parsePlan2, settlePlan2, validatePlan2 } from './plan2'
 import { recentlyUsed, repeatProblems, usageOf } from './repeats'
-import { buildWriter2Prompt } from './writer2'
 import { loreTrace, turnLore } from './lore'
 import type { LoreBudgetOverrides } from '@engine/rules'
 
@@ -59,21 +57,12 @@ export interface TurnOptions extends ResolveOptions {
   log?: string
   /** The clock, in milliseconds; injected so tests can fix timings. */
   now?: () => number
-  /**
-   * Which director and writer run: `situation` (the default since 2026-11-07: the director plans moves and facts, the
-   * writer writes the conversation; director-writer review, option B) or `lines` (the director plans each line's point;
-   * kept so the bench can compare the two).
-   */
-  pipeline?: Pipeline
   /** Lore budgets the player set in Settings, over the pack's; left out, the pack's apply (milestone 3, task 10). */
   loreBudgets?: LoreBudgetOverrides
 }
 
-export type Pipeline = 'situation' | 'lines'
-export const PIPELINES: Pipeline[] = ['situation', 'lines']
-
 /**
- * One player turn (narrator-scene-engine §3): director → game resolves mechanics → streamed writer → code checks →
+ * One player turn (director writer §3): director → game resolves mechanics → streamed writer → code checks →
  * one targeted rewrite if a check fails. At most three calls; anything still wrong after the rewrite is salvaged by
  * code rather than costing a fourth. A failed call throws a `TracedError` carrying the calls made so far.
  */
@@ -97,24 +86,19 @@ export async function runTurn(
 
   try {
     // Call 1: the director.
-    const situation = (options.pipeline ?? 'situation') === 'situation'
     const lore = turnLore(content, state, input, options.loreBudgets)
-    const directorPrompt = situation ? buildDirector2Prompt(content, state, input, lore) : buildDirectorPrompt(content, state, input)
+    const directorPrompt = buildDirectorPrompt(content, state, input, lore)
     const directorReply = await call('director', directorPrompt, () => llm.direct(directorPrompt))
-    const directed = situation ? parsePlan2(directorReply) : parsePlan(directorReply)
-    const validated = directed
-      ? situation
-        ? validatePlan2(content, state, directed as NonNullable<ReturnType<typeof parsePlan2>>, input, lore)
-        : validatePlan(content, state, directed as NonNullable<ReturnType<typeof parsePlan>>)
-      : { plan: fallbackPlan(content, state, input), corrections: [] }
+    const directed = parsePlan(directorReply)
+    const validated: { plan: BeatPlan; corrections: string[] } = directed ? validatePlan(content, state, directed, input, lore) : { plan: fallbackPlan(content, state, input), corrections: [] }
     const resolved = resolvePlan(content, state, validated.plan, options)
     const dice = resolved.dice
-    const plan = situation ? settlePlan2(content, state, resolved.plan) : resolved.plan
+    const plan = settlePlan(content, state, resolved.plan)
     emit({ type: 'planned', speakers: plan.speakers.map((s) => s.id), checks: plan.checks.flatMap((c) => (c.line ? [c.line] : [])), corrections: validated.corrections, fallback: !directed })
 
     // Call 2: the writer, streamed.
     const speakers = sceneSpeakers(content, state)
-    const writerPrompt = situation ? buildWriter2Prompt(content, state, plan, input) : buildWriterPrompt(content, state, plan, input)
+    const writerPrompt = buildWriterPrompt(content, state, plan, input)
     const stream = (role: 'writer' | 'rewrite', prompt: Prompt) =>
       call(role, prompt, (hooks) =>
         llm.write(
@@ -131,9 +115,8 @@ export async function runTurn(
       )
     const draft = await stream('writer', writerPrompt)
     let parsed: ParsedReply = parseReply(draft, speakers)
-    // The repetition tracker runs for the situation pipeline only, so the older one stays a fixed baseline.
-    const recent = situation ? recentlyUsed(content, scene) : {}
-    const check = (reply: ParsedReply) => [...checkReply(reply, plan, speakers, input, content.phrases), ...repeatProblems(content, reply, recent), ...loreProblems(content, state, plan, reply)]
+    const recent = recentlyUsed(content, scene)
+    const check = (reply: ParsedReply) => [...checkReply(reply, plan, speakers, input, content.phrases), ...repeatProblems(content, reply, recent), ...loreProblems(content, state, reply)]
     const problems = check(parsed)
     let remaining: Problem[] = []
     let kept = parsed.beats.map((_, i) => i)
@@ -151,9 +134,11 @@ export async function runTurn(
         kept = kept.filter((i) => /\p{L}/u.test(parsed.beats[i]!.text))
       }
     }
-    const beats = kept.map((i) => parsed.beats[i]!)
+    const accepted = acceptTags(content, plan, parsed.tags, parsed.beats, kept.map((i) => parsed.beats[i]!))
+    const departures = showDepartures(content, plan, kept.map((i) => parsed.beats[i]!))
+    const beats = departures.beats
 
-    const next = applyTurn(content, state, { id: turnId, ...(options.log && { log: options.log }), input, plan, beats, tags: parsed.tags, dice })
+    const next = applyTurn(content, state, { id: turnId, ...(options.log && { log: options.log }), input, plan, beats, tags: accepted.tags, dice })
     const rewritten = problems.length > 0
     const salvage = rewritten && remaining.length > 0
     const dropped = salvage ? droppedBeats(remaining).filter((n) => n <= parsed.beats.length) : []
@@ -165,6 +150,7 @@ export async function runTurn(
       salvaged: salvage,
       plan: planItems(content, plan, parsed.beats[i]!, parsed.beats.slice(0, i))
     }))
+    for (const { id, beat } of departures.added) beatTraces.push({ index: beatTraces.length + 1, beat, source: 'game', line: 0, salvaged: false, plan: [`leaves:${id}`] })
     const directorCall = calls.find((c) => c.role === 'director')!
     const usage = calls.flatMap((c) => (c.meta?.usage ? [c.meta.usage] : []))
     const trace: TurnTrace = {
@@ -174,11 +160,10 @@ export async function runTurn(
       at: new Date(started).toISOString(),
       input,
       cast: { before: castSnapshot(state), after: castSnapshot(next) },
-      director: { callId: directorCall.id, read: !directed ? 'unreadable' : directorCall.meta?.jsonRetried ? 'json-retried' : 'json', plan, corrections: validated.corrections, pipeline: situation ? 'situation' : 'lines' },
+      director: { callId: directorCall.id, read: !directed ? 'unreadable' : directorCall.meta?.jsonRetried ? 'json-retried' : 'json', plan, corrections: validated.corrections },
       dice: { before: state.dice, after: dice },
       checks: checkTraces(plan),
-      // The lines pipeline carries the stage only, so its trace says so: no scene or triggered lore reached it.
-      lore: situation ? loreTrace(lore) : { ...loreTrace(lore), scene: [], triggered: [], stances: [], budgetCuts: undefined, tokens: { ...loreTrace(lore).tokens, scene: 0, triggered: 0 } },
+      lore: loreTrace(lore),
       writer: { callId: `${turnId}:writer`, ...(parsed.reshaped.length > 0 && { reshaped: parsed.reshaped }) },
       findings: problems,
       ...(rewritten && {
@@ -190,7 +175,7 @@ export async function runTurn(
       }),
       beats: beatTraces,
       usage: usageOf(content, beats),
-      tags: { parsed: parsed.tags, dropped: parsed.droppedTags },
+      tags: { parsed: parsed.tags, dropped: [...parsed.droppedTags, ...accepted.rejected] },
       cost: {
         calls: calls.length,
         ms: now() - started,

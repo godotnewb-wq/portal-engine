@@ -1,8 +1,8 @@
 ---
-name: What the sealed case holds
+title: What the sealed case holds
 kind: faction
 keywords: [control core]
-summary: The sealed case wanted from Pump Station Nine is the station's control core.
+summary: Knows what the sealed case from Pump Station Nine holds.
 knowledge: secret
 known-by: [aether-grid-corporation trusted+, character oria-senn]
 related: [faction.aether-grid-corporation.reclamation]

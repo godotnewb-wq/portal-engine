@@ -1,5 +1,5 @@
 ---
-name: How the Academy gets its artifacts
+title: How the Academy gets its artifacts
 kind: faction
 keywords: [the collection]
 summary: The Academy buys off-world artifacts with no questions asked.

@@ -1,5 +1,6 @@
 ---
-name: The Crown
+title: The Crown
+label: The Crown
 kind: location
 keywords: [the spaceport]
 summary: "The tower’s top: governing families, the Academy, grid control rooms, the spaceport."

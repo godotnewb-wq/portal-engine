@@ -2,7 +2,7 @@ import type { Setting } from '@engine/world'
 import type { CodexEntry } from './schema'
 
 /**
- * The strict name check (claude/lore-injection.md §11): every name the writer gives a group or place must be canon.
+ * The strict name check (lore injection.md §11): every name the writer gives a group or place must be canon.
  * A name close to a canon one is a wrong name (the rewrite is told the right one); any other new name for a group or
  * place is an invented one. Personal names aren't checked: a one-word name that isn't close to a canon word passes.
  */
@@ -20,26 +20,32 @@ export type NameFinding = { kind: 'wrong-name'; name: string; canon: string[] } 
 
 const WORD = /[\p{L}\p{N}][\p{L}\p{N}'’-]*/gu
 const lowerWords = (s: string) => (s.toLowerCase().replace(/’/g, "'").match(WORD) ?? []).filter((w, i) => !(i === 0 && /^(the|a|an)$/.test(w)))
-/** The same word, allowing a simple plural either way ("Mechanists", "Mechanist"). */
+/** The same word, allowing a simple plural either way ("Weavers", "Weaver"). */
 /** The forms a plural may come from: "houses" from "house", "offices" from "office", "elves" from "elf". */
 const singulars = (w: string) => [w, w.replace(/s$/, ''), w.replace(/es$/, ''), w.replace(/ves$/, 'f')]
 const same = (a: string, b: string) => a === b || singulars(a).some((x) => singulars(b).includes(x))
-const capitalized = (w: string) => /^\p{Lu}/u.test(w) || /^\p{N}/u.test(w)
-
-/** Entries whose name is the thing's own name; the rest have descriptive titles ("How the grid really runs"). */
-const named = (e: CodexEntry) => e.kind === 'location' || e.kind === 'world' || e.kind === 'philosophy' || e.kind === 'concept' || (e.kind === 'faction' && e.id.split('.').at(-1) === e.faction)
+/** An entry's in-world names: its label and aliases. Titles are headings and keywords are lore triggers, not names. */
+const namesOf = (e: CodexEntry) => [...(e.label ? [e.label] : []), ...e.aliases]
 
 /**
- * Everything a pack names: the names and aliases of places, factions, worldviews, concepts and world background,
- * every entry's capitalized keywords (names like "Ward Office"), and the setting's own names.
+ * Whether a faction's own codex entry says it has no in-world name: a plural category such as "the street gangs",
+ * whose words must not make up names ("the Ada Gang") until play can create such groups (milestone 8).
+ */
+const unnamedFaction = (codex: CodexEntry[], faction: string) =>
+  codex.some((e) => e.kind === 'faction' && e.faction === faction && e.id.split('.').at(-1) === faction && !e.label)
+
+/**
+ * Everything a pack names: every codex entry's label and aliases, and the setting's own names. A setting faction's
+ * name counts only if its main codex entry, where there is one, has a label. Titles and keywords
+ * don't count, so a heading or a trigger word never becomes canon by being capitalized.
  */
 export function nameIndex(codex: CodexEntry[], setting: Setting, people: string[], genericWords: string[]): NameIndex {
   const written = [
-    ...codex.flatMap((e) => [...(named(e) ? [e.name] : []), ...e.aliases, ...e.keywords.filter((k) => capitalized(k.replace(/^the\s+/i, '')))]),
+    ...codex.flatMap(namesOf),
     setting.name,
     ...(setting.world ? [setting.world] : []),
     ...setting.tiers.map((t) => t.name),
-    ...setting.factions.map((f) => f.name),
+    ...setting.factions.filter((f) => !unnamedFaction(codex, f.id)).map((f) => f.name),
     ...setting.species.map((s) => s.name)
   ]
   const unique = [...new Map(written.map((w) => [lowerWords(w).join(' '), w])).entries()].filter(([k]) => k)
@@ -55,6 +61,11 @@ export function nameIndex(codex: CodexEntry[], setting: Setting, people: string[
 export interface Candidate {
   name: string
   sentenceStart: boolean
+  /**
+   * For a run that ends in a possessive, that run and the one straight after it, as written ("Tanners' Row"), so
+   * a canon name holding a possessive can pass as one name.
+   */
+  withNext?: string
 }
 
 /**
@@ -65,22 +76,46 @@ export function candidates(text: string): Candidate[] {
   const out: Candidate[] = []
   const tokens = [...text.replace(/’/g, "'").matchAll(/[\p{L}\p{N}][\p{L}\p{N}'-]*|[^\s\p{L}\p{N}]+/gu)].map((m) => m[0])
   let run: string[] = []
+  // The run as written, possessive included, for `withNext`.
+  let written: string[] = []
   let start = false
   let atStart = true
+  // The last run that ended in a possessive: its candidate, its text as written, and the token right after it.
+  let owner: { at: number; written: string; next: number } | undefined
+  let joins: typeof owner
   const flush = () => {
-    while (run.length > 0 && /^(of|the)$/.test(run.at(-1)!)) run.pop()
-    if (run.length > 0) out.push({ name: run.join(' ').replace(/'s$/, ''), sentenceStart: start })
+    while (run.length > 0 && /^(of|the)$/.test(run.at(-1)!)) {
+      run.pop()
+      written.pop()
+    }
+    if (run.length > 0) {
+      out.push({ name: run.join(' ').replace(/'s$/, ''), sentenceStart: start })
+      if (joins) out[joins.at]!.withNext = `${joins.written} ${written.join(' ')}`
+    }
     run = []
+    written = []
+    joins = undefined
   }
-  for (const t of tokens) {
+  for (const [i, t] of tokens.entries()) {
     if (/^\p{Lu}/u.test(t) || (run.length > 0 && /^\p{N}+$/u.test(t))) {
-      if (run.length === 0) start = atStart
-      // A possessive ends a name: "the Ada Line's conductors", "the Porters' Hall" are two things.
-      const owner = t.replace(/'s?$/, '')
-      run.push(owner)
-      if (owner !== t) flush()
-    } else if (run.length > 0 && (t === 'of' || (t === 'the' && run.at(-1) === 'of'))) run.push(t)
-    else flush()
+      if (run.length === 0) {
+        start = atStart
+        joins = owner?.next === i ? owner : undefined
+      }
+      // A possessive ends a name: "the Ada Line's conductors", "the Porters' Hall" are two things, unless the two
+      // runs together are canon (checked in `checkNames`).
+      const stem = t.replace(/'s?$/, '')
+      run.push(stem)
+      written.push(t)
+      if (stem !== t) {
+        const ownerWritten = written.join(' ')
+        flush()
+        owner = { at: out.length - 1, written: ownerWritten, next: i + 1 }
+      }
+    } else if (run.length > 0 && (t === 'of' || (t === 'the' && run.at(-1) === 'of'))) {
+      run.push(t)
+      written.push(t)
+    } else flush()
     atStart = /^[.!?:"“”—]+$/.test(t) || (atStart && /^["“'(]+$/.test(t))
   }
   flush()
@@ -135,7 +170,11 @@ export function checkName(candidate: string, index: NameIndex): NameFinding | un
  */
 export function checkNames(text: string, index: NameIndex): NameFinding[] {
   const seen = new Set<string>()
-  return candidates(text).flatMap((c) => {
+  const found = candidates(text)
+  // A canon name holding a possessive ("Tanners' Row") passes whole, both of its runs.
+  const whole = new Set(found.flatMap((c, i) => (c.withNext && isCanon(c.withNext, index) ? [i, i + 1] : [])))
+  return found.flatMap((c, i) => {
+    if (whole.has(i)) return []
     let f = checkName(c.name, index)
     const [first, ...others] = c.name.split(' ')
     const rest = others.join(' ')
@@ -152,33 +191,6 @@ export function checkNames(text: string, index: NameIndex): NameFinding[] {
     seen.add(f.name)
     return [f]
   })
-}
-
-const shingles = (text: string, n: number) => {
-  const w = text.toLowerCase().replace(/’/g, "'").match(WORD) ?? []
-  return w.length < n ? [] : w.slice(0, w.length - n + 1).map((_, i) => w.slice(i, i + n).join(' '))
-}
-
-/** How many words in a row from a secret's text count as the secret leaking. */
-export const LEAK_WORDS = 6
-
-/**
- * Codex secrets whose words show in a text (claude/lore-injection.md §11): their name or a multi-word keyword, or
- * `LEAK_WORDS` words in a row from their text. `allowed` are secrets someone in the scene is keeping this turn, whose
- * holder may let them slip.
- */
-export function secretLeaks(text: string, codex: CodexEntry[], allowed: Set<string> = new Set()): { entry: CodexEntry; words: string }[] {
-  const lower = ` ${(text.toLowerCase().replace(/’/g, "'").match(WORD) ?? []).join(' ')} `
-  const found: { entry: CodexEntry; words: string }[] = []
-  for (const e of codex) {
-    if (e.knowledge !== 'secret' || allowed.has(e.id)) continue
-    const phrase = [e.name, ...e.keywords]
-      .map((k) => lowerWords(k).join(' '))
-      .find((k) => k.split(' ').length >= 2 && lower.includes(` ${k} `))
-    const run = phrase ?? shingles(e.full, LEAK_WORDS).find((s) => lower.includes(` ${s} `))
-    if (run) found.push({ entry: e, words: run })
-  }
-  return found
 }
 
 /**

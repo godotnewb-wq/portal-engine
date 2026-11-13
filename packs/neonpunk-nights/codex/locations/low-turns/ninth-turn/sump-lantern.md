@@ -1,5 +1,6 @@
 ---
-name: The Sump Lantern
+title: The Sump Lantern
+label: The Sump Lantern
 kind: location
 keywords: [lantern-pour]
 summary: A low bar in a decommissioned pump hall under the old pumphouse.

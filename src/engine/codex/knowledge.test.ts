@@ -8,7 +8,7 @@ const sel = (t: string) => parseSelector(t) as Selector
 const who = (k: Partial<Knower>): Knower => ({ id: 'x', name: 'X', species: 'person', holds: [], ...k })
 const entry = (id: string) => entryById(fixture.codex, id)!
 
-describe('the knowledge filter (claude/lore-injection.md §7)', () => {
+describe('the knowledge filter (lore injection.md §7)', () => {
   it('reads standing on the four levels, one step lower in each parent, never above trusted', () => {
     expect([...standings(fixture.setting, { faction: 'night-shift', level: 'leadership' })]).toEqual([['night-shift', 'leadership'], ['guild', 'trusted']])
     expect([...standings(fixture.setting, { faction: 'night-shift', level: 'affiliated' })]).toEqual([['night-shift', 'affiliated']])

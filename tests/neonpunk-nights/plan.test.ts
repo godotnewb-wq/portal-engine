@@ -4,20 +4,28 @@ import { fallbackPlan, parsePlan, silence, validatePlan, type RawPlan } from '@e
 import { resolvePlan } from '@engine/scene'
 import { barScene, content } from './support'
 
-/** The worked example's turn 1 plan (narrator-scene-engine §11). */
+/** The worked example's turn 1 plan (director writer §11). */
 const WORKED = JSON.stringify({
   speakers: [
-    { id: 'oria', point: 'Claims the client is a private collector.', intent: "Deflect. Claim a 'private collector'.", mood: 'composed', hiding: 'client is the grid consortium', approach: 'lie; tell: over-formal' },
-    { id: 'vex', point: 'Asks the collector\'s name.', intent: 'Call out the evasion if she catches it.', mood: 'wary', depends_on_check: 'vex_empathy' }
+    { id: 'oria', goal: "Deflect. Claim a 'private collector'.", mood: 'composed', keeps: ['oria-senn.client-is-grid-corporation'], touched: 'the client', approach: 'lie' },
+    { id: 'vex', goal: 'Call out the evasion if she catches it.', mood: 'wary' }
+  ],
+  moves: [
+    { who: 'oria', answers: 'player', move: 'dodge' },
+    { who: 'vex', answers: 1, move: 'push back', needs: 'vex_empathy' }
   ],
   reactions: [{ id: 'brask', beat: 'fidgets with his glass' }],
   checks: [{ id: 'vex_empathy', who: 'vex', skill: 'Empathy', difficulty: 'moderate', stakes: 'notices Oria is lying' }],
   texture: ['condensation dripping from an Aether-cooled pipe overhead'],
-  contrast: 'Oria smooth, Vex clipped.',
   avoid: ['eyes narrowed']
 })
+const ASKED = 'Who is the client?'
 
 const raw = (patch: Partial<RawPlan>): RawPlan => ({ ...parsePlan(WORKED)!, ...patch })
+/** A speaker with only an id, the rest left as the director might: empty. */
+const speaker = (id: string): RawPlan['speakers'][number] => ({ id, goal: '', mood: '', pressure: '', keeps: [], touched: '' })
+/** An attempt in doubt, so a player check stands. */
+const attempt = { player_action: { doing: 'presses Oria', uncertain: true } }
 
 describe('parsePlan', () => {
   it('reads JSON wrapped in a fence or prose, and fills what is missing', () => {
@@ -41,7 +49,7 @@ describe('validatePlan', () => {
   const state = barScene()
 
   it('resolves first names to ids and normalises skills and difficulty words', () => {
-    const { plan, corrections } = validatePlan(content, state, raw({}))
+    const { plan, corrections } = validatePlan(content, state, raw({}), ASKED)
     expect(plan.speakers.map((s) => s.id)).toEqual(['oria-senn', 'vex'])
     expect(plan.checks[0]).toMatchObject({ who: 'vex', skill: 'empathy', difficulty: 'moderate' })
     expect(corrections).toEqual([])
@@ -49,7 +57,7 @@ describe('validatePlan', () => {
 
   it('takes up to three speakers and drops anyone not present', () => {
     const { plan, corrections } = validatePlan(content, state, raw({
-      speakers: [{ id: 'vex', intent: '', mood: '' }, { id: 'brask', intent: '', mood: '' }, { id: 'oria', intent: '', mood: '' }, { id: 'ghost', intent: '', mood: '' }],
+      speakers: [speaker('vex'), speaker('brask'), speaker('oria'), speaker('ghost')],
       reactions: [{ id: 'vex', beat: 'x' }, { id: 'oria', beat: 'smiles' }]
     }))
     expect(plan.speakers.map((s) => s.id)).toEqual(['vex', 'brask', 'oria-senn'])
@@ -57,8 +65,9 @@ describe('validatePlan', () => {
     expect(corrections.join('\n')).toMatch(/ghost/)
   })
 
-  it('drops checks with unknown skills, difficulties or people, and the dependencies on them', () => {
+  it('drops checks with unknown skills, difficulties or people', () => {
     const { plan } = validatePlan(content, state, raw({
+      ...attempt,
       checks: [
         { id: 'a', who: 'vex', skill: 'mind reading', difficulty: 'moderate', stakes: '' },
         { id: 'b', who: 'vex', skill: 'empathy', difficulty: 'impossible', stakes: '' },
@@ -68,11 +77,10 @@ describe('validatePlan', () => {
       ]
     }))
     expect(plan.checks).toEqual([expect.objectContaining({ id: 'e', who: 'player', skill: 'persuasion', difficulty: 'very hard' })])
-    expect(plan.speakers.find((s) => s.id === 'vex')?.depends_on_check).toBeUndefined()
   })
 
   it('fills texture from the location card when the director gives none', () => {
-    expect(validatePlan(content, state, raw({ texture: [] })).plan.texture).toHaveLength(2)
+    expect(validatePlan(content, state, raw({ texture: [] })).plan.texture).toHaveLength(1)
   })
 
   it('only keeps walk-ons who are here, by id, label or name', () => {
@@ -98,6 +106,7 @@ describe('resolvePlan', () => {
   it('gives an assist by the helper’s trust', () => {
     const state = barScene(3)
     const { plan } = validatePlan(content, state, raw({
+      ...attempt,
       checks: [{ id: 'p', who: 'player', skill: 'streetwise', difficulty: 'hard', stakes: '', assist: 'vex' }]
     }))
     // Vex trusts the player 60 and has Streetwise 2: +2.
@@ -121,7 +130,7 @@ describe('buildDirectorPrompt', () => {
     expect(system).toMatch(/client-is-grid-corporation/)
     expect(system).toMatch(/Oria Senn \[id: oria-senn\]/)
     expect(system).toMatch(/Dunmar/)
-    expect(user.trim().endsWith('Return the JSON beat plan.')).toBe(true)
+    expect(user.trim().endsWith('Return the JSON plan.')).toBe(true)
     expect(user).toMatch(/Who is the client\?/)
   })
 })
@@ -138,11 +147,11 @@ describe('quiet characters (round 0 F3)', () => {
   it('shows the director what a character quiet for two turns cares about, and asks rather than orders', () => {
     expect(buildDirectorPrompt(content, played(1), 'Why are we here?').user).not.toMatch(/# Quiet for a while/)
     const { system, user } = buildDirectorPrompt(content, played(2), 'Why are we here?')
-    const section = user.split('# Quiet for a while: does anything on the table touch them?\n')[1]!.split('\n\n')[0]!
+    const section = user.split('# Quiet for a while\n')[1]!.split('\n\n')[0]!
     expect(section).toMatch(/^- Brask \[id: brask\], silent 2 turns\. Trade: Freelance mechanic who keeps half the Low Turns' pumps/)
     expect(section).toMatch(/Tonight: Get through tonight without a fight/)
     expect(section.split('\n')).toHaveLength(1)
-    expect(system).toMatch(/If nothing does, silence is fine\./)
+    expect(system).toMatch(/Quiet characters are listed with what they care about: if the conversation touches it, they have something to say\./)
   })
 })
 

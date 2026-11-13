@@ -1,5 +1,6 @@
 ---
-name: The Night Shift
+title: The Night Shift
+label: The Night Shift
 kind: faction
 keywords: [night shift]
 summary: The Guild's after-dark crew.

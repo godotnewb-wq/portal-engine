@@ -1,5 +1,6 @@
 ---
-name: The Couriers
+title: The Couriers
+label: The Couriers
 kind: faction
 keywords: [courier sigil, route sash, dispatcher, dispatchers, sigil-runner, route license]
 summary: Messengers and smugglers who carry anything for anyone, and take no side.

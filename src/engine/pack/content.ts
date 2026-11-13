@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { CharacterSchema, PlayerSchema, type Character, type CharacterFile, type Meters, type Player } from '@engine/characters'
 import { rankCap, RulesetSchema, rulesetProblems, type Ruleset, type StatBlock } from '@engine/rules'
-import { buildCodex, codexProblems, entryById, mayHold, type CodexEntry, type CodexFile, type Knower } from '@engine/codex'
+import { buildCodex, codexProblems, codexWarnings, entryById, mayHold, type CodexEntry, type CodexFile, type Knower } from '@engine/codex'
 import { LocationSchema, SettingSchema, settingProblems, speciesById, factionById, tierById, STANCE_LEVEL_COUNT, type Location, type Setting } from '@engine/world'
 import { firstName } from '@engine/core'
 import { ENGINE_VERSION, PackManifestSchema, satisfies, type PackManifest } from './manifest'
@@ -36,7 +36,7 @@ export interface Pack {
   phrases: string[]
   /** Stance words, stance warnings and generic words, from the same file. */
   vocabulary: Vocabulary
-  /** Lore entries, from `codex/` (claude/lore-injection.md). */
+  /** Lore entries, from `codex/` (lore injection.md). */
   codex: CodexEntry[]
   characters: Character[]
   locations: Location[]
@@ -99,7 +99,7 @@ export function buildPack(files: PackFiles): BuiltPack {
 
 /**
  * A linked secret's text, resolved from the codex so every system that reads secrets sees the fact with the holder's
- * part and feelings: one fact, one home (claude/lore-injection.md §7.1). A broken pointer is reported by `packProblems`.
+ * part and feelings: one fact, one home (lore injection.md §7.1). A broken pointer is reported by `packProblems`.
  */
 /** Ends a piece of text as a sentence, so pieces joined into one prompt line stay readable. */
 const sentence = (t: string) => {
@@ -153,6 +153,19 @@ function statProblems(r: Ruleset, who: string, stats: StatBlock): string[] {
     else if (rank > rankCap(r, stats.level)) problems.push(`${who}'s ${skill} rank ${rank} is above the cap for level ${stats.level}`)
   }
   return problems
+}
+
+/**
+ * Things worth an author's look that don't stop a pack loading: stance words in codex text, and an authored character
+ * starting with more secrets than the ruleset's `codex.startingSecrets`, since each one adds to the director's sheet
+ * (lore injection.md §7.1).
+ */
+export function packWarnings(pack: Pack): string[] {
+  const most = pack.ruleset.codex.startingSecrets
+  return [
+    ...codexWarnings(pack.codex, pack.vocabulary),
+    ...pack.characters.filter((c) => c.secrets.length > most).map((c) => `${c.id} starts with ${c.secrets.length} secrets; more than ${most} crowds the director's sheet`)
+  ]
 }
 
 /**

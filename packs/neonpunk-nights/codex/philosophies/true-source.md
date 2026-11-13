@@ -1,5 +1,6 @@
 ---
-name: True Source
+title: True Source
+label: True Source
 kind: philosophy
 summary: The Aether is one face of a single source across the galaxy.
 stage: True Source holds that every world’s magic is one face of a single source.

@@ -1,5 +1,5 @@
 ---
-name: Aether in daily life
+title: Aether in daily life
 kind: concept
 keywords: [rune-lamp, rune-lamps, drive coil, conduits]
 summary: Sweating pipes, glowing conduits, humming meters.

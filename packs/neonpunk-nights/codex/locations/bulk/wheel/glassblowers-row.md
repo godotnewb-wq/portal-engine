@@ -1,5 +1,6 @@
 ---
-name: Glassblowers' Row
+title: Glassblowers' Row
+label: Glassblowers' Row
 kind: location
 keywords: [glassworks]
 summary: The glassworks along the Wheel’s inner rim.

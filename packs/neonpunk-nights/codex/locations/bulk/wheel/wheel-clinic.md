@@ -1,5 +1,6 @@
 ---
-name: The Wheel Clinic
+title: The Wheel Clinic
+label: The Wheel Clinic
 kind: location
 keywords: [the free clinic]
 summary: A free clinic by the market stop that runs on donations.

@@ -86,6 +86,8 @@
     {
       "id": "partner-sold-out",
       "text": "Her old running partner was caught at a syndicate checkpoint on a tip, and she suspects Oria Senn's network passed it on.",
+      "summary": "Her old running partner was caught on a tip; she suspects Oria.",
+      "keywords": ["partner", "old route", "tip-off", "tipped off"],
       "tell": "Gets very polite with Oria, which she never is with anyone",
       "revealWhen": "the player earns real trust, or Oria brings up the old route"
     }

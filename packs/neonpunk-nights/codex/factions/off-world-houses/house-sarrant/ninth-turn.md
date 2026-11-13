@@ -1,5 +1,5 @@
 ---
-name: House Sarrant and the Ninth Turn
+title: House Sarrant and the Ninth Turn
 kind: faction
 keywords: [sarrant money]
 summary: Sarrant money pays for the Ninth Turn reclamation.

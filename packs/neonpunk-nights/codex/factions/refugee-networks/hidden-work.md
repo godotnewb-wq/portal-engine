@@ -1,5 +1,5 @@
 ---
-name: What some networks also do
+title: What some networks also do
 kind: faction
 keywords: [forged papers, resistance cell]
 summary: Forged papers, hidden people, and watching for the Stillness’s agents.

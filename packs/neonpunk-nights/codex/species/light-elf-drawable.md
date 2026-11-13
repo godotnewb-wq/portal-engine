@@ -1,5 +1,5 @@
 ---
-name: Light elf looks
+title: Light elf looks
 kind: species-drawable
 summary: Long ears, luminous eyes, glyph-like markings.
 source: Peoples > The Fae (native to Faeworld) > Light elves and deep elves

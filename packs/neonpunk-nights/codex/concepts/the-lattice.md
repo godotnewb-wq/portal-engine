@@ -1,5 +1,6 @@
 ---
-name: The Lattice
+title: The Lattice
+label: The Lattice
 kind: concept
 aliases: [the Lattice Network]
 keywords: [ley lines]

@@ -1,5 +1,6 @@
 ---
-name: Pennies
+title: Pennies
+label: Pennies
 kind: concept
 keywords: [penny, pennies]
 summary: Testhold's coin.

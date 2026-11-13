@@ -5,7 +5,7 @@ import { locationChain } from './load'
 import type { CodexEntry, CodexKind } from './schema'
 
 /**
- * The three lore layers (claude/lore-injection.md §5): the stage, always on and cached; the scene-scoped layer, from
+ * The three lore layers (lore injection.md §5): the stage, always on and cached; the scene-scoped layer, from
  * where the scene is and who is in it, rebuilt every turn; and the triggered layer, from what was just said. Pure
  * lookups: no LLM call, and the same inputs always give the same text, so an unchanged layer stays in the cache.
  */
@@ -13,9 +13,13 @@ import type { CodexEntry, CodexKind } from './schema'
 /** Rough token count for budgets and reports: about four characters a token. */
 export const tokensOf = (text: string) => Math.ceil(text.length / 4)
 
-/** Kinds in the order layers list them, and (reversed) the order they give way under budget pressure. */
-const KIND_ORDER: CodexKind[] = ['location', 'faction', 'species-culture', 'philosophy', 'event', 'concept', 'world', 'species-drawable']
-const STAGE_ORDER: CodexKind[] = ['world', 'location', 'species-culture', 'philosophy', 'faction', 'concept', 'event']
+/**
+ * Kinds in the order the scene and triggered layers list them, and (reversed) the order they give way under budget
+ * pressure: background before history, history before what's going on now (lore injection.md §5).
+ */
+const KIND_ORDER: CodexKind[] = ['location', 'faction', 'species-culture', 'philosophy', 'current', 'concept', 'history', 'background', 'species-drawable']
+/** Kinds in the order the stage lists them: how things are and what happened first, what's going on now last. */
+const STAGE_ORDER: CodexKind[] = ['background', 'history', 'location', 'species-culture', 'philosophy', 'faction', 'concept', 'current']
 
 function byKind(order: CodexKind[], setting: Setting) {
   const tierIndex = (e: CodexEntry) => setting.tiers.findIndex((t) => t.id === e.id.split('.')[1])
@@ -49,12 +53,11 @@ export function directorStage(primer: string, codex: CodexEntry[], setting: Sett
 const isFactionMain = (e: CodexEntry) => e.kind === 'faction' && e.id.split('.').at(-1) === e.faction
 
 /**
- * The names a writer may use for groups and places: every common place, faction, worldview and piece of world
- * background, with their aliases. Descriptive titles ("How the grid really runs") aren't names, so they're left out.
+ * The names a writer may use: every common entry's label, with its aliases. Titles are headings, not names ("How the
+ * grid really runs"), so an entry without a label adds nothing.
  */
 export function canonNames(codex: CodexEntry[]): string[] {
-  const named = codex.filter((e) => e.knowledge === 'common' && (e.kind === 'location' || e.kind === 'world' || e.kind === 'philosophy' || isFactionMain(e)))
-  return [...new Set(named.flatMap((e) => [e.name, ...e.aliases]))]
+  return [...new Set(codex.filter((e) => e.knowledge === 'common' && e.label).flatMap((e) => [e.label!, ...e.aliases]))]
 }
 
 /** The line telling the writer which names exist; empty for a pack with no codex. */
@@ -89,8 +92,8 @@ export interface LoreScene {
 
 export interface LayerEntry {
   id: string
-  /** The entry's name, so logs read without the codex at hand. */
-  name: string
+  /** The entry's title, so logs read without the codex at hand. */
+  title: string
   form: 'full' | 'summary'
 }
 
@@ -145,9 +148,19 @@ export const codexFactionId = (setting: Setting, faction: string) =>
 
 const normalize = (s: string) => s.toLowerCase().replace(/[’‘]/g, "'").replace(/\s+/g, ' ')
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
-/** An entry's own words: its keywords, its name and its aliases, without a leading "the" so "the Order" and "Order" both match. */
-const termsOf = (e: CodexEntry) => [...new Set([...e.keywords, e.name, ...e.aliases].map((t) => normalize(t).replace(/^the /, '')).filter((t) => t.length > 1))]
+/** An entry's in-world names: its label and aliases. */
+const namesOf = (e: CodexEntry) => [...(e.label ? [e.label] : []), ...e.aliases]
+/**
+ * An entry's own words: its keywords, title, label and aliases, without a leading "the" so "the Order" and "Order"
+ * both match.
+ */
+const termsOf = (e: CodexEntry) => [...new Set([...e.keywords, e.title, ...namesOf(e)].map((t) => normalize(t).replace(/^the /, '')).filter((t) => t.length > 1))]
 /** Whole words, any case, with simple plurals. */
+/** Whether a term (keyword or name) is in a text: whole words, any case, simple plurals, a leading "the" ignored. */
+export const mentions = (text: string, term: string): boolean => {
+  const t = normalize(term).trim().replace(/^the /, '')
+  return t.length > 1 && matches(normalize(text), t)
+}
 const matches = (text: string, term: string) => new RegExp(`(?<![\\w-])${escape(term).replace(/ /g, '\\s+')}(?:s|es)?(?![\\w-])`).test(text)
 
 /** Removes character names, so a keyword inside a name never triggers an entry. Case is kept for the strict match. */
@@ -158,11 +171,12 @@ function withoutNames(texts: string[], ignore: string[]): string {
 }
 
 /**
- * The capitalized one-word forms of an entry's name and aliases ("Mill" from "the Mill"). In model-written text these
- * match only as written, because the same word in lowercase is usually the ordinary word. Keywords stay any case.
+ * The capitalized one-word forms of an entry's label and aliases ("Mill" from "the Mill"). In model-written text these
+ * match only as written, because the same word in lowercase is usually the ordinary word. A title shares the rule only
+ * when it is the label too; keywords and other titles stay any case.
  */
 const strictTermsOf = (e: CodexEntry) =>
-  new Set([e.name, ...e.aliases].map((t) => t.trim().replace(/^the /i, '')).filter((t) => !/\s/.test(t) && /^\p{Lu}/u.test(t)).map(normalize))
+  new Set(namesOf(e).map((t) => t.trim().replace(/^the /i, '')).filter((t) => !/\s/.test(t) && /^\p{Lu}/u.test(t)).map(normalize))
 
 const matchesAsWritten = (text: string, term: string) =>
   new RegExp(`(?<![\\w-])${escape(term[0]!.toUpperCase() + term.slice(1))}(?:s|es)?(?![\\w-])`).test(text)
@@ -192,7 +206,7 @@ type Knowers = Map<string, string[]>
 
 function render(entries: CodexEntry[], forms: Map<string, 'full' | 'summary'>, knowers: Knowers): string {
   const note = (e: CodexEntry) => (knowers.has(e.id) ? ` (insider knowledge: only ${knowers.get(e.id)!.join(', ')} here know${knowers.get(e.id)!.length === 1 ? 's' : ''} this)` : '')
-  return entries.map((e) => (forms.get(e.id) === 'full' ? `## ${e.name} [${e.id}]${note(e)}\n${e.full}` : `- ${e.name} [${e.id}]${note(e)}: ${e.summary}`)).join('\n')
+  return entries.map((e) => (forms.get(e.id) === 'full' ? `## ${e.title} [${e.id}]${note(e)}\n${e.full}` : `- ${e.title} [${e.id}]${note(e)}: ${e.summary}`)).join('\n')
 }
 
 /** Fits a layer to its budget: least specific entries drop to their summaries first, then drop out. */
@@ -216,7 +230,7 @@ function fit(entries: CodexEntry[], forms: Map<string, 'full' | 'summary'>, budg
     shortened.delete(e.id)
   }
   const text = render(kept, forms, knowers)
-  return { text, entries: kept.map((e) => ({ id: e.id, name: e.name, form: forms.get(e.id)! })), shortened: [...shortened], dropped, tokens: tokensOf(text) }
+  return { text, entries: kept.map((e) => ({ id: e.id, title: e.title, form: forms.get(e.id)! })), shortened: [...shortened], dropped, tokens: tokensOf(text) }
 }
 
 /**

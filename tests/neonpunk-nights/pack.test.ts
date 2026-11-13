@@ -2,7 +2,7 @@ import { cpSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
-import { characterById, locationById, packProblems } from '@engine/pack'
+import { characterById, locationById, packProblems, packWarnings } from '@engine/pack'
 import { readPack } from '@platform/packs'
 import { content, PACK_DIR } from './support'
 
@@ -21,7 +21,7 @@ describe('the Neonpunk Nights pack', () => {
   })
 
   it('opens on the Sump Lantern with everyone, and carries its ruleset, setting, primer and tone', () => {
-    expect(content.manifest.start).toEqual({ location: 'coil-line-car-14', cast: ['kesh', 'jun-halloway', 'teo-varrin'] })
+    expect(content.manifest.start).toEqual({ location: 'sump-lantern', cast: ['vex', 'brask', 'oria-senn'] })
     expect(content.ruleset.skills).toHaveLength(19)
     expect(content.ruleset.difficulties.map((d) => d.dc)).toEqual([5, 10, 15, 20, 25, 30])
     expect(content.setting.tiers.map((t) => t.id)).toEqual(['crown', 'high-turns', 'bulk', 'low-turns', 'deepwell'])
@@ -33,6 +33,10 @@ describe('the Neonpunk Nights pack', () => {
     const all = JSON.stringify(content)
     expect(all).not.toMatch(/consortium|middle turns|dark.elf/i)
     expect(characterById(content, 'vex')?.species).toBe('deep-elf')
+  })
+
+  it('gives the author no warnings: no stance words in codex text, no character crowded with secrets', () => {
+    expect(packWarnings(content)).toEqual([])
   })
 
   it('describes every character as an adult', () => {

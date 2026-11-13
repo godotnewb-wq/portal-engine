@@ -10,4 +10,4 @@ Talks to any OpenAI-compatible chat completions endpoint. Knows nothing about ga
 - `SettingsSchema` and friends: the four LLM profiles and their view without keys.
 
 **Depends on:** nothing in this repository.
-**Design:** `claude/narrator-scene-engine.md` §3 (model roles). Adapted from Breedhaven (see `NOTICE.md`).
+**Design:** `director writer.md` §3 (model roles). Adapted from Breedhaven (see `NOTICE.md`).

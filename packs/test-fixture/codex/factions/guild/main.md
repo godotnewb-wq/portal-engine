@@ -1,5 +1,6 @@
 ---
-name: The Guild
+title: The Guild
+label: The Guild
 kind: faction
 aliases: [the hall]
 keywords: [guild hall]

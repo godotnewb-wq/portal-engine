@@ -1,0 +1,1328 @@
+===== turn 1 =====
+{
+  "input": "So, Oria, who is the client, really?",
+  "fallback": false,
+  "corrections": [],
+  "plan": {
+    "speakers": [
+      {
+        "id": "oria-senn",
+        "intent": "keep the client hidden",
+        "mood": "composed, too polished",
+        "pressure": "pressing",
+        "hiding": "The 'private client' is the Aether Grid Corporation, and she owes them; this job pays down her debt.",
+        "approach": "lie",
+        "kept": [
+          "oria-senn.client-is-grid-corporation"
+        ],
+        "tell": "Becomes over-formal and calls people 'darling' when lying"
+      },
+      {
+        "id": "vex",
+        "intent": "catch the lie",
+        "mood": "wary",
+        "pressure": "background"
+      },
+      {
+        "id": "brask",
+        "intent": "keep the peace",
+        "mood": "uneasy",
+        "pressure": "background"
+      }
+    ],
+    "exchange": [
+      {
+        "who": "oria-senn",
+        "answers": "player",
+        "point": "dodge: The client wants the case badly enough to pay triple"
+      },
+      {
+        "who": "vex",
+        "answers": 1,
+        "point": "push back: Oria Senn has lied to her before, smoothly, about a run that went bad; Vex didn't catch it until afterward"
+      },
+      {
+        "who": "brask",
+        "answers": 2,
+        "point": "warn: The cooled pipe over the corner table is leaking and will drip on whoever sits there"
+      }
+    ],
+    "reactions": [
+      {
+        "id": "kesh",
+        "beat": "watches the door"
+      }
+    ],
+    "checks": [
+      {
+        "id": "read-oria",
+        "who": "vex",
+        "skill": "empathy",
+        "difficulty": "moderate",
+        "stakes": "Vex sees that Oria is lying",
+        "result": {
+          "skill": "empathy",
+          "attribute": "insight",
+          "difficulty": "moderate",
+          "dc": 15,
+          "rolls": [
+            11
+          ],
+          "natural": 11,
+          "edge": "none",
+          "modifier": 2,
+          "rank": 1,
+          "bonus": 0,
+          "total": 14,
+          "degree": "cost",
+          "critical": null
+        },
+        "line": "Vex — Empathy 14 vs 15: success at a cost"
+      }
+    ],
+    "walk_ons": [],
+    "texture": [
+      "condensation dripping from an Aether-cooled pipe overhead"
+    ],
+    "avoid": [],
+    "leaves": [],
+    "end_scene": false,
+    "moves": [
+      {
+        "who": "oria-senn",
+        "answers": "player",
+        "move": "dodge",
+        "says": [
+          {
+            "text": "The client wants the case badly enough to pay triple",
+            "id": "oria-senn.k3",
+            "unheard": true
+          }
+        ]
+      },
+      {
+        "who": "vex",
+        "answers": 1,
+        "move": "push back",
+        "says": [
+          {
+            "text": "Oria Senn has lied to her before, smoothly, about a run that went bad; Vex didn't catch it until afterward",
+            "id": "vex.k1",
+            "unheard": true
+          }
+        ],
+        "needs": "read-oria"
+      },
+      {
+        "who": "brask",
+        "answers": 2,
+        "move": "warn",
+        "says": [
+          {
+            "text": "The cooled pipe over the corner table is leaking and will drip on whoever sits there",
+            "id": "brask.k1",
+            "unheard": true
+          }
+        ]
+      }
+    ],
+    "player_action": {
+      "doing": "presses Oria about the client",
+      "uncertain": false
+    },
+    "change": "The table knows Oria is hiding something.",
+    "lore": [
+      {
+        "entry": "faction.couriers",
+        "title": "The Couriers",
+        "line": "Couriers carry for anyone and take no side."
+      }
+    ]
+  },
+  "checks": [
+    {
+      "id": "read-oria",
+      "who": "vex",
+      "skill": "empathy",
+      "attribute": "insight",
+      "difficulty": "moderate",
+      "dc": 15,
+      "rolls": [
+        11
+      ],
+      "natural": 11,
+      "edge": "none",
+      "modifier": 2,
+      "rank": 1,
+      "bonus": 0,
+      "total": 14,
+      "degree": "cost",
+      "critical": null,
+      "line": "Vex — Empathy 14 vs 15: success at a cost",
+      "stakes": "Vex sees that Oria is lying"
+    }
+  ],
+  "lore": {
+    "stage": [
+      "background.galactic-society",
+      "background.the-current-day",
+      "background.the-stillness",
+      "history.the-burn",
+      "location.crown",
+      "location.high-turns",
+      "location.bulk",
+      "location.low-turns",
+      "location.deepwell",
+      "species.human",
+      "species.light-elf",
+      "species.deep-elf",
+      "species.goblin",
+      "species.golem",
+      "philosophy.animist",
+      "philosophy.mechanist",
+      "philosophy.true-source",
+      "faction.spire-council",
+      "faction.aether-grid-corporation",
+      "faction.phoenix-academy",
+      "faction.garden-guard",
+      "faction.off-world-houses",
+      "faction.refugee-networks",
+      "faction.low-turns-syndicates",
+      "faction.couriers",
+      "concept.aether-in-the-body",
+      "concept.cinders",
+      "concept.the-aether",
+      "concept.the-lattice",
+      "concept.tiers"
+    ],
+    "scene": [
+      {
+        "id": "location.low-turns.ninth-turn.sump-lantern",
+        "title": "The Sump Lantern",
+        "form": "full"
+      },
+      {
+        "id": "location.low-turns.ninth-turn",
+        "title": "The Ninth Turn",
+        "form": "full"
+      },
+      {
+        "id": "location.low-turns",
+        "title": "The Low Turns",
+        "form": "full"
+      },
+      {
+        "id": "faction.spire-council",
+        "title": "The Spire Council",
+        "form": "full"
+      },
+      {
+        "id": "faction.aether-grid-corporation",
+        "title": "The Aether Grid Corporation",
+        "form": "summary"
+      },
+      {
+        "id": "faction.aether-grid-corporation.load-shedding",
+        "title": "How the grid really runs",
+        "form": "full"
+      },
+      {
+        "id": "faction.low-turns-syndicates.drowned-saints",
+        "title": "The Drowned Saints",
+        "form": "summary"
+      },
+      {
+        "id": "faction.couriers",
+        "title": "The Couriers",
+        "form": "full"
+      },
+      {
+        "id": "species.light-elf",
+        "title": "Light elf culture",
+        "form": "full"
+      },
+      {
+        "id": "species.deep-elf",
+        "title": "Deep elf culture",
+        "form": "full"
+      },
+      {
+        "id": "species.goblin",
+        "title": "Goblin culture",
+        "form": "full"
+      },
+      {
+        "id": "species.golem",
+        "title": "Golem culture",
+        "form": "full"
+      }
+    ],
+    "triggered": [],
+    "stances": [
+      "- The Spire Council toward The Drowned Saints: enemy"
+    ],
+    "tokens": {
+      "stage": 678,
+      "writerStage": 276,
+      "scene": 1197,
+      "triggered": 0
+    },
+    "budgets": {
+      "sceneTokens": 1200,
+      "triggeredTokens": 800,
+      "loreLines": 3,
+      "set": []
+    },
+    "budgetCuts": {
+      "scene": {
+        "shortened": [],
+        "dropped": []
+      },
+      "triggered": {
+        "shortened": [],
+        "dropped": []
+      }
+    },
+    "secrets": [
+      {
+        "holder": "vex",
+        "id": "vex.partner-sold-out",
+        "kind": "personal",
+        "form": "cue",
+        "cueTokens": 27,
+        "expansionTokens": 0
+      },
+      {
+        "holder": "brask",
+        "id": "brask.landlord-offer",
+        "kind": "personal",
+        "form": "cue",
+        "cueTokens": 22,
+        "expansionTokens": 0
+      },
+      {
+        "holder": "oria-senn",
+        "id": "oria-senn.client-is-grid-corporation",
+        "kind": "personal",
+        "form": "full",
+        "priority": "keyword",
+        "cueTokens": 27,
+        "expansionTokens": 51
+      },
+      {
+        "holder": "oria-senn",
+        "id": "oria-senn.the-case",
+        "kind": "linked",
+        "form": "cue",
+        "cueTokens": 39,
+        "expansionTokens": 0
+      },
+      {
+        "holder": "kesh",
+        "id": "kesh.bent-the-book",
+        "kind": "personal",
+        "form": "cue",
+        "cueTokens": 26,
+        "expansionTokens": 0
+      }
+    ]
+  },
+  "findings": [],
+  "remaining": [],
+  "beats": [
+    {
+      "kind": "narration",
+      "text": "Water ticks from the cooled pipe onto the table's edge."
+    },
+    {
+      "kind": "dialogue",
+      "speaker": "oria-senn",
+      "text": "A private collector, darling. One who pays triple."
+    },
+    {
+      "kind": "dialogue",
+      "speaker": "vex",
+      "text": "'Darling.' She only says that when she's lying."
+    },
+    {
+      "kind": "dialogue",
+      "speaker": "brask",
+      "text": "Mind the pipe. It drips on whoever sits there."
+    },
+    {
+      "kind": "narration",
+      "text": "Kesh keeps her eyes on the door."
+    }
+  ],
+  "tags": {
+    "parsed": {
+      "expressions": {
+        "oria-senn": "smile",
+        "vex": "smirk"
+      },
+      "comfort": {
+        "brask": {
+          "level": 2,
+          "reason": "too loud in here"
+        }
+      },
+      "moods": {},
+      "leaves": [],
+      "ended": false
+    },
+    "dropped": []
+  },
+  "scene": {
+    "id": "scene-1200",
+    "locationId": "sump-lantern",
+    "cast": [
+      "vex",
+      "brask",
+      "oria-senn",
+      "kesh"
+    ],
+    "walkOns": [
+      "bartender"
+    ],
+    "summary": "",
+    "moods": {
+      "vex": "wary",
+      "brask": "uneasy",
+      "oria-senn": "composed, too polished",
+      "kesh": "calm on the surface, counting minutes"
+    },
+    "comfort": {
+      "vex": 3,
+      "brask": 2,
+      "oria-senn": 3,
+      "kesh": 3
+    },
+    "expressions": {
+      "vex": "smirk",
+      "brask": "neutral",
+      "oria-senn": "smile",
+      "kesh": "neutral"
+    },
+    "departed": [],
+    "ended": false,
+    "nsfw": false,
+    "baseline": {
+      "vex": {
+        "approval": 55,
+        "trust": 60,
+        "attraction": 35
+      },
+      "brask": {
+        "approval": 60,
+        "trust": 55,
+        "attraction": 15
+      },
+      "oria-senn": {
+        "approval": 45,
+        "trust": 25,
+        "attraction": 30
+      },
+      "kesh": {
+        "approval": 45,
+        "trust": 35,
+        "attraction": 5
+      }
+    },
+    "told": [
+      "oria-senn.k3",
+      "vex.k1",
+      "brask.k1"
+    ],
+    "newFacts": [],
+    "pressures": {
+      "oria-senn": 1,
+      "vex": 0,
+      "brask": 0
+    },
+    "tells": [
+      "oria-senn.client-is-grid-corporation"
+    ]
+  }
+}
+
+===== turn 2 =====
+{
+  "input": "Forget the client. What's in the sealed case?",
+  "fallback": false,
+  "corrections": [],
+  "plan": {
+    "speakers": [
+      {
+        "id": "oria-senn",
+        "intent": "steer back to the fee",
+        "mood": "irritated",
+        "pressure": "pressing",
+        "hiding": "Oria's part: she is fetching the sealed case for the Grid. The sealed case the Grid wants pulled from Pump Station Nine's flooded lower level holds the station's original control core: a pre-Burn rune-key that lets whoever holds it restart the station as its legal owner. The Grid hires the job through fixers and pays far over the going rate to get it before anyone else does. Those who carry the job know what's in the case, not what the Grid means to do with it. How Oria feels about it: doesn't want to know what the Grid wants it for, and suspects anyway.",
+        "approach": "deflect",
+        "kept": [
+          "oria-senn.the-case"
+        ],
+        "tell": "Steers every question about the case back to the fee"
+      },
+      {
+        "id": "vex",
+        "intent": "make Oria answer",
+        "mood": "dry",
+        "pressure": "background"
+      }
+    ],
+    "exchange": [
+      {
+        "who": "oria-senn",
+        "answers": "player",
+        "point": "dodge: The job: retrieve a sealed case from a flooded pump station in the Low Turns before a rival crew does"
+      },
+      {
+        "who": "vex",
+        "answers": 1,
+        "point": "ask"
+      }
+    ],
+    "reactions": [
+      {
+        "id": "brask",
+        "beat": "turns his glass in a slow circle"
+      },
+      {
+        "id": "kesh",
+        "beat": "checks the time"
+      }
+    ],
+    "checks": [],
+    "walk_ons": [],
+    "texture": [
+      "chalked tallies of who owes the bar what, on a slate by the taps"
+    ],
+    "avoid": [],
+    "leaves": [],
+    "end_scene": false,
+    "moves": [
+      {
+        "who": "oria-senn",
+        "answers": "player",
+        "move": "dodge",
+        "says": [
+          {
+            "text": "The job: retrieve a sealed case from a flooded pump station in the Low Turns before a rival crew does",
+            "id": "oria-senn.k1",
+            "unheard": true
+          }
+        ]
+      },
+      {
+        "who": "vex",
+        "answers": 1,
+        "move": "ask",
+        "says": []
+      }
+    ],
+    "player_action": {
+      "doing": "asks what is in the case",
+      "uncertain": false
+    },
+    "change": "Oria refuses to say what the case holds."
+  },
+  "checks": [],
+  "lore": {
+    "stage": [
+      "background.galactic-society",
+      "background.the-current-day",
+      "background.the-stillness",
+      "history.the-burn",
+      "location.crown",
+      "location.high-turns",
+      "location.bulk",
+      "location.low-turns",
+      "location.deepwell",
+      "species.human",
+      "species.light-elf",
+      "species.deep-elf",
+      "species.goblin",
+      "species.golem",
+      "philosophy.animist",
+      "philosophy.mechanist",
+      "philosophy.true-source",
+      "faction.spire-council",
+      "faction.aether-grid-corporation",
+      "faction.phoenix-academy",
+      "faction.garden-guard",
+      "faction.off-world-houses",
+      "faction.refugee-networks",
+      "faction.low-turns-syndicates",
+      "faction.couriers",
+      "concept.aether-in-the-body",
+      "concept.cinders",
+      "concept.the-aether",
+      "concept.the-lattice",
+      "concept.tiers"
+    ],
+    "scene": [
+      {
+        "id": "location.low-turns.ninth-turn.sump-lantern",
+        "title": "The Sump Lantern",
+        "form": "full"
+      },
+      {
+        "id": "location.low-turns.ninth-turn",
+        "title": "The Ninth Turn",
+        "form": "full"
+      },
+      {
+        "id": "location.low-turns",
+        "title": "The Low Turns",
+        "form": "full"
+      },
+      {
+        "id": "faction.spire-council",
+        "title": "The Spire Council",
+        "form": "full"
+      },
+      {
+        "id": "faction.aether-grid-corporation",
+        "title": "The Aether Grid Corporation",
+        "form": "summary"
+      },
+      {
+        "id": "faction.aether-grid-corporation.load-shedding",
+        "title": "How the grid really runs",
+        "form": "full"
+      },
+      {
+        "id": "faction.low-turns-syndicates.drowned-saints",
+        "title": "The Drowned Saints",
+        "form": "summary"
+      },
+      {
+        "id": "faction.couriers",
+        "title": "The Couriers",
+        "form": "full"
+      },
+      {
+        "id": "species.light-elf",
+        "title": "Light elf culture",
+        "form": "full"
+      },
+      {
+        "id": "species.deep-elf",
+        "title": "Deep elf culture",
+        "form": "full"
+      },
+      {
+        "id": "species.goblin",
+        "title": "Goblin culture",
+        "form": "full"
+      },
+      {
+        "id": "species.golem",
+        "title": "Golem culture",
+        "form": "full"
+      }
+    ],
+    "triggered": [],
+    "stances": [
+      "- The Spire Council toward The Drowned Saints: enemy"
+    ],
+    "tokens": {
+      "stage": 678,
+      "writerStage": 276,
+      "scene": 1197,
+      "triggered": 0
+    },
+    "budgets": {
+      "sceneTokens": 1200,
+      "triggeredTokens": 800,
+      "loreLines": 3,
+      "set": []
+    },
+    "budgetCuts": {
+      "scene": {
+        "shortened": [],
+        "dropped": []
+      },
+      "triggered": {
+        "shortened": [],
+        "dropped": []
+      }
+    },
+    "secrets": [
+      {
+        "holder": "vex",
+        "id": "vex.partner-sold-out",
+        "kind": "personal",
+        "form": "cue",
+        "cueTokens": 27,
+        "expansionTokens": 0
+      },
+      {
+        "holder": "brask",
+        "id": "brask.landlord-offer",
+        "kind": "personal",
+        "form": "cue",
+        "cueTokens": 22,
+        "expansionTokens": 0
+      },
+      {
+        "holder": "oria-senn",
+        "id": "oria-senn.client-is-grid-corporation",
+        "kind": "personal",
+        "form": "full",
+        "priority": "kept",
+        "cueTokens": 27,
+        "expansionTokens": 51
+      },
+      {
+        "holder": "oria-senn",
+        "id": "oria-senn.the-case",
+        "kind": "linked",
+        "form": "cue",
+        "cueTokens": 39,
+        "expansionTokens": 0
+      },
+      {
+        "holder": "kesh",
+        "id": "kesh.bent-the-book",
+        "kind": "personal",
+        "form": "cue",
+        "cueTokens": 26,
+        "expansionTokens": 0
+      }
+    ]
+  },
+  "findings": [],
+  "remaining": [],
+  "beats": [
+    {
+      "kind": "dialogue",
+      "speaker": "oria-senn",
+      "text": "Something old from the pump station, retrieved before a rival crew gets to it. The contents are the client's business."
+    },
+    {
+      "kind": "dialogue",
+      "speaker": "vex",
+      "text": "And whose business is the client?"
+    },
+    {
+      "kind": "narration",
+      "text": "Brask turns his glass in a slow circle. Kesh checks the time."
+    }
+  ],
+  "tags": {
+    "parsed": {
+      "expressions": {},
+      "comfort": {},
+      "moods": {
+        "oria-senn": "irritated"
+      },
+      "leaves": [],
+      "ended": false
+    },
+    "dropped": []
+  },
+  "scene": {
+    "id": "scene-1200",
+    "locationId": "sump-lantern",
+    "cast": [
+      "vex",
+      "brask",
+      "oria-senn",
+      "kesh"
+    ],
+    "walkOns": [
+      "bartender"
+    ],
+    "summary": "",
+    "moods": {
+      "vex": "dry",
+      "brask": "uneasy",
+      "oria-senn": "irritated",
+      "kesh": "calm on the surface, counting minutes"
+    },
+    "comfort": {
+      "vex": 3,
+      "brask": 2,
+      "oria-senn": 3,
+      "kesh": 3
+    },
+    "expressions": {
+      "vex": "smirk",
+      "brask": "neutral",
+      "oria-senn": "smile",
+      "kesh": "neutral"
+    },
+    "departed": [],
+    "ended": false,
+    "nsfw": false,
+    "baseline": {
+      "vex": {
+        "approval": 55,
+        "trust": 60,
+        "attraction": 35
+      },
+      "brask": {
+        "approval": 60,
+        "trust": 55,
+        "attraction": 15
+      },
+      "oria-senn": {
+        "approval": 45,
+        "trust": 25,
+        "attraction": 30
+      },
+      "kesh": {
+        "approval": 45,
+        "trust": 35,
+        "attraction": 5
+      }
+    },
+    "told": [
+      "oria-senn.k3",
+      "vex.k1",
+      "brask.k1",
+      "oria-senn.k1"
+    ],
+    "newFacts": [],
+    "pressures": {
+      "oria-senn": 1,
+      "vex": 0,
+      "brask": 0
+    },
+    "tells": [
+      "oria-senn.client-is-grid-corporation",
+      "oria-senn.the-case"
+    ]
+  }
+}
+
+===== turn 3 =====
+{
+  "input": "Fine. When do we go, and what does it pay?",
+  "fallback": false,
+  "corrections": [
+    "oria-senn's secret isn't in play: \"when do we go\" isn't in what was just said"
+  ],
+  "plan": {
+    "speakers": [
+      {
+        "id": "oria-senn",
+        "intent": "close the deal",
+        "mood": "relieved",
+        "pressure": "urgent"
+      },
+      {
+        "id": "brask",
+        "intent": "raise the practical problem",
+        "mood": "worried",
+        "pressure": "background"
+      }
+    ],
+    "exchange": [
+      {
+        "who": "oria-senn",
+        "answers": "player",
+        "point": "answer: The flooded pump station's lower level fills at high tide, around midnight; The client wants the case badly enough to pay triple"
+      },
+      {
+        "who": "brask",
+        "answers": 1,
+        "point": "warn: Three pumps on the lower stairs are overdue for new seals"
+      }
+    ],
+    "reactions": [
+      {
+        "id": "vex",
+        "beat": "counts something on her fingers"
+      },
+      {
+        "id": "kesh",
+        "beat": "stands to leave"
+      }
+    ],
+    "checks": [],
+    "walk_ons": [],
+    "texture": [
+      "a dead pump wheel bolted to the wall as decoration, still faintly humming"
+    ],
+    "avoid": [],
+    "leaves": [],
+    "end_scene": false,
+    "moves": [
+      {
+        "who": "oria-senn",
+        "answers": "player",
+        "move": "answer",
+        "says": [
+          {
+            "text": "The flooded pump station's lower level fills at high tide, around midnight",
+            "id": "oria-senn.k7",
+            "unheard": true
+          },
+          {
+            "text": "The client wants the case badly enough to pay triple",
+            "id": "oria-senn.k3",
+            "unheard": false
+          }
+        ]
+      },
+      {
+        "who": "brask",
+        "answers": 1,
+        "move": "warn",
+        "says": [
+          {
+            "text": "Three pumps on the lower stairs are overdue for new seals",
+            "id": "brask.k5",
+            "unheard": true
+          }
+        ]
+      }
+    ],
+    "player_action": {
+      "doing": "asks when and for how much",
+      "uncertain": false
+    },
+    "change": "The job has a deadline: midnight."
+  },
+  "checks": [],
+  "lore": {
+    "stage": [
+      "background.galactic-society",
+      "background.the-current-day",
+      "background.the-stillness",
+      "history.the-burn",
+      "location.crown",
+      "location.high-turns",
+      "location.bulk",
+      "location.low-turns",
+      "location.deepwell",
+      "species.human",
+      "species.light-elf",
+      "species.deep-elf",
+      "species.goblin",
+      "species.golem",
+      "philosophy.animist",
+      "philosophy.mechanist",
+      "philosophy.true-source",
+      "faction.spire-council",
+      "faction.aether-grid-corporation",
+      "faction.phoenix-academy",
+      "faction.garden-guard",
+      "faction.off-world-houses",
+      "faction.refugee-networks",
+      "faction.low-turns-syndicates",
+      "faction.couriers",
+      "concept.aether-in-the-body",
+      "concept.cinders",
+      "concept.the-aether",
+      "concept.the-lattice",
+      "concept.tiers"
+    ],
+    "scene": [
+      {
+        "id": "location.low-turns.ninth-turn.sump-lantern",
+        "title": "The Sump Lantern",
+        "form": "full"
+      },
+      {
+        "id": "location.low-turns.ninth-turn",
+        "title": "The Ninth Turn",
+        "form": "full"
+      },
+      {
+        "id": "location.low-turns",
+        "title": "The Low Turns",
+        "form": "full"
+      },
+      {
+        "id": "faction.spire-council",
+        "title": "The Spire Council",
+        "form": "full"
+      },
+      {
+        "id": "faction.aether-grid-corporation",
+        "title": "The Aether Grid Corporation",
+        "form": "summary"
+      },
+      {
+        "id": "faction.aether-grid-corporation.load-shedding",
+        "title": "How the grid really runs",
+        "form": "full"
+      },
+      {
+        "id": "faction.low-turns-syndicates.drowned-saints",
+        "title": "The Drowned Saints",
+        "form": "summary"
+      },
+      {
+        "id": "faction.couriers",
+        "title": "The Couriers",
+        "form": "full"
+      },
+      {
+        "id": "species.light-elf",
+        "title": "Light elf culture",
+        "form": "full"
+      },
+      {
+        "id": "species.deep-elf",
+        "title": "Deep elf culture",
+        "form": "full"
+      },
+      {
+        "id": "species.goblin",
+        "title": "Goblin culture",
+        "form": "full"
+      },
+      {
+        "id": "species.golem",
+        "title": "Golem culture",
+        "form": "full"
+      }
+    ],
+    "triggered": [],
+    "stances": [
+      "- The Spire Council toward The Drowned Saints: enemy"
+    ],
+    "tokens": {
+      "stage": 678,
+      "writerStage": 276,
+      "scene": 1197,
+      "triggered": 0
+    },
+    "budgets": {
+      "sceneTokens": 1200,
+      "triggeredTokens": 800,
+      "loreLines": 3,
+      "set": []
+    },
+    "budgetCuts": {
+      "scene": {
+        "shortened": [],
+        "dropped": []
+      },
+      "triggered": {
+        "shortened": [],
+        "dropped": []
+      }
+    },
+    "secrets": [
+      {
+        "holder": "vex",
+        "id": "vex.partner-sold-out",
+        "kind": "personal",
+        "form": "cue",
+        "cueTokens": 27,
+        "expansionTokens": 0
+      },
+      {
+        "holder": "brask",
+        "id": "brask.landlord-offer",
+        "kind": "personal",
+        "form": "cue",
+        "cueTokens": 22,
+        "expansionTokens": 0
+      },
+      {
+        "holder": "oria-senn",
+        "id": "oria-senn.client-is-grid-corporation",
+        "kind": "personal",
+        "form": "full",
+        "priority": "keyword",
+        "cueTokens": 27,
+        "expansionTokens": 51
+      },
+      {
+        "holder": "oria-senn",
+        "id": "oria-senn.the-case",
+        "kind": "linked",
+        "form": "full",
+        "priority": "kept",
+        "cueTokens": 39,
+        "expansionTokens": 144
+      },
+      {
+        "holder": "kesh",
+        "id": "kesh.bent-the-book",
+        "kind": "personal",
+        "form": "cue",
+        "cueTokens": 26,
+        "expansionTokens": 0
+      }
+    ]
+  },
+  "findings": [],
+  "remaining": [],
+  "beats": [
+    {
+      "kind": "dialogue",
+      "speaker": "oria-senn",
+      "text": "Before midnight. The lower level floods at high tide. Triple the usual rate."
+    },
+    {
+      "kind": "dialogue",
+      "speaker": "brask",
+      "text": "Three of the pumps down there are overdue for seals. If one goes, the water won't wait for midnight."
+    },
+    {
+      "kind": "narration",
+      "text": "Vex counts something on her fingers."
+    }
+  ],
+  "tags": {
+    "parsed": {
+      "expressions": {
+        "oria-senn": "satisfied"
+      },
+      "comfort": {},
+      "moods": {
+        "brask": "worried"
+      },
+      "leaves": [],
+      "ended": false
+    },
+    "dropped": []
+  },
+  "scene": {
+    "id": "scene-1200",
+    "locationId": "sump-lantern",
+    "cast": [
+      "vex",
+      "brask",
+      "oria-senn",
+      "kesh"
+    ],
+    "walkOns": [
+      "bartender"
+    ],
+    "summary": "",
+    "moods": {
+      "vex": "dry",
+      "brask": "worried",
+      "oria-senn": "relieved",
+      "kesh": "calm on the surface, counting minutes"
+    },
+    "comfort": {
+      "vex": 3,
+      "brask": 2,
+      "oria-senn": 3,
+      "kesh": 3
+    },
+    "expressions": {
+      "vex": "smirk",
+      "brask": "neutral",
+      "oria-senn": "satisfied",
+      "kesh": "neutral"
+    },
+    "departed": [],
+    "ended": false,
+    "nsfw": false,
+    "baseline": {
+      "vex": {
+        "approval": 55,
+        "trust": 60,
+        "attraction": 35
+      },
+      "brask": {
+        "approval": 60,
+        "trust": 55,
+        "attraction": 15
+      },
+      "oria-senn": {
+        "approval": 45,
+        "trust": 25,
+        "attraction": 30
+      },
+      "kesh": {
+        "approval": 45,
+        "trust": 35,
+        "attraction": 5
+      }
+    },
+    "told": [
+      "oria-senn.k3",
+      "vex.k1",
+      "brask.k1",
+      "oria-senn.k1",
+      "oria-senn.k7",
+      "brask.k5"
+    ],
+    "newFacts": [],
+    "pressures": {
+      "oria-senn": 2,
+      "vex": 0,
+      "brask": 0
+    },
+    "tells": [
+      "oria-senn.client-is-grid-corporation",
+      "oria-senn.the-case"
+    ]
+  }
+}
+
+===== end of scene =====
+{
+  "witnesses": [
+    {
+      "id": "vex",
+      "summary": {
+        "memory": "Oria lied about the client again, and Rook pushed her on it.",
+        "level": "normal",
+        "reason": "Rook backed her up",
+        "delta": {
+          "approval": 1,
+          "trust": 0,
+          "attraction": 0
+        },
+        "learned": [],
+        "others": [
+          {
+            "with": "oria-senn",
+            "delta": {
+              "approval": -4,
+              "trust": -4,
+              "attraction": 0
+            },
+            "reason": "she lied again"
+          }
+        ]
+      },
+      "report": {
+        "id": "vex",
+        "memory": "Oria lied about the client again, and Rook pushed her on it.",
+        "level": "normal",
+        "reason": "Rook backed her up",
+        "before": {
+          "approval": 55,
+          "trust": 60,
+          "attraction": 35
+        },
+        "after": {
+          "approval": 56,
+          "trust": 60,
+          "attraction": 35
+        },
+        "learned": [],
+        "others": [
+          {
+            "with": "oria-senn",
+            "before": {
+              "approval": 30,
+              "trust": 15,
+              "attraction": 20
+            },
+            "after": {
+              "approval": 26,
+              "trust": 11,
+              "attraction": 20
+            },
+            "label": "wary acquaintances",
+            "reason": "she lied again"
+          }
+        ]
+      }
+    },
+    {
+      "id": "brask",
+      "summary": {
+        "memory": "Oria offered Rook a flooded pump job with a midnight deadline.",
+        "level": "fleeting",
+        "reason": "",
+        "delta": {
+          "approval": 0,
+          "trust": 0,
+          "attraction": 0
+        },
+        "learned": [],
+        "others": []
+      },
+      "report": {
+        "id": "brask",
+        "memory": "Oria offered Rook a flooded pump job with a midnight deadline.",
+        "level": "fleeting",
+        "reason": "",
+        "before": {
+          "approval": 60,
+          "trust": 55,
+          "attraction": 15
+        },
+        "after": {
+          "approval": 60,
+          "trust": 55,
+          "attraction": 15
+        },
+        "learned": [],
+        "others": []
+      }
+    },
+    {
+      "id": "oria-senn",
+      "summary": {
+        "memory": "Rook is asking about the client; I need to close this before Vex pushes harder.",
+        "level": "normal",
+        "reason": "Rook asked too many questions",
+        "delta": {
+          "approval": -1,
+          "trust": 0,
+          "attraction": 0
+        },
+        "learned": [],
+        "others": []
+      },
+      "report": {
+        "id": "oria-senn",
+        "memory": "Rook is asking about the client; I need to close this before Vex pushes harder.",
+        "level": "normal",
+        "reason": "Rook asked too many questions",
+        "before": {
+          "approval": 45,
+          "trust": 25,
+          "attraction": 30
+        },
+        "after": {
+          "approval": 44,
+          "trust": 25,
+          "attraction": 30
+        },
+        "learned": [],
+        "others": []
+      }
+    },
+    {
+      "id": "kesh",
+      "summary": {
+        "memory": "Strangers in the bar talked about a job at a pump station.",
+        "level": "normal",
+        "reason": "",
+        "delta": {
+          "approval": 0,
+          "trust": 0,
+          "attraction": 0
+        },
+        "learned": [],
+        "others": []
+      },
+      "report": {
+        "id": "kesh",
+        "memory": "Strangers in the bar talked about a job at a pump station.",
+        "level": "normal",
+        "reason": "",
+        "before": {
+          "approval": 45,
+          "trust": 35,
+          "attraction": 5
+        },
+        "after": {
+          "approval": 45,
+          "trust": 35,
+          "attraction": 5
+        },
+        "learned": [],
+        "others": []
+      }
+    }
+  ]
+}

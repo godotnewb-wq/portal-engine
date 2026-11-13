@@ -1,219 +1,242 @@
 import { z } from 'zod'
-import type { CheckResult, Difficulty, Edge, Ruleset, Skill } from '@engine/rules'
-import type { GameState, Scene } from '@engine/state'
-import { characterById, locationById, type Pack } from '@engine/pack'
+import type { GameState } from '@engine/state'
+import { characterById, knowerOf, type Pack } from '@engine/pack'
+import { checkNames, entryById, knows, LORE_LINE_WORDS } from '@engine/codex'
+import { packNames } from './checks'
+import { turnLore, type TurnLore } from './lore'
+import { canSay, sceneFacts, toldPlayer } from './facts'
+import type { Scene } from '@engine/state'
+import { locationById } from '@engine/pack'
+import {
+  MAX_CHECKS,
+  MAX_LINES,
+  MAX_SPEAKERS,
+  PlannedCheckSchema,
+  QUOTED_WORDS,
+  difficultyNamed,
+  list,
+  presentCast,
+  presentId,
+  silence,
+  skillNamed,
+  text,
+  type BeatPlan,
+  type ExchangeLine,
+  type LoreLine,
+  type Move,
+  type PlannedCheck,
+  type Said
+} from './planShape'
 
 /**
- * The director's beat plan (narrator-scene-engine §4), read leniently: a field the model leaves out or gets the wrong
- * shape of becomes empty rather than failing the turn. `validatePlan` then checks it against the scene.
+ * The director's plan, the situation plan (director writer review, option B, 2026-11-07; the only plan since
+ * milestone 3.6 retired the line plan). The director decides what is true, wanted and at
+ * stake; the writer writes the conversation. A move is a kind of move and the facts it says, not wording, so there is
+ * no planner prose for the writer to paraphrase, and facts are checked against who may say them.
  */
-export const text = z.string().catch('')
-export const list = <T extends z.ZodType>(item: T) => z.array(z.unknown()).catch([]).transform((xs) => xs.flatMap((x) => {
-  const parsed = item.safeParse(x)
-  return parsed.success ? [parsed.data as z.infer<T>] : []
-}))
+export const MOVE_KINDS = ['answer', 'ask', 'push back', 'dodge', 'offer', 'refuse', 'concede', 'reveal', 'agree', 'warn', 'explain'] as const
 
-export const PlannedSpeakerSchema = z.object({
-  id: z.string(),
-  /** The older one-line form: what their single line gets across. `exchange` replaces it; read when it's missing. */
-  point: text.optional(),
-  intent: text,
-  mood: text,
-  knows: text.optional(),
-  hiding: text.optional(),
-  approach: text.optional(),
-  depends_on_check: z.string().optional().catch(undefined),
-  /** Situation plan: how hard their aim for the scene presses this turn, as a ruleset pressure word. */
-  pressure: text.optional(),
-  /** Situation plan: the fact ids of the secrets they keep this turn (each touched by something just said). */
-  kept: z.array(z.string()).optional().catch(undefined),
-  /** Situation plan: the kept secret's tell, when the game lets it show this turn. */
-  tell: text.optional(),
-  /** Situation plan: how they colour what they say about the world ("resentful, street-level view"). */
-  framing: text.optional()
-})
+/** Something new a move brings in, at most this many words: a price, a time, a plan; never a line of dialogue. */
+export const NEW_FACT_WORDS = 25
 
-export const PlannedCheckSchema = z.object({
-  id: z.string(),
-  who: z.string(),
-  skill: z.string(),
-  difficulty: z.string(),
-  stakes: text,
-  /** A character present who helps. The game decides what their help is worth. */
-  assist: z.string().optional().catch(undefined),
-  /** Suggested with a reason; the game applies it, never stacked. */
-  edge: z.enum(['advantage', 'disadvantage']).optional().catch(undefined),
-  edge_reason: text.optional()
-})
+/** A lore line is a fact in plain words, at most this long (kept in the codex, whose summaries share the limit). */
+export { LORE_LINE_WORDS }
 
-/**
- * One line of the turn's conversation (round 0, session 2026-11-06_2313_c313): who says it, what it answers (the
- * player, or an earlier line by its 1-based number) and its point, so each line builds on the one before.
- */
-export const ExchangeLineSchema = z.object({
+const RawMoveSchema = z.object({
   who: z.string(),
   answers: z.union([z.number(), z.string()]).catch('player'),
-  point: text
+  move: text,
+  uses: list(z.string()),
+  new: list(z.string()),
+  needs: z.string().optional().catch(undefined)
 })
 
 export const RawPlanSchema = z.object({
-  speakers: list(PlannedSpeakerSchema),
-  exchange: list(ExchangeLineSchema),
+  player_action: z.object({ doing: text, uncertain: z.boolean().catch(false) }).catch({ doing: '', uncertain: false }),
+  speakers: list(z.object({ id: z.string(), goal: text, mood: text, pressure: text, keeps: list(z.string()), touched: text, approach: text.optional(), framing: text.optional() })),
+  moves: list(RawMoveSchema),
+  lore: list(z.object({ entry: z.string(), who: z.string().optional().catch(undefined), line: text })),
+  change: text,
   reactions: list(z.object({ id: z.string(), beat: z.string() })),
   checks: list(PlannedCheckSchema),
   walk_ons: list(z.object({ id: z.string(), line: z.string() })),
   texture: list(z.string()),
-  contrast: text,
   avoid: list(z.string()),
-  /** Characters who leave this beat. */
   leaves: list(z.string()),
   end_scene: z.boolean().catch(false)
 })
 export type RawPlan = z.infer<typeof RawPlanSchema>
 
-export interface PlannedCheck {
-  id: string
-  who: string
-  skill: Skill
-  difficulty: Difficulty
-  stakes: string
-  assist?: string
-  edge?: 'advantage' | 'disadvantage'
-  /** Filled in by the game once rolled. */
-  result?: CheckResult
-  /** What the assist was worth, once rolled: a bonus, an edge, or nothing (no skill, or not enough of the assist meter). */
-  assisted?: { by: string; bonus: number; edge: Edge; meter: number }
-  /** The line shown to the player, e.g. "Ada — Search 17 vs 15: success". */
-  line?: string
-}
+/** At most one detail of the place a turn, and none needed (round 0, F7). */
+export const MAX_TEXTURE = 1
 
-/** A line after validation: `answers` is "player" or the 1-based number of an earlier line. */
-export interface ExchangeLine {
-  who: string
-  answers: 'player' | number
-  point: string
-}
-
-/** Something a move says: a fact by id, or something new the plan brought in. `unheard`: the player hasn't been told it. */
-export interface Said {
-  text: string
-  id?: string
-  unheard: boolean
-}
-
-/** A move after validation (director-writer review, option B): who, what it answers, what kind of move, and what it says. */
-export interface Move {
-  who: string
-  answers: 'player' | number
-  move: string
-  says: Said[]
-  /** A check this move depends on: it happens only if the check succeeds (someone seeing through a lie). */
-  needs?: string
-}
-
-/**
- * The validated plan. `moves`, `player_action` and `change` come from the situation plan (`plan2.ts`); a plan from
- * the older director has none of them, and `exchange` then carries the lines.
- */
-/**
- * A line of world lore the writer may draw on this turn (claude/lore-injection.md §8): the codex entry it comes from,
- * the fact in plain words, and, for insider knowledge, the one speaker who would say it.
- */
-export interface LoreLine {
-  entry: string
-  /** The entry's name, for read-outs. */
-  name: string
-  line: string
-  who?: string
-}
-
-export type BeatPlan = Omit<RawPlan, 'checks' | 'exchange'> & {
-  checks: PlannedCheck[]
-  exchange: ExchangeLine[]
-  moves?: Move[]
-  /** Situation plan: a pool of lore lines, apart from the moves. */
-  lore?: LoreLine[]
-  player_action?: { doing: string; uncertain: boolean }
-  change?: string
-}
-
-/**
- * At most three speakers a turn, so a group of three can all talk (play: with a cap of two, the third was always
- * silent), and few enough checks to keep the turn quick.
- */
-export const MAX_SPEAKERS = 3
-export const MAX_CHECKS = 2
-export const MAX_TEXTURE = 3
-/** Lines in a turn's exchange: one for each of three speakers and two replies, inside the beat budget (tune). */
-export const MAX_LINES = 5
-/**
- * After this many turns without a line, the director is shown what a character cares about (round 0 F3). A reminder
- * to look, never a quota: whether they speak stays the director's call (director-writer §6).
- */
-export const QUIET_TURNS = 2
-
-/**
- * A plan's lines for showing, also for plans logged before the exchange existed (a point per speaker): read-outs
- * read old sessions too.
- */
-export function planLines(plan: Pick<BeatPlan, 'speakers'> & { exchange?: ExchangeLine[] }): ExchangeLine[] {
-  return plan.exchange ?? plan.speakers.flatMap((s) => (s.point ? [{ who: s.id, answers: 'player' as const, point: s.point }] : []))
-}
-
-/** "1. Ada → the player: …", for read-outs. */
-export const lineText = (lines: ExchangeLine[], i: number, nameOf: (id: string) => string): string => {
-  const l = lines[i]!
-  return `${i + 1}. ${nameOf(l.who)} → ${l.answers === 'player' ? 'the player' : `${l.answers}`}: ${l.point}`
-}
-
-/** Pulls the JSON object out of a reply that may wrap it in a code fence or a sentence. */
+/** Reads the situation plan out of a reply; null when there's no JSON object with moves or speakers in it. */
 export function parsePlan(reply: string): RawPlan | null {
+  // Reasoning models may think aloud first; the plan is what follows.
   const stripped = reply.replace(/<think(?:ing)?>[\s\S]*?<\/think(?:ing)?>/gi, '')
   const start = stripped.indexOf('{')
   const end = stripped.lastIndexOf('}')
   if (start < 0 || end <= start) return null
-  let raw: unknown
   try {
-    raw = JSON.parse(stripped.slice(start, end + 1))
+    const json: unknown = JSON.parse(stripped.slice(start, end + 1))
+    const plan = RawPlanSchema.parse(json)
+    return plan.moves.length > 0 || plan.speakers.length > 0 ? plan : null
   } catch {
     return null
   }
-  const parsed = RawPlanSchema.safeParse(raw)
-  return parsed.success ? parsed.data : null
 }
 
-const normalize = (s: string) => s.trim().toLowerCase().replace(/[_-]+/g, ' ').replace(/\s+/g, ' ')
+/** A move as one line for read-outs and the older parts of the pipeline: "push back: the doors stay sealed". */
+export const moveText = (m: Move): string => `${m.move}${m.says.length > 0 ? `: ${m.says.map((s) => s.text).join('; ')}` : ''}`
 
-/** A skill as the director wrote it, by id or by name. */
-export function skillNamed(r: Ruleset, written: string): Skill | undefined {
-  const asked = normalize(written)
-  return r.skills.find((s) => normalize(s.id) === asked || normalize(s.name) === asked)?.id
-}
+/** Short words a trigger shares with anything; they don't show that something was touched. */
+const COMMON = new Set(['that', 'this', 'with', 'what', 'when', 'were', 'they', 'them', 'their', 'there', 'then', 'than', 'have', 'from', 'your', 'just', 'about', 'would', 'could', 'into', 'some', 'here', 'will', 'been', 'only', 'said', 'asks', 'says'])
+const triggerWords = (t: string) => [...new Set(t.toLowerCase().match(/\p{L}{4,}/gu) ?? [])].filter((w) => !COMMON.has(w))
 
-export function difficultyNamed(r: Ruleset, written: string): Difficulty | undefined {
-  const asked = normalize(written)
-  return r.difficulties.find((d) => normalize(d.word) === asked)?.word
-}
-
-/** Who is here now: the persistent cast minus anyone who left. */
-export const presentCast = (scene: Scene): string[] => scene.cast.filter((id) => !scene.departed.includes(id))
-
-/** Who is meant: an id, a full name or a first name, for someone present. */
-export function presentId(content: Pack, scene: Scene, written: string): string | undefined {
-  const asked = normalize(written)
-  return presentCast(scene).find((id) => {
-    const c = characterById(content, id)
-    return id === asked || (c && (normalize(c.name) === asked || normalize(c.name.split(' ')[0]!) === asked))
-  })
+/** What was just said or done: the player's input and the last turn, where a trigger for a secret must be found. */
+function justSaid(state: GameState, input: string): string {
+  const last = state.scene!.turns.at(-1)
+  return [input, last?.player ?? '', ...(last?.beats.map((b) => b.text) ?? [])].join(' ').toLowerCase()
 }
 
 /**
- * Checks the plan against the scene and fixes what it can: unknown people are dropped, speakers capped at two,
- * checks with skills or difficulties that don't exist removed, texture capped. Returns what was changed and why,
- * so the test bench can show how often the director strays.
+ * Checks the plan against the scene. Speakers, checks, reactions, walk-ons, texture and departures go through
+ * `validateShared`; then each move is checked: its speaker must be one of the turn's, a reply must answer an
+ * earlier move, and every fact it uses must be one its speaker can say. A fact the speaker can't say is dropped from
+ * the move and counted: that is a character saying what only someone else knows.
+ *
+ * Relevance (scene system redesign.md §5): a secret is kept only when something just said touches it, named
+ * in `touched` and found in the player's words or the last turn, so a secret isn't in play every turn (round 0: 96–100%
+ * of speaker slots). An aim's pressure moves at most one step a turn. A move's facts are a pool it may draw on, so a
+ * move with none is fine.
  */
-/** `exchange: false` leaves the lines to the caller (the situation plan validates its own moves). */
-export function validatePlan(content: Pack, state: GameState, raw: RawPlan, options: { exchange?: boolean } = {}): { plan: BeatPlan; corrections: string[] } {
+export function validatePlan(content: Pack, state: GameState, raw: RawPlan, input = '', lore: TurnLore = turnLore(content, state, input)): { plan: BeatPlan; corrections: string[] } {
+  const scene = state.scene!
+  const facts = new Map(sceneFacts(content, state).map((f) => [f.id, f]))
+  const words = content.ruleset.pressures
+  const ground = justSaid(state, input)
+  const early: string[] = []
+  const shared: SharedPlan = {
+    speakers: raw.speakers.map((s) => {
+      const who = presentId(content, scene, s.id) ?? s.id
+      const own = s.keeps.map((id) => facts.get(id.trim())).filter((f): f is NonNullable<typeof f> => f !== undefined && f.kind === 'secret' && f.owner === who)
+      if (own.length < s.keeps.length) early.push(`${who} keeps something that isn't one of their secrets`)
+      const grounded = triggerWords(s.touched).some((w) => ground.includes(w))
+      if (own.length > 0 && !grounded) early.push(`${who}'s secret isn't in play: ${s.touched.trim() ? `"${s.touched.trim()}" isn't in what was just said` : 'nothing named touches it'}`)
+      const kept = grounded ? own : []
+
+      const asked = words.findIndex((w) => w.toLowerCase() === s.pressure.trim().toLowerCase())
+      const before = scene.pressures[who]
+      let level = asked >= 0 ? asked : (before ?? 0)
+      if (asked < 0 && s.pressure.trim()) early.push(`${who}: no pressure word "${s.pressure.trim()}"`)
+      if (before !== undefined && Math.abs(level - before) > 1) {
+        level = before + Math.sign(level - before)
+        early.push(`${who}'s pressure moved one step, to ${words[level]}`)
+      }
+      return {
+        id: s.id,
+        intent: s.goal,
+        mood: s.mood,
+        pressure: words[level]!,
+        ...(s.framing?.trim() && { framing: s.framing.trim() }),
+        ...(kept.length > 0 && { hiding: kept.length === 1 ? kept[0]!.text : kept.map((f, i) => `(${i + 1}) ${f.text}`).join(' '), approach: s.approach || 'deflect', kept: kept.map((f) => f.id) })
+      }
+    }),
+    exchange: [],
+    reactions: raw.reactions,
+    checks: raw.checks,
+    walk_ons: raw.walk_ons,
+    texture: raw.texture,
+    avoid: raw.avoid,
+    leaves: raw.leaves,
+    end_scene: raw.end_scene
+  }
+  const { plan, corrections } = validateShared(content, state, shared)
+  corrections.unshift(...early)
+  const fix = (why: string) => corrections.push(why)
+
+  // Talking and asking aren't in doubt; a roll for the player belongs to an attempt (round 0, F4).
+  if (!raw.player_action.uncertain && plan.checks.some((c) => c.who === 'player')) {
+    fix('dropped the player check: the player action is not an uncertain attempt')
+    plan.checks = plan.checks.filter((c) => c.who !== 'player')
+  }
+  if (plan.texture.length > MAX_TEXTURE) plan.texture = plan.texture.slice(0, MAX_TEXTURE)
+
+  const speakers = new Set(plan.speakers.map((s) => s.id))
+  const moves: Move[] = []
+  const renumbered = new Map<number, number>()
+  // A move dropped for a check that can't be resolved passes its place on: a reply to it answers what it answered.
+  const passedOn = new Map<number, Move['answers']>()
+  raw.moves.forEach((m, i) => {
+    const n = i + 1
+    const who = presentId(content, scene, m.who)
+    if (!who || !speakers.has(who)) return fix(`dropped move ${n}: "${m.who}" is not a speaker`)
+    if (moves.length >= MAX_LINES) return fix(`dropped move ${n}: at most ${MAX_LINES}`)
+    const asked = typeof m.answers === 'number' ? m.answers : /^\d+$/.test(m.answers.trim()) ? Number(m.answers) : undefined
+    let answers: Move['answers'] = 'player'
+    if (asked !== undefined) {
+      const earlier = renumbered.get(asked) ?? passedOn.get(asked)
+      if (earlier !== undefined) answers = earlier
+      else fix(`move ${n} answered move ${asked}, which isn't an earlier move; it answers the player`)
+    }
+    // A move the director made conditional happens only if its check succeeds (settlePlan). When the check named
+    // doesn't exist or was dropped above, there is nothing that could succeed, so the move is dropped too rather than
+    // happening unconditionally (milestone 3.6 code review, P1).
+    const needs = m.needs?.trim()
+    if (needs && !plan.checks.some((c) => c.id === needs)) {
+      passedOn.set(n, answers)
+      return fix(`dropped move ${n}: it needs check "${needs}", which isn't in the plan`)
+    }
+    const says: Said[] = []
+    for (const id of m.uses) {
+      const fact = facts.get(id.trim())
+      if (!fact) fix(`move ${n}: no fact "${id}"`)
+      else if (!canSay(scene, fact, who)) fix(`move ${n}: ${who} can't know ${fact.id}`)
+      else says.push({ text: fact.text, id: fact.id, unheard: !toldPlayer(scene, fact) })
+    }
+    for (const t of m.new.map((x) => x.trim()).filter(Boolean)) {
+      if (QUOTED_WORDS.test(t)) fix(`move ${n} quotes dialogue in what it says`)
+      const w = t.split(/\s+/)
+      says.push({ text: w.length > NEW_FACT_WORDS ? w.slice(0, NEW_FACT_WORDS).join(' ') : t, unheard: true })
+    }
+    moves.push({ who, answers, move: m.move.trim().toLowerCase() || 'answer', says, ...(needs && { needs }) })
+    renumbered.set(n, moves.length)
+  })
+  for (const id of speakers) if (!moves.some((m) => m.who === id)) fix(`speaker "${id}" had no move`)
+
+  const exchange: ExchangeLine[] = moves.map((m) => ({ who: m.who, answers: m.answers, point: moveText(m) }))
+  const loreLines = validateLore(content, state, raw, lore, speakers, fix)
+  return {
+    plan: { ...plan, exchange, moves, player_action: raw.player_action, change: raw.change, ...(loreLines.length > 0 && { lore: loreLines }) },
+    corrections
+  }
+}
+
+/** The plan's speakers once read from the director's fields, and the fields checked the same way for everyone. */
+interface SharedPlan {
+  speakers: BeatPlan['speakers']
+  /** Always empty here; the moves fill it once checked. */
+  exchange: ExchangeLine[]
+  reactions: BeatPlan['reactions']
+  checks: RawPlan['checks']
+  walk_ons: BeatPlan['walk_ons']
+  texture: string[]
+  avoid: string[]
+  leaves: string[]
+  end_scene: boolean
+}
+
+/** More texture than this is counted as a correction before the plan keeps its one detail (`MAX_TEXTURE`). */
+const NOTED_TEXTURE = 3
+
+const normalize = (s: string) => s.trim().toLowerCase().replace(/[_-]+/g, ' ').replace(/\s+/g, ' ')
+
+/**
+ * Checks the fields every plan shares against the scene and fixes what it can: unknown people are dropped, speakers
+ * capped, checks with skills or difficulties that don't exist removed, texture capped. Returns what was changed and
+ * why, so the test bench can show how often the director strays.
+ */
+function validateShared(content: Pack, state: GameState, raw: SharedPlan): { plan: BeatPlan; corrections: string[] } {
   const scene = state.scene
   if (!scene) throw new Error('No scene in progress')
   const corrections: string[] = []
@@ -260,13 +283,6 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan, opti
       })
     }
   }
-  for (const s of speakers) {
-    if (s.depends_on_check && !checks.some((c) => c.id === s.depends_on_check)) {
-      fix(`removed ${s.id}'s dependency on unknown check "${s.depends_on_check}"`)
-      delete s.depends_on_check
-    }
-  }
-  const exchange = options.exchange === false ? [] : validateExchange(content, scene, raw, speakers, fix)
 
   const location = locationById(content, scene.locationId)!
   const walk_ons = raw.walk_ons.flatMap((w) => {
@@ -279,9 +295,9 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan, opti
   })
 
   let texture = raw.texture.filter((t) => t.trim().length > 0)
-  if (texture.length > MAX_TEXTURE) {
-    fix(`kept ${MAX_TEXTURE} of ${texture.length} texture details`)
-    texture = texture.slice(0, MAX_TEXTURE)
+  if (texture.length > NOTED_TEXTURE) {
+    fix(`kept ${NOTED_TEXTURE} of ${texture.length} texture details`)
+    texture = texture.slice(0, NOTED_TEXTURE)
   }
   if (texture.length === 0) texture = freshTexture(content, scene, 2)
 
@@ -291,47 +307,82 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan, opti
     return id ? [id] : []
   })
 
-  return { plan: { ...raw, speakers, exchange, reactions, checks, walk_ons, texture, leaves }, corrections }
+  return { plan: { ...raw, speakers, reactions, checks, walk_ons, texture, leaves }, corrections }
 }
 
-/** Words in quotes: double quotes, or single quotes around a phrase (an apostrophe inside a word doesn't count). */
-export const QUOTED_WORDS = /["“”]|(?:^|[\s(—–-])'[^']+'(?=$|[\s.,;:!?)—–-])/
-
 /**
- * The turn's lines in order. A line by someone who isn't a speaker is dropped, a reply to a dropped or later line
- * answers the player instead, and the list is capped. A plan in the older form (a point per speaker, no exchange)
- * becomes one line each, and a speaker left without a line gets one, so an imperfect reply never costs the turn.
+ * The plan's lore lines, checked the way `canSay` checks facts (lore injection.md §8): the entry must be one
+ * the director was given this turn, never a secret; an insider entry's line needs a `who`, a speaker who knows it,
+ * and only they would say it; a common entry's line may be said by anyone, or used in narration. A line that fails
+ * is dropped and counted as a correction. At most the turn's `loreLines` budget (the ruleset's, or the player's setting),
+ * each a fact in plain words, not dialogue.
  */
-function validateExchange(content: Pack, scene: Scene, raw: RawPlan, speakers: BeatPlan['speakers'], fix: (why: string) => void): ExchangeLine[] {
-  const lines: ExchangeLine[] = []
-  // Raw line number → its number once dropped lines are gone, so replies keep pointing at the right line.
-  const renumbered = new Map<number, number>()
-  raw.exchange.forEach((l, i) => {
-    const id = presentId(content, scene, l.who)
-    if (!id || !speakers.some((s) => s.id === id)) return fix(`dropped line ${i + 1}: "${l.who}" is not a speaker`)
-    if (lines.length >= MAX_LINES) return fix(`dropped line ${i + 1}: at most ${MAX_LINES}`)
-    const asked = typeof l.answers === 'number' ? l.answers : /^\d+$/.test(l.answers.trim()) ? Number(l.answers) : undefined
-    let answers: ExchangeLine['answers'] = 'player'
-    if (asked !== undefined) {
-      const earlier = renumbered.get(asked)
-      if (earlier !== undefined && asked <= i) answers = earlier
-      else fix(`line ${i + 1} answered line ${asked}, which isn't an earlier line; it answers the player`)
+function validateLore(content: Pack, state: GameState, raw: RawPlan, lore: TurnLore, speakers: Set<string>, fix: (why: string) => void): LoreLine[] {
+  const given = new Set([...lore.layers.scene.entries, ...lore.layers.triggered.entries].map((e) => e.id))
+  const lines: LoreLine[] = []
+  raw.lore.forEach((l, i) => {
+    const n = i + 1
+    const id = l.entry.trim().replace(/^\[|\]$/g, '')
+    const line = l.line.trim()
+    const entry = entryById(content.codex, id)
+    if (!line) return fix(`dropped lore line ${n}: it says nothing`)
+    if (!entry || !given.has(id)) return fix(`dropped lore line ${n}: "${id}" wasn't given this turn`)
+    if (entry.knowledge === 'secret') return fix(`dropped lore line ${n}: "${id}" is a secret`)
+    if (lines.length >= lore.budgets.loreLines) return fix(`dropped lore line ${n}: at most ${lore.budgets.loreLines}`)
+    // A line that runs long gives way to the entry's own summary: cutting it could end mid-sentence or before the words
+    // that change its meaning, and the summary is a whole sentence about the same entry (kept short by the content check).
+    const words = line.split(/\s+/).length
+    const long = words > LORE_LINE_WORDS
+    if (long) fix(`lore line ${n} was ${words} words; the most is ${LORE_LINE_WORDS}, so the entry's summary stands in`)
+    const said = long ? entry.summary.trim() : line
+    if (!long) {
+      const bad = checkNames(line, packNames(content, [state.player.name]))[0]
+      if (bad) return fix(`dropped lore line ${n}: "${bad.name}" isn't a name in this world`)
+      if (QUOTED_WORDS.test(line)) fix(`lore line ${n} quotes dialogue`)
     }
-    lines.push({ who: id, answers, point: l.point })
-    renumbered.set(i + 1, lines.length)
-  })
-  for (const s of speakers) {
-    if (lines.some((l) => l.who === s.id)) continue
-    if (raw.exchange.length > 0) fix(`speaker "${s.id}" had no line; gave them one`)
-    if (lines.length < MAX_LINES) lines.push({ who: s.id, answers: 'player', point: s.point ?? '' })
-  }
-  // Counted, not dropped: a line without a point is the filler round 0 found (F2), and a point with quoted words is
-  // the director writing the line itself, which the writer then copies (session 2026-11-07_0013_714e).
-  lines.forEach((l, i) => {
-    if (!l.point.trim()) fix(`line ${i + 1} (${l.who}) has no point`)
-    else if (QUOTED_WORDS.test(l.point)) fix(`line ${i + 1} (${l.who}) quotes dialogue in its point`)
+    const who = l.who?.trim() ? presentId(content, state.scene!, l.who.trim()) : undefined
+    if (entry.knowledge === 'circles') {
+      const c = who ? characterById(content, who) : undefined
+      if (!who || !speakers.has(who) || !c) return fix(`dropped lore line ${n}: insider knowledge needs a speaker who knows it`)
+      if (!knows(content.setting, entry, knowerOf(c))) return fix(`dropped lore line ${n}: ${who} doesn't know ${id}`)
+      return void lines.push({ entry: id, title: entry.title, line: said, who })
+    }
+    if (l.who?.trim() && (!who || !speakers.has(who))) fix(`lore line ${n}: "${l.who.trim()}" isn't a speaker; anyone may use it`)
+    lines.push({ entry: id, title: entry.title, line: said, ...(who && speakers.has(who) && { who }) })
   })
   return lines
+}
+
+/**
+ * The plan once its checks are rolled. A move that needs a check happens only if the check succeeded (round 0,
+ * criterion 5: catching a lie takes the roll); replies to a dropped move answer what it answered. A kept secret's
+ * tell is given to the writer the first time in a scene, or again when someone else's check this turn succeeded
+ * (they were looking closely); otherwise the secret is kept without showing.
+ */
+export function settlePlan(content: Pack, state: GameState, plan: BeatPlan): BeatPlan {
+  const scene = state.scene!
+  const passed = new Set(plan.checks.filter((c) => c.result && c.result.degree !== 'failure').map((c) => c.id))
+  let moves = plan.moves
+  if (moves && moves.some((m) => m.needs && !passed.has(m.needs))) {
+    const keep = moves.map((m) => !m.needs || passed.has(m.needs))
+    const number = new Map<number, number>()
+    moves.forEach((_, i) => keep[i] && number.set(i + 1, number.size + 1))
+    const target = (a: Move['answers']): Move['answers'] => {
+      while (a !== 'player' && !keep[a - 1]) a = moves![a - 1]!.answers
+      return a === 'player' ? 'player' : number.get(a)!
+    }
+    moves = moves.filter((_, i) => keep[i]).map((m) => ({ ...m, answers: target(m.answers) }))
+  }
+  const speakers = plan.speakers.map((s) => {
+    if (!s.kept?.length) return s
+    const secrets = s.kept
+    const watched = plan.checks.some((c) => c.who !== s.id && passed.has(c.id))
+    const first = secrets.some((id) => !scene.tells.includes(id))
+    const tells = (characterById(content, s.id)?.secrets ?? []).filter((x) => secrets.includes(`${s.id}.${x.id}`)).map((x) => x.tell)
+    return (first || watched) && tells.length > 0 ? { ...s, tell: tells.join('; ') } : s
+  })
+  const exchange = moves ? moves.map((m) => ({ who: m.who, answers: m.answers, point: moveText(m) })) : plan.exchange
+  return { ...plan, speakers, ...(moves && { moves }), exchange }
 }
 
 /** Location details not used in the last few turns, so description doesn't repeat. */
@@ -344,16 +395,6 @@ export function freshTexture(content: Pack, scene: Scene, count: number): string
   const pool = fresh.length >= count ? fresh : all
   const start = scene.turns.length % pool.length
   return [...pool.slice(start), ...pool.slice(0, start)].slice(0, count)
-}
-
-/** How many turns since each present character last had a speaking slot (the whole scene if never). */
-export function silence(scene: Scene): Record<string, number> {
-  const result: Record<string, number> = {}
-  for (const id of presentCast(scene)) {
-    const last = scene.turns.findLastIndex((t) => t.speakers.includes(id))
-    result[id] = last < 0 ? scene.turns.length : scene.turns.length - 1 - last
-  }
-  return result
 }
 
 /**
@@ -376,7 +417,6 @@ export function fallbackPlan(content: Pack, state: GameState, input: string): Be
     checks: [],
     walk_ons: [],
     texture: freshTexture(content, scene, 2),
-    contrast: '',
     avoid: [],
     leaves: [],
     end_scene: false

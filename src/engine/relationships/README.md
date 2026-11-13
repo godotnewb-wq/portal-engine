@@ -5,4 +5,4 @@ The end of a scene: one summary call per witness (present or departed), all at o
 **Public API** (`@engine/relationships`): `endScene(pack, state, summarize, now?)` (returns the new state, the reports and a `SceneEndTrace` for the logs), `buildSummaryPrompt`, `parseSummary`, `applySummaries`, `plainSummary`, `addMeters`, `bandOf`, `witnesses`, `transcript`, `WitnessReport`.
 
 **Depends on:** core, rules, characters, pack, state, memory.
-**Design:** `claude/quests-relationships-npcs.md` §1, §3. **Tuning:** the ruleset's `meters`, `wordScale` and `relations`.
+**Design:** `relationships.md` §1. **Tuning:** the ruleset's `meters`, `wordScale` and `relations`.

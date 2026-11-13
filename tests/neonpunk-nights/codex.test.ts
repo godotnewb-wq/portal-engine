@@ -1,17 +1,44 @@
 import { describe, expect, it } from 'vitest'
-import { checkNames, codexWarnings, entryById, locationChain, secretLeaks } from '@engine/codex'
+import { canonNames, checkNames, codexWarnings, triggeredEntries, entryById, locationChain } from '@engine/codex'
 import { packNames } from '@engine/scene'
 import { characterById, knowerOf } from '@engine/pack'
 import { content } from './support'
 
-/** How the pack is written, checked here rather than in the engine (claude/lore-injection.md §2.1). */
+/** How the pack is written, checked here rather than in the engine (lore injection.md §2.1). */
 describe('the Neonpunk Nights codex', () => {
   it('loads with no stance words in its prose', () => {
     expect(content.codex.length).toBeGreaterThan(50)
     expect(codexWarnings(content.codex, content.vocabulary)).toEqual([])
   })
 
-  it('says where in claude/lore.md every entry comes from', () => {
+  it('files the old world and event entries as history, background and current (milestone 3.5, task 3)', () => {
+    const of = (kind: string) => content.codex.filter((e) => e.kind === kind).map((e) => e.id).sort()
+    expect(of('history')).toEqual(['history.the-aether-arts', 'history.the-burn', 'history.the-old-world'])
+    expect(of('background')).toEqual(['background.galactic-society', 'background.the-current-day', 'background.the-korrath', 'background.the-stillness'])
+    expect(of('current')).toHaveLength(5)
+    expect(entryById(content.codex, 'background.the-stillness')?.label).toBe('The Stillness')
+    expect(content.codex).toHaveLength(85)
+  })
+
+  it('names Faeworld, and leaves topics and the two plural categories unnamed (milestone 3.5, task 4)', () => {
+    const list = canonNames(content.codex)
+    expect(list).toContain('Faeworld')
+    for (const not of ['Faeworld today', 'Galactic society', 'The old world', 'The refugee networks', 'The Low Turns syndicates', 'the networks', 'the syndicates']) expect(list).not.toContain(not)
+    // The categories still bring up their lore.
+    const hit = (t: string) => triggeredEntries(content.codex, [t], []).map((e) => e.id)
+    expect(hit('the syndicates own those stairs')).toContain('faction.low-turns-syndicates')
+    expect(hit('ask the networks')).toContain('faction.refugee-networks')
+  })
+
+  it('has the Coil Line as a name of its own, which brings up its entry rather than car 14 (milestone 3.5, task 4)', () => {
+    expect(canonNames(content.codex)).toContain('The Coil Line')
+    const hit = triggeredEntries(content.codex, ['Is the Coil Line running tonight?'], []).map((e) => e.id)
+    expect(hit).toContain('concept.the-coil-line')
+    expect(hit).not.toContain('location.bulk.kilnworks.coil-line-car-14')
+    expect(entryById(content.codex, 'location.bulk.kilnworks.coil-line-car-14')?.related).toContain('concept.the-coil-line')
+  })
+
+  it('says where in lore.md every entry comes from', () => {
     expect(content.codex.filter((e) => !e.source).map((e) => e.file)).toEqual([])
   })
 
@@ -37,7 +64,7 @@ describe('the Neonpunk Nights codex', () => {
       ['coil-line-car-14', 'location.bulk.kilnworks'],
       ['sump-lantern', 'location.low-turns.ninth-turn']
     ])
-    expect(locationChain(content.codex, 'location.low-turns.ninth-turn.sump-lantern').map((e) => e.name)).toEqual(['The Sump Lantern', 'The Ninth Turn', 'The Low Turns'])
+    expect(locationChain(content.codex, 'location.low-turns.ninth-turn.sump-lantern').map((e) => e.title)).toEqual(['The Sump Lantern', 'The Ninth Turn', 'The Low Turns'])
   })
 
   it('keeps the reclamation and Sarrant’s money secret, and the load-shedding to Grid staff and Couriers', () => {
@@ -65,7 +92,7 @@ describe('the Neonpunk Nights codex', () => {
   })
 })
 
-describe('the Neonpunk Nights lore layers (the worked example, claude/lore-injection.md §12)', () => {
+describe('the Neonpunk Nights lore layers (the worked example, lore injection.md §12)', () => {
   it('at the Sump Lantern: the place, the Ninth Turn and the Low Turns, the Couriers for Vex, and the peoples present', async () => {
     const { createInitialState, startScene } = await import('@engine/state')
     const { turnLore } = await import('@engine/scene')
@@ -121,6 +148,27 @@ describe('the name check on Neonpunk prose', () => {
     expect(names('A Grid Corp van idled outside the Wheel Clinic while the Saints watched the Lower Stairs.')).toEqual([])
     expect(names("House Sarrant's people met the Wardens of the Ninth Turn at Pump Station Nine.")).toEqual([])
     expect(names('The Low Turns Ward Office was shut. Behind Kettle Court, Coil Line Car 14 waited.')).toEqual([])
+    // Found in the milestone 3.5 baseline bench: the possessive used to split this canon name and flag it.
+    expect(names("Close enough to Glassblowers' Row you'll pass it.")).toEqual([])
+    expect(names('The Abbess sent word to the Korrath elders; nobody here studies the Aether Arts.')).toEqual([])
+  })
+
+  it('knows the names that only keywords used to supply, and drops keywords that were never names (milestone 3.5)', () => {
+    expect(names('The Abess wants her tithe, and a Korath elder heard it.')).toEqual(['The Abess → The Abbess', 'Korath → The Korrath'])
+    const index = packNames(content)
+    for (const not of ['Grid bills', 'Aether sickness', 'the Wheel market']) expect(index.written).not.toContain(not)
+  })
+
+  it('gives the writer labels only: no topic titles (milestone 3.5)', () => {
+    const list = canonNames(content.codex)
+    expect(list).toEqual(expect.arrayContaining(['The Lattice', 'The Aether', 'Cinders', 'The Korrath', 'The Aether Arts', 'The Abbess']))
+    for (const not of ['Aether in the body', 'Street slang', 'How each tier lives', 'Body augmentation']) expect(list).not.toContain(not)
+  })
+
+  it('catches group names made up from the plural categories’ words (milestone 3.5, task 4)', () => {
+    expect(names('The Refugee Council sent food.')).toEqual(['new: The Refugee Council'])
+    expect(names('A runner from the Ninth Turn Syndicate waited.')).not.toEqual([])
+    expect(names('The refugee networks run the kitchens, and the syndicates run the stairs.')).toEqual([])
   })
 
   it('flags near misses with the right name, and new groups', () => {
@@ -133,11 +181,6 @@ describe('the name check on Neonpunk prose', () => {
     const prose = [...content.codex.flatMap((e) => [e.summary, e.full]), ...content.locations.map((l) => l.description)]
     expect(prose.flatMap(names)).toEqual([])
   })
-
-  it('sees a codex secret named in prose', () => {
-    const secret = content.codex.find((e) => e.knowledge === 'secret')!
-    expect(secretLeaks(`They spoke of ${secret.name.toLowerCase()} in whispers.`, content.codex).map((l) => l.entry.id)).toContain(secret.id)
-  })
 })
 
 describe('Oria’s linked secret', () => {
@@ -148,12 +191,6 @@ describe('Oria’s linked secret', () => {
     expect(linked.text).toMatch(/^Oria's part: she is fetching the sealed case for the Grid\. The sealed case /)
     expect(linked.text).toMatch(/How Oria feels about it: doesn[’']t want to know .*anyway\.$/)
     expect(knowerOf(oria).holds).toEqual(['faction.aether-grid-corporation.control-core'])
-  })
-
-  it('lets her slip about the core while she guards it, and cuts it otherwise', () => {
-    const line = 'Oria lets it drop: the control core is in there.'
-    expect(secretLeaks(line, content.codex).map((l) => l.entry.id)).toEqual(['faction.aether-grid-corporation.control-core'])
-    expect(secretLeaks(line, content.codex, new Set(['faction.aether-grid-corporation.control-core']))).toEqual([])
   })
 
   it('leaves the reclamation itself held by nobody', () => {

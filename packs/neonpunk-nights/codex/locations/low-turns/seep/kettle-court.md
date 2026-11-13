@@ -1,5 +1,6 @@
 ---
-name: Kettle Court
+title: Kettle Court
+label: Kettle Court
 kind: location
 keywords: [the job board]
 summary: Shared housing around a refugee kitchen where anyone can eat once a day.

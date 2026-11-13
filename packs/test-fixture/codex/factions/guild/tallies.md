@@ -1,5 +1,5 @@
 ---
-name: How the tallies work
+title: How the tallies work
 kind: faction
 keywords: [tallies, tally]
 summary: The tallies are rounded in the Guild's favor.

@@ -81,6 +81,8 @@
     {
       "id": "client-is-grid-corporation",
       "text": "The 'private client' is the Aether Grid Corporation, and she owes them; this job pays down her debt.",
+      "summary": "Her private client is the Grid, and she owes them.",
+      "keywords": ["client", "who's paying", "debt", "owe"],
       "tell": "Becomes over-formal and calls people 'darling' when lying",
       "revealWhen": "she is caught lying and pressed, or offered something worth more than the debt"
     },

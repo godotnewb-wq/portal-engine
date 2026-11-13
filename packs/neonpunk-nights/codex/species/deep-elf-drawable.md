@@ -1,5 +1,5 @@
 ---
-name: Deep elf looks
+title: Deep elf looks
 kind: species-drawable
 summary: Long ears, reflective eyes, glowing markings.
 source: Peoples > The Fae (native to Faeworld) > Light elves and deep elves

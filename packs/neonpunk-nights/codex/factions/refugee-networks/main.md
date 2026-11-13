@@ -1,8 +1,7 @@
 ---
-name: The refugee networks
+title: The refugee networks
 kind: faction
-aliases: [the networks]
-keywords: [refugee, refugees, mutual aid]
+keywords: [the networks, refugee, refugees, mutual aid]
 summary: Mutual-aid circles that house, feed and find work for refugees.
 stage: The refugee networks are mutual-aid circles that house and feed the city’s refugees.
 source: Factions > The factions in depth > The refugee networks

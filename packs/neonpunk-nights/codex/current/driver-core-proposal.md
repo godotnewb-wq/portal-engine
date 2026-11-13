@@ -1,6 +1,6 @@
 ---
-name: The driver-core proposal
-kind: event
+title: The driver-core proposal
+kind: current
 keywords: [replace conductors, conductors]
 summary: The transit office wants driver cores in place of conductors.
 related: [faction.off-world-houses.house-sarrant]

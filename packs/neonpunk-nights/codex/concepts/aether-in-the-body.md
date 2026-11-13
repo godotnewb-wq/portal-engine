@@ -1,5 +1,5 @@
 ---
-name: Aether in the body
+title: Aether in the body
 kind: concept
 keywords: [Aether sickness, Aether-sick, grid-sick, tolerance, potential]
 summary: Everyone raised here carries Aether; bodies differ in how much they can hold.

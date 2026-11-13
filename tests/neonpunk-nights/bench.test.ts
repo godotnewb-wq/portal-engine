@@ -7,6 +7,7 @@ import { content, PACK_DIR } from './support'
 import { SettingsSchema } from '@llm'
 import { benchSettings, modelsOf } from '../../tools/bench/config'
 import { compareRuns, renderReport, stats } from '../../tools/bench/report'
+import { comparability, fingerprint, roleSettings } from '../../tools/bench/inputs'
 import { callsOf, mockLlm, readRun, runBench, runScenario, writeRun, type BenchLlm } from '../../tools/bench/run'
 import { loadScenarios, scenarioProblems, scenarioState, ScenarioSchema } from '../../tools/bench/scenario'
 
@@ -161,5 +162,67 @@ describe('benchSettings', () => {
     expect(settings.writer).toMatchObject({ baseUrl: 'http://x/v1', apiKey: 'k', model: 'strong' })
     expect(modelsOf(settings)).toEqual({ director: 'fast', writer: 'strong', summary: 'strong' })
     expect(modelsOf(SettingsSchema.parse({}))).toEqual({ director: '(none)', writer: '(none)', summary: '(none)' })
+  })
+})
+
+// Milestone 3.6, task 7 (code review P2): a run records what it was given, and a comparison matches inputs.
+describe('run inputs and comparability', () => {
+  const two = scenarios.slice(0, 2)
+  const run = (label: string, over: Parameters<typeof runBench>[5] = {}, list = two) => runBench(content, list, mockLlm(), label, { all: 'mock' }, over)
+
+  it('records the pack and scenario fingerprints, the names as the pack had them, and the source when given', async () => {
+    const bench = await run('A', { source: { commit: 'abc1234def', dirty: true } })
+    expect(bench.inputs).toMatchObject({ source: { commit: 'abc1234def', dirty: true }, pack: fingerprint(content), roles: {} })
+    expect(Object.keys(bench.inputs!.scenarios)).toEqual(['deception-caught', 'deception-uncaught'])
+    expect(bench.inputs!.names).toMatchObject({ vex: 'Vex', 'oria-senn': 'Oria', bartender: 'Dunmar' })
+    expect(renderReport(content, bench)).toContain('Inputs: source `abc1234` with uncommitted changes, pack content `' + fingerprint(content) + '`.')
+    // Line ends don't change a fingerprint.
+    expect(fingerprint({ text: 'a\r\nb' })).toBe(fingerprint({ text: 'a\nb' }))
+  })
+
+  it('keeps role settings without the key, and with only the endpoint’s host', () => {
+    const settings = benchSettings(undefined, { BENCH_BASE_URL: 'https://api.example.com/v1', BENCH_API_KEY: 'secret', BENCH_MODEL: 'strong' })
+    const roles = roleSettings(settings, ['director', 'writer'])
+    expect(roles['writer']).toMatchObject({ profile: 'writer', host: 'api.example.com', model: 'strong' })
+    expect(JSON.stringify(roles)).not.toMatch(/secret|baseUrl|apiKey/)
+  })
+
+  it('matches every play of two runs with the same inputs, and reports no differences', async () => {
+    const c = comparability(await run('A'), await run('B'))
+    expect(c).toMatchObject({ differences: [], left: [], unknown: [] })
+    expect(c.matched.map(([a, b]) => [a.id, b.id])).toEqual([['deception-caught', 'deception-caught'], ['deception-uncaught', 'deception-uncaught']])
+  })
+
+  it('leaves out a scenario whose content changed, a play only one run has, and says what differs', async () => {
+    const changed = [two[0]!, { ...two[1]!, turns: [...two[1]!.turns.slice(0, 2), 'Something else entirely.'] }]
+    const a = await run('A', { repeat: 1 })
+    const b = await run('B', { repeat: 2, loreBudgets: { loreLines: 1 } }, changed)
+    const c = comparability(a, b)
+    expect(c.matched.map(([x]) => x.id)).toEqual(['deception-caught'])
+    expect(c.left).toEqual(['deception-uncaught #1 (seed 11): the scenario changed between the runs', 'deception-caught #2 (seed 12): only in B', 'deception-uncaught #2 (seed 12): only in B'])
+    expect(c.differences).toEqual(expect.arrayContaining(['repeats: A `1`, B `2`', 'lore budgets: A `{"scene":1200,"triggered":800,"lines":3}`, B `{"scene":1200,"triggered":800,"lines":1}`', 'scenario deception-uncaught: its content differs']))
+    const md = compareRuns(content, a, b)
+    expect(md).toMatch(/## What differs between the runs\n\n- /)
+    expect(md).toContain('Compared: 1 matching scenario plays. Left out of the shared metrics (3 of 6 plays):')
+    expect(md).toContain('## Metrics (matching scenario plays)')
+  })
+
+  it('flags a run with no recorded inputs and matches it on scenario, repeat and seed alone', async () => {
+    const { inputs: _gone, ...old } = await run('old')
+    const c = comparability(old, await run('new'))
+    expect(c.unknown).toEqual(['A'])
+    expect(c.matched).toHaveLength(2)
+    expect(compareRuns(content, old, await run('new'))).toContain('⚠ Run A recorded no inputs')
+  })
+
+  it('names people as each run recorded them, not from the pack loaded now', async () => {
+    const a = await run('A', {}, [two[0]!])
+    const b = await run('B', {}, [two[0]!])
+    b.inputs!.names['oria-senn'] = 'Oriana'
+    const md = compareRuns(content, a, b)
+    const turn = md.split('### Turn 1')[1]!.split('\n\n### ')[0]!
+    const [colA, colB] = turn.split('\n').find((l) => l.startsWith('| ') && !l.startsWith('| A |'))!.split(' | ')
+    expect(colA).toContain('**Oria:**')
+    expect(colB).toContain('**Oriana:**')
   })
 })

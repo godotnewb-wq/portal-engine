@@ -1,5 +1,6 @@
 ---
-name: The Spire Council
+title: The Spire Council
+label: The Spire Council
 kind: faction
 aliases: [the Council]
 keywords: [Ward Office, Wardens, warden]

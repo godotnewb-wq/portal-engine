@@ -87,11 +87,16 @@ export const RulesetSchema = z.object({
   /**
    * How hard a character's aim for the scene presses on them, weakest first (e.g. "idle", "keen", "driven"). The
    * director picks a word each turn; the weakest keeps the aim out of the writer's brief, the strongest makes it
-   * what drives them (claude/scene-system-redesign.md §5.3).
+   * what drives them (scene system redesign.md §5.3).
    */
   pressures: z.array(z.string().min(1)).min(2),
   /**
-   * Codex tuning (claude/lore-injection.md §4–5): the most words an entry's full text may have, the rough token
+   * Lines the game narrates itself, in the pack's words, with `{name}` for a character's first name. `departure`: a
+   * planned departure the turn's kept prose doesn't show (milestone 3.6, task 6a), so nobody vanishes without a word.
+   */
+  narration: z.object({ departure: z.string().min(1) }),
+  /**
+   * Codex tuning (lore injection.md §4–5): the most words an entry's full text may have, the rough token
    * budgets for the scene-scoped and triggered layers, and the most lore lines the director may give the writer a
    * turn (generous starting points, tuned from the bench). The player can override the budgets in Settings
    * (`loreBudgets`); these are the pack's defaults.
@@ -101,9 +106,17 @@ export const RulesetSchema = z.object({
       fullWords: z.number().int().positive().default(120),
       sceneTokens: z.number().int().min(0).default(1200),
       triggeredTokens: z.number().int().min(0).default(800),
-      loreLines: z.number().int().min(0).default(3)
+      loreLines: z.number().int().min(0).default(3),
+      /**
+       * Per character, the extra estimated tokens the director's sheet may spend showing secrets in full rather than as
+       * short cues: one budget for secrets linked to the codex, one for personal secrets (lore injection.md §7.1).
+       */
+      linkedSecretTokens: z.number().int().min(0).default(200),
+      personalSecretTokens: z.number().int().min(0).default(100),
+      /** An authored character starting with more secrets than this gets an authoring warning. */
+      startingSecrets: z.number().int().min(0).default(3)
     })
-    .default({ fullWords: 120, sceneTokens: 1200, triggeredTokens: 800, loreLines: 3 })
+    .default({ fullWords: 120, sceneTokens: 1200, triggeredTokens: 800, loreLines: 3, linkedSecretTokens: 200, personalSecretTokens: 100, startingSecrets: 3 })
 })
 export type Ruleset = z.infer<typeof RulesetSchema>
 
@@ -130,6 +143,7 @@ export function rulesetProblems(r: Ruleset): string[] {
   }
   if (!r.wordScale.some((w) => w.value === 0)) problems.push('the word scale needs a word worth 0 (no change)')
   if (r.attributes.min > r.attributes.max) problems.push('attributes.min is above attributes.max')
+  if (!r.narration.departure.includes('{name}')) problems.push('narration.departure needs {name}, for who leaves')
   return problems
 }
 

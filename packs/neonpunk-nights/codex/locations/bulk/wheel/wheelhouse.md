@@ -1,5 +1,6 @@
 ---
-name: The Wheelhouse
+title: The Wheelhouse
+label: The Wheelhouse
 kind: location
 keywords: [the route board]
 summary: The Couriers’ Bulk dispatch office in the turntable’s old control house.

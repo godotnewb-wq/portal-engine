@@ -1,8 +1,9 @@
 import type { Beat, GameState, RolledCheck, Turn } from '@engine/state'
 import type { Tags } from './beats'
-import type { Pack } from '@engine/pack'
+import { characterById, type Pack } from '@engine/pack'
+import { firstName } from '@engine/core'
 import { RECENT_TURNS, turnText } from './director'
-import { presentCast, type BeatPlan } from './plan'
+import { presentCast, type BeatPlan } from './planShape'
 
 /** In-game minutes a turn of talk takes (tune). */
 export const MINUTES_PER_TURN = 3
@@ -28,9 +29,69 @@ export function rolledChecks(plan: BeatPlan): RolledCheck[] {
   )
 }
 
+const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+
+/** The cast who appear in these beats: a line of their own, or narration that names them. */
+export function appearing(content: Pack, beats: Beat[]): Set<string> {
+  const ids = new Set<string>()
+  for (const b of beats) if (b.kind === 'dialogue') ids.add(b.speaker)
+  const narration = beats.flatMap((b) => (b.kind === 'narration' ? [b.text] : [])).join('\n')
+  for (const c of content.characters) {
+    if (new RegExp(`\\b(?:${[c.name, firstName(c.name)].map(escape).join('|')})\\b`, 'i').test(narration)) ids.add(c.id)
+  }
+  return ids
+}
+
 /**
- * Applies a finished turn to the state. Tags only touch characters who are present, a departure the plan didn't call
- * for still happens if the writer tagged it (people may walk out), but only the plan can end the scene.
+ * Which of the writer's tags count (milestone 3.6, task 6; decided 2026-11-12). Departures come only from the plan:
+ * a `[LEAVES: Name]` tag moves no one, and one for someone the plan didn't send away is reported. When salvage cut
+ * every beat a character appeared in, their `EXPRESSION`, `MOOD` and `COMFORT` tags are dropped too: they describe
+ * prose the player never sees. Tags about someone who was never in the prose apply as on any turn. `[END SCENE]` has
+ * no effect either way: only the plan ends a scene. Returns the tags to apply and each one set aside, with why.
+ */
+export function acceptTags(content: Pack, plan: BeatPlan, tags: Tags, written: Beat[], kept: Beat[]): { tags: Tags; rejected: string[] } {
+  const name = (id: string) => firstName(characterById(content, id)?.name ?? id)
+  const rejected: string[] = []
+  for (const id of tags.leaves) if (!plan.leaves.includes(id)) rejected.push(`[LEAVES: ${name(id)}] (not in the plan)`)
+  const shown = appearing(content, kept)
+  const cut = new Set([...appearing(content, written)].filter((id) => !shown.has(id)))
+  const keep = <T>(kind: string, record: Record<string, T>, text: (value: T) => string) =>
+    Object.fromEntries(
+      Object.entries(record).filter(([id, value]) => {
+        if (!cut.has(id)) return true
+        rejected.push(`[${name(id)}: ${kind} ${text(value)}] (salvage cut their lines)`)
+        return false
+      })
+    )
+  return {
+    tags: {
+      expressions: keep('EXPRESSION', tags.expressions, (v) => v),
+      moods: keep('MOOD', tags.moods, (v) => v),
+      comfort: keep('COMFORT', tags.comfort, (v) => `${v.level} ${v.reason}`.trim()),
+      leaves: tags.leaves.filter((id) => plan.leaves.includes(id)),
+      ended: tags.ended
+    },
+    rejected
+  }
+}
+
+/**
+ * A planned departure the kept prose doesn't show gets one narration beat in the pack's words (the ruleset's
+ * `narration.departure`), so a character never vanishes without a word on screen (milestone 3.6, task 6a). "Shows"
+ * can only mean the character is in the kept beats, with a line or named in narration: code can't tell whether the
+ * prose has them walk out, which is why the writer is told who leaves.
+ */
+export function showDepartures(content: Pack, plan: BeatPlan, beats: Beat[]): { beats: Beat[]; added: { id: string; beat: Beat }[] } {
+  const shown = appearing(content, beats)
+  const added = plan.leaves
+    .filter((id) => !shown.has(id))
+    .map((id) => ({ id, beat: { kind: 'narration' as const, text: content.ruleset.narration.departure.replaceAll('{name}', firstName(characterById(content, id)?.name ?? id)) } }))
+  return { beats: [...beats, ...added.map((a) => a.beat)], added }
+}
+
+/**
+ * Applies a finished turn to the state. Tags only touch characters who are present; departures and the scene's end
+ * come from the plan alone (see `acceptTags` for which tags count).
  */
 export function applyTurn(content: Pack, state: GameState, written: TurnWritten): GameState {
   const scene = state.scene
@@ -47,9 +108,11 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
     speakers: written.plan.speakers.map((s) => s.id),
     texture: written.plan.texture
   }
+  const kept = written.plan.speakers.flatMap((s) => s.kept ?? [])
+  if (kept.length > 0) turn.kept = kept
   const plannedMoods = Object.fromEntries(written.plan.speakers.filter((s) => s.mood.trim()).map((s) => [s.id, s.mood]))
   const comfort = Object.fromEntries(Object.entries(only(written.tags.comfort)).map(([id, c]) => [id, c.level]))
-  const leaving = [...new Set([...written.plan.leaves, ...written.tags.leaves])].filter((id) => present.has(id))
+  const leaving = [...new Set(written.plan.leaves)].filter((id) => present.has(id))
 
   // The turn that drops out of the prompts' verbatim window goes into the running summary.
   const turns = [...scene.turns, turn]

@@ -1,5 +1,5 @@
 ---
-name: Human culture
+title: Human culture
 kind: species-culture
 keywords: [humans]
 summary: The most numerous people, in every tier.

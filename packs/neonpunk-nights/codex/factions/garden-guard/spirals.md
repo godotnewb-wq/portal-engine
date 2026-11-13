@@ -1,5 +1,5 @@
 ---
-name: What the spirals mean
+title: What the spirals mean
 kind: faction
 keywords: [the spirals]
 summary: A spiral on a door marks a place the Grid has surveyed.

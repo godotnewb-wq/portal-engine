@@ -83,5 +83,6 @@
     ],
     "otherwise": "acquaintances"
   },
-  "pressures": ["background", "pressing", "urgent"]
+  "pressures": ["background", "pressing", "urgent"],
+  "narration": { "departure": "{name} leaves." }
 }

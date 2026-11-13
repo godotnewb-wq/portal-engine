@@ -1,5 +1,5 @@
 ---
-name: The back door
+title: The back door
 kind: faction
 keywords: [back door]
 summary: The Night Shift lets carts in through the back.

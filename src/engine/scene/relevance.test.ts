@@ -3,17 +3,17 @@ import type { CheckResult } from '@engine/rules'
 import type { GameState, Turn } from '@engine/state'
 import { fixture, yardScene } from '@tests/fixture'
 import { parseReply } from './beats'
-import type { BeatPlan } from './plan'
-import { parsePlan2, settlePlan2, validatePlan2 } from './plan2'
+import type { BeatPlan } from './planShape'
+import { parsePlan, settlePlan, validatePlan } from './plan'
 import { recentlyUsed, repeatProblems, usageOf } from './repeats'
 import { applyTurn } from './turn'
 import { sceneSpeakers } from './writer'
-import { buildWriter2Prompt } from './writer2'
+import { buildWriterPrompt } from './writer'
 
-// Redesign step 2 (claude/scene-system-redesign.md §5): what is live each turn, and how strongly.
+// Redesign step 2 (scene system redesign.md §5): what is live each turn, and how strongly.
 const ASK = 'Tobin, who came by?'
 const plan = (speakers: object[], over: object = {}) =>
-  parsePlan2(
+  parsePlan(
     JSON.stringify({
       player_action: { doing: 'asks Tobin who came by', uncertain: false },
       speakers,
@@ -31,22 +31,22 @@ const withScene = (state: GameState, over: Partial<NonNullable<GameState['scene'
 
 describe('secrets are live only when something just said touches them', () => {
   it('keeps a secret when its trigger is in the player’s words', () => {
-    const { plan: p, corrections } = validatePlan2(fixture, yardScene(), plan([tobin(), mara()]), ASK)
+    const { plan: p, corrections } = validatePlan(fixture, yardScene(), plan([tobin(), mara()]), ASK)
     expect(p.speakers[0]).toMatchObject({ kept: ['tobin.after-closing'], approach: 'deflect' })
     expect(corrections).toEqual([])
   })
 
   it('drops it when nothing said touches it, or when no trigger is named', () => {
-    const elsewhere = validatePlan2(fixture, yardScene(), plan([tobin({ touched: 'the broken cart' }), mara()]), 'Nice evening.')
+    const elsewhere = validatePlan(fixture, yardScene(), plan([tobin({ touched: 'the broken cart' }), mara()]), 'Nice evening.')
     expect(elsewhere.plan.speakers[0]!.hiding).toBeUndefined()
     expect(elsewhere.corrections).toContain('tobin\'s secret isn\'t in play: "the broken cart" isn\'t in what was just said')
-    const unnamed = validatePlan2(fixture, yardScene(), plan([tobin({ touched: '' }), mara()]), ASK)
+    const unnamed = validatePlan(fixture, yardScene(), plan([tobin({ touched: '' }), mara()]), ASK)
     expect(unnamed.plan.speakers[0]!.hiding).toBeUndefined()
     expect(unnamed.corrections).toContain("tobin's secret isn't in play: nothing named touches it")
   })
 
   it('only lets a character keep their own secrets', () => {
-    const { plan: p, corrections } = validatePlan2(fixture, yardScene(), plan([tobin({ keeps: ['mara.two-books'] }), mara()]), ASK)
+    const { plan: p, corrections } = validatePlan(fixture, yardScene(), plan([tobin({ keeps: ['mara.two-books'] }), mara()]), ASK)
     expect(p.speakers[0]!.hiding).toBeUndefined()
     expect(corrections).toContain("tobin keeps something that isn't one of their secrets")
   })
@@ -55,10 +55,10 @@ describe('secrets are live only when something just said touches them', () => {
 describe('an aim’s pressure', () => {
   it('moves at most one step a turn, and only presses into the writer’s brief above the weakest word', () => {
     const state = withScene(yardScene(), { pressures: { tobin: 0 } })
-    const { plan: p, corrections } = validatePlan2(fixture, state, plan([tobin({ pressure: 'driven', keeps: [] }), mara({ pressure: 'idle' })]), ASK)
+    const { plan: p, corrections } = validatePlan(fixture, state, plan([tobin({ pressure: 'driven', keeps: [] }), mara({ pressure: 'idle' })]), ASK)
     expect(p.speakers.map((s) => s.pressure)).toEqual(['keen', 'idle'])
     expect(corrections).toContain("tobin's pressure moved one step, to keen")
-    const brief = buildWriter2Prompt(fixture, state, p, ASK).user
+    const brief = buildWriterPrompt(fixture, state, p, ASK).user
     expect(brief).toMatch(/- Tobin: in this exchange, get it dropped\. Mood: uneasy\. Tonight's aim is on their mind and may come up if it fits: Keep anyone from asking about last night\./)
     expect(brief).toMatch(/- Mara: in this exchange, catch him out\. Mood: sharp\.\n/)
     const next = applyTurn(fixture, state, { id: 't1', input: ASK, plan: p, beats: [], tags: parseReply('', []).tags, dice: state.dice })
@@ -66,7 +66,7 @@ describe('an aim’s pressure', () => {
   })
 
   it('names an unknown word and keeps the last level', () => {
-    const { plan: p, corrections } = validatePlan2(fixture, withScene(yardScene(), { pressures: { mara: 2 } }), plan([mara({ pressure: 'frantic' })], { moves: [] }), ASK)
+    const { plan: p, corrections } = validatePlan(fixture, withScene(yardScene(), { pressures: { mara: 2 } }), plan([mara({ pressure: 'frantic' })], { moves: [] }), ASK)
     expect(p.speakers[0]!.pressure).toBe('driven')
     expect(corrections).toContain('mara: no pressure word "frantic"')
   })
@@ -82,8 +82,8 @@ describe('seeing through a secret takes the roll (criterion 5)', () => {
         { who: 'tobin', answers: 2, move: 'refuse', uses: [] }
       ]
     })
-    const { plan: p } = validatePlan2(fixture, state, raw, ASK)
-    return settlePlan2(fixture, state, { ...p, checks: p.checks.map((c) => ({ ...c, result: rolled(degree) })) })
+    const { plan: p } = validatePlan(fixture, state, raw, ASK)
+    return settlePlan(fixture, state, { ...p, checks: p.checks.map((c) => ({ ...c, result: rolled(degree) })) })
   }
 
   it('drops the move that needs a failed check, and its reply answers what it answered', () => {
@@ -91,19 +91,46 @@ describe('seeing through a secret takes the roll (criterion 5)', () => {
     expect(failed.moves!.map((m) => [m.who, m.answers])).toEqual([['tobin', 'player'], ['tobin', 1]])
     const passed = caught(yardScene(), 'success')
     expect(passed.moves!.map((m) => [m.who, m.answers, m.needs])).toEqual([['tobin', 'player', undefined], ['mara', 1, 'read'], ['tobin', 2, undefined]])
-    expect(buildWriter2Prompt(fixture, yardScene(), passed, ASK).user).toMatch(/2\. Mara, answering 1 \(Tobin\): push back \(may draw on: he is hiding something \[new to the player\]\) \(the check succeeded\)/)
+    expect(buildWriterPrompt(fixture, yardScene(), passed, ASK).user).toMatch(/2\. Mara, answering 1 \(Tobin\): push back \(may draw on: he is hiding something \[new to the player\]\) \(the check succeeded\)/)
+  })
+
+  // Milestone 3.6 code review, P1: a move gated on a check that can't be resolved used to happen unconditionally.
+  it('drops a move gated on a check that is missing or was dropped, and its reply answers what it answered', () => {
+    const gated = (needs: string, extra: object = {}) =>
+      validatePlan(fixture, yardScene(), plan([tobin(), mara()], {
+        checks: [{ id: 'read', who: 'mara', skill: 'notice', difficulty: 'tough', stakes: 'sees Tobin is hiding something' }],
+        moves: [
+          { who: 'tobin', answers: 'player', move: 'dodge', uses: [] },
+          { who: 'mara', answers: 1, move: 'push back', uses: [], new: ['he is hiding something'], needs },
+          { who: 'tobin', answers: 2, move: 'refuse', uses: [] }
+        ],
+        ...extra
+      }), ASK)
+    const missing = gated('read-pell')
+    expect(missing.plan.moves!.map((m) => [m.who, m.answers, m.needs])).toEqual([['tobin', 'player', undefined], ['tobin', 1, undefined]])
+    expect(missing.plan.exchange.map((l) => l.who)).toEqual(['tobin', 'tobin'])
+    expect(missing.corrections).toContain('dropped move 2: it needs check "read-pell", which isn\'t in the plan')
+    // A check validation removed: an unknown skill, and a player check on an action that isn't in doubt.
+    const unknownSkill = gated('read', { checks: [{ id: 'read', who: 'mara', skill: 'mind reading', difficulty: 'tough', stakes: '' }] })
+    expect(unknownSkill.plan.moves!.map((m) => m.who)).toEqual(['tobin', 'tobin'])
+    expect(unknownSkill.corrections).toEqual(expect.arrayContaining(['dropped check "read": no skill "mind reading"', 'dropped move 2: it needs check "read", which isn\'t in the plan']))
+    const playerCheck = gated('talked', { checks: [{ id: 'talked', who: 'player', skill: 'talk', difficulty: 'tough', stakes: '' }] })
+    expect(playerCheck.plan.checks).toEqual([])
+    expect(playerCheck.plan.moves!.map((m) => m.who)).toEqual(['tobin', 'tobin'])
+    // A check that exists keeps its gate: settlePlan decides once it is rolled (above).
+    expect(gated('read').plan.moves!.map((m) => [m.who, m.needs])).toEqual([['tobin', undefined], ['mara', 'read'], ['tobin', undefined]])
   })
 
   it('shows a kept secret’s tell the first time, then again only when someone else’s check succeeds', () => {
     const state = yardScene()
-    const { plan: first } = validatePlan2(fixture, state, plan([tobin(), mara()]), ASK)
-    const settled = settlePlan2(fixture, state, first)
+    const { plan: first } = validatePlan(fixture, state, plan([tobin(), mara()]), ASK)
+    const settled = settlePlan(fixture, state, first)
     expect(settled.speakers[0]!.tell).toBe('Hums')
     const after = applyTurn(fixture, state, { id: 't1', input: ASK, plan: settled, beats: [], tags: parseReply('', []).tags, dice: state.dice })
     expect(after.scene!.tells).toEqual(['tobin.after-closing'])
-    const { plan: again } = validatePlan2(fixture, after, plan([tobin(), mara()]), ASK)
-    expect(settlePlan2(fixture, after, again).speakers[0]!.tell).toBeUndefined()
-    expect(buildWriter2Prompt(fixture, after, settlePlan2(fixture, after, again), ASK).user).toMatch(/Keeping to themselves: Tobin let someone into the yard after closing\. \(deflect\)\. It doesn't show\./)
+    const { plan: again } = validatePlan(fixture, after, plan([tobin(), mara()]), ASK)
+    expect(settlePlan(fixture, after, again).speakers[0]!.tell).toBeUndefined()
+    expect(buildWriterPrompt(fixture, after, settlePlan(fixture, after, again), ASK).user).toMatch(/Keeping to themselves: Tobin let someone into the yard after closing\. \(deflect\)\. It doesn't show\./)
     expect(caught(after, 'success').speakers[0]!.tell).toBe('Hums')
   })
 })
@@ -116,8 +143,8 @@ describe('the repetition tracker', () => {
 
   it('lists what each character used in the last turns, and gives it to the writer', () => {
     expect(recentlyUsed(fixture, lately.scene!)).toEqual({ mara: { slang: ['by the book'], gestures: [] }, tobin: { slang: [], gestures: ['polishes his plates with a rag'] } })
-    const { plan: p } = validatePlan2(fixture, lately, plan([tobin({ keeps: [] }), mara()]), ASK)
-    expect(buildWriter2Prompt(fixture, lately, p, ASK).user).toMatch(/# Used in the last turns \(don't repeat\)\n- Mara: "by the book"\n- Tobin: polishes his plates with a rag/)
+    const { plan: p } = validatePlan(fixture, lately, plan([tobin({ keeps: [] }), mara()]), ASK)
+    expect(buildWriterPrompt(fixture, lately, p, ASK).user).toMatch(/# Used in the last turns \(don't repeat\)\n- Mara: "by the book"\n- Tobin: polishes his plates with a rag/)
   })
 
   it('lets one repeat through and sends two or more back', () => {

@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { IdSchema } from '@engine/core'
 
-/** A walk-on: one line of each, voiced by the narrator, never given a speaking slot (quests-relationships-npcs §5). */
+/** A walk-on: one line of each, voiced by the narrator, never given a speaking slot (npc design §2). */
 export const SceneCardSchema = z.object({
   id: IdSchema,
   label: z.string(),
@@ -15,7 +15,7 @@ export type SceneCard = z.infer<typeof SceneCardSchema>
 
 /**
  * Specific details the director picks 2–3 of per beat, so description is rooted in the pack's world and not generic
- * fantasy (narrator-scene-engine §8).
+ * fantasy (director writer §8).
  */
 export const TextureCardSchema = z.object({
   sights: z.array(z.string()).min(1),

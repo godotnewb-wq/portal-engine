@@ -1,5 +1,6 @@
 ---
-name: House Sarrant
+title: House Sarrant
+label: House Sarrant
 kind: faction
 aliases: [Sarrant]
 keywords: [driver cores, driver core]

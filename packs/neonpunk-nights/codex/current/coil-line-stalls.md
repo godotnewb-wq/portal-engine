@@ -1,6 +1,6 @@
 ---
-name: The Coil Line stalls
-kind: event
+title: The Coil Line stalls
+kind: current
 keywords: [stalled, stalls]
 summary: The Coil Line has stalled three times this month.
 source: Everyday Spire City > Current tensions

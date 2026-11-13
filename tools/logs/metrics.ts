@@ -134,7 +134,7 @@ export interface Metrics {
     agreement: { both: number; same: number; humanBadMarkedBad: number; humanBad: number; aiBadFlaggedBad: number; aiBad: number }
   }
   /**
-   * Relevance (claude/scene-system-redesign.md §11): how often a speaker keeps a secret, how many lines use slang or
+   * Relevance (scene system redesign.md §11): how often a speaker keeps a secret, how many lines use slang or
    * talk about the speaker's aim, gestures repeated within a scene, and how many characters speak a turn. Rates over
    * logs without usage counts (before redesign step 2) are NaN.
    */

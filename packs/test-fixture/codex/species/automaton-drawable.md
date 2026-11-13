@@ -1,5 +1,5 @@
 ---
-name: Automaton looks
+title: Automaton looks
 kind: species-drawable
 summary: Brass plates and glass eyes.
 ---
