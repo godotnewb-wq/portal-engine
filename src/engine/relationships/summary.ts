@@ -1,6 +1,6 @@
 import { caresAbout, feelingWords, shadeList, type Character, type Meters } from '@engine/characters'
 import { meterWords, type Ruleset } from '@engine/rules'
-import { absenceWords, agoWords, carrying, daysSince, towardName, type GameState, type Memory, type Relation } from '@engine/state'
+import { absenceWords, agoWords, carrying, daysSince, tieWords, towardName, type GameState, type Memory, type Relation } from '@engine/state'
 import { applyCarried, fade, type CarriedReport, type WrittenFeeling } from './aftermath'
 import { characterById, locationById, type Pack } from '@engine/pack'
 import type { Prompt } from '@engine/core'
@@ -97,6 +97,15 @@ function carriedLines(content: Pack, state: GameState, c: Character, others: Cha
   ].filter((x): x is string => !!x)
 }
 
+/** Tie changes this scene that involve them (relationships §3): each is a Core memory, which the summary is told. */
+function tieLines(content: Pack, state: GameState, c: Character): string[] {
+  const events = tieEventsFor(state, c.id)
+  return events.length > 0 ? [`- What changed between people this scene (a Core memory for ${firstName(c.name)}): ${events.map((e) => `${tieWords(content, state, { from: e.from, to: e.to, ...(e.added[0] && { add: e.added[0] }), ...(e.word && { word: e.word }), ...(e.ended[0] && { end: e.ended[0] }), reason: e.reason })}${e.reason ? ` (${e.reason})` : ''}`).join('; ')}.`] : []
+}
+
+/** The scene's tie changes a character is part of, either side. */
+const tieEventsFor = (state: GameState, id: string) => state.scene!.tieEvents.filter((e) => e.from === id || e.to === id)
+
 function about(content: Pack, state: GameState, c: Character, others: Character[]): string {
   const r = content.ruleset
   const me = firstName(c.name)
@@ -117,6 +126,7 @@ function about(content: Pack, state: GameState, c: Character, others: Character[
     ...relations,
     memories.length > 0 && `- Remembers: ${memories.map((m) => m.text).join(' ')}`,
     ...carriedLines(content, state, c, others),
+    ...tieLines(content, state, c),
     `- Mood at the end: ${feelingWords(r, scene.moods[c.id])}; comfort ${scene.comfort[c.id] ?? 3}/5.`,
     ...reads(state, c.id).map((x) => `- ${me} saw through to what ${firstName(others.find((o) => o.id === x.target)?.name ?? x.target)} really felt: ${feelingWords(r, x.feeling)}.`),
     scene.departed.includes(c.id) && `- ${me} left before the scene was over; the memory ends with leaving.`
@@ -272,7 +282,9 @@ export function applySummaries(content: Pack, state: GameState, summaries: { id:
     const learnedSecrets = c.secrets.filter((s) => summary.learned.some((l) => l.toLowerCase() === s.id))
     if (learnedSecrets.length > 0) facts[id] = [...new Set([...(facts[id] ?? []), ...learnedSecrets.map((s) => s.text)])]
 
-    if (summary.memory) memories.push({ owner: id, text: summary.memory, level: summary.level, at: state.time, about: ['player', ...present.filter((x) => x !== id)] })
+    // A tag beginning or ending is a game-forced Core memory for both sides (memory §4; relationships §3), whatever the call chose.
+    const level = tieEventsFor(state, id).length > 0 ? 'core' : summary.level
+    if (summary.memory) memories.push({ owner: id, text: summary.memory, level, at: state.time, about: ['player', ...present.filter((x) => x !== id)] })
 
     const others: WitnessReport['others'] = []
     for (const o of summary.others) {
@@ -288,11 +300,11 @@ export function applySummaries(content: Pack, state: GameState, summaries: { id:
       others.push({ with: other, before: start.meters, after: moved, reason: o.reason })
     }
 
-    const applied = applyCarried(content, state, { aftermath, endedFeelings, meters, relations }, id, summary, scene.id)
+    const applied = applyCarried(content, state, { aftermath, endedFeelings, meters, relations }, id, { ...summary, level }, scene.id)
     ;({ aftermath, endedFeelings, meters, relations } = applied.world)
     // A repeat moved a meter after the summary's words did: the report shows where things ended up.
     const othersAfter = others.map((o) => ({ ...o, after: relations.find((x) => x.from === id && x.to === o.with)?.meters ?? o.after }))
-    reports.push({ id, memory: summary.memory, level: summary.level, reason: summary.reason, before, after: meters[id]!, learned: learnedSecrets.map((s) => s.text), others: othersAfter, carried: applied.report, ...(error && { error }) })
+    reports.push({ id, memory: summary.memory, level, reason: summary.reason, before, after: meters[id]!, learned: learnedSecrets.map((s) => s.text), others: othersAfter, carried: applied.report, ...(error && { error }) })
   }
 
   const lastSeen = { ...state.lastSeen, ...Object.fromEntries(present.map((id) => [id, state.time])) }

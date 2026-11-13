@@ -54,6 +54,36 @@ export const TurnSchema = z.object({
 })
 export type Turn = z.infer<typeof TurnSchema>
 
+/**
+ * A relationship tag change (relationships §3, milestone 4b: `set_tie`): `from` starts holding `add` toward `to` (a
+ * character's id or "player") and/or stops holding `end`, because of something on screen. `word` is how `from` words
+ * the new tag, `backWord` how `to` words its counterpart; `reason` becomes the relationship note.
+ */
+export const TieChangeSchema = z.object({
+  from: IdSchema,
+  to: z.string(),
+  add: z.string().optional(),
+  word: z.string().optional(),
+  backWord: z.string().optional(),
+  end: z.string().optional(),
+  reason: z.string().default('')
+})
+export type TieChange = z.infer<typeof TieChangeSchema>
+
+/** A tie change that happened: the tags each side began and stopped holding (a counterpart, or one dropped at the limit, included). Forces a Core memory for both. */
+export const TieEventSchema = z.object({
+  from: IdSchema,
+  to: z.string(),
+  added: z.array(z.string()).default([]),
+  ended: z.array(z.string()).default([]),
+  /** The word for the tag added, as `from` words it. */
+  word: z.string().optional(),
+  reason: z.string().default(''),
+  /** The turn it happened on. */
+  turn: z.string().optional()
+})
+export type TieEvent = z.infer<typeof TieEventSchema>
+
 /** A scene in progress. Prompts are rebuilt from this every turn, never from a growing chat log. */
 export const SceneSchema = z.object({
   /** Names the scene in logs; turn ids start from it. */
@@ -85,6 +115,12 @@ export const SceneSchema = z.object({
   /** How hard each character's aim presses now, as an index into the ruleset's pressure words; moves a step a turn. */
   pressures: z.record(z.string(), z.number().int().nonnegative()).default({}),
   /** Secrets (fact ids) whose tell the writer has already been given this scene: a tell shows once unless someone looks closely. */
-  tells: z.array(z.string()).default([])
+  tells: z.array(z.string()).default([]),
+  /** Tie changes with the player that wait for the player's answer (an arrangement needs their agreement; relationships §3). */
+  pendingTies: z.array(TieChangeSchema).default([]),
+  /** The player's answers since the last turn, for the director's next prompt; cleared once a turn has used them. */
+  answered: z.array(TieChangeSchema.extend({ accepted: z.boolean() })).default([]),
+  /** Tie changes that happened in the scene (relationships §3): each forces a Core memory for both sides at its end. */
+  tieEvents: z.array(TieEventSchema).default([])
 })
 export type Scene = z.infer<typeof SceneSchema>

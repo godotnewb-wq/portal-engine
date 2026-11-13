@@ -91,6 +91,8 @@ NARRATION: Brask turns his glass in a slow circle. Kesh checks the time.
         { who: 'brask', answers: 1, move: 'warn', uses: ['brask.k5'], new: [] }
       ],
       change: 'The job has a deadline: midnight.',
+      // Oria hires the player: an arrangement with the player, so it waits for their answer (milestone 4b).
+      ties: [{ from: 'oria-senn', to: 'player', add: 'contractor', reason: 'she hires Rook for the pump job' }],
       reactions: [
         { id: 'vex', beat: 'counts something on her fingers' },
         { id: 'kesh', beat: 'stands to leave' }

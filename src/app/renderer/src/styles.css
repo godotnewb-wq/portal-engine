@@ -79,6 +79,8 @@ input, select { background: var(--bg); color: var(--text); border: 1px solid var
 
 .say { display: flex; gap: 0.5rem; }
 .say input { flex: 1; padding: 0.6rem 0.8rem; font-size: 1rem; }
+.say.ask { align-items: center; }
+.say.ask span { flex: 1; }
 
 /* Summary */
 .summary { max-width: 72rem; margin: 0 auto; }

@@ -136,6 +136,7 @@
   },
   "ties": {
     "max": 2,
+    "agreement": ["master", "hand"],
     "groups": [{ "id": "blood", "name": "Blood" }, { "id": "trade", "name": "Trade" }],
     "tags": [
       { "id": "elder", "group": "blood", "counterpart": "younger", "words": ["older sister", "older brother"], "family": true },

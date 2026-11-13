@@ -26,6 +26,10 @@ describe('peopleProblems', () => {
     ])
   })
 
+  it('names only known tags as needing the player’s agreement (milestone 4b)', () => {
+    expect(peopleProblems(P, { ...T, agreement: ['hand', 'spouse'] }, meters)).toEqual(['ties.agreement names unknown tag "spouse"'])
+  })
+
   it('checks how feelings show and are read against the meters, tags, masking and its axis (milestone 4b)', () => {
     const visibility = { ...P.visibility, trustMeter: 'trust', guardedTags: ['enemy'], bands: [{ word: 'hidden', max: 1, shows: 'x' }, { word: 'some', max: 1, shows: 'y' }, { word: 'all', max: 3, shows: 'z' }] }
     const reading = { ...P.reading, difficulty: { bare: 'routine', thin: 'tough', bulky: 'grim' }, harder: ['shut'] }

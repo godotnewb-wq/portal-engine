@@ -75,6 +75,17 @@ describe('what a summary leaves a witness carrying', () => {
   })
 })
 
+describe('a tie change on screen (relationships §3, task 4)', () => {
+  it('makes both sides’ memories Core, whatever the summary chose, and tells the summary what changed', () => {
+    const base = yardScene()
+    const state = { ...base, scene: { ...base.scene!, tieEvents: [{ from: 'mara', to: 'tobin', added: ['hand'], ended: [], word: 'apprentice', reason: 'she takes him on' }] } }
+    expect(buildSummaryPrompt(fixture, state, 'tobin').user).toContain("- What changed between people this scene (a Core memory for Tobin): Tobin becomes Mara's apprentice (she takes him on).")
+    const { state: next, reports } = end(state, summary(state, 'mara', { memory: 'I took Tobin on.', level: 'fleeting' }), summary(state, 'tobin', { memory: 'Mara took me on.', level: 'normal' }))
+    expect(next.memories.map((m) => [m.owner, m.level])).toEqual([['mara', 'core'], ['tobin', 'core']])
+    expect(reports.map((x) => x.level)).toEqual(['core', 'core'])
+  })
+})
+
 describe('the repeat rule', () => {
   const grievance = (state: GameState) => summary(state, 'mara', { toward: [{ who: 'player', shade: 'livid', intensity: 4, reason: 'forgot again' }] })
   const history = (state: GameState, n: number, ago = 10) => ({

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type FormEvent } from 'react'
-import type { GameState, Turn } from '@engine/state'
+import { answerTie, tieQuestion, type GameState, type Turn } from '@engine/state'
 import { flagKey, type Flag, type FlagRecord } from '@engine/review'
 import type { TurnDetails as Details } from '@platform/logs'
 import { characterById, locationById, type Pack } from '@engine/pack'
@@ -311,6 +311,18 @@ export function SceneView({ content, state, onState, onEnd, onSave, endError }: 
 
         {(error || endError) && <div className="error">{error || endError}</div>}
 
+        {/* An arrangement with the player waits for their answer (relationships §3, milestone 4b); the next line waits with it. */}
+        {!busy && scene.pendingTies.length > 0 ? (
+          <div className="say ask">
+            <span>{tieQuestion(content, scene.pendingTies[0]!)}</span>
+            <Button variant="primary" onClick={() => onState(answerTie(content, state, 0, true))}>
+              Yes
+            </Button>
+            <Button variant="ghost" onClick={() => onState(answerTie(content, state, 0, false))}>
+              No
+            </Button>
+          </div>
+        ) : (
         <form className="say" onSubmit={submit}>
           <input
             ref={inputRef}
@@ -323,6 +335,7 @@ export function SceneView({ content, state, onState, onEnd, onSave, endError }: 
             Send
           </Button>
         </form>
+        )}
       </div>
     </div>
   )

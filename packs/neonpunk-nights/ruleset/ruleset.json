@@ -344,6 +344,7 @@
   },
   "ties": {
     "max": 3,
+    "agreement": ["partner", "lover", "fiance", "spouse", "boss", "employee", "business-partner", "client", "contractor", "handler", "informant", "creditor", "debtor", "landlord", "tenant", "roommate", "mentor", "protege", "teacher", "student"],
     "groups": [
       { "id": "family", "name": "Family" },
       { "id": "partners", "name": "Partners" },

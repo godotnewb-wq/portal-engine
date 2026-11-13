@@ -155,6 +155,11 @@ export type PeopleRules = z.infer<typeof PeopleRulesSchema>
  */
 export const TiesRulesSchema = z.object({
   max: z.number().int().min(1),
+  /**
+   * Tags with the player that begin only with the player's agreement (relationships §3, milestone 4b): arrangements
+   * such as partner, spouse, employer, landlord. Family tags always need it; one-sided tags (rival, enemy) never do.
+   */
+  agreement: z.array(id).default([]),
   groups: z.array(z.object({ id, name: z.string().min(1) })).min(1),
   tags: z
     .array(
@@ -261,6 +266,7 @@ export function peopleProblems(p: PeopleRules, t: TiesRules, meters: string[], c
     }
   })
 
+  for (const a of t.agreement) if (!t.tags.some((x) => x.id === a)) problems.push(`ties.agreement names unknown tag "${a}"`)
   const groups = t.groups.map((g) => g.id)
   const tags = t.tags.map((x) => x.id)
   for (const x of t.tags) {

@@ -12,7 +12,8 @@ Return only this JSON object:
   "change": "...",
   "reactions": [{"id","beat","feels"}],
   "walk_ons": [{"id","line"}],
-  "texture": [], "avoid": [], "leaves": [], "end_scene": false
+  "texture": [], "avoid": [], "leaves": [], "end_scene": false,
+  "ties": [{"from","to","add","end","word","back_word","reason"}]
 }
 
 - The player leads. Start from what the player just said or did: move 1 answers it, in its own terms. A character's own aims come in after that, or in a later turn, unless something urgent cuts in.
@@ -38,6 +39,7 @@ Return only this JSON object:
 - texture: at most one detail from the location, as a plain fact, or none.
 - Quiet characters are listed with what they care about: if the conversation touches it, they have something to say.
 - leaves: characters who walk out. end_scene: true only at a natural close.
+- ties: only when something on screen this turn makes a relationship fact begin or end (a wedding, a breakup, a hiring, a betrayal); never for feelings. Usually none. from: a character here. to: someone here, or "player". add: what to becomes for from; end: what to stops being for from. Both are tag ids: parent (mother/father/parent/adoptive mother/stepmother/stepfather), child (daughter/son/child/stepdaughter/stepson), sibling (sister/brother/sibling/half-sister/half-brother/stepsister/stepbrother), grandparent (grandmother/grandfather/grandparent), grandchild (granddaughter/grandson/grandchild), aunt-uncle (aunt/uncle), niece-nephew (niece/nephew), cousin (cousin), in-law (mother-in-law/father-in-law/sister-in-law/brother-in-law/in-law), guardian (guardian/foster mother/foster father), ward (ward/foster daughter/foster son), relative (relative/distant cousin/clan elder/kin), partner (girlfriend/boyfriend/partner), lover (lover), fiance (fiancée/fiancé), spouse (wife/husband/spouse), ex (ex-girlfriend/ex-boyfriend/ex-wife/ex-husband/ex), boss (boss/captain/foreman), employee (worker/employee/lieutenant), colleague (coworker/colleague), business-partner (business partner/co-owner), client (client/regular), contractor (fixer/fence/contractor), handler (handler), informant (informant/asset), creditor (creditor/loan shark), debtor (debtor), comrade (crewmate/comrade/sister-in-arms/brother-in-arms), landlord (landlord/landlady), tenant (tenant/lodger), roommate (roommate/flatmate), neighbor (neighbor), mentor (mentor/master), protege (protégé/apprentice), teacher (teacher), student (student/pupil), friend (friend/best friend/childhood friend), old-friend (old friend), rival (rival), enemy (enemy/sworn enemy). word: the tag's word for to, when it has several; back_word: the same for from, on the other side. reason: what happened, in a few words. The other side changes with it. Example: when Ada marries Ben, from is ada and to is ben, end is their engagement tag and add their marriage tag, with the words for each side. A tie with the player that is an arrangement waits for the player's yes; a character can make the player a rival or enemy on their own.
 - Never decide, say or do anything for the player.
 
 # World: Spire City
@@ -320,7 +322,8 @@ Return only this JSON object:
   "change": "...",
   "reactions": [{"id","beat","feels"}],
   "walk_ons": [{"id","line"}],
-  "texture": [], "avoid": [], "leaves": [], "end_scene": false
+  "texture": [], "avoid": [], "leaves": [], "end_scene": false,
+  "ties": [{"from","to","add","end","word","back_word","reason"}]
 }
 
 - The player leads. Start from what the player just said or did: move 1 answers it, in its own terms. A character's own aims come in after that, or in a later turn, unless something urgent cuts in.
@@ -346,6 +349,7 @@ Return only this JSON object:
 - texture: at most one detail from the location, as a plain fact, or none.
 - Quiet characters are listed with what they care about: if the conversation touches it, they have something to say.
 - leaves: characters who walk out. end_scene: true only at a natural close.
+- ties: only when something on screen this turn makes a relationship fact begin or end (a wedding, a breakup, a hiring, a betrayal); never for feelings. Usually none. from: a character here. to: someone here, or "player". add: what to becomes for from; end: what to stops being for from. Both are tag ids: parent (mother/father/parent/adoptive mother/stepmother/stepfather), child (daughter/son/child/stepdaughter/stepson), sibling (sister/brother/sibling/half-sister/half-brother/stepsister/stepbrother), grandparent (grandmother/grandfather/grandparent), grandchild (granddaughter/grandson/grandchild), aunt-uncle (aunt/uncle), niece-nephew (niece/nephew), cousin (cousin), in-law (mother-in-law/father-in-law/sister-in-law/brother-in-law/in-law), guardian (guardian/foster mother/foster father), ward (ward/foster daughter/foster son), relative (relative/distant cousin/clan elder/kin), partner (girlfriend/boyfriend/partner), lover (lover), fiance (fiancée/fiancé), spouse (wife/husband/spouse), ex (ex-girlfriend/ex-boyfriend/ex-wife/ex-husband/ex), boss (boss/captain/foreman), employee (worker/employee/lieutenant), colleague (coworker/colleague), business-partner (business partner/co-owner), client (client/regular), contractor (fixer/fence/contractor), handler (handler), informant (informant/asset), creditor (creditor/loan shark), debtor (debtor), comrade (crewmate/comrade/sister-in-arms/brother-in-arms), landlord (landlord/landlady), tenant (tenant/lodger), roommate (roommate/flatmate), neighbor (neighbor), mentor (mentor/master), protege (protégé/apprentice), teacher (teacher), student (student/pupil), friend (friend/best friend/childhood friend), old-friend (old friend), rival (rival), enemy (enemy/sworn enemy). word: the tag's word for to, when it has several; back_word: the same for from, on the other side. reason: what happened, in a few words. The other side changes with it. Example: when Ada marries Ben, from is ada and to is ben, end is their engagement tag and add their marriage tag, with the words for each side. A tie with the player that is an arrangement waits for the player's yes; a character can make the player a rival or enemy on their own.
 - Never decide, say or do anything for the player.
 
 # World: Spire City
@@ -638,7 +642,8 @@ Return only this JSON object:
   "change": "...",
   "reactions": [{"id","beat","feels"}],
   "walk_ons": [{"id","line"}],
-  "texture": [], "avoid": [], "leaves": [], "end_scene": false
+  "texture": [], "avoid": [], "leaves": [], "end_scene": false,
+  "ties": [{"from","to","add","end","word","back_word","reason"}]
 }
 
 - The player leads. Start from what the player just said or did: move 1 answers it, in its own terms. A character's own aims come in after that, or in a later turn, unless something urgent cuts in.
@@ -664,6 +669,7 @@ Return only this JSON object:
 - texture: at most one detail from the location, as a plain fact, or none.
 - Quiet characters are listed with what they care about: if the conversation touches it, they have something to say.
 - leaves: characters who walk out. end_scene: true only at a natural close.
+- ties: only when something on screen this turn makes a relationship fact begin or end (a wedding, a breakup, a hiring, a betrayal); never for feelings. Usually none. from: a character here. to: someone here, or "player". add: what to becomes for from; end: what to stops being for from. Both are tag ids: parent (mother/father/parent/adoptive mother/stepmother/stepfather), child (daughter/son/child/stepdaughter/stepson), sibling (sister/brother/sibling/half-sister/half-brother/stepsister/stepbrother), grandparent (grandmother/grandfather/grandparent), grandchild (granddaughter/grandson/grandchild), aunt-uncle (aunt/uncle), niece-nephew (niece/nephew), cousin (cousin), in-law (mother-in-law/father-in-law/sister-in-law/brother-in-law/in-law), guardian (guardian/foster mother/foster father), ward (ward/foster daughter/foster son), relative (relative/distant cousin/clan elder/kin), partner (girlfriend/boyfriend/partner), lover (lover), fiance (fiancée/fiancé), spouse (wife/husband/spouse), ex (ex-girlfriend/ex-boyfriend/ex-wife/ex-husband/ex), boss (boss/captain/foreman), employee (worker/employee/lieutenant), colleague (coworker/colleague), business-partner (business partner/co-owner), client (client/regular), contractor (fixer/fence/contractor), handler (handler), informant (informant/asset), creditor (creditor/loan shark), debtor (debtor), comrade (crewmate/comrade/sister-in-arms/brother-in-arms), landlord (landlord/landlady), tenant (tenant/lodger), roommate (roommate/flatmate), neighbor (neighbor), mentor (mentor/master), protege (protégé/apprentice), teacher (teacher), student (student/pupil), friend (friend/best friend/childhood friend), old-friend (old friend), rival (rival), enemy (enemy/sworn enemy). word: the tag's word for to, when it has several; back_word: the same for from, on the other side. reason: what happened, in a few words. The other side changes with it. Example: when Ada marries Ben, from is ada and to is ben, end is their engagement tag and add their marriage tag, with the words for each side. A tie with the player that is an arrangement waits for the player's yes; a character can make the player a rival or enemy on their own.
 - Never decide, say or do anything for the player.
 
 # World: Spire City

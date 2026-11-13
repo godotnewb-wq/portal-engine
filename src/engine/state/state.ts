@@ -60,7 +60,10 @@ export function startScene(content: Pack, state: GameState, locationId: string, 
     told: [],
     newFacts: [],
     pressures: {},
-    tells: []
+    tells: [],
+    pendingTies: [],
+    answered: [],
+    tieEvents: []
   }
   return { ...state, scene }
 }

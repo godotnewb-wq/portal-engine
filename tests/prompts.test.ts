@@ -7,7 +7,8 @@ import { playScene, type ScriptedTurn } from './prompts'
  * a move gated on it, a move gated on a check that doesn't exist, a fact planned for a move nobody voiced, a player
  * check, a rewrite, a salvaged rewrite whose dropped speaker left tags behind, a planned departure, an unplanned
  * LEAVES tag, the running summary once turns leave the verbatim window, and the end-of-scene summaries, with a
- * feeling toward someone and a general aftermath carried out of the scene (milestone 4b).
+ * feeling toward someone and a general aftermath carried out of the scene, and a tie change on screen (Mara takes Tobin
+ * on), mirrored on his side and making both memories Core (milestone 4b).
  */
 const TURNS: ScriptedTurn[] = [
   {
@@ -109,7 +110,8 @@ Tobin: "Seven, counting Pell."
       texture: [],
       avoid: [],
       leaves: ['tobin'],
-      end_scene: false
+      end_scene: false,
+      ties: [{ from: 'mara', to: 'tobin', add: 'hand', word: 'apprentice', back_word: 'master', reason: 'she takes him on to keep him close' }]
     },
     writes: [
       `Tobin: "Yes. The horses need water anyway."

@@ -357,7 +357,10 @@
     },
     "tells": [
       "tobin.after-closing"
-    ]
+    ],
+    "pendingTies": [],
+    "answered": [],
+    "tieEvents": []
   }
 }
 
@@ -711,7 +714,10 @@
     },
     "tells": [
       "tobin.after-closing"
-    ]
+    ],
+    "pendingTies": [],
+    "answered": [],
+    "tieEvents": []
   }
 }
 
@@ -992,7 +998,10 @@
     },
     "tells": [
       "tobin.after-closing"
-    ]
+    ],
+    "pendingTies": [],
+    "answered": [],
+    "tieEvents": []
   }
 }
 
@@ -1049,7 +1058,20 @@
       "doing": "tells Tobin to leave",
       "uncertain": false
     },
-    "change": "Tobin leaves the yard."
+    "change": "Tobin leaves the yard.",
+    "ties": [
+      {
+        "change": {
+          "from": "mara",
+          "to": "tobin",
+          "add": "hand",
+          "word": "apprentice",
+          "backWord": "master",
+          "reason": "she takes him on to keep him close"
+        },
+        "pending": false
+      }
+    ]
   },
   "checks": [],
   "lore": {
@@ -1278,6 +1300,21 @@
     },
     "tells": [
       "tobin.after-closing"
+    ],
+    "pendingTies": [],
+    "answered": [],
+    "tieEvents": [
+      {
+        "from": "mara",
+        "to": "tobin",
+        "added": [
+          "hand"
+        ],
+        "ended": [],
+        "word": "apprentice",
+        "reason": "she takes him on to keep him close",
+        "turn": "scene-1200-4"
+      }
     ]
   }
 }
@@ -1418,7 +1455,7 @@
   },
   "brief": {
     "budget": 500,
-    "used": 35,
+    "used": 36,
     "selected": [
       {
         "id": "mara.motive1",
@@ -1434,13 +1471,13 @@
         "kind": "absent",
         "rank": "choice",
         "trigger": "named last turn: Tobin",
-        "tokens": 17
+        "tokens": 18
       }
     ],
     "cut": [],
     "dropped": [],
     "recurring": {
-      "mara": 206
+      "mara": 209
     }
   },
   "findings": [],
@@ -1552,6 +1589,21 @@
     },
     "tells": [
       "tobin.after-closing"
+    ],
+    "pendingTies": [],
+    "answered": [],
+    "tieEvents": [
+      {
+        "from": "mara",
+        "to": "tobin",
+        "added": [
+          "hand"
+        ],
+        "ended": [],
+        "word": "apprentice",
+        "reason": "she takes him on to keep him close",
+        "turn": "scene-1200-4"
+      }
     ]
   }
 }
@@ -1594,7 +1646,7 @@
       "report": {
         "id": "mara",
         "memory": "Tobin let someone with a Guild seal into the yard after closing; Kit got it out of him.",
-        "level": "normal",
+        "level": "core",
         "reason": "Kit kept it quiet",
         "before": {
           "warmth": 2,
@@ -1633,7 +1685,13 @@
             }
           ],
           "resolved": [],
-          "dropped": []
+          "dropped": [],
+          "aftermath": {
+            "shade": "sore",
+            "family": "mad",
+            "intensity": 2,
+            "reason": "she wants to know more first"
+          }
         }
       }
     },

@@ -560,7 +560,10 @@
     },
     "tells": [
       "oria-senn.client-is-grid-corporation"
-    ]
+    ],
+    "pendingTies": [],
+    "answered": [],
+    "tieEvents": []
   }
 }
 
@@ -1070,7 +1073,10 @@
     "tells": [
       "oria-senn.client-is-grid-corporation",
       "oria-senn.the-case"
-    ]
+    ],
+    "pendingTies": [],
+    "answered": [],
+    "tieEvents": []
   }
 }
 
@@ -1200,6 +1206,17 @@
       "uncertain": false
     },
     "change": "The job has a deadline: midnight.",
+    "ties": [
+      {
+        "change": {
+          "from": "oria-senn",
+          "to": "player",
+          "add": "contractor",
+          "reason": "she hires Rook for the pump job"
+        },
+        "pending": true
+      }
+    ],
     "reads": [
       {
         "by": "vex",
@@ -1635,7 +1652,17 @@
     "tells": [
       "oria-senn.client-is-grid-corporation",
       "oria-senn.the-case"
-    ]
+    ],
+    "pendingTies": [
+      {
+        "from": "oria-senn",
+        "to": "player",
+        "add": "contractor",
+        "reason": "she hires Rook for the pump job"
+      }
+    ],
+    "answered": [],
+    "tieEvents": []
   }
 }
 
