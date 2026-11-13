@@ -3,8 +3,11 @@
 import { z } from 'zod'
 import { GameStateSchema } from './schema'
 
-/** Bump when the save format changes; older saves are then unreadable (no backwards compatibility before release). */
-export const SAVE_VERSION = 3
+/**
+ * Bump when the save format changes; older saves are then refused with a clear message (no backwards compatibility
+ * before release). 4: signed meters, Interest for Attraction, relation notes for derived labels (milestone 4a).
+ */
+export const SAVE_VERSION = 4
 
 /** The game's own slot: written after every turn and every scene's end, never by hand. */
 export const AUTO_SLOT_ID = 'auto'
@@ -48,7 +51,7 @@ export type SaveRequest = z.input<typeof SaveRequestSchema>
 /** What the slot list shows. Unreadable saves are listed so they aren't overwritten unknowingly. */
 export type SaveSummary = { slotId: SlotId; savedAt: string } & (
   | { unreadable: false; name?: string; packVersion: string; playerName: string; time: number; inScene: boolean; turns: number; memories: number }
-  | { unreadable: true }
+  | { unreadable: true; /** Made with an earlier save format: refused, not damaged. */ outdated?: true }
 )
 
 export function slotLabel(slotId: SlotId): string {

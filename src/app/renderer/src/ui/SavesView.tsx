@@ -19,7 +19,7 @@ function clock(minutes: number): string {
 }
 
 function describe(summary: SaveSummary): string {
-  if (summary.unreadable) return 'Unreadable save'
+  if (summary.unreadable) return summary.outdated ? 'Made with an earlier version of the game; can’t be loaded' : 'Unreadable save'
   const where = summary.inScene ? `in a scene, ${summary.turns} turn${summary.turns === 1 ? '' : 's'} in` : 'between scenes'
   return `${summary.playerName} · ${clock(summary.time)} · ${where} · ${summary.memories} memor${summary.memories === 1 ? 'y' : 'ies'}`
 }

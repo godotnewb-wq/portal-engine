@@ -110,9 +110,9 @@ NARRATION: Vex counts something on her fingers.
 ]
 
 const SUMMARIES = {
-  vex: { memory: 'Oria lied about the client again, and Rook pushed her on it.', level: 'normal', reason: 'Rook backed her up', approval: 'a little more', trust: 'unchanged', attraction: 'unchanged', learned: [], others: [{ with: 'oria-senn', approval: 'less', trust: 'less', attraction: 'unchanged', reason: 'she lied again' }] },
-  brask: { memory: 'Oria offered Rook a flooded pump job with a midnight deadline.', level: 'fleeting', reason: '', approval: 'unchanged', trust: 'unchanged', attraction: 'unchanged', learned: [], others: [] },
-  'oria-senn': { memory: 'Rook is asking about the client; I need to close this before Vex pushes harder.', level: 'normal', reason: 'Rook asked too many questions', approval: 'a little less', trust: 'unchanged', attraction: 'unchanged', learned: [], others: [] },
+  vex: { memory: 'Oria lied about the client again, and Rook pushed her on it.', level: 'normal', reason: 'Rook backed her up', approval: 'a little more', trust: 'unchanged', interest: 'unchanged', learned: [], others: [{ with: 'oria-senn', approval: 'less', trust: 'less', interest: 'unchanged', reason: 'she lied again' }] },
+  brask: { memory: 'Oria offered Rook a flooded pump job with a midnight deadline.', level: 'fleeting', reason: '', approval: 'unchanged', trust: 'unchanged', interest: 'unchanged', learned: [], others: [] },
+  'oria-senn': { memory: 'Rook is asking about the client; I need to close this before Vex pushes harder.', level: 'normal', reason: 'Rook asked too many questions', approval: 'a little less', trust: 'unchanged', interest: 'unchanged', learned: [], others: [] },
   kesh: 'Strangers in the bar talked about a job at a pump station.'
 }
 

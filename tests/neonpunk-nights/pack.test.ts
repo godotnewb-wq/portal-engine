@@ -94,7 +94,7 @@ describe('reading a pack folder', () => {
 
   it('reports problems across files', () => {
     const vex = characterById(content, 'vex')!
-    const broken = { ...content, characters: [...content.characters, vex, { ...vex, id: 'ghost', relations: [{ to: 'nobody', label: 'x', meters: vex.meters }] }] }
+    const broken = { ...content, characters: [...content.characters, vex, { ...vex, id: 'ghost', relations: [{ to: 'nobody', note: 'x', meters: vex.meters }] }] }
     expect(packProblems(broken)).toEqual(expect.arrayContaining(['character id "vex" is used twice', 'ghost has a relation to unknown character "nobody"']))
   })
 })

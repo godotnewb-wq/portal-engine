@@ -1,25 +1,32 @@
 import { characterById, type Pack } from '@engine/pack'
 import { firstName } from '@engine/core'
 import type { WitnessReport } from '@engine/relationships'
+import { bandWord, type Ruleset } from '@engine/rules'
 import { Button } from './Button'
 
+/** Which way a meter moved, without the number (relationships §1: the player sees bands, not values). */
 function Delta({ before, after }: { before: number; after: number }) {
-  const d = after - before
-  if (d === 0) return <span className="delta">±0</span>
-  return <span className={d > 0 ? 'delta up' : 'delta down'}>{d > 0 ? `+${d}` : d}</span>
+  if (after === before) return <span className="delta">·</span>
+  return <span className={after > before ? 'delta up' : 'delta down'}>{after > before ? '▲' : '▼'}</span>
 }
 
-/** One meter as a bar: where it stood at the start of the scene, and where it is now, across the ruleset's range. */
-function Meter({ label, before, after, min, max }: { label: string; before: number; after: number; min: number; max: number }) {
-  const at = (v: number) => `${((v - min) / (max - min || 1)) * 100}%`
+/**
+ * One meter as a bar from neutral to where it is now, with a mark where it stood at the start of the scene, and the
+ * band it now falls in, in words. No numbers: the game keeps those.
+ */
+function Meter({ ruleset, id, label, before, after }: { ruleset: Ruleset; id: string; label: string; before: number; after: number }) {
+  const { min, max, neutral } = ruleset.meters
+  const at = (v: number) => ((v - min) / (max - min || 1)) * 100
+  const from = Math.min(at(neutral), at(after))
   return (
     <div className="meter">
       <span className="meter-label">{label}</span>
       <div className="meter-track">
-        <div className="meter-fill" style={{ width: at(after) }} />
-        <div className="meter-was" style={{ left: at(before) }} title={`Was ${before}`} />
+        <div className="meter-neutral" style={{ left: `${at(neutral)}%` }} />
+        <div className={after < neutral ? 'meter-fill below' : 'meter-fill'} style={{ left: `${from}%`, width: `${Math.abs(at(after) - at(neutral))}%` }} />
+        <div className="meter-was" style={{ left: `${at(before)}%` }} title={`Was: ${bandWord(ruleset, id, before)}`} />
       </div>
-      <span className="meter-value">{after}</span>
+      <span className="meter-value">{bandWord(ruleset, id, after)}</span>
       <Delta before={before} after={after} />
     </div>
   )
@@ -45,7 +52,7 @@ export function SummaryView({ content, reports, againLabel, onAgain, onTitle }: 
             <div className="meters">
               <div className="meters-title">Toward you</div>
               {meters.map((m) => (
-                <Meter key={m.id} label={m.name} before={r.before[m.id] ?? 0} after={r.after[m.id] ?? 0} min={content.ruleset.meters.min} max={content.ruleset.meters.max} />
+                <Meter key={m.id} ruleset={content.ruleset} id={m.id} label={m.name} before={r.before[m.id] ?? content.ruleset.meters.neutral} after={r.after[m.id] ?? content.ruleset.meters.neutral} />
               ))}
             </div>
             {r.others.length > 0 && (
@@ -53,11 +60,11 @@ export function SummaryView({ content, reports, againLabel, onAgain, onTitle }: 
                 {r.others.map((o) => (
                   <div key={o.with} className="other" title={o.reason || undefined}>
                     <span>
-                      Toward {name(o.with)} <em>({o.label})</em>
+                      Toward {name(o.with)}
                     </span>
                     {meters.map((m) => (
                       <span key={m.id} className="other-meter">
-                        {m.name} {o.after[m.id]} <Delta before={o.before[m.id] ?? 0} after={o.after[m.id] ?? 0} />
+                        {m.name}: {bandWord(content.ruleset, m.id, o.after[m.id] ?? content.ruleset.meters.neutral)} <Delta before={o.before[m.id] ?? content.ruleset.meters.neutral} after={o.after[m.id] ?? content.ruleset.meters.neutral} />
                       </span>
                     ))}
                   </div>

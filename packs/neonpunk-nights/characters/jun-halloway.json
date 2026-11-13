@@ -91,18 +91,18 @@
     }
   ],
   "meters": {
-    "approval": 45,
-    "trust": 40,
-    "attraction": 10
+    "approval": -5,
+    "trust": 0,
+    "interest": 0
   },
   "relations": [
     {
       "to": "kesh",
-      "label": "impatient with the conductor's rulebook",
+      "note": "impatient with the conductor's rulebook",
       "meters": {
-        "approval": 40,
-        "trust": 45,
-        "attraction": 0
+        "approval": -10,
+        "trust": 5,
+        "interest": 0
       }
     }
   ],

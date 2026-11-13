@@ -45,12 +45,12 @@ describe('rollCheck', () => {
   })
 })
 
-describe('assists (meter bond: +1 from 6, advantage from 12, rank 1 needed)', () => {
+describe('assists (meter bond: +1 from 1, advantage from 7, rank 1 needed)', () => {
   it('reads the threshold meter and values from the ruleset', () => {
-    expect(assistFrom(R, { stats: sharp, meter: 20 }, 'fight')).toEqual({ bonus: 0, edge: 'none' })
-    expect(assistFrom(R, { stats: sharp, meter: 5 }, 'notice')).toEqual({ bonus: 0, edge: 'none' })
-    expect(assistFrom(R, { stats: sharp, meter: 6 }, 'notice')).toEqual({ bonus: 1, edge: 'none' })
-    expect(assistFrom(R, { stats: sharp, meter: 12 }, 'notice')).toEqual({ bonus: 0, edge: 'advantage' })
+    expect(assistFrom(R, { stats: sharp, meter: 10 }, 'fight')).toEqual({ bonus: 0, edge: 'none' })
+    expect(assistFrom(R, { stats: sharp, meter: 0 }, 'notice')).toEqual({ bonus: 0, edge: 'none' })
+    expect(assistFrom(R, { stats: sharp, meter: 1 }, 'notice')).toEqual({ bonus: 1, edge: 'none' })
+    expect(assistFrom(R, { stats: sharp, meter: 7 }, 'notice')).toEqual({ bonus: 0, edge: 'advantage' })
   })
 
   it('never stacks advantages, and cancels advantage against disadvantage', () => {

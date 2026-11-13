@@ -96,18 +96,18 @@
     }
   ],
   "meters": {
-    "approval": 50,
-    "trust": 40,
-    "attraction": 10
+    "approval": 0,
+    "trust": 0,
+    "interest": 0
   },
   "relations": [
     {
       "to": "jun-halloway",
-      "label": "awkward; wants her to make her shift",
+      "note": "awkward; wants her to make her shift",
       "meters": {
-        "approval": 55,
-        "trust": 50,
-        "attraction": 0
+        "approval": 5,
+        "trust": 10,
+        "interest": 0
       }
     }
   ],

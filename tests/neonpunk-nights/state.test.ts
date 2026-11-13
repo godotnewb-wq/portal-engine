@@ -8,8 +8,8 @@ import { createInitialState, startScene } from '@engine/state'
 describe('createInitialState', () => {
   it('starts with every character’s meters and relations, and a valid state', () => {
     const state = createInitialState(content, 1234)
-    expect(state.meters['vex']).toEqual({ approval: 55, trust: 60, attraction: 35 })
-    expect(state.relations).toContainEqual(expect.objectContaining({ from: 'brask', to: 'vex', label: 'friends' }))
+    expect(state.meters['vex']).toEqual({ approval: 5, trust: 20, interest: 12 })
+    expect(state.relations).toContainEqual(expect.objectContaining({ from: 'brask', to: 'vex', note: 'friends' }))
     expect(GameStateSchema.parse(state)).toEqual(state)
   })
 })

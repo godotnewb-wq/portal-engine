@@ -13,7 +13,7 @@ export type CharacterTier = z.infer<typeof CharacterTierSchema>
 
 const id = IdSchema
 
-/** Relationship meters by the ruleset's meter ids (e.g. approval, trust, attraction); checked against it on load. */
+/** Relationship meters by the ruleset's meter ids (e.g. approval, trust, interest), signed around neutral; checked against it on load. */
 export const MetersSchema = z.record(z.string(), z.number())
 export type Meters = z.infer<typeof MetersSchema>
 
@@ -65,10 +65,13 @@ export type Secret = z.infer<typeof SecretSchema> & { text: string }
 
 export const ValueSchema = z.object({ value: z.string(), stance: z.enum(['likes', 'dislikes']) })
 
-/** How a character starts out toward someone else in the cast. */
+/**
+ * How a character starts out toward someone else in the cast: how they feel (meters) and one line of specific
+ * history between them (relationships §3, the relationship note). Relationship tags replace the old derived label.
+ */
 export const RelationSeedSchema = z.object({
   to: id,
-  label: z.string(),
+  note: z.string().min(1),
   meters: MetersSchema
 })
 

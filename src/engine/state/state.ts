@@ -5,7 +5,7 @@ import { characterById, locationById, type Pack } from '@engine/pack'
 /** A new game: the test player, everyone's starting feelings, the dice seeded. */
 export function createInitialState(content: Pack, seed: number): GameState {
   const relations: Relation[] = content.characters.flatMap((c) =>
-    c.relations.map((r) => ({ from: c.id, to: r.to, label: r.label, meters: r.meters }))
+    c.relations.map((r) => ({ from: c.id, to: r.to, note: r.note, meters: r.meters }))
   )
   return {
     player: content.player,

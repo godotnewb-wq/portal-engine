@@ -19,6 +19,7 @@ Return only this JSON object:
 - player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking and asking are not uncertain.
 - checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most 2. who is "player" or a character id. skill is one of: athletics, melee, acrobatics, stealth, finesse, marksmanship, endurance, arcanotech, engineering, infiltration, investigation, medicine, perception, empathy, streetwise, persuasion, deception, intimidation, performance. difficulty is one of: trivial, easy, moderate, hard, very hard, legendary. stakes says what success means. assist: a character present who helps.
 - People are in the moment. What they say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line.
+- Feelings on the sheets are words for each meter, toward the player and toward others here. Approval (approval): whether they approve of who the other is and what they do. Trust (trust): whether they can rely on the other and be honest with them. Interest (interest): how strongly they are drawn to the other: attention, curiosity, wanting to be around them. It isn't approval: someone can be fascinated by a person they disapprove of and distrust, and low interest is aversion, not disapproval. Each is a separate feeling; when they pull apart, play the tension.
 - speakers: at most 3 characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone. mood: how what just happened lands on them.
 - pressure: how hard their aim for tonight (on their sheet) presses on them right now, one of: background, pressing, urgent (weakest first). Most of the time it is background. It rises when time runs short or events push, and moves at most one step a turn.
 - keeps: ids of their own secrets, only when what was just said or done touches one; touched: the words that touched it, as said. Most turns nobody keeps anything. approach: lie, deflect or partial truth. A secret marked "in short" is shown as a brief cue; keep it by its id all the same, and the writer will get the whole secret.
@@ -128,8 +129,8 @@ Knows:
 Values: likes loyalty, likes honesty between friends, likes freedom, dislikes cruelty, dislikes authority
 Secret [vex.partner-sold-out] (in short): Her old running partner was caught on a tip; she suspects Oria.
 Lying tell: Over-explains; uses full sentences, which she never otherwise does
-Toward the player: approval 55, trust 60, attraction 35 (0–100)
-Toward others here: Brask: friends (approval 65, trust 70, attraction 5 (0–100)); Oria Senn: wary acquaintances (approval 30, trust 15, attraction 20 (0–100))
+Toward the player: approval: no settled opinion; trust: trusts; interest: intrigued
+Toward others here: Brask: approval: approves; trust: trusts; interest: indifferent (friends); Oria Senn: approval: disapproves; trust: wary, distrustful; interest: indifferent (wary acquaintances)
 
 ## Brask [id: brask] — companion, goblin, he/him
 Role: Freelance mechanic who keeps half the Low Turns' pumps and lifts running; rents a workshop two stairs below the Sump Lantern
@@ -149,8 +150,8 @@ Knows:
 Values: likes kindness, likes craftsmanship, likes honesty, dislikes showing off, dislikes greed
 Secret [brask.landlord-offer] (in short): A Grid agent wants to buy his filter design.
 Lying tell: Looks at the nearest machine instead of the person, and answers too fast
-Toward the player: approval 60, trust 55, attraction 15 (0–100)
-Toward others here: Vex: friends (approval 70, trust 75, attraction 10 (0–100))
+Toward the player: approval: no settled opinion; trust: trusts; interest: indifferent
+Toward others here: Vex: approval: approves; trust: trusts implicitly; interest: indifferent (friends)
 
 ## Oria Senn [id: oria-senn] — recurring, light-elf, she/her
 Role: Fixer who brokers jobs between the High Turns and the Low; keeps a standing booth at the Sump Lantern on nights she wants to be found
@@ -171,8 +172,8 @@ Values: likes keeping promises, likes discretion, likes ambition, dislikes ruden
 Secret [oria-senn.client-is-grid-corporation]: The 'private client' is the Aether Grid Corporation, and she owes them; this job pays down her debt. Tell: Becomes over-formal and calls people 'darling' when lying. Would reveal when: she is caught lying and pressed, or offered something worth more than the debt.
 Secret [oria-senn.the-case] (in short): Oria's part: she is fetching the sealed case for the Grid. Knows what the sealed case from Pump Station Nine holds.
 Lying tell: Becomes over-formal and calls people 'darling'
-Toward the player: approval 45, trust 25, attraction 30 (0–100)
-Toward others here: Vex: useful acquaintance (approval 40, trust 30, attraction 15 (0–100))
+Toward the player: approval: no settled opinion; trust: wary, distrustful; interest: intrigued
+Toward others here: Vex: approval: no settled opinion; trust: undecided; interest: indifferent (useful acquaintance)
 
 ## Kesh [id: kesh] — recurring, golem, she/her
 Role: Conductor of Coil Line car 14 for eleven years; knows every stop on the line and every way a car can fail
@@ -193,7 +194,7 @@ Knows:
 Values: likes responsibility, likes competence, likes kindness, dislikes recklessness, dislikes carelessness with other people's safety
 Secret [kesh.bent-the-book] (in short): Once broke procedure on a stalled car, and a passenger was hurt.
 Lying tell: Can't keep a figure straight, and corrects herself
-Toward the player: approval 45, trust 35, attraction 5 (0–100)
+Toward the player: approval: no settled opinion; trust: undecided; interest: indifferent
 ----- user -----
 # The scene opens now.
 
@@ -333,6 +334,7 @@ Return only this JSON object:
 - player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking and asking are not uncertain.
 - checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most 2. who is "player" or a character id. skill is one of: athletics, melee, acrobatics, stealth, finesse, marksmanship, endurance, arcanotech, engineering, infiltration, investigation, medicine, perception, empathy, streetwise, persuasion, deception, intimidation, performance. difficulty is one of: trivial, easy, moderate, hard, very hard, legendary. stakes says what success means. assist: a character present who helps.
 - People are in the moment. What they say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line.
+- Feelings on the sheets are words for each meter, toward the player and toward others here. Approval (approval): whether they approve of who the other is and what they do. Trust (trust): whether they can rely on the other and be honest with them. Interest (interest): how strongly they are drawn to the other: attention, curiosity, wanting to be around them. It isn't approval: someone can be fascinated by a person they disapprove of and distrust, and low interest is aversion, not disapproval. Each is a separate feeling; when they pull apart, play the tension.
 - speakers: at most 3 characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone. mood: how what just happened lands on them.
 - pressure: how hard their aim for tonight (on their sheet) presses on them right now, one of: background, pressing, urgent (weakest first). Most of the time it is background. It rises when time runs short or events push, and moves at most one step a turn.
 - keeps: ids of their own secrets, only when what was just said or done touches one; touched: the words that touched it, as said. Most turns nobody keeps anything. approach: lie, deflect or partial truth. A secret marked "in short" is shown as a brief cue; keep it by its id all the same, and the writer will get the whole secret.
@@ -442,8 +444,8 @@ Knows:
 Values: likes loyalty, likes honesty between friends, likes freedom, dislikes cruelty, dislikes authority
 Secret [vex.partner-sold-out] (in short): Her old running partner was caught on a tip; she suspects Oria.
 Lying tell: Over-explains; uses full sentences, which she never otherwise does
-Toward the player: approval 55, trust 60, attraction 35 (0–100)
-Toward others here: Brask: friends (approval 65, trust 70, attraction 5 (0–100)); Oria Senn: wary acquaintances (approval 30, trust 15, attraction 20 (0–100))
+Toward the player: approval: no settled opinion; trust: trusts; interest: intrigued
+Toward others here: Brask: approval: approves; trust: trusts; interest: indifferent (friends); Oria Senn: approval: disapproves; trust: wary, distrustful; interest: indifferent (wary acquaintances)
 
 ## Brask [id: brask] — companion, goblin, he/him
 Role: Freelance mechanic who keeps half the Low Turns' pumps and lifts running; rents a workshop two stairs below the Sump Lantern
@@ -463,8 +465,8 @@ Knows:
 Values: likes kindness, likes craftsmanship, likes honesty, dislikes showing off, dislikes greed
 Secret [brask.landlord-offer] (in short): A Grid agent wants to buy his filter design.
 Lying tell: Looks at the nearest machine instead of the person, and answers too fast
-Toward the player: approval 60, trust 55, attraction 15 (0–100)
-Toward others here: Vex: friends (approval 70, trust 75, attraction 10 (0–100))
+Toward the player: approval: no settled opinion; trust: trusts; interest: indifferent
+Toward others here: Vex: approval: approves; trust: trusts implicitly; interest: indifferent (friends)
 
 ## Oria Senn [id: oria-senn] — recurring, light-elf, she/her
 Role: Fixer who brokers jobs between the High Turns and the Low; keeps a standing booth at the Sump Lantern on nights she wants to be found
@@ -485,8 +487,8 @@ Values: likes keeping promises, likes discretion, likes ambition, dislikes ruden
 Secret [oria-senn.client-is-grid-corporation]: The 'private client' is the Aether Grid Corporation, and she owes them; this job pays down her debt. Tell: Becomes over-formal and calls people 'darling' when lying. Would reveal when: she is caught lying and pressed, or offered something worth more than the debt.
 Secret [oria-senn.the-case] (in short): Oria's part: she is fetching the sealed case for the Grid. Knows what the sealed case from Pump Station Nine holds.
 Lying tell: Becomes over-formal and calls people 'darling'
-Toward the player: approval 45, trust 25, attraction 30 (0–100)
-Toward others here: Vex: useful acquaintance (approval 40, trust 30, attraction 15 (0–100))
+Toward the player: approval: no settled opinion; trust: wary, distrustful; interest: intrigued
+Toward others here: Vex: approval: no settled opinion; trust: undecided; interest: indifferent (useful acquaintance)
 
 ## Kesh [id: kesh] — recurring, golem, she/her
 Role: Conductor of Coil Line car 14 for eleven years; knows every stop on the line and every way a car can fail
@@ -507,7 +509,7 @@ Knows:
 Values: likes responsibility, likes competence, likes kindness, dislikes recklessness, dislikes carelessness with other people's safety
 Secret [kesh.bent-the-book] (in short): Once broke procedure on a stalled car, and a passenger was hurt.
 Lying tell: Can't keep a figure straight, and corrects herself
-Toward the player: approval 45, trust 35, attraction 5 (0–100)
+Toward the player: approval: no settled opinion; trust: undecided; interest: indifferent
 ----- user -----
 # Last turns
 Rook: So, Oria, who is the client, really?
@@ -654,6 +656,7 @@ Return only this JSON object:
 - player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking and asking are not uncertain.
 - checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most 2. who is "player" or a character id. skill is one of: athletics, melee, acrobatics, stealth, finesse, marksmanship, endurance, arcanotech, engineering, infiltration, investigation, medicine, perception, empathy, streetwise, persuasion, deception, intimidation, performance. difficulty is one of: trivial, easy, moderate, hard, very hard, legendary. stakes says what success means. assist: a character present who helps.
 - People are in the moment. What they say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line.
+- Feelings on the sheets are words for each meter, toward the player and toward others here. Approval (approval): whether they approve of who the other is and what they do. Trust (trust): whether they can rely on the other and be honest with them. Interest (interest): how strongly they are drawn to the other: attention, curiosity, wanting to be around them. It isn't approval: someone can be fascinated by a person they disapprove of and distrust, and low interest is aversion, not disapproval. Each is a separate feeling; when they pull apart, play the tension.
 - speakers: at most 3 characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone. mood: how what just happened lands on them.
 - pressure: how hard their aim for tonight (on their sheet) presses on them right now, one of: background, pressing, urgent (weakest first). Most of the time it is background. It rises when time runs short or events push, and moves at most one step a turn.
 - keeps: ids of their own secrets, only when what was just said or done touches one; touched: the words that touched it, as said. Most turns nobody keeps anything. approach: lie, deflect or partial truth. A secret marked "in short" is shown as a brief cue; keep it by its id all the same, and the writer will get the whole secret.
@@ -763,8 +766,8 @@ Knows:
 Values: likes loyalty, likes honesty between friends, likes freedom, dislikes cruelty, dislikes authority
 Secret [vex.partner-sold-out] (in short): Her old running partner was caught on a tip; she suspects Oria.
 Lying tell: Over-explains; uses full sentences, which she never otherwise does
-Toward the player: approval 55, trust 60, attraction 35 (0–100)
-Toward others here: Brask: friends (approval 65, trust 70, attraction 5 (0–100)); Oria Senn: wary acquaintances (approval 30, trust 15, attraction 20 (0–100))
+Toward the player: approval: no settled opinion; trust: trusts; interest: intrigued
+Toward others here: Brask: approval: approves; trust: trusts; interest: indifferent (friends); Oria Senn: approval: disapproves; trust: wary, distrustful; interest: indifferent (wary acquaintances)
 
 ## Brask [id: brask] — companion, goblin, he/him
 Role: Freelance mechanic who keeps half the Low Turns' pumps and lifts running; rents a workshop two stairs below the Sump Lantern
@@ -784,8 +787,8 @@ Knows:
 Values: likes kindness, likes craftsmanship, likes honesty, dislikes showing off, dislikes greed
 Secret [brask.landlord-offer] (in short): A Grid agent wants to buy his filter design.
 Lying tell: Looks at the nearest machine instead of the person, and answers too fast
-Toward the player: approval 60, trust 55, attraction 15 (0–100)
-Toward others here: Vex: friends (approval 70, trust 75, attraction 10 (0–100))
+Toward the player: approval: no settled opinion; trust: trusts; interest: indifferent
+Toward others here: Vex: approval: approves; trust: trusts implicitly; interest: indifferent (friends)
 
 ## Oria Senn [id: oria-senn] — recurring, light-elf, she/her
 Role: Fixer who brokers jobs between the High Turns and the Low; keeps a standing booth at the Sump Lantern on nights she wants to be found
@@ -806,8 +809,8 @@ Values: likes keeping promises, likes discretion, likes ambition, dislikes ruden
 Secret [oria-senn.client-is-grid-corporation]: The 'private client' is the Aether Grid Corporation, and she owes them; this job pays down her debt. Tell: Becomes over-formal and calls people 'darling' when lying. Would reveal when: she is caught lying and pressed, or offered something worth more than the debt.
 Secret [oria-senn.the-case]: Oria's part: she is fetching the sealed case for the Grid. The sealed case the Grid wants pulled from Pump Station Nine's flooded lower level holds the station's original control core: a pre-Burn rune-key that lets whoever holds it restart the station as its legal owner. The Grid hires the job through fixers and pays far over the going rate to get it before anyone else does. Those who carry the job know what's in the case, not what the Grid means to do with it. How Oria feels about it: doesn't want to know what the Grid wants it for, and suspects anyway. Tell: Steers every question about the case back to the fee. Would reveal when: someone opens the case, or names the control core to her face.
 Lying tell: Becomes over-formal and calls people 'darling'
-Toward the player: approval 45, trust 25, attraction 30 (0–100)
-Toward others here: Vex: useful acquaintance (approval 40, trust 30, attraction 15 (0–100))
+Toward the player: approval: no settled opinion; trust: wary, distrustful; interest: intrigued
+Toward others here: Vex: approval: no settled opinion; trust: undecided; interest: indifferent (useful acquaintance)
 
 ## Kesh [id: kesh] — recurring, golem, she/her
 Role: Conductor of Coil Line car 14 for eleven years; knows every stop on the line and every way a car can fail
@@ -828,7 +831,7 @@ Knows:
 Values: likes responsibility, likes competence, likes kindness, dislikes recklessness, dislikes carelessness with other people's safety
 Secret [kesh.bent-the-book] (in short): Once broke procedure on a stalled car, and a passenger was hurt.
 Lying tell: Can't keep a figure straight, and corrects herself
-Toward the player: approval 45, trust 35, attraction 5 (0–100)
+Toward the player: approval: no settled opinion; trust: undecided; interest: indifferent
 ----- user -----
 # Last turns
 Rook: So, Oria, who is the client, really?
@@ -975,11 +978,11 @@ Write the beats.
 You judge what one character takes away from a scene in a visual-novel RPG. Write Vex's memory of the scene and how it changed what Vex feels.
 
 Reply with only a JSON object:
-{"memory": "...", "level": "core|normal|fleeting", "reason": "...", "approval": "...", "trust": "...", "attraction": "...", "learned": [], "others": [{"with": "id", "approval": "...", "trust": "...", "attraction": "...", "reason": "..."}]}
+{"memory": "...", "level": "core|normal|fleeting", "reason": "...", "approval": "...", "trust": "...", "interest": "...", "learned": [], "others": [{"with": "id", "approval": "...", "trust": "...", "interest": "...", "reason": "..."}]}
 
 - memory: one or two sentences, past tense, third person, from Vex's point of view: what Vex said, did, noticed and felt, and how Rook treated Vex. End on what stayed with Vex most.
 - level: "core" for a moment that defines them (a confession, a betrayal, a first kiss, a promise made or broken; rare), "normal" for time that meant something, "fleeting" when little happened.
-- approval, trust, attraction: how each CHANGED toward Rook because of this scene, each one of: "much less", "less", "a little less", "unchanged", "a little more", "more", "much more". Meters move slowly; nothing is owed for turning up. Toward someone, approval is regard and liking; trust is whether they can rely on the other and be honest with them; attraction is wanting the other, which can rise while trust falls.
+- approval, trust, interest: how each CHANGED toward Rook because of this scene, each one of: "much less", "less", "a little less", "unchanged", "a little more", "more", "much more". Meters move slowly; nothing is owed for turning up. Toward someone, approval is whether they approve of who the other is and what they do; trust is whether they can rely on the other and be honest with them; interest is how strongly they are drawn to the other: attention, curiosity, wanting to be around them. It isn't approval: someone can be fascinated by a person they disapprove of and distrust, and low interest is aversion, not disapproval.
 - Judge as Vex: by Vex's values, agenda and how things stood before. Values Vex likes, shown by Rook, raise regard; values Vex dislikes lower it.
 - reason: one short sentence on what moved Vex, and which way.
 - learned: ids of Vex's own secrets that Rook truly found out in this scene (said or plainly shown); [] if none.
@@ -990,9 +993,9 @@ About Vex (deep-elf, she/her):
 - Wants: Buy her own route license so no dispatcher can drop her; Find out who sold out her old running partner to a syndicate checkpoint. Tonight: Keep the player from walking into a bad deal tonight without making it look like she cares
 - Values: likes loyalty, likes honesty between friends, likes freedom, dislikes cruelty, dislikes authority
 - Secret [partner-sold-out]: Her old running partner was caught at a syndicate checkpoint on a tip, and she suspects Oria Senn's network passed it on.
-- Before this scene, toward Rook: approval 55, trust 60, attraction 35 (0–100)
-- Toward Brask: friends; approval 65, trust 70, attraction 5
-- Toward Oria: wary acquaintances; approval 30, trust 15, attraction 20
+- Before this scene, toward Rook: approval: no settled opinion; trust: trusts; interest: intrigued
+- Toward Brask: approval: approves; trust: trusts; interest: indifferent (friends)
+- Toward Oria: approval: disapproves; trust: wary, distrustful; interest: indifferent (wary acquaintances)
 - Mood at the end: dry; comfort 3/5.
 
 Place: The Sump Lantern, Ninth Turn, under the old pumphouse.
@@ -1021,11 +1024,11 @@ Vex counts something on her fingers.
 You judge what one character takes away from a scene in a visual-novel RPG. Write Brask's memory of the scene and how it changed what Brask feels.
 
 Reply with only a JSON object:
-{"memory": "...", "level": "core|normal|fleeting", "reason": "...", "approval": "...", "trust": "...", "attraction": "...", "learned": [], "others": [{"with": "id", "approval": "...", "trust": "...", "attraction": "...", "reason": "..."}]}
+{"memory": "...", "level": "core|normal|fleeting", "reason": "...", "approval": "...", "trust": "...", "interest": "...", "learned": [], "others": [{"with": "id", "approval": "...", "trust": "...", "interest": "...", "reason": "..."}]}
 
 - memory: one or two sentences, past tense, third person, from Brask's point of view: what Brask said, did, noticed and felt, and how Rook treated Brask. End on what stayed with Brask most.
 - level: "core" for a moment that defines them (a confession, a betrayal, a first kiss, a promise made or broken; rare), "normal" for time that meant something, "fleeting" when little happened.
-- approval, trust, attraction: how each CHANGED toward Rook because of this scene, each one of: "much less", "less", "a little less", "unchanged", "a little more", "more", "much more". Meters move slowly; nothing is owed for turning up. Toward someone, approval is regard and liking; trust is whether they can rely on the other and be honest with them; attraction is wanting the other, which can rise while trust falls.
+- approval, trust, interest: how each CHANGED toward Rook because of this scene, each one of: "much less", "less", "a little less", "unchanged", "a little more", "more", "much more". Meters move slowly; nothing is owed for turning up. Toward someone, approval is whether they approve of who the other is and what they do; trust is whether they can rely on the other and be honest with them; interest is how strongly they are drawn to the other: attention, curiosity, wanting to be around them. It isn't approval: someone can be fascinated by a person they disapprove of and distrust, and low interest is aversion, not disapproval.
 - Judge as Brask: by Brask's values, agenda and how things stood before. Values Brask likes, shown by Rook, raise regard; values Brask dislikes lower it.
 - reason: one short sentence on what moved Brask, and which way.
 - learned: ids of Brask's own secrets that Rook truly found out in this scene (said or plainly shown); [] if none.
@@ -1036,8 +1039,8 @@ About Brask (goblin, he/him):
 - Wants: Save enough cinders to buy the workshop outright before the landlord sells to the Aether Grid Corporation; Get his designs for a cheap Aether filter taken seriously by someone with money. Tonight: Get through tonight without a fight, and get out of this noisy room as soon as he decently can
 - Values: likes kindness, likes craftsmanship, likes honesty, dislikes showing off, dislikes greed
 - Secret [landlord-offer]: A Grid Corporation agent has already offered to buy his filter design. He hasn't said no.
-- Before this scene, toward Rook: approval 60, trust 55, attraction 15 (0–100)
-- Toward Vex: friends; approval 70, trust 75, attraction 10
+- Before this scene, toward Rook: approval: no settled opinion; trust: trusts; interest: indifferent
+- Toward Vex: approval: approves; trust: trusts implicitly; interest: indifferent (friends)
 - Mood at the end: worried; comfort 2/5.
 
 Place: The Sump Lantern, Ninth Turn, under the old pumphouse.
@@ -1066,11 +1069,11 @@ Vex counts something on her fingers.
 You judge what one character takes away from a scene in a visual-novel RPG. Write Oria's memory of the scene and how it changed what Oria feels.
 
 Reply with only a JSON object:
-{"memory": "...", "level": "core|normal|fleeting", "reason": "...", "approval": "...", "trust": "...", "attraction": "...", "learned": [], "others": [{"with": "id", "approval": "...", "trust": "...", "attraction": "...", "reason": "..."}]}
+{"memory": "...", "level": "core|normal|fleeting", "reason": "...", "approval": "...", "trust": "...", "interest": "...", "learned": [], "others": [{"with": "id", "approval": "...", "trust": "...", "interest": "...", "reason": "..."}]}
 
 - memory: one or two sentences, past tense, third person, from Oria's point of view: what Oria said, did, noticed and felt, and how Rook treated Oria. End on what stayed with Oria most.
 - level: "core" for a moment that defines them (a confession, a betrayal, a first kiss, a promise made or broken; rare), "normal" for time that meant something, "fleeting" when little happened.
-- approval, trust, attraction: how each CHANGED toward Rook because of this scene, each one of: "much less", "less", "a little less", "unchanged", "a little more", "more", "much more". Meters move slowly; nothing is owed for turning up. Toward someone, approval is regard and liking; trust is whether they can rely on the other and be honest with them; attraction is wanting the other, which can rise while trust falls.
+- approval, trust, interest: how each CHANGED toward Rook because of this scene, each one of: "much less", "less", "a little less", "unchanged", "a little more", "more", "much more". Meters move slowly; nothing is owed for turning up. Toward someone, approval is whether they approve of who the other is and what they do; trust is whether they can rely on the other and be honest with them; interest is how strongly they are drawn to the other: attention, curiosity, wanting to be around them. It isn't approval: someone can be fascinated by a person they disapprove of and distrust, and low interest is aversion, not disapproval.
 - Judge as Oria: by Oria's values, agenda and how things stood before. Values Oria likes, shown by Rook, raise regard; values Oria dislikes lower it.
 - reason: one short sentence on what moved Oria, and which way.
 - learned: ids of Oria's own secrets that Rook truly found out in this scene (said or plainly shown); [] if none.
@@ -1082,8 +1085,8 @@ About Oria (light-elf, she/her):
 - Values: likes keeping promises, likes discretion, likes ambition, dislikes rudeness, dislikes sentimentality
 - Secret [client-is-grid-corporation]: The 'private client' is the Aether Grid Corporation, and she owes them; this job pays down her debt.
 - Secret [the-case]: Oria's part: she is fetching the sealed case for the Grid. The sealed case the Grid wants pulled from Pump Station Nine's flooded lower level holds the station's original control core: a pre-Burn rune-key that lets whoever holds it restart the station as its legal owner. The Grid hires the job through fixers and pays far over the going rate to get it before anyone else does. Those who carry the job know what's in the case, not what the Grid means to do with it. How Oria feels about it: doesn't want to know what the Grid wants it for, and suspects anyway.
-- Before this scene, toward Rook: approval 45, trust 25, attraction 30 (0–100)
-- Toward Vex: useful acquaintance; approval 40, trust 30, attraction 15
+- Before this scene, toward Rook: approval: no settled opinion; trust: wary, distrustful; interest: intrigued
+- Toward Vex: approval: no settled opinion; trust: undecided; interest: indifferent (useful acquaintance)
 - Mood at the end: relieved; comfort 3/5.
 
 Place: The Sump Lantern, Ninth Turn, under the old pumphouse.
@@ -1112,11 +1115,11 @@ Vex counts something on her fingers.
 You judge what one character takes away from a scene in a visual-novel RPG. Write Kesh's memory of the scene and how it changed what Kesh feels.
 
 Reply with only a JSON object:
-{"memory": "...", "level": "core|normal|fleeting", "reason": "...", "approval": "...", "trust": "...", "attraction": "...", "learned": [], "others": [{"with": "id", "approval": "...", "trust": "...", "attraction": "...", "reason": "..."}]}
+{"memory": "...", "level": "core|normal|fleeting", "reason": "...", "approval": "...", "trust": "...", "interest": "...", "learned": [], "others": [{"with": "id", "approval": "...", "trust": "...", "interest": "...", "reason": "..."}]}
 
 - memory: one or two sentences, past tense, third person, from Kesh's point of view: what Kesh said, did, noticed and felt, and how Rook treated Kesh. End on what stayed with Kesh most.
 - level: "core" for a moment that defines them (a confession, a betrayal, a first kiss, a promise made or broken; rare), "normal" for time that meant something, "fleeting" when little happened.
-- approval, trust, attraction: how each CHANGED toward Rook because of this scene, each one of: "much less", "less", "a little less", "unchanged", "a little more", "more", "much more". Meters move slowly; nothing is owed for turning up. Toward someone, approval is regard and liking; trust is whether they can rely on the other and be honest with them; attraction is wanting the other, which can rise while trust falls.
+- approval, trust, interest: how each CHANGED toward Rook because of this scene, each one of: "much less", "less", "a little less", "unchanged", "a little more", "more", "much more". Meters move slowly; nothing is owed for turning up. Toward someone, approval is whether they approve of who the other is and what they do; trust is whether they can rely on the other and be honest with them; interest is how strongly they are drawn to the other: attention, curiosity, wanting to be around them. It isn't approval: someone can be fascinated by a person they disapprove of and distrust, and low interest is aversion, not disapproval.
 - Judge as Kesh: by Kesh's values, agenda and how things stood before. Values Kesh likes, shown by Rook, raise regard; values Kesh dislikes lower it.
 - reason: one short sentence on what moved Kesh, and which way.
 - learned: ids of Kesh's own secrets that Rook truly found out in this scene (said or plainly shown); [] if none.
@@ -1127,7 +1130,7 @@ About Kesh (golem, she/her):
 - Wants: Keep her post: the Coil Line keeps proposing to replace conductors with fixed driver cores, and she wants to prove a person in the car matters; Save for a better body; her right hand is a cheap replacement that loses grip in the cold. Tonight: Keep every passenger in the car and safe until the grid comes back or rescue arrives; procedure says the doors stay sealed on a dead span
 - Values: likes responsibility, likes competence, likes kindness, dislikes recklessness, dislikes carelessness with other people's safety
 - Secret [bent-the-book]: She broke procedure once to get a passenger off a stalled car, and the passenger was hurt on the rail. That's why she won't open the doors. She won't volunteer it, but she won't lie about it either.
-- Before this scene, toward Rook: approval 45, trust 35, attraction 5 (0–100)
+- Before this scene, toward Rook: approval: no settled opinion; trust: undecided; interest: indifferent
 - Mood at the end: calm on the surface, counting minutes; comfort 3/5.
 
 Place: The Sump Lantern, Ninth Turn, under the old pumphouse.

@@ -55,15 +55,49 @@
   ],
   "degrees": { "strongMargin": 5, "costMargin": 4 },
   "criticals": { "hit": 20, "miss": 1 },
-  "assists": { "meter": "trust", "minRank": 1, "bonusFrom": 40, "bonus": 2, "advantageFrom": 70 },
+  "assists": { "meter": "trust", "minRank": 1, "bonusFrom": 10, "bonus": 2, "advantageFrom": 35 },
   "meters": {
     "list": [
-      { "id": "approval", "name": "Approval", "description": "regard and liking" },
-      { "id": "trust", "name": "Trust", "description": "whether they can rely on the other and be honest with them" },
-      { "id": "attraction", "name": "Attraction", "description": "wanting the other, which can rise while trust falls" }
+      {
+        "id": "approval",
+        "name": "Approval",
+        "description": "whether they approve of who the other is and what they do",
+        "bands": [
+          { "from": -50, "word": "despises" },
+          { "from": -34, "word": "disapproves" },
+          { "from": -10, "word": "no settled opinion" },
+          { "from": 11, "word": "approves" },
+          { "from": 35, "word": "admires" }
+        ]
+      },
+      {
+        "id": "trust",
+        "name": "Trust",
+        "description": "whether they can rely on the other and be honest with them",
+        "bands": [
+          { "from": -50, "word": "deeply distrusts" },
+          { "from": -34, "word": "wary, distrustful" },
+          { "from": -10, "word": "undecided" },
+          { "from": 11, "word": "trusts" },
+          { "from": 35, "word": "trusts implicitly" }
+        ]
+      },
+      {
+        "id": "interest",
+        "name": "Interest",
+        "description": "how strongly they are drawn to the other: attention, curiosity, wanting to be around them. It isn't approval: someone can be fascinated by a person they disapprove of and distrust, and low interest is aversion, not disapproval",
+        "bands": [
+          { "from": -50, "word": "repelled" },
+          { "from": -34, "word": "put off" },
+          { "from": -10, "word": "indifferent" },
+          { "from": 11, "word": "intrigued" },
+          { "from": 35, "word": "captivated" }
+        ]
+      }
     ],
-    "min": 0,
-    "max": 100
+    "min": -50,
+    "max": 50,
+    "neutral": 0
   },
   "wordScale": [
     { "word": "much less", "value": -8 },
@@ -75,13 +109,7 @@
     { "word": "much more", "value": 8 }
   ],
   "relations": {
-    "start": { "approval": 50, "trust": 40, "attraction": 10 },
-    "bands": [
-      { "label": "enemies", "max": { "approval": 15, "trust": 20 } },
-      { "label": "rivals", "max": { "approval": 30 } },
-      { "label": "friends", "min": { "approval": 65, "trust": 60 } }
-    ],
-    "otherwise": "acquaintances"
+    "start": { "approval": 0, "trust": 0, "interest": 0 }
   },
   "pressures": ["background", "pressing", "urgent"],
   "narration": { "departure": "{name} leaves." }

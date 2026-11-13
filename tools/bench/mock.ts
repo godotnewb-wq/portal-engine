@@ -19,7 +19,7 @@ export function mockLlm(): BenchLlm {
     },
     summarize: async (prompt) => {
       const who = prompt.user.match(/^About (\S+)/)?.[1] ?? 'Someone'
-      return JSON.stringify({ memory: `${who} remembers a mock scene.`, level: 'fleeting', approval: 'unchanged', trust: 'unchanged', attraction: 'a little more' })
+      return JSON.stringify({ memory: `${who} remembers a mock scene.`, level: 'fleeting', approval: 'unchanged', trust: 'unchanged', interest: 'a little more' })
     }
   }
 }

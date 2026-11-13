@@ -109,7 +109,7 @@ describe('buildPack', () => {
 
   it('reports duplicate ids and relations to nobody across files', () => {
     const mara = fixture.characters[0]!
-    expect(packProblems({ ...fixture, characters: [...fixture.characters, mara, { ...mara, id: 'ghost', relations: [{ to: 'nobody', label: 'x', meters: mara.meters }] }] })).toEqual(
+    expect(packProblems({ ...fixture, characters: [...fixture.characters, mara, { ...mara, id: 'ghost', relations: [{ to: 'nobody', note: 'x', meters: mara.meters }] }] })).toEqual(
       expect.arrayContaining(['character id "mara" is used twice', 'ghost has a relation to unknown character "nobody"'])
     )
   })

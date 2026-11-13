@@ -1,4 +1,4 @@
-import { mkdtempSync, readdirSync, writeFileSync } from 'node:fs'
+import { mkdirSync, mkdtempSync, readdirSync, writeFileSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
@@ -23,9 +23,9 @@ function playedGame() {
         ...plainSummary(content, state, 'oria-senn'),
         memory: 'Oria was caught lying.',
         level: 'core',
-        delta: { approval: -4, trust: -8, attraction: 1 },
+        delta: { approval: -4, trust: -8, interest: 1 },
         learned: ['client-is-grid-corporation'],
-        others: [{ with: 'brask', delta: { approval: 1, trust: 0, attraction: 0 }, reason: '' }]
+        others: [{ with: 'brask', delta: { approval: 1, trust: 0, interest: 0 }, reason: '' }]
       }
     }
   ]).state
@@ -43,7 +43,7 @@ describe('SaveStore', () => {
     const loaded = store.load('slot2')
     expect(loaded).toEqual(state)
     expect(loaded.memories[0]).toMatchObject({ owner: 'oria-senn', text: 'Oria was caught lying.', level: 'core' })
-    expect(loaded.meters['oria-senn']).toEqual({ approval: 41, trust: 17, attraction: 31 })
+    expect(loaded.meters['oria-senn']).toEqual({ approval: -9, trust: -23, interest: 16 })
     expect(loaded.relations.some((r) => r.from === 'oria-senn' && r.to === 'brask')).toBe(true)
     expect(loaded.facts['oria-senn']).toHaveLength(1)
   })
@@ -99,9 +99,22 @@ describe('SaveStore', () => {
     const dir = tempDir()
     const store = new SaveStore(dir, PACK)
     store.save('slot3', barScene())
-    writeFileSync(join(dir, 'slot3.json'), '{"version": 0}')
+    writeFileSync(join(dir, 'slot3.json'), '{"version": 4, "cut off')
     expect(store.list()).toEqual([expect.objectContaining({ slotId: 'slot3', unreadable: true })])
+    expect(store.list()[0]).not.toHaveProperty('outdated')
     expect(() => store.load('slot3')).toThrow('Slot 3 could not be read')
+  })
+
+  // Milestone 4a, acceptance 1: a save from before the signed meters (3.5's format, version 3) is refused with a clear
+  // message, not patched and not called damaged.
+  it('refuses a save made with an earlier save format, and says so', () => {
+    const dir = tempDir()
+    const store = new SaveStore(dir, PACK)
+    const old = { version: 3, pack: PACK, savedAt: '2026-11-12T10:00:00.000Z', state: { ...barScene(), meters: { vex: { approval: 55, trust: 60, attraction: 35 } } } }
+    mkdirSync(dir, { recursive: true })
+    writeFileSync(join(dir, 'slot4.json'), JSON.stringify(old))
+    expect(store.list()).toEqual([{ slotId: 'slot4', savedAt: expect.any(String), unreadable: true, outdated: true }])
+    expect(() => store.load('slot4')).toThrow("Slot 4 was made with an earlier version of the game and can't be loaded")
   })
 })
 
@@ -128,7 +141,7 @@ describe('stateProblems', () => {
 
   it('names what a save refers to that the content no longer has', () => {
     const state = barScene()
-    state.meters['ghost'] = { approval: 1, trust: 1, attraction: 1 }
+    state.meters['ghost'] = { approval: 1, trust: 1, interest: 1 }
     state.scene!.walkOns.push('bouncer')
     expect(stateProblems(content, state)).toEqual(['meters names unknown character "ghost"', 'the scene has unknown walk-on "bouncer"'])
   })
@@ -136,6 +149,6 @@ describe('stateProblems', () => {
   it('refuses a game whose meters are not the pack’s', () => {
     const state = barScene()
     state.meters['vex'] = { approval: 1, trust: 1 }
-    expect(stateProblems(content, state)).toEqual(["its relationship meters aren't this pack's (approval, attraction, trust)"])
+    expect(stateProblems(content, state)).toEqual(["its relationship meters aren't this pack's (approval, interest, trust)"])
   })
 })

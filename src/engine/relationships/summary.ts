@@ -1,5 +1,5 @@
 import type { Character, Meters } from '@engine/characters'
-import type { Ruleset } from '@engine/rules'
+import { meterWords, type Ruleset } from '@engine/rules'
 import { type GameState, type Memory, type Relation } from '@engine/state'
 import { characterById, locationById, type Pack } from '@engine/pack'
 import type { Prompt } from '@engine/core'
@@ -59,15 +59,13 @@ Reply with only a JSON object:
 - learned: ids of ${me}'s own secrets that ${player} truly found out in this scene (said or plainly shown); [] if none.${others.length > 0 ? `\n- others: how ${me}'s feelings toward ${others.map((o) => `${firstName(o.name)} [${o.id}]`).join(', ')} changed in this scene, same words; leave someone out if nothing changed.` : '\n- others: [].'}`
 }
 
-const meterLine = (r: Ruleset, m: Meters) => r.meters.list.map((x) => `${x.id} ${m[x.id] ?? r.meters.min}`).join(', ')
-
 function about(r: Ruleset, state: GameState, c: Character, others: Character[]): string {
   const me = firstName(c.name)
   const meters = state.meters[c.id]!
   const memories = recall(state, c)
   const relations = others.flatMap((o) => {
     const rel = state.relations.find((x) => x.from === c.id && x.to === o.id)
-    return rel ? [`- Toward ${firstName(o.name)}: ${rel.label}; ${meterLine(r, rel.meters)}`] : []
+    return rel ? [`- Toward ${firstName(o.name)}: ${meterWords(r, rel.meters)}${rel.note ? ` (${rel.note})` : ''}`] : []
   })
   const scene = state.scene!
   return [
@@ -76,7 +74,7 @@ function about(r: Ruleset, state: GameState, c: Character, others: Character[]):
     `- Wants: ${c.agenda.longTerm.join('; ')}. Tonight: ${c.agenda.current}`,
     c.values.length > 0 && `- Values: ${c.values.map((v) => `${v.stance} ${v.value}`).join(', ')}`,
     ...c.secrets.map((s) => `- Secret [${s.id}]: ${s.text}`),
-    `- Before this scene, toward ${state.player.name}: ${meterLine(r, meters)} (${r.meters.min}–${r.meters.max})`,
+    `- Before this scene, toward ${state.player.name}: ${meterWords(r, meters)}`,
     ...relations,
     memories.length > 0 && `- Remembers: ${memories.map((m) => m.text).join(' ')}`,
     `- Mood at the end: ${scene.moods[c.id] ?? c.mood}; comfort ${scene.comfort[c.id] ?? 3}/5.`,
@@ -172,14 +170,7 @@ export function plainSummary(content: Pack, state: GameState, id: string): Summa
 /** Moves each meter by its change, kept within the ruleset's range. */
 export function addMeters(r: Ruleset, m: Meters, d: MeterDelta): Meters {
   const clamp = (n: number) => Math.max(r.meters.min, Math.min(r.meters.max, n))
-  return Object.fromEntries(r.meters.list.map((x) => [x.id, clamp((m[x.id] ?? r.meters.min) + (d[x.id] ?? 0))]))
-}
-
-/** A relation's band, from its meters, by the ruleset's bands. A seeded label is kept until the meters move it into another band. */
-export function bandOf(r: Ruleset, m: Meters): string {
-  const fits = (band: Ruleset['relations']['bands'][number]) =>
-    Object.entries(band.min).every(([id, v]) => (m[id] ?? 0) >= v) && Object.entries(band.max).every(([id, v]) => (m[id] ?? 0) <= v)
-  return r.relations.bands.find(fits)?.label ?? r.relations.otherwise
+  return Object.fromEntries(r.meters.list.map((x) => [x.id, clamp((m[x.id] ?? r.meters.neutral) + (d[x.id] ?? 0))]))
 }
 
 /** What one witness took from the scene, as the summary screen shows it. */
@@ -192,7 +183,7 @@ export interface WitnessReport {
   after: Meters
   /** Secrets the player learned, as text. */
   learned: string[]
-  others: { with: string; before: Meters; after: Meters; label: string; reason: string }[]
+  others: { with: string; before: Meters; after: Meters; reason: string }[]
   /** Set when the summary call failed and the game wrote a plain memory. */
   error?: string
 }
@@ -232,12 +223,11 @@ export function applySummaries(content: Pack, state: GameState, summaries: { id:
       const existing = relations.find((r) => r.from === id && r.to === other)
       // Relations are created where there's a reason; sharing a scene is one.
       const fresh = { ...r.relations.start }
-      const start: Relation = existing ?? { from: id, to: other, label: bandOf(r, fresh), meters: fresh }
+      const start: Relation = existing ?? { from: id, to: other, meters: fresh }
       const moved = addMeters(r, start.meters, o.delta)
-      const label = bandOf(r, moved) !== bandOf(r, start.meters) ? bandOf(r, moved) : start.label
-      const next = { ...start, meters: moved, label }
+      const next = { ...start, meters: moved }
       relations = existing ? relations.map((r) => (r === existing ? next : r)) : [...relations, next]
-      others.push({ with: other, before: start.meters, after: moved, label, reason: o.reason })
+      others.push({ with: other, before: start.meters, after: moved, reason: o.reason })
     }
 
     reports.push({ id, memory: summary.memory, level: summary.level, reason: summary.reason, before, after, learned: learnedSecrets.map((s) => s.text), others, ...(error && { error }) })

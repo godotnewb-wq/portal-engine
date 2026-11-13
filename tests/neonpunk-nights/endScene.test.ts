@@ -12,12 +12,12 @@ describe('endScene', () => {
       await new Promise((r) => setTimeout(r, 10))
       running--
       const who = prompt.user.match(/^About (\w+)/)![1]
-      return JSON.stringify({ memory: `${who} had a drink with Rook.`, level: 'fleeting', approval: 'a little more', trust: 'unchanged', attraction: 'unchanged' })
+      return JSON.stringify({ memory: `${who} had a drink with Rook.`, level: 'fleeting', approval: 'a little more', trust: 'unchanged', interest: 'unchanged' })
     })
     expect(most).toBe(3)
     expect(state.scene).toBeNull()
     expect(reports.map((r) => r.memory).sort()).toEqual(['Brask had a drink with Rook.', 'Oria had a drink with Rook.', 'Vex had a drink with Rook.'])
-    expect(state.meters['vex']!.approval).toBe(56)
+    expect(state.meters['vex']!.approval).toBe(6)
   })
 
   it('gives a witness whose call fails a plain memory, without losing the others', async () => {
@@ -28,6 +28,6 @@ describe('endScene', () => {
     const brask = reports.find((r) => r.id === 'brask')!
     expect(brask).toMatchObject({ error: 'timeout', memory: 'Brask spent time with Rook at The Sump Lantern.' })
     expect(brask.after).toEqual(brask.before)
-    expect(reports.find((r) => r.id === 'vex')!.after.approval).toBe(59)
+    expect(reports.find((r) => r.id === 'vex')!.after.approval).toBe(9)
   })
 })

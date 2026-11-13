@@ -19,8 +19,8 @@ export function statsOf(r: Ruleset, character: Character): StatBlock {
  */
 function assistMeter(r: Ruleset, state: GameState, helper: string, who: string): number {
   const meter = r.assists.meter
-  if (who === 'player') return state.meters[helper]?.[meter] ?? 0
-  return state.relations.find((x) => x.from === helper && x.to === who)?.meters[meter] ?? 0
+  if (who === 'player') return state.meters[helper]?.[meter] ?? r.meters.neutral
+  return state.relations.find((x) => x.from === helper && x.to === who)?.meters[meter] ?? r.meters.neutral
 }
 
 export interface ResolveOptions {

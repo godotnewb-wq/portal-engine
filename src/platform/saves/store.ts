@@ -23,8 +23,8 @@ export class SaveStore {
       if (!existsSync(path)) return []
       try {
         return [summarize(slotId, this.read(path))]
-      } catch {
-        return [{ slotId, savedAt: statSync(path).mtime.toISOString(), unreadable: true }]
+      } catch (e) {
+        return [{ slotId, savedAt: statSync(path).mtime.toISOString(), unreadable: true, ...(e instanceof OutdatedSave && { outdated: true as const }) }]
       }
     })
   }
@@ -54,7 +54,8 @@ export class SaveStore {
     let file: SaveFile
     try {
       file = this.read(path)
-    } catch {
+    } catch (e) {
+      if (e instanceof OutdatedSave) throw new Error(`${slotLabel(slotId)} was made with an earlier version of the game and can't be loaded`)
       throw new Error(`${slotLabel(slotId)} could not be read`)
     }
     if (file.pack.id !== this.pack.id) throw new Error(`${slotLabel(slotId)} belongs to the pack "${file.pack.id}"`)
@@ -83,9 +84,15 @@ export class SaveStore {
   }
 
   private read(path: string): SaveFile {
-    return SaveFileSchema.parse(JSON.parse(readFileSync(path, 'utf8')))
+    const raw: unknown = JSON.parse(readFileSync(path, 'utf8'))
+    const version = typeof raw === 'object' && raw !== null ? (raw as { version?: unknown }).version : undefined
+    if (typeof version === 'number' && version < SAVE_VERSION) throw new OutdatedSave()
+    return SaveFileSchema.parse(raw)
   }
 }
+
+/** A save in an earlier format: refused with its own message rather than called damaged (milestone 4a). */
+class OutdatedSave extends Error {}
 
 function summarize(slotId: SlotId, file: SaveFile): SaveSummary {
   return {

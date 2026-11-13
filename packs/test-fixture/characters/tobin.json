@@ -19,5 +19,5 @@
   },
   "mood": "uneasy",
   "secrets": [{ "id": "after-closing", "text": "Tobin let someone into the yard after closing.", "tell": "Hums" }],
-  "meters": { "warmth": 6, "bond": 3 }
+  "meters": { "warmth": -2, "bond": -2 }
 }

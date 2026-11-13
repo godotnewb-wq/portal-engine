@@ -67,22 +67,33 @@ export const RulesetSchema = z.object({
     advantageFrom: z.number()
   }),
   meters: z.object({
-    /** The relationship meters every character keeps toward the player and toward each other. */
-    list: z.array(z.object({ id, name: z.string(), description: z.string() })).min(1),
+    /**
+     * The relationship meters every character keeps toward the player and toward each other (relationships §1). Each
+     * has word bands, lowest first: prompts and the summary screen show the band a value falls in, never the number.
+     */
+    list: z
+      .array(
+        z.object({
+          id,
+          name: z.string(),
+          /** What the meter means, in a few words; prompts use it so the LLM keeps the meters apart. */
+          description: z.string(),
+          /** From each `from` up to the next band's: lowest first, the first starting at `min`. */
+          bands: z.array(z.object({ from: z.number(), word: z.string().min(1) })).min(1)
+        })
+      )
+      .min(1),
+    /** Signed: below `neutral` is a real feeling the other way (distrust, disapproval, aversion), not "not much yet". */
     min: z.number(),
-    max: z.number()
+    max: z.number(),
+    /** No settled feeling either way: where a meter with no value reads. */
+    neutral: z.number()
   }),
   /** The words a summary judges each meter's change in, worst to best, and what each moves a meter by. */
   wordScale: z.array(z.object({ word: z.string().min(1), value: z.number() })).min(2),
   relations: z.object({
-    /** Where a relation starts when two characters first share a scene. */
-    start: z.record(id, z.number()),
-    /**
-     * Labels by meter bands, checked in order; the first that fits wins. A band fits when every `min` is met and every
-     * `max` is not exceeded. A seeded label is kept until the meters move into another band.
-     */
-    bands: z.array(z.object({ label: z.string(), min: z.record(id, z.number()).default({}), max: z.record(id, z.number()).default({}) })),
-    otherwise: z.string()
+    /** Where a relation starts when two characters first share a scene: a true stranger. */
+    start: z.record(id, z.number())
   }),
   /**
    * How hard a character's aim for the scene presses on them, weakest first (e.g. "idle", "keen", "driven"). The
@@ -138,8 +149,16 @@ export function rulesetProblems(r: Ruleset): string[] {
   if (!meters.includes(r.assists.meter)) problems.push(`assists use unknown meter "${r.assists.meter}"`)
   for (const m of meters) if (!(m in r.relations.start)) problems.push(`relations.start has no value for meter "${m}"`)
   for (const m of Object.keys(r.relations.start)) if (!meters.includes(m)) problems.push(`relations.start names unknown meter "${m}"`)
-  for (const band of r.relations.bands) {
-    for (const m of [...Object.keys(band.min), ...Object.keys(band.max)]) if (!meters.includes(m)) problems.push(`band "${band.label}" names unknown meter "${m}"`)
+  const inRange = (v: number) => v >= r.meters.min && v <= r.meters.max
+  if (r.meters.min >= r.meters.max) problems.push('meters.min is not below meters.max')
+  if (!inRange(r.meters.neutral)) problems.push(`meters.neutral ${r.meters.neutral} is outside ${r.meters.min}–${r.meters.max}`)
+  for (const [m, v] of Object.entries(r.relations.start)) if (!inRange(v)) problems.push(`relations.start for "${m}" is outside ${r.meters.min}–${r.meters.max}`)
+  for (const m of r.meters.list) {
+    if (m.bands[0]!.from !== r.meters.min) problems.push(`meter "${m.id}"'s first band must start at ${r.meters.min}`)
+    m.bands.forEach((b, i) => {
+      if (!inRange(b.from)) problems.push(`meter "${m.id}"'s band "${b.word}" starts outside ${r.meters.min}–${r.meters.max}`)
+      if (i > 0 && b.from <= m.bands[i - 1]!.from) problems.push(`meter "${m.id}"'s bands must rise: "${b.word}" starts at or below the one before`)
+    })
   }
   if (!r.wordScale.some((w) => w.value === 0)) problems.push('the word scale needs a word worth 0 (no change)')
   if (r.attributes.min > r.attributes.max) problems.push('attributes.min is above attributes.max')
@@ -148,6 +167,17 @@ export function rulesetProblems(r: Ruleset): string[] {
 }
 
 export const meterIds = (r: Ruleset): string[] => r.meters.list.map((m) => m.id)
+
+/** The word band a meter's value falls in (relationships §1); a value outside the range reads as the nearest end. */
+export function bandWord(r: Ruleset, meter: string, value: number): string {
+  const m = r.meters.list.find((x) => x.id === meter)
+  if (!m) return String(value)
+  return [...m.bands].reverse().find((b) => value >= b.from)?.word ?? m.bands[0]!.word
+}
+
+/** A character's feelings as prompts show them, in bands: "approval: approves; trust: undecided; interest: intrigued". */
+export const meterWords = (r: Ruleset, m: Record<string, number>): string =>
+  r.meters.list.map((x) => `${x.id}: ${bandWord(r, x.id, m[x.id] ?? r.meters.neutral)}`).join('; ')
 export const skillById = (r: Ruleset, id: string) => r.skills.find((s) => s.id === id)
 export const difficultyDc = (r: Ruleset, word: string): number | undefined => r.difficulties.find((d) => d.word === word)?.dc
 

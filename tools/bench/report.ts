@@ -122,7 +122,7 @@ function scenarioSection(names: Names, run: ScenarioRun, repeats: boolean, budge
     lines.push('### After the scene', '')
     for (const r of summaries) {
       lines.push(`- **${name(r.id)}** (${r.level}): ${r.memory}${r.reason ? ` — *${r.reason}*` : ''}`, `  - Toward the player: ${delta(r.before, r.after)}`)
-      for (const o of r.others) lines.push(`  - Toward ${name(o.with)} (${o.label}): ${delta(o.before, o.after)}`)
+      for (const o of r.others) lines.push(`  - Toward ${name(o.with)}: ${delta(o.before, o.after)}`)
       for (const fact of r.learned) lines.push(`  - Learned: ${fact}`)
       if (r.error) lines.push(`  - ⚠ summary failed: ${r.error}`)
     }

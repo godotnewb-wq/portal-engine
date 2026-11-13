@@ -20,7 +20,8 @@ export const MemorySchema = z.object({
 export type Memory = z.infer<typeof MemorySchema>
 
 /** One direction of a relationship between two characters (A's feelings for B need not match B's for A). */
-export const RelationSchema = z.object({ from: IdSchema, to: IdSchema, label: z.string(), meters: MetersSchema })
+/** `note`: the authored line of history between them, if any (relationships §3). */
+export const RelationSchema = z.object({ from: IdSchema, to: IdSchema, note: z.string().optional(), meters: MetersSchema })
 export type Relation = z.infer<typeof RelationSchema>
 
 export const GameStateSchema = z.object({

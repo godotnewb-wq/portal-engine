@@ -41,10 +41,10 @@ The engine supplies the mechanics; the ruleset their parameters and words. See `
 - `ranks` (max and cap by level), `levels`.
 - `difficulties`: the words the director may use, and each one's target number.
 - `degrees` (`strongMargin`, `costMargin`), `criticals` (`hit`, `miss`).
-- `assists`: which relationship meter decides how much a helper adds, and the thresholds.
-- `meters`: the relationship meters every character keeps toward the player and each other (`id`, `name`, `description` used in summary prompts), and their range.
+- `assists`: which relationship meter decides how much a helper adds, and the thresholds (milestone 4a task 5 replaces this with per-companion assist gates).
+- `meters`: the relationship meters every character keeps toward the player and each other (`id`, `name`, `description` used in the director and summary prompts, and `bands`: word bands lowest first, the first starting at `min`), their signed range (`min`, `max`) and `neutral` point. Prompts and the summary screen show bands, never numbers.
 - `wordScale`: the words summaries judge a change in, worst to best, each with its value; one must be worth 0.
-- `relations`: where a new relation starts, and labels by meter bands.
+- `relations`: where a new relation starts (`start`: a stranger, normally neutral).
 - `codex`: `fullWords`, the most words a codex entry's text may have (default 120); `sceneTokens` and `triggeredTokens`, rough budgets for the scene-scoped and triggered lore layers (defaults 800 and 400).
 - `pressures`: words for how hard a character's aim for the scene presses on them, weakest first (at least two). The weakest keeps the aim out of the writer's brief; the strongest makes it what drives them.
 
@@ -54,11 +54,11 @@ The engine supplies the mechanics; the ruleset their parameters and words. See `
 - `stances`: official stances between factions, one way: `{ "from", "toward", "stance" }`, `stance` being one of the pack's stance words. Write only the ones that matter; a faction with none toward another has none, and nothing is mirrored.
 - `phrases.json`: `overused` (phrases this world's prose over-uses), `stanceWords` (exactly five, warmest first, if there are stances), `stanceWarnings` (words that suggest codex prose is stating a stance; flagged as warnings) and `genericWords` (words the name check ignores when comparing names, like "the" or "council").
 - `primer.md`: a short paragraph of the world's essentials, in prompt-ready prose. Keep it under ~200 words. With a codex, it opens the stage before every entry's `stage` line, so keep to what no stage line says.
-- `tone.md`: a few lines on tone. The engine adds its general style guide and its adults-only rule; a pack can't turn the latter off.
+- `tone.md`: a few lines on tone. The engine adds its general style guide.
 
 ## Characters, locations, player
 
-Same files as in milestone 1, checked against the ruleset and setting: a character's `species` and `faction` must be the setting's, its `meters` exactly the ruleset's meters, its `stats` the ruleset's attributes and skills within their ranges and rank caps; a location's `tier` must be a setting tier. Describe every character as an adult.
+Same files as in milestone 1, checked against the ruleset and setting: a character's `species` and `faction` must be the setting's, its `meters` exactly the ruleset's meters, its `stats` the ruleset's attributes and skills within their ranges and rank caps; a location's `tier` must be a setting tier.
 
 - Characters may also have a `level` in their faction (`affiliated`, `member`, `trusted` or `leadership`; needs a `faction`), a `rank` title they go by (flavor; needs a `level`) and an `occupation` (lower case). Any may be left out.
 - A secret is personal (`text`) or linked to a codex secret: `{ "id", "codex": "<secret entry id>", "role": "their part in it", "angle": "how they feel about it", "tell" }`. The holder must fit the entry's `known-by`, and no more characters than its `cap` may hold it.

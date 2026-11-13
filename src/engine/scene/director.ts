@@ -1,7 +1,7 @@
 import type { Prompt } from '@engine/core'
-import type { Character, Meters } from '@engine/characters'
+import type { Character } from '@engine/characters'
 import type { GameState, Turn } from '@engine/state'
-import type { Ruleset } from '@engine/rules'
+import { meterWords, type Ruleset } from '@engine/rules'
 import { characterById, locationById, type Pack } from '@engine/pack'
 import { recall } from '@engine/memory'
 import { tierById } from '@engine/world'
@@ -13,10 +13,6 @@ import { cueSecretLine, fullSecretLine, type SecretShown } from './secrets'
 
 /** How many past turns go into prompts verbatim; older ones live in the running summary. */
 export const RECENT_TURNS = 3
-
-/** A character's meters as the prompts show them, e.g. "approval 55, trust 60, attraction 35 (0–100)". */
-export const meterWords = (r: Ruleset, m: Meters): string =>
-  `${r.meters.list.map((x) => `${x.id} ${m[x.id] ?? r.meters.min}`).join(', ')} (${r.meters.min}–${r.meters.max})`
 
 
 /**
@@ -42,6 +38,7 @@ ${loreLines > 0 ? '  "lore": [{"entry","who","line"}],\n' : ''}  "change": "..."
 - player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking and asking are not uncertain.
 - checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most ${MAX_CHECKS}. who is "player" or a character id. skill is one of: ${r.skills.map((x) => x.id).join(', ')}. difficulty is one of: ${r.difficulties.map((d) => d.word).join(', ')}. stakes says what success means. assist: a character present who helps.
 - People are in the moment. What they say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line.
+- Feelings on the sheets are words for each meter, toward the player and toward others here. ${r.meters.list.map((m) => `${m.name} (${m.id}): ${m.description}.`).join(' ')} Each is a separate feeling; when they pull apart, play the tension.
 - speakers: at most ${MAX_SPEAKERS} characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone. mood: how what just happened lands on them.
 - pressure: how hard their aim for tonight (on their sheet) presses on them right now, one of: ${r.pressures.join(', ')} (weakest first). Most of the time it is ${r.pressures[0]}. It rises when time runs short or events push, and moves at most one step a turn.
 - keeps: ids of their own secrets, only when what was just said or done touches one; touched: the words that touched it, as said. Most turns nobody keeps anything. approach: lie, deflect or partial truth. A secret marked "in short" is shown as a brief cue; keep it by its id all the same, and the writer will get the whole secret.
@@ -119,7 +116,7 @@ export function sheet(content: Pack, state: GameState, c: Character, present: st
   const meters = state.meters[c.id]
   const relations = state.relations
     .filter((r) => r.from === c.id && present.includes(r.to))
-    .map((r) => `${characterById(content, r.to)?.name ?? r.to}: ${r.label} (${meterWords(content.ruleset, r.meters)})`)
+    .map((r) => `${characterById(content, r.to)?.name ?? r.to}: ${meterWords(content.ruleset, r.meters)}${r.note ? ` (${r.note})` : ''}`)
   return [
     `## ${c.name} [id: ${c.id}] — ${c.tier}, ${c.species}, ${c.pronouns}`,
     `Role: ${c.role}`,

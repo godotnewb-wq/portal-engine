@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { GameStateSchema, type GameState } from '@engine/state'
 import { fixture, yardScene } from '@tests/fixture'
 import { endScene } from './endScene'
-import { addMeters, applySummaries, bandOf, buildSummaryPrompt, parseSummary, plainSummary } from './summary'
+import { addMeters, applySummaries, buildSummaryPrompt, parseSummary, plainSummary } from './summary'
 
 const R = fixture.ruleset
 
@@ -19,8 +19,9 @@ describe('summaries in the pack’s meters and words', () => {
     expect(system).toMatch(/"warmth": "\.\.\.", "bond": "\.\.\."/)
     expect(system).toMatch(/each one of: "colder", "same", "warmer"/)
     expect(system).toMatch(/warmth is how much they like the other; bond is how much they would do for the other/)
-    expect(system).not.toMatch(/approval|attraction/)
-    expect(user).toMatch(/toward Kit: warmth 10, bond 8 \(0–20\)/)
+    expect(system).not.toMatch(/approval|interest/)
+    expect(user).toMatch(/toward Kit: warmth: civil; bond: loose/)
+    expect(user).toMatch(/Toward Tobin: warmth: civil; bond: loose \(has known him since the guild took him on\)/)
   })
 
   it('maps the words to numbers through the ruleset, ignoring words not on its scale', () => {
@@ -29,11 +30,9 @@ describe('summaries in the pack’s meters and words', () => {
     expect(s.others[0]!.delta).toEqual({ warmth: -3, bond: 0 })
   })
 
-  it('keeps meters within the ruleset’s range and labels relations by its bands', () => {
-    expect(addMeters(R, { warmth: 19, bond: 1 }, { warmth: 3, bond: -3 })).toEqual({ warmth: 20, bond: 0 })
-    expect(bandOf(R, { warmth: 2, bond: 10 })).toBe('foes')
-    expect(bandOf(R, { warmth: 16, bond: 12 })).toBe('close')
-    expect(bandOf(R, { warmth: 10, bond: 5 })).toBe('known')
+  it('keeps meters within the ruleset’s signed range, and reads a missing meter as neutral', () => {
+    expect(addMeters(R, { warmth: 9, bond: -9 }, { warmth: 3, bond: -3 })).toEqual({ warmth: 10, bond: -10 })
+    expect(addMeters(R, { warmth: 2 }, { bond: -3 })).toEqual({ warmth: 2, bond: -3 })
   })
 
   it('applies summaries: memories, meters, real secrets, new relations from the ruleset’s start values', () => {
@@ -42,11 +41,11 @@ describe('summaries in the pack’s meters and words', () => {
       { id: 'tobin', summary: { ...plainSummary(fixture, state, 'tobin'), memory: 'Tobin was asked about last night.', delta: { warmth: -3, bond: 0 }, learned: ['after-closing', 'made-up'], others: [{ with: 'Mara', delta: { warmth: 3, bond: 0 }, reason: '' }] } }
     ])
     expect(next.scene).toBeNull()
-    expect(next.meters['tobin']).toEqual({ warmth: 3, bond: 3 })
+    expect(next.meters['tobin']).toEqual({ warmth: -5, bond: -2 })
     expect(next.facts['tobin']).toEqual(['Tobin let someone into the yard after closing.'])
     // Tobin had no relation to Mara: it starts at the ruleset's 8 / 5 and moves from there.
-    expect(next.relations.find((r) => r.from === 'tobin' && r.to === 'mara')).toEqual({ from: 'tobin', to: 'mara', label: 'known', meters: { warmth: 11, bond: 5 } })
-    expect(reports[0]!.after).toEqual({ warmth: 3, bond: 3 })
+    expect(next.relations.find((r) => r.from === 'tobin' && r.to === 'mara')).toEqual({ from: 'tobin', to: 'mara', meters: { warmth: 3, bond: 0 } })
+    expect(reports[0]!.after).toEqual({ warmth: -5, bond: -2 })
     expect(GameStateSchema.parse(next)).toEqual(next)
   })
 
@@ -55,7 +54,7 @@ describe('summaries in the pack’s meters and words', () => {
       if (/^About Tobin/.test(prompt.user)) throw new Error('timeout')
       return JSON.stringify({ memory: 'Mara counted the crates.', warmth: 'warmer', bond: 'same' })
     })
-    expect(reports.find((r) => r.id === 'mara')!.after).toEqual({ warmth: 13, bond: 8 })
+    expect(reports.find((r) => r.id === 'mara')!.after).toEqual({ warmth: 5, bond: 3 })
     expect(reports.find((r) => r.id === 'tobin')).toMatchObject({ error: 'timeout', memory: 'Tobin spent time with Kit at The Guild Yard.' })
   })
 })
@@ -75,7 +74,7 @@ describe('the scene-end trace (milestone 2, A1)', () => {
     ])
     const mara = trace.witnesses.find((w) => w.id === 'mara')!
     expect(mara.summary).toMatchObject({ memory: 'Mara saw through him.', delta: { warmth: 3, bond: 0 } })
-    expect(mara.report).toMatchObject({ before: { warmth: 10, bond: 8 }, after: { warmth: 13, bond: 8 } })
+    expect(mara.report).toMatchObject({ before: { warmth: 2, bond: 3 }, after: { warmth: 5, bond: 3 } })
     expect(trace.witnesses.find((w) => w.id === 'tobin')).toMatchObject({ error: 'timed out', summary: { level: 'fleeting' } })
   })
 })

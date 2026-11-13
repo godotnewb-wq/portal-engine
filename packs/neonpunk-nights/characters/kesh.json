@@ -91,18 +91,18 @@
     }
   ],
   "meters": {
-    "approval": 45,
-    "trust": 35,
-    "attraction": 5
+    "approval": -5,
+    "trust": -5,
+    "interest": 0
   },
   "relations": [
     {
       "to": "teo-varrin",
-      "label": "wary of an uncertified hand on her panel",
+      "note": "wary of an uncertified hand on her panel",
       "meters": {
-        "approval": 45,
-        "trust": 30,
-        "attraction": 0
+        "approval": -5,
+        "trust": -10,
+        "interest": 0
       }
     }
   ],

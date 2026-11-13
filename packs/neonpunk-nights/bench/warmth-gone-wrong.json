@@ -5,7 +5,7 @@
   "location": "sump-lantern",
   "cast": ["vex", "brask"],
   "seed": 51,
-  "meters": { "vex": { "approval": 62, "trust": 55, "attraction": 20 } },
+  "meters": { "vex": { "approval": 12, "trust": 15, "interest": 8 } },
   "moods": { "vex": "loose, a drink in, enjoying herself" },
   "turns": [
     "Good to see you, Vex. How was the run tonight?",

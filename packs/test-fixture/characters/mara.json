@@ -25,7 +25,7 @@
   "knowledge": ["Tobin was in the yard after closing"],
   "values": [{ "value": "honesty", "stance": "likes" }],
   "secrets": [{ "id": "two-books", "codex": "faction.guild.second-ledger", "role": "she keeps the second ledger", "angle": "would rather lose her post than see it found", "tell": "Gives exact numbers" }],
-  "meters": { "warmth": 10, "bond": 8 },
-  "relations": [{ "to": "tobin", "label": "known", "meters": { "warmth": 9, "bond": 4 } }],
+  "meters": { "warmth": 2, "bond": 3 },
+  "relations": [{ "to": "tobin", "note": "has known him since the guild took him on", "meters": { "warmth": 1, "bond": -1 } }],
   "stats": { "level": 2, "attributes": { "brawn": 3, "wits": 7, "nerve": 5 }, "skills": { "notice": 1, "talk": 1 } }
 }

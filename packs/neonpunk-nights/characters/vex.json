@@ -93,27 +93,27 @@
     }
   ],
   "meters": {
-    "approval": 55,
-    "trust": 60,
-    "attraction": 35
+    "approval": 5,
+    "trust": 20,
+    "interest": 12
   },
   "relations": [
     {
       "to": "brask",
-      "label": "friends",
+      "note": "friends",
       "meters": {
-        "approval": 65,
-        "trust": 70,
-        "attraction": 5
+        "approval": 15,
+        "trust": 30,
+        "interest": 0
       }
     },
     {
       "to": "oria-senn",
-      "label": "wary acquaintances",
+      "note": "wary acquaintances",
       "meters": {
-        "approval": 30,
-        "trust": 15,
-        "attraction": 20
+        "approval": -20,
+        "trust": -25,
+        "interest": 5
       }
     }
   ],

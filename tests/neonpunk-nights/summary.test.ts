@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { GameStateSchema, type GameState } from '@engine/state'
 import { buildDirectorPrompt } from '@engine/scene'
 import { selectMemories } from '@engine/memory'
-import { applySummaries, bandOf, buildSummaryPrompt, parseSummary, plainSummary, transcript, witnesses } from '@engine/relationships'
+import { applySummaries, buildSummaryPrompt, parseSummary, plainSummary, transcript, witnesses } from '@engine/relationships'
 import { barScene, content } from './support'
 
 /** The bar scene after the worked example's turn, with Brask having left. */
@@ -41,7 +41,9 @@ describe('summary prompt', () => {
     expect(system).toMatch(/"much less", "less", "a little less", "unchanged"/)
     expect(system).toMatch(/Vex \[vex\]/)
     expect(user).toMatch(/Secret \[client-is-grid-corporation\]/)
-    expect(user).toMatch(/approval 45, trust 25, attraction 30/)
+    expect(user).toMatch(/toward Rook: approval: no settled opinion; trust: wary, distrustful; interest: intrigued/)
+    expect(user).toMatch(/Toward Vex: approval: no settled opinion; trust: undecided; interest: indifferent \(useful acquaintance\)/)
+    expect(user).not.toMatch(/-?\d+–-?\d+|approval -?\d/)
     expect(buildSummaryPrompt(content, playedScene(), 'brask').user).toMatch(/left before the scene was over/)
   })
 })
@@ -54,19 +56,19 @@ describe('parseSummary', () => {
       reason: 'Rook pressed her in public.',
       approval: 'a little less',
       trust: 'much_less',
-      attraction: 'more',
+      interest: 'more',
       learned: ['client-is-grid-corporation'],
-      others: [{ with: 'vex', approval: 'less', trust: 'unchanged', attraction: 'sideways', reason: 'She exposed me.' }]
+      others: [{ with: 'vex', approval: 'less', trust: 'unchanged', interest: 'sideways', reason: 'She exposed me.' }]
     }))
-    expect(s).toMatchObject({ level: 'core', delta: { approval: -1, trust: -8, attraction: 4 }, learned: ['client-is-grid-corporation'] })
-    expect(s.others).toEqual([{ with: 'vex', delta: { approval: -4, trust: 0, attraction: 0 }, reason: 'She exposed me.' }])
+    expect(s).toMatchObject({ level: 'core', delta: { approval: -1, trust: -8, interest: 4 }, learned: ['client-is-grid-corporation'] })
+    expect(s.others).toEqual([{ with: 'vex', delta: { approval: -4, trust: 0, interest: 0 }, reason: 'She exposed me.' }])
   })
 
   it('takes a reply that is not JSON as the memory alone, changing nothing', () => {
-    expect(parseSummary(content.ruleset, 'Vex watched Oria squirm.')).toMatchObject({ memory: 'Vex watched Oria squirm.', delta: { approval: 0, trust: 0, attraction: 0 } })
+    expect(parseSummary(content.ruleset, 'Vex watched Oria squirm.')).toMatchObject({ memory: 'Vex watched Oria squirm.', delta: { approval: 0, trust: 0, interest: 0 } })
     // Session 2026-11-07_1955_cdd1: a reply cut off mid-JSON became Vex's memory, braces and all.
     const cut = '{"memory": "Vex pushed Oria for a name and got \\"charm\\" instead.", "level": "normal", "others": [{"with": "brask", "trust": "'
-    expect(parseSummary(content.ruleset, cut)).toMatchObject({ memory: 'Vex pushed Oria for a name and got "charm" instead.', delta: { approval: 0, trust: 0, attraction: 0 } })
+    expect(parseSummary(content.ruleset, cut)).toMatchObject({ memory: 'Vex pushed Oria for a name and got "charm" instead.', delta: { approval: 0, trust: 0, interest: 0 } })
     expect(parseSummary(content.ruleset, '{"level": "normal", "memo').memory).toBe('')
   })
 })
@@ -81,42 +83,41 @@ describe('applySummaries', () => {
           memory: 'Oria lied and was caught.',
           level: 'normal',
           reason: 'Pressed in public.',
-          delta: { approval: -4, trust: -1, attraction: 1 },
+          delta: { approval: -4, trust: -1, interest: 1 },
           learned: ['client-is-grid-corporation', 'made-up-secret'],
-          others: [{ with: 'Vex', delta: { approval: -8, trust: -4, attraction: 0 }, reason: 'She exposed me.' }]
+          others: [{ with: 'Vex', delta: { approval: -8, trust: -4, interest: 0 }, reason: 'She exposed me.' }]
         }
       },
       { id: 'brask', summary: plainSummary(content, state, 'brask'), error: 'timeout' }
     ])
     expect(next.scene).toBeNull()
-    expect(next.meters['oria-senn']).toEqual({ approval: 41, trust: 24, attraction: 31 })
+    expect(next.meters['oria-senn']).toEqual({ approval: -9, trust: -16, interest: 16 })
     expect(next.facts['oria-senn']).toEqual([content.characters.find((c) => c.id === 'oria-senn')!.secrets[0]!.text])
     expect(next.memories.map((m) => m.owner)).toEqual(['oria-senn', 'brask'])
     expect(next.memories[0]!.about).toEqual(expect.arrayContaining(['player', 'vex', 'brask']))
-    // Oria → Vex was approval 40: down to 32, still above the rivals line, so the seeded label stays.
+    // Oria → Vex moves; the authored note stays (relationship notes change only through story developments, 4b).
     const toVex = next.relations.find((r) => r.from === 'oria-senn' && r.to === 'vex')!
-    expect(toVex.meters).toEqual({ approval: 32, trust: 26, attraction: 15 })
-    expect(toVex.label).toBe('useful acquaintance')
+    expect(toVex.meters).toEqual({ approval: -18, trust: -14, interest: 10 })
+    expect(toVex.note).toBe('useful acquaintance')
     expect(reports.find((r) => r.id === 'brask')).toMatchObject({ error: 'timeout', level: 'fleeting' })
     expect(GameStateSchema.parse(next)).toEqual(next)
   })
 
-  it('creates a relation between witnesses who had none, and relabels one that changes band', () => {
+  it('creates a relation between witnesses who had none, starting from strangers (0/0/0), with no note', () => {
     const state = playedScene()
     const { state: next } = applySummaries(content, state, [
-      { id: 'brask', summary: { ...plainSummary(content, state, 'brask'), others: [{ with: 'oria-senn', delta: { approval: -8, trust: -8, attraction: 0 }, reason: '' }] } }
+      { id: 'brask', summary: { ...plainSummary(content, state, 'brask'), others: [{ with: 'oria-senn', delta: { approval: -8, trust: -8, interest: 0 }, reason: '' }] } }
     ])
     const r = next.relations.find((x) => x.from === 'brask' && x.to === 'oria-senn')!
-    expect(r.meters).toEqual({ approval: 42, trust: 32, attraction: 10 })
-    expect(r.label).toBe('acquaintances')
-    expect(bandOf(content.ruleset, { approval: 10, trust: 10, attraction: 0 })).toBe('enemies')
+    expect(r.meters).toEqual({ approval: -8, trust: -8, interest: 0 })
+    expect(r.note).toBeUndefined()
   })
 
-  it('clamps meters to 0–100', () => {
+  it('clamps meters to −50 … +50', () => {
     const state = playedScene()
-    state.meters['vex'] = { approval: 98, trust: 2, attraction: 50 }
-    const { state: next } = applySummaries(content, state, [{ id: 'vex', summary: { ...plainSummary(content, state, 'vex'), delta: { approval: 8, trust: -8, attraction: 0 } } }])
-    expect(next.meters['vex']).toEqual({ approval: 100, trust: 0, attraction: 50 })
+    state.meters['vex'] = { approval: 48, trust: -48, interest: 50 }
+    const { state: next } = applySummaries(content, state, [{ id: 'vex', summary: { ...plainSummary(content, state, 'vex'), delta: { approval: 8, trust: -8, interest: 0 } } }])
+    expect(next.meters['vex']).toEqual({ approval: 50, trust: -50, interest: 50 })
   })
 })
 

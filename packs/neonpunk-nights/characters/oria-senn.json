@@ -96,18 +96,18 @@
     }
   ],
   "meters": {
-    "approval": 45,
-    "trust": 25,
-    "attraction": 30
+    "approval": -5,
+    "trust": -15,
+    "interest": 15
   },
   "relations": [
     {
       "to": "vex",
-      "label": "useful acquaintance",
+      "note": "useful acquaintance",
       "meters": {
-        "approval": 40,
-        "trust": 30,
-        "attraction": 15
+        "approval": -10,
+        "trust": -10,
+        "interest": 10
       }
     }
   ]

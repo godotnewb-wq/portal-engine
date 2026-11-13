@@ -127,9 +127,9 @@ const api: RendererApi = {
     await wait(600)
     // Keyed by the first name each summary prompt opens with ("About Vex …").
     const summaries: Record<string, object> = {
-      Vex: { memory: 'Vex caught Oria lying about the client and called it out in front of Rook, who backed her.', level: 'normal', reason: 'Rook trusted her read over Oria\'s polish.', approval: 'more', trust: 'a little more', attraction: 'a little more', others: [{ with: 'oria-senn', approval: 'less', trust: 'a little less', attraction: 'unchanged', reason: 'Same old Oria.' }] },
-      Brask: { memory: 'Brask sat through a loud night at the Sump Lantern while Oria lied and Vex called it; nobody asked him anything.', level: 'fleeting', reason: 'Too loud, and nobody noticed he wanted to go.', approval: 'unchanged', trust: 'unchanged', attraction: 'unchanged' },
-      Oria: { memory: 'Oria was caught in her "darling" by a Courier and had to admit the client was corporate.', level: 'normal', reason: 'Rook pushed her in public.', approval: 'a little less', trust: 'unchanged', attraction: 'a little more', learned: [], others: [{ with: 'vex', approval: 'less', trust: 'unchanged', attraction: 'unchanged', reason: 'She sees through me.' }] }
+      Vex: { memory: 'Vex caught Oria lying about the client and called it out in front of Rook, who backed her.', level: 'normal', reason: 'Rook trusted her read over Oria\'s polish.', approval: 'more', trust: 'a little more', interest: 'a little more', others: [{ with: 'oria-senn', approval: 'less', trust: 'a little less', interest: 'unchanged', reason: 'Same old Oria.' }] },
+      Brask: { memory: 'Brask sat through a loud night at the Sump Lantern while Oria lied and Vex called it; nobody asked him anything.', level: 'fleeting', reason: 'Too loud, and nobody noticed he wanted to go.', approval: 'unchanged', trust: 'unchanged', interest: 'unchanged' },
+      Oria: { memory: 'Oria was caught in her "darling" by a Courier and had to admit the client was corporate.', level: 'normal', reason: 'Rook pushed her in public.', approval: 'a little less', trust: 'unchanged', interest: 'a little more', learned: [], others: [{ with: 'vex', approval: 'less', trust: 'unchanged', interest: 'unchanged', reason: 'She sees through me.' }] }
     }
     const summarize = content.manifest.id === 'neonpunk-nights' ? async (prompt: { user: string }) => JSON.stringify(summaries[prompt.user.match(/^About (\w+)/)![1]!]) : mockLlm().summarize
     const { state: next, reports } = await endScene(content, state, summarize)

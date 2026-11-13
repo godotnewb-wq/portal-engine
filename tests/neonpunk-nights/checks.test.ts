@@ -64,10 +64,10 @@ describe('edges and assists', () => {
   })
 
   it('gives help by trust only when the helper has the skill', () => {
-    expect(assistFrom(R, { stats: vex, meter: 90 }, 'medicine')).toEqual({ bonus: 0, edge: 'none' })
-    expect(assistFrom(R, { stats: vex, meter: 20 }, 'empathy')).toEqual({ bonus: 0, edge: 'none' })
-    expect(assistFrom(R, { stats: vex, meter: 50 }, 'empathy')).toEqual({ bonus: 2, edge: 'none' })
-    expect(assistFrom(R, { stats: vex, meter: 80 }, 'empathy')).toEqual({ bonus: 0, edge: 'advantage' })
+    expect(assistFrom(R, { stats: vex, meter: 45 }, 'medicine')).toEqual({ bonus: 0, edge: 'none' })
+    expect(assistFrom(R, { stats: vex, meter: 5 }, 'empathy')).toEqual({ bonus: 0, edge: 'none' })
+    expect(assistFrom(R, { stats: vex, meter: 20 }, 'empathy')).toEqual({ bonus: 2, edge: 'none' })
+    expect(assistFrom(R, { stats: vex, meter: 40 }, 'empathy')).toEqual({ bonus: 0, edge: 'advantage' })
   })
 })
 

@@ -27,14 +27,33 @@
   ],
   "degrees": { "strongMargin": 4, "costMargin": 2 },
   "criticals": { "hit": 20, "miss": 1 },
-  "assists": { "meter": "bond", "minRank": 1, "bonusFrom": 6, "bonus": 1, "advantageFrom": 12 },
+  "assists": { "meter": "bond", "minRank": 1, "bonusFrom": 1, "bonus": 1, "advantageFrom": 7 },
   "meters": {
     "list": [
-      { "id": "warmth", "name": "Warmth", "description": "how much they like the other" },
-      { "id": "bond", "name": "Bond", "description": "how much they would do for the other" }
+      {
+        "id": "warmth",
+        "name": "Warmth",
+        "description": "how much they like the other",
+        "bands": [
+          { "from": -10, "word": "cold" },
+          { "from": -3, "word": "civil" },
+          { "from": 4, "word": "warm" }
+        ]
+      },
+      {
+        "id": "bond",
+        "name": "Bond",
+        "description": "how much they would do for the other",
+        "bands": [
+          { "from": -10, "word": "estranged" },
+          { "from": -3, "word": "loose" },
+          { "from": 4, "word": "close" }
+        ]
+      }
     ],
-    "min": 0,
-    "max": 20
+    "min": -10,
+    "max": 10,
+    "neutral": 0
   },
   "wordScale": [
     { "word": "colder", "value": -3 },
@@ -42,12 +61,7 @@
     { "word": "warmer", "value": 3 }
   ],
   "relations": {
-    "start": { "warmth": 8, "bond": 5 },
-    "bands": [
-      { "label": "foes", "max": { "warmth": 3 } },
-      { "label": "close", "min": { "warmth": 15, "bond": 12 } }
-    ],
-    "otherwise": "known"
+    "start": { "warmth": 0, "bond": 0 }
   },
   "pressures": ["idle", "keen", "driven"],
   "narration": { "departure": "{name} heads off across the yard." }

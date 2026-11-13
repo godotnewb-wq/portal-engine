@@ -287,12 +287,12 @@
     "nsfw": false,
     "baseline": {
       "mara": {
-        "warmth": 10,
-        "bond": 8
+        "warmth": 2,
+        "bond": 3
       },
       "tobin": {
-        "warmth": 6,
-        "bond": 3
+        "warmth": -2,
+        "bond": -2
       }
     },
     "told": [
@@ -581,12 +581,12 @@
     "nsfw": false,
     "baseline": {
       "mara": {
-        "warmth": 10,
-        "bond": 8
+        "warmth": 2,
+        "bond": 3
       },
       "tobin": {
-        "warmth": 6,
-        "bond": 3
+        "warmth": -2,
+        "bond": -2
       }
     },
     "told": [
@@ -841,12 +841,12 @@
     "nsfw": false,
     "baseline": {
       "mara": {
-        "warmth": 10,
-        "bond": 8
+        "warmth": 2,
+        "bond": 3
       },
       "tobin": {
-        "warmth": 6,
-        "bond": 3
+        "warmth": -2,
+        "bond": -2
       }
     },
     "told": [
@@ -1080,12 +1080,12 @@
     "nsfw": false,
     "baseline": {
       "mara": {
-        "warmth": 10,
-        "bond": 8
+        "warmth": 2,
+        "bond": 3
       },
       "tobin": {
-        "warmth": 6,
-        "bond": 3
+        "warmth": -2,
+        "bond": -2
       }
     },
     "told": [
@@ -1310,12 +1310,12 @@
     "nsfw": false,
     "baseline": {
       "mara": {
-        "warmth": 10,
-        "bond": 8
+        "warmth": 2,
+        "bond": 3
       },
       "tobin": {
-        "warmth": 6,
-        "bond": 3
+        "warmth": -2,
+        "bond": -2
       }
     },
     "told": [
@@ -1384,26 +1384,25 @@
         "level": "normal",
         "reason": "Kit kept it quiet",
         "before": {
-          "warmth": 10,
-          "bond": 8
+          "warmth": 2,
+          "bond": 3
         },
         "after": {
-          "warmth": 13,
-          "bond": 8
+          "warmth": 5,
+          "bond": 3
         },
         "learned": [],
         "others": [
           {
             "with": "tobin",
             "before": {
-              "warmth": 9,
-              "bond": 4
+              "warmth": 1,
+              "bond": -1
             },
             "after": {
-              "warmth": 6,
-              "bond": 4
+              "warmth": -2,
+              "bond": -1
             },
-            "label": "known",
             "reason": "he lied to her"
           }
         ]
@@ -1428,12 +1427,12 @@
         "level": "core",
         "reason": "Kit let him leave",
         "before": {
-          "warmth": 6,
-          "bond": 3
+          "warmth": -2,
+          "bond": -2
         },
         "after": {
-          "warmth": 9,
-          "bond": 6
+          "warmth": 1,
+          "bond": 1
         },
         "learned": [],
         "others": []

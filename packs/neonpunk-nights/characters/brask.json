@@ -88,18 +88,18 @@
     }
   ],
   "meters": {
-    "approval": 60,
-    "trust": 55,
-    "attraction": 15
+    "approval": 10,
+    "trust": 15,
+    "interest": 5
   },
   "relations": [
     {
       "to": "vex",
-      "label": "friends",
+      "note": "friends",
       "meters": {
-        "approval": 70,
-        "trust": 75,
-        "attraction": 10
+        "approval": 20,
+        "trust": 35,
+        "interest": 5
       }
     }
   ],

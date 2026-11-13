@@ -91,9 +91,11 @@ input, select { background: var(--bg); color: var(--text); border: 1px solid var
 .memory { margin: 0; line-height: 1.5; }
 .reason { margin: 0; color: var(--muted); font-size: 0.85rem; font-style: italic; }
 .meters-title { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin-bottom: 0.2rem; }
-.meter { display: grid; grid-template-columns: 5.5rem 1fr 2rem 2.5rem; align-items: center; gap: 0.5rem; font-size: 0.82rem; }
+.meter { display: grid; grid-template-columns: 5.5rem 1fr 8.5rem 1rem; align-items: center; gap: 0.5rem; font-size: 0.82rem; }
 .meter-track { position: relative; height: 0.45rem; background: var(--bg); border-radius: 999px; }
-.meter-fill { height: 100%; border-radius: 999px; background: var(--neon); opacity: 0.75; }
+.meter-fill { position: absolute; top: 0; height: 100%; border-radius: 999px; background: var(--neon); opacity: 0.75; }
+.meter-fill.below { background: var(--hot); }
+.meter-neutral { position: absolute; top: -0.1rem; width: 1px; height: 0.65rem; background: var(--muted); }
 .meter-was { position: absolute; top: -0.2rem; width: 2px; height: 0.85rem; background: var(--text); opacity: 0.6; }
 .meter-value { text-align: right; }
 .delta { color: var(--muted); font-size: 0.78rem; }
