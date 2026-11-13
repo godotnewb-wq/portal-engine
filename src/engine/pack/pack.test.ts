@@ -94,6 +94,22 @@ describe('buildPack', () => {
     )
   })
 
+  // Milestone 4a, task 3: the party is its own list, of Major Characters with stat blocks who open the game present.
+  it('checks the starting party: Major Characters with stat blocks, in the opening cast, within the ruleset’s size', () => {
+    const start = fixture.manifest.start
+    const withStart = (s: Partial<typeof start>, ruleset = fixture.ruleset) => packProblems({ ...fixture, ruleset, manifest: { ...fixture.manifest, start: { ...start, ...s } } })
+    expect(withStart({})).toEqual([])
+    expect(withStart({ party: ['tobin', 'ghost'] })).toEqual(
+      expect.arrayContaining([
+        'pack.json: party member "tobin" must be a Major Character',
+        'pack.json: party member "tobin" needs a stat block',
+        'pack.json: the starting party names unknown character "ghost"'
+      ])
+    )
+    expect(withStart({ cast: ['tobin'] })).toEqual(expect.arrayContaining(['pack.json: party member "mara" must be in the opening cast']))
+    expect(withStart({}, { ...fixture.ruleset, party: { max: 0 } })).toEqual(expect.arrayContaining(['pack.json: the starting party has 1 members; the ruleset allows 0']))
+  })
+
   it('finds problems inside a ruleset: references between its own lists', () => {
     const r = RulesetSchema.parse({ ...structuredClone(fixture.ruleset), assists: { ...fixture.ruleset.assists, meter: 'love' } })
     r.skills.push({ id: 'cook', name: 'Cook', attribute: 'taste', description: '' })

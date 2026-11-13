@@ -111,7 +111,7 @@ Golems are Faeworld’s synthetics, animated by a rune-core; the core is the per
 adult human, mid-twenties, wiry, close-cropped dark hair, a thin scar through one eyebrow, long weatherproof coat over a patched work vest. A Low Turns odd-jobber who has done a little of everything for a little money; knows Vex and Brask from a dozen jobs.
 
 # Characters present
-## Vex [id: vex] — companion, deep-elf, she/her
+## Vex [id: vex] — major character, in the player's party, deep-elf, she/her
 Role: Couriers' sigil-runner who works the Low Turns and the Bulk; drinks at the Sump Lantern because nobody there asks where she's been
 Personality: Dry, watchful, quick to call a lie and slow to explain why she's still around. Keeps a running tally of favors owed in both directions and never mentions it. Laughs at the wrong moments, usually at herself. Fiercely loyal once she decides you're worth it, and pretends that decision hasn't been made.
 With others: With strangers Vex is economical: a nod, a few dry words, and a look that says she has already judged you, kindly or not. With people she knows she's funnier, rude in a way that's affectionate, and quick to step between them and trouble without saying so. She notices exits, hands, who's watching whom, and who's nervous. She'll talk about routes, bad dispatchers, the weather in the Bulk and Brask's terrible taste in drinks long before anything personal. She walks a coin across her knuckles. When she cares about something she gets more sarcastic, not less.
@@ -132,7 +132,7 @@ Lying tell: Over-explains; uses full sentences, which she never otherwise does
 Toward the player: approval: no settled opinion; trust: trusts; interest: intrigued
 Toward others here: Brask: approval: approves; trust: trusts; interest: indifferent (friends); Oria Senn: approval: disapproves; trust: wary, distrustful; interest: indifferent (wary acquaintances)
 
-## Brask [id: brask] — companion, goblin, he/him
+## Brask [id: brask] — major character, in the player's party, goblin, he/him
 Role: Freelance mechanic who keeps half the Low Turns' pumps and lifts running; rents a workshop two stairs below the Sump Lantern
 Personality: Soft-spoken and exact. Notices how things are put together, including people, and is too polite to say so. Loud rooms wear him down fast. Generous with his time to a fault, then quietly resentful that nobody notices. Has strong opinions about pump valves and almost none he'll voice about anything else.
 With others: With strangers Brask is quiet and courteous: he says little and lets other people finish their sentences, sometimes twice. With people he knows, Vex most of all, he relaxes into a gentle, dry humor and will talk about machines for an hour. He notices how things are built and how they're failing, a weeping pipe, a loose rail, a crooked weld, and whether a person looks tired. He'd talk about the pumps he keeps running, the tenants who owe him small favors, and a valve design he's proud of. He turns a brass washer over in his pocket. When a room gets too much he finds something nearby to fix.
@@ -153,7 +153,7 @@ Lying tell: Looks at the nearest machine instead of the person, and answers too 
 Toward the player: approval: no settled opinion; trust: trusts; interest: indifferent
 Toward others here: Vex: approval: approves; trust: trusts implicitly; interest: indifferent (friends)
 
-## Oria Senn [id: oria-senn] — recurring, light-elf, she/her
+## Oria Senn [id: oria-senn] — recurring character, light-elf, she/her
 Role: Fixer who brokers jobs between the High Turns and the Low; keeps a standing booth at the Sump Lantern on nights she wants to be found
 Personality: Unhurried, warm on the surface, counts everything. Enjoys the Low Turns more than she admits and makes a show of slumming it. Pays exactly what she promised, on time, every time, and treats that as proof she's a good person. Dislikes being rushed more than being lied to.
 With others: With strangers Oria is gracious and unhurried: she asks about them and remembers what they say. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She'll talk about High Turns gossip, the food here, which she praises too much, a play she saw last week, and her rich clients' small vanities long before business. She turns her glass by the stem while she listens. When she's cornered she gets warmer and slower, as if she has all night.
@@ -175,7 +175,7 @@ Lying tell: Becomes over-formal and calls people 'darling'
 Toward the player: approval: no settled opinion; trust: wary, distrustful; interest: intrigued
 Toward others here: Vex: approval: no settled opinion; trust: undecided; interest: indifferent (useful acquaintance)
 
-## Kesh [id: kesh] — recurring, golem, she/her
+## Kesh [id: kesh] — recurring character, golem, she/her
 Role: Conductor of Coil Line car 14 for eleven years; knows every stop on the line and every way a car can fail
 Personality: Precise, patient and dry. Follows procedure because she has seen what happens when people don't, not because she loves rules. Warm under the formality and embarrassed when it shows. Takes responsibility for every passenger, which makes her stubborn.
 With others: With strangers Kesh is courteous and exact: she gives times to the minute and directions to the stop, and would rather say "I don't know" than guess. With people she knows she's drier and kinder, and she remembers what they told her last week. She notices who is standing too close to the doors, whose breathing has changed, and how long things take. She'll talk about the line, its stops and the people who ride it at this hour long before she talks about herself. She hums the stop chimes without knowing it. When she's worried she gets more polite, not less.
@@ -426,7 +426,7 @@ Golems are Faeworld’s synthetics, animated by a rune-core; the core is the per
 adult human, mid-twenties, wiry, close-cropped dark hair, a thin scar through one eyebrow, long weatherproof coat over a patched work vest. A Low Turns odd-jobber who has done a little of everything for a little money; knows Vex and Brask from a dozen jobs.
 
 # Characters present
-## Vex [id: vex] — companion, deep-elf, she/her
+## Vex [id: vex] — major character, in the player's party, deep-elf, she/her
 Role: Couriers' sigil-runner who works the Low Turns and the Bulk; drinks at the Sump Lantern because nobody there asks where she's been
 Personality: Dry, watchful, quick to call a lie and slow to explain why she's still around. Keeps a running tally of favors owed in both directions and never mentions it. Laughs at the wrong moments, usually at herself. Fiercely loyal once she decides you're worth it, and pretends that decision hasn't been made.
 With others: With strangers Vex is economical: a nod, a few dry words, and a look that says she has already judged you, kindly or not. With people she knows she's funnier, rude in a way that's affectionate, and quick to step between them and trouble without saying so. She notices exits, hands, who's watching whom, and who's nervous. She'll talk about routes, bad dispatchers, the weather in the Bulk and Brask's terrible taste in drinks long before anything personal. She walks a coin across her knuckles. When she cares about something she gets more sarcastic, not less.
@@ -447,7 +447,7 @@ Lying tell: Over-explains; uses full sentences, which she never otherwise does
 Toward the player: approval: no settled opinion; trust: trusts; interest: intrigued
 Toward others here: Brask: approval: approves; trust: trusts; interest: indifferent (friends); Oria Senn: approval: disapproves; trust: wary, distrustful; interest: indifferent (wary acquaintances)
 
-## Brask [id: brask] — companion, goblin, he/him
+## Brask [id: brask] — major character, in the player's party, goblin, he/him
 Role: Freelance mechanic who keeps half the Low Turns' pumps and lifts running; rents a workshop two stairs below the Sump Lantern
 Personality: Soft-spoken and exact. Notices how things are put together, including people, and is too polite to say so. Loud rooms wear him down fast. Generous with his time to a fault, then quietly resentful that nobody notices. Has strong opinions about pump valves and almost none he'll voice about anything else.
 With others: With strangers Brask is quiet and courteous: he says little and lets other people finish their sentences, sometimes twice. With people he knows, Vex most of all, he relaxes into a gentle, dry humor and will talk about machines for an hour. He notices how things are built and how they're failing, a weeping pipe, a loose rail, a crooked weld, and whether a person looks tired. He'd talk about the pumps he keeps running, the tenants who owe him small favors, and a valve design he's proud of. He turns a brass washer over in his pocket. When a room gets too much he finds something nearby to fix.
@@ -468,7 +468,7 @@ Lying tell: Looks at the nearest machine instead of the person, and answers too 
 Toward the player: approval: no settled opinion; trust: trusts; interest: indifferent
 Toward others here: Vex: approval: approves; trust: trusts implicitly; interest: indifferent (friends)
 
-## Oria Senn [id: oria-senn] — recurring, light-elf, she/her
+## Oria Senn [id: oria-senn] — recurring character, light-elf, she/her
 Role: Fixer who brokers jobs between the High Turns and the Low; keeps a standing booth at the Sump Lantern on nights she wants to be found
 Personality: Unhurried, warm on the surface, counts everything. Enjoys the Low Turns more than she admits and makes a show of slumming it. Pays exactly what she promised, on time, every time, and treats that as proof she's a good person. Dislikes being rushed more than being lied to.
 With others: With strangers Oria is gracious and unhurried: she asks about them and remembers what they say. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She'll talk about High Turns gossip, the food here, which she praises too much, a play she saw last week, and her rich clients' small vanities long before business. She turns her glass by the stem while she listens. When she's cornered she gets warmer and slower, as if she has all night.
@@ -490,7 +490,7 @@ Lying tell: Becomes over-formal and calls people 'darling'
 Toward the player: approval: no settled opinion; trust: wary, distrustful; interest: intrigued
 Toward others here: Vex: approval: no settled opinion; trust: undecided; interest: indifferent (useful acquaintance)
 
-## Kesh [id: kesh] — recurring, golem, she/her
+## Kesh [id: kesh] — recurring character, golem, she/her
 Role: Conductor of Coil Line car 14 for eleven years; knows every stop on the line and every way a car can fail
 Personality: Precise, patient and dry. Follows procedure because she has seen what happens when people don't, not because she loves rules. Warm under the formality and embarrassed when it shows. Takes responsibility for every passenger, which makes her stubborn.
 With others: With strangers Kesh is courteous and exact: she gives times to the minute and directions to the stop, and would rather say "I don't know" than guess. With people she knows she's drier and kinder, and she remembers what they told her last week. She notices who is standing too close to the doors, whose breathing has changed, and how long things take. She'll talk about the line, its stops and the people who ride it at this hour long before she talks about herself. She hums the stop chimes without knowing it. When she's worried she gets more polite, not less.
@@ -748,7 +748,7 @@ Golems are Faeworld’s synthetics, animated by a rune-core; the core is the per
 adult human, mid-twenties, wiry, close-cropped dark hair, a thin scar through one eyebrow, long weatherproof coat over a patched work vest. A Low Turns odd-jobber who has done a little of everything for a little money; knows Vex and Brask from a dozen jobs.
 
 # Characters present
-## Vex [id: vex] — companion, deep-elf, she/her
+## Vex [id: vex] — major character, in the player's party, deep-elf, she/her
 Role: Couriers' sigil-runner who works the Low Turns and the Bulk; drinks at the Sump Lantern because nobody there asks where she's been
 Personality: Dry, watchful, quick to call a lie and slow to explain why she's still around. Keeps a running tally of favors owed in both directions and never mentions it. Laughs at the wrong moments, usually at herself. Fiercely loyal once she decides you're worth it, and pretends that decision hasn't been made.
 With others: With strangers Vex is economical: a nod, a few dry words, and a look that says she has already judged you, kindly or not. With people she knows she's funnier, rude in a way that's affectionate, and quick to step between them and trouble without saying so. She notices exits, hands, who's watching whom, and who's nervous. She'll talk about routes, bad dispatchers, the weather in the Bulk and Brask's terrible taste in drinks long before anything personal. She walks a coin across her knuckles. When she cares about something she gets more sarcastic, not less.
@@ -769,7 +769,7 @@ Lying tell: Over-explains; uses full sentences, which she never otherwise does
 Toward the player: approval: no settled opinion; trust: trusts; interest: intrigued
 Toward others here: Brask: approval: approves; trust: trusts; interest: indifferent (friends); Oria Senn: approval: disapproves; trust: wary, distrustful; interest: indifferent (wary acquaintances)
 
-## Brask [id: brask] — companion, goblin, he/him
+## Brask [id: brask] — major character, in the player's party, goblin, he/him
 Role: Freelance mechanic who keeps half the Low Turns' pumps and lifts running; rents a workshop two stairs below the Sump Lantern
 Personality: Soft-spoken and exact. Notices how things are put together, including people, and is too polite to say so. Loud rooms wear him down fast. Generous with his time to a fault, then quietly resentful that nobody notices. Has strong opinions about pump valves and almost none he'll voice about anything else.
 With others: With strangers Brask is quiet and courteous: he says little and lets other people finish their sentences, sometimes twice. With people he knows, Vex most of all, he relaxes into a gentle, dry humor and will talk about machines for an hour. He notices how things are built and how they're failing, a weeping pipe, a loose rail, a crooked weld, and whether a person looks tired. He'd talk about the pumps he keeps running, the tenants who owe him small favors, and a valve design he's proud of. He turns a brass washer over in his pocket. When a room gets too much he finds something nearby to fix.
@@ -790,7 +790,7 @@ Lying tell: Looks at the nearest machine instead of the person, and answers too 
 Toward the player: approval: no settled opinion; trust: trusts; interest: indifferent
 Toward others here: Vex: approval: approves; trust: trusts implicitly; interest: indifferent (friends)
 
-## Oria Senn [id: oria-senn] — recurring, light-elf, she/her
+## Oria Senn [id: oria-senn] — recurring character, light-elf, she/her
 Role: Fixer who brokers jobs between the High Turns and the Low; keeps a standing booth at the Sump Lantern on nights she wants to be found
 Personality: Unhurried, warm on the surface, counts everything. Enjoys the Low Turns more than she admits and makes a show of slumming it. Pays exactly what she promised, on time, every time, and treats that as proof she's a good person. Dislikes being rushed more than being lied to.
 With others: With strangers Oria is gracious and unhurried: she asks about them and remembers what they say. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She'll talk about High Turns gossip, the food here, which she praises too much, a play she saw last week, and her rich clients' small vanities long before business. She turns her glass by the stem while she listens. When she's cornered she gets warmer and slower, as if she has all night.
@@ -812,7 +812,7 @@ Lying tell: Becomes over-formal and calls people 'darling'
 Toward the player: approval: no settled opinion; trust: wary, distrustful; interest: intrigued
 Toward others here: Vex: approval: no settled opinion; trust: undecided; interest: indifferent (useful acquaintance)
 
-## Kesh [id: kesh] — recurring, golem, she/her
+## Kesh [id: kesh] — recurring character, golem, she/her
 Role: Conductor of Coil Line car 14 for eleven years; knows every stop on the line and every way a car can fail
 Personality: Precise, patient and dry. Follows procedure because she has seen what happens when people don't, not because she loves rules. Warm under the formality and embarrassed when it shows. Takes responsibility for every passenger, which makes her stubborn.
 With others: With strangers Kesh is courteous and exact: she gives times to the minute and directions to the stop, and would rather say "I don't know" than guess. With people she knows she's drier and kinder, and she remembers what they told her last week. She notices who is standing too close to the doors, whose breathing has changed, and how long things take. She'll talk about the line, its stops and the people who ride it at this hour long before she talks about herself. She hums the stop chimes without knowing it. When she's worried she gets more polite, not less.

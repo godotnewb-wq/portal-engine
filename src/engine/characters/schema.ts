@@ -4,10 +4,11 @@ import { StatBlockSchema } from '@engine/rules'
 import { FactionLevelSchema } from '@engine/world'
 
 /**
- * Persistent NPC tiers (npc design §2). Extras are narration only and walk-ons live on a scene card,
- * so neither has a character file.
+ * Persistent NPC tiers (npc design §2): how detailed a character is. Extras are narration only and walk-ons live on a
+ * scene card, so neither has a character file. Being in the party is not a tier: a companion is a Major Character
+ * currently in the party, kept in the game state (milestone 4a).
  */
-export const CHARACTER_TIERS = ['recurring', 'companion'] as const
+export const CHARACTER_TIERS = ['recurring', 'major'] as const
 export const CharacterTierSchema = z.enum(CHARACTER_TIERS)
 export type CharacterTier = z.infer<typeof CharacterTierSchema>
 
@@ -114,12 +115,11 @@ export const CharacterSchema = z
     /** How they start out toward the player. */
     meters: MetersSchema,
     relations: z.array(RelationSeedSchema).default([]),
-    /** Companions carry a full stat block; recurring NPCs get one from a tier template when first needed. */
+    /** A full stat block. Party members need one; others get one from a tier template when first needed. */
     stats: StatBlockSchema.optional(),
     /** Placeholder sprite path relative to the content folder, until art generation exists. */
     sprite: z.string().optional()
   })
-  .refine((c) => c.tier !== 'companion' || c.stats !== undefined, { message: 'companions need a stat block', path: ['stats'] })
 /** A character file as written; linked secrets have no text yet. */
 export type CharacterFile = z.infer<typeof CharacterSchema>
 /** A loaded character: every secret has its text. */

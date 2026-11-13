@@ -7,9 +7,10 @@ import { readPack } from '@platform/packs'
 import { content, PACK_DIR } from './support'
 
 describe('the Neonpunk Nights pack', () => {
-  it('has the milestone 1 bar scene: Vex and Brask as companions, Oria Senn with her secret, a bartender walk-on', () => {
-    expect(characterById(content, 'vex')?.tier).toBe('companion')
-    expect(characterById(content, 'brask')?.tier).toBe('companion')
+  it('has the milestone 1 bar scene: Vex and Brask as Major Characters in the party, Oria Senn with her secret, a bartender walk-on', () => {
+    expect(characterById(content, 'vex')?.tier).toBe('major')
+    expect(characterById(content, 'brask')?.tier).toBe('major')
+    expect(content.manifest.start.party).toEqual(['vex', 'brask'])
     const oria = characterById(content, 'oria-senn')!
     expect(oria.tier).toBe('recurring')
     expect(oria.secrets.map((s) => s.id)).toContain('client-is-grid-corporation')
@@ -21,7 +22,7 @@ describe('the Neonpunk Nights pack', () => {
   })
 
   it('opens on the Sump Lantern with everyone, and carries its ruleset, setting, primer and tone', () => {
-    expect(content.manifest.start).toEqual({ location: 'sump-lantern', cast: ['vex', 'brask', 'oria-senn'] })
+    expect(content.manifest.start).toEqual({ location: 'sump-lantern', cast: ['vex', 'brask', 'oria-senn'], party: ['vex', 'brask'] })
     expect(content.ruleset.skills).toHaveLength(19)
     expect(content.ruleset.difficulties.map((d) => d.dc)).toEqual([5, 10, 15, 20, 25, 30])
     expect(content.setting.tiers.map((t) => t.id)).toEqual(['crown', 'high-turns', 'bulk', 'low-turns', 'deepwell'])

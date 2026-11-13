@@ -62,7 +62,7 @@ Reply with only a JSON object:
 function about(r: Ruleset, state: GameState, c: Character, others: Character[]): string {
   const me = firstName(c.name)
   const meters = state.meters[c.id]!
-  const memories = recall(state, c)
+  const memories = recall(r, state, c)
   const relations = others.flatMap((o) => {
     const rel = state.relations.find((x) => x.from === c.id && x.to === o.id)
     return rel ? [`- Toward ${firstName(o.name)}: ${meterWords(r, rel.meters)}${rel.note ? ` (${rel.note})` : ''}`] : []

@@ -229,6 +229,17 @@ export function packProblems(pack: Pack): string[] {
   const start = pack.manifest.start
   if (!pack.locations.some((l) => l.id === start.location)) problems.push(`pack.json: the opening scene is at unknown location "${start.location}"`)
   for (const id of start.cast) if (!characters.has(id)) problems.push(`pack.json: the opening cast names unknown character "${id}"`)
+  const max = pack.ruleset.party.max
+  if (start.party.length > max) problems.push(`pack.json: the starting party has ${start.party.length} members; the ruleset allows ${max}`)
+  for (const id of start.party) {
+    const c = pack.characters.find((x) => x.id === id)
+    if (!c) problems.push(`pack.json: the starting party names unknown character "${id}"`)
+    else {
+      if (c.tier !== 'major') problems.push(`pack.json: party member "${id}" must be a Major Character`)
+      if (!c.stats) problems.push(`pack.json: party member "${id}" needs a stat block`)
+      if (!start.cast.includes(id)) problems.push(`pack.json: party member "${id}" must be in the opening cast`)
+    }
+  }
   return problems
 }
 

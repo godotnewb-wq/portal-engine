@@ -111,6 +111,8 @@
   "relations": {
     "start": { "approval": 0, "trust": 0, "interest": 0 }
   },
+  "party": { "max": 3 },
+  "memory": { "recall": { "recurring": 4, "major": 8 } },
   "pressures": ["background", "pressing", "urgent"],
   "narration": { "departure": "{name} leaves." }
 }

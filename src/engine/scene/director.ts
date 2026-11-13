@@ -14,6 +14,9 @@ import { cueSecretLine, fullSecretLine, type SecretShown } from './secrets'
 /** How many past turns go into prompts verbatim; older ones live in the running summary. */
 export const RECENT_TURNS = 3
 
+/** How the director's sheet names a tier. */
+const TIER_WORDS: Record<Character['tier'], string> = { recurring: 'recurring character', major: 'major character' }
+
 
 /**
  * The director's rules (director writer review, option B, the situation plan). It plans what is true, wanted and at stake, as
@@ -114,11 +117,12 @@ export function buildDirectorPrompt(content: Pack, state: GameState, input: stri
 export function sheet(content: Pack, state: GameState, c: Character, present: string[], secrets: SecretShown[]): string {
   const scene = state.scene!
   const meters = state.meters[c.id]
+  const memories = recall(content.ruleset, state, c)
   const relations = state.relations
     .filter((r) => r.from === c.id && present.includes(r.to))
     .map((r) => `${characterById(content, r.to)?.name ?? r.to}: ${meterWords(content.ruleset, r.meters)}${r.note ? ` (${r.note})` : ''}`)
   return [
-    `## ${c.name} [id: ${c.id}] — ${c.tier}, ${c.species}, ${c.pronouns}`,
+    `## ${c.name} [id: ${c.id}] — ${TIER_WORDS[c.tier]}${state.party.includes(c.id) ? ', in the player\'s party' : ''}, ${c.species}, ${c.pronouns}`,
     `Role: ${c.role}`,
     `Personality: ${c.personality}`,
     `With others: ${c.portrait}`,
@@ -133,7 +137,7 @@ export function sheet(content: Pack, state: GameState, c: Character, present: st
     }),
     `Lying tell: ${c.voice.shifts.lying}`,
     meters && `Toward the player: ${meterWords(content.ruleset, meters)}`,
-    recall(state, c).length > 0 && `Remembers: ${recall(state, c).map((m) => `(${m.level}) ${m.text}`).join(' ')}`,
+    memories.length > 0 && `Remembers: ${memories.map((m) => `(${m.level}) ${m.text}`).join(' ')}`,
     (state.facts[c.id] ?? []).length > 0 && `The player already knows: ${state.facts[c.id]!.join(' ')}`,
     relations.length > 0 && `Toward others here: ${relations.join('; ')}`
   ]

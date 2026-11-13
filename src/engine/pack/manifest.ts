@@ -17,7 +17,11 @@ export const PackManifestSchema = z.object({
   /** The engine versions this pack works with: "^0.2.0", ">=0.2.0 <1.0.0", "0.2.0" or "*". */
   engine: z.string().min(1),
   /** Where a new game opens. */
-  start: z.object({ location: IdSchema, cast: z.array(IdSchema).default([]) }),
+  /**
+   * The opening scene. `party`: Major Characters already in the player's party at the start (npc design §2); they must
+   * be in the opening cast. Joining and leaving in play come with milestone 7.
+   */
+  start: z.object({ location: IdSchema, cast: z.array(IdSchema).default([]), party: z.array(IdSchema).default([]) }),
   ui: z
     .object({
       /** The title screen's heading; the pack name if left out. */

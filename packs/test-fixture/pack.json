@@ -6,7 +6,7 @@
   "author": "Portal Engine",
   "license": "GPL-3.0-only",
   "engine": "^0.2.0",
-  "start": { "location": "the-yard", "cast": ["mara", "tobin"] },
+  "start": { "location": "the-yard", "cast": ["mara", "tobin"], "party": ["mara"] },
   "ui": { "title": "Test Fixture", "tagline": "Testhold · the yard" },
   "content": { "rating": "For testing", "notes": "" }
 }

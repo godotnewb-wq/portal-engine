@@ -95,6 +95,15 @@ export const RulesetSchema = z.object({
     /** Where a relation starts when two characters first share a scene: a true stranger. */
     start: z.record(id, z.number())
   }),
+  /** The party (party §4): how many companions the player can have at once. */
+  party: z.object({ max: z.number().int().min(0) }).default({ max: 3 }),
+  /**
+   * Memory tuning (memory §3, §11): how many memories a character brings to a scene, by tier. A Major Character keeps
+   * the same budget in the party or out of it.
+   */
+  memory: z
+    .object({ recall: z.object({ recurring: z.number().int().min(0), major: z.number().int().min(0) }) })
+    .default({ recall: { recurring: 4, major: 8 } }),
   /**
    * How hard a character's aim for the scene presses on them, weakest first (e.g. "idle", "keen", "driven"). The
    * director picks a word each turn; the weakest keeps the aim out of the writer's brief, the strongest makes it

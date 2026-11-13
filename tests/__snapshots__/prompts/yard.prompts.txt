@@ -74,7 +74,7 @@ Automatons often take night work, and many keep to themselves. These are tendenc
 adult, travel-worn. A newcomer looking for work.
 
 # Characters present
-## Mara Quill [id: mara] — companion, person, she/her
+## Mara Quill [id: mara] — major character, in the player's party, person, she/her
 Role: Guild tally-keeper who knows everyone in the yard
 Personality: Precise, wry, quietly kind; keeps lists of everything.
 With others: With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
@@ -89,7 +89,7 @@ Lying tell: Gives exact numbers
 Toward the player: warmth: civil; bond: loose
 Toward others here: Tobin: warmth: civil; bond: loose (has known him since the guild took him on)
 
-## Tobin [id: tobin] — recurring, automaton, he/him
+## Tobin [id: tobin] — recurring character, automaton, he/him
 Role: Night porter in the yard
 Personality: Slow, polite, literal; hums when nervous.
 With others: With strangers Tobin is shy; with friends he talks about the yard horses.
@@ -269,7 +269,7 @@ Automatons often take night work, and many keep to themselves. These are tendenc
 adult, travel-worn. A newcomer looking for work.
 
 # Characters present
-## Mara Quill [id: mara] — companion, person, she/her
+## Mara Quill [id: mara] — major character, in the player's party, person, she/her
 Role: Guild tally-keeper who knows everyone in the yard
 Personality: Precise, wry, quietly kind; keeps lists of everything.
 With others: With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
@@ -284,7 +284,7 @@ Lying tell: Gives exact numbers
 Toward the player: warmth: civil; bond: loose
 Toward others here: Tobin: warmth: civil; bond: loose (has known him since the guild took him on)
 
-## Tobin [id: tobin] — recurring, automaton, he/him
+## Tobin [id: tobin] — recurring character, automaton, he/him
 Role: Night porter in the yard
 Personality: Slow, polite, literal; hums when nervous.
 With others: With strangers Tobin is shy; with friends he talks about the yard horses.
@@ -564,7 +564,7 @@ Automatons often take night work, and many keep to themselves. These are tendenc
 adult, travel-worn. A newcomer looking for work.
 
 # Characters present
-## Mara Quill [id: mara] — companion, person, she/her
+## Mara Quill [id: mara] — major character, in the player's party, person, she/her
 Role: Guild tally-keeper who knows everyone in the yard
 Personality: Precise, wry, quietly kind; keeps lists of everything.
 With others: With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
@@ -579,7 +579,7 @@ Lying tell: Gives exact numbers
 Toward the player: warmth: civil; bond: loose
 Toward others here: Tobin: warmth: civil; bond: loose (has known him since the guild took him on)
 
-## Tobin [id: tobin] — recurring, automaton, he/him
+## Tobin [id: tobin] — recurring character, automaton, he/him
 Role: Night porter in the yard
 Personality: Slow, polite, literal; hums when nervous.
 With others: With strangers Tobin is shy; with friends he talks about the yard horses.
@@ -880,7 +880,7 @@ Automatons often take night work, and many keep to themselves. These are tendenc
 adult, travel-worn. A newcomer looking for work.
 
 # Characters present
-## Mara Quill [id: mara] — companion, person, she/her
+## Mara Quill [id: mara] — major character, in the player's party, person, she/her
 Role: Guild tally-keeper who knows everyone in the yard
 Personality: Precise, wry, quietly kind; keeps lists of everything.
 With others: With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
@@ -895,7 +895,7 @@ Lying tell: Gives exact numbers
 Toward the player: warmth: civil; bond: loose
 Toward others here: Tobin: warmth: civil; bond: loose (has known him since the guild took him on)
 
-## Tobin [id: tobin] — recurring, automaton, he/him
+## Tobin [id: tobin] — recurring character, automaton, he/him
 Role: Night porter in the yard
 Personality: Slow, polite, literal; hums when nervous.
 With others: With strangers Tobin is shy; with friends he talks about the yard horses.
@@ -1107,7 +1107,7 @@ The Guild owns the yard, sets the cart fees and keeps the tallies. Everyone in t
 adult, travel-worn. A newcomer looking for work.
 
 # Characters present
-## Mara Quill [id: mara] — companion, person, she/her
+## Mara Quill [id: mara] — major character, in the player's party, person, she/her
 Role: Guild tally-keeper who knows everyone in the yard
 Personality: Precise, wry, quietly kind; keeps lists of everything.
 With others: With strangers Mara is brisk; with friends she teases. She notices numbers that are off.

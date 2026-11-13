@@ -14,6 +14,7 @@ export function createInitialState(content: Pack, seed: number): GameState {
     dice: seed >>> 0,
     meters: Object.fromEntries(content.characters.map((c) => [c.id, c.meters])),
     relations,
+    party: [...content.manifest.start.party],
     memories: [],
     facts: {},
     scene: null
@@ -73,6 +74,11 @@ export function stateProblems(content: Pack, state: GameState): string[] {
   }
   for (const [skill] of Object.entries(state.player.stats.skills)) {
     if (!content.ruleset.skills.some((s) => s.id === skill)) problems.push(`the player has unknown skill "${skill}"`)
+  }
+  for (const id of state.party) {
+    unknown('the party', id)
+    const c = characterById(content, id)
+    if (c && c.tier !== 'major') problems.push(`the party has "${id}", who isn't a Major Character`)
   }
   for (const r of state.relations) {
     unknown('a relation', r.from)

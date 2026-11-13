@@ -27,7 +27,7 @@ my-pack/
 | `id` | lower-case words joined by hyphens; saves are kept per id |
 | `name`, `version`, `description`, `author`, `license` | `version` is `major.minor.patch` |
 | `engine` | the Portal Engine versions it works with, e.g. `"^0.2.0"` |
-| `start` | where a new game opens: `{ "location": "<location id>", "cast": ["<character id>", …] }` |
+| `start` | where a new game opens: `{ "location": "<location id>", "cast": ["<character id>", …], "party": ["<character id>", …] }`; `party` lists Major Characters already with the player, each in the cast and with a stat block |
 | `ui` | `title`, `tagline`, `cover` (a file in the pack) |
 | `content` | `rating`, `notes`, shown in the picker |
 
@@ -45,6 +45,8 @@ The engine supplies the mechanics; the ruleset their parameters and words. See `
 - `meters`: the relationship meters every character keeps toward the player and each other (`id`, `name`, `description` used in the director and summary prompts, and `bands`: word bands lowest first, the first starting at `min`), their signed range (`min`, `max`) and `neutral` point. Prompts and the summary screen show bands, never numbers.
 - `wordScale`: the words summaries judge a change in, worst to best, each with its value; one must be worth 0.
 - `relations`: where a new relation starts (`start`: a stranger, normally neutral).
+- `party`: `max`, how many companions the player can have at once (default 3).
+- `memory`: `recall`, how many memories a character brings to a scene by tier (`recurring`, `major`; defaults 4 and 8).
 - `codex`: `fullWords`, the most words a codex entry's text may have (default 120); `sceneTokens` and `triggeredTokens`, rough budgets for the scene-scoped and triggered lore layers (defaults 800 and 400).
 - `pressures`: words for how hard a character's aim for the scene presses on them, weakest first (at least two). The weakest keeps the aim out of the writer's brief; the strongest makes it what drives them.
 

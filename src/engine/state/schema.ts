@@ -33,6 +33,8 @@ export const GameStateSchema = z.object({
   /** Each character's meters toward the player. */
   meters: z.record(IdSchema, MetersSchema),
   relations: z.array(RelationSchema).default([]),
+  /** Major Characters in the player's party (companions), separate from their tier (npc design §2). */
+  party: z.array(IdSchema),
   memories: z.array(MemorySchema).default([]),
   /** Facts the player has learned, per character. */
   facts: z.record(IdSchema, z.array(z.string())).default({}),
