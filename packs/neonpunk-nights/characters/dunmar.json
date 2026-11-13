@@ -188,5 +188,14 @@
         "interest": 0
       }
     }
-  ]
+  ],
+  "playerTie": {
+    "tags": [
+      {
+        "tag": "client",
+        "word": "regular"
+      }
+    ],
+    "note": "drinks here when there's money, and when there isn't; a small slate"
+  }
 }

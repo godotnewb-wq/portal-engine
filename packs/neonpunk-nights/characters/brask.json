@@ -246,6 +246,14 @@
       }
     }
   ],
+  "playerTie": {
+    "tags": [
+      {
+        "tag": "friend"
+      }
+    ],
+    "note": "Rook has run errands for half his tenants; he's patched Rook's coat zip twice and never charged"
+  },
   "stats": {
     "level": 3,
     "attributes": {

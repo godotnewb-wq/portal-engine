@@ -260,6 +260,14 @@
       }
     }
   ],
+  "playerTie": {
+    "tags": [
+      {
+        "tag": "friend"
+      }
+    ],
+    "note": "a dozen jobs together; covers for Rook more than she'd admit, and keeps a tally of who owes whom"
+  },
   "stats": {
     "level": 3,
     "attributes": {
