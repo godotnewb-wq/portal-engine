@@ -4,9 +4,9 @@ import { SecretSchema, type Character } from '@engine/characters'
 import { packWarnings, type Pack } from '@engine/pack'
 import type { GameState } from '@engine/state'
 import { fixture, yardScene } from '@tests/fixture'
-import { buildDirector2Prompt } from './director2'
+import { buildDirectorPrompt } from './director'
 import { turnLore } from './lore'
-import { parsePlan2, validatePlan2 } from './plan2'
+import { parsePlan, validatePlan } from './plan'
 import { runTurn, type TurnLlm } from './runTurn'
 import { secretDisplay } from './secrets'
 
@@ -36,7 +36,7 @@ describe('secret cues and full text on the sheet', () => {
   it('shows every held secret, as a cue or in full, with its id', () => {
     const list = shown(fixture, yardScene(), 'Ask the Guild.')
     expect(list.map((s) => s.id).sort()).toEqual(['mara.two-books', 'tobin.after-closing'])
-    const prompt = buildDirector2Prompt(fixture, yardScene(), 'Nice evening.', turnLore(fixture, yardScene(), 'Nice evening.')).system
+    const prompt = buildDirectorPrompt(fixture, yardScene(), 'Nice evening.', turnLore(fixture, yardScene(), 'Nice evening.')).system
     expect(prompt).toContain('Secret [mara.two-books]')
     expect(prompt).toContain('Secret [tobin.after-closing]')
   })
@@ -44,7 +44,7 @@ describe('secret cues and full text on the sheet', () => {
   it('writes a linked cue from the holder’s part and the codex summary, and a personal one from its summary or first sentence', () => {
     const content = pack([{ id: 'debt', text: LONG, summary: 'He owes a fence across the river' }, { id: 'name', text: 'He was born Tobias Hale. Nobody here knows it.' }], { linked: 0 })
     const state = yardScene()
-    const system = buildDirector2Prompt(content, state, 'Nice evening.', turnLore(content, state, 'Nice evening.')).system
+    const system = buildDirectorPrompt(content, state, 'Nice evening.', turnLore(content, state, 'Nice evening.')).system
     expect(system).toContain("Secret [mara.two-books] (in short): Mara's part: she keeps the second ledger. The Guild keeps a second set of books.")
     expect(system).toContain('Secret [tobin.debt] (in short): He owes a fence across the river.')
     expect(system).toContain('Secret [tobin.name] (in short): He was born Tobias Hale.')
@@ -131,7 +131,7 @@ describe('keeping a secret shown as a cue', () => {
   it('passes the relevance check from the cue and gives the writer the whole secret', () => {
     const input = 'Anyone you know across the river?'
     expect(form(shown(content, yardScene(), input), 'tobin.debt')?.form).toBe('cue')
-    const { plan: checked } = validatePlan2(content, yardScene(), parsePlan2(plan)!, input)
+    const { plan: checked } = validatePlan(content, yardScene(), parsePlan(plan)!, input)
     const tobin = checked.speakers.find((s) => s.id === 'tobin')!
     expect(tobin.kept).toEqual(['tobin.debt'])
     expect(tobin.hiding).toContain('the fence has started asking after his sister')

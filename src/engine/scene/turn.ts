@@ -2,7 +2,7 @@ import type { Beat, GameState, RolledCheck, Turn } from '@engine/state'
 import type { Tags } from './beats'
 import type { Pack } from '@engine/pack'
 import { RECENT_TURNS, turnText } from './director'
-import { presentCast, type BeatPlan } from './plan'
+import { presentCast, type BeatPlan } from './planShape'
 
 /** In-game minutes a turn of talk takes (tune). */
 export const MINUTES_PER_TURN = 3

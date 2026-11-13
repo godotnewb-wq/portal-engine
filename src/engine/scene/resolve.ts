@@ -3,7 +3,7 @@ import { type Character } from '@engine/characters'
 import { type GameState } from '@engine/state'
 import { characterById, type Pack } from '@engine/pack'
 import { dice, type Dice } from '@engine/core'
-import type { BeatPlan, PlannedCheck } from './plan'
+import type { BeatPlan, PlannedCheck } from './planShape'
 
 /**
  * Someone without a stat block (a recurring NPC, until tier templates exist) rolls as an average adult: every

@@ -13,8 +13,12 @@ import { buildWriterPrompt, sceneSpeakers } from './writer'
 /** A plan in the fixture's own vocabulary: skills by name, its difficulty words. */
 const PLAN = {
   speakers: [
-    { id: 'Tobin', point: 'Says he locked up at the usual hour.', intent: 'Avoid the question politely.', mood: 'uneasy', hiding: 'let someone in after closing', approach: 'deflect' },
-    { id: 'mara', point: 'Asks why the gate was warm at midnight.', intent: 'Catch him out if she can.', mood: 'sharp', depends_on_check: 'see' }
+    { id: 'Tobin', goal: 'Avoid the question politely.', mood: 'uneasy' },
+    { id: 'mara', goal: 'Catch him out if she can.', mood: 'sharp' }
+  ],
+  moves: [
+    { who: 'tobin', answers: 'player', move: 'dodge' },
+    { who: 'mara', answers: 1, move: 'push back', needs: 'see' }
   ],
   checks: [{ id: 'see', who: 'Mara', skill: 'Notice', difficulty: 'tough', stakes: 'notices Tobin humming', assist: 'tobin' }]
 }
@@ -26,9 +30,9 @@ describe('plans in the pack’s vocabulary', () => {
     expect(plan.speakers.map((s) => s.id)).toEqual(['tobin', 'mara'])
     expect(plan.checks).toEqual([expect.objectContaining({ who: 'mara', skill: 'notice', difficulty: 'tough', assist: 'tobin' })])
     expect(corrections).toEqual([])
-    const other = validatePlan(fixture, state, parsePlan(JSON.stringify({ checks: [{ id: 'x', who: 'mara', skill: 'empathy', difficulty: 'moderate', stakes: '' }] }))!)
+    const other = validatePlan(fixture, state, parsePlan(JSON.stringify({ ...PLAN, checks: [{ id: 'x', who: 'mara', skill: 'empathy', difficulty: 'moderate', stakes: '' }] }))!)
     expect(other.plan.checks).toEqual([])
-    expect(other.corrections).toEqual(['dropped check "x": no skill "empathy"'])
+    expect(other.corrections).toContain('dropped check "x": no skill "empathy"')
   })
 
   it('resolves checks with the ruleset’s numbers, and an assist through its assist meter', () => {
@@ -58,61 +62,16 @@ describe('prompts take the pack’s slots', () => {
     const { plan } = validatePlan(fixture, state, parsePlan(JSON.stringify(PLAN))!)
     const { system } = buildWriterPrompt(fixture, state, plan, 'Hello.')
     expect(system).toMatch(/Tone:\nPlain and brisk\./)
-    expect(system).toMatch(/Setting: The Guild Yard, east gate, Testhold\./)
+    expect(buildWriterPrompt(fixture, state, plan, 'Hello.').user).toMatch(/^# Where you are\nThe Guild Yard\. A muddy yard/)
   })
 
-  it('reads a plan in the older form, a point per speaker, as one line each, and counts a line without a point', () => {
-    const { plan } = validatePlan(fixture, state, parsePlan(JSON.stringify(PLAN))!)
-    expect(plan.exchange).toEqual([
-      { who: 'tobin', answers: 'player', point: 'Says he locked up at the usual hour.' },
-      { who: 'mara', answers: 'player', point: 'Asks why the gate was warm at midnight.' }
-    ])
-    const pointless = { speakers: [{ id: 'tobin', intent: 'Avoid the question.', mood: 'uneasy' }] }
-    expect(validatePlan(fixture, state, parsePlan(JSON.stringify(pointless))!).corrections).toEqual(['line 1 (tobin) has no point'])
-  })
-
-  // Round 0, session 2026-11-06_2313_c313: each speaker gave a speech aimed at the player; nobody answered anybody.
-  it('plans the turn as an exchange: lines in order, each answering the player or an earlier line', () => {
-    const exchange = [
-      { who: 'Tobin', answers: 'player', point: 'Says he locked up at the usual hour.' },
-      { who: 'Pell', answers: 'player', point: 'Not a speaker.' },
-      { who: 'mara', answers: 1, point: 'Asks why the gate was warm at midnight, then.' },
-      { who: 'tobin', answers: '3', point: 'Claims the forge was banked late.' },
-      { who: 'mara', answers: 9, point: 'Answers a line that does not exist.' },
-      { who: 'tobin', answers: 4, point: 'Admits the gate was warm.' },
-      { who: 'mara', answers: 5, point: 'One line too many.' }
-    ]
-    const { plan, corrections } = validatePlan(fixture, state, parsePlan(JSON.stringify({ ...PLAN, exchange }))!)
-    expect(plan.exchange).toEqual([
-      { who: 'tobin', answers: 'player', point: 'Says he locked up at the usual hour.' },
-      { who: 'mara', answers: 1, point: 'Asks why the gate was warm at midnight, then.' },
-      { who: 'tobin', answers: 2, point: 'Claims the forge was banked late.' },
-      { who: 'mara', answers: 'player', point: 'Answers a line that does not exist.' },
-      { who: 'tobin', answers: 3, point: 'Admits the gate was warm.' }
-    ])
-    expect(corrections).toEqual(expect.arrayContaining([
-      'dropped line 2: "Pell" is not a speaker',
-      "line 5 answered line 9, which isn't an earlier line; it answers the player",
-      'dropped line 7: at most 5'
-    ]))
-    expect(buildDirectorPrompt(fixture, state, 'Hello.').system).toMatch(/"exchange": \[\{"who","answers","point"\}\]/)
-    const user = buildWriterPrompt(fixture, state, plan, 'Hello.').user
-    expect(user).toMatch(/# The exchange, in order \(what each line gets across: notes, not wording\)\n1\. Tobin, answering the player: Says he locked up at the usual hour\.\n2\. Mara, answering line 1 \(Tobin\): Asks why[^\n]*\n3\. Tobin, answering line 2 \(Mara\): Claims the forge/)
-    expect(user).not.toMatch(/Point \(what their line gets across\)/)
-    // The writer sees the person before the voice, and slang as seasoning.
-    expect(buildWriterPrompt(fixture, state, plan, 'Hello.').system).toMatch(/## Tobin\nWith strangers Tobin is shy[^\n]*\n\n### Tobin's voice/)
-  })
-
-  // Session 2026-11-07_0013_714e: the director quoted the line in its point ("'private money, darling, and shy of
-  // lantern-light'") and the writer copied it.
-  it('counts a point that quotes dialogue, but not an apostrophe inside a word', () => {
-    const plan = (point: string) => ({ ...PLAN, exchange: [{ who: 'tobin', answers: 'player', point }] })
-    const corrections = (point: string) => validatePlan(fixture, state, parsePlan(JSON.stringify(plan(point)))!).corrections
-    expect(corrections("Says it's Pell's cart, and he'll vouch for it.")).not.toContain('line 1 (tobin) quotes dialogue in its point')
-    expect(corrections("Says the client is 'private money, darling' and won't say more.")).toContain('line 1 (tobin) quotes dialogue in its point')
-    expect(corrections('Says "locked up at the usual hour".')).toContain('line 1 (tobin) quotes dialogue in its point')
-    expect(buildDirectorPrompt(fixture, state, 'Hello.').system).toMatch(/A point is a note for the writer, not the line/)
-    expect(buildWriterPrompt(fixture, state, validatePlan(fixture, state, parsePlan(JSON.stringify(PLAN))!).plan, 'Hello.').system).toMatch(/The plan is notes, not wording\./)
+  // Session 2026-11-07_0013_714e: the director quoted the line in its plan and the writer copied it.
+  it('counts a move that quotes dialogue in what it says, but not an apostrophe inside a word', () => {
+    const plan = (said: string) => ({ ...PLAN, moves: [{ who: 'tobin', answers: 'player', move: 'answer', new: [said] }] })
+    const corrections = (said: string) => validatePlan(fixture, state, parsePlan(JSON.stringify(plan(said)))!).corrections
+    expect(corrections("it's Pell's cart, and he'll vouch for it")).not.toContain('move 1 quotes dialogue in what it says')
+    expect(corrections("the client is 'private money, darling' and no more")).toContain('move 1 quotes dialogue in what it says')
+    expect(corrections('"locked up at the usual hour"')).toContain('move 1 quotes dialogue in what it says')
   })
 
   it('checks the writer’s prose against the pack’s own over-used phrases too', () => {

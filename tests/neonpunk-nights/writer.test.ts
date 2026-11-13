@@ -8,19 +8,23 @@ import { buildRewritePrompt, buildWriterPrompt, sceneSpeakers } from '@engine/sc
 
 const state = barScene(5)
 const speakers = sceneSpeakers(content, state)
+const INPUT = 'So, Oria, who is the client, really?'
+
 const { plan } = validatePlan(content, state, parsePlan(JSON.stringify({
   speakers: [
-    { id: 'oria-senn', intent: 'Deflect.', mood: 'composed', hiding: 'client is the grid consortium', approach: 'lie' },
-    { id: 'vex', intent: 'Call out the lie if she catches it.', mood: 'wary', depends_on_check: 'vex_empathy' }
+    { id: 'oria-senn', goal: 'Deflect.', mood: 'composed', keeps: ['oria-senn.client-is-grid-corporation'], touched: 'who is the client', approach: 'lie' },
+    { id: 'vex', goal: 'Call out the lie if she catches it.', mood: 'wary' }
+  ],
+  moves: [
+    { who: 'oria-senn', answers: 'player', move: 'dodge' },
+    { who: 'vex', answers: 1, move: 'push back', needs: 'vex_empathy' }
   ],
   reactions: [{ id: 'brask', beat: 'fidgets with his glass, ears flat' }],
   checks: [{ id: 'vex_empathy', who: 'vex', skill: 'empathy', difficulty: 'moderate', stakes: 'notices Oria is lying' }],
   walk_ons: [{ id: 'bartender', line: 'slides a lantern-pour across without being asked' }],
   texture: ['condensation dripping from an Aether-cooled pipe overhead'],
   avoid: ['darling, darling']
-}))!)
-
-const INPUT = 'So, Oria, who is the client, really?'
+}))!, INPUT)
 
 /** The worked example's turn, as the writer should return it. */
 const GOOD = `NARRATION: Water ticks from the cooled pipe onto the table edge, inches from your hand. Oria doesn't move her glass.
@@ -155,7 +159,7 @@ describe('buildWriterPrompt', () => {
     expect(prompt.system).not.toMatch(/## Brask's voice/)
     // Vex's own secret is not part of this beat.
     expect(prompt.system + prompt.user).not.toMatch(/running partner/)
-    expect(prompt.user).toMatch(/Hiding: client is the grid consortium/)
+    expect(prompt.user).toMatch(/Keeping to themselves: The 'private client' is the Aether Grid Corporation/)
   })
 
   it('states the check result as decided', () => {
@@ -164,8 +168,8 @@ describe('buildWriterPrompt', () => {
   })
 
   it('carries the reactions, the walk-on and the texture, and ends on the player’s words', () => {
-    expect(prompt.user).toMatch(/Brask \(no dialogue\): fidgets/)
-    expect(prompt.user).toMatch(/Dunmar \(the bartender/)
+    expect(prompt.user).toMatch(/# Also present, silent\n- Brask: fidgets/)
+    expect(prompt.user).toMatch(/# Walk-ons\n- Dunmar: slides a lantern-pour/)
     expect(prompt.user).toMatch(/condensation dripping/)
     expect(prompt.user.trim().endsWith('Write the beats.')).toBe(true)
   })

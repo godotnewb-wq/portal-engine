@@ -4,7 +4,7 @@ import type { Beat, Scene } from '@engine/state'
 import { characterById, type Pack } from '@engine/pack'
 import type { ParsedReply } from './beats'
 import type { Problem } from './checks'
-import { presentCast } from './plan'
+import { presentCast } from './planShape'
 
 /**
  * The repetition tracker (claude/director-writer.md §8; claude/scene-system-redesign.md §5.4). Round 0 found slang in

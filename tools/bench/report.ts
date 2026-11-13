@@ -143,7 +143,7 @@ export function renderReport(content: Pack, bench: BenchRun): string {
   return [
     `# Scene test bench — ${bench.label}`,
     '',
-    `Run ${bench.startedAt}, pack \`${bench.pack}\` ${bench.packVersion}, prompts \`${bench.prompts}\`${bench.options.pipeline ? `, pipeline \`${bench.options.pipeline}\`` : ''}${repeats ? `, ${bench.options.repeat} repeats` : ''}. Models: ${Object.entries(bench.models).map(([role, model]) => `${role} \`${model}\``).join(', ')}.${budgetsLine(bench)}`,
+    `Run ${bench.startedAt}, pack \`${bench.pack}\` ${bench.packVersion}, prompts \`${bench.prompts}\`${repeats ? `, ${bench.options.repeat} repeats` : ''}. Models: ${Object.entries(bench.models).map(([role, model]) => `${role} \`${model}\``).join(', ')}.${budgetsLine(bench)}`,
     '',
     `| ${STAT_HEADS.join(' | ')} |`,
     `|${STAT_HEADS.map(() => '---').join('|')}|`,

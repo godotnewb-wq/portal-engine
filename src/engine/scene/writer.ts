@@ -1,13 +1,16 @@
-import type { Character, VoiceCard } from '@engine/characters'
+import type { Prompt } from '@engine/core'
+import { firstName } from '@engine/core'
+import type { VoiceCard } from '@engine/characters'
 import type { GameState } from '@engine/state'
-import type { Speaker } from './beats'
 import type { Degree } from '@engine/rules'
 import { characterById, locationById, type Pack } from '@engine/pack'
+import type { Speaker } from './beats'
 import { RECENT_TURNS, turnText } from './director'
-import { type Prompt } from '@engine/core'
-import { firstName } from '@engine/core'
-import { presentCast, type BeatPlan, type PlannedCheck } from './plan'
-import { BEATS, STYLE_GUIDE } from './style'
+import { sceneFacts } from './facts'
+import { presentCast, type BeatPlan, type Move, type PlannedCheck } from './planShape'
+import { BEATS } from './style'
+import { recentlyUsed } from './repeats'
+import { writerStage } from '@engine/codex'
 
 /** Everyone a beat or tag may name in this scene: the cast present, the walk-ons, and the player. */
 export function sceneSpeakers(content: Pack, state: GameState): Speaker[] {
@@ -24,17 +27,107 @@ export function sceneSpeakers(content: Pack, state: GameState): Speaker[] {
   return [...cast, ...walkOns, player]
 }
 
+
+/**
+ * How the conversation should read (director-writer review, option B). A few principles and one example in place of
+ * a long rule list: what code checks (who knows what, what's new to the player, who may speak) arrives as data in
+ * the brief instead. Examples use made-up people, as engine text must.
+ */
+export const WRITER_STYLE = `How it should read:
+- People talk like people: complete, plain sentences that someone hearing them for the first time can follow.
+- Each line answers the line before it: what that person actually said and meant. A question gets an answer, or a dodge the reader can see, in its own terms.
+- People are in the moment. Their aims and secrets show in what they choose, avoid or notice, rarely in what they say outright.
+- A move's facts are there to draw on if the line needs them, never to recite. A line can bring nothing new; what matters is that it answers. A fact marked new hasn't been said to the player yet: if it's used, say what it is.
+- Each character sounds like their voice card. The card wins over everything else.
+- Narration only for what happens: an action that matters, a reaction, at most one detail of the place. Show what can be seen; never write the plan's notes out as prose.
+- No sayings, maxims or riddles in place of an answer. A comparison only when it makes something clearer.
+- The player is "you", in the present tense. A check result for the player is what you notice, manage or fail to.
+
+Too clipped: Ada: "Mill. Bell's at six. Gate's a gate."
+Better: Ada: "I work the night line at the mill, and the bell goes at six. If I'm not through that gate by then, I lose the shift."`
+
 export const WRITER_FORMAT = `Output format, nothing else:
-- One beat per line. Each beat is either speech or narration, never both.
-- A dialogue beat: Name: "spoken words" (the character's first name). Only the words they say, in double quotes: no action, gesture or description.
-- A narration beat: "NARRATION: …". Everything that isn't spoken: actions, gestures, reactions, the room. A character's action names them: "NARRATION: Ada climbs onto the bar."
-- Someone who speaks and acts gets separate beats, in the order it happens: dialogue, then narration, then dialogue.
+- One beat per line: a dialogue beat, Name: "spoken words" (first name; only the words said), or a narration beat, NARRATION: … (everything that isn't spoken; a character's action names them).
+- Each move is one dialogue beat by its speaker, in the order given. Narration goes between them only when something happens.
 - ${BEATS.target} beats, each under ${BEATS.targetWords} words.
-- Only the planned speakers get dialogue beats. Others appear only as their planned reactions, inside narration, and reactions are silent: no quoted or reported speech from anyone without a line in the exchange. A planned walk-on line may be a dialogue beat under the walk-on's name.
-- Write the exchange's lines in order, one dialogue beat each, and no other lines from the speakers. Each line responds to the line it answers: to what was actually said there, not just to the topic.
+- Only the speakers and planned walk-ons speak. Everyone else stays silent: no quoted or reported speech.
 - Hidden tags at the end, one per line: [Name: EXPRESSION word] for each speaker; [Name: COMFORT 1-5 reason] when someone's comfort changes; [Name: MOOD words] when a mood shifts; [LEAVES: Name] for a planned departure; [END SCENE] only if the plan ends the scene.
 - Never write the player's words, choices, thoughts or actions beyond what their input stated.
 - Honor every check result exactly: a failed roll means it does not happen.`
+
+/** The writer's brief: the facts in play as facts, the moves as moves, and nothing in planner prose. */
+export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPlan, input: string): Prompt {
+  const scene = state.scene!
+  const location = locationById(content, scene.locationId)!
+  const nameOf = (id: string) => {
+    const c = characterById(content, id)
+    if (c) return firstName(c.name)
+    const w = location.walkOns.find((x) => x.id === id)
+    return w?.name ?? w?.label ?? id
+  }
+  const speakers = plan.speakers.map((s) => characterById(content, s.id)!)
+
+  const system = [
+    "You write one turn of a visual-novel RPG scene from a director's plan: the conversation and what happens.",
+    WRITER_STYLE,
+    writerStage(content.tone, content.codex).text,
+    WRITER_FORMAT,
+    `The player is ${state.player.name} (${state.player.pronouns}), addressed as "you".`,
+    ...speakers.map((c) => voiceCard(firstName(c.name), c.voice, c.portrait))
+  ]
+    .filter(Boolean)
+    .join('\n\n')
+
+  const facts = sceneFacts(content, state)
+  const told = facts.filter((f) => f.kind === 'said' || scene.told.includes(f.id))
+  // A plan without moves (the game planned the turn itself) still has its lines in the exchange.
+  const moves: Move[] = plan.moves ?? plan.exchange.map((l) => ({ who: l.who, answers: l.answers, move: 'answer', says: [{ text: l.point, unheard: false }] }))
+  const answering = (m: Move) => (m.answers === 'player' ? 'the player' : `${m.answers} (${nameOf(moves[m.answers - 1]?.who ?? '')})`)
+  // A fact already said is marked, so it isn't said again in other words (session 2026-11-07_1949_ffec: "a crew is on
+  // its way" three times, "five minutes" four).
+  const said = (m: Move) => m.says.map((s) => `${s.text} ${s.unheard ? '[new to the player]' : "[already said; don't repeat it]"}`).join('; ')
+  // An aim reaches the writer only when it presses (claude/scene-system-redesign.md §5.3): the weakest word keeps it out.
+  const words = content.ruleset.pressures
+  const aim = (id: string, pressure?: string) => {
+    const level = pressure ? words.indexOf(pressure) : 0
+    const goal = characterById(content, id)?.agenda.current
+    if (!goal || level <= 0) return ''
+    return level >= words.length - 1 ? ` Tonight's aim drives what they do: ${goal}.` : ` Tonight's aim is on their mind and may come up if it fits: ${goal}.`
+  }
+  const speakerLine = (s: BeatPlan['speakers'][number]) =>
+    [
+      `- ${nameOf(s.id)}: in this exchange, ${(s.intent || 'answer what was asked').replace(/[.\s]+$/, '')}. Mood: ${(s.mood || 'as before').replace(/[.\s]+$/, '')}.`,
+      s.framing ? ` What they say about the world comes with this view: ${s.framing.replace(/[.\s]+$/, '')}.` : '',
+      aim(s.id, s.pressure),
+      s.hiding && ` Keeping to themselves: ${s.hiding} (${s.approach ?? 'deflect'}).${s.tell ? ` It shows only as: ${s.tell}. Show it; nobody remarks on it unless their check to read them succeeded.` : ' It doesn\'t show.'}`
+    ].join('')
+  const recent = Object.entries(recentlyUsed(content, scene)).map(([id, u]) =>
+    `- ${nameOf(id)}: ${[...u.slang.map((t) => `"${t}"`), ...u.gestures].join('; ')}`
+  )
+
+  const user = [
+    `# Where you are\n${location.name}. ${location.description}`,
+    told.length > 0 ? `# What the player has been told this scene\n${told.map((f) => `- ${f.text}`).join('\n')}` : '# What the player has been told this scene\nNothing yet beyond what they can see.',
+    scene.summary && `# Earlier in the scene\n${scene.summary}`,
+    scene.turns.length > 0 && `# Last turns\n${scene.turns.slice(-RECENT_TURNS).map((t) => turnText(content, state.player.name, t)).join('\n\n')}`,
+    `# The player says or does\n${input}`,
+    plan.checks.some((c) => c.result) && `# Check results (decided; honor them)\n${plan.checks.filter((c) => c.result).map((c) => checkLine(content, state, c)).join('\n')}`,
+    plan.speakers.length > 0 && `# Who speaks\n${plan.speakers.map(speakerLine).join('\n')}`,
+    moves.length > 0 && `# The conversation, in order\n${moves.map((m, i) => `${i + 1}. ${nameOf(m.who)}, answering ${answering(m)}: ${m.move}${m.says.length > 0 ? ` (may draw on: ${said(m)})` : ''}${m.needs ? ' (the check succeeded)' : ''}`).join('\n')}`,
+    plan.lore && plan.lore.length > 0 && `# About the world, to draw on only if it fits (some, all or none; never recite)\n${plan.lore.map((l) => `- ${l.line}${l.who ? ` (only ${nameOf(l.who)} would say this)` : ''}`).join('\n')}`,
+    plan.change && `# By the end of the turn\n${plan.change}`,
+    plan.reactions.length > 0 && `# Also present, silent\n${plan.reactions.map((r) => `- ${nameOf(r.id)}: ${r.beat}`).join('\n')}`,
+    plan.walk_ons.length > 0 && `# Walk-ons\n${plan.walk_ons.map((w) => `- ${nameOf(w.id)}: ${w.line}`).join('\n')}`,
+    plan.texture.length > 0 && `# A detail of the place, if it fits\n${plan.texture.join('\n')}`,
+    recent.length > 0 && `# Used in the last turns (don't repeat)\n${recent.join('\n')}`,
+    plan.avoid.length > 0 && `# Avoid\n${plan.avoid.join('; ')}`,
+    'Write the beats.'
+  ]
+    .filter(Boolean)
+    .join('\n\n')
+
+  return { system, user }
+}
 
 /** A speaker as the writer sees them: the person first, then how they talk. */
 export function voiceCard(name: string, v: VoiceCard, portrait?: string): string {
@@ -61,68 +154,6 @@ const OUTCOME: Record<Degree, (stakes: string) => string> = {
 export function checkLine(content: Pack, state: GameState, check: PlannedCheck): string {
   const who = check.who === 'player' ? state.player.name : firstName(characterById(content, check.who)!.name)
   return `- ${who}'s ${check.skill} check [${check.id}]: ${check.result ? OUTCOME[check.result.degree](check.stakes) : check.stakes}`
-}
-
-/** What the writer needs for one beat, and nothing more (narrator-scene-engine §5). */
-export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPlan, input: string): Prompt {
-  const scene = state.scene!
-  const location = locationById(content, scene.locationId)!
-  const speakers = plan.speakers.map((s) => characterById(content, s.id)!) as Character[]
-  const nameOf = (id: string) => firstName(characterById(content, id)?.name ?? id)
-  const walkOn = (id: string) => location.walkOns.find((w) => w.id === id)!
-
-  const system = [
-    'You write the prose of a visual-novel RPG scene from a director\'s plan.',
-    STYLE_GUIDE,
-    content.tone && `Tone:\n${content.tone}`,
-    WRITER_FORMAT,
-    `The player is ${state.player.name} (${state.player.pronouns}), addressed as "you". Setting: ${location.name}, ${location.district}, ${content.setting.name}.`,
-    ...speakers.map((c) => voiceCard(firstName(c.name), c.voice, c.portrait))
-  ]
-    .filter(Boolean)
-    .join('\n\n')
-
-  const lineName = (n: number) => `line ${n} (${nameOf(plan.exchange[n - 1]!.who)})`
-  const brief = [
-    '# This beat',
-    ...plan.speakers.map((s) => {
-      const c = characterById(content, s.id)!
-      return [
-        `- ${firstName(c.name)} speaks.`,
-        `  Intent: ${s.intent}`,
-        s.mood && `  Mood: ${s.mood}`,
-        s.knows && `  Knows: ${s.knows}`,
-        s.hiding && `  Hiding: ${s.hiding}. Approach: ${s.approach ?? 'deflect'}.`,
-        s.depends_on_check && `  Their line depends on check ${s.depends_on_check}.`,
-        `  Look: ${c.appearance}`
-      ]
-        .filter(Boolean)
-        .join('\n')
-    }),
-    plan.exchange.length > 0 && `# The exchange, in order (what each line gets across: notes, not wording)\n${plan.exchange.map((l, i) => `${i + 1}. ${nameOf(l.who)}, answering ${l.answers === 'player' ? 'the player' : lineName(l.answers)}: ${l.point || 'answers what was said'}`).join('\n')}`,
-    '# Also in the beat',
-    ...plan.reactions.map((r) => `- ${nameOf(r.id)} (no dialogue): ${r.beat}`),
-    ...plan.walk_ons.map((w) => `- ${walkOn(w.id).name ?? walkOn(w.id).label} (${walkOn(w.id).label}; ${walkOn(w.id).manner}): ${w.line}`),
-    plan.checks.length > 0 && `# Check results (decided; honor them)\n${plan.checks.map((c) => checkLine(content, state, c)).join('\n')}`,
-    plan.texture.length > 0 && `# Texture to use (facts; show them plainly)\n${plan.texture.map((t) => `- ${t}`).join('\n')}`,
-    plan.contrast && `# Voice contrast\n${plan.contrast}`,
-    plan.avoid.length > 0 && `# Avoid\n${plan.avoid.join('; ')}`,
-    plan.leaves.length > 0 && `# Leaving this beat\n${plan.leaves.map(nameOf).join(', ')}`,
-    plan.end_scene && '# The scene closes with this beat. End with [END SCENE].'
-  ].filter(Boolean)
-
-  const recent = scene.turns.slice(-RECENT_TURNS)
-  const user = [
-    scene.summary && `# Earlier in the scene\n${scene.summary}`,
-    recent.length > 0 && `# Last turns\n${recent.map((t) => turnText(content, state.player.name, t)).join('\n\n')}`,
-    brief.join('\n'),
-    `# The player says or does\n${input}`,
-    'Write the beats.'
-  ]
-    .filter(Boolean)
-    .join('\n\n')
-
-  return { system, user }
 }
 
 /** The one targeted rewrite (call 3), told exactly what to fix. */

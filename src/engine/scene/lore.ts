@@ -4,7 +4,7 @@ import { characterById, knowerOf, locationById, type Pack } from '@engine/pack'
 import { loreBudgets, type LoreBudgetOverrides, type LoreBudgets } from '@engine/rules'
 import type { GameState } from '@engine/state'
 import { RECENT_TURNS } from './director'
-import { presentCast } from './plan'
+import { presentCast } from './planShape'
 import { secretDisplay, type SecretShown } from './secrets'
 
 /** The lore one turn's prompts carry (claude/lore-injection.md §5), worked out once and shared by both calls. */

@@ -3,7 +3,7 @@ import { firstName } from '@engine/core'
 import type { Character, Secret } from '@engine/characters'
 import { characterById, type Pack } from '@engine/pack'
 import type { GameState } from '@engine/state'
-import { presentCast } from './plan'
+import { presentCast } from './planShape'
 
 /**
  * How each held secret appears on the director's situation sheet (claude/lore-injection.md §7.1, milestone 3.5): every

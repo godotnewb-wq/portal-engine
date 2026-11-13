@@ -2,7 +2,7 @@ import type { Beat, GameState } from '@engine/state'
 import { checkNames, nameIndex, withProseNames, type NameIndex } from '@engine/codex'
 import type { Pack } from '@engine/pack'
 import type { ParsedReply, Speaker } from './beats'
-import type { BeatPlan } from './plan'
+import type { BeatPlan } from './planShape'
 import { BEATS, OVERUSED_PHRASES } from './style'
 
 export type ProblemKind =

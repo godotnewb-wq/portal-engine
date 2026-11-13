@@ -7,7 +7,7 @@ import { characterById, type Pack } from '@engine/pack'
 import { firstName } from '@engine/core'
 import type { Tags } from './beats'
 import type { Problem } from './checks'
-import type { BeatPlan } from './plan'
+import type { BeatPlan } from './planShape'
 import type { LoreTrace } from './lore'
 
 /**
@@ -30,8 +30,6 @@ export interface TurnTrace {
     /** The plan after validation, with its checks rolled. */
     plan: BeatPlan
     corrections: string[]
-    /** Which director and writer ran (`TurnOptions.pipeline`); absent in turns logged before there was a choice. */
-    pipeline?: 'situation' | 'lines'
   }
   dice: { before: number; after: number }
   checks: CheckTrace[]
@@ -149,8 +147,8 @@ export function checkTraces(plan: BeatPlan): CheckTrace[] {
 const escape = (s: string) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 
 /**
- * Which plan items a beat carries out. A line by a planned speaker is their brief (and the check their line depends
- * on), and their nth line in the turn is their nth line of the exchange, numbered as the writer saw it (beats in a row by
+ * Which plan items a beat carries out. A line by a planned speaker is their brief (and the check its move needs, or
+ * in older logs the check their line depended on), and their nth line in the turn is their nth line of the exchange, numbered as the writer saw it (beats in a row by
  * the same speaker, with only narration between, are one line written in parts); a walk-on's line is theirs; narration that names someone with a planned reaction is that reaction. Narration
  * naming no one is plain narration. Names are matched as whole words, by id, full name or first name.
  */
@@ -162,7 +160,8 @@ export function planItems(content: Pack, plan: BeatPlan, beat: Beat, earlier: Be
       const runs = said.filter((w, i) => w === beat.speaker && said[i - 1] !== w).length
       const nth = said.at(-1) === beat.speaker ? runs - 1 : runs
       const line = plan.exchange.map((l, i) => ({ ...l, n: i + 1 })).filter((l) => l.who === beat.speaker)[nth]
-      return [`speaker:${speaker.id}`, ...(line ? [`line:${line.n}`] : []), ...(speaker.depends_on_check ? [`check:${speaker.depends_on_check}`] : [])]
+      const check = (line && plan.moves?.[line.n - 1]?.needs) || speaker.depends_on_check
+      return [`speaker:${speaker.id}`, ...(line ? [`line:${line.n}`] : []), ...(check ? [`check:${check}`] : [])]
     }
     if (plan.walk_ons.some((w) => w.id === beat.speaker)) return [`walk-on:${beat.speaker}`]
     return []

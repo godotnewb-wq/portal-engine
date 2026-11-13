@@ -1,7 +1,7 @@
 import type { GameState, Scene } from '@engine/state'
 import type { Pack } from '@engine/pack'
 import { characterById, locationById } from '@engine/pack'
-import { presentCast } from './plan'
+import { presentCast } from './planShape'
 
 /**
  * Something a line can say, with who may say it (director-writer review, option B). Characters' knowledge and

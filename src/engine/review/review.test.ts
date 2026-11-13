@@ -4,7 +4,8 @@ import { runTurn, type TurnLlm } from '@engine/scene'
 import { buildScorerPrompt, currentFlags, FLAG_REASONS, itemsFor, parseScore, RUBRIC, type FlagRecord } from '.'
 
 const PLAN = JSON.stringify({
-  speakers: [{ id: 'tobin', intent: 'Dodge.', mood: 'uneasy', hiding: 'let someone in', approach: 'deflect' }],
+  speakers: [{ id: 'tobin', goal: 'Dodge.', mood: 'uneasy', keeps: ['tobin.after-closing'], touched: 'who came by', approach: 'deflect' }],
+  moves: [{ who: 'tobin', answers: 'player', move: 'dodge' }],
   reactions: [{ id: 'mara', beat: 'watches his hands' }],
   checks: [{ id: 'see', who: 'mara', skill: 'notice', difficulty: 'tough', stakes: 'spots the tell' }]
 })
@@ -33,7 +34,7 @@ describe('flags', () => {
 
 describe('the AI scorer', () => {
   it('asks only the rubric items that apply, with the pack’s material in its slots, and never sees flags', async () => {
-    const { trace } = await runTurn(fixture, yardScene(), 'Tobin, who came by?', llm, () => {}, { pipeline: 'lines', forceNatural: 15 })
+    const { trace } = await runTurn(fixture, yardScene(), 'Tobin, who came by?', llm, () => {}, { forceNatural: 15 })
     const asked = itemsFor(trace).map((i) => i.id)
     // A first turn: no focus rotation or repetition yet. It has a check and a secret, so 3, 5 and 9 apply.
     expect(asked).toEqual(RUBRIC.map((i) => i.id).filter((id) => id !== 2 && id !== 13))

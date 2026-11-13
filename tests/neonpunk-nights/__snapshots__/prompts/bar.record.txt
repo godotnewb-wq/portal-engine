@@ -84,7 +84,6 @@
     "texture": [
       "condensation dripping from an Aether-cooled pipe overhead"
     ],
-    "contrast": "",
     "avoid": [],
     "leaves": [],
     "end_scene": false,
@@ -499,7 +498,6 @@
     "texture": [
       "chalked tallies of who owes the bar what, on a slate by the taps"
     ],
-    "contrast": "",
     "avoid": [],
     "leaves": [],
     "end_scene": false,
@@ -849,7 +847,6 @@
     "texture": [
       "a dead pump wheel bolted to the wall as decoration, still faintly humming"
     ],
-    "contrast": "",
     "avoid": [],
     "leaves": [],
     "end_scene": false,

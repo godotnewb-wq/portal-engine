@@ -1,12 +1,14 @@
-import { directorStage } from '@engine/codex'
 import type { Prompt } from '@engine/core'
 import type { Character, Meters } from '@engine/characters'
 import type { GameState, Turn } from '@engine/state'
 import type { Ruleset } from '@engine/rules'
 import { characterById, locationById, type Pack } from '@engine/pack'
-import { MAX_CHECKS, MAX_LINES, MAX_SPEAKERS, QUIET_TURNS, presentCast, silence } from './plan'
 import { recall } from '@engine/memory'
 import { tierById } from '@engine/world'
+import { sceneFacts } from './facts'
+import { MAX_CHECKS, MAX_LINES, MAX_SPEAKERS, QUIET_TURNS, presentCast, silence } from './planShape'
+import { LORE_LINE_WORDS, MOVE_KINDS, NEW_FACT_WORDS } from './plan'
+import { turnLore, type TurnLore } from './lore'
 import { cueSecretLine, fullSecretLine, type SecretShown } from './secrets'
 
 /** How many past turns go into prompts verbatim; older ones live in the running summary. */
@@ -16,53 +18,103 @@ export const RECENT_TURNS = 3
 export const meterWords = (r: Ruleset, m: Meters): string =>
   `${r.meters.list.map((x) => `${x.id} ${m[x.id] ?? r.meters.min}`).join(', ')} (${r.meters.min}–${r.meters.max})`
 
-export const directorRules = (r: Ruleset): string => `You are the director of a visual-novel RPG scene. You do not write prose. You read the whole situation and return a short JSON beat plan for this turn; a separate writer turns it into prose.
-
-Return only a JSON object:
-{
-  "speakers": [{"id","intent","mood","knows","hiding","approach","depends_on_check"}],
-  "exchange": [{"who","answers","point"}],
-  "reactions": [{"id","beat"}],
-  "checks": [{"id","who","skill","difficulty","stakes","assist","edge","edge_reason"}],
-  "walk_ons": [{"id","line"}],
-  "texture": ["..."],
-  "contrast": "...",
-  "avoid": ["..."],
-  "leaves": ["id"],
-  "end_scene": false
-}
-
-Rules:
-- At most ${MAX_SPEAKERS} speakers. Pick: whoever the player addressed; anyone whose agenda is urgent; anyone whose comfort is low; whoever has been silent longest. Everyone else present gets a one-line reaction.
-- exchange: the turn's conversation, line by line in order, at most ${MAX_LINES} lines, each by one of the speakers. Plan it as a conversation, not separate speeches: each line answers the one before it or the player.
-  - who: the speaker's id.
-  - answers: "player", or the number of an earlier line (1 is the first). When the player spoke to someone, line 1 answers the player. A later line answers whoever just spoke when it can: a speaker replies to the last line, pushes back on it or takes it further.
-  - A speaker can have more than one line when someone answers them. Every line needs its own point.
-  - point: the one thing this line gets across, in plain words and with its content: what they answer, ask, offer, refuse, demand, admit or warn ("names her price: nine each, half tonight"; "asks who else knows about the case"). It adds one new thing the conversation didn't have; more waits for a later line. A stance ("needles her") or a mood is not a point. When lying or deflecting, the point is the specific lie or dodge.
-  - A point is a note for the writer, not the line: your own plain words, never quoted dialogue, sayings or a finished sentence for the character to say. State the content flatly, with no wordplay or turns of phrase ("says it has to be tonight because the rival crew is close"). The writer writes the line in the character's voice.
-  - When a line brings up something the player hasn't heard this scene (a job, an object, a person, a place), the point says so: "first mention of the case: what it is".
-  - A point refers only to what was actually said in the last turns, by whom it was said.
-- reactions: silent, one line each: a look, a gesture, a move. Never speech, muttering or "says that". Someone with something to say needs a line in the exchange, which makes them a speaker; if both speaker slots are taken, it waits for a later turn.
-- Only plan someone to speak when they have a point. Never repeat a point already made in the last turns.
-- A question asked in the last turns that nobody has answered gets an answer or a visible dodge this turn, from whoever it was asked of.
-- speakers: who has lines this turn, with their brief. intent: what the speaker is trying to do this beat, from their own agenda, not just answering the player.
-- hiding/approach: only when a secret matters now; approach is lie / deflect / partial truth / tell, and name their tell when lying.
-- checks: only when the outcome is uncertain and matters (noticing a lie, persuading, sneaking). At most ${MAX_CHECKS}. who is "player" or a character id. skill is one of: ${r.skills.map((x) => x.id).join(', ')}. difficulty is one of: ${r.difficulties.map((d) => d.word).join(', ')}. stakes says what success means. A speaker whose line depends on a roll names it in depends_on_check. assist: a character present who helps.
-- walk_ons: a line or action for a walk-on, voiced by the narrator. Only when the player speaks to them, or what they say or do bears on the conversation right now (their trade, a price, a warning that changes what happens next). Never a line for atmosphere; atmosphere belongs in texture.
-- texture: 2–3 details from the location card, as plain facts ("the conduit flickers"), preferring ones not used recently. No similes or description: the writer decides how to show them.
-- contrast: one line on how the speakers' voices differ.
-- avoid: phrases and details to steer clear of.
-- Every field is notes for the writer. Never write the prose or the dialogue yourself.
-- leaves: characters who walk out this beat. end_scene: true only when the scene has reached a natural close.
-- Quiet characters are listed each turn with what they care about. If what is being said touches their trade, aims or knowledge, they have a point: give them a slot. If nothing does, silence is fine.
-- Never decide, say or do anything for the player.`
 
 /**
- * A character as the director sees them. With `ids`, knowledge and secrets carry the fact ids moves refer to. With
- * `secrets` (the situation pipeline), each secret shows as its cue or in full as worked out for the turn; without, every
- * secret shows in full, as the older pipeline always had it.
+ * The director's rules (director-writer review, option B, the situation plan). It plans what is true, wanted and at stake, as
+ * choices and fact ids, and writes no prose and no dialogue. Short on purpose: what code can check (who knows what,
+ * what's been said, who may speak) is checked in code, not asked for here.
  */
-export function sheet(content: Pack, state: GameState, c: Character, present: string[], ids = false, secrets?: SecretShown[]): string {
+export const directorRules = (r: Ruleset, loreLines = r.codex.loreLines): string => `You are the director of a visual-novel RPG scene. You don't write prose or dialogue. You decide what happens this turn and return JSON; a writer turns it into the scene.
+
+Return only this JSON object:
+{
+  "player_action": {"doing", "uncertain"},
+  "checks": [{"id","who","skill","difficulty","stakes","assist","edge","edge_reason"}],
+  "speakers": [{"id","goal","mood","pressure","keeps","touched","approach","framing"}],
+  "moves": [{"who","answers","move","uses","new","needs"}],
+${loreLines > 0 ? '  "lore": [{"entry","who","line"}],\n' : ''}  "change": "...",
+  "reactions": [{"id","beat"}],
+  "walk_ons": [{"id","line"}],
+  "texture": [], "avoid": [], "leaves": [], "end_scene": false
+}
+
+- The player leads. Start from what the player just said or did: move 1 answers it, in its own terms. A character's own aims come in after that, or in a later turn, unless something urgent cuts in.
+- player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking and asking are not uncertain.
+- checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most ${MAX_CHECKS}. who is "player" or a character id. skill is one of: ${r.skills.map((x) => x.id).join(', ')}. difficulty is one of: ${r.difficulties.map((d) => d.word).join(', ')}. stakes says what success means. assist: a character present who helps.
+- People are in the moment. What they say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line.
+- speakers: at most ${MAX_SPEAKERS} characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone. mood: how what just happened lands on them.
+- pressure: how hard their aim for tonight (on their sheet) presses on them right now, one of: ${r.pressures.join(', ')} (weakest first). Most of the time it is ${r.pressures[0]}. It rises when time runs short or events push, and moves at most one step a turn.
+- keeps: ids of their own secrets, only when what was just said or done touches one; touched: the words that touched it, as said. Most turns nobody keeps anything. approach: lie, deflect or partial truth. A secret marked "in short" is shown as a brief cue; keep it by its id all the same, and the writer will get the whole secret.
+- When someone lies or deflects about a kept secret and someone present could see through it, give the person reading them a check with the skill that fits. If a character is reading the speaker, set who to that character's id. Simply asking a question does not make the player the one reading the speaker. Put the check id in needs on the reader's move that sees through the dodge. They can still question the answer or show distrust without that move. Success lets them recognize the dodge, not learn the secret itself. Example: the player asks a question, Ada dodges, and Ben studies Ada. Set player_action.uncertain to false. Give the check id read-ada to who: ben. Leave needs blank on Ada's dodge. Put needs: read-ada on Ben's move where he realizes Ada dodged.
+- moves: the conversation in order, at most ${MAX_LINES}. who: a speaker. answers: "player", or the number of an earlier move (1 is the first). move: one of ${MOVE_KINDS.join(', ')}. uses: ids of facts the line may draw on, if it needs any: a pool to pick from, not a list to recite. Plenty of lines need none. A speaker can use only their own facts, the place's, and facts already said on screen. new: anything the line needs that no fact holds (a price, a time, a plan), in at most ${NEW_FACT_WORDS} plain words; never a line of dialogue. needs: the id of a check the move depends on; it happens only if the check succeeds.
+- A move answers the move before it, or the player. A speaker can have two moves when someone answers them.
+- framing: only when it matters, how a speaker colours what they say about the world (e.g. "bitter, street-level view").
+${loreLines > 0 ? `- lore: at most ${loreLines} facts of world lore the writer may draw on this turn, when the conversation turns to the world; usually none. entry: the [id] of a lore entry given above. line: the fact in plain words, at most ${LORE_LINE_WORDS}, never dialogue. An insider entry needs who: a speaker it says knows it. A lore line is something to draw on, not a line to say.\n` : ''}- Don't repeat a fact already said unless someone asks again. A question asked and not answered gets an answer or a visible dodge.
+- change: what is different at the end of this turn: something decided, conceded, refused, revealed or learned. A check result that matters changes it.
+- reactions: everyone else present: silent, one line each (a look, a gesture, a move).
+- walk_ons: only when the player speaks to them, or they have news that changes things.
+- texture: at most one detail from the location, as a plain fact, or none.
+- Quiet characters are listed with what they care about: if the conversation touches it, they have something to say.
+- leaves: characters who walk out. end_scene: true only at a natural close.
+- Never decide, say or do anything for the player.`
+
+export function buildDirectorPrompt(content: Pack, state: GameState, input: string, lore: TurnLore = turnLore(content, state, input)): Prompt {
+  const scene = state.scene
+  if (!scene) throw new Error('No scene in progress')
+  const location = locationById(content, scene.locationId)!
+  const present = presentCast(scene)
+  const cast = present.map((id) => characterById(content, id)!)
+  const walkOns = location.walkOns.filter((w) => scene.walkOns.includes(w.id))
+  const player = state.player
+  const facts = sceneFacts(content, state)
+
+  const system = [
+    directorRules(content.ruleset, lore.budgets.loreLines),
+    `# World: ${content.setting.name}\n${lore.stage.text}`,
+    content.tone && `# Tone\n${content.tone}`,
+    [
+      `# Location: ${location.name} (${tierById(content.setting, location.tier)?.name ?? location.tier}, ${location.district})`,
+      location.description,
+      `Details: ${[...location.texture.sights, ...location.texture.sounds, ...location.texture.smells].join('; ')}`,
+      ...facts.filter((f) => f.kind === 'place').map((f) => `- [${f.id}] ${f.text}`)
+    ].join('\n'),
+    lore.layers.scene.text && `# Lore of this place and the people here (background, not things to recite)\n${lore.layers.scene.text}`,
+    walkOns.length > 0 && `# Walk-ons\n${walkOns.map((w) => `- ${w.label}${w.name ? ` (${w.name})` : ''} [id: ${w.id}]: ${w.species}; ${w.look}; ${w.manner}; ${w.role}`).join('\n')}`,
+    `# The player: ${player.name} (${player.species}, ${player.pronouns})\n${player.appearance}. ${player.background}`,
+    `# Characters present\n${cast.map((c) => sheet(content, state, c, present, lore.secrets)).join('\n\n')}`
+  ]
+    .filter(Boolean)
+    .join('\n\n')
+
+  const quiet = silence(scene)
+  const recent = scene.turns.slice(-RECENT_TURNS)
+  const quietOnes = cast
+    .filter((c) => quiet[c.id]! >= QUIET_TURNS)
+    .map((c) => `- ${c.name} [id: ${c.id}], silent ${quiet[c.id]} turns. Trade: ${c.role}. Tonight: ${c.agenda.current}. Wants: ${c.agenda.longTerm.join('; ')}.`)
+  const said = facts.filter((f) => f.kind === 'said' || scene.told.includes(f.id))
+  const user = [
+    scene.summary && `# Earlier in the scene\n${scene.summary}`,
+    recent.length > 0 ? `# Last turns\n${recent.map((t) => turnText(content, player.name, t)).join('\n\n')}` : '# The scene opens now.',
+    said.length > 0 ? `# Already said on screen (anyone present can use these)\n${said.map((f) => `- [${f.id}] ${f.text}`).join('\n')}` : '# Nothing has been said on screen yet.',
+    `# Turns since each last spoke\n${present.map((id) => `${id}: ${quiet[id]}`).join(', ')}`,
+    Object.keys(scene.pressures).length > 0 && `# Pressure now\n${present.filter((id) => scene.pressures[id] !== undefined).map((id) => `${id}: ${content.ruleset.pressures[scene.pressures[id]!]}`).join(', ')}`,
+    quietOnes.length > 0 && `# Quiet for a while\n${quietOnes.join('\n')}`,
+    lore.layers.triggered.text && `# Lore that has come up (background, not things to recite)\n${lore.layers.triggered.text}`,
+    lore.layers.stances.length > 0 && `# Official stances between the factions here (individuals feel as their sheets say)\n${lore.layers.stances.join('\n')}`,
+    `# The player says or does\n${input}`,
+    'Return the JSON plan.'
+  ]
+    .filter(Boolean)
+    .join('\n\n')
+
+  return { system, user }
+}
+
+/**
+ * A character as the director sees them. Knowledge and secrets carry the fact ids moves refer to, and each secret
+ * shows as its cue or in full, as worked out for the turn.
+ */
+export function sheet(content: Pack, state: GameState, c: Character, present: string[], secrets: SecretShown[]): string {
   const scene = state.scene!
   const meters = state.meters[c.id]
   const relations = state.relations
@@ -76,11 +128,11 @@ export function sheet(content: Pack, state: GameState, c: Character, present: st
     `Agenda: ${c.agenda.longTerm.join('; ')}. Tonight: ${c.agenda.current}`,
     `Contradictions: ${c.contradictions.join('; ')}`,
     `Mood now: ${scene.moods[c.id] ?? c.mood}. Comfort ${scene.comfort[c.id] ?? 3}/5.`,
-    c.knowledge.length > 0 && (ids ? `Knows:\n${c.knowledge.map((k, i) => `- [${c.id}.k${i + 1}] ${k}`).join('\n')}` : `Knows: ${c.knowledge.join('; ')}`),
+    c.knowledge.length > 0 && `Knows:\n${c.knowledge.map((k, i) => `- [${c.id}.k${i + 1}] ${k}`).join('\n')}`,
     c.values.length > 0 && `Values: ${c.values.map((v) => `${v.stance} ${v.value}`).join(', ')}`,
     ...c.secrets.map((s) => {
-      const id = ids ? `${c.id}.${s.id}` : s.id
-      return secrets?.find((x) => x.id === `${c.id}.${s.id}`)?.form === 'cue' ? cueSecretLine(content, c, s, id) : fullSecretLine(c, s, id)
+      const id = `${c.id}.${s.id}`
+      return secrets.find((x) => x.id === id)?.form === 'cue' ? cueSecretLine(content, c, s, id) : fullSecretLine(c, s, id)
     }),
     `Lying tell: ${c.voice.shifts.lying}`,
     meters && `Toward the player: ${meterWords(content.ruleset, meters)}`,
@@ -107,47 +159,4 @@ function speakerName(content: Pack, id: string): string {
 export function turnText(content: Pack, playerName: string, turn: Turn): string {
   const beats = turn.beats.map((b) => (b.kind === 'narration' ? b.text : `${speakerName(content, b.speaker)}: "${b.text}"`))
   return [`${playerName}: ${turn.player}`, ...beats].join('\n')
-}
-
-export function buildDirectorPrompt(content: Pack, state: GameState, input: string): Prompt {
-  const scene = state.scene
-  if (!scene) throw new Error('No scene in progress')
-  const location = locationById(content, scene.locationId)!
-  const present = presentCast(scene)
-  const cast = present.map((id) => characterById(content, id)!)
-  const walkOns = location.walkOns.filter((w) => scene.walkOns.includes(w.id))
-  const player = state.player
-
-  const system = [
-    directorRules(content.ruleset),
-    `# World: ${content.setting.name}\n${directorStage(content.primer, content.codex, content.setting).text}`,
-    content.tone && `# Tone\n${content.tone}`,
-    `# Location: ${location.name} (${tierById(content.setting, location.tier)?.name ?? location.tier}, ${location.district})\n${location.description}\nSights: ${location.texture.sights.join('; ')}\nSounds: ${location.texture.sounds.join('; ')}\nSmells: ${location.texture.smells.join('; ')}${location.texture.slang.length ? `\nLocal slang: ${location.texture.slang.join('; ')}` : ''}${location.texture.current.length ? `\nLately: ${location.texture.current.join('; ')}` : ''}${location.extras.length ? `\nCrowd: ${location.extras.join('; ')}` : ''}`,
-    walkOns.length > 0 && `# Walk-ons\n${walkOns.map((w) => `- ${w.label}${w.name ? ` (${w.name})` : ''} [id: ${w.id}]: ${w.species}; ${w.look}; ${w.manner}; ${w.role}`).join('\n')}`,
-    `# The player: ${player.name} (${player.species}, ${player.pronouns})\n${player.appearance}. ${player.background}`,
-    `# Characters present\n${cast.map((c) => sheet(content, state, c, present)).join('\n\n')}`
-  ]
-    .filter(Boolean)
-    .join('\n\n')
-
-  const quiet = silence(scene)
-  const recent = scene.turns.slice(-RECENT_TURNS)
-  // What each quiet character cares about, pulled from their sheet so the director weighs it against this turn.
-  const quietOnes = cast
-    .filter((c) => quiet[c.id]! >= QUIET_TURNS)
-    .map((c) => [`- ${c.name} [id: ${c.id}], silent ${quiet[c.id]} turns. Trade: ${c.role}. Tonight: ${c.agenda.current}. Wants: ${c.agenda.longTerm.join('; ')}.`, c.knowledge.length > 0 && ` Knows: ${c.knowledge.join('; ')}.`].filter(Boolean).join(''))
-  const usedTexture = [...new Set(scene.turns.slice(-3).flatMap((t) => t.texture))]
-  const user = [
-    scene.summary && `# Earlier in the scene\n${scene.summary}`,
-    recent.length > 0 ? `# Last turns\n${recent.map((t) => turnText(content, player.name, t)).join('\n\n')}` : '# The scene opens now.',
-    `# Turns since each last spoke\n${present.map((id) => `${id}: ${quiet[id]}`).join(', ')}`,
-    quietOnes.length > 0 && `# Quiet for a while: does anything on the table touch them?\n${quietOnes.join('\n')}`,
-    usedTexture.length > 0 && `# Texture used recently\n${usedTexture.join('; ')}`,
-    `# The player says or does\n${input}`,
-    'Return the JSON beat plan.'
-  ]
-    .filter(Boolean)
-    .join('\n\n')
-
-  return { system, user }
 }

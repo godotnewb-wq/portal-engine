@@ -3,13 +3,17 @@ import { TracedError, type Prompt } from '@engine/core'
 import { fixture, yardScene } from '@tests/fixture'
 import { runTurn, type TurnLlm } from './runTurn'
 import { planItems } from './trace'
-import type { BeatPlan } from './plan'
+import type { BeatPlan } from './planShape'
 import { BEATS } from './style'
 
 const PLAN = JSON.stringify({
   speakers: [
-    { id: 'tobin', point: 'Says he locked up at the usual hour.', intent: 'Avoid the question.', mood: 'uneasy', hiding: 'let someone in after closing', approach: 'deflect' },
-    { id: 'mara', point: 'Asks why the gate was warm at midnight.', intent: 'Catch him out.', mood: 'sharp', depends_on_check: 'see' }
+    { id: 'tobin', goal: 'Avoid the question.', mood: 'uneasy', keeps: ['tobin.after-closing'], touched: 'after closing', approach: 'deflect' },
+    { id: 'mara', goal: 'Catch him out.', mood: 'sharp' }
+  ],
+  moves: [
+    { who: 'tobin', answers: 'player', move: 'dodge' },
+    { who: 'mara', answers: 1, move: 'push back', needs: 'see' }
   ],
   reactions: [],
   walk_ons: [{ id: 'clerk', line: 'stamps a ledger, loudly' }],
@@ -43,7 +47,7 @@ const clock = () => {
 describe('the turn trace (milestone 2, A1)', () => {
   it('records the turn: identity, cast before and after, plan, rolls, calls and cost', async () => {
     const state = yardScene(3)
-    const outcome = await runTurn(fixture, state, 'Tobin, who came by after closing?', scripted(PLAN, CLEAN), () => {}, { pipeline: 'lines', forceNatural: 11, turnId: 'abc', log: 'session-1', now: clock() })
+    const outcome = await runTurn(fixture, state, 'Tobin, who came by after closing?', scripted(PLAN, CLEAN), () => {}, { forceNatural: 11, turnId: 'abc', log: 'session-1', now: clock() })
     const t = outcome.trace
     expect(t).toMatchObject({ turnId: 'abc', sceneId: state.scene!.id, turn: 1, input: 'Tobin, who came by after closing?' })
     expect(t.at).toBe(new Date(1_700_000_000_010).toISOString())
@@ -61,7 +65,7 @@ describe('the turn trace (milestone 2, A1)', () => {
 
   it('breaks each check down: dice, edge asked and applied, modifier, rank, total, degree', async () => {
     const state = yardScene(3)
-    const { trace } = await runTurn(fixture, state, 'Tobin?', scripted(PLAN, CLEAN), () => {}, { pipeline: 'lines', forceNatural: 11 })
+    const { trace } = await runTurn(fixture, state, 'Tobin?', scripted(PLAN, CLEAN), () => {}, { forceNatural: 11 })
     expect(trace.checks).toEqual([
       expect.objectContaining({ id: 'see', who: 'mara', skill: 'notice', difficulty: 'tough', dc: 13, rolls: [11, 11], natural: 11, edgeAsked: 'advantage', edge: 'advantage', modifier: 3, rank: 1, total: 15, degree: 'success' })
     ])
@@ -69,7 +73,7 @@ describe('the turn trace (milestone 2, A1)', () => {
   })
 
   it('traces each beat to its line in the reply and to the plan item it carries out', async () => {
-    const { trace } = await runTurn(fixture, yardScene(), 'Tobin?', scripted(PLAN, CLEAN), () => {}, { pipeline: 'lines', forceNatural: 11 })
+    const { trace } = await runTurn(fixture, yardScene(), 'Tobin?', scripted(PLAN, CLEAN), () => {}, { forceNatural: 11 })
     expect(trace.beats.map((b) => [b.index, b.source, b.line, b.plan])).toEqual([
       [1, 'draft', 1, ['walk-on:clerk']],
       [2, 'draft', 3, ['speaker:tobin', 'line:1']],
@@ -81,7 +85,7 @@ describe('the turn trace (milestone 2, A1)', () => {
     const unplanned = 'Tobin: "Usual hour."\nMara: "Humming."\nClerk: "Next!"'
     // Still wrong after the rewrite: a line by no one in the scene (beat 2), then enough narration to go one beat over the budget once it is dropped.
     const stillWrong = ['Tobin: "Usual hour."', 'You say: "Fine."', 'Mara: "Humming."', ...Array.from({ length: BEATS.max - 1 }, (_, i) => `NARRATION: Rain ${i + 1}.`)].join('\n')
-    const { trace, beats } = await runTurn(fixture, yardScene(), 'Tobin?', scripted(JSON.stringify({ speakers: [{ id: 'tobin', intent: 'x', mood: '' }, { id: 'mara', intent: 'y', mood: '' }] }), unplanned, stillWrong), () => {}, { pipeline: 'lines', now: clock() })
+    const { trace, beats } = await runTurn(fixture, yardScene(), 'Tobin?', scripted(JSON.stringify({ speakers: [{ id: 'tobin', goal: 'x' }, { id: 'mara', goal: 'y' }], moves: [{ who: 'tobin', answers: 'player', move: 'answer' }, { who: 'mara', answers: 1, move: 'ask' }] }), unplanned, stillWrong), () => {}, { now: clock() })
     expect(trace.findings).toEqual([expect.objectContaining({ kind: 'unplanned-speaker', beat: 3, text: 'Next!' })])
     expect(trace.rewrite).toMatchObject({ callId: expect.stringMatching(/:rewrite$/), salvage: { dropped: [2], cut: 1 } })
     expect(trace.rewrite!.remaining.map((p) => p.kind)).toContain('unknown-speaker')
@@ -94,7 +98,7 @@ describe('the turn trace (milestone 2, A1)', () => {
   // Session 2026-11-07_0039_e46a, t2b5: a silent reaction given words, which ended up in quotes inside narration.
   it('sends speech in narration to the rewrite, and cuts the words but keeps the action if it is still there', async () => {
     const speaking = `${CLEAN}\nNARRATION: Pell doesn't look up. "Gate's been warm all week, if anyone asked me."`
-    const { beats, trace } = await runTurn(fixture, yardScene(), 'Was the gate warm?', scripted(PLAN, speaking, speaking), () => {}, { pipeline: 'lines', now: clock() })
+    const { beats, trace } = await runTurn(fixture, yardScene(), 'Was the gate warm?', scripted(PLAN, speaking, speaking), () => {}, { forceNatural: 11, now: clock() })
     expect(trace.findings.map((p) => p.kind)).toEqual(['speech-in-narration'])
     expect(trace.findings[0]!.fix).toMatch(/^Beat 4 puts spoken words in narration \("Gate's been warm all week, if anyone asked me\."\)\./)
     expect(beats.at(-1)).toEqual({ kind: 'narration', text: "Pell doesn't look up." })

@@ -1,14 +1,14 @@
 import { describe, expect, it } from 'vitest'
 import { fixture, yardScene } from '@tests/fixture'
-import { buildDirector2Prompt } from './director2'
+import { buildDirectorPrompt } from './director'
 import { turnLore } from './lore'
-import { LORE_LINE_WORDS, parsePlan2, validatePlan2 } from './plan2'
-import { buildWriter2Prompt } from './writer2'
+import { LORE_LINE_WORDS, parsePlan, validatePlan } from './plan'
+import { buildWriterPrompt } from './writer'
 
 // Lore lines and framing on the situation plan (claude/lore-injection.md §8, option B).
 const ASK = 'What do the tallies say about the Guild?'
 const raw = (lore: object[], speakers?: object[]) =>
-  parsePlan2(
+  parsePlan(
     JSON.stringify({
       player_action: { doing: 'asks about the tallies', uncertain: false },
       speakers: speakers ?? [
@@ -26,7 +26,7 @@ const raw = (lore: object[], speakers?: object[]) =>
   )!
 const validate = (lore: object[], speakers?: object[], budgets = {}) => {
   const state = yardScene()
-  return validatePlan2(fixture, state, raw(lore, speakers), ASK, turnLore(fixture, state, ASK, budgets))
+  return validatePlan(fixture, state, raw(lore, speakers), ASK, turnLore(fixture, state, ASK, budgets))
 }
 
 describe('lore lines', () => {
@@ -83,9 +83,9 @@ describe('lore lines', () => {
     expect(plan.lore?.map((l) => l.line)).toEqual(['The Guild owns the yard.'])
     expect(corrections).toEqual(['dropped lore line 2: at most 1'])
     const state = yardScene()
-    const off = buildDirector2Prompt(fixture, state, ASK, turnLore(fixture, state, ASK, { loreLines: 0 })).system
+    const off = buildDirectorPrompt(fixture, state, ASK, turnLore(fixture, state, ASK, { loreLines: 0 })).system
     expect(off).not.toMatch(/"lore"|lore: at most/)
-    const on = buildDirector2Prompt(fixture, state, ASK, turnLore(fixture, state, ASK)).system
+    const on = buildDirectorPrompt(fixture, state, ASK, turnLore(fixture, state, ASK)).system
     expect(on).toMatch(/lore: at most 3 facts/)
   })
 
@@ -103,7 +103,7 @@ describe('lore lines', () => {
     expect(ok.plan.lore?.[0]?.who).toBe('tobin')
     const state = yardScene()
     const noPorter = { ...fixture, characters: fixture.characters.map((c) => (c.id === 'tobin' ? { ...c, occupation: undefined } : c)) }
-    const { corrections } = validatePlan2(noPorter, state, raw([{ entry: 'faction.guild.tallies', who: 'tobin', line: 'x' }]), ASK, turnLore(fixture, state, ASK))
+    const { corrections } = validatePlan(noPorter, state, raw([{ entry: 'faction.guild.tallies', who: 'tobin', line: 'x' }]), ASK, turnLore(fixture, state, ASK))
     expect(corrections).toContain("dropped lore line 1: tobin doesn't know faction.guild.tallies")
   })
 
@@ -113,14 +113,14 @@ describe('lore lines', () => {
       { entry: 'faction.guild', line: 'The Guild owns the yard.' },
       { entry: 'faction.guild.tallies', who: 'mara', line: 'Every tally is rounded up.' }
     ])
-    const brief = buildWriter2Prompt(fixture, state, plan, ASK).user
+    const brief = buildWriterPrompt(fixture, state, plan, ASK).user
     expect(brief).toContain('# About the world, to draw on only if it fits (some, all or none; never recite)\n- The Guild owns the yard.\n- Every tally is rounded up. (only Mara would say this)')
     expect(brief).toContain('What they say about the world comes with this view: proud of the hall, wary of the yard.')
   })
 
   it('are asked for in the director’s rules, against entry ids it can see', () => {
     const state = yardScene()
-    const p = buildDirector2Prompt(fixture, state, ASK)
+    const p = buildDirectorPrompt(fixture, state, ASK)
     expect(p.system).toContain('"lore": [{"entry","who","line"}]')
     expect(p.system + p.user).toContain('## How the tallies work [faction.guild.tallies]')
   })

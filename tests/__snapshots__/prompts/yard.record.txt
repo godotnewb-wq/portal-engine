@@ -80,7 +80,6 @@
     "texture": [
       "a gate creaking"
     ],
-    "contrast": "",
     "avoid": [],
     "leaves": [],
     "end_scene": false,
@@ -401,7 +400,6 @@
     "texture": [
       "a cart with a broken wheel"
     ],
-    "contrast": "",
     "avoid": [],
     "leaves": [],
     "end_scene": false,
@@ -674,7 +672,6 @@
     "texture": [
       "stacked crates"
     ],
-    "contrast": "",
     "avoid": [],
     "leaves": [],
     "end_scene": false,
@@ -942,7 +939,6 @@
     "texture": [
       "wet straw"
     ],
-    "contrast": "",
     "avoid": [],
     "leaves": [
       "tobin"
@@ -1182,7 +1178,6 @@
     "texture": [
       "stacked crates"
     ],
-    "contrast": "",
     "avoid": [],
     "leaves": [],
     "end_scene": false,
