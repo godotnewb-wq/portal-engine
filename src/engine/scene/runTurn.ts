@@ -9,6 +9,7 @@ import { fallbackPlan, parsePlan, settlePlan, validatePlan } from './plan'
 import type { BeatPlan } from './planShape'
 import { resolvePlan, type ResolveOptions } from './resolve'
 import { castSnapshot, checkTraces, planItems, type BeatTrace, type TurnTrace } from './trace'
+import { activeSecrets } from './secrets'
 import { acceptTags, applyTurn, showDepartures } from './turn'
 import { buildRewritePrompt, buildWriterPrompt, sceneSpeakers } from './writer'
 import { recentlyUsed, repeatProblems, usageOf } from './repeats'
@@ -140,7 +141,7 @@ export async function runTurn(
     const departures = showDepartures(content, plan, kept.map((i) => parsed.beats[i]!))
     const beats = departures.beats
 
-    const next = applyTurn(content, state, { id: turnId, ...(options.log && { log: options.log }), input, plan, beats, tags: accepted.tags, dice, details: carryDetails(briefs.details, plan), memories: briefs.details.filter((d) => d.kind === 'memory').map((d) => d.id) })
+    const next = applyTurn(content, state, { id: turnId, ...(options.log && { log: options.log }), input, plan, beats, tags: accepted.tags, dice, details: carryDetails(briefs.details, plan), memories: briefs.details.filter((d) => d.kind === 'memory').map((d) => d.id), secrets: activeSecrets(lore.secrets) })
     const rewritten = problems.length > 0
     const salvage = rewritten && remaining.length > 0
     const dropped = salvage ? droppedBeats(remaining).filter((n) => n <= parsed.beats.length) : []

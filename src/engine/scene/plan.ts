@@ -1,9 +1,9 @@
 import { z } from 'zod'
 import { applyTie, needsAgreement, tagNamed, tieProblem, type GameState, type TieChange } from '@engine/state'
-import { characterById, knowerOf, type Pack } from '@engine/pack'
+import { characterById, type Pack } from '@engine/pack'
 import { checkNames, entryById, knows, LORE_LINE_WORDS } from '@engine/codex'
 import { packNames } from './checks'
-import { turnLore, type TurnLore } from './lore'
+import { knowerIn, turnLore, type TurnLore } from './lore'
 import { canSay, sceneFacts, toldPlayer } from './facts'
 import { wouldDisclose } from './resolve'
 import { readFeeling, type Feeling } from '@engine/characters'
@@ -439,7 +439,7 @@ function validateLore(content: Pack, state: GameState, raw: RawPlan, lore: TurnL
     if (entry.knowledge === 'circles') {
       const c = who ? characterById(content, who) : undefined
       if (!who || !speakers.has(who) || !c) return fix(`dropped lore line ${n}: insider knowledge needs a speaker who knows it`)
-      if (!knows(content.setting, entry, knowerOf(c))) return fix(`dropped lore line ${n}: ${who} doesn't know ${id}`)
+      if (!knows(content.setting, entry, knowerIn(state, c))) return fix(`dropped lore line ${n}: ${who} doesn't know ${id}`)
       return void lines.push({ entry: id, title: entry.title, line: said, who })
     }
     if (l.who?.trim() && (!who || !speakers.has(who))) fix(`lore line ${n}: "${l.who.trim()}" isn't a speaker; anyone may use it`)

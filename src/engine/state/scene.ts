@@ -46,6 +46,12 @@ export const TurnSchema = z.object({
    * the reader's end-of-scene memory. Absent when none.
    */
   reads: z.array(z.object({ by: z.string(), target: z.string(), feeling: FeelingSchema })).optional(),
+  /**
+   * Secrets that came out on screen this turn and who they came out in front of (milestone 4b): a move that used one,
+   * said in front of everyone present, or a reading check that saw through someone keeping one, for the reader. Only
+   * these can become someone's learned secret at the scene's end.
+   */
+  exposed: z.array(z.object({ secret: z.string(), to: z.array(z.string()) })).optional(),
   /** Memories brought into the director's briefs this turn as optional detail (milestone 4b), so the summary can name them as revisited. */
   memories: z.array(z.string()).optional(),
   /**

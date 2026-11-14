@@ -1,4 +1,6 @@
-import { directorStage, loreLayers, triggeredEntries, writerStage, type LayerEntry, type LoreLayers, type Stage } from '@engine/codex'
+import { directorStage, loreLayers, triggeredEntries, writerStage, type Knower, type LayerEntry, type LoreLayers, type Stage } from '@engine/codex'
+import type { Character } from '@engine/characters'
+import { learnedEntries } from '@engine/memory'
 import { firstName } from '@engine/core'
 import { characterById, knowerOf, locationById, type Pack } from '@engine/pack'
 import { loreBudgets, type LoreBudgetOverrides, type LoreBudgets } from '@engine/rules'
@@ -34,12 +36,18 @@ export interface LoreTrace {
   secrets?: SecretShown[]
 }
 
+/** Who someone is to the knowledge filter, with the codex secrets they learned in play: their memories' pointers (milestone 4b). */
+export function knowerIn(state: GameState, c: Character): Knower {
+  const k = knowerOf(c)
+  return { ...k, holds: [...new Set([...k.holds, ...learnedEntries(state, c.id)])] }
+}
+
 export function turnLore(content: Pack, state: GameState, input: string, overrides: LoreBudgetOverrides = {}): TurnLore {
   const scene = state.scene!
   const location = locationById(content, scene.locationId)
   const present = presentCast(scene).flatMap((id) => {
     const c = characterById(content, id)
-    return c ? [knowerOf(c)] : []
+    return c ? [knowerIn(state, c)] : []
   })
   const people = [...content.characters.map((c) => c.name), state.player.name, ...(location?.walkOns.flatMap((w) => (w.name ? [w.name] : [])) ?? [])]
   const ignore = [...new Set([...people, ...people.map(firstName)])]

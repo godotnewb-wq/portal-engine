@@ -52,6 +52,8 @@ export const SecretSchema = z
     tell: z.string(),
     /** When they would let it go: prose the director weighs, alongside the minimums below. */
     revealWhen: z.string().optional(),
+    /** Kept on the director's sheet however long it goes unused (milestone 4b: dormancy); it counts toward the sheet's limit. */
+    pinned: z.boolean().optional(),
     /**
      * Voluntary disclosure (npc design §6, milestone 4a): ladder words per meter that the holder's feelings toward the
      * listener must all meet before they choose to share it. A meter left out asks nothing.

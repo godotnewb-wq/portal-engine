@@ -155,9 +155,14 @@ export const RulesetSchema = z.object({
       linkedSecretTokens: z.number().int().min(0).default(200),
       personalSecretTokens: z.number().int().min(0).default(100),
       /** An authored character starting with more secrets than this gets an authoring warning. */
-      startingSecrets: z.number().int().min(0).default(3)
+      startingSecrets: z.number().int().min(0).default(3),
+      /**
+       * How many of a character's held secrets the director's sheet shows: the most recently active, pinned ones
+       * counting toward it; the rest are dormant until their keywords or subject come up (milestone 4b, *tune*).
+       */
+      activeSecrets: z.number().int().min(0).default(3)
     })
-    .default({ fullWords: 120, sceneTokens: 1200, triggeredTokens: 800, loreLines: 3, linkedSecretTokens: 200, personalSecretTokens: 100, startingSecrets: 3 }),
+    .default({ fullWords: 120, sceneTokens: 1200, triggeredTokens: 800, loreLines: 3, linkedSecretTokens: 200, personalSecretTokens: 100, startingSecrets: 3, activeSecrets: 3 }),
   /**
    * Director briefs (director writer §7, milestone 4a; *tune*): the rough token budget the whole scene's optional
    * detail shares (knowledge, goals, contradictions, history notes, ties to people who aren't here), how many absent

@@ -8,7 +8,8 @@ import { playScene, type ScriptedTurn } from './prompts'
  * check, a rewrite, a salvaged rewrite whose dropped speaker left tags behind, a planned departure, an unplanned
  * LEAVES tag, the running summary once turns leave the verbatim window, and the end-of-scene summaries, with a
  * feeling toward someone and a general aftermath carried out of the scene, and a tie change on screen (Mara takes Tobin
- * on), mirrored on his side and making both memories Core (milestone 4b).
+ * on), mirrored on his side and making both memories Core; Tobin's secret coming out in front of Mara, which she learns
+ * (milestone 4b).
  */
 const TURNS: ScriptedTurn[] = [
   {
@@ -49,7 +50,7 @@ Mara: "You were here after closing, Tobin. I saw the lamp."
       player_action: { doing: 'persuades Tobin to name who he let in', uncertain: true },
       checks: [{ id: 'persuade-tobin', who: 'player', skill: 'talk', difficulty: 'tough', stakes: 'Tobin says who he let in' }],
       speakers: [{ id: 'tobin', goal: 'decide whether to trust Kit', feels: { shade: 'glum', intensity: 3, reason: 'he wants to trust Kit' }, pressure: 'keen', keeps: ['tobin.after-closing'], touched: 'into the yard after closing', approach: 'partial truth' }],
-      moves: [{ who: 'tobin', answers: 'player', move: 'concede', uses: [], new: ['Someone with a Guild seal knocked after closing.'], needs: 'persuade-tobin' }],
+      moves: [{ who: 'tobin', answers: 'player', move: 'concede', uses: ['tobin.after-closing'], new: ['Someone with a Guild seal knocked after closing.'], needs: 'persuade-tobin' }],
       change: 'Tobin admits he opened the gate.',
       reactions: [{ id: 'mara', beat: 'stops writing' }],
       walk_ons: [],
@@ -146,7 +147,7 @@ NARRATION: She glances at the gate Tobin left by.
 ]
 
 const SUMMARIES = {
-  mara: { memories: [{ text: 'Tobin let someone with a Guild seal into the yard after closing; Kit got it out of him.', level: 'normal' }, { text: 'Tobin is my apprentice now.', level: 'core', why: 'she took him on' }], reason: 'Kit kept it quiet', warmth: 'warmer', bond: 'same', learned: [], others: [{ with: 'tobin', warmth: 'colder', bond: 'same', reason: 'he lied to her' }], toward: [{ who: 'tobin', shade: 'sore', family: 'mad', intensity: 3, reason: 'he lied to her' }] },
+  mara: { heard: [{ id: 'tobin.after-closing', memory: 'Tobin admitted he let someone into the yard after closing.' }], memories: [{ text: 'Tobin let someone with a Guild seal into the yard after closing; Kit got it out of him.', level: 'normal' }, { text: 'Tobin is my apprentice now.', level: 'core', why: 'she took him on' }], reason: 'Kit kept it quiet', warmth: 'warmer', bond: 'same', learned: [], others: [{ with: 'tobin', warmth: 'colder', bond: 'same', reason: 'he lied to her' }], toward: [{ who: 'tobin', shade: 'sore', family: 'mad', intensity: 3, reason: 'he lied to her' }] },
   tobin: { feels: { shade: 'glum', intensity: 4, reason: 'he gave the seal away' }, memories: [{ text: 'I told Kit about the seal. Mara heard.', level: 'core', why: 'his secret came out' }], reason: 'Kit let him leave', warmth: 'warmer', bond: 'warmer', learned: [], others: [] }
 }
 

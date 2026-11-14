@@ -3,6 +3,7 @@ import { firstName } from '@engine/core'
 import type { Character, Secret } from '@engine/characters'
 import { characterById, type Pack } from '@engine/pack'
 import type { GameState } from '@engine/state'
+import { knowersOf } from '@engine/memory'
 import { presentCast } from './planShape'
 
 /**
@@ -19,7 +20,11 @@ export interface SecretShown {
   /** Its fact id, `<character>.<secret>`: what the director keeps it by. */
   id: string
   kind: 'linked' | 'personal'
-  form: 'full' | 'cue'
+  /** `off`: not on the sheet this turn (milestone 4b), because it is dormant or everyone present knows it (`off`). */
+  form: 'full' | 'cue' | 'off'
+  off?: 'dormant' | 'known'
+  /** Who present, besides the holder, knows it (the player included): it is kept only from the others. */
+  knownBy?: string[]
   /** Why it was first in line for full display, when it was. */
   priority?: 'kept' | 'keyword' | 'context'
   /** Estimated tokens of the cue line. */
@@ -76,6 +81,39 @@ function priorityOf(content: Pack, s: Secret, id: string, keptLast: Set<string>,
 
 const RANK = { kept: 0, keyword: 1, context: 2 } as const
 
+/**
+ * Which held secrets are on the sheet (milestone 4b; decided 2026-11-13). A secret everyone present knows costs nothing
+ * and stays off. Of the rest, the ruleset's `codex.activeSecrets` most recently active are on: pinned ones first (they
+ * count toward the limit), then those brought up this turn, then by when they were last active, then the card's
+ * order. The others are dormant, off the sheet but still held, until their keywords or subject come up.
+ */
+function onSheet(content: Pack, state: GameState, c: Character, shown: (SecretShown & { secret: Secret })[]): void {
+  const present = presentCast(state.scene!).filter((x) => x !== c.id)
+  for (const x of shown) {
+    const knownBy = knowersOf(state, x.id, x.secret.text).filter((k) => k === 'player' || present.includes(k))
+    if (knownBy.length > 0) x.knownBy = knownBy
+    if (knownBy.length === present.length + 1) {
+      x.form = 'off'
+      x.off = 'known'
+    }
+  }
+  const last = (x: SecretShown) => state.secretActivity[x.id]?.at ?? Number.NEGATIVE_INFINITY
+  const ranked = shown
+    .map((x, order) => ({ x, order }))
+    .filter(({ x }) => x.form !== 'off')
+    .sort((a, b) => Number(!!b.x.secret.pinned) - Number(!!a.x.secret.pinned) || Number(!!b.x.priority) - Number(!!a.x.priority) || last(b.x) - last(a.x) || a.order - b.order)
+  const limit = Math.max(content.ruleset.codex.activeSecrets, ranked.filter(({ x }) => x.secret.pinned).length)
+  for (const { x } of ranked.slice(limit)) {
+    x.form = 'off'
+    x.off = 'dormant'
+  }
+}
+
+/** The held secrets that were active this turn on the sheet (milestone 4b): shown in full, or brought up by keyword or subject. */
+export function activeSecrets(shown: SecretShown[]): { id: string; how: 'kept' | 'full' | 'keyword' | 'context' }[] {
+  return shown.flatMap((x): { id: string; how: 'kept' | 'full' | 'keyword' | 'context' }[] => (x.form === 'off' ? [] : x.priority ? [{ id: x.id, how: x.priority }] : x.form === 'full' ? [{ id: x.id, how: 'full' }] : []))
+}
+
 /** How every secret held by someone present shows on the sheet this turn. */
 export function secretDisplay(content: Pack, state: GameState, scan: SecretScan): SecretShown[] {
   const scene = state.scene!
@@ -93,10 +131,11 @@ export function secretDisplay(content: Pack, state: GameState, scan: SecretScan)
       const priority = priorityOf(content, s, id, keptLast, scan)
       return { secret: s, holder: c.id, id, kind: s.codex ? 'linked' : 'personal', form: 'cue', ...(priority && { priority }), cueTokens: tokensOf(cueSecretLine(content, c, s)), expansionTokens: 0 }
     })
+    onSheet(content, state, c, shown)
     for (const kind of ['linked', 'personal'] as const) {
       let left = budgets[kind]
       const line = shown
-        .filter((x) => x.kind === kind && x.priority)
+        .filter((x) => x.kind === kind && x.priority && x.form !== 'off')
         .sort((a, b) => RANK[a.priority!] - RANK[b.priority!] || (lastKept.get(b.id) ?? -1) - (lastKept.get(a.id) ?? -1) || a.id.localeCompare(b.id))
       for (const x of line) {
         const extra = Math.max(0, tokensOf(fullSecretLine(c, x.secret)) - x.cueTokens)

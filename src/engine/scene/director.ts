@@ -1,4 +1,4 @@
-import type { Prompt } from '@engine/core'
+import { firstName, type Prompt } from '@engine/core'
 import { shadeList, type Character } from '@engine/characters'
 import { tieWords, type GameState, type Turn } from '@engine/state'
 import { type Ruleset } from '@engine/rules'
@@ -157,12 +157,17 @@ export function buildDirectorPrompt(content: Pack, state: GameState, input: stri
 export function sheet(content: Pack, state: GameState, c: Character, secrets: SecretShown[], details: BriefDetail[]): string {
   return [
     ...recurringLines(content, state, c, TIER_WORDS[c.tier]),
-    ...c.secrets.map((s) => {
+    ...c.secrets.flatMap((s) => {
       const id = `${c.id}.${s.id}`
-      const line = secrets.find((x) => x.id === id)?.form === 'cue' ? cueSecretLine(content, c, s, id) : fullSecretLine(c, s, id)
+      const shown = secrets.find((x) => x.id === id)
+      // Dormant, or known to everyone here: off the sheet (milestone 4b).
+      if (shown?.form === 'off') return []
+      const base = shown?.form === 'cue' ? cueSecretLine(content, c, s, id) : fullSecretLine(c, s, id)
+      // Kept only from those here who don't know it.
+      const line = shown?.knownBy ? `${base} Already known to ${shown.knownBy.map((k) => (k === 'player' ? 'the player' : firstName(characterById(content, k)?.name ?? k))).join(' and ')}.` : base
       // Its disclosure minimums in words (npc design §6), so the director doesn't plan a telling the game will refuse.
-      if (!s.disclose) return line
-      return `${line} ${wouldDisclose(content, state, c.id, s.id, 'player') ? 'Would tell the player now, if it fits.' : "Won't tell the player yet."}`
+      if (!s.disclose) return [line]
+      return [`${line} ${wouldDisclose(content, state, c.id, s.id, 'player') ? 'Would tell the player now, if it fits.' : "Won't tell the player yet."}`]
     }),
     `Lying tell: ${c.voice.shifts.lying}`,
     rememberedLine(content, state, c),

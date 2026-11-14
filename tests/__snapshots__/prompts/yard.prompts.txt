@@ -414,7 +414,7 @@ I'm not the Watch. Tell me who you let into the yard after closing, and I'll kee
 - Tobin → you: employer; took him on for the night shift last month
 
 # The conversation, in order
-1. Tobin, answering the player: concede (may draw on: Someone with a Guild seal knocked after closing. [new to the player]) (the check succeeded)
+1. Tobin, answering the player: concede (may draw on: Tobin let someone into the yard after closing. [new to the player]; Someone with a Guild seal knocked after closing. [new to the player]) (the check succeeded)
 
 # By the end of the turn
 Tobin admits he opened the gate.
@@ -496,7 +496,7 @@ I'm not the Watch. Tell me who you let into the yard after closing, and I'll kee
 - Tobin → you: employer; took him on for the night shift last month
 
 # The conversation, in order
-1. Tobin, answering the player: concede (may draw on: Someone with a Guild seal knocked after closing. [new to the player]) (the check succeeded)
+1. Tobin, answering the player: concede (may draw on: Tobin let someone into the yard after closing. [new to the player]; Someone with a Guild seal knocked after closing. [new to the player]) (the check succeeded)
 
 # By the end of the turn
 Tobin admits he opened the gate.
@@ -619,7 +619,6 @@ Cares about: kin (some)
 Tonight: Keep anyone from asking about last night
 Mood now: glum, 3 of 5: he wants to trust Kit; it shows as: leaking. Comfort 3/5.
 Toward the player: warmth: civil; bond: loose · employer: took him on for the night shift last month
-Secret [tobin.after-closing]: Tobin let someone into the yard after closing. Tell: Hums.
 Lying tell: Hums
 ----- user -----
 # Last turns
@@ -635,6 +634,7 @@ Mara's pen stops over the tally.
 
 # Already said on screen (anyone present can use these)
 - [mara.k1] Tobin was in the yard after closing
+- [tobin.after-closing] Tobin let someone into the yard after closing.
 - [said.1] The gate stood open until ten.
 - [said.2] Someone with a Guild seal knocked after closing.
 
@@ -708,6 +708,7 @@ The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
 
 # What the player has been told this scene
 - Tobin was in the yard after closing
+- Tobin let someone into the yard after closing.
 - The gate stood open until ten.
 - Someone with a Guild seal knocked after closing.
 
@@ -797,6 +798,7 @@ The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
 
 # What the player has been told this scene
 - Tobin was in the yard after closing
+- Tobin let someone into the yard after closing.
 - The gate stood open until ten.
 - Someone with a Guild seal knocked after closing.
 
@@ -952,7 +954,6 @@ Cares about: kin (some)
 Tonight: Keep anyone from asking about last night
 Mood now: glum, 3 of 5: he wants to trust Kit; it shows as: leaking. Comfort 3/5.
 Toward the player: warmth: civil; bond: loose · employer: took him on for the night shift last month
-Secret [tobin.after-closing] (in short): Tobin let someone into the yard after closing.
 Lying tell: Hums
 ----- user -----
 # Last turns
@@ -971,6 +972,7 @@ Mara: "Only clerks carry Guild seals. That makes it six people."
 
 # Already said on screen (anyone present can use these)
 - [mara.k1] Tobin was in the yard after closing
+- [tobin.after-closing] Tobin let someone into the yard after closing.
 - [said.1] The gate stood open until ten.
 - [said.2] Someone with a Guild seal knocked after closing.
 - [said.3] Only clerks carry Guild seals.
@@ -1044,6 +1046,7 @@ The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
 
 # What the player has been told this scene
 - Tobin was in the yard after closing
+- Tobin let someone into the yard after closing.
 - The gate stood open until ten.
 - Someone with a Guild seal knocked after closing.
 - Only clerks carry Guild seals.
@@ -1325,11 +1328,12 @@ Write the beats.
 You judge what one character takes away from a scene in a visual-novel RPG. Write Mara's memory of the scene and how it changed what Mara feels.
 
 Reply with only a JSON object:
-{"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "..."}], "revisited": [], "reason": "...", "warmth": "...", "bond": "...", "learned": [], "others": [{"with": "id", "warmth": "...", "bond": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": []}
+{"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "..."}], "revisited": [], "reason": "...", "warmth": "...", "bond": "...", "learned": [], "others": [{"with": "id", "warmth": "...", "bond": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": [], "heard": [{"id": "...", "memory": "..."}]}
 
 - memories: what stays with Mara from this scene, one for each distinct moment, most important first. Most scenes leave one; at most 3. text: one or two sentences, past tense, third person, from Mara's point of view: what Mara said, did, noticed and felt, and how Kit treated Mara. End on what stayed with Mara most.
 - level: "core" for a moment that changed something lasting for Mara, one Mara would still bring up in a year (a first betrayal or first real job, a loss, a secret of theirs coming out, a promise made or broken, real danger to their life; rare; at most 2, each with why: what it changed for Mara); "normal" for something that matters for weeks (a deal, an argument, a favor, learning something useful); "fleeting" for small talk, routine, atmosphere.
 - revisited: the ids of memories under "Remembers" that this scene came back to (a debt raised again, a promise kept); [] if none.
+- heard: of the other people's secrets listed as coming out in front of Mara, the ids of those Mara truly took in, each with memory: one sentence, past tense, from Mara's point of view, of learning it; [] if none.
 - warmth, bond: how each CHANGED toward Kit because of this scene, each one of: "colder", "same", "warmer". Meters move slowly; nothing is owed for turning up. Toward someone, warmth is how much they like the other; bond is how much they would do for the other.
 - Judge as Mara: by Mara's values, agenda and how things stood before. Values Mara likes, shown by Kit, raise regard; values Mara dislikes lower it.
 - reason: one short sentence on what moved Mara, and which way.
@@ -1348,6 +1352,8 @@ About Mara (person, she/her):
 - Before this scene, toward Kit: warmth: civil; bond: loose
 - Toward Tobin: warmth: civil; bond: loose (she takes him on to keep him close)
 - What changed between people this scene (a Core memory for Mara): Tobin becomes Mara's apprentice (she takes him on to keep him close).
+- Other people's secrets that came out in front of Mara this scene:
+  - [tobin.after-closing] Tobin: Tobin let someone into the yard after closing.
 - Mood at the end: sore (mad), 2 of 5: she wants to know more first; comfort 2/5.
 
 Place: The Guild Yard, east gate.
@@ -1405,6 +1411,7 @@ About Tobin (automaton, he/him):
 - Before this scene, toward Kit: warmth: civil; bond: loose
 - Toward Mara: warmth: civil; bond: loose (she takes him on to keep him close)
 - What changed between people this scene (a Core memory for Tobin): Tobin becomes Mara's apprentice (she takes him on to keep him close).
+- Tobin's secret [after-closing] came out on screen this scene (a Core memory for Tobin).
 - Mood at the end: jolted, 2 of 5; comfort 3/5.
 - Tobin left before the scene was over; the memory ends with leaving.
 

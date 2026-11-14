@@ -33,7 +33,14 @@ export const MemorySchema = z.object({
   /** Who it's about, by id ("player" for the player): the people in the scene. */
   about: z.array(z.string()).default([]),
   /** Whether it is still brought to scenes; a faded memory stays in the save and can come back when revisited. */
-  inRecall: z.boolean().default(true)
+  inRecall: z.boolean().default(true),
+  /**
+   * For a memory of learning someone else's secret (milestone 4b): the secret, by fact id (`<holder>.<secret>`), and,
+   * when it is linked to the codex, the codex entry. The pointer grants the knowledge while the memory is in the save,
+   * in recall or not.
+   */
+  secret: z.string().optional(),
+  codex: z.string().optional()
 })
 export type Memory = z.infer<typeof MemorySchema>
 
@@ -83,6 +90,11 @@ export const GameStateSchema = z.object({
   aftermath: z.array(AftermathSchema).default([]),
   /** Feelings toward a person that ended, for the repeat rule; trimmed to the ruleset's `aftermath.historyDays`. */
   endedFeelings: z.array(EndedFeelingSchema).default([]),
+  /**
+   * When each held secret was last active, by fact id, and how (milestone 4b: dormancy): kept, shown in full, or its
+   * keywords or subject brought up. The director's sheet shows the most recently active.
+   */
+  secretActivity: z.record(z.string(), z.object({ at: z.number().int(), how: z.enum(['kept', 'full', 'keyword', 'context']) })).default({}),
   /** When each character last shared a scene with the player, in game time (milestone 4b: noticing absence). */
   lastSeen: z.record(IdSchema, z.number().int()).default({}),
   /** Facts the player has learned, per character. */

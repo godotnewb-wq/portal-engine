@@ -1742,6 +1742,7 @@
         ],
         "revisited": [],
         "memoryNotes": [],
+        "heard": [],
         "reason": "Rook backed her up",
         "before": {
           "approval": 5,
@@ -1850,6 +1851,7 @@
         "memoryNotes": [
           "kept the first 3 of 4 memories"
         ],
+        "heard": [],
         "reason": "",
         "before": {
           "approval": 10,
@@ -1918,6 +1920,7 @@
         ],
         "revisited": [],
         "memoryNotes": [],
+        "heard": [],
         "reason": "Rook asked too many questions",
         "before": {
           "approval": -5,
@@ -1984,6 +1987,7 @@
         ],
         "revisited": [],
         "memoryNotes": [],
+        "heard": [],
         "reason": "",
         "before": {
           "approval": -5,

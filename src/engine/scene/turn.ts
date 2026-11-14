@@ -23,6 +23,8 @@ export interface TurnWritten {
   details?: string[]
   /** Memories the briefs brought in as optional detail this turn (milestone 4b). */
   memories?: string[]
+  /** Held secrets that were active this turn, for dormancy (milestone 4b): kept, shown in full, or brought up. */
+  secrets?: { id: string; how: 'kept' | 'full' | 'keyword' | 'context' }[]
 }
 
 export function rolledChecks(plan: BeatPlan): RolledCheck[] {
@@ -93,6 +95,35 @@ export function showDepartures(content: Pack, plan: BeatPlan, beats: Beat[]): { 
 }
 
 /**
+ * Secrets that came out on screen this turn, and who they came out in front of (milestone 4b; decided 2026-11-13): a
+ * move whose speaker had a line used one, in front of everyone present but its holder; or a reading check saw through
+ * someone keeping one, for the reader (the player keeps no memories, so a player's read records nothing).
+ */
+export function exposures(content: Pack, scene: NonNullable<GameState['scene']>, written: Pick<TurnWritten, 'plan' | 'beats'>): NonNullable<Turn['exposed']> {
+  const present = presentCast(scene)
+  const holderOf = (id: string) => {
+    const dot = id.indexOf('.')
+    const c = dot > 0 ? characterById(content, id.slice(0, dot)) : undefined
+    return c?.secrets.some((s) => `${c.id}.${s.id}` === id) ? c.id : undefined
+  }
+  const voiced = new Set(written.beats.flatMap((b) => (b.kind === 'dialogue' ? [b.speaker] : [])))
+  const out = new Map<string, Set<string>>()
+  const add = (secret: string, to: string[]) => out.set(secret, new Set([...(out.get(secret) ?? []), ...to]))
+  for (const m of written.plan.moves ?? []) {
+    if (!voiced.has(m.who)) continue
+    for (const s of m.says) {
+      const holder = s.id ? holderOf(s.id) : undefined
+      if (holder) add(s.id!, present.filter((x) => x !== holder))
+    }
+  }
+  for (const read of written.plan.reads ?? []) {
+    if (read.by === 'player') continue
+    for (const id of written.plan.speakers.find((x) => x.id === read.target)?.kept ?? []) add(id, [read.by])
+  }
+  return [...out].flatMap(([secret, to]) => (to.size > 0 ? [{ secret, to: [...to] }] : []))
+}
+
+/**
  * Applies a finished turn to the state. Felt moods come from the plan's `feels`; tags only touch characters who are
  * present; departures and the scene's end
  * come from the plan alone (see `acceptTags` for which tags count).
@@ -117,6 +148,8 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
   if (written.details && written.details.length > 0) turn.details = written.details
   if (written.plan.reads && written.plan.reads.length > 0) turn.reads = written.plan.reads
   if (written.memories && written.memories.length > 0) turn.memories = written.memories
+  const exposed = exposures(content, scene, written)
+  if (exposed.length > 0) turn.exposed = exposed
   // What the director says they feel becomes their mood (milestone 4b); anyone it says nothing about keeps theirs.
   const felt = Object.fromEntries([...written.plan.speakers, ...written.plan.reactions].flatMap((s) => (s.feels ? [[s.id, s.feels]] : [])))
   // The strongest each felt, for the memory over-grading guard at the scene's end.
@@ -160,8 +193,14 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
   }
   const pending = (written.plan.ties ?? []).filter((t) => t.pending).map((t) => t.change)
 
+  // When each held secret was last active (milestone 4b: dormancy); a keep counts over being shown or brought up.
+  const secretActivity = { ...tied.secretActivity }
+  const ORDER = ['kept', 'full', 'keyword', 'context'] as const
+  for (const s of [...(written.secrets ?? []), ...kept.map((id) => ({ id, how: 'kept' as const }))].sort((a, b) => ORDER.indexOf(b.how) - ORDER.indexOf(a.how))) secretActivity[s.id] = { at: state.time, how: s.how }
+
   return {
     ...tied,
+    secretActivity,
     time: state.time + MINUTES_PER_TURN,
     dice: written.dice,
     scene: {

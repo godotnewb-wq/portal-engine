@@ -21,6 +21,7 @@ export function createInitialState(content: Pack, seed: number): GameState {
     memories: [],
     aftermath: [],
     endedFeelings: [],
+    secretActivity: {},
     lastSeen: {},
     facts: {},
     scene: null

@@ -398,7 +398,7 @@
       {
         "who": "tobin",
         "answers": "player",
-        "point": "concede: Someone with a Guild seal knocked after closing."
+        "point": "concede: Tobin let someone into the yard after closing.; Someone with a Guild seal knocked after closing."
       }
     ],
     "reactions": [
@@ -450,6 +450,11 @@
         "answers": "player",
         "move": "concede",
         "says": [
+          {
+            "text": "Tobin let someone into the yard after closing.",
+            "id": "tobin.after-closing",
+            "unheard": true
+          },
           {
             "text": "Someone with a Guild seal knocked after closing.",
             "unheard": true
@@ -700,7 +705,8 @@
       }
     },
     "told": [
-      "mara.k1"
+      "mara.k1",
+      "tobin.after-closing"
     ],
     "newFacts": [
       {
@@ -871,10 +877,15 @@
         "holder": "tobin",
         "id": "tobin.after-closing",
         "kind": "personal",
-        "form": "full",
+        "form": "off",
         "priority": "kept",
         "cueTokens": 22,
-        "expansionTokens": 0
+        "expansionTokens": 0,
+        "knownBy": [
+          "mara",
+          "player"
+        ],
+        "off": "known"
       }
     ]
   },
@@ -886,7 +897,7 @@
     "dropped": [],
     "recurring": {
       "mara": 213,
-      "tobin": 137
+      "tobin": 115
     },
     "memories": {}
   },
@@ -984,7 +995,8 @@
       }
     },
     "told": [
-      "mara.k1"
+      "mara.k1",
+      "tobin.after-closing"
     ],
     "newFacts": [
       {
@@ -1175,9 +1187,14 @@
         "holder": "tobin",
         "id": "tobin.after-closing",
         "kind": "personal",
-        "form": "cue",
+        "form": "off",
         "cueTokens": 22,
-        "expansionTokens": 0
+        "expansionTokens": 0,
+        "knownBy": [
+          "mara",
+          "player"
+        ],
+        "off": "known"
       }
     ]
   },
@@ -1214,7 +1231,7 @@
     "dropped": [],
     "recurring": {
       "mara": 213,
-      "tobin": 137
+      "tobin": 115
     },
     "memories": {}
   },
@@ -1291,7 +1308,8 @@
       }
     },
     "told": [
-      "mara.k1"
+      "mara.k1",
+      "tobin.after-closing"
     ],
     "newFacts": [
       {
@@ -1580,7 +1598,8 @@
       }
     },
     "told": [
-      "mara.k1"
+      "mara.k1",
+      "tobin.after-closing"
     ],
     "newFacts": [
       {
@@ -1677,7 +1696,13 @@
             "reason": "he lied to her"
           }
         ],
-        "resolved": []
+        "resolved": [],
+        "heard": [
+          {
+            "id": "tobin.after-closing",
+            "memory": "Tobin admitted he let someone into the yard after closing."
+          }
+        ]
       },
       "report": {
         "id": "mara",
@@ -1693,10 +1718,18 @@
             "id": "mara.m2",
             "text": "Tobin is my apprentice now.",
             "level": "core"
+          },
+          {
+            "id": "mara.m3",
+            "text": "Tobin admitted he let someone into the yard after closing.",
+            "level": "normal"
           }
         ],
         "revisited": [],
         "memoryNotes": [],
+        "heard": [
+          "tobin.after-closing"
+        ],
         "reason": "Kit kept it quiet",
         "before": {
           "warmth": 2,
@@ -1784,6 +1817,7 @@
         ],
         "revisited": [],
         "memoryNotes": [],
+        "heard": [],
         "reason": "Kit let him leave",
         "before": {
           "warmth": -2,

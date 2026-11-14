@@ -5,7 +5,7 @@ import { shown } from './feelings'
 import { characterById, locationById, type Pack } from '@engine/pack'
 import { meterWords, type Ruleset } from '@engine/rules'
 import { absenceWords, carrying, type GameState, type Relation } from '@engine/state'
-import { recall } from '@engine/memory'
+import { learnedMemories, recall } from '@engine/memory'
 import { presentCast, type BeatPlan } from './planShape'
 
 /**
@@ -166,6 +166,12 @@ function candidates(content: Pack, state: GameState): Candidate[] {
       ...c.agenda.longTerm.map((g, i) => of(c.id, `${c.id}.goal${i + 1}`, 'goal', `Wants: ${g}`)),
       ...c.contradictions.map((x, i) => of(c.id, `${c.id}.torn${i + 1}`, 'contradiction', `Torn: ${x}`)),
       ...c.motives.map((m, i) => of(c.id, `${c.id}.motive${i + 1}`, 'motive', `Bound to the player (${m.type}, ${m.strength}): ${m.reason}`)),
+      // Secrets they learned in play (milestone 4b): by the secret's fact id, so a move can use it when it comes up.
+      ...learnedMemories(state, c.id).flatMap((m) => {
+        const holder = characterById(content, m.secret!.slice(0, m.secret!.indexOf('.')))
+        const s = holder?.secrets.find((x) => `${holder.id}.${x.id}` === m.secret)
+        return holder && s ? [of(c.id, `${c.id}:${m.secret}`, 'knows', `[${m.secret}] Learned ${firstName(holder.name)}'s secret: ${s.text}`, `${s.text} ${(s.keywords ?? []).join(' ')}`)] : []
+      }),
       // Memories not recalled for the scene, faded ones included, come in when the conversation reaches them (memory §6).
       ...(() => {
         const recalled = new Set(recall(r, state, c).map((m) => m.id))
