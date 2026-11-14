@@ -258,7 +258,8 @@
     "recurring": {
       "mara": 173,
       "tobin": 136
-    }
+    },
+    "memories": {}
   },
   "findings": [],
   "remaining": [],
@@ -360,6 +361,10 @@
     ],
     "pendingTies": [],
     "answered": [],
+    "peaks": {
+      "mara": 4,
+      "tobin": 3
+    },
     "tieEvents": []
   }
 }
@@ -611,7 +616,8 @@
     "recurring": {
       "mara": 175,
       "tobin": 138
-    }
+    },
+    "memories": {}
   },
   "findings": [
     {
@@ -717,6 +723,10 @@
     ],
     "pendingTies": [],
     "answered": [],
+    "peaks": {
+      "mara": 4,
+      "tobin": 3
+    },
     "tieEvents": []
   }
 }
@@ -877,7 +887,8 @@
     "recurring": {
       "mara": 213,
       "tobin": 137
-    }
+    },
+    "memories": {}
   },
   "findings": [
     {
@@ -1001,6 +1012,10 @@
     ],
     "pendingTies": [],
     "answered": [],
+    "peaks": {
+      "mara": 4,
+      "tobin": 3
+    },
     "tieEvents": []
   }
 }
@@ -1200,7 +1215,8 @@
     "recurring": {
       "mara": 213,
       "tobin": 137
-    }
+    },
+    "memories": {}
   },
   "findings": [],
   "remaining": [],
@@ -1303,6 +1319,10 @@
     ],
     "pendingTies": [],
     "answered": [],
+    "peaks": {
+      "mara": 4,
+      "tobin": 3
+    },
     "tieEvents": [
       {
         "from": "mara",
@@ -1478,7 +1498,8 @@
     "dropped": [],
     "recurring": {
       "mara": 209
-    }
+    },
+    "memories": {}
   },
   "findings": [],
   "remaining": [],
@@ -1592,6 +1613,10 @@
     ],
     "pendingTies": [],
     "answered": [],
+    "peaks": {
+      "mara": 4,
+      "tobin": 3
+    },
     "tieEvents": [
       {
         "from": "mara",
@@ -1614,8 +1639,19 @@
     {
       "id": "mara",
       "summary": {
-        "memory": "Tobin let someone with a Guild seal into the yard after closing; Kit got it out of him.",
-        "level": "normal",
+        "memories": [
+          {
+            "text": "Tobin let someone with a Guild seal into the yard after closing; Kit got it out of him.",
+            "level": "normal",
+            "why": ""
+          },
+          {
+            "text": "Tobin is my apprentice now.",
+            "level": "core",
+            "why": "she took him on"
+          }
+        ],
+        "revisited": [],
         "reason": "Kit kept it quiet",
         "delta": {
           "warmth": 3,
@@ -1647,6 +1683,20 @@
         "id": "mara",
         "memory": "Tobin let someone with a Guild seal into the yard after closing; Kit got it out of him.",
         "level": "core",
+        "memories": [
+          {
+            "id": "mara.m1",
+            "text": "Tobin let someone with a Guild seal into the yard after closing; Kit got it out of him.",
+            "level": "core"
+          },
+          {
+            "id": "mara.m2",
+            "text": "Tobin is my apprentice now.",
+            "level": "core"
+          }
+        ],
+        "revisited": [],
+        "memoryNotes": [],
         "reason": "Kit kept it quiet",
         "before": {
           "warmth": 2,
@@ -1698,8 +1748,14 @@
     {
       "id": "tobin",
       "summary": {
-        "memory": "I told Kit about the seal. Mara heard.",
-        "level": "core",
+        "memories": [
+          {
+            "text": "I told Kit about the seal. Mara heard.",
+            "level": "core",
+            "why": "his secret came out"
+          }
+        ],
+        "revisited": [],
         "reason": "Kit let him leave",
         "delta": {
           "warmth": 3,
@@ -1719,6 +1775,15 @@
         "id": "tobin",
         "memory": "I told Kit about the seal. Mara heard.",
         "level": "core",
+        "memories": [
+          {
+            "id": "tobin.m1",
+            "text": "I told Kit about the seal. Mara heard.",
+            "level": "core"
+          }
+        ],
+        "revisited": [],
+        "memoryNotes": [],
         "reason": "Kit let him leave",
         "before": {
           "warmth": -2,

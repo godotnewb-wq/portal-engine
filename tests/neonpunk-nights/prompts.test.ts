@@ -8,7 +8,8 @@ import { playScene, type ScriptedTurn } from '../prompts'
  * and one stays quiet. Covers a lie with a reading check, felt emotion that carries, shows as tells or breaks through,
  * and a reading check aimed at Brask whose difficulty the game sets from his masking (milestone 4b), a lore line, a secret shown as a cue then kept and expanded,
  * a second character keeping a secret, and the four end-of-scene summaries, with feelings toward someone and Brask's
- * panic carried out as aftermath (milestone 4b).
+ * panic carried out as aftermath; Brask's summary lists more memories than his tier keeps, and Vex's is in the shape
+ * from before milestone 4b (milestone 4b).
  */
 const TURNS: ScriptedTurn[] = [
   {
@@ -115,7 +116,7 @@ NARRATION: Vex counts something on her fingers.
 
 const SUMMARIES = {
   vex: { toward: [{ who: 'oria-senn', shade: 'contempt', intensity: 3, reason: 'she lied about the client again' }], memory: 'Oria lied about the client again, and Rook pushed her on it.', level: 'normal', reason: 'Rook backed her up', approval: 'a little more', trust: 'unchanged', interest: 'unchanged', learned: [], others: [{ with: 'oria-senn', approval: 'less', trust: 'less', interest: 'unchanged', reason: 'she lied again' }] },
-  brask: { memory: 'Oria offered Rook a flooded pump job with a midnight deadline.', level: 'fleeting', reason: '', approval: 'unchanged', trust: 'unchanged', interest: 'unchanged', learned: [], others: [] },
+  brask: { memories: [{ text: 'Oria offered Rook a flooded pump job with a midnight deadline.', level: 'normal' }, { text: 'The lower level floods at midnight and nobody listened.', level: 'core', why: 'he was afraid for the job' }, { text: 'Kesh left early.', level: 'fleeting' }, { text: 'One too many.', level: 'fleeting' }], reason: '', approval: 'unchanged', trust: 'unchanged', interest: 'unchanged', learned: [], others: [] },
   'oria-senn': { toward: [{ who: 'player', shade: 'resentment', intensity: 2, reason: 'Rook kept asking about the client' }], memory: 'Rook is asking about the client; I need to close this before Vex pushes harder.', level: 'normal', reason: 'Rook asked too many questions', approval: 'a little less', trust: 'unchanged', interest: 'unchanged', learned: [], others: [] },
   kesh: 'Strangers in the bar talked about a job at a pump station.'
 }

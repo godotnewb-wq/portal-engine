@@ -5,6 +5,7 @@ import { shown } from './feelings'
 import { characterById, locationById, type Pack } from '@engine/pack'
 import { meterWords, type Ruleset } from '@engine/rules'
 import { absenceWords, carrying, type GameState, type Relation } from '@engine/state'
+import { recall } from '@engine/memory'
 import { presentCast, type BeatPlan } from './planShape'
 
 /**
@@ -17,7 +18,7 @@ import { presentCast, type BeatPlan } from './planShape'
  */
 
 /** What an optional detail is. Knowledge keeps its fact id (`<character>.k<n>`), which moves cite in `uses`. */
-export type DetailKind = 'knows' | 'goal' | 'contradiction' | 'note' | 'absent' | 'motive'
+export type DetailKind = 'knows' | 'goal' | 'contradiction' | 'note' | 'absent' | 'motive' | 'memory'
 
 /**
  * Why a detail made the brief, strongest first: it helps answer or understand the player's action; it could change
@@ -52,6 +53,8 @@ export interface BriefTrace {
   cut: (Omit<BriefDetail, 'text'> & { why: 'budget' | 'absent cap' })[]
   /** Details carried from last turn that a clear change of topic let go. */
   dropped: string[]
+  /** Estimated tokens of each character's recalled memories, reported apart (memory §6; milestone 4b). */
+  memories?: Record<string, number>
 }
 
 export interface Briefs {
@@ -163,6 +166,11 @@ function candidates(content: Pack, state: GameState): Candidate[] {
       ...c.agenda.longTerm.map((g, i) => of(c.id, `${c.id}.goal${i + 1}`, 'goal', `Wants: ${g}`)),
       ...c.contradictions.map((x, i) => of(c.id, `${c.id}.torn${i + 1}`, 'contradiction', `Torn: ${x}`)),
       ...c.motives.map((m, i) => of(c.id, `${c.id}.motive${i + 1}`, 'motive', `Bound to the player (${m.type}, ${m.strength}): ${m.reason}`)),
+      // Memories not recalled for the scene, faded ones included, come in when the conversation reaches them (memory §6).
+      ...(() => {
+        const recalled = new Set(recall(r, state, c).map((m) => m.id))
+        return state.memories.filter((m) => m.owner === c.id && !recalled.has(m.id)).map((m) => of(c.id, m.id, 'memory', `Remembers (${m.level}): ${m.text}`, m.text))
+      })(),
       ...ties.flatMap((x) => {
         const t = tie(x)
         if (!t || !x.note) return []
@@ -189,6 +197,11 @@ function rankOf(content: Pack, state: GameState, s: Signals, x: Candidate, carri
   // A pair speaking to each other, or both in last turn's exchange: their history shapes what they say next.
   if (x.kind === 'note' && x.other && s.spokeLast.has(x.owner) && s.spokeLast.has(x.other)) return { rank: 'choice', trigger: 'the pair spoke last turn', score: 1 }
   if (x.kind === 'motive' && s.addressed.has(x.owner)) return { rank: 'choice', trigger: 'addressed', score: 1 }
+  // A memory comes back on the player's words or last turn's, not on the summary or a haunt.
+  if (x.kind === 'memory') {
+    const inRecent = shared(x.words, s.recentWords, true)
+    return inRecent.length > 0 ? { rank: 'choice', trigger: `last turn: ${inRecent.join(', ')}`, score: inRecent.length } : carried.has(x.id) ? { rank: 'choice', trigger: 'carried', score: 0 } : undefined
+  }
   const inRecent = shared(x.words, s.recentWords, true)
   const namedRecent = x.names.filter((n) => mentions(s.recent, n))
   if (x.kind !== 'note' && (inRecent.length > 0 || (x.kind === 'absent' && namedRecent.length > 0))) {

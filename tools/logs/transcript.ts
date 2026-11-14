@@ -77,7 +77,12 @@ export function renderTranscript(content: Pack, log: SessionLog, flags: FlagReco
     if (end.type !== 'end') continue
     const nameOf = namer(content, sceneLocation(log, end.sceneId))
     lines.push(`## After scene \`${end.sceneId}\``, '')
-    for (const w of end.witnesses) lines.push(`- **${nameOf(w.id)}** (${w.summary.level}): ${w.summary.memory}${w.summary.reason ? ` — *${w.summary.reason}*` : ''}${w.error ? ` ⚠ ${w.error}` : ''}`)
+    for (const w of end.witnesses) {
+      // Logs from before milestone 4b hold one memory as "memory" and "level".
+      const old = w.summary as unknown as { memory?: string; level?: string }
+      const memories = w.summary.memories ?? (old.memory ? [{ text: old.memory, level: old.level ?? 'normal' }] : [])
+      lines.push(`- **${nameOf(w.id)}**: ${memories.map((m) => `(${m.level}) ${m.text}`).join(' ')}${w.summary.reason ? ` — *${w.summary.reason}*` : ''}${w.error ? ` ⚠ ${w.error}` : ''}`)
+    }
     lines.push('')
   }
   if (log.errors.length > 0) lines.push('## Errors', '', ...log.errors.map((e) => `- ${e.at} ${e.where}${e.turnId ? ` \`${e.turnId}\`` : ''}: ${e.message}`), '')

@@ -140,7 +140,7 @@ export async function runTurn(
     const departures = showDepartures(content, plan, kept.map((i) => parsed.beats[i]!))
     const beats = departures.beats
 
-    const next = applyTurn(content, state, { id: turnId, ...(options.log && { log: options.log }), input, plan, beats, tags: accepted.tags, dice, details: carryDetails(briefs.details, plan) })
+    const next = applyTurn(content, state, { id: turnId, ...(options.log && { log: options.log }), input, plan, beats, tags: accepted.tags, dice, details: carryDetails(briefs.details, plan), memories: briefs.details.filter((d) => d.kind === 'memory').map((d) => d.id) })
     const rewritten = problems.length > 0
     const salvage = rewritten && remaining.length > 0
     const dropped = salvage ? droppedBeats(remaining).filter((n) => n <= parsed.beats.length) : []

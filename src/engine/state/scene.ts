@@ -46,6 +46,8 @@ export const TurnSchema = z.object({
    * the reader's end-of-scene memory. Absent when none.
    */
   reads: z.array(z.object({ by: z.string(), target: z.string(), feeling: FeelingSchema })).optional(),
+  /** Memories brought into the director's briefs this turn as optional detail (milestone 4b), so the summary can name them as revisited. */
+  memories: z.array(z.string()).optional(),
   /**
    * Optional brief detail this turn used or left open (director writer §7): carried into the next turn's brief on a
    * follow-up, dropped on a change of topic. Absent when none.
@@ -120,6 +122,8 @@ export const SceneSchema = z.object({
   pendingTies: z.array(TieChangeSchema).default([]),
   /** The player's answers since the last turn, for the director's next prompt; cleared once a turn has used them. */
   answered: z.array(TieChangeSchema.extend({ accepted: z.boolean() })).default([]),
+  /** The strongest intensity each character felt in the scene (the director's `feels`), for the memory over-grading guard. */
+  peaks: z.record(z.string(), z.number().int()).default({}),
   /** Tie changes that happened in the scene (relationships §3): each forces a Core memory for both sides at its end. */
   tieEvents: z.array(TieEventSchema).default([])
 })

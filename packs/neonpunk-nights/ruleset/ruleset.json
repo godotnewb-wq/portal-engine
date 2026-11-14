@@ -488,7 +488,14 @@
     ]
   },
   "party": { "max": 3 },
-  "memory": { "recall": { "recurring": 4, "major": 8 } },
+  "memory": {
+    "recall": { "recurring": 4, "major": 8 },
+    "perScene": { "recurring": 2, "major": 3 },
+    "core": { "recurring": 1, "major": 2 },
+    "coreShare": 0.5,
+    "fade": { "fleeting": 7, "normal": 30 },
+    "guard": 3
+  },
   "pressures": ["background", "pressing", "urgent"],
   "narration": { "departure": "{name} leaves." },
   "clock": { "morning": 480 }

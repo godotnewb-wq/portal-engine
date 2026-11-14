@@ -50,7 +50,7 @@ describe('summaries in the pack’s meters and words', () => {
   it('applies summaries: memories, meters, real secrets, new relations from the ruleset’s start values', () => {
     const state = played()
     const { state: next, reports } = applySummaries(fixture, state, [
-      { id: 'tobin', summary: { ...plainSummary(fixture, state, 'tobin'), memory: 'Tobin was asked about last night.', delta: { warmth: -3, bond: 0 }, learned: ['after-closing', 'made-up'], others: [{ with: 'Mara', delta: { warmth: 3, bond: 0 }, reason: '' }] } }
+      { id: 'tobin', summary: { ...plainSummary(fixture, state, 'tobin'), memories: [{ text: 'Tobin was asked about last night.', level: 'normal', why: '' }], delta: { warmth: -3, bond: 0 }, learned: ['after-closing', 'made-up'], others: [{ with: 'Mara', delta: { warmth: 3, bond: 0 }, reason: '' }] } }
     ])
     expect(next.scene).toBeNull()
     expect(next.meters['tobin']).toEqual({ warmth: -5, bond: -2 })
@@ -85,8 +85,8 @@ describe('the scene-end trace (milestone 2, A1)', () => {
       [`${state.scene!.id}:summary:tobin`, 'summary', 'timed out']
     ])
     const mara = trace.witnesses.find((w) => w.id === 'mara')!
-    expect(mara.summary).toMatchObject({ memory: 'Mara saw through him.', delta: { warmth: 3, bond: 0 } })
+    expect(mara.summary).toMatchObject({ memories: [{ text: 'Mara saw through him.', level: 'normal' }], delta: { warmth: 3, bond: 0 } })
     expect(mara.report).toMatchObject({ before: { warmth: 2, bond: 3 }, after: { warmth: 5, bond: 3 } })
-    expect(trace.witnesses.find((w) => w.id === 'tobin')).toMatchObject({ error: 'timed out', summary: { level: 'fleeting' } })
+    expect(trace.witnesses.find((w) => w.id === 'tobin')).toMatchObject({ error: 'timed out', summary: { memories: [{ level: 'fleeting' }] } })
   })
 })

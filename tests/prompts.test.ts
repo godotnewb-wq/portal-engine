@@ -146,8 +146,8 @@ NARRATION: She glances at the gate Tobin left by.
 ]
 
 const SUMMARIES = {
-  mara: { memory: 'Tobin let someone with a Guild seal into the yard after closing; Kit got it out of him.', level: 'normal', reason: 'Kit kept it quiet', warmth: 'warmer', bond: 'same', learned: [], others: [{ with: 'tobin', warmth: 'colder', bond: 'same', reason: 'he lied to her' }], toward: [{ who: 'tobin', shade: 'sore', family: 'mad', intensity: 3, reason: 'he lied to her' }] },
-  tobin: { feels: { shade: 'glum', intensity: 4, reason: 'he gave the seal away' }, memory: 'I told Kit about the seal. Mara heard.', level: 'core', reason: 'Kit let him leave', warmth: 'warmer', bond: 'warmer', learned: [], others: [] }
+  mara: { memories: [{ text: 'Tobin let someone with a Guild seal into the yard after closing; Kit got it out of him.', level: 'normal' }, { text: 'Tobin is my apprentice now.', level: 'core', why: 'she took him on' }], reason: 'Kit kept it quiet', warmth: 'warmer', bond: 'same', learned: [], others: [{ with: 'tobin', warmth: 'colder', bond: 'same', reason: 'he lied to her' }], toward: [{ who: 'tobin', shade: 'sore', family: 'mad', intensity: 3, reason: 'he lied to her' }] },
+  tobin: { feels: { shade: 'glum', intensity: 4, reason: 'he gave the seal away' }, memories: [{ text: 'I told Kit about the seal. Mara heard.', level: 'core', why: 'his secret came out' }], reason: 'Kit let him leave', warmth: 'warmer', bond: 'warmer', learned: [], others: [] }
 }
 
 describe('prompt snapshots: test fixture', () => {

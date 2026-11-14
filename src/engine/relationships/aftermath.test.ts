@@ -8,7 +8,7 @@ import { applySummaries, buildSummaryPrompt, parseSummary, plainSummary, type Su
 // Milestone 4b, task 3: mood and aftermath across scenes (npc design §7; decided 2026-11-13).
 const R = fixture.ruleset
 const DAY = MINUTES_PER_DAY
-const summary = (state: GameState, id: string, over: Partial<Summary> = {}): { id: string; summary: Summary } => ({ id, summary: { ...plainSummary(fixture, state, id), level: 'normal', ...over } })
+const summary = (state: GameState, id: string, over: Partial<Summary> = {}): { id: string; summary: Summary } => ({ id, summary: { ...plainSummary(fixture, state, id), memories: [{ text: 'It happened.', level: 'normal', why: '' }], ...over } })
 const end = (state: GameState, ...s: { id: string; summary: Summary }[]) => applySummaries(fixture, state, s)
 const later = (state: GameState, days: number): GameState => ({ ...state, time: state.time + days * DAY })
 const carried = (owner: string, over: Partial<Aftermath> = {}, state = yardScene()): Aftermath => ({
@@ -45,7 +45,7 @@ describe('what a summary leaves a witness carrying', () => {
     expect(strong.aftermath).toMatchObject([{ owner: 'mara', shade: 'livid', intensity: 4 }])
     expect(strong.aftermath[0]!.toward).toBeUndefined()
     expect(end(state, summary(state, 'mara', { feels: { shade: 'glum', intensity: 2 } })).state.aftermath).toEqual([])
-    expect(end(state, summary(state, 'mara', { feels: { shade: 'glum', intensity: 2 }, level: 'core' })).state.aftermath).toMatchObject([{ shade: 'glum', intensity: 2 }])
+    expect(end(state, summary(state, 'mara', { feels: { shade: 'glum', intensity: 3 }, memories: [{ text: 'A loss.', level: 'core', why: 'it changed her' }] })).state.aftermath).toMatchObject([{ shade: 'glum', intensity: 3 }])
     const shaken = { ...state, scene: { ...state.scene!, moods: { ...state.scene!.moods, tobin: { shade: 'sore', family: 'mad', intensity: 5, reason: 'caught out' } } } }
     expect(end(shaken, summary(shaken, 'tobin')).state.aftermath).toMatchObject([{ owner: 'tobin', shade: 'sore', family: 'mad', intensity: 5, reason: 'caught out' }])
   })
@@ -80,7 +80,7 @@ describe('a tie change on screen (relationships §3, task 4)', () => {
     const base = yardScene()
     const state = { ...base, scene: { ...base.scene!, tieEvents: [{ from: 'mara', to: 'tobin', added: ['hand'], ended: [], word: 'apprentice', reason: 'she takes him on' }] } }
     expect(buildSummaryPrompt(fixture, state, 'tobin').user).toContain("- What changed between people this scene (a Core memory for Tobin): Tobin becomes Mara's apprentice (she takes him on).")
-    const { state: next, reports } = end(state, summary(state, 'mara', { memory: 'I took Tobin on.', level: 'fleeting' }), summary(state, 'tobin', { memory: 'Mara took me on.', level: 'normal' }))
+    const { state: next, reports } = end(state, summary(state, 'mara', { memories: [{ text: 'I took Tobin on.', level: 'fleeting', why: '' }] }), summary(state, 'tobin', { memories: [{ text: 'Mara took me on.', level: 'normal', why: '' }] }))
     expect(next.memories.map((m) => [m.owner, m.level])).toEqual([['mara', 'core'], ['tobin', 'core']])
     expect(reports.map((x) => x.level)).toEqual(['core', 'core'])
   })

@@ -21,6 +21,8 @@ export interface TurnWritten {
   dice: number
   /** Brief detail to carry into the next turn (`carryDetails`). */
   details?: string[]
+  /** Memories the briefs brought in as optional detail this turn (milestone 4b). */
+  memories?: string[]
 }
 
 export function rolledChecks(plan: BeatPlan): RolledCheck[] {
@@ -114,8 +116,12 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
   if (kept.length > 0) turn.kept = kept
   if (written.details && written.details.length > 0) turn.details = written.details
   if (written.plan.reads && written.plan.reads.length > 0) turn.reads = written.plan.reads
+  if (written.memories && written.memories.length > 0) turn.memories = written.memories
   // What the director says they feel becomes their mood (milestone 4b); anyone it says nothing about keeps theirs.
   const felt = Object.fromEntries([...written.plan.speakers, ...written.plan.reactions].flatMap((s) => (s.feels ? [[s.id, s.feels]] : [])))
+  // The strongest each felt, for the memory over-grading guard at the scene's end.
+  const peaks = { ...scene.peaks }
+  for (const [id, f] of Object.entries(felt)) if (present.has(id)) peaks[id] = Math.max(peaks[id] ?? 0, f.intensity)
   const comfort = Object.fromEntries(Object.entries(only(written.tags.comfort)).map(([id, c]) => [id, c.level]))
   const leaving = [...new Set(written.plan.leaves)].filter((id) => present.has(id))
 
@@ -161,6 +167,7 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
     scene: {
       ...scene,
       pendingTies: [...scene.pendingTies, ...pending],
+      peaks,
       answered: [],
       tieEvents: [...scene.tieEvents, ...events],
       turns,

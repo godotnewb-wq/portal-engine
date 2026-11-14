@@ -20,7 +20,7 @@ Adapted so far:
 | `src/llm/settings.ts` | `src/shared/settings.ts` (profiles per role) |
 | `src/engine/core/seed.ts` | `src/shared/game/seed.ts` |
 | `src/engine/core/names.ts` | `src/shared/game/scene.ts` (`plainName`, `namesHer`) |
-| `src/engine/memory/memory.ts` | `src/shared/game/memory.ts` (`selectMemories`) |
+| `src/engine/memory/memory.ts` | `src/shared/game/memory.ts` (`selectMemories`; its ranking was replaced in milestone 4b) |
 | `src/engine/relationships/summary.ts` | `src/shared/game/memory.ts` (scene-change word scale and values, summary parsing approach) |
 | `src/engine/state/saves.ts` | `src/shared/saves.ts` |
 | `src/platform/saves/store.ts` | `src/main/saves/store.ts` |

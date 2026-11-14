@@ -47,7 +47,11 @@ export function SummaryView({ content, reports, againLabel, onAgain, onNextDay, 
               <h2>{name(r.id)}</h2>
               <span className={`level ${r.level}`}>{r.level}</span>
             </header>
-            <p className="memory">{r.memory}</p>
+            {(r.memories ?? [{ id: r.id, text: r.memory, level: r.level }]).map((m, i) => (
+              <p key={m.id} className="memory">
+                {i > 0 && <span className={`level ${m.level}`}>{m.level}</span>} {m.text}
+              </p>
+            ))}
             {r.reason && <p className="reason">{r.reason}</p>}
             <div className="meters">
               <div className="meters-title">Toward you</div>

@@ -109,8 +109,22 @@ export const RulesetSchema = z.object({
    * the same budget in the party or out of it.
    */
   memory: z
-    .object({ recall: z.object({ recurring: z.number().int().min(0), major: z.number().int().min(0) }) })
-    .default({ recall: { recurring: 4, major: 8 } }),
+    .object({
+      recall: z.object({ recurring: z.number().int().min(0), major: z.number().int().min(0) }),
+      /** Memories one scene can add, and how many of them the summary may grade Core, by tier (memory §3; milestone 4b). Forced Core memories count toward neither. */
+      perScene: z.object({ recurring: z.number().int().min(1), major: z.number().int().min(1) }).default({ recurring: 2, major: 3 }),
+      core: z.object({ recurring: z.number().int().min(0), major: z.number().int().min(0) }).default({ recurring: 1, major: 2 }),
+      /** The most of the recall slots Core memories take (memory §6), as a share: about half. */
+      coreShare: z.number().min(0).max(1).default(0.5),
+      /** In-game days unrevisited before a Fleeting memory leaves recall, and before a Normal one steps down to Fleeting (memory §6). */
+      fade: z.object({ fleeting: z.number().int().min(1), normal: z.number().int().min(1) }).default({ fleeting: 7, normal: 30 }),
+      /**
+       * The over-grading guard (memory §4): a Core memory the summary chose is downgraded to Normal when nothing the
+       * witness felt in the scene reached this intensity.
+       */
+      guard: z.number().int().min(1).max(5).default(3)
+    })
+    .default({ recall: { recurring: 4, major: 8 }, perScene: { recurring: 2, major: 3 }, core: { recurring: 1, major: 2 }, coreShare: 0.5, fade: { fleeting: 7, normal: 30 }, guard: 3 }),
   /**
    * How hard a character's aim for the scene presses on them, weakest first (e.g. "idle", "keen", "driven"). The
    * director picks a word each turn; the weakest keeps the aim out of the writer's brief, the strongest makes it

@@ -21,8 +21,7 @@ function playedGame() {
       id: 'oria-senn',
       summary: {
         ...plainSummary(content, state, 'oria-senn'),
-        memory: 'Oria was caught lying.',
-        level: 'core',
+        memories: [{ text: 'Oria was caught lying.', level: 'core', why: 'caught in public' }],
         delta: { approval: -4, trust: -8, interest: 1 },
         learned: ['client-is-grid-corporation'],
         others: [{ with: 'brask', delta: { approval: 1, trust: 0, interest: 0 }, reason: '' }]

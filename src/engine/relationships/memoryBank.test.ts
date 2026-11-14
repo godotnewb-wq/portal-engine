@@ -1,0 +1,119 @@
+import { describe, expect, it } from 'vitest'
+import { fadeMemories, recall, selectMemories } from '@engine/memory'
+import { characterById } from '@engine/pack'
+import { buildBriefs, applyTurn, parseReply, validatePlan, parsePlan } from '@engine/scene'
+import { MINUTES_PER_DAY, type GameState, type Memory } from '@engine/state'
+import { fixture, yardScene } from '@tests/fixture'
+import { dailyUpkeep } from './aftermath'
+import { applySummaries, buildSummaryPrompt, plainSummary, type Summary, type WrittenMemory } from './summary'
+
+// Milestone 4b, task 5a: the Memory Bank's shape, levels, limits and fading, and relevance-based recall (memory §3–6).
+const R = fixture.ruleset
+const DAY = MINUTES_PER_DAY
+const mara = characterById(fixture, 'mara')!
+const tobin = characterById(fixture, 'tobin')!
+const mem = (over: Partial<Memory> & { id: string }): Memory => ({ owner: 'mara', text: over.id, level: 'normal', at: 0, revisits: 0, fadeFrom: 0, about: [], inRecall: true, ...over })
+const written = (text: string, level: WrittenMemory['level'] = 'normal', why = ''): WrittenMemory => ({ text, level, why })
+const end = (state: GameState, id: string, over: Partial<Summary>) => applySummaries(fixture, state, [{ id, summary: { ...plainSummary(fixture, state, id), ...over } }])
+/** The yard with Mara having felt something strong this scene, so the guard lets her Core memories stand. */
+const stirred = (state = yardScene()) => ({ ...state, scene: { ...state.scene!, peaks: { ...state.scene!.peaks, mara: 4, tobin: 4 } } })
+
+describe('recall', () => {
+  const context = { people: ['player', 'tobin'], place: 'the-yard' }
+  it('ranks by the scene’s people and place, then recency, and gives Core at most about half the slots', () => {
+    const pool = [
+      mem({ id: 'old-core-here', level: 'core', about: ['tobin'], place: 'the-yard', at: 1 }),
+      mem({ id: 'new-core-elsewhere', level: 'core', at: 9 }),
+      mem({ id: 'core-3', level: 'core', at: 3 }),
+      mem({ id: 'normal-here', about: ['tobin'], at: 2 }),
+      mem({ id: 'normal-recent', at: 8 }),
+      mem({ id: 'faded', at: 10, inRecall: false })
+    ]
+    // Four slots: two Core, two others.
+    expect(selectMemories(R, pool, 4, context).map((m) => m.id)).toEqual(['old-core-here', 'new-core-elsewhere', 'normal-here', 'normal-recent'])
+    // With no others, Core fills every slot; with few Core, the rest fill them.
+    expect(selectMemories(R, pool.filter((m) => m.level === 'core'), 4, context)).toHaveLength(3)
+    expect(selectMemories(R, [pool[0]!, pool[3]!, pool[4]!, mem({ id: 'n3', at: 5 })], 4, context).map((m) => m.id)).toEqual(['old-core-here', 'normal-here', 'normal-recent', 'n3'])
+  })
+})
+
+describe('fading', () => {
+  it('steps Normal down to Fleeting after 30 days, takes Fleeting out of recall after 7 more, never touches Core, and keeps everything', () => {
+    const pool = [mem({ id: 'n' }), mem({ id: 'f', level: 'fleeting' }), mem({ id: 'c', level: 'core' })]
+    const at = (days: number) => fadeMemories(R, pool, days * DAY).map((m) => [m.id, m.level, m.inRecall])
+    expect(at(6)).toEqual([['n', 'normal', true], ['f', 'fleeting', true], ['c', 'core', true]])
+    expect(at(7)).toEqual([['n', 'normal', true], ['f', 'fleeting', false], ['c', 'core', true]])
+    expect(at(30)).toEqual([['n', 'fleeting', true], ['f', 'fleeting', false], ['c', 'core', true]])
+    expect(at(37)).toEqual([['n', 'fleeting', false], ['f', 'fleeting', false], ['c', 'core', true]])
+    // The daily upkeep runs it.
+    const state = { ...yardScene(), scene: null, memories: pool, time: 8 * DAY }
+    expect(dailyUpkeep(fixture, state).memories.find((m) => m.id === 'f')!.inRecall).toBe(false)
+  })
+})
+
+describe('memories from a scene', () => {
+  it('stores several, with ids, the scene, the place and who was there, up to the tier’s limit', () => {
+    const state = yardScene()
+    const { state: next, reports } = end(state, 'tobin', { memories: [written('One.'), written('Two.', 'fleeting'), written('Three.')] })
+    expect(next.memories).toEqual([
+      { id: 'tobin.m1', owner: 'tobin', text: 'One.', level: 'normal', scene: state.scene!.id, place: 'the-yard', at: state.time, revisits: 0, fadeFrom: state.time, about: ['player', 'mara'], inRecall: true },
+      expect.objectContaining({ id: 'tobin.m2', text: 'Two.', level: 'fleeting' })
+    ])
+    expect(reports[0]!.memoryNotes).toEqual(['kept the first 2 of 3 memories'])
+    expect(reports[0]).toMatchObject({ memory: 'One.', level: 'normal' })
+  })
+
+  it('needs a reason for Core, holds to the Core limit, and downgrades Core when nothing felt was strong (the guard)', () => {
+    const many = [written('A.', 'core', 'it changed her'), written('B.', 'core', 'it changed her too'), written('C.', 'core')]
+    const strong = end(stirred(), 'mara', { memories: many })
+    expect(strong.state.memories.map((m) => [m.text, m.level, m.reason])).toEqual([['A.', 'core', 'it changed her'], ['B.', 'core', 'it changed her too'], ['C.', 'normal', undefined]])
+    expect(strong.reports[0]!.memoryNotes).toEqual(['"C.…": Normal, not Core (no reason given)'])
+    const tight = end(stirred(), 'tobin', { memories: [written('A.', 'core', 'x'), written('B.', 'core', 'y')] })
+    expect(tight.state.memories.map((m) => m.level)).toEqual(['core', 'normal'])
+    const calm = end(yardScene(), 'mara', { memories: [written('A.', 'core', 'it changed her')] })
+    expect(calm.state.memories[0]!.level).toBe('normal')
+    expect(calm.reports[0]!.memoryNotes).toEqual(['"A.…": Normal, not Core (nothing felt in the scene was strong enough)'])
+  })
+
+  it('forces Core for a secret of theirs said on screen, outside the limits, and tells the summary', () => {
+    const base = yardScene()
+    const state = { ...base, scene: { ...base.scene!, told: ['tobin.after-closing'] } }
+    expect(buildSummaryPrompt(fixture, state, 'tobin').user).toContain("- Tobin's secret [after-closing] came out on screen this scene (a Core memory for Tobin).")
+    const { state: next } = end(state, 'tobin', { memories: [written('He told.', 'fleeting'), written('Also this.', 'core', 'x')] })
+    expect(next.memories.map((m) => [m.level, m.reason])).toEqual([['core', 'a secret of theirs came out'], ['normal', undefined]])
+  })
+
+  it('upgrades a memory the scene revisited by one level, restarts its clock and brings a faded one back', () => {
+    const base = stirred()
+    const old = [mem({ id: 'mara.m1', level: 'fleeting', inRecall: false, at: -5 * DAY }), mem({ id: 'mara.m2', at: -2 * DAY }), mem({ id: 'tobin.m1', owner: 'tobin', at: -1 })]
+    const state = { ...base, memories: old }
+    const { state: next, reports } = end(state, 'mara', { memories: [written('Again.')], revisited: ['mara.m1', 'mara.m2', 'tobin.m1', 'mara.m3'] })
+    const m = (id: string) => next.memories.find((x) => x.id === id)!
+    expect([m('mara.m1').level, m('mara.m1').inRecall, m('mara.m1').revisits, m('mara.m1').fadeFrom]).toEqual(['normal', true, 1, state.time])
+    expect(m('mara.m2').level).toBe('core')
+    expect(m('tobin.m1').revisits).toBe(0)
+    expect(reports[0]!.revisited).toEqual([{ id: 'mara.m1', level: 'normal' }, { id: 'mara.m2', level: 'core' }])
+    expect(reports[0]!.memoryNotes).toEqual(['revisited "tobin.m1": not one of their earlier memories', 'revisited "mara.m3": not one of their earlier memories'])
+  })
+
+  it('shows the summary its memories with ids, those recalled and those the scene brought in', () => {
+    const base = yardScene()
+    const faded = mem({ id: 'mara.m1', text: 'The second ledger was moved to the tally office.', level: 'fleeting', inRecall: false })
+    const state = { ...base, memories: [faded, mem({ id: 'mara.m2', text: 'Tobin owes the yard a week.', about: ['tobin'] })] }
+    // The player's words reach the faded memory; the brief brings it in, and the turn records it.
+    const briefs = buildBriefs(fixture, state, 'Where is the second ledger now?')
+    expect(briefs.details.find((d) => d.id === 'mara.m1')).toMatchObject({ kind: 'memory', rank: 'answer' })
+    expect(briefs.trace.memories!['mara']).toBeGreaterThan(0)
+    const plan = validatePlan(fixture, state, parsePlan(JSON.stringify({ speakers: [{ id: 'mara', goal: 'x' }], moves: [{ who: 'mara', answers: 'player', move: 'answer' }] }))!, 'x').plan
+    const next = applyTurn(fixture, state, { id: 't1', input: 'x', plan, beats: [], tags: parseReply('', []).tags, dice: 1, memories: ['mara.m1'] })
+    const user = buildSummaryPrompt(fixture, next, 'mara').user
+    expect(user).toContain('- Remembers:\n  - [mara.m2] (normal) Tobin owes the yard a week.\n  - [mara.m1] (fleeting) The second ledger was moved to the tally office.')
+  })
+
+  it('brings recalled memories to the director for the scene’s people first, within the tier’s count', () => {
+    const many = Array.from({ length: 6 }, (_, i) => mem({ id: `tobin.m${i + 1}`, owner: 'tobin', at: i, about: i === 0 ? ['mara'] : [] }))
+    const state = { ...yardScene(), memories: many }
+    expect(recall(R, state, tobin).map((m) => m.id)).toEqual(['tobin.m1', 'tobin.m6', 'tobin.m5', 'tobin.m4'])
+    expect(recall(R, state, mara)).toEqual([])
+  })
+})

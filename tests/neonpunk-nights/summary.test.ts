@@ -60,16 +60,17 @@ describe('parseSummary', () => {
       learned: ['client-is-grid-corporation'],
       others: [{ with: 'vex', approval: 'less', trust: 'unchanged', interest: 'sideways', reason: 'She exposed me.' }]
     }))
-    expect(s).toMatchObject({ level: 'core', delta: { approval: -1, trust: -8, interest: 4 }, learned: ['client-is-grid-corporation'] })
+    // The shape before milestone 4b, one memory: read as a list of one, its reason standing in as why for Core.
+    expect(s).toMatchObject({ memories: [{ level: 'core', why: 'Rook pressed her in public.' }], delta: { approval: -1, trust: -8, interest: 4 }, learned: ['client-is-grid-corporation'] })
     expect(s.others).toEqual([{ with: 'vex', delta: { approval: -4, trust: 0, interest: 0 }, reason: 'She exposed me.' }])
   })
 
   it('takes a reply that is not JSON as the memory alone, changing nothing', () => {
-    expect(parseSummary(content.ruleset, 'Vex watched Oria squirm.')).toMatchObject({ memory: 'Vex watched Oria squirm.', delta: { approval: 0, trust: 0, interest: 0 } })
+    expect(parseSummary(content.ruleset, 'Vex watched Oria squirm.')).toMatchObject({ memories: [{ text: 'Vex watched Oria squirm.' }], delta: { approval: 0, trust: 0, interest: 0 } })
     // Session 2026-11-07_1955_cdd1: a reply cut off mid-JSON became Vex's memory, braces and all.
     const cut = '{"memory": "Vex pushed Oria for a name and got \\"charm\\" instead.", "level": "normal", "others": [{"with": "brask", "trust": "'
-    expect(parseSummary(content.ruleset, cut)).toMatchObject({ memory: 'Vex pushed Oria for a name and got "charm" instead.', delta: { approval: 0, trust: 0, interest: 0 } })
-    expect(parseSummary(content.ruleset, '{"level": "normal", "memo').memory).toBe('')
+    expect(parseSummary(content.ruleset, cut)).toMatchObject({ memories: [{ text: 'Vex pushed Oria for a name and got "charm" instead.' }], delta: { approval: 0, trust: 0, interest: 0 } })
+    expect(parseSummary(content.ruleset, '{"level": "normal", "memo').memories).toEqual([])
   })
 })
 
@@ -80,8 +81,8 @@ describe('applySummaries', () => {
       {
         id: 'oria-senn',
         summary: {
-          memory: 'Oria lied and was caught.',
-          level: 'normal',
+          memories: [{ text: 'Oria lied and was caught.', level: 'normal', why: '' }],
+          revisited: [],
           reason: 'Pressed in public.',
           delta: { approval: -4, trust: -1, interest: 1 },
           learned: ['client-is-grid-corporation', 'made-up-secret'],
@@ -127,16 +128,17 @@ describe('applySummaries', () => {
 
 describe('memories in later scenes', () => {
   it('ranks core first, then the most recent', () => {
-    const m = (text: string, level: 'core' | 'normal' | 'fleeting', at: number) => ({ owner: 'vex', text, level, at, about: [] })
-    expect(selectMemories([m('a', 'normal', 1), m('b', 'core', 0), m('c', 'normal', 5), m('d', 'fleeting', 9)], 3).map((x) => x.text)).toEqual(['b', 'c', 'a'])
+    const m = (text: string, level: 'core' | 'normal' | 'fleeting', at: number) => ({ id: `vex.${text}`, owner: 'vex', text, level, at, revisits: 0, fadeFrom: at, about: [], inRecall: true })
+    expect(selectMemories(content.ruleset, [m('a', 'normal', 1), m('b', 'core', 0), m('c', 'normal', 5), m('d', 'fleeting', 9)], 3, { people: [] }).map((x) => x.text)).toEqual(['b', 'd', 'c'])
   })
 
   it('reach the director, with the secrets the player already knows', () => {
     const state = playedScene()
-    const { state: after } = applySummaries(content, state, [{ id: 'oria-senn', summary: { ...plainSummary(content, state, 'oria-senn'), memory: 'Oria was caught lying.', learned: ['client-is-grid-corporation'] } }])
+    const { state: after } = applySummaries(content, state, [{ id: 'oria-senn', summary: { ...plainSummary(content, state, 'oria-senn'), memories: [{ text: 'Oria was caught lying.', level: 'fleeting', why: '' }], learned: ['client-is-grid-corporation'] } }])
     const again = { ...after, scene: barScene(3).scene }
     const { system } = buildDirectorPrompt(content, again, 'Hello again.')
-    expect(system).toMatch(/Remembers: \(fleeting\) Oria was caught lying\./)
+    // The player found out her secret: a game-forced Core memory (memory §4).
+    expect(system).toMatch(/Remembers: \(core\) Oria was caught lying\./)
     expect(system).toMatch(/The player already knows: The 'private client' is the Aether Grid Corporation/)
   })
 })

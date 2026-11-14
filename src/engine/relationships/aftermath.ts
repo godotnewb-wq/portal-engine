@@ -3,6 +3,7 @@ import { moodOnly, readFeeling, type Feeling } from '@engine/characters'
 import type { Ruleset } from '@engine/rules'
 import { dayOf, intensityOn, nextMorning, type Aftermath, type EndedFeeling, type GameState, type Relation } from '@engine/state'
 import type { Pack } from '@engine/pack'
+import { fadeMemories } from '@engine/memory'
 
 /**
  * Mood and aftermath across scenes (npc design §7, milestone 4b): what a character carries out of a scene, how it fades
@@ -56,10 +57,10 @@ const recent = (r: Ruleset, now: number, ended: EndedFeeling[]) => ended.filter(
 /**
  * The daily upkeep (decided 2026-11-13): at each morning rollover, aftermath and feelings toward a person fade. Fading
  * is worked out from the days that passed, so running it again on the same day changes nothing. Milestone 12's world
- * turn calls the same step as its character upkeep; memory fading joins it in task 5.
+ * turn calls the same step as its character upkeep. Memories fade here too (memory §6).
  */
 export function dailyUpkeep(content: Pack, state: GameState): GameState {
-  return { ...state, ...fade(content.ruleset, state) }
+  return { ...state, ...fade(content.ruleset, state), memories: fadeMemories(content.ruleset, state.memories, state.time) }
 }
 
 /** Next day (between scenes only): the clock moves to the next morning, and the daily upkeep runs. */

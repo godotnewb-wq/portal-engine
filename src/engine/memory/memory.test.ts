@@ -4,7 +4,7 @@ import { characterById } from '@engine/pack'
 import type { Memory } from '@engine/state'
 import { recall } from './memory'
 
-const memoriesOf = (owner: string, n: number): Memory[] => Array.from({ length: n }, (_, i) => ({ owner, text: `m${i}`, level: 'normal', at: i, about: [] }))
+const memoriesOf = (owner: string, n: number): Memory[] => Array.from({ length: n }, (_, i) => ({ id: `${owner}.m${i + 1}`, owner, text: `m${i}`, level: 'normal', at: i, revisits: 0, fadeFrom: i, about: [], inRecall: true }))
 
 // Milestone 4a, task 3 (acceptance 2): recall budgets come from the ruleset by tier, and party membership doesn't change them.
 describe('recall budgets by tier', () => {
@@ -17,7 +17,7 @@ describe('recall budgets by tier', () => {
     expect(tobin.tier).toBe('recurring')
     expect(recall(fixture.ruleset, state, mara)).toHaveLength(fixture.ruleset.memory.recall.major)
     expect(recall(fixture.ruleset, state, tobin)).toHaveLength(fixture.ruleset.memory.recall.recurring)
-    const tight = { ...fixture.ruleset, memory: { recall: { recurring: 1, major: 2 } } }
+    const tight = { ...fixture.ruleset, memory: { ...fixture.ruleset.memory, recall: { recurring: 1, major: 2 } } }
     expect(recall(tight, state, mara)).toHaveLength(2)
     expect(recall(tight, state, tobin)).toHaveLength(1)
   })

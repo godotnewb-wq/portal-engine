@@ -36,7 +36,7 @@ export async function endScene(content: Pack, state: GameState, summarize: Summa
         try {
           const reply = await traced(calls, { id: `${scene.id}:summary:${id}`, role: 'summary', sceneId: scene.id }, prompt, now, () => summarize(prompt))
           const summary = parseSummary(content.ruleset, reply)
-          return { id, summary: summary.memory ? summary : { ...summary, memory: plainSummary(content, state, id).memory } }
+          return { id, summary: summary.memories.length > 0 ? summary : { ...summary, memories: plainSummary(content, state, id).memories } }
         } catch (error) {
           return { id, summary: plainSummary(content, state, id), error: (error as Error).message }
         }

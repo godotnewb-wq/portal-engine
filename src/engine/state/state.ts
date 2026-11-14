@@ -63,6 +63,10 @@ export function startScene(content: Pack, state: GameState, locationId: string, 
     tells: [],
     pendingTies: [],
     answered: [],
+    peaks: Object.fromEntries(characters.flatMap((c): [string, number][] => {
+      const f = openingMood(content, state, c.id, cast) ?? defaultFeeling(content.ruleset, c)
+      return f ? [[c.id, f.intensity]] : []
+    })),
     tieEvents: []
   }
   return { ...state, scene }

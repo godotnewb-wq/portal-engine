@@ -7,15 +7,33 @@ import { SceneSchema } from './scene'
 /** How long a memory is kept in mind (Breedhaven's Core / Normal / Fleeting). */
 export const MemoryLevelSchema = z.enum(['core', 'normal', 'fleeting'])
 
+/**
+ * A memory in the Memory Bank (memory §2–7, milestone 4b): the save's per-character memories, kept apart from the codex.
+ * Storage is free: fading takes a memory out of recall (`inRecall`), never out of the save.
+ */
 export const MemorySchema = z.object({
+  /** Unique in the save: `<owner>.m<n>`. */
+  id: z.string(),
   /** Whose memory it is. */
   owner: IdSchema,
   text: z.string(),
   level: MemoryLevelSchema,
+  /** Why it is Core: the summary's reason, or the event that forced it. */
+  reason: z.string().optional(),
+  /** The scene it was made in, and where. */
+  scene: z.string().optional(),
+  place: z.string().optional(),
   /** Game time it was formed, in minutes since the start. */
   at: z.number().int(),
-  /** Others it involves. */
-  about: z.array(z.string()).default([])
+  /** When a scene last came back to it, and how often scenes have. */
+  revisited: z.number().int().optional(),
+  revisits: z.number().int().min(0).default(0),
+  /** When its fading clock last started: made, revisited, or stepped down a level. */
+  fadeFrom: z.number().int(),
+  /** Who it's about, by id ("player" for the player): the people in the scene. */
+  about: z.array(z.string()).default([]),
+  /** Whether it is still brought to scenes; a faded memory stays in the save and can come back when revisited. */
+  inRecall: z.boolean().default(true)
 })
 export type Memory = z.infer<typeof MemorySchema>
 

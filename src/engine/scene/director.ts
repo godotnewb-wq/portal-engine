@@ -76,14 +76,17 @@ export function buildBriefs(content: Pack, state: GameState, input: string, lore
   const { details, trace } = selectDetails(content, state, input)
   const sheets: Record<string, string> = {}
   const recurring: Record<string, number> = {}
+  const memories: Record<string, number> = {}
   for (const id of present) {
     const c = characterById(content, id)
     if (!c) continue
     const own = details.filter((d) => d.owner === id)
     sheets[id] = sheet(content, state, c, lore.secrets, own)
     recurring[id] = tokensOf(sheet(content, state, c, lore.secrets, []))
+    const line = rememberedLine(content, state, c)
+    if (line) memories[id] = tokensOf(line)
   }
-  return { sheets, details, trace: { ...trace, recurring } }
+  return { sheets, details, trace: { ...trace, recurring, memories } }
 }
 
 export function buildDirectorPrompt(content: Pack, state: GameState, input: string, lore: TurnLore = turnLore(content, state, input), briefs: Briefs = buildBriefs(content, state, input, lore)): Prompt {
@@ -152,7 +155,6 @@ export function buildDirectorPrompt(content: Pack, state: GameState, input: stri
  * refer to. The four layers appear as plain words, never as the writer's material.
  */
 export function sheet(content: Pack, state: GameState, c: Character, secrets: SecretShown[], details: BriefDetail[]): string {
-  const memories = recall(content.ruleset, state, c)
   return [
     ...recurringLines(content, state, c, TIER_WORDS[c.tier]),
     ...c.secrets.map((s) => {
@@ -163,12 +165,18 @@ export function sheet(content: Pack, state: GameState, c: Character, secrets: Se
       return `${line} ${wouldDisclose(content, state, c.id, s.id, 'player') ? 'Would tell the player now, if it fits.' : "Won't tell the player yet."}`
     }),
     `Lying tell: ${c.voice.shifts.lying}`,
-    memories.length > 0 && `Remembers: ${memories.map((m) => `(${m.level}) ${m.text}`).join(' ')}`,
+    rememberedLine(content, state, c),
     (state.facts[c.id] ?? []).length > 0 && `The player already knows: ${state.facts[c.id]!.join(' ')}`,
     details.length > 0 && `Relevant now:\n${details.map((d) => `- ${d.text}`).join('\n')}`
   ]
     .filter(Boolean)
     .join('\n')
+}
+
+/** The memories a character recalls for the scene, as the sheet shows them (memory §6). */
+function rememberedLine(content: Pack, state: GameState, c: Character): string {
+  const memories = recall(content.ruleset, state, c)
+  return memories.length > 0 ? `Remembers: ${memories.map((m) => `(${m.level}) ${m.text}`).join(' ')}` : ''
 }
 
 /** Who said a line, by the name the scene knows them by: a character's first name, a walk-on's name or label. */
