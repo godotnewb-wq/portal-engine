@@ -3,7 +3,7 @@ import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Pack } from '@engine/pack'
 import { TracedError } from '@engine/core'
-import { endScene } from '@engine/relationships'
+import { consolidate, endScene } from '@engine/relationships'
 import { runTurn } from '@engine/scene'
 import { FlagSchema } from '@engine/review'
 import { detailsOf, PlayLogs, roleModels, type FlagInput } from '@platform/logs'
@@ -19,6 +19,7 @@ import {
   type LoadResponse,
   type SaveResponse,
   type SceneEndResponse,
+  type ConsolidateResponse,
   type SceneEvent,
   type SceneTurnResponse,
   type TestConnectionResult
@@ -192,6 +193,29 @@ app.whenReady().then(() => {
         return { ok: true, state: next, reports }
       } catch (error) {
         logs.error('scene-end', (error as Error).message, { ...(state.scene && { sceneId: state.scene.id }), ...(error instanceof TracedError && { calls: error.calls }) })
+        throw error
+      }
+    } catch (error) {
+      return { ok: false, error: (error as Error).message }
+    } finally {
+      turning = false
+    }
+  })
+
+  // Consolidation runs between scenes, after Next day's upkeep, with the summary model (memory §7; milestone 4b).
+  ipcMain.handle(IPC.consolidate, async (_event, raw: unknown): Promise<ConsolidateResponse> => {
+    if (turning) return { ok: false, error: 'A turn is still running.' }
+    turning = true
+    try {
+      const { pack, logs } = current()
+      const state = GameStateSchema.parse(raw)
+      if (state.scene) return { ok: false, error: 'Memories are merged between scenes only.' }
+      try {
+        const { state: next, trace } = await consolidate(pack, state, summaryLlm(settings.get()))
+        if (trace.groups.length > 0) logs.consolidation(trace)
+        return { ok: true, state: next, merged: trace.groups.filter((g) => g.made).length }
+      } catch (error) {
+        logs.error('app', (error as Error).message, { ...(error instanceof TracedError && { calls: error.calls }) })
         throw error
       }
     } catch (error) {

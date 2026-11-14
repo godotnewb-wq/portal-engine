@@ -52,6 +52,8 @@ export const TurnSchema = z.object({
    * these can become someone's learned secret at the scene's end.
    */
   exposed: z.array(z.object({ secret: z.string(), to: z.array(z.string()) })).optional(),
+  /** Codex entries the conversation brought up this turn and secrets that came out (milestone 4b): what memories can be tagged with. */
+  topics: z.array(z.string()).optional(),
   /** Memories brought into the director's briefs this turn as optional detail (milestone 4b), so the summary can name them as revisited. */
   memories: z.array(z.string()).optional(),
   /**

@@ -3,6 +3,7 @@ import { meterWords, type Ruleset } from '@engine/rules'
 import { absenceWords, agoWords, carrying, daysSince, tieWords, towardName, type GameState, type Memory, type Relation } from '@engine/state'
 import { applyCarried, fade, type CarriedReport, type WrittenFeeling } from './aftermath'
 import { characterById, locationById, type Pack } from '@engine/pack'
+import { entryById } from '@engine/codex'
 import type { Prompt } from '@engine/core'
 import { hasLearned, memoryId, recall, recallContext } from '@engine/memory'
 import { firstName } from '@engine/core'
@@ -52,6 +53,7 @@ export function transcript(content: Pack, state: GameState): string {
 function task(content: Pack, state: GameState, c: Character, others: Character[]): string {
   const r = content.ruleset
   const heard = exposedTo(content, state, c).length > 0
+  const topics = sceneTopics(content, state).length > 0
   const perScene = r.memory.perScene[c.tier]
   const core = r.memory.core[c.tier]
   const player = state.player.name
@@ -63,11 +65,11 @@ function task(content: Pack, state: GameState, c: Character, others: Character[]
   return `You judge what one character takes away from a scene in a visual-novel RPG. Write ${me}'s memory of the scene and how it changed what ${me} feels.
 
 Reply with only a JSON object:
-{"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "..."}], "revisited": [], "reason": "...", ${meterFields}, "learned": [], "others": [{"with": "id", ${meterFields}, "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": []${heard ? ', "heard": [{"id": "...", "memory": "..."}]' : ''}}
+{"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "..."${topics ? ', "topics": []' : ''}}], "revisited": [], "reason": "...", ${meterFields}, "learned": [], "others": [{"with": "id", ${meterFields}, "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": []${heard ? ', "heard": [{"id": "...", "memory": "..."}]' : ''}}
 
 - memories: what stays with ${me} from this scene, one for each distinct moment, most important first. Most scenes leave one; at most ${perScene}. text: one or two sentences, past tense, third person, from ${me}'s point of view: what ${me} said, did, noticed and felt, and how ${player} treated ${me}. End on what stayed with ${me} most.
 - level: "core" for a moment that changed something lasting for ${me}, one ${me} would still bring up in a year (a first betrayal or first real job, a loss, a secret of theirs coming out, a promise made or broken, real danger to their life; rare; at most ${core}, each with why: what it changed for ${me}); "normal" for something that matters for weeks (a deal, an argument, a favor, learning something useful); "fleeting" for small talk, routine, atmosphere.
-- revisited: the ids of memories under "Remembers" that this scene came back to (a debt raised again, a promise kept); [] if none.${heard ? `\n- heard: of the other people's secrets listed as coming out in front of ${me}, the ids of those ${me} truly took in, each with memory: one sentence, past tense, from ${me}'s point of view, of learning it; [] if none.` : ''}
+${topics ? `- topics: for each memory, the ids of the topics that came up this scene that it is about; [] if none.\n` : ''}- revisited: the ids of memories under "Remembers" that this scene came back to (a debt raised again, a promise kept); [] if none.${heard ? `\n- heard: of the other people's secrets listed as coming out in front of ${me}, the ids of those ${me} truly took in, each with memory: one sentence, past tense, from ${me}'s point of view, of learning it; [] if none.` : ''}
 - ${meterNames}: how each CHANGED toward ${player} because of this scene, each one of: ${words}. Meters move slowly; nothing is owed for turning up. Toward someone, ${meaning}.
 - Judge as ${me}: by ${me}'s values, agenda and how things stood before. Values ${me} likes, shown by ${player}, raise regard; values ${me} dislikes lower it.
 - reason: one short sentence on what moved ${me}, and which way.
@@ -134,6 +136,20 @@ function exposedTo(content: Pack, state: GameState, c: Character): { id: string;
   })
 }
 
+/**
+ * What the scene's memories can be tagged with (memory §7; decided 2026-11-13): the codex entries the conversation
+ * brought up and the secrets that came out, by id, with a title for each. The summary picks from these only.
+ */
+export function sceneTopics(content: Pack, state: GameState): { id: string; title: string }[] {
+  const ids = [...new Set(state.scene!.turns.flatMap((t) => t.topics ?? []))]
+  return ids.flatMap((id) => {
+    const entry = entryById(content.codex, id)
+    if (entry) return [{ id, title: entry.title }]
+    const holder = characterById(content, id.slice(0, id.indexOf('.')))
+    return holder?.secrets.some((s) => `${holder.id}.${s.id}` === id) ? [{ id, title: `${firstName(holder.name)}'s secret` }] : []
+  })
+}
+
 /** The scene's tie changes a character is part of, either side. */
 const tieEventsFor = (state: GameState, id: string) => state.scene!.tieEvents.filter((e) => e.from === id || e.to === id)
 
@@ -159,6 +175,10 @@ function about(content: Pack, state: GameState, c: Character, others: Character[
     ...carriedLines(content, state, c, others),
     ...tieLines(content, state, c),
     ...revealedSecrets(state, c).map((s) => `- ${me}'s secret [${s.id}] came out on screen this scene (a Core memory for ${me}).`),
+    ...(() => {
+      const topics = sceneTopics(content, state)
+      return topics.length > 0 ? [`- Topics that came up this scene: ${topics.map((t) => `[${t.id}] ${t.title}`).join('; ')}.`] : []
+    })(),
     ...(() => {
       const heard = exposedTo(content, state, c)
       return heard.length > 0 ? [`- Other people's secrets that came out in front of ${me} this scene:\n${heard.map((h) => `  - [${h.id}] ${firstName(h.holder.name)}: ${h.text}`).join('\n')}`] : []
@@ -197,6 +217,8 @@ export interface WrittenMemory {
   text: string
   level: Memory['level']
   why: string
+  /** Ids from the scene's topics (milestone 4b); others are dropped. */
+  topics?: string[]
 }
 
 export interface Summary {
@@ -252,7 +274,7 @@ export function parseSummary(r: Ruleset, reply: string): Summary {
   const level = (x: unknown) => LEVELS.find((l) => l === text(x).toLowerCase()) ?? 'normal'
   // One memory in the shape before milestone 4b ("memory", "level") is read as a list of one; its reason stands in as why.
   const written: WrittenMemory[] = Array.isArray(given['memories'])
-    ? given['memories'].filter(isObject).flatMap((m) => (text(m['text']) ? [{ text: text(m['text']), level: level(m['level']), why: text(m['why']) }] : []))
+    ? given['memories'].filter(isObject).flatMap((m) => (text(m['text']) ? [{ text: text(m['text']), level: level(m['level']), why: text(m['why']), ...(Array.isArray(m['topics']) && { topics: m['topics'].filter((x): x is string => typeof x === 'string').map((x) => x.trim()) }) }] : []))
     : text(given['memory'])
       ? [{ text: text(given['memory']), level: level(given['level']), why: level(given['level']) === 'core' ? text(given['reason']) : '' }]
       : []
@@ -355,10 +377,13 @@ function makeMemories(content: Pack, state: GameState, c: Character, summary: Su
   })
   let memories = [...all]
   const place = scene.locationId
+  const allowed = new Set(sceneTopics(content, state).map((t) => t.id))
+  const dropped = [...new Set(graded.flatMap((m) => (m.topics ?? []).filter((t) => !allowed.has(t))))]
+  if (dropped.length > 0) notes.push(`dropped topics that didn't come up: ${dropped.join(', ')}`)
   const about = ['player', ...witnesses(state).filter((x) => x !== c.id)]
   const mine: Memory[] = []
   for (const m of graded) {
-    const made: Memory = { id: memoryId(memories, c.id), owner: c.id, text: m.text, level: m.level, ...(m.level === 'core' && m.why && { reason: m.why }), scene: scene.id, place, at: state.time, revisits: 0, fadeFrom: state.time, about, inRecall: true }
+    const made: Memory = { id: memoryId(memories, c.id), owner: c.id, text: m.text, level: m.level, ...(m.level === 'core' && m.why && { reason: m.why }), scene: scene.id, place, at: state.time, revisits: 0, fadeFrom: state.time, about, inRecall: true, topics: [...new Set((m.topics ?? []).filter((t) => allowed.has(t)))] }
     memories = [...memories, made]
     mine.push(made)
   }
@@ -388,7 +413,7 @@ function makeMemories(content: Pack, state: GameState, c: Character, summary: Su
       continue
     }
     const text = h.memory || `${firstName(c.name)} learned ${firstName(e.holder.name)}'s secret: ${e.text}`
-    const made: Memory = { id: memoryId(memories, c.id), owner: c.id, text, level: 'normal', scene: scene.id, place, at: state.time, revisits: 0, fadeFrom: state.time, about: [e.holder.id], inRecall: true, secret: e.id, ...(e.codex && { codex: e.codex }) }
+    const made: Memory = { id: memoryId(memories, c.id), owner: c.id, text, level: 'normal', scene: scene.id, place, at: state.time, revisits: 0, fadeFrom: state.time, about: [e.holder.id], inRecall: true, secret: e.id, ...(e.codex && { codex: e.codex }), topics: [e.id] }
     memories = [...memories, made]
     mine.push(made)
     heard.push(e.id)

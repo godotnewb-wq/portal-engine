@@ -122,9 +122,15 @@ export const RulesetSchema = z.object({
        * The over-grading guard (memory §4): a Core memory the summary chose is downgraded to Normal when nothing the
        * witness felt in the scene reached this intensity.
        */
-      guard: z.number().int().min(1).max(5).default(3)
+      guard: z.number().int().min(1).max(5).default(3),
+      /**
+       * Consolidation (memory §7; decided 2026-11-13): when a character has at least `min` Normal and Fleeting memories
+       * on one subject, older than `days` in-game days, one background call merges them into one memory of at most
+       * `words` words.
+       */
+      consolidate: z.object({ min: z.number().int().min(2), days: z.number().int().min(0), words: z.number().int().min(5) }).default({ min: 5, days: 14, words: 60 })
     })
-    .default({ recall: { recurring: 4, major: 8 }, perScene: { recurring: 2, major: 3 }, core: { recurring: 1, major: 2 }, coreShare: 0.5, fade: { fleeting: 7, normal: 30 }, guard: 3 }),
+    .default({ recall: { recurring: 4, major: 8 }, perScene: { recurring: 2, major: 3 }, core: { recurring: 1, major: 2 }, coreShare: 0.5, fade: { fleeting: 7, normal: 30 }, guard: 3, consolidate: { min: 5, days: 14, words: 60 } }),
   /**
    * How hard a character's aim for the scene presses on them, weakest first (e.g. "idle", "keen", "driven"). The
    * director picks a word each turn; the weakest keeps the aim out of the writer's brief, the strongest makes it

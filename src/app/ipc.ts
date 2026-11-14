@@ -26,6 +26,7 @@ export const IPC = {
   sceneTurn: 'scene:turn',
   sceneEvent: 'scene:event',
   sceneEnd: 'scene:end',
+  consolidate: 'memories:consolidate',
   listSaves: 'saves:list',
   saveGame: 'saves:save',
   loadGame: 'saves:load',
@@ -70,6 +71,9 @@ export type SceneTurnResponse =
 /** Streamed while a turn runs: the engine's turn events, passed through. */
 export type SceneEvent = TurnEvent
 
+/** Consolidation's result: the new state, with any memories merged (milestone 4b). */
+export type ConsolidateResponse = { ok: true; state: GameState; merged: number } | { ok: false; error: string }
+
 /** The scene's close: the new state (scene cleared) and what each witness took from it. */
 export type SceneEndResponse = { ok: true; state: GameState; reports: WitnessReport[] } | { ok: false; error: string }
 
@@ -101,6 +105,8 @@ export interface RendererApi {
   sceneTurn(request: SceneTurnRequest): Promise<SceneTurnResponse>
   /** Runs the end-of-scene summaries, one per witness, in parallel. */
   sceneEnd(state: GameState): Promise<SceneEndResponse>
+  /** After the daily upkeep, between scenes: merges older memories on one subject (memory §7), one background call per group. */
+  consolidate(state: GameState): Promise<ConsolidateResponse>
   listSaves(): Promise<SaveSummary[]>
   saveGame(request: SaveRequest): Promise<SaveResponse>
   /** Loads a slot, refusing a save that no longer fits the content. */

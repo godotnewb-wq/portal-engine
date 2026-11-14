@@ -494,7 +494,8 @@
     "core": { "recurring": 1, "major": 2 },
     "coreShare": 0.5,
     "fade": { "fleeting": 7, "normal": 30 },
-    "guard": 3
+    "guard": 3,
+    "consolidate": { "min": 5, "days": 14, "words": 60 }
   },
   "pressures": ["background", "pressing", "urgent"],
   "narration": { "departure": "{name} leaves." },

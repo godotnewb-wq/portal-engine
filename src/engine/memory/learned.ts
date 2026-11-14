@@ -6,14 +6,23 @@ import type { GameState, Memory } from '@engine/state'
  * grants the knowledge while it is in the save, whether or not it is still recalled.
  */
 
-/** Their memories of learning someone else's secret. */
-export const learnedMemories = (state: GameState, who: string): Memory[] => state.memories.filter((m) => m.owner === who && !!m.secret)
+/** The learned secrets a memory carries: its own, and those a consolidated memory took over from its originals. */
+export const pointersOf = (m: Memory): { secret: string; codex?: string }[] => [...(m.secret ? [{ secret: m.secret, ...(m.codex && { codex: m.codex }) }] : []), ...(m.inherited ?? [])]
+
+/** Their memories of learning someone else's secret, a consolidated memory carrying one included. */
+export const learnedMemories = (state: GameState, who: string): Memory[] => state.memories.filter((m) => m.owner === who && pointersOf(m).length > 0)
+
+/** The secrets a character learned, each once, with its codex pointer when linked. */
+export function learnedSecrets(state: GameState, who: string): { secret: string; codex?: string }[] {
+  const all = learnedMemories(state, who).flatMap(pointersOf)
+  return [...new Map(all.map((p) => [p.secret, p])).values()]
+}
 
 /** Whether a character has learned a secret (by fact id). */
-export const hasLearned = (state: GameState, who: string, secret: string): boolean => state.memories.some((m) => m.owner === who && m.secret === secret)
+export const hasLearned = (state: GameState, who: string, secret: string): boolean => learnedSecrets(state, who).some((p) => p.secret === secret)
 
 /** Codex entries a character knows through what they learned: the pointers on their memories. */
-export const learnedEntries = (state: GameState, who: string): string[] => [...new Set(learnedMemories(state, who).flatMap((m) => (m.codex ? [m.codex] : [])))]
+export const learnedEntries = (state: GameState, who: string): string[] => [...new Set(learnedSecrets(state, who).flatMap((p) => (p.codex ? [p.codex] : [])))]
 
 /**
  * Who knows a held secret, besides its holder: every character with a memory of learning it or in front of whom it came
@@ -23,7 +32,7 @@ export const learnedEntries = (state: GameState, who: string): string[] => [...n
 export function knowersOf(state: GameState, secret: string, text: string): string[] {
   const holder = secret.slice(0, secret.indexOf('.'))
   const now = (state.scene?.turns ?? []).flatMap((t) => (t.exposed ?? []).filter((e) => e.secret === secret).flatMap((e) => e.to))
-  const learners = [...new Set([...state.memories.filter((m) => m.secret === secret).map((m) => m.owner), ...now])].filter((x) => x !== holder)
+  const learners = [...new Set([...state.memories.filter((m) => pointersOf(m).some((p) => p.secret === secret)).map((m) => m.owner), ...now])].filter((x) => x !== holder)
   const player = (state.facts[holder] ?? []).includes(text) || !!state.scene?.told.includes(secret)
   return player ? [...learners, 'player'] : learners
 }

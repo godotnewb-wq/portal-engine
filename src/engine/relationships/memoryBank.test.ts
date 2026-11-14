@@ -12,7 +12,7 @@ const R = fixture.ruleset
 const DAY = MINUTES_PER_DAY
 const mara = characterById(fixture, 'mara')!
 const tobin = characterById(fixture, 'tobin')!
-const mem = (over: Partial<Memory> & { id: string }): Memory => ({ owner: 'mara', text: over.id, level: 'normal', at: 0, revisits: 0, fadeFrom: 0, about: [], inRecall: true, ...over })
+const mem = (over: Partial<Memory> & { id: string }): Memory => ({ owner: 'mara', text: over.id, level: 'normal', at: 0, revisits: 0, fadeFrom: 0, about: [], inRecall: true, topics: [], ...over })
 const written = (text: string, level: WrittenMemory['level'] = 'normal', why = ''): WrittenMemory => ({ text, level, why })
 const end = (state: GameState, id: string, over: Partial<Summary>) => applySummaries(fixture, state, [{ id, summary: { ...plainSummary(fixture, state, id), ...over } }])
 /** The yard with Mara having felt something strong this scene, so the guard lets her Core memories stand. */
@@ -56,7 +56,7 @@ describe('memories from a scene', () => {
     const state = yardScene()
     const { state: next, reports } = end(state, 'tobin', { memories: [written('One.'), written('Two.', 'fleeting'), written('Three.')] })
     expect(next.memories).toEqual([
-      { id: 'tobin.m1', owner: 'tobin', text: 'One.', level: 'normal', scene: state.scene!.id, place: 'the-yard', at: state.time, revisits: 0, fadeFrom: state.time, about: ['player', 'mara'], inRecall: true },
+      { id: 'tobin.m1', owner: 'tobin', text: 'One.', level: 'normal', scene: state.scene!.id, place: 'the-yard', at: state.time, revisits: 0, fadeFrom: state.time, about: ['player', 'mara'], inRecall: true, topics: [] },
       expect.objectContaining({ id: 'tobin.m2', text: 'Two.', level: 'fleeting' })
     ])
     expect(reports[0]!.memoryNotes).toEqual(['kept the first 2 of 3 memories'])

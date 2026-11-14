@@ -2,7 +2,7 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync, renameSync, writeF
 import { randomBytes } from 'node:crypto'
 import { join } from 'node:path'
 import type { CallTrace } from '@engine/core'
-import type { SceneEndTrace } from '@engine/relationships'
+import type { ConsolidationTrace, SceneEndTrace } from '@engine/relationships'
 import type { TurnTrace } from '@engine/scene'
 import type { FlagRecord, ScoreRecord } from '@engine/review'
 import { FILES, sessionName, splitPrompt, type CallRecord, type ErrorRecord, type PromptRecord, type SceneRecord, type SessionRecord, type TurnRecord } from './records'
@@ -77,6 +77,11 @@ export class LogSession {
   sceneEnd(trace: SceneEndTrace): void {
     const { calls, ...rest } = trace
     this.append(FILES.scenes, { type: 'end', ...rest, calls: this.calls(calls) } satisfies SceneRecord)
+  }
+
+  consolidation(trace: ConsolidationTrace): void {
+    const { calls, ...rest } = trace
+    this.append(FILES.scenes, { type: 'consolidation', ...rest, calls: this.calls(calls) } satisfies SceneRecord)
   }
 
   error(error: Omit<ErrorRecord, 'at' | 'calls'> & { calls?: CallTrace[] }, now = new Date()): void {

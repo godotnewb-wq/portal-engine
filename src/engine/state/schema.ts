@@ -40,7 +40,14 @@ export const MemorySchema = z.object({
    * in recall or not.
    */
   secret: z.string().optional(),
-  codex: z.string().optional()
+  codex: z.string().optional(),
+  /** What it is about besides people and place (memory §7): ids of codex entries and secrets that came up in its scene, chosen by the summary. */
+  topics: z.array(z.string()).default([]),
+  /** A consolidated memory (memory §7): the memories it merged, and the learned secrets they carried, which it keeps. */
+  from: z.array(z.string()).optional(),
+  inherited: z.array(z.object({ secret: z.string(), codex: z.string().optional() })).optional(),
+  /** An original that was merged: the consolidated memory that stands for it in recall. */
+  mergedInto: z.string().optional()
 })
 export type Memory = z.infer<typeof MemorySchema>
 

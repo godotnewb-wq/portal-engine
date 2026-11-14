@@ -2,7 +2,7 @@ import type { GameState, Scene } from '@engine/state'
 import type { Pack } from '@engine/pack'
 import { characterById, locationById } from '@engine/pack'
 import { presentCast } from './planShape'
-import { learnedMemories } from '@engine/memory'
+import { learnedSecrets } from '@engine/memory'
 
 /**
  * Something a line can say, with who may say it (director writer review, option B). Characters' knowledge and
@@ -37,7 +37,7 @@ export function sceneFacts(content: Pack, state: GameState): Fact[] {
   // Secrets learned in play (milestone 4b): a learner present can say it too, holder here or not. The fact keeps the
   // holder's id, so it is still introduced the first time and its holder's disclosure gate doesn't apply to the learner.
   const learned = new Map<string, string[]>()
-  for (const who of presentCast(scene)) for (const m of learnedMemories(state, who)) learned.set(m.secret!, [...(learned.get(m.secret!) ?? []), who])
+  for (const who of presentCast(scene)) for (const p of learnedSecrets(state, who)) learned.set(p.secret, [...(learned.get(p.secret) ?? []), who])
   const absent = [...learned.keys()].filter((id) => !cast.some((f) => f.id === id)).flatMap((id): Fact[] => {
     const holder = characterById(content, id.slice(0, id.indexOf('.')))
     const s = holder?.secrets.find((x) => `${holder.id}.${x.id}` === id)

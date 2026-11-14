@@ -2,7 +2,7 @@ import { existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import type { CallTrace } from '@engine/core'
 import type { Pack } from '@engine/pack'
-import type { SceneEndTrace } from '@engine/relationships'
+import type { ConsolidationTrace, SceneEndTrace } from '@engine/relationships'
 import { promptSources, type TurnTrace } from '@engine/scene'
 import { currentFlags, FlagSchema, type Flag, type FlagRecord, type ScoreRecord } from '@engine/review'
 import { findSessions, readFlags, readSession } from './reader'
@@ -128,6 +128,11 @@ export class PlayLogs {
 
   sceneEnd(trace: SceneEndTrace): void {
     this.open()?.sceneEnd(trace)
+  }
+
+  /** A consolidation run between scenes (milestone 4b): its groups and calls, in the scenes file. */
+  consolidation(trace: ConsolidationTrace): void {
+    this.open()?.consolidation(trace)
   }
 
   error(where: 'turn' | 'scene-end' | 'app', message: string, context: { turnId?: string; sceneId?: string; calls?: CallTrace[] } = {}): void {

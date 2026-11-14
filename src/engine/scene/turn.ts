@@ -23,6 +23,8 @@ export interface TurnWritten {
   details?: string[]
   /** Memories the briefs brought in as optional detail this turn (milestone 4b). */
   memories?: string[]
+  /** Codex entries the conversation brought up this turn (the triggered layer), for tagging memories (milestone 4b). */
+  topics?: string[]
   /** Held secrets that were active this turn, for dormancy (milestone 4b): kept, shown in full, or brought up. */
   secrets?: { id: string; how: 'kept' | 'full' | 'keyword' | 'context' }[]
 }
@@ -150,6 +152,8 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
   if (written.memories && written.memories.length > 0) turn.memories = written.memories
   const exposed = exposures(content, scene, written)
   if (exposed.length > 0) turn.exposed = exposed
+  const topics = [...new Set([...(written.topics ?? []), ...exposed.map((e) => e.secret)])]
+  if (topics.length > 0) turn.topics = topics
   // What the director says they feel becomes their mood (milestone 4b); anyone it says nothing about keeps theirs.
   const felt = Object.fromEntries([...written.plan.speakers, ...written.plan.reactions].flatMap((s) => (s.feels ? [[s.id, s.feels]] : [])))
   // The strongest each felt, for the memory over-grading guard at the scene's end.

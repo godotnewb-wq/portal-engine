@@ -16,6 +16,7 @@ const api: RendererApi = {
   testConnection: (profileId) => ipcRenderer.invoke(IPC.testConnection, profileId),
   sceneTurn: (request) => ipcRenderer.invoke(IPC.sceneTurn, request),
   sceneEnd: (state) => ipcRenderer.invoke(IPC.sceneEnd, state),
+  consolidate: (state) => ipcRenderer.invoke(IPC.consolidate, state),
   listSaves: () => ipcRenderer.invoke(IPC.listSaves),
   saveGame: (request) => ipcRenderer.invoke(IPC.saveGame, request),
   loadGame: (slotId) => ipcRenderer.invoke(IPC.loadGame, slotId),

@@ -12,7 +12,7 @@ import { SceneView } from './ui/SceneView'
 import { Settings } from './ui/Settings'
 import { SummaryView } from './ui/SummaryView'
 
-type Screen = 'picker' | 'title' | 'settings' | 'scene' | 'ending' | 'summary' | 'save' | 'load'
+type Screen = 'picker' | 'title' | 'settings' | 'scene' | 'ending' | 'night' | 'summary' | 'save' | 'load'
 
 /**
  * Owns which screen is showing, the chosen pack and the game state; main only runs turns and summaries on it, and
@@ -95,6 +95,17 @@ export function App() {
     setScreen('settings')
   }
 
+  /**
+   * Next day (milestone 4b): the clock has moved and the daily upkeep has run; older memories on one subject are merged
+   * in the background before the next scene. If that fails, the day goes on without it.
+   */
+  const sleepOn = async (morning: GameState) => {
+    setScreen('night')
+    const response = await window.api.consolidate(morning)
+    if (!response.ok) console.error('Consolidation failed:', response.error)
+    enterScene(response.ok ? response.state : morning)
+  }
+
   /** Closing a scene where nothing was said needs no summaries; otherwise every witness writes theirs. */
   const endScene = async () => {
     if (!state?.scene) return
@@ -121,6 +132,13 @@ export function App() {
   if (screen === 'save' || screen === 'load') {
     return <SavesView mode={screen} state={state ?? undefined} onLoaded={(game) => resume(game)} onClose={() => setScreen(from)} />
   }
+  if (screen === 'night') {
+    return (
+      <div className="screen title">
+        <p className="tagline">The night passes…</p>
+      </div>
+    )
+  }
   if (screen === 'ending') {
     return (
       <div className="screen title">
@@ -130,7 +148,7 @@ export function App() {
   }
   if (screen === 'summary' && content && state) {
     const again = locationById(content, content.manifest.start.location)?.name ?? ''
-    return <SummaryView content={content} reports={reports} againLabel={`Back to ${again}`} onAgain={() => enterScene(state)} onNextDay={() => enterScene(nextDay(content, state))} onTitle={() => setScreen('title')} />
+    return <SummaryView content={content} reports={reports} againLabel={`Back to ${again}`} onAgain={() => enterScene(state)} onNextDay={() => void sleepOn(nextDay(content, state))} onTitle={() => setScreen('title')} />
   }
   if (screen === 'scene' && content && state?.scene) {
     return <SceneView content={content} state={state} onState={setState} onEnd={endScene} onSave={() => openSaves('save')} endError={error} />

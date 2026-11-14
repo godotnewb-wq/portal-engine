@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto'
 import { isConfigured, profileFor, type LlmRole, type Settings } from '@llm'
 import type { CallTrace, Prompt } from '@engine/core'
-import type { SceneEndTrace } from '@engine/relationships'
+import type { ConsolidationTrace, SceneEndTrace } from '@engine/relationships'
 import type { TurnTrace } from '@engine/scene'
 
 /**
@@ -60,6 +60,7 @@ export interface PromptRecord {
 export type SceneRecord =
   | { type: 'start'; sceneId: string; at: string; location: string; cast: string[] }
   | ({ type: 'end' } & Omit<SceneEndTrace, 'calls'> & { calls: string[] })
+  | ({ type: 'consolidation' } & Omit<ConsolidationTrace, 'calls'> & { calls: string[] })
 
 /** `errors.jsonl`: anything that went wrong, with the turn or scene it happened in. */
 export interface ErrorRecord {

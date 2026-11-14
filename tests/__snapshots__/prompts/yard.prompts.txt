@@ -1328,10 +1328,11 @@ Write the beats.
 You judge what one character takes away from a scene in a visual-novel RPG. Write Mara's memory of the scene and how it changed what Mara feels.
 
 Reply with only a JSON object:
-{"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "..."}], "revisited": [], "reason": "...", "warmth": "...", "bond": "...", "learned": [], "others": [{"with": "id", "warmth": "...", "bond": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": [], "heard": [{"id": "...", "memory": "..."}]}
+{"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "...", "topics": []}], "revisited": [], "reason": "...", "warmth": "...", "bond": "...", "learned": [], "others": [{"with": "id", "warmth": "...", "bond": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": [], "heard": [{"id": "...", "memory": "..."}]}
 
 - memories: what stays with Mara from this scene, one for each distinct moment, most important first. Most scenes leave one; at most 3. text: one or two sentences, past tense, third person, from Mara's point of view: what Mara said, did, noticed and felt, and how Kit treated Mara. End on what stayed with Mara most.
 - level: "core" for a moment that changed something lasting for Mara, one Mara would still bring up in a year (a first betrayal or first real job, a loss, a secret of theirs coming out, a promise made or broken, real danger to their life; rare; at most 2, each with why: what it changed for Mara); "normal" for something that matters for weeks (a deal, an argument, a favor, learning something useful); "fleeting" for small talk, routine, atmosphere.
+- topics: for each memory, the ids of the topics that came up this scene that it is about; [] if none.
 - revisited: the ids of memories under "Remembers" that this scene came back to (a debt raised again, a promise kept); [] if none.
 - heard: of the other people's secrets listed as coming out in front of Mara, the ids of those Mara truly took in, each with memory: one sentence, past tense, from Mara's point of view, of learning it; [] if none.
 - warmth, bond: how each CHANGED toward Kit because of this scene, each one of: "colder", "same", "warmer". Meters move slowly; nothing is owed for turning up. Toward someone, warmth is how much they like the other; bond is how much they would do for the other.
@@ -1352,6 +1353,7 @@ About Mara (person, she/her):
 - Before this scene, toward Kit: warmth: civil; bond: loose
 - Toward Tobin: warmth: civil; bond: loose (she takes him on to keep him close)
 - What changed between people this scene (a Core memory for Mara): Tobin becomes Mara's apprentice (she takes him on to keep him close).
+- Topics that came up this scene: [faction.watch] The Ward Watch; [tobin.after-closing] Tobin's secret; [faction.guild.tallies] How the tallies work.
 - Other people's secrets that came out in front of Mara this scene:
   - [tobin.after-closing] Tobin: Tobin let someone into the yard after closing.
 - Mood at the end: sore (mad), 2 of 5: she wants to know more first; comfort 2/5.
@@ -1388,10 +1390,11 @@ She glances at the gate Tobin left by.
 You judge what one character takes away from a scene in a visual-novel RPG. Write Tobin's memory of the scene and how it changed what Tobin feels.
 
 Reply with only a JSON object:
-{"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "..."}], "revisited": [], "reason": "...", "warmth": "...", "bond": "...", "learned": [], "others": [{"with": "id", "warmth": "...", "bond": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": []}
+{"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "...", "topics": []}], "revisited": [], "reason": "...", "warmth": "...", "bond": "...", "learned": [], "others": [{"with": "id", "warmth": "...", "bond": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": []}
 
 - memories: what stays with Tobin from this scene, one for each distinct moment, most important first. Most scenes leave one; at most 2. text: one or two sentences, past tense, third person, from Tobin's point of view: what Tobin said, did, noticed and felt, and how Kit treated Tobin. End on what stayed with Tobin most.
 - level: "core" for a moment that changed something lasting for Tobin, one Tobin would still bring up in a year (a first betrayal or first real job, a loss, a secret of theirs coming out, a promise made or broken, real danger to their life; rare; at most 1, each with why: what it changed for Tobin); "normal" for something that matters for weeks (a deal, an argument, a favor, learning something useful); "fleeting" for small talk, routine, atmosphere.
+- topics: for each memory, the ids of the topics that came up this scene that it is about; [] if none.
 - revisited: the ids of memories under "Remembers" that this scene came back to (a debt raised again, a promise kept); [] if none.
 - warmth, bond: how each CHANGED toward Kit because of this scene, each one of: "colder", "same", "warmer". Meters move slowly; nothing is owed for turning up. Toward someone, warmth is how much they like the other; bond is how much they would do for the other.
 - Judge as Tobin: by Tobin's values, agenda and how things stood before. Values Tobin likes, shown by Kit, raise regard; values Tobin dislikes lower it.
@@ -1412,6 +1415,7 @@ About Tobin (automaton, he/him):
 - Toward Mara: warmth: civil; bond: loose (she takes him on to keep him close)
 - What changed between people this scene (a Core memory for Tobin): Tobin becomes Mara's apprentice (she takes him on to keep him close).
 - Tobin's secret [after-closing] came out on screen this scene (a Core memory for Tobin).
+- Topics that came up this scene: [faction.watch] The Ward Watch; [tobin.after-closing] Tobin's secret; [faction.guild.tallies] How the tallies work.
 - Mood at the end: jolted, 2 of 5; comfort 3/5.
 - Tobin left before the scene was over; the memory ends with leaving.
 

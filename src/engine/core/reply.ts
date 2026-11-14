@@ -24,7 +24,7 @@ export const replyText = (reply: LlmReply): string => (typeof reply === 'string'
 export const replyMeta = (reply: LlmReply): CallMeta | undefined => (typeof reply === 'string' ? undefined : reply.meta)
 
 /** What each LLM call is for. `scorer` calls are made by the review tools, never during play. */
-export type CallRole = 'director' | 'writer' | 'rewrite' | 'summary' | 'scorer'
+export type CallRole = 'director' | 'writer' | 'rewrite' | 'summary' | 'scorer' | 'consolidation'
 
 /** One LLM call as the logs keep it: the full prompt, the raw reply, timing, and what the platform reported. */
 export interface CallTrace {

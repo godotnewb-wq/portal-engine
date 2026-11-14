@@ -128,7 +128,7 @@ describe('applySummaries', () => {
 
 describe('memories in later scenes', () => {
   it('ranks core first, then the most recent', () => {
-    const m = (text: string, level: 'core' | 'normal' | 'fleeting', at: number) => ({ id: `vex.${text}`, owner: 'vex', text, level, at, revisits: 0, fadeFrom: at, about: [], inRecall: true })
+    const m = (text: string, level: 'core' | 'normal' | 'fleeting', at: number) => ({ id: `vex.${text}`, owner: 'vex', text, level, at, revisits: 0, fadeFrom: at, about: [], inRecall: true, topics: [] })
     expect(selectMemories(content.ruleset, [m('a', 'normal', 1), m('b', 'core', 0), m('c', 'normal', 5), m('d', 'fleeting', 9)], 3, { people: [] }).map((x) => x.text)).toEqual(['b', 'd', 'c'])
   })
 

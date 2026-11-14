@@ -1662,7 +1662,11 @@
           {
             "text": "Tobin let someone with a Guild seal into the yard after closing; Kit got it out of him.",
             "level": "normal",
-            "why": ""
+            "why": "",
+            "topics": [
+              "tobin.after-closing",
+              "faction.navy"
+            ]
           },
           {
             "text": "Tobin is my apprentice now.",
@@ -1726,7 +1730,9 @@
           }
         ],
         "revisited": [],
-        "memoryNotes": [],
+        "memoryNotes": [
+          "dropped topics that didn't come up: faction.navy"
+        ],
         "heard": [
           "tobin.after-closing"
         ],

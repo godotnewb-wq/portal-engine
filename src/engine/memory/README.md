@@ -4,6 +4,6 @@ The Memory Bank's rules (memory §6, milestone 4b): which memories a character b
 
 **Learned secrets** (`learned.ts`, milestone 4b): a memory of learning someone else's secret carries the secret's fact id and, for a linked secret, the codex pointer; it grants the knowledge while it is in the save (`learnedMemories`, `hasLearned`, `learnedEntries`, `knowersOf`, which counts the player too).
 
-**Public API** (`@engine/memory`): `recall(ruleset, state, character, context?)`, `recallContext`, `relevance`, `selectMemories`, `memoryId`, `fadeMemories`, `RecallContext`, `learnedMemories`, `hasLearned`, `learnedEntries`, `knowersOf`.
+**Public API** (`@engine/memory`): `recall(ruleset, state, character, context?)`, `recallContext`, `relevance`, `selectMemories`, `memoryId`, `fadeMemories`, `RecallContext`, `learnedMemories`, `learnedSecrets`, `pointersOf` (a consolidated memory's inherited pointers included), `hasLearned`, `learnedEntries`, `knowersOf`.
 
 **Depends on:** characters, rules, state. **Design:** `memory.md`. Adapted from Breedhaven.
