@@ -1666,6 +1666,9 @@
             "topics": [
               "tobin.after-closing",
               "faction.navy"
+            ],
+            "about": [
+              "tobin"
             ]
           },
           {

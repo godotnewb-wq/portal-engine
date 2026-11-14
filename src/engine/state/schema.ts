@@ -30,8 +30,14 @@ export const MemorySchema = z.object({
   revisits: z.number().int().min(0).default(0),
   /** When its fading clock last started: made, revisited, or stepped down a level. */
   fadeFrom: z.number().int(),
-  /** Who it's about, by id ("player" for the player): the people in the scene. */
+  /** Who was there, by id ("player" for the player): the people in the scene. Recall ranks by it. */
   about: z.array(z.string()).default([]),
+  /**
+   * Who it is actually about (milestone 4b, 5c follow-up): the people the summary names, and anyone the scene changed
+   * something with. Being there isn't enough, so the player, who is in every scene, is here only when the memory is
+   * about them. Consolidation groups by it.
+   */
+  focus: z.array(z.string()).default([]),
   /** Whether it is still brought to scenes; a faded memory stays in the save and can come back when revisited. */
   inRecall: z.boolean().default(true),
   /**

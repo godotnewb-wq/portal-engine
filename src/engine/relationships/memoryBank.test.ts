@@ -12,7 +12,7 @@ const R = fixture.ruleset
 const DAY = MINUTES_PER_DAY
 const mara = characterById(fixture, 'mara')!
 const tobin = characterById(fixture, 'tobin')!
-const mem = (over: Partial<Memory> & { id: string }): Memory => ({ owner: 'mara', text: over.id, level: 'normal', at: 0, revisits: 0, fadeFrom: 0, about: [], inRecall: true, topics: [], ...over })
+const mem = (over: Partial<Memory> & { id: string }): Memory => ({ owner: 'mara', text: over.id, level: 'normal', at: 0, revisits: 0, fadeFrom: 0, about: [], focus: [], inRecall: true, topics: [], ...over })
 const written = (text: string, level: WrittenMemory['level'] = 'normal', why = ''): WrittenMemory => ({ text, level, why })
 const end = (state: GameState, id: string, over: Partial<Summary>) => applySummaries(fixture, state, [{ id, summary: { ...plainSummary(fixture, state, id), ...over } }])
 /** The yard with Mara having felt something strong this scene, so the guard lets her Core memories stand. */
@@ -56,11 +56,25 @@ describe('memories from a scene', () => {
     const state = yardScene()
     const { state: next, reports } = end(state, 'tobin', { memories: [written('One.'), written('Two.', 'fleeting'), written('Three.')] })
     expect(next.memories).toEqual([
-      { id: 'tobin.m1', owner: 'tobin', text: 'One.', level: 'normal', scene: state.scene!.id, place: 'the-yard', at: state.time, revisits: 0, fadeFrom: state.time, about: ['player', 'mara'], inRecall: true, topics: [] },
+      { id: 'tobin.m1', owner: 'tobin', text: 'One.', level: 'normal', scene: state.scene!.id, place: 'the-yard', at: state.time, revisits: 0, fadeFrom: state.time, about: ['player', 'mara'], focus: [], inRecall: true, topics: [] },
       expect.objectContaining({ id: 'tobin.m2', text: 'Two.', level: 'fleeting' })
     ])
     expect(reports[0]!.memoryNotes).toEqual(['kept the first 2 of 3 memories'])
     expect(reports[0]).toMatchObject({ memory: 'One.', level: 'normal' })
+  })
+
+  it('records who a memory is about: whom the summary names, and whom the scene changed something with, never just who was there', () => {
+    const state = yardScene()
+    const focus = (over: Partial<Summary>) => end(state, 'mara', over).state.memories.map((m) => m.focus)
+    // Small talk, nothing changed: about no one, though Tobin and the player were there.
+    expect(focus({ memories: [written('Small talk.')] })).toEqual([[]])
+    expect(end(state, 'mara', { memories: [written('Small talk.')] }).state.memories[0]!.about).toEqual(['player', 'tobin'])
+    // Named by the summary, by id or name; someone who wasn't there is left out.
+    expect(focus({ memories: [{ ...written('Tobin dodged.'), about: ['Tobin', 'pell'] }] })).toEqual([['tobin']])
+    // Her meters toward the player moved, or she carries a feeling toward him: about the player too.
+    expect(focus({ memories: [written('Kit was kind.')], delta: { warmth: 3, bond: 0 } })).toEqual([['player']])
+    expect(focus({ memories: [written('Kit forgot.')], toward: [{ who: 'player', shade: 'glum', intensity: 2 }] })).toEqual([['player']])
+    expect(buildSummaryPrompt(fixture, state, 'mara').system).toContain('- about: for each memory, who it is really about: "tobin", "player" for Kit.')
   })
 
   it('needs a reason for Core, holds to the Core limit, and downgrades Core when nothing felt was strong (the guard)', () => {

@@ -10,25 +10,25 @@ import { applySummaries, buildSummaryPrompt, plainSummary } from './summary'
 // Milestone 4b, task 5c: topic tagging and consolidation (memory §7; decided 2026-11-13).
 const DAY = MINUTES_PER_DAY
 const NOW = 40 * DAY
-const mem = (n: number, over: Partial<Memory> = {}): Memory => ({ id: `mara.m${n}`, owner: 'mara', text: `moment ${n}`, level: 'normal', at: 0, revisits: 0, fadeFrom: 0, about: ['player'], inRecall: true, topics: [], ...over })
+const mem = (n: number, over: Partial<Memory> = {}): Memory => ({ id: `mara.m${n}`, owner: 'mara', text: `moment ${n}`, level: 'normal', at: 0, revisits: 0, fadeFrom: 0, about: ['player'], focus: [], inRecall: true, topics: [], ...over })
 const world = (memories: Memory[]): GameState => ({ ...yardScene(), scene: null, time: NOW, memories })
 
 describe('subjects', () => {
-  it('are a memory’s topics, the people in it, its place and the player', () => {
-    expect(subjectsOf(mem(1, { topics: ['faction.guild'], about: ['player', 'tobin'], place: 'the-yard' }))).toEqual([
+  it('are a memory’s topics and the people it is about, the player only when it is about them; never who was merely there, or the place', () => {
+    expect(subjectsOf(mem(1, { topics: ['faction.guild'], about: ['player', 'tobin'], focus: ['player', 'tobin'], place: 'the-yard' }))).toEqual([
       { kind: 'topic', id: 'faction.guild' },
       { kind: 'person', id: 'tobin' },
-      { kind: 'place', id: 'the-yard' },
       { kind: 'player', id: 'player' }
     ])
+    expect(subjectsOf(mem(2, { about: ['player', 'tobin'], place: 'the-yard' }))).toEqual([])
   })
 })
 
 describe('which memories merge', () => {
   it('needs at least five on one subject, older than 14 days, Normal or Fleeting, in recall and never merged before', () => {
-    const five = [1, 2, 3, 4, 5].map((n) => mem(n, { about: ['player', 'tobin'] }))
+    const five = [1, 2, 3, 4, 5].map((n) => mem(n, { about: ['player', 'tobin'], focus: ['tobin'] }))
     expect(consolidationGroups(fixture, world(five)).map((g) => [g.owner, g.subject, g.memories.length])).toEqual([['mara', { kind: 'person', id: 'tobin' }, 5]])
-    const notYet = (over: Partial<Memory>) => consolidationGroups(fixture, world([...five.slice(0, 4), mem(5, { about: ['player', 'tobin'], ...over })]))
+    const notYet = (over: Partial<Memory>) => consolidationGroups(fixture, world([...five.slice(0, 4), mem(5, { about: ['player', 'tobin'], focus: ['tobin'], ...over })]))
     expect(notYet({ level: 'core' })).toEqual([])
     expect(notYet({ at: NOW - 13 * DAY })).toEqual([])
     expect(notYet({ inRecall: false })).toEqual([])
@@ -36,27 +36,29 @@ describe('which memories merge', () => {
     expect(notYet({ mergedInto: 'mara.m9' })).toEqual([])
   })
 
-  it('puts each memory in one group, the most specific subject first', () => {
-    const topic = [1, 2, 3, 4, 5].map((n) => mem(n, { topics: ['faction.guild'], about: ['player', 'tobin'] }))
-    const tobinOnly = [6, 7, 8].map((n) => mem(n, { about: ['player', 'tobin'] }))
-    const playerOnly = [9, 10, 11, 12, 13].map((n) => mem(n))
-    const groups = consolidationGroups(fixture, world([...topic, ...tobinOnly, ...playerOnly]))
-    // The guild topic takes its five; Tobin is left with three (too few); the player's eight make the last group.
-    expect(groups.map((g) => [g.subject.kind, g.subject.id, g.memories.map((m) => m.id).length])).toEqual([['topic', 'faction.guild', 5], ['player', 'player', 8]])
+  it('puts each memory in one group, the most specific subject first, and never groups memories the player was merely in', () => {
+    const topic = [1, 2, 3, 4, 5].map((n) => mem(n, { topics: ['faction.guild'], about: ['player', 'tobin'], focus: ['tobin'] }))
+    const tobinOnly = [6, 7, 8].map((n) => mem(n, { about: ['player', 'tobin'], focus: ['tobin'] }))
+    const aboutKit = [9, 10, 11, 12, 13].map((n) => mem(n, { focus: ['player'] }))
+    const background = [14, 15, 16, 17, 18, 19].map((n) => mem(n, { place: 'the-yard' }))
+    const groups = consolidationGroups(fixture, world([...topic, ...tobinOnly, ...aboutKit, ...background]))
+    // The guild topic takes its five; Tobin is left with three (too few); the five about Kit make a group; the six
+    // where Kit and the yard were only the setting make none.
+    expect(groups.map((g) => [g.subject.kind, g.subject.id, g.memories.length])).toEqual([['topic', 'faction.guild', 5], ['player', 'player', 5]])
   })
 })
 
 describe('merging', () => {
-  const learned = (n: number) => mem(n, { secret: 'tobin.after-closing', about: ['tobin'], topics: ['tobin.after-closing'] })
+  const learned = (n: number) => mem(n, { secret: 'tobin.after-closing', about: ['tobin'], focus: ['tobin'], topics: ['tobin.after-closing'] })
   const group = (memories: Memory[]) => consolidationGroups(fixture, world(memories))[0]!
 
   it('makes one Normal memory with its originals’ people, topics and learned secrets, and takes them out of recall, linked', () => {
-    const originals = [learned(1), ...[2, 3, 4, 5].map((n) => mem(n, { about: ['player', 'tobin'], place: 'the-yard', topics: ['tobin.after-closing'] }))]
+    const originals = [learned(1), ...[2, 3, 4, 5].map((n) => mem(n, { about: ['player', 'tobin'], focus: ['tobin', 'player'], place: 'the-yard', topics: ['tobin.after-closing'] }))]
     const state = world(originals)
     const { state: next, made } = applyConsolidation(fixture, state, group(originals), 'All month, Tobin kept letting people in after closing, and Mara knew.')
     expect(made).toEqual({
       id: 'mara.m6', owner: 'mara', text: 'All month, Tobin kept letting people in after closing, and Mara knew.', level: 'normal', at: NOW, revisits: 0, fadeFrom: NOW,
-      about: ['tobin', 'player'], inRecall: true, topics: ['tobin.after-closing'], from: ['mara.m1', 'mara.m2', 'mara.m3', 'mara.m4', 'mara.m5'], inherited: [{ secret: 'tobin.after-closing' }]
+      about: ['tobin', 'player'], focus: ['tobin', 'player'], inRecall: true, topics: ['tobin.after-closing'], from: ['mara.m1', 'mara.m2', 'mara.m3', 'mara.m4', 'mara.m5'], inherited: [{ secret: 'tobin.after-closing' }]
     })
     expect(next.memories.filter((m) => m.from === undefined).every((m) => !m.inRecall && m.mergedInto === 'mara.m6')).toBe(true)
     // What was learned is still known through the merged memory, and recall brings the merged one.
@@ -65,7 +67,7 @@ describe('merging', () => {
   })
 
   it('carries codex pointers too, and refuses a text that is empty or over the word cap', () => {
-    const linked = [1, 2, 3, 4, 5].map((n) => mem(n, { owner: 'tobin', id: `tobin.m${n}`, about: ['mara'], ...(n === 1 && { secret: 'mara.two-books', codex: 'faction.guild.second-ledger' }) }))
+    const linked = [1, 2, 3, 4, 5].map((n) => mem(n, { owner: 'tobin', id: `tobin.m${n}`, about: ['mara'], focus: ['mara'], ...(n === 1 && { secret: 'mara.two-books', codex: 'faction.guild.second-ledger' }) }))
     const { state } = applyConsolidation(fixture, world(linked), group(linked), 'Mara keeps the second ledger.')
     expect(learnedEntries(state, 'tobin')).toEqual(['faction.guild.second-ledger'])
     expect(applyConsolidation(fixture, world(linked), group(linked), '').refused).toBe('no text')
@@ -79,7 +81,7 @@ describe('merging', () => {
   })
 
   it('runs one call per group, keeps going past a failure, and leaves a failed group’s memories as they were', async () => {
-    const memories = [...[1, 2, 3, 4, 5].map((n) => mem(n, { about: ['player', 'tobin'] })), ...[1, 2, 3, 4, 5].map((n) => mem(n, { id: `tobin.m${n}`, owner: 'tobin' }))]
+    const memories = [...[1, 2, 3, 4, 5].map((n) => mem(n, { about: ['player', 'tobin'], focus: ['tobin'] })), ...[1, 2, 3, 4, 5].map((n) => mem(n, { id: `tobin.m${n}`, owner: 'tobin', focus: ['player'] }))]
     const prompts: string[] = []
     const { state, trace } = await consolidate(fixture, world(memories), async (prompt) => {
       prompts.push(prompt.user)

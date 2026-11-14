@@ -1,7 +1,7 @@
 import { firstName, traced, TracedError, type CallTrace, type Prompt } from '@engine/core'
 import { entryById } from '@engine/codex'
 import { memoryId, pointersOf } from '@engine/memory'
-import { characterById, locationById, type Pack } from '@engine/pack'
+import { characterById, type Pack } from '@engine/pack'
 import { daysSince, type GameState, type Memory } from '@engine/state'
 import type { Summarize } from './endScene'
 
@@ -13,9 +13,9 @@ import type { Summarize } from './endScene'
  * originals stay in the save, out of recall, linked to it. Runs after the daily upkeep, never on a player's turn.
  */
 
-/** A subject memories can share: a topic (a codex entry or a secret), a person, the place, or the player. */
+/** A subject memories can share: a topic (a codex entry or a secret), a person, or the player. */
 export interface Subject {
-  kind: 'topic' | 'person' | 'place' | 'player'
+  kind: 'topic' | 'person' | 'player'
   id: string
 }
 
@@ -25,18 +25,21 @@ export interface Group {
   memories: Memory[]
 }
 
-/** Every subject a memory is about. The player is a subject apart: nearly every memory has them. */
+/**
+ * Every subject a memory is about (5c follow-up, decided 2026-11-14): its topics and the people it is actually about
+ * (`focus`), never just who was there, so the player, who is in every scene, is a subject only of memories about them.
+ * Places aren't subjects: what happened in one place is as mixed as everything with the player.
+ */
 export function subjectsOf(m: Memory): Subject[] {
   return [
     ...m.topics.map((id): Subject => ({ kind: 'topic', id })),
-    ...m.about.filter((p) => p !== 'player').map((id): Subject => ({ kind: 'person', id })),
-    ...(m.place ? [{ kind: 'place' as const, id: m.place }] : []),
-    ...(m.about.includes('player') ? [{ kind: 'player' as const, id: 'player' }] : [])
+    ...m.focus.filter((p) => p !== 'player').map((id): Subject => ({ kind: 'person', id })),
+    ...(m.focus.includes('player') ? [{ kind: 'player' as const, id: 'player' }] : [])
   ]
 }
 
-/** Most specific first: a topic, then a person, then a place, then the player, who is in almost everything. */
-const SPECIFIC = { topic: 0, person: 1, place: 2, player: 3 } as const
+/** Most specific first: a topic, then a person, then the player. */
+const SPECIFIC = { topic: 0, person: 1, player: 2 } as const
 const key = (s: Subject) => `${s.kind}:${s.id}`
 
 /**
@@ -71,11 +74,10 @@ export function consolidationGroups(content: Pack, state: GameState): Group[] {
   return groups
 }
 
-/** A subject in words: a codex entry's title, "Ada's secret", a person's or place's name, or the player's. */
+/** A subject in words: a codex entry's title, "Ada's secret", a person's name, or the player's. */
 export function subjectWords(content: Pack, state: GameState, s: Subject): string {
   if (s.kind === 'player') return state.player.name
   if (s.kind === 'person') return characterById(content, s.id)?.name ?? s.id
-  if (s.kind === 'place') return locationById(content, s.id)?.name ?? s.id
   const entry = entryById(content.codex, s.id)
   if (entry) return entry.title
   const holder = characterById(content, s.id.slice(0, s.id.indexOf('.')))
@@ -133,6 +135,7 @@ export function applyConsolidation(content: Pack, state: GameState, g: Group, te
     revisits: 0,
     fadeFrom: state.time,
     about: [...new Set(g.memories.flatMap((m) => m.about))],
+    focus: [...new Set(g.memories.flatMap((m) => m.focus))],
     inRecall: true,
     topics: [...new Set(g.memories.flatMap((m) => m.topics))],
     from: g.memories.map((m) => m.id),

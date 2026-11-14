@@ -4,7 +4,7 @@ import { characterById } from '@engine/pack'
 import type { Memory } from '@engine/state'
 import { recall } from './memory'
 
-const memoriesOf = (owner: string, n: number): Memory[] => Array.from({ length: n }, (_, i) => ({ id: `${owner}.m${i + 1}`, owner, text: `m${i}`, level: 'normal', at: i, revisits: 0, fadeFrom: i, about: [], inRecall: true, topics: [] }))
+const memoriesOf = (owner: string, n: number): Memory[] => Array.from({ length: n }, (_, i) => ({ id: `${owner}.m${i + 1}`, owner, text: `m${i}`, level: 'normal', at: i, revisits: 0, fadeFrom: i, about: [], focus: [], inRecall: true, topics: [] }))
 
 // Milestone 4a, task 3 (acceptance 2): recall budgets come from the ruleset by tier, and party membership doesn't change them.
 describe('recall budgets by tier', () => {
