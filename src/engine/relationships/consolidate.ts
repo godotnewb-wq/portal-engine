@@ -90,7 +90,7 @@ export function buildConsolidationPrompt(content: Pack, state: GameState, g: Gro
   const me = firstName(c.name)
   const words = content.ruleset.memory.consolidate.words
   return {
-    system: `You merge several of one character's older memories on the same subject into one memory, as they would remember it now. Reply with only a JSON object: {"text": "..."}
+    system: `You merge several of one character's older memories on the same subject into one memory, as they would remember it now. ${state.player.name} is the player (${state.player.pronouns}). Reply with only a JSON object: {"text": "..."}
 
 - text: one or two sentences, at most ${words} words, past tense, third person, from ${me}'s point of view: what these moments add up to for ${me}, keeping what still matters (names, promises, debts, how they were treated). No new events.`,
     user: [`${me}'s memories about ${subjectWords(content, state, g.subject)}, oldest first:`, ...g.memories.map((m) => `- (${daysSince(m.at, state.time)} days ago) ${m.text}`)].join('\n')

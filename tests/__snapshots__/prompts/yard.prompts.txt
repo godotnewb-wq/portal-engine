@@ -1325,7 +1325,7 @@ Write the beats.
 
 ===== summary: mara =====
 ----- system -----
-You judge what one character takes away from a scene in a visual-novel RPG. Write Mara's memory of the scene and how it changed what Mara feels.
+You judge what one character takes away from a scene in a visual-novel RPG. Write Mara's memory of the scene and how it changed what Mara feels. Kit is the player (they/them).
 
 Reply with only a JSON object:
 {"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "...", "about": [], "topics": []}], "revisited": [], "reason": "...", "warmth": "...", "bond": "...", "learned": [], "others": [{"with": "id", "warmth": "...", "bond": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": [], "heard": [{"id": "...", "memory": "..."}]}
@@ -1388,7 +1388,7 @@ She glances at the gate Tobin left by.
 
 ===== summary: tobin =====
 ----- system -----
-You judge what one character takes away from a scene in a visual-novel RPG. Write Tobin's memory of the scene and how it changed what Tobin feels.
+You judge what one character takes away from a scene in a visual-novel RPG. Write Tobin's memory of the scene and how it changed what Tobin feels. Kit is the player (they/them).
 
 Reply with only a JSON object:
 {"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "...", "about": [], "topics": []}], "revisited": [], "reason": "...", "warmth": "...", "bond": "...", "learned": [], "others": [{"with": "id", "warmth": "...", "bond": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": []}

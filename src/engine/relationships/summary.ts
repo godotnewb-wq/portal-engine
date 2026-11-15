@@ -62,7 +62,7 @@ function task(content: Pack, state: GameState, c: Character, others: Character[]
   const meterFields = r.meters.list.map((m) => `"${m.id}": "..."`).join(', ')
   const meterNames = r.meters.list.map((m) => m.id).join(', ')
   const meaning = r.meters.list.map((m) => `${m.id} is ${m.description}`).join('; ')
-  return `You judge what one character takes away from a scene in a visual-novel RPG. Write ${me}'s memory of the scene and how it changed what ${me} feels.
+  return `You judge what one character takes away from a scene in a visual-novel RPG. Write ${me}'s memory of the scene and how it changed what ${me} feels. ${player} is the player (${state.player.pronouns}).
 
 Reply with only a JSON object:
 {"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "...", "about": []${topics ? ', "topics": []' : ''}}], "revisited": [], "reason": "...", ${meterFields}, "learned": [], "others": [{"with": "id", ${meterFields}, "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": []${heard ? ', "heard": [{"id": "...", "memory": "..."}]' : ''}}

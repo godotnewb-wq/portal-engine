@@ -111,6 +111,21 @@ describe('reading through the mask', () => {
     expect(fight.plan.checks[0]).toMatchObject({ target: 'tobin', difficulty: 'routine' })
   })
 
+  // Found by the end-of-Milestone-4 bench: reading checks were dropped by the rule that the player rolls only on an attempt.
+  it('keeps the player’s reading check while the mask hides something, even when the player is only talking', () => {
+    const talking = { player_action: { doing: 'asks Tobin who came by', uncertain: false } }
+    const look = { id: 'look', who: 'player', skill: 'notice', difficulty: 'routine', target: 'tobin', stakes: 'sees what he feels' }
+    const sore = shown(fixture, yardScene(), 'tobin', felt('sore', 4, 'mad'))!
+    expect(sore.visibility).toBeLessThan(4)
+    const kept = validatePlan(fixture, yardScene(), reading([look], talking), ASK)
+    expect(kept.plan.checks.map((c) => c.id)).toEqual(['look'])
+    expect(kept.corrections).not.toContain('dropped the player check: the player action is not an uncertain attempt')
+    // Not a reading check: dropped as before.
+    const notice = validatePlan(fixture, yardScene(), reading([{ ...look, target: undefined }], talking), ASK)
+    expect(notice.plan.checks).toEqual([])
+    expect(notice.corrections).toContain('dropped the player check: the player action is not an uncertain attempt')
+  })
+
   const rolled = (degree: CheckResult['degree']) => ({ degree, natural: 10, total: 10, dc: 10 }) as CheckResult
   const settled = (who: string, degree: CheckResult['degree'], state = yardScene()) => {
     const { plan } = validatePlan(fixture, state, reading([{ id: 'look', who, skill: 'notice', difficulty: 'routine', target: 'tobin', stakes: 'sees what he feels' }]), ASK)

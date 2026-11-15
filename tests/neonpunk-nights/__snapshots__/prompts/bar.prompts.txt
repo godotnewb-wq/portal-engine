@@ -967,7 +967,7 @@ Write the beats.
 
 ===== summary: vex =====
 ----- system -----
-You judge what one character takes away from a scene in a visual-novel RPG. Write Vex's memory of the scene and how it changed what Vex feels.
+You judge what one character takes away from a scene in a visual-novel RPG. Write Vex's memory of the scene and how it changed what Vex feels. Rook is the player (they/them).
 
 Reply with only a JSON object:
 {"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "...", "about": []}], "revisited": [], "reason": "...", "approval": "...", "trust": "...", "interest": "...", "learned": [], "others": [{"with": "id", "approval": "...", "trust": "...", "interest": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": []}
@@ -1021,7 +1021,7 @@ Vex counts something on her fingers.
 
 ===== summary: brask =====
 ----- system -----
-You judge what one character takes away from a scene in a visual-novel RPG. Write Brask's memory of the scene and how it changed what Brask feels.
+You judge what one character takes away from a scene in a visual-novel RPG. Write Brask's memory of the scene and how it changed what Brask feels. Rook is the player (they/them).
 
 Reply with only a JSON object:
 {"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "...", "about": []}], "revisited": [], "reason": "...", "approval": "...", "trust": "...", "interest": "...", "learned": [], "others": [{"with": "id", "approval": "...", "trust": "...", "interest": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": []}
@@ -1074,7 +1074,7 @@ Vex counts something on her fingers.
 
 ===== summary: oria-senn =====
 ----- system -----
-You judge what one character takes away from a scene in a visual-novel RPG. Write Oria's memory of the scene and how it changed what Oria feels.
+You judge what one character takes away from a scene in a visual-novel RPG. Write Oria's memory of the scene and how it changed what Oria feels. Rook is the player (they/them).
 
 Reply with only a JSON object:
 {"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "...", "about": []}], "revisited": [], "reason": "...", "approval": "...", "trust": "...", "interest": "...", "learned": [], "others": [{"with": "id", "approval": "...", "trust": "...", "interest": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": []}
@@ -1128,7 +1128,7 @@ Vex counts something on her fingers.
 
 ===== summary: kesh =====
 ----- system -----
-You judge what one character takes away from a scene in a visual-novel RPG. Write Kesh's memory of the scene and how it changed what Kesh feels.
+You judge what one character takes away from a scene in a visual-novel RPG. Write Kesh's memory of the scene and how it changed what Kesh feels. Rook is the player (they/them).
 
 Reply with only a JSON object:
 {"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "...", "about": []}], "revisited": [], "reason": "...", "approval": "...", "trust": "...", "interest": "...", "learned": [], "others": [{"with": "id", "approval": "...", "trust": "...", "interest": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": []}

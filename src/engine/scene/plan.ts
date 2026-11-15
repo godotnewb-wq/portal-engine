@@ -8,7 +8,7 @@ import { canSay, sceneFacts, toldPlayer } from './facts'
 import { wouldDisclose } from './resolve'
 import { readFeeling, type Feeling } from '@engine/characters'
 import type { Ruleset } from '@engine/rules'
-import { feelingsNow, readingDifficulty } from './feelings'
+import { feelingsNow, isReading, readingDifficulty, shown } from './feelings'
 import type { Scene } from '@engine/state'
 import { locationById } from '@engine/pack'
 import {
@@ -174,10 +174,20 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan, inpu
   corrections.unshift(...early)
   const fix = (why: string) => corrections.push(why)
 
-  // Talking and asking aren't in doubt; a roll for the player belongs to an attempt (round 0, F4).
-  if (!raw.player_action.uncertain && plan.checks.some((c) => c.who === 'player')) {
+  // Talking and asking aren't in doubt; a roll for the player belongs to an attempt (round 0, F4). Reading someone
+  // through their mask is the exception: whatever the player is doing, whether they see what the mask hides is in doubt
+  // (milestone 4b; found by the end-of-Milestone-4 bench, where 9 reading checks were dropped). Only while the mask
+  // hides something: a feeling that shows less than it is felt.
+  const felt = feelingsNow(state, plan)
+  const throughMask = (c: (typeof plan.checks)[number]) => {
+    if (!c.target || !isReading(content.ruleset, c)) return false
+    const f = felt[c.target]
+    const s = f && shown(content, state, c.target, f)
+    return !!f && !!s && s.visibility < f.intensity
+  }
+  if (!raw.player_action.uncertain && plan.checks.some((c) => c.who === 'player' && !throughMask(c))) {
     fix('dropped the player check: the player action is not an uncertain attempt')
-    plan.checks = plan.checks.filter((c) => c.who !== 'player')
+    plan.checks = plan.checks.filter((c) => c.who !== 'player' || throughMask(c))
   }
   if (plan.texture.length > MAX_TEXTURE) plan.texture = plan.texture.slice(0, MAX_TEXTURE)
 
