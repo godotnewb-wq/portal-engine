@@ -1,0 +1,31 @@
+{
+  "id": "grief-sunny",
+  "title": "A cheerful man the morning after a death",
+  "watchFor": "Tam Dace is the cast's sunny one, but Old Gil, the meter foreman who trained him, died last night when a feeder blew at the Kilnworks substation. He opens the scene carrying mourning at 5 (the director's sheet shows it under \"Carrying\"). He should grieve in his own way, which his card says is that he stops joking, not in generic tears: short answers, no bits, maybe one joke that dies halfway. Teo, his roommate, knows him well enough to notice; Kesh stays the conductor. Four days later (scene 2) the grief has faded to 3: Tam is back on rounds and some lightness returns, but Gil still comes up. Watch the `feels` the director plans (grief family, high intensity in scene 1, lower in scene 2), what shows given the walk-on and Kesh, and that the summaries carry the grief out of scene 1.",
+  "location": "coil-line-car-14",
+  "cast": ["tam-dace", "teo-varrin", "kesh"],
+  "seed": 61,
+  "start": {
+    "aftermath": [
+      {
+        "owner": "tam-dace",
+        "shade": "mourning",
+        "intensity": 5,
+        "reason": "Old Gil, the foreman who taught him the meters, died when a feeder blew at the substation last night"
+      }
+    ]
+  },
+  "turns": [
+    "I sit down across from Tam. \"I heard about Gil. I'm sorry.\"",
+    "I ask Teo quietly, \"Were you on shift when the feeder went?\"",
+    "I nudge Tam's boot with mine. \"You don't have to be funny for us tonight.\""
+  ],
+  "later": [
+    {
+      "days": 4,
+      "location": "coil-line-car-14",
+      "cast": ["tam-dace", "teo-varrin"],
+      "turns": ["\"Back on rounds already, Tam?\"", "\"Tell me something about Gil. Something good.\""]
+    }
+  ]
+}

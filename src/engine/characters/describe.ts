@@ -7,7 +7,15 @@ import type { Character, TieTag } from './schema'
  */
 
 /** A tag as the card words it ("stepbrother"), or the ruleset's first word for it. */
-export const tagWord = (r: Ruleset, t: TieTag): string => t.word ?? r.ties.tags.find((x) => x.id === t.tag)?.words[0] ?? t.tag
+/**
+ * The word for a tag: its own, else the tag's neutral word when it has one (its id, e.g. "spouse", "sibling"), else its
+ * first. A tag set in play without a word (`set_tie`) mustn't call a man a wife (found by task 6's wedding scenario).
+ */
+export const tagWord = (r: Ruleset, t: TieTag): string => {
+  if (t.word) return t.word
+  const words = r.ties.tags.find((x) => x.id === t.tag)?.words ?? []
+  return words.find((w) => w === t.tag) ?? words[0] ?? t.tag
+}
 
 /** The axis stages that set a character apart: listed stages other than an axis's middle one. */
 export function nature(r: Ruleset, c: Character): string {

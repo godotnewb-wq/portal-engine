@@ -1,7 +1,7 @@
 import type { Turn } from '@engine/state'
 import { currentFlags } from '@engine/review'
 import type { SessionLog, TurnRecord } from '@platform/logs'
-import type { Scenario } from '../bench/scenario'
+import { StartSchema, type Scenario } from '../bench/scenario'
 import { sceneLocation } from './load'
 
 /** A logged turn as the state keeps it, for a scenario's history. */
@@ -44,6 +44,9 @@ export function toScenario(log: SessionLog, n: number, flags = log.flags): Scena
     comfort: Object.fromEntries(present.map((c) => [c.id, c.comfort])),
     history: before.map(asTurn),
     turns: [turn.input],
-    summaries: false
+    summaries: false,
+    start: StartSchema.parse({}),
+    later: [],
+    answerTies: 'yes'
   }
 }

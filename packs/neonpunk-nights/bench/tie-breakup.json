@@ -1,0 +1,56 @@
+{
+  "id": "tie-breakup",
+  "title": "A breakup at the bar",
+  "watchFor": "For this run Brask and Dunmar are together, and Dunmar is frustrated (3) with Brask, who keeps choosing the Saints' pump job over their nights. In scene 1 Dunmar should end it on screen, in his own guarded way; when he does, the plan should carry a `ties` change ending partner and adding ex, mirrored to both sides. Their work tags (client and contractor) stay. Nobody else's tags change. Scene 2, two days later, they are exes: the sheet should say so, and the talk should be awkward, not a reunion.",
+  "location": "sump-lantern",
+  "cast": ["brask", "dunmar", "vex"],
+  "seed": 79,
+  "start": {
+    "ties": [
+      {
+        "from": "brask",
+        "to": "dunmar",
+        "tags": [
+          { "tag": "client" },
+          { "tag": "partner", "word": "boyfriend" }
+        ],
+        "mirror": false
+      },
+      {
+        "from": "dunmar",
+        "to": "brask",
+        "tags": [
+          { "tag": "contractor" },
+          { "tag": "partner", "word": "boyfriend" }
+        ],
+        "mirror": false
+      }
+    ],
+    "aftermath": [
+      {
+        "owner": "dunmar",
+        "toward": "brask",
+        "shade": "frustration",
+        "intensity": 3,
+        "reason": "he chose the Saints' pump job over their night again",
+        "daysAgo": 1
+      }
+    ]
+  },
+  "turns": [
+    "I look from Brask to Dunmar. \"You two have been quiet all night. What's going on?\"",
+    "\"Dunmar, if you've got something to say to him, say it. Don't make him guess.\"",
+    "I put a hand on Brask's shoulder. \"Are you all right?\""
+  ],
+  "later": [
+    {
+      "days": 2,
+      "location": "sump-lantern",
+      "cast": ["brask", "dunmar"],
+      "turns": [
+        "I wave Brask over to the bar. \"Didn't think you'd come in tonight.\"",
+        "\"Dunmar, one for him. On my slate.\""
+      ]
+    }
+  ]
+}

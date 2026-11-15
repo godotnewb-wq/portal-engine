@@ -18,6 +18,9 @@ describe('the shipped scenarios', () => {
     expect(scenarios.map((s) => s.id)).toEqual([
       'deception-caught',
       'deception-uncaught',
+      'forgotten-anniversary',
+      'grief-sunny',
+      'long-run-memories',
       'lore-budget-pressure',
       'lore-departure',
       'lore-invented-gang',
@@ -29,12 +32,17 @@ describe('the shipped scenarios', () => {
       'lore-paraphrase',
       'lore-secret-fishing',
       'lore-species-stereotype',
+      'mask-strangers-then-trusted',
       'repair-with-brask',
+      'secret-dormancy',
       'secret-dormant',
+      'secret-learned',
       'secret-touched',
       'siblings-on-the-car',
       'tense-negotiation',
       'three-way-argument',
+      'tie-breakup',
+      'tie-wedding',
       'tram-attempt',
       'tram-small-talk',
       'tram-stay-or-go',
@@ -56,10 +64,17 @@ describe('runBench (acceptance 9: the bench runs its scenarios)', () => {
   it('plays every scenario through the pipeline with the mock and records it', async () => {
     const bench = await runBench(content, scenarios, mockLlm(), 'test', { all: 'mock' })
     expect(bench.scenarios.map((s) => s.error)).toEqual(scenarios.map(() => undefined))
-    for (const run of bench.scenarios) {
+    for (const run of bench.scenarios.filter((r) => !r.scenes)) {
       expect(run.turns).toHaveLength(3)
       expect(run.sceneEnd!.witnesses.length).toBeGreaterThan(0)
       expect(stats(run).calls).toBe(6)
+    }
+    // Several scenes (milestone 4b, task 6): every scene played and summed up, two turn calls a turn.
+    for (const run of bench.scenarios.filter((r) => r.scenes)) {
+      const s = scenarios.find((x) => x.id === run.id)!
+      expect(run.turns).toHaveLength(s.turns.length + s.later.reduce((n, x) => n + x.turns.length, 0))
+      expect(run.scenes!.every((x) => x.sceneEnd!.witnesses.length > 0)).toBe(true)
+      expect(stats(run).calls).toBe(run.turns.length * 2)
     }
     const report = renderReport(content, bench)
     expect(report).toMatch(/^# Scene test bench — test/)

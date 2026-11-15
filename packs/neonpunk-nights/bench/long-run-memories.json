@@ -1,0 +1,103 @@
+{
+  "id": "long-run-memories",
+  "title": "Nine evenings over a month: old Core memories and consolidation",
+  "watchFor": "A scripted long run (acceptance 6): nine short evenings with Vex and Brask over about four weeks. Each starts with an old Core memory (Vex's of the night Rook pulled her out at the Saints' checkpoint, 60 days ago; Brask's of Rook vouching for him to Pim, 45 days ago). By the last scenes those must still be reachable: the Briefs section should show them recalled when the talk turns to them (scenes 8 and 9). Rook keeps borrowing from Vex and paying back; with Brask it's small favors. Once memories are 14 days old, the nights between scenes should consolidate: Vex's memories about Rook's debts into one, in her voice, while small talk about no one stays as it was (the 'who a memory is about' grouping). Watch what merges and what doesn't, and that a merged memory keeps what mattered (amounts, promises, who covered for whom).",
+  "location": "sump-lantern",
+  "cast": ["vex", "brask"],
+  "seed": 97,
+  "start": {
+    "memories": [
+      {
+        "owner": "vex",
+        "text": "The night Sef was taken at the Saints' checkpoint, Rook pulled Vex out of the floodwater and never once asked why she was there.",
+        "level": "core",
+        "reason": "Rook saved her life and kept her secret without knowing it",
+        "focus": ["player"],
+        "daysAgo": 60
+      },
+      {
+        "owner": "brask",
+        "text": "Rook's first winter down here, Brask was late on the rent and Rook talked Pim round for him, as if it were nothing.",
+        "level": "core",
+        "reason": "no one had ever stood up for him to Pim",
+        "focus": ["player"],
+        "daysAgo": 45
+      }
+    ]
+  },
+  "turns": [
+    "Vex, can you spot me forty until Friday? The tram fine came in.",
+    "Brask, the zip's gone on my coat again."
+  ],
+  "later": [
+    {
+      "days": 2,
+      "location": "sump-lantern",
+      "cast": ["vex", "brask"],
+      "turns": [
+        "Here's twenty of what I owe you, Vex. The rest next week.",
+        "Brask, how are the pumps holding?"
+      ]
+    },
+    {
+      "days": 2,
+      "location": "sump-lantern",
+      "cast": ["vex", "brask"],
+      "turns": [
+        "Vex, I need another favor. Can you hold a package for me overnight?",
+        "Brask, can you look at the lock on my door?"
+      ]
+    },
+    {
+      "days": 2,
+      "location": "sump-lantern",
+      "cast": ["vex", "brask"],
+      "turns": [
+        "Vex, sorry about the package. I'll pick it up tomorrow, I swear.",
+        "Brask, you fixed the lock. What do I owe you?"
+      ]
+    },
+    {
+      "days": 2,
+      "location": "sump-lantern",
+      "cast": ["vex", "brask"],
+      "turns": ["Vex, here's the rest of what I owe you. All of it.", "Brask, a drink on me, for once."]
+    },
+    {
+      "days": 2,
+      "location": "sump-lantern",
+      "cast": ["vex", "brask"],
+      "turns": [
+        "Vex, there's a run on Friday that pays double. Want in?",
+        "Brask, would you look over the job's pump specs?"
+      ]
+    },
+    {
+      "days": 2,
+      "location": "sump-lantern",
+      "cast": ["vex", "brask"],
+      "turns": [
+        "Vex, the run went bad. I need to borrow again.",
+        "Brask, can I sleep in the workshop tonight?"
+      ]
+    },
+    {
+      "days": 14,
+      "location": "sump-lantern",
+      "cast": ["vex", "brask"],
+      "turns": [
+        "Vex, it's been two weeks. We're square now, aren't we?",
+        "Brask, what do you remember about my first winter down here?"
+      ]
+    },
+    {
+      "days": 1,
+      "location": "sump-lantern",
+      "cast": ["vex", "brask"],
+      "turns": [
+        "Vex, do you remember the night at the Saints' checkpoint?",
+        "Brask, do you two ever talk about me when I'm not here?"
+      ]
+    }
+  ]
+}

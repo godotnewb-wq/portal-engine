@@ -1,0 +1,45 @@
+{
+  "id": "tie-wedding",
+  "title": "A wedding on car 14",
+  "watchFor": "Kesh and Teo are engaged for this run, and they marry on Kesh's own car with Rook officiating and Tam as witness. When the vows are said on screen, the director's plan should carry a `ties` change ending fiancé and adding spouse; the game mirrors it, so both sides end with spouse (check the next scene's sheet and the report's tie events). No one should propose a tie before the vows. Both should come out with a Core memory of the wedding (forced by the tie event). Scene 2, the next evening at the Sump Lantern, should treat them as married.",
+  "location": "coil-line-car-14",
+  "cast": ["kesh", "teo-varrin", "tam-dace"],
+  "seed": 73,
+  "start": {
+    "ties": [
+      {
+        "from": "kesh",
+        "to": "teo-varrin",
+        "tags": [
+          { "tag": "fiance", "word": "fiancé" }
+        ],
+        "mirror": false
+      },
+      {
+        "from": "teo-varrin",
+        "to": "kesh",
+        "tags": [
+          { "tag": "fiance", "word": "fiancée" }
+        ],
+        "mirror": false
+      }
+    ]
+  },
+  "turns": [
+    "I stand in the aisle between the seats. \"Everyone ready? Kesh, Teo, this is your stop.\"",
+    "\"Kesh, do you take Teo, here on car fourteen, with the whole line listening?\"",
+    "\"And Teo, do you take Kesh?\"",
+    "\"Then by the power the Coil Line never gave me: you're married.\""
+  ],
+  "later": [
+    {
+      "days": 1,
+      "location": "sump-lantern",
+      "cast": ["kesh", "teo-varrin", "vex"],
+      "turns": [
+        "I raise my glass. \"To the newlyweds!\"",
+        "\"Kesh, how does it feel, being someone's wife?\""
+      ]
+    }
+  ]
+}

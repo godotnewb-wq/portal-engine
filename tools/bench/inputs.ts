@@ -3,7 +3,7 @@ import type { Pack } from '@engine/pack'
 import { isConfigured, profileFor, type LlmProfile, type LlmProfileId, type Settings } from '@llm'
 import { promptVersion } from '@platform/logs'
 import type { ScenarioRun } from './run'
-import type { Scenario } from './scenario'
+import { scenesOf, type Scenario } from './scenario'
 import { nameIn } from './names'
 
 /**
@@ -59,7 +59,7 @@ export function roleSettings(settings: Settings, roles: readonly ('director' | '
 /** The inputs the run itself can see: the pack, the scenarios as played and the names in them. */
 export function runInputs(content: Pack, scenarios: Scenario[], extra: Pick<RunInputs, 'source' | 'roles'>): RunInputs {
   const names: Record<string, string> = {}
-  for (const s of scenarios) {
+  for (const s of scenarios.flatMap(scenesOf)) {
     for (const id of s.cast) names[id] = nameIn(content, s.location, id)
     for (const w of content.locations.find((l) => l.id === s.location)?.walkOns ?? []) names[w.id] = nameIn(content, s.location, w.id)
   }

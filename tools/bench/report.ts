@@ -1,9 +1,9 @@
 import type { Beat } from '@engine/state'
-import type { WitnessReport } from '@engine/relationships'
-import type { Meters } from '@engine/characters'
+import { parseConsolidation, type SceneEndTrace, type WitnessReport } from '@engine/relationships'
+import { feelingLabel, type Meters } from '@engine/characters'
 import type { Pack } from '@engine/pack'
 import { lineText, moodOf, planLines, type TurnTrace } from '@engine/scene'
-import { callsOf, metricInputOf, nameIn, type BenchRun, type ScenarioRun } from './run'
+import { callsOf, metricInputOf, nameIn, turnsOf, type BenchRun, type SceneRun, type ScenarioRun } from './run'
 import { comparability } from './inputs'
 import { compareMetrics, metrics, renderMetrics } from '../logs/metrics'
 
@@ -11,8 +11,8 @@ import { compareMetrics, metrics, renderMetrics } from '../logs/metrics'
 type Names = (location: string, id: string) => string
 export const namesOf = (content: Pack, bench: BenchRun): Names => (location, id) => bench.inputs?.names[id] ?? nameIn(content, location, id)
 
-const beatLine = (names: Names, run: ScenarioRun, beat: Beat): string =>
-  beat.kind === 'narration' ? `*${beat.text}*` : `**${names(run.location, beat.speaker)}:** ${beat.text}`
+const beatLine = (names: Names, location: string, beat: Beat): string =>
+  beat.kind === 'narration' ? `*${beat.text}*` : `**${names(location, beat.speaker)}:** ${beat.text}`
 
 const delta = (before: Meters, after: Meters): string =>
   Object.keys(after)
@@ -26,7 +26,8 @@ const average = (xs: number[]) => (xs.length === 0 ? 0 : Math.round(xs.reduce((a
 
 /** The numbers that show at a glance whether a change made things better or worse. */
 export function stats(run: ScenarioRun) {
-  const turnCalls = callsOf(run).filter((c) => c.role !== 'summary')
+  // Turn calls only: summaries and consolidation run between scenes.
+  const turnCalls = callsOf(run).filter((c) => c.role !== 'summary' && c.role !== 'consolidation')
   return {
     turns: run.turns.length,
     calls: turnCalls.length,
@@ -104,14 +105,43 @@ function briefLines(turn: TurnTrace): string[] {
 }
 
 function scenarioSection(names: Names, run: ScenarioRun, repeats: boolean, budgets?: BenchRun['loreBudgets']): string {
-  const name = (id: string) => names(run.location, id)
   const lines = [`## ${run.title} (\`${run.id}\`${repeats ? `, #${run.repeat}, seed ${run.seed}` : ''})`, '', `> ${run.watchFor}`, '']
   if (run.forceNatural !== undefined) lines.push(`Checks forced to a natural ${run.forceNatural}.`, '')
   const missed = missedCheck(run)
   if (missed) lines.push(`**${missed}**`, '')
   if (run.error) lines.push(`**Stopped:** ${run.error}`, '')
-  run.turns.forEach((t, i) => {
-    lines.push(`### Turn ${i + 1}`, '', `**Player:** ${t.input}`, '')
+  if (!run.scenes) {
+    lines.push(...turnLines(names, run.location, run.turns, '###', budgets), ...afterLines(names, run.location, run.sceneEnd, '###'))
+    return lines.join('\n')
+  }
+  for (const s of run.scenes) {
+    const name = (id: string) => names(s.location, id)
+    const when = s.n === 1 ? '' : s.days === 0 ? ', the same evening' : `, ${s.days} day${s.days === 1 ? '' : 's'} later`
+    lines.push(`### Scene ${s.n}: \`${s.location}\`${when}`, '', `Present: ${s.cast.map(name).join(', ')}.`, '')
+    lines.push(...nightLines(names, s), ...turnLines(names, s.location, turnsOf(run, s), '####', budgets), ...afterLines(names, s.location, s.sceneEnd, '####'))
+  }
+  return lines.join('\n')
+}
+
+/** What each night between scenes merged (milestone 4b): whose memories, on what subject, and the merged text. */
+function nightLines(names: Names, s: SceneRun): string[] {
+  const groups = s.consolidations.flatMap((night) =>
+    night.groups.map((g, i) => {
+      const call = night.calls.find((c) => c.id.endsWith(`:${i + 1}`))
+      const subject = g.subject.kind === 'player' ? 'the player' : g.subject.kind === 'person' ? names(s.location, g.subject.id) : `\`${g.subject.id}\``
+      const outcome = g.made ? `→ ${g.made}: "${parseConsolidation(call?.reply ?? '')}"` : g.refused ? `refused: ${g.refused}` : `failed: ${g.error ?? '?'}`
+      return `- ${names(s.location, g.owner)} merged ${g.from.length} memories about ${subject} (${g.from.join(', ')}) ${outcome}`
+    })
+  )
+  return groups.length > 0 ? ['Overnight, consolidation:', '', ...groups, ''] : []
+}
+
+/** A scene's turns as the report shows them. */
+function turnLines(names: Names, location: string, turns: TurnTrace[], heading: string, budgets?: BenchRun['loreBudgets']): string[] {
+  const name = (id: string) => names(location, id)
+  const lines: string[] = []
+  turns.forEach((t, i) => {
+    lines.push(`${heading} Turn ${i + 1}`, '', `**Player:** ${t.input}`, '')
     const p = t.director.plan
     const exchange = planLines(p)
     const plan = [
@@ -128,27 +158,47 @@ function scenarioSection(names: Names, run: ScenarioRun, repeats: boolean, budge
     if (lore.length > 0) lines.push('<details><summary>Lore</summary>', '', ...lore.map((line) => '- ' + line), '', '</details>', '')
     const brief = briefLines(t)
     if (brief.length > 0) lines.push('<details><summary>Briefs</summary>', '', ...brief.map((line) => '- ' + line), '', '</details>', '')
-    lines.push(...shown(t).map((b, n) => `${n + 1}. ${beatLine(names, run, b)}`), '')
+    lines.push(...shown(t).map((b, n) => `${n + 1}. ${beatLine(names, location, b)}`), '')
     if (fixes(t).length > 0) lines.push(`Rewrite asked to fix: ${fixes(t).map((f) => `"${f}"`).join(' ')}`, '')
     if (left(t).length > 0) lines.push(`Still wrong after the rewrite (salvaged): ${left(t).map((f) => `"${f}"`).join(' ')}`, '')
     lines.push(`*${t.cost.calls} calls, ${t.cost.ms} ms*`, '')
   })
-  const summaries = reportsOf(run)
-  if (summaries.length > 0) {
-    lines.push('### After the scene', '')
-    for (const r of summaries) {
-      lines.push(`- **${name(r.id)}** (${r.level}): ${r.memory}${r.reason ? ` — *${r.reason}*` : ''}`, `  - Toward the player: ${delta(r.before, r.after)}`)
-      for (const o of r.others) lines.push(`  - Toward ${name(o.with)}: ${delta(o.before, o.after)}`)
-      for (const fact of r.learned) lines.push(`  - Learned: ${fact}`)
-      if (r.error) lines.push(`  - ⚠ summary failed: ${r.error}`)
-    }
-    lines.push('')
-  }
-  return lines.join('\n')
+  return lines
 }
 
+/** What each witness took from a scene: memories, meters, what they learned and what they carry (milestone 4b). */
+function afterLines(names: Names, location: string, end: SceneEndTrace | undefined, heading: string): string[] {
+  const name = (id: string) => names(location, id)
+  const summaries = reportsOf(end)
+  if (summaries.length === 0) return []
+  const lines = [`${heading} After the scene`, '']
+  for (const r of summaries) {
+    lines.push(`- **${name(r.id)}** (${r.level}): ${r.memory}${r.reason ? ` — *${r.reason}*` : ''}`)
+    for (const m of r.memories.slice(1)) lines.push(`  - Also remembers (${m.level}): ${m.text}`)
+    for (const m of r.revisited) lines.push(`  - Came back to ${m.id} (now ${m.level})`)
+    for (const note of r.memoryNotes) lines.push(`  - Memory note: ${note}`)
+    lines.push(`  - Toward the player: ${delta(r.before, r.after)}`)
+    for (const o of r.others) lines.push(`  - Toward ${name(o.with)}: ${delta(o.before, o.after)}`)
+    for (const fact of r.learned) lines.push(`  - Learned: ${fact}`)
+    for (const id of r.heard) lines.push(`  - Took in someone's secret: ${id}`)
+    const c = r.carried
+    if (c?.aftermath) lines.push(`  - Carries: ${feelingLabel(c.aftermath)}`)
+    for (const t of c?.toward ?? []) lines.push(`  - Carries toward ${name(t.toward)}: ${feelingLabel(t.feeling)}${t.renewed ? ' (renewed)' : ''}${t.repeat ? ` — repeat ${t.repeat.count}: ${t.repeat.meter} ${t.repeat.change > 0 ? '+' : ''}${t.repeat.change}` : ''}`)
+    for (const who of c?.resolved ?? []) lines.push(`  - Resolved toward ${name(who)}`)
+    for (const d of c?.dropped ?? []) lines.push(`  - Dropped: ${d}`)
+    if (r.error) lines.push(`  - ⚠ summary failed: ${r.error}`)
+  }
+  lines.push('')
+  return lines
+}
+
+/** Where a turn was played: its scene's location in a run with several. */
+const locationOf = (run: ScenarioRun, t: TurnTrace): string => run.scenes?.find((s) => s.id === t.sceneId)?.location ?? run.location
+/** What every witness took from every scene of a run. */
+const allReports = (run: ScenarioRun): WitnessReport[] => (run.scenes ? run.scenes.flatMap((s) => reportsOf(s.sceneEnd)) : reportsOf(run.sceneEnd))
+
 /** What each witness took from the scene. */
-const reportsOf = (run: ScenarioRun): WitnessReport[] => run.sceneEnd?.witnesses.flatMap((w) => (w.report ? [{ ...w.report, ...(w.error && { error: w.error }) }] : [])) ?? []
+const reportsOf = (end: SceneEndTrace | undefined): WitnessReport[] => end?.witnesses.flatMap((w) => (w.report ? [{ ...w.report, ...(w.error && { error: w.error }) }] : [])) ?? []
 
 /** The lore budgets a run used, marking those the config set; nothing for runs from before they were recorded. */
 const budgetsLine = (bench: BenchRun): string => {
@@ -244,10 +294,10 @@ export function compareRuns(content: Pack, a: BenchRun, b: BenchRun): string {
       const tb = rb.turns[i]
       lines.push(`### Turn ${i + 1}: ${ta?.input ?? tb?.input}`, '', '| A | B |', '|---|---|')
       const side = (names: Names, run: ScenarioRun, t: typeof ta, budgets?: BenchRun['loreBudgets']) =>
-        t ? cell([...checkLines(t).map((line) => `🎲 ${line}`), ...shown(t).map((beat) => beatLine(names, run, beat)), ...loreLines(t, budgets), t.rewrite ? `↻ rewritten (${t.findings.length} fixes)` : ''].filter(Boolean).join('\n\n')) : '—'
+        t ? cell([...checkLines(t).map((line) => `🎲 ${line}`), ...shown(t).map((beat) => beatLine(names, locationOf(run, t), beat)), ...loreLines(t, budgets), t.rewrite ? `↻ rewritten (${t.findings.length} fixes)` : ''].filter(Boolean).join('\n\n')) : '—'
       lines.push(`| ${side(namesA, ra, ta, a.loreBudgets)} | ${side(namesB, rb, tb, b.loreBudgets)} |`, '')
     }
-    const memories = (names: Names, run: ScenarioRun) => cell(reportsOf(run).map((r) => `**${names(run.location, r.id)}:** ${r.memory} (${delta(r.before, r.after)})`).join('\n\n') || '—')
+    const memories = (names: Names, run: ScenarioRun) => cell(allReports(run).map((r) => `**${names(run.location, r.id)}:** ${r.memory} (${delta(r.before, r.after)})`).join('\n\n') || '—')
     lines.push('### After the scene', '', '| A | B |', '|---|---|', `| ${memories(namesA, ra)} | ${memories(namesB, rb)} |`, '')
   }
   return lines.join('\n')

@@ -1,0 +1,39 @@
+{
+  "id": "mask-strangers-then-trusted",
+  "title": "A heavy masker among strangers, then alone with someone she trusts",
+  "watchFor": "Oria masks fear heavily, and tonight she is in a panic (5): someone left a dead courier's badge in her booth as a warning. In scene 1 the bar has a walk-on and Corvin, a stranger to her, so she is guarded: what shows should be only her small tells (the brief says so), and the prose should keep her polished surface, with perhaps one crack a careful reader catches. An Empathy check to read her is fair; if Rook asks for one, its target should be Oria. In scene 2, the same evening after closing, it is only Oria and Rook, whom she trusts (trust 30): the mask should break, and the writer should show the panic plainly in her own way. Her secrets shouldn't come out just because the mask does.",
+  "location": "sump-lantern",
+  "cast": ["oria-senn", "dunmar", "corvin-hale"],
+  "seed": 67,
+  "meters": {
+    "oria-senn": { "approval": 20, "trust": 30, "interest": 10 }
+  },
+  "start": {
+    "aftermath": [
+      {
+        "owner": "oria-senn",
+        "shade": "panic",
+        "intensity": 5,
+        "reason": "someone left a dead courier's badge in her booth tonight, as a warning"
+      }
+    ]
+  },
+  "turns": [
+    "I slide into the booth across from Oria. \"Evening. Buying or selling tonight?\"",
+    "I turn to Corvin. \"You've been measuring the stairs all week. Find anything?\"",
+    "I watch Oria's hands around her glass. \"You've barely touched that.\""
+  ],
+  "later": [
+    {
+      "days": 0,
+      "location": "sump-lantern",
+      "cast": ["oria-senn"],
+      "walkOns": [],
+      "turns": [
+        "Dunmar's gone home and the chairs are up. \"It's just us, Oria. What happened tonight?\"",
+        "\"Who left it? Do you know?\"",
+        "\"You can stay at mine tonight if you don't want to go home.\""
+      ]
+    }
+  ]
+}

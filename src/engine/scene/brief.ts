@@ -173,9 +173,10 @@ function candidates(content: Pack, state: GameState): Candidate[] {
         return holder && s ? [of(c.id, `${c.id}:${secret}`, 'knows', `[${secret}] Learned ${firstName(holder.name)}'s secret: ${s.text}`, `${s.text} ${(s.keywords ?? []).join(' ')}`)] : []
       }),
       // Memories not recalled for the scene, faded ones included, come in when the conversation reaches them (memory §6).
+      // One merged by consolidation doesn't: the memory it was merged into stands for it (found by task 6's long run).
       ...(() => {
         const recalled = new Set(recall(r, state, c).map((m) => m.id))
-        return state.memories.filter((m) => m.owner === c.id && !recalled.has(m.id)).map((m) => of(c.id, m.id, 'memory', `Remembers (${m.level}): ${m.text}`, m.text))
+        return state.memories.filter((m) => m.owner === c.id && !recalled.has(m.id) && !m.mergedInto).map((m) => of(c.id, m.id, 'memory', `Remembers (${m.level}): ${m.text}`, m.text))
       })(),
       ...ties.flatMap((x) => {
         const t = tie(x)

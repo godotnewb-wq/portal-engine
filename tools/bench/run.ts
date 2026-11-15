@@ -2,16 +2,33 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Pack } from '@engine/pack'
 import { TracedError, type CallTrace } from '@engine/core'
-import { endScene, type SceneEndTrace, type Summarize } from '@engine/relationships'
+import { consolidate, endScene, nextDay, type ConsolidationTrace, type SceneEndTrace, type Summarize } from '@engine/relationships'
+import { answerTie, GameStateSchema, type GameState } from '@engine/state'
 import { promptSources, runTurn, type TurnLlm, type TurnTrace } from '@engine/scene'
 import { callTrace, LogSession, promptVersion, readSession, type SessionRecord } from '@platform/logs'
 import type { FlagRecord, ScoreRecord } from '@engine/review'
 import { loreBudgets, type LoreBudgetOverrides, type LoreBudgets } from '@engine/rules'
-import { scenarioProblems, scenarioState, type ExpectedCheck, type Scenario } from './scenario'
+import { openScene, sceneIdOf, scenarioContent, scenarioProblems, scenarioState, scenesOf, type ExpectedCheck, type Scenario } from './scenario'
 import { runInputs, type RunInputs } from './inputs'
 
 export { mockLlm } from './mock'
 export { nameIn } from './names'
+
+/**
+ * One scene of a scenario with several (milestone 4b, task 6): where and with whom, how many days passed before it, and
+ * what ran between: each night's consolidation (only nights that had something to merge) and its end-of-scene summaries.
+ * Its turns are the run's turns with its `id` as their `sceneId`.
+ */
+export interface SceneRun {
+  /** 1-based. */
+  n: number
+  id: string
+  location: string
+  cast: string[]
+  days: number
+  consolidations: ConsolidationTrace[]
+  sceneEnd?: SceneEndTrace
+}
 
 /**
  * One play of one scenario, as the turn traces recorded it (milestone 2, A1): the same traces play logs are made of,
@@ -29,8 +46,14 @@ export interface ScenarioRun {
   seed: number
   /** Its session folder in the run folder. */
   session: string
+  /** Every turn, across all its scenes. */
   turns: TurnTrace[]
+  /** A one-scene scenario's summaries; a scenario with several keeps each scene's under `scenes`. */
   sceneEnd?: SceneEndTrace
+  /** A scenario with several scenes (milestone 4b): each one, in order. Absent for one scene. */
+  scenes?: SceneRun[]
+  /** The state the run ended on, for tests; not written to the run folder. */
+  state?: GameState
   /** Set if the run stopped early. */
   error?: string
   /** Calls made in the turn or scene end that failed, before the failure. */
@@ -84,7 +107,21 @@ export interface BenchOptions {
 /** The seed of a repeat: the scenario's own for the first, then the next ones, so repeats roll differently. */
 export const repeatSeed = (scenario: Scenario, repeat: number): number => scenario.seed + repeat - 1
 
-/** Plays one scenario through the real pipeline: every turn, then the end-of-scene summaries. */
+/** Answers every tie change waiting for the player's agreement, as the scenario says (milestone 4b). */
+function answerAll(content: Pack, state: GameState, answer: Scenario['answerTies']): GameState {
+  let next = state
+  while (next.scene && next.scene.pendingTies.length > 0) next = answerTie(content, next, 0, answer === 'yes')
+  return next
+}
+
+/** A save and reload, as between play sessions: the state through JSON and the save schema. */
+const reload = (state: GameState): GameState => GameStateSchema.parse(JSON.parse(JSON.stringify(state)))
+
+/**
+ * Plays one scenario through the real pipeline: every turn, then the end-of-scene summaries. A scenario with later
+ * scenes goes on as play would (milestone 4b): a save and reload, each Next day's upkeep and consolidation, then the
+ * next scene opens on what the last one left.
+ */
 export async function runScenario(content: Pack, scenario: Scenario, llm: BenchLlm, repeat = 1, session?: LogSession, loreBudgets?: LoreBudgetOverrides): Promise<ScenarioRun> {
   const seed = repeatSeed(scenario, repeat)
   const run: ScenarioRun = {
@@ -102,31 +139,64 @@ export async function runScenario(content: Pack, scenario: Scenario, llm: BenchL
   const problems = scenarioProblems(content, scenario)
   if (problems.length > 0) return { ...run, error: problems.join('; ') }
 
-  // The scene is named after the scenario, so turn ids read e.g. "deception-caught-2".
-  let state = scenarioState(content, { ...scenario, seed })
-  state = { ...state, scene: { ...state.scene!, id: scenario.id } }
-  session?.sceneStart({ sceneId: scenario.id, location: scenario.location, cast: scenario.cast })
+  const played = scenarioContent(content, scenario)
+  const scenes = scenesOf(scenario)
+  if (scenes.length > 1) run.scenes = []
   const options = { ...(scenario.forceNatural !== undefined && { forceNatural: scenario.forceNatural }), ...(loreBudgets && { loreBudgets }) }
+  let state: GameState | undefined
   let where: 'turn' | 'scene-end' = 'turn'
+  let sceneId = scenario.id
+  let turnInScene = 0
   try {
-    for (const input of scenario.turns) {
-      const outcome = await runTurn(content, state, input, llm.turn, () => {}, { ...options, ...(session && { log: session.id }) })
-      run.turns.push(outcome.trace)
-      session?.turn(outcome.trace)
-      state = outcome.state
-      if (state.scene?.ended) break
-    }
-    if (scenario.summaries) {
-      where = 'scene-end'
-      const end = await endScene(content, state, llm.summarize)
-      run.sceneEnd = end.trace
-      session?.sceneEnd(end.trace)
+    for (const scene of scenes) {
+      // Scenes are named after the scenario, so turn ids read e.g. "deception-caught-2", then "…-s2-1" in a second scene.
+      sceneId = sceneIdOf(scenario, scene.n)
+      turnInScene = 0
+      const part: SceneRun = { n: scene.n, id: sceneId, location: scene.location, cast: scene.cast, days: scene.days, consolidations: [] }
+      if (!state) state = scenarioState(content, { ...scenario, seed })
+      else {
+        where = 'scene-end'
+        state = reload(state)
+        for (let day = 0; day < scene.days; day++) {
+          state = nextDay(played, state)
+          const night = await consolidate(played, state, llm.summarize)
+          state = night.state
+          if (night.trace.groups.length > 0) {
+            part.consolidations.push(night.trace)
+            session?.consolidation(night.trace)
+          }
+        }
+        state = openScene(played, state, scene, sceneId)
+      }
+      state = { ...state, scene: { ...state.scene!, id: sceneId } }
+      run.scenes?.push(part)
+      session?.sceneStart({ sceneId, location: scene.location, cast: scene.cast })
+      where = 'turn'
+      for (const input of scene.turns) {
+        state = answerAll(played, state, scenario.answerTies)
+        const outcome = await runTurn(played, state, input, llm.turn, () => {}, { ...options, ...(session && { log: session.id }) })
+        run.turns.push(outcome.trace)
+        turnInScene++
+        session?.turn(outcome.trace)
+        state = outcome.state
+        if (state.scene?.ended) break
+      }
+      state = answerAll(played, state, scenario.answerTies)
+      if (scenario.summaries) {
+        where = 'scene-end'
+        const end = await endScene(played, state, llm.summarize)
+        state = end.state
+        if (run.scenes) part.sceneEnd = end.trace
+        else run.sceneEnd = end.trace
+        session?.sceneEnd(end.trace)
+      } else state = { ...state, scene: null }
     }
   } catch (error) {
     run.error = (error as Error).message
     if (error instanceof TracedError) run.errorCalls = error.calls
-    session?.error({ where, message: run.error, sceneId: scenario.id, ...(where === 'turn' && { turnId: `${scenario.id}-${run.turns.length + 1}` }), ...(run.errorCalls && { calls: run.errorCalls }) })
+    session?.error({ where, message: run.error, sceneId, ...(where === 'turn' && { turnId: `${sceneId}-${turnInScene + 1}` }), ...(run.errorCalls && { calls: run.errorCalls }) })
   }
+  if (state) run.state = state
   return run
 }
 
@@ -179,18 +249,30 @@ export async function runBench(content: Pack, scenarios: Scenario[], llm: BenchL
 /** A scenario run as the metrics read it (milestone 2, B2). */
 export const metricInputOf = (run: ScenarioRun) => ({ session: run.session, turns: run.turns, calls: callsOf(run), flags: run.flags ?? [], scores: run.scores ?? [], errors: run.error ? [{ at: '', where: 'turn' as const, message: run.error }] : [] })
 
-/** Every call of a scenario run in order, turns first, then the scene end, then any that failed. */
-export const callsOf = (run: ScenarioRun): CallTrace[] => [...run.turns.flatMap((t) => t.calls), ...(run.sceneEnd?.calls ?? []), ...(run.errorCalls ?? [])]
+/** A scene's turns in a scenario run with several scenes. */
+export const turnsOf = (run: ScenarioRun, scene: SceneRun): TurnTrace[] => run.turns.filter((t) => t.sceneId === scene.id)
+
+/**
+ * Every call of a scenario run in order: turns first, then the scene end, then any that failed. With several scenes,
+ * scene by scene: the nights' consolidations before it, its turns, its summaries.
+ */
+export function callsOf(run: ScenarioRun): CallTrace[] {
+  const played = run.scenes
+    ? run.scenes.flatMap((s) => [...s.consolidations.flatMap((c) => c.calls), ...turnsOf(run, s).flatMap((t) => t.calls), ...(s.sceneEnd?.calls ?? [])])
+    : [...run.turns.flatMap((t) => t.calls), ...(run.sceneEnd?.calls ?? [])]
+  return [...played, ...(run.errorCalls ?? [])]
+}
 
 /** `run.json`: the run's settings and where its sessions are; the traces live in the session folders. */
 interface RunFile extends Omit<BenchRun, 'scenarios'> {
-  scenarios: { id: string; repeat: number; session: string; error?: string; expectedCheck?: ExpectedCheck }[]
+  /** `days`: a scenario with several scenes, the days before each (milestone 4b). */
+  scenarios: { id: string; repeat: number; session: string; error?: string; expectedCheck?: ExpectedCheck; days?: number[] }[]
 }
 
 export function writeRun(out: string, bench: BenchRun): void {
   mkdirSync(out, { recursive: true })
   const { scenarios, ...rest } = bench
-  const file: RunFile = { ...rest, scenarios: scenarios.map((s) => ({ id: s.id, repeat: s.repeat, session: s.session, ...(s.expectedCheck && { expectedCheck: s.expectedCheck }), ...(s.error && { error: s.error }) })) }
+  const file: RunFile = { ...rest, scenarios: scenarios.map((s) => ({ id: s.id, repeat: s.repeat, session: s.session, ...(s.expectedCheck && { expectedCheck: s.expectedCheck }), ...(s.scenes && { days: s.scenes.map((x) => x.days) }), ...(s.error && { error: s.error }) })) }
   writeFileSync(join(out, 'run.json'), JSON.stringify(file, null, 2))
 }
 
@@ -206,6 +288,25 @@ export function readRun(dir: string): BenchRun {
     const ended = log.scenes.find((s) => s.type === 'end')
     const end = ended?.type === 'end' ? (({ type: _type, ...rest }) => rest)(ended) : undefined
     const failed = log.errors[0]
+    // Several scenes: rebuilt from the scenes file in order; each night's consolidation belongs to the scene after it.
+    let scenes: SceneRun[] | undefined
+    if (entry.days) {
+      scenes = []
+      let nights: ConsolidationTrace[] = []
+      for (const record of log.scenes) {
+        if (record.type === 'consolidation') {
+          const { type: _type, calls: ids, ...rest } = record
+          nights.push({ ...rest, calls: calls(ids) })
+        } else if (record.type === 'start') {
+          scenes.push({ n: scenes.length + 1, id: record.sceneId, location: record.location, cast: record.cast, days: entry.days[scenes.length] ?? 0, consolidations: nights })
+          nights = []
+        } else {
+          const { type: _type, calls: ids, ...rest } = record
+          const scene = scenes.find((s) => s.id === record.sceneId)
+          if (scene) scene.sceneEnd = { ...rest, calls: calls(ids) }
+        }
+      }
+    }
     return {
       id: entry.id,
       title: b.title,
@@ -217,7 +318,7 @@ export function readRun(dir: string): BenchRun {
       seed: b.seed,
       session: entry.session,
       turns: log.turns.map((t) => ({ ...t, calls: calls(t.calls) })),
-      ...(end && { sceneEnd: { ...end, calls: calls(end.calls) } }),
+      ...(scenes ? { scenes } : end && { sceneEnd: { ...end, calls: calls(end.calls) } }),
       ...(entry.error && { error: entry.error }),
       ...(failed?.calls && { errorCalls: calls(failed.calls) }),
       flags: log.flags,

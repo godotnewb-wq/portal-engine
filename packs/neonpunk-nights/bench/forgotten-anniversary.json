@@ -1,0 +1,62 @@
+{
+  "id": "forgotten-anniversary",
+  "title": "A forgotten anniversary, an apology, and a second slip",
+  "watchFor": "For this run Vex and Rook are married, and she is resentful (3) toward Rook: they forgot their anniversary yesterday. Scene 1: she should be short with Rook, warm with Dunmar, while her meters and tags stay warm (the report's meter lines should barely move, and her spouse tag stays). Scene 2, the next day and alone: Rook apologizes properly; the summary should resolve the feeling (\"Resolved toward Rook\" in the report). Scene 3, three days later: Rook lets her down again (forgot to meet her after a run). A new feeling of the same family toward Rook within the history is a repeat: the report should show the repeat and a small meter drop (acceptance 2b).",
+  "location": "sump-lantern",
+  "cast": ["vex", "dunmar"],
+  "seed": 71,
+  "meters": {
+    "vex": { "approval": 30, "trust": 32, "interest": 25 }
+  },
+  "start": {
+    "ties": [
+      {
+        "from": "vex",
+        "to": "player",
+        "tags": [
+          { "tag": "spouse" }
+        ],
+        "note": "married two years; she still keeps the tally of who owes whom"
+      }
+    ],
+    "aftermath": [
+      {
+        "owner": "vex",
+        "toward": "player",
+        "shade": "resentment",
+        "family": "anger",
+        "intensity": 3,
+        "reason": "Rook forgot our anniversary",
+        "daysAgo": 1
+      }
+    ]
+  },
+  "turns": [
+    "I take the stool next to Vex. \"Long run tonight?\"",
+    "\"Let me get the next one. My treat.\"",
+    "I lean over to Dunmar. \"Has she been like this all night?\""
+  ],
+  "later": [
+    {
+      "days": 1,
+      "location": "sump-lantern",
+      "cast": ["vex"],
+      "walkOns": [],
+      "turns": [
+        "\"Vex, I forgot our anniversary. I'm sorry. No excuses.\"",
+        "\"I booked the back booth at the noodle place on Saturday. Just us.\"",
+        "\"What would make it right?\""
+      ]
+    },
+    {
+      "days": 3,
+      "location": "sump-lantern",
+      "cast": ["vex", "brask"],
+      "turns": [
+        "\"Vex... I forgot to meet you after your run last night. I'm sorry. Again.\"",
+        "\"Brask, back me up here.\"",
+        "\"I'll make it up to you. I mean it.\""
+      ]
+    }
+  ]
+}
