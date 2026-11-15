@@ -2,9 +2,9 @@
 
 A game-agnostic engine for single-player LLM visual novel RPGs. The engine runs the gameplay: a director plans each turn, the game rolls the dice, a writer streams the prose as visual-novel beats, code checks catch what the LLM gets wrong, characters remember scenes and change how they feel, and games are saved. **Game packs** supply everything specific to one game: its ruleset, world, lore, characters, places, tone and art.
 
-The first pack is **Neonpunk Nights**, an adult visual novel RPG set in Spire City (`packs/neonpunk-nights`). `packs/test-fixture` is a tiny pack with a deliberately different ruleset that the engine's tests run against.
+The first pack is **Neonpunk Nights**, a mature (M-rated) visual novel RPG set in Spire City (`packs/neonpunk-nights`). `packs/test-fixture` is a tiny pack with a deliberately different ruleset that the engine's tests run against.
 
-Status: **Milestone 3 in progress**. The lore codex, prompt layers, and budget settings are implemented. Benchmark scenarios, lore reporting, and acceptance checks remain open. Continue Milestone 3 work on the designated `milestone-3.5` branch.
+Status: **Milestone 4b in progress** on the `milestone-4b` branch (2026-11-14). Milestones 1–3.6 and 4a are complete: the scene turn, the lore codex, full character cards, signed meters, relationship tags and director briefs. Milestone 4b has built felt vs. shown emotion, mood and aftermath across in-game days, relationship tags that change in play, and the Memory Bank (several memories per scene, fading, relevance recall, learned and dormant secrets, consolidation); its bench scenarios and model-backed testing remain. Saves are version 9; earlier saves are refused. Status and next steps are in `Developer Handoff.md` in the design docs folder.
 
 ## Running it
 
