@@ -348,8 +348,11 @@ export interface WitnessReport {
  *   secrets said on screen or found out by the player), the first memory is Core with that reason, outside the limits;
  * - Core the summary chose needs a why, at most the tier's `memory.core` of them, and the over-grading guard: nothing
  *   they felt in the scene reached `memory.guard`. Otherwise it is Normal, and the reason is noted;
- * - **upgrades**: an earlier memory of theirs the scene revisited goes up one level (Normal to Core only with a forced
- *   event or room in the Core limit), its fading clock restarts, and a faded one comes back into recall.
+ * - **upgrades**: an earlier memory of theirs the scene revisited has its fading clock restarted and comes back into
+ *   recall if it had faded; Fleeting becomes Normal. A revisit counts toward Core only when `memory.upgrade.apartDays`
+ *   have passed since the last that counted; on the `memory.upgrade.revisits`-th, Normal becomes Core if the scene's
+ *   Core limit has room, shared with the summary's own Core choices (tuned 2026-11-15, user). Promoted memories can
+ *   still be consolidated.
  */
 function makeMemories(content: Pack, state: GameState, c: Character, summary: Summary, all: Memory[], learned: string[]): { memories: Memory[]; mine: Memory[]; revisited: WitnessReport['revisited']; notes: string[]; heard: string[] } {
   const r = content.ruleset
@@ -400,17 +403,24 @@ function makeMemories(content: Pack, state: GameState, c: Character, summary: Su
     mine.push(made)
   }
   const revisited: WitnessReport['revisited'] = []
-  const UP = { fleeting: 'normal', normal: 'core', core: 'core' } as const
   for (const id of new Set(summary.revisited)) {
     const was = memories.find((m) => m.id === id && m.owner === c.id && m.at < state.time)
     if (!was) {
       notes.push(`revisited "${id}": not one of their earlier memories`)
       continue
     }
-    let level: Memory['level'] = UP[was.level]
-    if (was.level === 'normal' && !forced && chosen >= r.memory.core[c.tier]) level = 'normal'
-    else if (was.level === 'normal') chosen++
-    const next: Memory = { ...was, level, revisited: state.time, revisits: was.revisits + 1, fadeFrom: state.time, inRecall: true }
+    const U = r.memory.upgrade
+    const counts = daysSince(was.counted ?? was.at, state.time) >= U.apartDays
+    const revisits = was.revisits + (counts ? 1 : 0)
+    let level: Memory['level'] = was.level === 'fleeting' ? 'normal' : was.level
+    if (was.level === 'normal' && counts && revisits >= U.revisits) {
+      if (chosen < r.memory.core[c.tier]) {
+        level = 'core'
+        chosen++
+        notes.push(`${short(was.text)}: Core after ${revisits} revisits`)
+      } else notes.push(`${short(was.text)}: stays Normal after ${revisits} revisits (over the limit of ${r.memory.core[c.tier]})`)
+    }
+    const next: Memory = { ...was, level, revisited: state.time, revisits, ...(counts && { counted: state.time }), ...(level === 'core' && was.level === 'normal' && { promoted: true }), fadeFrom: state.time, inRecall: true }
     memories = memories.map((m) => (m === was ? next : m))
     revisited.push({ id, level })
   }

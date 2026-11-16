@@ -25,9 +25,15 @@ export const MemorySchema = z.object({
   place: z.string().optional(),
   /** Game time it was formed, in minutes since the start. */
   at: z.number().int(),
-  /** When a scene last came back to it, and how often scenes have. */
+  /**
+   * When a scene last came back to it, and how many revisits have counted toward an upgrade: one counts only when the
+   * ruleset's `memory.upgrade.apartDays` have passed since `counted`, the last that did (milestone 4b tuning).
+   */
   revisited: z.number().int().optional(),
   revisits: z.number().int().min(0).default(0),
+  counted: z.number().int().optional(),
+  /** Raised to Core by revisits, not made Core by the summary or an event: it can still be consolidated (milestone 4b tuning). */
+  promoted: z.boolean().optional(),
   /** When its fading clock last started: made, revisited, or stepped down a level. */
   fadeFrom: z.number().int(),
   /** Who was there, by id ("player" for the player): the people in the scene. Recall ranks by it. */

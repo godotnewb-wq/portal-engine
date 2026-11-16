@@ -30,6 +30,8 @@ describe('which memories merge', () => {
     expect(consolidationGroups(fixture, world(five)).map((g) => [g.owner, g.subject, g.memories.length])).toEqual([['mara', { kind: 'person', id: 'tobin' }, 5]])
     const notYet = (over: Partial<Memory>) => consolidationGroups(fixture, world([...five.slice(0, 4), mem(5, { about: ['player', 'tobin'], focus: ['tobin'], ...over })]))
     expect(notYet({ level: 'core' })).toEqual([])
+    // Raised to Core by revisits alone, it still merges (tuned 2026-11-15).
+    expect(notYet({ level: 'core', promoted: true })).toHaveLength(1)
     expect(notYet({ at: NOW - 13 * DAY })).toEqual([])
     expect(notYet({ inRecall: false })).toEqual([])
     expect(notYet({ from: ['mara.m9'] })).toEqual([])

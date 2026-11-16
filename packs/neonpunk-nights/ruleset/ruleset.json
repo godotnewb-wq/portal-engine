@@ -495,7 +495,8 @@
     "coreShare": 0.5,
     "fade": { "fleeting": 7, "normal": 30 },
     "guard": 3,
-    "consolidate": { "min": 5, "days": 14, "words": 60 }
+    "consolidate": { "min": 5, "days": 14, "words": 60 },
+    "upgrade": { "revisits": 3, "apartDays": 7 }
   },
   "pressures": ["background", "pressing", "urgent"],
   "narration": { "departure": "{name} leaves." },

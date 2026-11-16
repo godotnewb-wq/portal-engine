@@ -49,7 +49,8 @@ const key = (s: Subject) => `${s.kind}:${s.id}`
  */
 export function consolidationGroups(content: Pack, state: GameState): Group[] {
   const C = content.ruleset.memory.consolidate
-  const eligible = state.memories.filter((m) => m.level !== 'core' && m.inRecall && !m.from && !m.mergedInto && daysSince(m.at, state.time) >= C.days)
+  // Core memories never merge, except those raised to Core by revisits alone (`promoted`; tuned 2026-11-15).
+  const eligible = state.memories.filter((m) => (m.level !== 'core' || m.promoted) && m.inRecall && !m.from && !m.mergedInto && daysSince(m.at, state.time) >= C.days)
   const groups: Group[] = []
   for (const owner of [...new Set(eligible.map((m) => m.owner))]) {
     const used = new Set<string>()

@@ -97,17 +97,39 @@ describe('memories from a scene', () => {
     expect(next.memories.map((m) => [m.level, m.reason])).toEqual([['core', 'a secret of theirs came out'], ['normal', undefined]])
   })
 
-  it('upgrades a memory the scene revisited by one level, restarts its clock and brings a faded one back', () => {
+  it('restarts a revisited memory’s clock, brings a faded one back and makes a Fleeting one Normal', () => {
     const base = stirred()
     const old = [mem({ id: 'mara.m1', level: 'fleeting', inRecall: false, at: -5 * DAY }), mem({ id: 'mara.m2', at: -2 * DAY }), mem({ id: 'tobin.m1', owner: 'tobin', at: -1 })]
     const state = { ...base, memories: old }
     const { state: next, reports } = end(state, 'mara', { memories: [written('Again.')], revisited: ['mara.m1', 'mara.m2', 'tobin.m1', 'mara.m3'] })
     const m = (id: string) => next.memories.find((x) => x.id === id)!
-    expect([m('mara.m1').level, m('mara.m1').inRecall, m('mara.m1').revisits, m('mara.m1').fadeFrom]).toEqual(['normal', true, 1, state.time])
-    expect(m('mara.m2').level).toBe('core')
+    // Made 5 and 2 days ago: too soon for either revisit to count toward Core (memory.upgrade.apartDays, 7).
+    expect([m('mara.m1').level, m('mara.m1').inRecall, m('mara.m1').revisits, m('mara.m1').fadeFrom]).toEqual(['normal', true, 0, state.time])
+    expect([m('mara.m2').level, m('mara.m2').revisits, m('mara.m2').revisited]).toEqual(['normal', 0, state.time])
     expect(m('tobin.m1').revisits).toBe(0)
-    expect(reports[0]!.revisited).toEqual([{ id: 'mara.m1', level: 'normal' }, { id: 'mara.m2', level: 'core' }])
+    expect(reports[0]!.revisited).toEqual([{ id: 'mara.m1', level: 'normal' }, { id: 'mara.m2', level: 'normal' }])
     expect(reports[0]!.memoryNotes).toEqual(['revisited "tobin.m1": not one of their earlier memories', 'revisited "mara.m3": not one of their earlier memories'])
+  })
+
+  // Tuned 2026-11-15 (user): the bench's long run raised seven ordinary memories to Core, one revisit at a time.
+  it('raises a Normal memory to Core only on its third revisit a week or more apart, within the scene’s Core limit', () => {
+    const base = stirred()
+    const old = [
+      mem({ id: 'mara.m1', at: -30 * DAY, revisits: 2, counted: -10 * DAY }),
+      mem({ id: 'mara.m2', at: -30 * DAY, revisits: 2, counted: -3 * DAY }),
+      mem({ id: 'mara.m3', at: -30 * DAY, revisits: 1, counted: -20 * DAY })
+    ]
+    const { state: next, reports } = end({ ...base, memories: old }, 'mara', { memories: [written('Again.')], revisited: ['mara.m1', 'mara.m2', 'mara.m3'] })
+    const m = (id: string) => next.memories.find((x) => x.id === id)!
+    expect([m('mara.m1').level, m('mara.m1').revisits, m('mara.m1').counted, m('mara.m1').promoted]).toEqual(['core', 3, base.time, true])
+    // Revisited 3 days after the last that counted: the clock restarts, the count doesn't move.
+    expect([m('mara.m2').level, m('mara.m2').revisits, m('mara.m2').counted, m('mara.m2').fadeFrom]).toEqual(['normal', 2, -3 * DAY, base.time])
+    expect([m('mara.m3').level, m('mara.m3').revisits]).toEqual(['normal', 2])
+    expect(reports[0]!.memoryNotes).toContain('"mara.m1…": Core after 3 revisits')
+    // The summary's own Core choices share the limit (Mara is Major: 2); an upgrade past it waits for a later revisit.
+    const full = end({ ...base, memories: [old[0]!] }, 'mara', { memories: [written('It changed her.', 'core', 'she saw it'), written('So did this.', 'core', 'it mattered')], revisited: ['mara.m1'] })
+    expect(full.state.memories.find((x) => x.id === 'mara.m1')!.level).toBe('normal')
+    expect(full.reports[0]!.memoryNotes).toContain('"mara.m1…": stays Normal after 3 revisits (over the limit of 2)')
   })
 
   it('shows the summary its memories with ids, those recalled and those the scene brought in', () => {
