@@ -46,11 +46,14 @@ export function tieProblem(content: Pack, state: GameState, c: TieChange): strin
   const r = content.ruleset.ties
   const def = (id?: string) => r.tags.find((t) => t.id === id)
   if (!c.add && !c.end) return 'it adds and ends nothing'
+  // Ending a tag and adding it back changes nothing, so it isn't a story development (found by the end-of-Milestone-4
+  // bench: a wedding planned as "end fiancé, add fiancé" counted as a tie event and forced two Core memories).
+  if (c.add && c.add === c.end) return `it ends and adds "${c.add}", which changes nothing`
   if (c.add && !def(c.add)) return `no tag "${c.add}"`
   if (c.end && !def(c.end)) return `no tag "${c.end}"`
   const held = tagsToward(state, c.from, c.to)
   if (c.end && !held.some((t) => t.tag === c.end)) return `${c.from} doesn't hold "${c.end}" toward ${c.to}`
-  if (c.add && held.some((t) => t.tag === c.add) && c.add !== c.end) return `${c.from} already holds "${c.add}" toward ${c.to}`
+  if (c.add && held.some((t) => t.tag === c.add)) return `${c.from} already holds "${c.add}" toward ${c.to}`
   const mine = changed(content, held, c.add ? { tag: c.add } : undefined, c.end)
   if ('problem' in mine) return `${c.from} toward ${c.to}: ${mine.problem}`
   const back = c.to !== 'player' && c.add && !def(c.add)!.oneSided ? changed(content, tagsToward(state, c.to, c.from), { tag: def(c.add)!.counterpart }, c.end && !def(c.end)!.oneSided ? def(c.end)!.counterpart : undefined) : undefined

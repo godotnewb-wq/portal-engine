@@ -48,6 +48,12 @@ describe('tie changes', () => {
   it('refuse ending a tag not held or adding one already held, and leave a one-sided tag unmirrored', () => {
     expect(tieProblem(fixture, yardScene(), change({ from: 'mara', to: 'tobin', end: 'hand' }))).toBe('mara doesn\'t hold "hand" toward tobin')
     expect(tieProblem(fixture, yardScene(), change({ from: 'mara', to: 'tobin', add: 'foe' }))).toBe('mara already holds "foe" toward tobin')
+    // Ending a tag and adding it back is no development, even with a new word (the end-of-Milestone-4 bench's wedding).
+    expect(tieProblem(fixture, yardScene(), change({ from: 'mara', to: 'tobin', end: 'foe', add: 'foe', word: 'enemy' }))).toBe('it ends and adds "foe", which changes nothing')
+    const { plan: p, corrections, next } = turned(yardScene(), [{ from: 'mara', to: 'tobin', end: 'foe', add: 'foe', reason: 'nothing really' }])
+    expect(p.ties ?? []).toEqual([])
+    expect(corrections).toContain('dropped tie 1: it ends and adds "foe", which changes nothing')
+    expect(next.scene!.tieEvents).toEqual([])
     const grudge = applyTie(fixture, yardScene(), change({ from: 'tobin', to: 'mara', add: 'foe' })).state
     expect([tagsToward(grudge, 'tobin', 'mara'), tagsToward(grudge, 'mara', 'tobin')]).toEqual([[{ tag: 'foe' }], [{ tag: 'foe', word: 'rival' }]])
   })
