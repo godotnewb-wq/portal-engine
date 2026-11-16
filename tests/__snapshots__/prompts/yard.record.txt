@@ -1085,20 +1085,7 @@
       "doing": "tells Tobin to leave",
       "uncertain": false
     },
-    "change": "Tobin leaves the yard.",
-    "ties": [
-      {
-        "change": {
-          "from": "mara",
-          "to": "tobin",
-          "add": "hand",
-          "word": "apprentice",
-          "backWord": "master",
-          "reason": "she takes him on to keep him close"
-        },
-        "pending": false
-      }
-    ]
+    "change": "Tobin leaves the yard."
   },
   "checks": [],
   "lore": {
@@ -1341,19 +1328,7 @@
       "mara": 4,
       "tobin": 3
     },
-    "tieEvents": [
-      {
-        "from": "mara",
-        "to": "tobin",
-        "added": [
-          "hand"
-        ],
-        "ended": [],
-        "word": "apprentice",
-        "reason": "she takes him on to keep him close",
-        "turn": "scene-1200-4"
-      }
-    ]
+    "tieEvents": []
   }
 }
 
@@ -1493,7 +1468,7 @@
   },
   "brief": {
     "budget": 500,
-    "used": 36,
+    "used": 35,
     "selected": [
       {
         "id": "mara.motive1",
@@ -1509,13 +1484,13 @@
         "kind": "absent",
         "rank": "choice",
         "trigger": "named last turn: Tobin",
-        "tokens": 18
+        "tokens": 17
       }
     ],
     "cut": [],
     "dropped": [],
     "recurring": {
-      "mara": 209
+      "mara": 206
     },
     "memories": {}
   },
@@ -1636,20 +1611,42 @@
       "mara": 4,
       "tobin": 3
     },
-    "tieEvents": [
-      {
-        "from": "mara",
-        "to": "tobin",
-        "added": [
-          "hand"
-        ],
-        "ended": [],
-        "word": "apprentice",
-        "reason": "she takes him on to keep him close",
-        "turn": "scene-1200-4"
-      }
-    ]
+    "tieEvents": []
   }
+}
+
+===== relationship changes =====
+{
+  "sceneId": "scene-1200",
+  "at": "1970-01-01T00:00:00.000Z",
+  "callId": "scene-1200:ties",
+  "proposed": [
+    {
+      "turn": 4,
+      "from": "mara",
+      "to": "tobin",
+      "add": "hand",
+      "word": "apprentice",
+      "back_word": "master",
+      "reason": "she takes him on to keep him close"
+    }
+  ],
+  "applied": [
+    {
+      "from": "mara",
+      "to": "tobin",
+      "added": [
+        "hand"
+      ],
+      "ended": [],
+      "word": "apprentice",
+      "reason": "she takes him on to keep him close",
+      "turn": "scene-1200-4"
+    }
+  ],
+  "pending": [],
+  "refused": [],
+  "answered": []
 }
 
 ===== end of scene =====

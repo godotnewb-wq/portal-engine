@@ -118,10 +118,10 @@ describe('scenarios with several scenes', () => {
     expect(report).toMatch(/\| long-run-memories \| 18 \| 36 \|/)
   })
 
-  it('answers a tie change that needs the player’s agreement as the scenario says', async () => {
+  it('reads relationship changes at the end of each scene and answers one that needs the player’s agreement as the scenario says', async () => {
     const asking: BenchLlm = {
       ...mockLlm(),
-      turn: { ...mockLlm().turn, direct: async () => JSON.stringify({ speakers: [{ id: 'vex', intent: 'Say yes.' }], ties: [{ from: 'vex', to: 'player', add: 'partner', reason: 'they got together' }] }) }
+      summarize: async (p) => (p.system.startsWith('You read a finished scene') ? JSON.stringify({ ties: [{ turn: 1, from: 'vex', to: 'player', add: 'partner', reason: 'they got together' }] }) : mockLlm().summarize(p))
     }
     const yes = await runScenario(content, twoScenes({ later: [] }), asking)
     expect(yes.state!.playerTies['vex']!.tags.map((t) => t.tag)).toEqual(['friend', 'partner'])
@@ -161,13 +161,14 @@ describe('the 4b scenarios, as the game sets them up', () => {
   })
 
   it('wedding and breakup: the tag changes on both sides and the next scene’s sheet shows it (acceptance 4)', async () => {
-    const vows = (from: string, to: string, end: string, add: string): BenchLlm => ({
-      ...mockLlm(),
-      turn: {
-        ...mockLlm().turn,
-        direct: async (p) => (/you're married|don't make him guess/i.test(p.user.split('# The player says or does')[1] ?? '') ? JSON.stringify({ speakers: [{ id: from, intent: 'Answer.' }], ties: [{ from, to, end, add, reason: 'on screen' }] }) : '(no plan)')
+    // The tie check reads scene 1 and finds the change; nothing in scene 2.
+    const vows = (from: string, to: string, end: string, add: string): BenchLlm => {
+      let checks = 0
+      return {
+        ...mockLlm(),
+        summarize: async (p) => (p.system.startsWith('You read a finished scene') ? JSON.stringify({ ties: checks++ === 0 ? [{ from, to, end, add, reason: 'on screen' }] : [] }) : mockLlm().summarize(p))
       }
-    })
+    }
     const wedding = await runScenario(content, named('tie-wedding'), vows('kesh', 'teo-varrin', 'fiance', 'spouse'))
     expect(tagsToward(wedding.state!, 'kesh', 'teo-varrin').map((t) => t.tag)).toEqual(['spouse'])
     expect(tagsToward(wedding.state!, 'teo-varrin', 'kesh').map((t) => t.tag)).toEqual(['spouse'])

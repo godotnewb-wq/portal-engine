@@ -124,6 +124,7 @@ const api: RendererApi = {
     return { ok: true, state: outcome.state, beats: outcome.beats, checks: outcome.plan.checks.flatMap((c) => (c.line ? [c.line] : [])), calls: outcome.calls, corrections: outcome.corrections, rewrite: outcome.problems.map((p) => p.fix), details }
   },
   consolidate: async (state) => ({ ok: true, state, merged: 0 }),
+  sceneTies: async (state) => ({ ok: true, state }),
   sceneEnd: async (state) => {
     await wait(600)
     // Keyed by the first name each summary prompt opens with ("About Vex …").

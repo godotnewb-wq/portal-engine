@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { applyTie, needsAgreement, tagNamed, tieProblem, type GameState, type TieChange } from '@engine/state'
+import type { GameState } from '@engine/state'
 import { characterById, type Pack } from '@engine/pack'
 import { checkNames, entryById, knows, LORE_LINE_WORDS } from '@engine/codex'
 import { packNames } from './checks'
@@ -76,8 +76,7 @@ export const RawPlanSchema = z.object({
   texture: list(z.string()),
   avoid: list(z.string()),
   leaves: list(z.string()),
-  end_scene: z.boolean().catch(false),
-  ties: list(z.object({ from: z.string(), to: z.string(), add: text.optional(), end: text.optional(), word: text.optional(), back_word: text.optional(), reason: text }))
+  end_scene: z.boolean().catch(false)
 })
 export type RawPlan = z.infer<typeof RawPlanSchema>
 
@@ -237,47 +236,10 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan, inpu
 
   const exchange: ExchangeLine[] = moves.map((m) => ({ who: m.who, answers: m.answers, point: moveText(m) }))
   const loreLines = validateLore(content, state, raw, lore, speakers, fix)
-  const ties = validateTies(content, state, raw, fix)
   return {
-    plan: { ...plan, exchange, moves, player_action: raw.player_action, change: raw.change, ...(loreLines.length > 0 && { lore: loreLines }), ...(ties.length > 0 && { ties }) },
+    plan: { ...plan, exchange, moves, player_action: raw.player_action, change: raw.change, ...(loreLines.length > 0 && { lore: loreLines }) },
     corrections
   }
-}
-
-/**
- * The plan's tie changes (`set_tie`; relationships §3, decided 2026-11-13): who holds the tag must be here, toward
- * someone here or the player; tags by id or word; a tag ended must be held, one added not already held, and there must
- * be room (`tieProblem`). Each is checked as if the ones before it had happened. One the player must agree to (an
- * arrangement with the player) is pending: the game asks them. A failure is dropped as a correction. A word or counterpart
- * word that isn't one of the tag's words is left out.
- */
-function validateTies(content: Pack, state: GameState, raw: RawPlan, fix: (why: string) => void): NonNullable<BeatPlan['ties']> {
-  const scene = state.scene!
-  const out: NonNullable<BeatPlan['ties']> = []
-  let sim = state
-  raw.ties.forEach((t, i) => {
-    const n = i + 1
-    const from = presentId(content, scene, t.from)
-    const asked = normalize(t.to)
-    const to = asked === 'player' || asked === normalize(state.player.name) ? 'player' : presentId(content, scene, t.to)
-    if (!from) return fix(`dropped tie ${n}: "${t.from}" isn't here to hold a tag`)
-    if (!to || to === from) return fix(`dropped tie ${n}: "${t.to}" isn't someone here`)
-    const add = tagNamed(content, t.add)
-    const end = tagNamed(content, t.end)
-    if (t.add?.trim() && !add) return fix(`dropped tie ${n}: no tag "${t.add.trim()}"`)
-    if (t.end?.trim() && !end) return fix(`dropped tie ${n}: no tag "${t.end.trim()}"`)
-    const def = (id?: string) => content.ruleset.ties.tags.find((x) => x.id === id)
-    const wordOf = (id: string | undefined, w: string | undefined) => (id && w?.trim() && def(id)!.words.includes(w.trim()) ? w.trim() : undefined)
-    const word = wordOf(add, t.word ?? (t.add && add !== t.add.trim() ? t.add : undefined))
-    const backWord = wordOf(def(add)?.counterpart, t.back_word)
-    const change: TieChange = { from, to, ...(add && { add }), ...(word && { word }), ...(backWord && { backWord }), ...(end && { end }), reason: t.reason.trim() }
-    const problem = tieProblem(content, sim, change)
-    if (problem) return fix(`dropped tie ${n}: ${problem}`)
-    const pending = to === 'player' && !!add && needsAgreement(content, add)
-    if (!pending) sim = applyTie(content, sim, change).state
-    out.push({ change, pending })
-  })
-  return out
 }
 
 /**

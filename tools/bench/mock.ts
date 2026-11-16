@@ -20,6 +20,7 @@ export function mockLlm(): BenchLlm {
       }
     },
     summarize: async (prompt) => {
+      if (prompt.system.startsWith('You read a finished scene')) return JSON.stringify({ ties: [] })
       if (prompt.system.startsWith('You merge')) {
         const who = prompt.user.match(/^(\S+)'s memories/)?.[1] ?? 'Someone'
         return JSON.stringify({ text: `${who} remembers ${prompt.user.split('\n').length - 1} mock scenes as one.` })

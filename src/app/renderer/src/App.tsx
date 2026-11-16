@@ -2,7 +2,7 @@ import { useEffect, useRef, useState } from 'react'
 import type { GameState } from '@engine/state'
 import { locationById, type Pack } from '@engine/pack'
 import { seedFrom } from '@engine/core'
-import { createInitialState, startScene } from '@engine/state'
+import { answerTie, createInitialState, startScene, tieQuestion } from '@engine/state'
 import { nextDay, type WitnessReport } from '@engine/relationships'
 import { AUTO_SLOT_ID, latestSave, type SaveSummary } from '@engine/state'
 import { Button } from './ui/Button'
@@ -12,7 +12,7 @@ import { SceneView } from './ui/SceneView'
 import { Settings } from './ui/Settings'
 import { SummaryView } from './ui/SummaryView'
 
-type Screen = 'picker' | 'title' | 'settings' | 'scene' | 'ending' | 'night' | 'summary' | 'save' | 'load'
+type Screen = 'picker' | 'title' | 'settings' | 'scene' | 'ending' | 'ties' | 'night' | 'summary' | 'save' | 'load'
 
 /**
  * Owns which screen is showing, the chosen pack and the game state; main only runs turns and summaries on it, and
@@ -106,7 +106,11 @@ export function App() {
     enterScene(response.ok ? response.state : morning)
   }
 
-  /** Closing a scene where nothing was said needs no summaries; otherwise every witness writes theirs. */
+  /**
+   * Closing a scene where nothing was said needs no summaries. Otherwise the relationship changes are read from the
+   * scene first (milestone 4b); any the player must agree to are asked before the summaries, so memories match the
+   * answer; then every witness writes theirs. A failed tie check changes nothing, and the scene still ends.
+   */
   const endScene = async () => {
     if (!state?.scene) return
     if (state.scene.turns.length === 0) {
@@ -116,7 +120,27 @@ export function App() {
     }
     setScreen('ending')
     setError('')
-    const response = await window.api.sceneEnd(state)
+    const checked = await window.api.sceneTies(state)
+    if (!checked.ok) console.error('Tie check failed:', checked.error)
+    const next = checked.ok ? checked.state : state
+    setState(next)
+    if (next.scene && next.scene.pendingTies.length > 0) setScreen('ties')
+    else await summarize(next)
+  }
+
+  /** The player answers a relationship change waiting for them; once none are left, the summaries run. */
+  const answer = (accepted: boolean) => {
+    if (!content || !state?.scene) return
+    const next = answerTie(content, state, 0, accepted)
+    setState(next)
+    if (next.scene!.pendingTies.length === 0) {
+      setScreen('ending')
+      void summarize(next)
+    }
+  }
+
+  const summarize = async (game: GameState) => {
+    const response = await window.api.sceneEnd(game)
     if (response.ok) {
       setState(response.state)
       setReports(response.reports)
@@ -136,6 +160,22 @@ export function App() {
     return (
       <div className="screen title">
         <p className="tagline">The night passes…</p>
+      </div>
+    )
+  }
+  if (screen === 'ties' && content && state?.scene?.pendingTies[0]) {
+    return (
+      <div className="screen title">
+        <p className="tagline">Before you go…</p>
+        <p>{tieQuestion(content, state.scene.pendingTies[0])}</p>
+        <div className="menu">
+          <Button variant="primary" onClick={() => answer(true)}>
+            Yes
+          </Button>
+          <Button variant="ghost" onClick={() => answer(false)}>
+            No
+          </Button>
+        </div>
       </div>
     )
   }

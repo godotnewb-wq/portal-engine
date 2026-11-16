@@ -1,4 +1,4 @@
-import { applyTie, type Beat, type GameState, type RolledCheck, type TieEvent, type Turn } from '@engine/state'
+import type { Beat, GameState, RolledCheck, Turn } from '@engine/state'
 import type { Tags } from './beats'
 import { characterById, type Pack } from '@engine/pack'
 import { firstName } from '@engine/core'
@@ -185,34 +185,19 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
   }
   const tells = [...new Set([...scene.tells, ...written.plan.speakers.flatMap((s) => (s.tell && s.kept ? s.kept : []))])]
 
-  // Tie changes the story made this turn (relationships §3): applied now, except an arrangement with the player, which
-  // waits for the player's answer. The player's earlier answers have now reached the director, so they are cleared.
-  let tied: GameState = state
-  const events: TieEvent[] = []
-  for (const t of written.plan.ties ?? []) {
-    if (t.pending) continue
-    const applied = applyTie(content, tied, t.change, written.id)
-    tied = applied.state
-    events.push(applied.event)
-  }
-  const pending = (written.plan.ties ?? []).filter((t) => t.pending).map((t) => t.change)
-
   // When each held secret was last active (milestone 4b: dormancy); a keep counts over being shown or brought up.
-  const secretActivity = { ...tied.secretActivity }
+  const secretActivity = { ...state.secretActivity }
   const ORDER = ['kept', 'full', 'keyword', 'context'] as const
   for (const s of [...(written.secrets ?? []), ...kept.map((id) => ({ id, how: 'kept' as const }))].sort((a, b) => ORDER.indexOf(b.how) - ORDER.indexOf(a.how))) secretActivity[s.id] = { at: state.time, how: s.how }
 
   return {
-    ...tied,
+    ...state,
     secretActivity,
     time: state.time + MINUTES_PER_TURN,
     dice: written.dice,
     scene: {
       ...scene,
-      pendingTies: [...scene.pendingTies, ...pending],
       peaks,
-      answered: [],
-      tieEvents: [...scene.tieEvents, ...events],
       turns,
       summary,
       moods: { ...scene.moods, ...only(felt) },

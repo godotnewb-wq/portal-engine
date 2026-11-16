@@ -1,6 +1,6 @@
 import { firstName, type Prompt } from '@engine/core'
 import { shadeList, type Character } from '@engine/characters'
-import { tieWords, type GameState, type Turn } from '@engine/state'
+import type { GameState, Turn } from '@engine/state'
 import { type Ruleset } from '@engine/rules'
 import { characterById, locationById, type Pack } from '@engine/pack'
 import { recall } from '@engine/memory'
@@ -38,8 +38,7 @@ Return only this JSON object:
 ${loreLines > 0 ? '  "lore": [{"entry","who","line"}],\n' : ''}  "change": "...",
   "reactions": [{"id","beat","feels"}],
   "walk_ons": [{"id","line"}],
-  "texture": [], "avoid": [], "leaves": [], "end_scene": false,
-  "ties": [{"from","to","add","end","word","back_word","reason"}]
+  "texture": [], "avoid": [], "leaves": [], "end_scene": false
 }
 
 - The player leads. Start from what the player just said or did: move 1 answers it, in its own terms. A character's own aims come in after that, or in a later turn, unless something urgent cuts in.
@@ -64,7 +63,7 @@ ${loreLines > 0 ? `- lore: at most ${loreLines} facts of world lore the writer m
 - texture: at most one detail from the location, as a plain fact, or none.
 - Quiet characters are listed with what they care about: if the conversation touches it, they have something to say.
 - leaves: characters who walk out. end_scene: true only at a natural close.
-- ties: only when something on screen this turn makes a relationship fact begin or end (a wedding, a breakup, a hiring, a betrayal); never for feelings. Usually none. from: a character here. to: someone here, or "player". add: what to becomes for from; end: what to stops being for from. Both are tag ids: ${r.ties.tags.map((t) => `${t.id} (${t.words.join('/')})`).join(', ')}. word: the tag's word for to, when it has several; back_word: the same for from, on the other side. reason: what happened, in a few words. The other side changes with it. Example: when Ada marries Ben, from is ada and to is ben, end is their engagement tag and add their marriage tag, with the words for each side. A tie with the player that is an arrangement waits for the player's yes; a character can make the player a rival or enemy on their own.
+- Relationship tags (what people are to each other) change only after the scene, from what happened in it: play out a wedding, a breakup or a hiring, and never plan the tag change.
 - Never decide, say or do anything for the player.`
 
 /**
@@ -139,7 +138,6 @@ export function buildDirectorPrompt(content: Pack, state: GameState, input: stri
     quietOnes.length > 0 && `# Quiet for a while\n${quietOnes.join('\n')}`,
     lore.layers.triggered.text && `# Lore that has come up (background, not things to recite)\n${lore.layers.triggered.text}`,
     lore.layers.stances.length > 0 && `# Official stances between the factions here (individuals feel as their sheets say)\n${lore.layers.stances.join('\n')}`,
-    scene.answered.length > 0 && `# The player's answers since the last turn\n${scene.answered.map((a) => `- ${a.accepted ? 'Said yes' : 'Said no'}: ${tieWords(content, state, a)}.`).join('\n')}`,
     `# The player says or does\n${input}`,
     'Return the JSON plan.'
   ]

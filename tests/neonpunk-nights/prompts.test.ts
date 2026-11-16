@@ -92,8 +92,6 @@ NARRATION: Brask turns his glass in a slow circle. Kesh checks the time.
         { who: 'brask', answers: 1, move: 'warn', uses: ['brask.k5'], new: [] }
       ],
       change: 'The job has a deadline: midnight.',
-      // Oria hires the player: an arrangement with the player, so it waits for their answer (milestone 4b).
-      ties: [{ from: 'oria-senn', to: 'player', add: 'contractor', reason: 'she hires Rook for the pump job' }],
       reactions: [
         { id: 'vex', beat: 'counts something on her fingers' },
         { id: 'kesh', beat: 'stands to leave' }
@@ -124,7 +122,9 @@ const SUMMARIES = {
 describe('prompt snapshots: Neonpunk Nights', () => {
   it('the crowded bar scene sends the same prompts and decides the same things', async () => {
     const start = startScene(content, createInitialState(content, 11), 'sump-lantern', ['vex', 'brask', 'oria-senn', 'kesh'])
-    const played = await playScene(content, start, TURNS, SUMMARIES)
+    // Oria hires the player: an arrangement with the player, read from the scene and asked of them before the summaries.
+    const ties = { reply: { ties: [{ turn: 3, from: 'oria-senn', to: 'player', add: 'contractor', reason: 'she hires Rook for the pump job' }] }, answer: true }
+    const played = await playScene(content, start, TURNS, SUMMARIES, ties)
     await expect(played.prompts).toMatchFileSnapshot('./__snapshots__/prompts/bar.prompts.txt')
     await expect(played.record).toMatchFileSnapshot('./__snapshots__/prompts/bar.record.txt')
   })

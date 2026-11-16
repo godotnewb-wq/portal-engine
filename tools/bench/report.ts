@@ -1,5 +1,5 @@
 import type { Beat } from '@engine/state'
-import { parseConsolidation, type SceneEndTrace, type WitnessReport } from '@engine/relationships'
+import { parseConsolidation, type SceneEndTrace, type TieCheckTrace, type WitnessReport } from '@engine/relationships'
 import { feelingLabel, type Meters } from '@engine/characters'
 import type { Pack } from '@engine/pack'
 import { lineText, moodOf, planLines, type TurnTrace } from '@engine/scene'
@@ -27,7 +27,7 @@ const average = (xs: number[]) => (xs.length === 0 ? 0 : Math.round(xs.reduce((a
 /** The numbers that show at a glance whether a change made things better or worse. */
 export function stats(run: ScenarioRun) {
   // Turn calls only: summaries and consolidation run between scenes.
-  const turnCalls = callsOf(run).filter((c) => c.role !== 'summary' && c.role !== 'consolidation')
+  const turnCalls = callsOf(run).filter((c) => c.role !== 'summary' && c.role !== 'consolidation' && c.role !== 'ties')
   return {
     turns: run.turns.length,
     calls: turnCalls.length,
@@ -111,14 +111,14 @@ function scenarioSection(names: Names, run: ScenarioRun, repeats: boolean, budge
   if (missed) lines.push(`**${missed}**`, '')
   if (run.error) lines.push(`**Stopped:** ${run.error}`, '')
   if (!run.scenes) {
-    lines.push(...turnLines(names, run.location, run.turns, '###', budgets), ...afterLines(names, run.location, run.sceneEnd, '###'))
+    lines.push(...turnLines(names, run.location, run.turns, '###', budgets), ...tieLines(names, run.location, run.ties, run.sceneEnd, '###'), ...afterLines(names, run.location, run.sceneEnd, '###'))
     return lines.join('\n')
   }
   for (const s of run.scenes) {
     const name = (id: string) => names(s.location, id)
     const when = s.n === 1 ? '' : s.days === 0 ? ', the same evening' : `, ${s.days} day${s.days === 1 ? '' : 's'} later`
     lines.push(`### Scene ${s.n}: \`${s.location}\`${when}`, '', `Present: ${s.cast.map(name).join(', ')}.`, '')
-    lines.push(...nightLines(names, s), ...turnLines(names, s.location, turnsOf(run, s), '####', budgets), ...afterLines(names, s.location, s.sceneEnd, '####'))
+    lines.push(...nightLines(names, s), ...turnLines(names, s.location, turnsOf(run, s), '####', budgets), ...tieLines(names, s.location, s.ties, s.sceneEnd, '####'), ...afterLines(names, s.location, s.sceneEnd, '####'))
   }
   return lines.join('\n')
 }
@@ -134,6 +134,19 @@ function nightLines(names: Names, s: SceneRun): string[] {
     })
   )
   return groups.length > 0 ? ['Overnight, consolidation:', '', ...groups, ''] : []
+}
+
+/** The end-of-scene tie check (milestone 4b): what changed, what waited for the player and their answer, what was refused. */
+function tieLines(names: Names, location: string, ties: TieCheckTrace | undefined, end: SceneEndTrace | undefined, heading: string): string[] {
+  if (!ties) return []
+  const name = (id: string) => names(location, id)
+  const lines = [
+    ...ties.applied.map((e) => `- ${name(e.from)} → ${name(e.to)}: ${[...e.added.map((t) => `+${t}`), ...e.ended.map((t) => `−${t}`)].join(' ')}${e.word ? ` ("${e.word}")` : ''}${e.reason ? ` — ${e.reason}` : ''}`),
+    ...(end?.answered ?? []).map((a) => `- Asked the player: ${name(a.change.from)} → ${name(a.change.to)}${a.change.add ? ` +${a.change.add}` : ''}${a.change.end ? ` −${a.change.end}` : ''}: ${a.accepted ? 'yes' : 'no'}`),
+    ...ties.refused.map((x) => `- Refused ${x}`),
+    ...(ties.error ? [`- ⚠ tie check failed: ${ties.error}`] : [])
+  ]
+  return [`${heading} Relationship changes`, '', ...(lines.length > 0 ? lines : ['None.']), '']
 }
 
 /** A scene's turns as the report shows them. */

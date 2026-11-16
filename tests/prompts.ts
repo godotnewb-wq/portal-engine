@@ -2,7 +2,8 @@ import type { Prompt } from '@engine/core'
 import type { Pack } from '@engine/pack'
 import type { GameState } from '@engine/state'
 import { runTurn, type TurnLlm } from '@engine/scene'
-import { endScene, witnesses } from '@engine/relationships'
+import { checkTies, endScene, witnesses } from '@engine/relationships'
+import { answerTie } from '@engine/state'
 
 /**
  * Prompt snapshots (milestone 3.6, task 2): plays a scripted scene through the real turn pipeline and the end of the
@@ -30,7 +31,13 @@ const lf = (s: string) => s.replace(/\r\n?/g, '\n')
 const json = (value: unknown) => lf(JSON.stringify(value, null, 2))
 const promptText = (heading: string, p: Prompt) => `===== ${heading} =====\n----- system -----\n${lf(p.system)}\n----- user -----\n${lf(p.user)}\n`
 
-export async function playScene(content: Pack, start: GameState, turns: ScriptedTurn[], summaries: Record<string, object | string> = {}): Promise<PlayedScene> {
+/** The end-of-scene tie check's reply, and how the player answers any change that waits on them (milestone 4b). */
+export interface ScriptedTies {
+  reply: object | string
+  answer?: boolean
+}
+
+export async function playScene(content: Pack, start: GameState, turns: ScriptedTurn[], summaries: Record<string, object | string> = {}, ties: ScriptedTies = { reply: { ties: [] } }): Promise<PlayedScene> {
   const prompts: string[] = []
   const record: string[] = []
   let state = start
@@ -71,6 +78,20 @@ export async function playScene(content: Pack, start: GameState, turns: Scripted
       })}\n`
     )
   }
+  // The tie check reads the finished scene; changes waiting on the player are answered before the summaries.
+  const checked = await checkTies(
+    content,
+    state,
+    async (prompt) => {
+      prompts.push(promptText('ties', prompt))
+      return typeof ties.reply === 'string' ? ties.reply : JSON.stringify(ties.reply)
+    },
+    () => 0
+  )
+  state = checked.state
+  while (state.scene!.pendingTies.length > 0) state = answerTie(content, state, 0, ties.answer ?? true)
+  const { calls: _calls, ...tieRecord } = checked.trace
+  record.push(`===== relationship changes =====\n${json({ ...tieRecord, answered: state.scene!.answered })}\n`)
   // endScene asks for every witness's summary at once, in witness order, so the nth call is the nth witness.
   const order = witnesses(state)
   let asked = 0

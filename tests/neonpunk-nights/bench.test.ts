@@ -93,7 +93,7 @@ describe('runBench (acceptance 9: the bench runs its scenarios)', () => {
     const log = readSession(join(out, 'deception-caught-1'))
     expect(log.session).toMatchObject({ kind: 'bench', bench: { scenario: 'deception-caught', repeat: 1, forceNatural: 18 }, endedAt: expect.any(String) })
     expect(log.turns.map((t) => t.turnId)).toEqual(['deception-caught-1', 'deception-caught-2', 'deception-caught-3'])
-    expect(log.scenes.map((s) => s.type)).toEqual(['start', 'end'])
+    expect(log.scenes.map((s) => s.type)).toEqual(['start', 'ties', 'end'])
     const back = readRun(out)
     expect(renderReport(content, back)).toBe(renderReport(content, bench))
     expect(back.scenarios[0]!.turns[0]!.calls[0]!.prompt).toEqual(bench.scenarios[0]!.turns[0]!.calls[0]!.prompt)

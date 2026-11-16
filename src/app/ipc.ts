@@ -25,6 +25,7 @@ export const IPC = {
   testConnection: 'settings:test',
   sceneTurn: 'scene:turn',
   sceneEvent: 'scene:event',
+  sceneTies: 'scene:ties',
   sceneEnd: 'scene:end',
   consolidate: 'memories:consolidate',
   listSaves: 'saves:list',
@@ -72,6 +73,9 @@ export type SceneTurnResponse =
 export type SceneEvent = TurnEvent
 
 /** Consolidation's result: the new state, with any memories merged (milestone 4b). */
+/** The end-of-scene tie check: the state with relationship changes applied and any for the player waiting in `scene.pendingTies`. */
+export type SceneTiesResponse = { ok: true; state: GameState } | { ok: false; error: string }
+
 export type ConsolidateResponse = { ok: true; state: GameState; merged: number } | { ok: false; error: string }
 
 /** The scene's close: the new state (scene cleared) and what each witness took from it. */
@@ -103,6 +107,8 @@ export interface RendererApi {
   listModels(request: ListModelsRequest): Promise<ListModelsResponse>
   testConnection(profileId: LlmProfileId): Promise<TestConnectionResult>
   sceneTurn(request: SceneTurnRequest): Promise<SceneTurnResponse>
+  /** Before the summaries (milestone 4b): reads the scene for relationship tags that began or ended on screen. */
+  sceneTies(state: GameState): Promise<SceneTiesResponse>
   /** Runs the end-of-scene summaries, one per witness, in parallel. */
   sceneEnd(state: GameState): Promise<SceneEndResponse>
   /** After the daily upkeep, between scenes: merges older memories on one subject (memory §7), one background call per group. */

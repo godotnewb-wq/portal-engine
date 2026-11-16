@@ -7,8 +7,8 @@ import { playScene, type ScriptedTurn } from './prompts'
  * a move gated on it, a move gated on a check that doesn't exist, a fact planned for a move nobody voiced, a player
  * check, a rewrite, a salvaged rewrite whose dropped speaker left tags behind, a planned departure, an unplanned
  * LEAVES tag, the running summary once turns leave the verbatim window, and the end-of-scene summaries, with a
- * feeling toward someone and a general aftermath carried out of the scene, and a tie change on screen (Mara takes Tobin
- * on), mirrored on his side and making both memories Core; Tobin's secret coming out in front of Mara, which she learns
+ * feeling toward someone and a general aftermath carried out of the scene, and a tie change read from the scene at its
+ * end (Mara takes Tobin on), mirrored on his side and making both memories Core; Tobin's secret coming out in front of Mara, which she learns
  * (milestone 4b), and her memory tagged with a topic that came up (and one that didn't, dropped) and with who it is
  * about.
  */
@@ -112,8 +112,7 @@ Tobin: "Seven, counting Pell."
       texture: [],
       avoid: [],
       leaves: ['tobin'],
-      end_scene: false,
-      ties: [{ from: 'mara', to: 'tobin', add: 'hand', word: 'apprentice', back_word: 'master', reason: 'she takes him on to keep him close' }]
+      end_scene: false
     },
     writes: [
       `Tobin: "Yes. The horses need water anyway."
@@ -154,7 +153,8 @@ const SUMMARIES = {
 
 describe('prompt snapshots: test fixture', () => {
   it('the yard scene sends the same prompts and decides the same things', async () => {
-    const played = await playScene(fixture, yardScene(13), TURNS, SUMMARIES)
+    const ties = { reply: { ties: [{ turn: 4, from: 'mara', to: 'tobin', add: 'hand', word: 'apprentice', back_word: 'master', reason: 'she takes him on to keep him close' }] } }
+    const played = await playScene(fixture, yardScene(13), TURNS, SUMMARIES, ties)
     await expect(played.prompts).toMatchFileSnapshot('./__snapshots__/prompts/yard.prompts.txt')
     await expect(played.record).toMatchFileSnapshot('./__snapshots__/prompts/yard.record.txt')
   })

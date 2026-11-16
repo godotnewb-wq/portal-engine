@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import type { CheckResult, Difficulty, Ruleset, Skill } from '@engine/rules'
 import { feelingLabel, type Feeling } from '@engine/characters'
-import type { Scene, TieChange } from '@engine/state'
+import type { Scene } from '@engine/state'
 import { characterById, type Pack } from '@engine/pack'
 
 /**
@@ -130,8 +130,6 @@ export interface BeatPlan {
   checks: PlannedCheck[]
   /** Reading checks that succeeded this turn, once rolled (`settlePlan`). */
   reads?: Read[]
-  /** Relationship tag changes this turn (`set_tie`, milestone 4b); `pending`: an arrangement with the player, which waits for their answer. */
-  ties?: { change: TieChange; pending: boolean }[]
   walk_ons: { id: string; line: string }[]
   texture: string[]
   avoid: string[]

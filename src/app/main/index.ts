@@ -3,7 +3,7 @@ import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Pack } from '@engine/pack'
 import { TracedError } from '@engine/core'
-import { consolidate, endScene } from '@engine/relationships'
+import { checkTies, consolidate, endScene } from '@engine/relationships'
 import { runTurn } from '@engine/scene'
 import { FlagSchema } from '@engine/review'
 import { detailsOf, PlayLogs, roleModels, type FlagInput } from '@platform/logs'
@@ -20,6 +20,7 @@ import {
   type SaveResponse,
   type SceneEndResponse,
   type ConsolidateResponse,
+  type SceneTiesResponse,
   type SceneEvent,
   type SceneTurnResponse,
   type TestConnectionResult
@@ -195,6 +196,24 @@ app.whenReady().then(() => {
         logs.error('scene-end', (error as Error).message, { ...(state.scene && { sceneId: state.scene.id }), ...(error instanceof TracedError && { calls: error.calls }) })
         throw error
       }
+    } catch (error) {
+      return { ok: false, error: (error as Error).message }
+    } finally {
+      turning = false
+    }
+  })
+
+  // The end-of-scene tie check, before the summaries, with the summary model (relationships §3; milestone 4b). A failed
+  // call changes nothing and is logged; the scene still ends.
+  ipcMain.handle(IPC.sceneTies, async (_event, raw: unknown): Promise<SceneTiesResponse> => {
+    if (turning) return { ok: false, error: 'A turn is still running.' }
+    turning = true
+    try {
+      const { pack, logs } = current()
+      const state = GameStateSchema.parse(raw)
+      const { state: next, trace } = await checkTies(pack, state, summaryLlm(settings.get()))
+      if (trace.calls.length > 0) logs.ties(trace)
+      return { ok: true, state: next }
     } catch (error) {
       return { ok: false, error: (error as Error).message }
     } finally {

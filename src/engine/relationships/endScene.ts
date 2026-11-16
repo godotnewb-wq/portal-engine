@@ -1,4 +1,4 @@
-import type { GameState } from '@engine/state'
+import type { GameState, TieChange } from '@engine/state'
 import type { Pack } from '@engine/pack'
 import { traced, TracedError, type CallTrace, type LlmReply, type Prompt } from '@engine/core'
 import { applySummaries, buildSummaryPrompt, parseSummary, plainSummary, witnesses, type Summary, type WitnessReport } from './summary'
@@ -11,6 +11,8 @@ export interface SceneEndTrace {
   sceneId: string
   at: string
   witnesses: { id: string; callId: string; summary: Summary; error?: string; report?: WitnessReport }[]
+  /** The player's answers to relationship changes waiting on them (milestone 4b), asked before the summaries. */
+  answered?: { change: TieChange; accepted: boolean }[]
   calls: CallTrace[]
 }
 
@@ -50,6 +52,7 @@ export async function endScene(content: Pack, state: GameState, summarize: Summa
         const report = reports.find((r) => r.id === s.id)
         return { id: s.id, callId: `${scene.id}:summary:${s.id}`, summary: s.summary, ...(s.error && { error: s.error }), ...(report && { report }) }
       }),
+      ...(scene.answered.length > 0 && { answered: scene.answered.map(({ accepted, ...change }) => ({ change, accepted })) }),
       // Parallel calls finish in any order; the log reads better in witness order.
       calls: witnesses(state).flatMap((id) => calls.filter((c) => c.id === `${scene.id}:summary:${id}`))
     }

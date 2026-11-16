@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Pack } from '@engine/pack'
 import { TracedError, type CallTrace } from '@engine/core'
-import { consolidate, endScene, nextDay, type ConsolidationTrace, type SceneEndTrace, type Summarize } from '@engine/relationships'
+import { checkTies, consolidate, endScene, nextDay, type ConsolidationTrace, type SceneEndTrace, type Summarize, type TieCheckTrace } from '@engine/relationships'
 import { answerTie, GameStateSchema, type GameState } from '@engine/state'
 import { promptSources, runTurn, type TurnLlm, type TurnTrace } from '@engine/scene'
 import { callTrace, LogSession, promptVersion, readSession, type SessionRecord } from '@platform/logs'
@@ -27,6 +27,8 @@ export interface SceneRun {
   cast: string[]
   days: number
   consolidations: ConsolidationTrace[]
+  /** The end-of-scene tie check (milestone 4b), before the summaries. */
+  ties?: TieCheckTrace
   sceneEnd?: SceneEndTrace
 }
 
@@ -48,7 +50,8 @@ export interface ScenarioRun {
   session: string
   /** Every turn, across all its scenes. */
   turns: TurnTrace[]
-  /** A one-scene scenario's summaries; a scenario with several keeps each scene's under `scenes`. */
+  /** A one-scene scenario's tie check and summaries; a scenario with several keeps each scene's under `scenes`. */
+  ties?: TieCheckTrace
   sceneEnd?: SceneEndTrace
   /** A scenario with several scenes (milestone 4b): each one, in order. Absent for one scene. */
   scenes?: SceneRun[]
@@ -173,7 +176,6 @@ export async function runScenario(content: Pack, scenario: Scenario, llm: BenchL
       session?.sceneStart({ sceneId, location: scene.location, cast: scene.cast })
       where = 'turn'
       for (const input of scene.turns) {
-        state = answerAll(played, state, scenario.answerTies)
         const outcome = await runTurn(played, state, input, llm.turn, () => {}, { ...options, ...(session && { log: session.id }) })
         run.turns.push(outcome.trace)
         turnInScene++
@@ -181,9 +183,16 @@ export async function runScenario(content: Pack, scenario: Scenario, llm: BenchL
         state = outcome.state
         if (state.scene?.ended) break
       }
-      state = answerAll(played, state, scenario.answerTies)
       if (scenario.summaries) {
+        // As the app does: relationship changes read from the scene, the player's answers, then the summaries.
         where = 'scene-end'
+        const checked = await checkTies(played, state, llm.summarize)
+        state = answerAll(played, checked.state, scenario.answerTies)
+        if (checked.trace.calls.length > 0) {
+          if (run.scenes) part.ties = checked.trace
+          else run.ties = checked.trace
+          session?.ties(checked.trace)
+        }
         const end = await endScene(played, state, llm.summarize)
         state = end.state
         if (run.scenes) part.sceneEnd = end.trace
@@ -253,13 +262,13 @@ export const metricInputOf = (run: ScenarioRun) => ({ session: run.session, turn
 export const turnsOf = (run: ScenarioRun, scene: SceneRun): TurnTrace[] => run.turns.filter((t) => t.sceneId === scene.id)
 
 /**
- * Every call of a scenario run in order: turns first, then the scene end, then any that failed. With several scenes,
+ * Every call of a scenario run in order: turns first, then the scene end (the tie check, then the summaries), then any that failed. With several scenes,
  * scene by scene: the nights' consolidations before it, its turns, its summaries.
  */
 export function callsOf(run: ScenarioRun): CallTrace[] {
   const played = run.scenes
-    ? run.scenes.flatMap((s) => [...s.consolidations.flatMap((c) => c.calls), ...turnsOf(run, s).flatMap((t) => t.calls), ...(s.sceneEnd?.calls ?? [])])
-    : [...run.turns.flatMap((t) => t.calls), ...(run.sceneEnd?.calls ?? [])]
+    ? run.scenes.flatMap((s) => [...s.consolidations.flatMap((c) => c.calls), ...turnsOf(run, s).flatMap((t) => t.calls), ...(s.ties?.calls ?? []), ...(s.sceneEnd?.calls ?? [])])
+    : [...run.turns.flatMap((t) => t.calls), ...(run.ties?.calls ?? []), ...(run.sceneEnd?.calls ?? [])]
   return [...played, ...(run.errorCalls ?? [])]
 }
 
@@ -287,6 +296,8 @@ export function readRun(dir: string): BenchRun {
     const calls = (ids: string[]) => ids.flatMap((id) => callTrace(log, id) ?? [])
     const ended = log.scenes.find((s) => s.type === 'end')
     const end = ended?.type === 'end' ? (({ type: _type, ...rest }) => rest)(ended) : undefined
+    const tied = log.scenes.find((s) => s.type === 'ties')
+    const ties = tied?.type === 'ties' ? (({ type: _type, ...rest }) => rest)(tied) : undefined
     const failed = log.errors[0]
     // Several scenes: rebuilt from the scenes file in order; each night's consolidation belongs to the scene after it.
     let scenes: SceneRun[] | undefined
@@ -300,6 +311,10 @@ export function readRun(dir: string): BenchRun {
         } else if (record.type === 'start') {
           scenes.push({ n: scenes.length + 1, id: record.sceneId, location: record.location, cast: record.cast, days: entry.days[scenes.length] ?? 0, consolidations: nights })
           nights = []
+        } else if (record.type === 'ties') {
+          const { type: _type, calls: ids, ...rest } = record
+          const scene = scenes.find((s) => s.id === record.sceneId)
+          if (scene) scene.ties = { ...rest, calls: calls(ids) }
         } else {
           const { type: _type, calls: ids, ...rest } = record
           const scene = scenes.find((s) => s.id === record.sceneId)
@@ -318,7 +333,7 @@ export function readRun(dir: string): BenchRun {
       seed: b.seed,
       session: entry.session,
       turns: log.turns.map((t) => ({ ...t, calls: calls(t.calls) })),
-      ...(scenes ? { scenes } : end && { sceneEnd: { ...end, calls: calls(end.calls) } }),
+      ...(scenes ? { scenes } : { ...(ties && { ties: { ...ties, calls: calls(ties.calls) } }), ...(end && { sceneEnd: { ...end, calls: calls(end.calls) } }) }),
       ...(entry.error && { error: entry.error }),
       ...(failed?.calls && { errorCalls: calls(failed.calls) }),
       flags: log.flags,
