@@ -76,7 +76,7 @@ ${topics ? `- topics: for each memory, the ids of the topics that came up this s
 - reason: one short sentence on what moved ${me}, and which way.
 - learned: ids of ${me}'s own secrets that ${player} truly found out in this scene (said or plainly shown); [] if none.${others.length > 0 ? `\n- others: how ${me}'s feelings toward ${others.map((o) => `${firstName(o.name)} [${o.id}]`).join(', ')} changed in this scene, same words; leave someone out if nothing changed.` : '\n- others: [].'}
 - feels: how ${me} feels as the scene ends, when it isn't about one person: a shade from the list below, family only when the shade is listed under more than one, intensity 1 to 5, and why in a few words. Leave it out if nothing much.
-- toward: feelings this scene left ${me} with toward one person (who: ${[...others.map((o) => `"${o.id}"`), `or "player" for ${player}`].join(', ')}): what happened between them, not how ${me} feels about them overall, which the meters hold. A shade, intensity and why ("forgot our anniversary"). They pass in days. [] if none.
+- toward: feelings this scene left ${me} with toward one person (who: ${[...others.map((o) => `"${o.id}"`), `or "player" for ${player}`].join(', ')}): what happened between them, not how ${me} feels about them overall, which the meters hold. Only for something between them that will still be felt tomorrow, at intensity ${r.people.aftermath.towardMin} or more; a pleasant chat or a small slight is none. A shade, intensity and why ("forgot our anniversary"). They pass in days. Most scenes leave none: [].
 - resolved: the people (as ids) toward whom a feeling ${me} already carries was settled in this scene (an apology accepted, a fear put to rest); [] if none.
 - Shades by family (usual intensity): ${shadeList(r)}.`
 }

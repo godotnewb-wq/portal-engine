@@ -1952,20 +1952,11 @@
         "learned": [],
         "others": [],
         "carried": {
-          "toward": [
-            {
-              "toward": "player",
-              "feeling": {
-                "shade": "resentment",
-                "family": "anger",
-                "intensity": 2,
-                "reason": "Rook kept asking about the client"
-              },
-              "renewed": false
-            }
-          ],
+          "toward": [],
           "resolved": [],
-          "dropped": [],
+          "dropped": [
+            "toward player: \"resentment\" at 2 is below 3"
+          ],
           "aftermath": {
             "shade": "relief",
             "family": "joy",

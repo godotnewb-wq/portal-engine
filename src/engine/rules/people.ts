@@ -99,13 +99,16 @@ export const PeopleRulesSchema = z.object({
   /**
    * Aftermath (§7, milestone 4b; all *tune*): a feeling at scene end of at least `minIntensity`, or one with a Core
    * memory, lingers; it loses 1 intensity every `fadeDays` in-game days and ends at 0. A character carries at most `max`
-   * general aftermath entries and `towardMax` feelings toward any one person; one more replaces the weakest. **Repeats**:
-   * when a feeling toward someone comes back in a family that ended toward them within `historyDays`, the game adds
-   * `repeat[n − 1]` (n: how many ended before, capped at the list's end) to the meter `meters` maps the family to, in
-   * its direction (`sign`). A family with no meter moves none.
+   * general aftermath entries and `towardMax` feelings toward any one person; one more replaces the weakest. A feeling
+   * toward someone needs at least `towardMin` (tuned 2026-11-15, user: the summaries wrote mild ones in nearly every
+   * scene). **Repeats**: when a feeling toward someone comes back in a family that ended toward them within `historyDays`
+   * (faded or resolved; one pushed out by a newer feeling doesn't count), the game adds `repeat[n − 1]` (n: how many
+   * ended before, capped at the list's end) to the meter `meters` maps the family to. Repeats only lower a meter
+   * (`sign` −1): the summary already raises meters for good scenes. A family with no meter moves none.
    */
   aftermath: z.object({
     minIntensity: z.number().int().min(1).max(5),
+    towardMin: z.number().int().min(1).max(5),
     fadeDays: z.number().int().min(1),
     max: z.number().int().min(0),
     towardMax: z.number().int().min(0),
@@ -224,6 +227,7 @@ export function peopleProblems(p: PeopleRules, t: TiesRules, meters: string[], c
   for (const [f, m] of Object.entries(p.aftermath.meters)) {
     if (!families.includes(f)) problems.push(`aftermath.meters names unknown family "${f}"`)
     if (!meters.includes(m.meter)) problems.push(`aftermath.meters gives "${f}" the unknown meter "${m.meter}"`)
+    if (m.sign !== -1) problems.push(`aftermath.meters raises "${m.meter}" for "${f}"; repeats only lower a meter`)
   }
   for (const g of p.absence.tags) if (!t.tags.some((x) => x.id === g)) problems.push(`absence.tags names unknown tag "${g}"`)
   for (const level of p.masking.levels) if (!(level in p.reading.difficulty)) problems.push(`reading.difficulty has no word for masking "${level}"`)

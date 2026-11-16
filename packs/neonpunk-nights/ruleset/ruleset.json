@@ -290,6 +290,7 @@
     },
     "aftermath": {
       "minIntensity": 4,
+      "towardMin": 3,
       "fadeDays": 2,
       "max": 2,
       "towardMax": 2,
@@ -298,9 +299,7 @@
       "meters": {
         "anger": { "meter": "approval", "sign": -1 },
         "hurt": { "meter": "approval", "sign": -1 },
-        "fear": { "meter": "trust", "sign": -1 },
-        "affection": { "meter": "approval", "sign": 1 },
-        "gratitude": { "meter": "trust", "sign": 1 }
+        "fear": { "meter": "trust", "sign": -1 }
       }
     },
     "absence": { "family": true, "tags": ["partner", "lover", "fiance", "spouse", "friend", "old-friend"] },

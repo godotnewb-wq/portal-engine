@@ -7,7 +7,8 @@ import { playScene, type ScriptedTurn } from '../prompts'
  * Prompt snapshots on Neonpunk Nights (milestone 3.6, task 2): the Sump Lantern with four of the cast, so three speak
  * and one stays quiet. Covers a lie with a reading check, felt emotion that carries, shows as tells or breaks through,
  * and a reading check aimed at Brask whose difficulty the game sets from his masking (milestone 4b), a lore line, a secret shown as a cue then kept and expanded,
- * a second character keeping a secret, and the four end-of-scene summaries, with feelings toward someone and Brask's
+ * a second character keeping a secret, and the four end-of-scene summaries, with feelings toward someone (Oria's, at 2,
+ * below the minimum and dropped) and Brask's
  * panic carried out as aftermath; Brask's summary lists more memories than his tier keeps, and Vex's is in the shape
  * from before milestone 4b (milestone 4b).
  */

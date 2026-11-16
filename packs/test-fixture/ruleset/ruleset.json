@@ -105,6 +105,7 @@
     "reading": { "skill": "notice", "difficulty": { "bare": "routine", "thin": "tough", "thick": "grim" }, "harder": ["closed"] },
     "aftermath": {
       "minIntensity": 4,
+      "towardMin": 3,
       "fadeDays": 2,
       "max": 2,
       "towardMax": 2,

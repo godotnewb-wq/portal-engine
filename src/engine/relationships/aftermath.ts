@@ -146,14 +146,19 @@ export function applyCarried(
       report.dropped.push(`toward ${who}: ${f ?? 'no feeling'}`)
       continue
     }
+    if (f.intensity < A.towardMin) {
+      report.dropped.push(`toward ${who}: "${f.shade}" at ${f.intensity} is below ${A.towardMin}`)
+      continue
+    }
     const same = aftermath.find((a) => a.owner === owner && a.toward === who && a.family === f.family)
     if (same) {
       aftermath = aftermath.map((a) => (a === same ? entry(f, who) : a))
       report.toward.push({ toward: who, feeling: f, renewed: true })
       continue
     }
-    // A repeat: the same family came back toward the same person after an earlier one ended (npc design §7).
-    const count = endedFeelings.filter((e) => e.owner === owner && e.toward === who && e.family === f.family && now - e.at <= A.historyDays * 24 * 60).length
+    // A repeat: the same family came back toward the same person after an earlier one faded or was resolved (npc design
+    // §7). One pushed out by a newer feeling didn't end on its own, so it doesn't count (tuned 2026-11-15).
+    const count = endedFeelings.filter((e) => e.owner === owner && e.toward === who && e.family === f.family && e.how !== 'replaced' && now - e.at <= A.historyDays * 24 * 60).length
     const map = A.meters[f.family]
     let repeat: CarriedReport['toward'][number]['repeat']
     if (count > 0 && map) {

@@ -1393,7 +1393,7 @@ Reply with only a JSON object:
 - learned: ids of Mara's own secrets that Kit truly found out in this scene (said or plainly shown); [] if none.
 - others: how Mara's feelings toward Tobin [tobin] changed in this scene, same words; leave someone out if nothing changed.
 - feels: how Mara feels as the scene ends, when it isn't about one person: a shade from the list below, family only when the shade is listed under more than one, intensity 1 to 5, and why in a few words. Leave it out if nothing much.
-- toward: feelings this scene left Mara with toward one person (who: "tobin", or "player" for Kit): what happened between them, not how Mara feels about them overall, which the meters hold. A shade, intensity and why ("forgot our anniversary"). They pass in days. [] if none.
+- toward: feelings this scene left Mara with toward one person (who: "tobin", or "player" for Kit): what happened between them, not how Mara feels about them overall, which the meters hold. Only for something between them that will still be felt tomorrow, at intensity 3 or more; a pleasant chat or a small slight is none. A shade, intensity and why ("forgot our anniversary"). They pass in days. Most scenes leave none: [].
 - resolved: the people (as ids) toward whom a feeling Mara already carries was settled in this scene (an apology accepted, a fear put to rest); [] if none.
 - Shades by family (usual intensity): sad: glum 1–3, sore 2–4; mad: sore 2–4, livid 4–5; startled (in the moment only): jolted 1–2.
 ----- user -----
@@ -1455,7 +1455,7 @@ Reply with only a JSON object:
 - learned: ids of Tobin's own secrets that Kit truly found out in this scene (said or plainly shown); [] if none.
 - others: how Tobin's feelings toward Mara [mara] changed in this scene, same words; leave someone out if nothing changed.
 - feels: how Tobin feels as the scene ends, when it isn't about one person: a shade from the list below, family only when the shade is listed under more than one, intensity 1 to 5, and why in a few words. Leave it out if nothing much.
-- toward: feelings this scene left Tobin with toward one person (who: "mara", or "player" for Kit): what happened between them, not how Tobin feels about them overall, which the meters hold. A shade, intensity and why ("forgot our anniversary"). They pass in days. [] if none.
+- toward: feelings this scene left Tobin with toward one person (who: "mara", or "player" for Kit): what happened between them, not how Tobin feels about them overall, which the meters hold. Only for something between them that will still be felt tomorrow, at intensity 3 or more; a pleasant chat or a small slight is none. A shade, intensity and why ("forgot our anniversary"). They pass in days. Most scenes leave none: [].
 - resolved: the people (as ids) toward whom a feeling Tobin already carries was settled in this scene (an apology accepted, a fear put to rest); [] if none.
 - Shades by family (usual intensity): sad: glum 1–3, sore 2–4; mad: sore 2–4, livid 4–5; startled (in the moment only): jolted 1–2.
 ----- user -----

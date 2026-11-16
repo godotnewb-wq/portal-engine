@@ -1,6 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { dayOf, MINUTES_PER_DAY, startScene, type Aftermath, type GameState } from '@engine/state'
 import { buildBriefs } from '@engine/scene'
+import { rulesetProblems } from '@engine/rules'
 import { fixture, yardScene } from '@tests/fixture'
 import { dailyUpkeep, nextDay } from './aftermath'
 import { applySummaries, buildSummaryPrompt, parseSummary, plainSummary, type Summary } from './summary'
@@ -23,13 +24,22 @@ describe('what a summary leaves a witness carrying', () => {
 
   it('makes a feeling toward someone, with who by id, name or the player, and marks everyone there as having seen the player', () => {
     const state = yardScene()
-    const { state: next, reports } = end(state, summary(state, 'mara', { toward: [{ who: 'Tobin', shade: 'livid', intensity: 4, reason: 'he lied' }, { who: 'Kit', shade: 'glum', intensity: 2 }] }), summary(state, 'tobin'))
+    const { state: next, reports } = end(state, summary(state, 'mara', { toward: [{ who: 'Tobin', shade: 'livid', intensity: 4, reason: 'he lied' }, { who: 'Kit', shade: 'glum', intensity: 3 }] }), summary(state, 'tobin'))
     expect(next.aftermath).toEqual([
       { owner: 'mara', toward: 'tobin', shade: 'livid', family: 'mad', intensity: 4, reason: 'he lied', since: state.time, scene: state.scene!.id, fadedOn: dayOf(R, state.time) },
-      { owner: 'mara', toward: 'player', shade: 'glum', family: 'sad', intensity: 2, reason: '', since: state.time, scene: state.scene!.id, fadedOn: dayOf(R, state.time) }
+      { owner: 'mara', toward: 'player', shade: 'glum', family: 'sad', intensity: 3, reason: '', since: state.time, scene: state.scene!.id, fadedOn: dayOf(R, state.time) }
     ])
     expect(next.lastSeen).toEqual({ mara: state.time, tobin: state.time })
     expect(reports[0]!.carried!.toward.map((t) => t.toward)).toEqual(['tobin', 'player'])
+  })
+
+  // Tuned 2026-11-15 (user): the summaries wrote a mild feeling toward someone in nearly every scene.
+  it('refuses a feeling toward someone below the ruleset’s minimum', () => {
+    const state = yardScene()
+    const { state: next, reports } = end(state, summary(state, 'mara', { toward: [{ who: 'Kit', shade: 'glum', intensity: 2, reason: 'a small slight' }] }))
+    expect(next.aftermath).toEqual([])
+    expect(reports[0]!.carried!.dropped).toEqual([`toward player: "glum" at 2 is below ${R.people.aftermath.towardMin}`])
+    expect(buildSummaryPrompt(fixture, state, 'mara').system).toContain(`at intensity ${R.people.aftermath.towardMin} or more; a pleasant chat or a small slight is none`)
   })
 
   it('refuses a feeling toward themselves or nobody, a shade not listed, and surprise, which is felt in the moment only', () => {
@@ -101,6 +111,19 @@ describe('the repeat rule', () => {
     expect(once.reports[0]!.carried!.toward[0]!.repeat).toEqual({ count: 1, meter: 'warmth', change: -1 })
     // The ruleset's steps are 1, 2: from the second repeat on, 2.
     expect(end(history(state, 3), grievance(history(state, 3))).state.meters['mara']!['warmth']).toBe(state.meters['mara']!['warmth']! - 2)
+  })
+
+  it('doesn’t count a feeling pushed out by a newer one, which didn’t end on its own', () => {
+    const state = yardScene()
+    const pushed = { ...state, endedFeelings: [{ owner: 'mara', toward: 'player', family: 'mad', at: state.time - DAY, how: 'replaced' as const }] }
+    const next = end(pushed, grievance(pushed))
+    expect(next.state.meters['mara']).toEqual(state.meters['mara'])
+    expect(next.reports[0]!.carried!.toward[0]!.repeat).toBeUndefined()
+  })
+
+  it('only lowers a meter: a ruleset that would raise one for a repeat is a problem', () => {
+    const raising = { ...R.people.aftermath, meters: { ...R.people.aftermath.meters, sad: { meter: 'bond', sign: 1 as const } } }
+    expect(rulesetProblems({ ...R, people: { ...R.people, aftermath: raising } })).toContain('aftermath.meters raises "bond" for "sad"; repeats only lower a meter')
   })
 
   it('forgets what ended before the history window, and moves a relation for a feeling toward another character', () => {
