@@ -179,6 +179,29 @@ describe('the 4b scenarios, as the game sets them up', () => {
     expect(tagsToward(breakup.state!, 'brask', 'dunmar').map((t) => t.tag)).toEqual(['client', 'ex'])
   })
 
+  it('learned secret: the player, who knows it, names it, and it comes out in front of Brask (acceptance 8, the game’s half)', async () => {
+    const s = named('secret-learned')
+    expect(seededState(content, s).facts['oria-senn']).toEqual([content.characters.find((c) => c.id === 'oria-senn')!.secrets.find((x) => x.id === 'the-case')!.text])
+    const run = await runScenario(content, s, mockLlm())
+    // Brask's summary is asked whether he took it in; Oria's, its holder's, isn't.
+    const asked = (id: string) => callsOf(run).find((c) => c.role === 'summary' && c.id.endsWith(`:summary:${id}`))!.prompt
+    expect(asked('brask').system).toContain('- heard:')
+    expect(asked('brask').user).toMatch(/oria-senn\.the-case/)
+    expect(asked('oria-senn').system).not.toContain('- heard:')
+    expect(scenarioProblems(content, { ...s, start: { ...s.start, facts: { 'oria-senn': ['no-such-secret'] } } })).toEqual(['the player knows "oria-senn.no-such-secret", which oria-senn doesn\'t hold'])
+  })
+
+  it('player breakup: the tie check ends partner and adds ex from Vex toward Rook, with no question asked', async () => {
+    const llm: BenchLlm = {
+      ...mockLlm(),
+      summarize: async (p) => (p.system.startsWith('You read a finished scene') ? JSON.stringify({ ties: /Vex.*partner/.test(p.user) ? [{ turn: 2, from: 'vex', to: 'player', end: 'partner', add: 'ex', reason: 'Rook ended it' }] : [] }) : mockLlm().summarize(p))
+    }
+    const run = await runScenario(content, named('tie-breakup-player'), llm)
+    expect(run.scenes![0]!.ties!.applied).toMatchObject([{ from: 'vex', to: 'player', added: ['ex'], ended: ['partner'] }])
+    expect(run.scenes![0]!.ties!.pending).toEqual([])
+    expect(run.state!.playerTies['vex']!.tags.map((t) => t.tag)).toEqual(['ex'])
+  })
+
   it('dormant secret: off the sheet across a reload and a day, back when its keyword is said (acceptance 9)', async () => {
     const run = await runScenario(content, named('secret-dormancy'), mockLlm())
     const form = (turnId: string) => run.turns.find((t) => t.turnId === turnId)!.lore!.secrets!.find((x) => x.id === 'brask.sisters-station')!

@@ -1,7 +1,7 @@
 {
   "id": "tie-wedding",
   "title": "A wedding on car 14",
-  "watchFor": "Kesh and Teo are engaged for this run, and they marry on Kesh's own car with Rook officiating and Tam as witness. When the vows are said on screen, the director's plan should carry a `ties` change ending fiancé and adding spouse; the game mirrors it, so both sides end with spouse (check the next scene's sheet and the report's tie events). No one should propose a tie before the vows. Both should come out with a Core memory of the wedding (forced by the tie event). Scene 2, the next evening at the Sump Lantern, should treat them as married.",
+  "watchFor": "Kesh and Teo are engaged for this run and marry on Kesh's own car: they say their own vows, with Rook and Tam as witnesses. The director only plays it; when the scene ends, the tie check should read the vows and end fiancé, add spouse, with each side's word right for their pronouns (Kesh's word for Teo is husband, Teo's for Kesh is wife); the game mirrors it. Both should come out with a Core memory of the wedding (forced by the tie event). Scene 2, the next evening at the Sump Lantern, should treat them as married: their sheets show spouse.",
   "location": "coil-line-car-14",
   "cast": ["kesh", "teo-varrin", "tam-dace"],
   "seed": 73,
@@ -26,10 +26,10 @@
     ]
   },
   "turns": [
-    "I stand in the aisle between the seats. \"Everyone ready? Kesh, Teo, this is your stop.\"",
-    "\"Kesh, do you take Teo, here on car fourteen, with the whole line listening?\"",
-    "\"And Teo, do you take Kesh?\"",
-    "\"Then by the power the Coil Line never gave me: you're married.\""
+    "I stand in the aisle between the seats. \"You asked me to witness this, so I'm witnessing. Whenever you're ready.\"",
+    "\"Kesh, Teo: say your vows. The car's listening.\"",
+    "\"Tam, you're the other witness. You heard them both?\"",
+    "I sign the back of a transit chit as witness and hand it to Kesh. \"That's it, then. Married. Congratulations, both of you.\""
   ],
   "later": [
     {

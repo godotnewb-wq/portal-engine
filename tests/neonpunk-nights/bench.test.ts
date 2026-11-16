@@ -41,6 +41,7 @@ describe('the shipped scenarios', () => {
       'siblings-on-the-car',
       'tense-negotiation',
       'three-way-argument',
+      'tie-breakup-player',
       'tie-breakup',
       'tie-wedding',
       'tram-attempt',

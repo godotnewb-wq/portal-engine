@@ -1,0 +1,37 @@
+{
+  "id": "tie-breakup-player",
+  "title": "Rook ends it with Vex",
+  "watchFor": "For this run Vex and Rook are partners. Rook breaks up with her after closing, plainly and on screen, so whether it happens doesn't depend on the director. The scene should let Vex react in her own way (sarcastic, quiet, or steady), not talk Rook out of it. When the scene ends, the tie check should end partner and add ex from Vex toward the player (ending needs no yes from the player; ex isn't an arrangement). Vex should carry a feeling toward Rook out of it and a Core memory (forced by the tie event). Two days later, with Brask there, her sheet should say ex, and the talk should be awkward.",
+  "location": "sump-lantern",
+  "cast": ["vex"],
+  "walkOns": [],
+  "seed": 101,
+  "meters": {
+    "vex": { "approval": 25, "trust": 30, "interest": 25 }
+  },
+  "start": {
+    "ties": [
+      {
+        "from": "vex",
+        "to": "player",
+        "tags": [
+          { "tag": "partner" }
+        ],
+        "note": "together since the winter; she still keeps the tally"
+      }
+    ]
+  },
+  "turns": [
+    "The chairs are up and Dunmar's gone. \"Vex, we need to talk. I don't think we should keep doing this.\"",
+    "\"I'm ending it. I'm sorry. You deserve someone who shows up.\"",
+    "\"We can still run jobs together, if you want. But we're done.\""
+  ],
+  "later": [
+    {
+      "days": 2,
+      "location": "sump-lantern",
+      "cast": ["vex", "brask"],
+      "turns": ["\"Evening, Vex. Brask.\"", "\"Brask, did she tell you?\""]
+    }
+  ]
+}

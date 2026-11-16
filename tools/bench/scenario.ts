@@ -33,7 +33,9 @@ export const StartSchema = z
     /** Secrets added to a character's card for this run, after their own (e.g. to hold more than the sheet shows, for dormancy). */
     secrets: z.record(IdSchema, z.array(SecretSchema)).default({}),
     /** When each character last saw the player, in days before the first scene. */
-    lastSeen: z.record(IdSchema, z.number().int().min(0)).default({})
+    lastSeen: z.record(IdSchema, z.number().int().min(0)).default({}),
+    /** Secrets the player already knows, by holder and secret id (the card's or one added above), as if learned in play. */
+    facts: z.record(IdSchema, z.array(IdSchema)).default({})
   })
   .prefault({})
 export type ScenarioStart = z.infer<typeof StartSchema>
@@ -176,6 +178,10 @@ function startProblems(content: Pack, start: ScenarioStart): string[] {
     for (const s of secrets) if (s.codex && !entryById(content.codex, s.codex)) problems.push(`${id}'s secret "${s.id}" points to unknown codex entry "${s.codex}"`)
   }
   for (const id of Object.keys(start.lastSeen)) if (!known(id)) problems.push(`last seen names unknown character "${id}"`)
+  for (const [id, ids] of Object.entries(start.facts)) {
+    const held = [...(characterById(content, id)?.secrets ?? []), ...(start.secrets[id] ?? [])].map((s) => s.id)
+    for (const s of ids) if (!held.includes(s)) problems.push(`the player knows "${id}.${s}", which ${known(id) ? `${id} doesn't hold` : 'no one holds'}`)
+  }
   return problems
 }
 
@@ -233,9 +239,15 @@ export function seededState(content: Pack, scenario: Scenario): GameState {
     memories.push({ id: memoryId(memories, m.owner), owner: m.owner, text: m.text, level: m.level, ...(m.reason && { reason: m.reason }), ...(m.place && { place: m.place }), at, revisits: 0, fadeFrom: at, about: m.about, focus: m.focus, inRecall: true, topics: m.topics })
   }
 
+  const cards = scenarioContent(content, scenario)
+  const facts = Object.fromEntries(Object.entries(s.facts).map(([id, ids]) => {
+    const secrets = characterById(cards, id)?.secrets ?? []
+    return [id, ids.flatMap((x) => secrets.filter((y) => y.id === x).map((y) => y.text))]
+  }))
   return {
     ...fresh,
     time,
+    facts,
     meters: { ...fresh.meters, ...scenario.meters },
     relations,
     playerTies,

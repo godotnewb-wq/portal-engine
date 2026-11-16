@@ -1,7 +1,7 @@
 {
   "id": "tie-breakup",
   "title": "A breakup at the bar",
-  "watchFor": "For this run Brask and Dunmar are together, and Dunmar is frustrated (3) with Brask, who keeps choosing the Saints' pump job over their nights. In scene 1 Dunmar should end it on screen, in his own guarded way; when he does, the plan should carry a `ties` change ending partner and adding ex, mirrored to both sides. Their work tags (client and contractor) stay. Nobody else's tags change. Scene 2, two days later, they are exes: the sheet should say so, and the talk should be awkward, not a reunion.",
+  "watchFor": "For this run Brask and Dunmar are together, and Dunmar has decided to end it tonight (seeded: resentment 4 toward Brask, and a memory of telling Rook so this afternoon). In scene 1 Dunmar should end it on screen, in his own guarded way. The director only plays it; when the scene ends, the tie check should read it and end partner, add ex, mirrored to both sides. Their work tags (client and contractor) stay. Nobody else's tags change. Scene 2, two days later, they are exes: the sheet should say so, and the talk should be awkward, not a reunion.",
   "location": "sump-lantern",
   "cast": ["brask", "dunmar", "vex"],
   "seed": 79,
@@ -30,16 +30,27 @@
       {
         "owner": "dunmar",
         "toward": "brask",
-        "shade": "frustration",
-        "intensity": 3,
-        "reason": "he chose the Saints' pump job over their night again",
+        "shade": "resentment",
+        "family": "anger",
+        "intensity": 4,
+        "reason": "he chose the Saints' pump job over them once too often, and Dunmar has decided to end it tonight",
         "daysAgo": 1
+      }
+    ],
+    "memories": [
+      {
+        "owner": "dunmar",
+        "text": "This afternoon Dunmar told Rook he was ending it with Brask tonight, before he lost his nerve.",
+        "level": "normal",
+        "about": ["player", "brask"],
+        "focus": ["player", "brask"],
+        "daysAgo": 0
       }
     ]
   },
   "turns": [
     "I look from Brask to Dunmar. \"You two have been quiet all night. What's going on?\"",
-    "\"Dunmar, if you've got something to say to him, say it. Don't make him guess.\"",
+    "\"Dunmar, you told me this afternoon you'd made up your mind. Tell him, not me.\"",
     "I put a hand on Brask's shoulder. \"Are you all right?\""
   ],
   "later": [

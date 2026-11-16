@@ -34,6 +34,20 @@ describe('a secret coming out on screen', () => {
     expect(exposures(fixture, yardScene().scene!, { plan: keeping('mara'), beats: [] })).toEqual([{ secret: 'tobin.after-closing', to: ['mara'] }])
     expect(exposures(fixture, yardScene().scene!, { plan: keeping('player'), beats: [] })).toEqual([])
   })
+
+  // Decided 2026-11-15 (user), after the bench: the player named a secret to its holder's face, and no one could learn it.
+  it('comes out when the player says it by its keywords, but only a secret the player knows', () => {
+    const keyed: Pack = { ...fixture, characters: fixture.characters.map((c) => (c.id === 'tobin' ? { ...c, secrets: c.secrets.map((s) => ({ ...s, keywords: ['after closing'] })) } : c)) }
+    const quiet = { plan: plan({ speakers: [{ id: 'mara', goal: 'listen' }], moves: [{ who: 'mara', answers: 'player', move: 'answer' }] }), beats: [] }
+    const text = keyed.characters.find((c) => c.id === 'tobin')!.secrets[0]!.text
+    const knowing = { ...yardScene(), facts: { tobin: [text] } }
+    const input = 'Mara, Tobin let someone in after closing.'
+    expect(exposures(keyed, knowing.scene!, quiet, { state: knowing, input })).toEqual([{ secret: 'tobin.after-closing', to: ['mara'] }])
+    // A guess: the player never learned it, so it doesn't spread.
+    expect(exposures(keyed, yardScene().scene!, quiet, { state: yardScene(), input })).toEqual([])
+    // Said but not by its keywords.
+    expect(exposures(keyed, knowing.scene!, quiet, { state: knowing, input: 'Mara, ask Tobin about last night.' })).toEqual([])
+  })
 })
 
 describe('learning a secret', () => {

@@ -1,6 +1,7 @@
 import type { Beat, GameState, RolledCheck, Turn } from '@engine/state'
 import type { Tags } from './beats'
 import { characterById, type Pack } from '@engine/pack'
+import { entryById, mentions } from '@engine/codex'
 import { firstName } from '@engine/core'
 import { RECENT_TURNS, turnText } from './director'
 import { presentCast, type BeatPlan } from './planShape'
@@ -99,9 +100,12 @@ export function showDepartures(content: Pack, plan: BeatPlan, beats: Beat[]): { 
 /**
  * Secrets that came out on screen this turn, and who they came out in front of (milestone 4b; decided 2026-11-13): a
  * move whose speaker had a line used one, in front of everyone present but its holder; or a reading check saw through
- * someone keeping one, for the reader (the player keeps no memories, so a player's read records nothing).
+ * someone keeping one, for the reader (the player keeps no memories, so a player's read records nothing). Given the
+ * state and the player's words, also a secret the player knows (learned, or said on screen) that their words bring up
+ * by its keywords, in front of everyone present but its holder (decided 2026-11-15, user: you can only spread what you
+ * know). Whether a listener took it in is the summary's call, as for the others.
  */
-export function exposures(content: Pack, scene: NonNullable<GameState['scene']>, written: Pick<TurnWritten, 'plan' | 'beats'>): NonNullable<Turn['exposed']> {
+export function exposures(content: Pack, scene: NonNullable<GameState['scene']>, written: Pick<TurnWritten, 'plan' | 'beats'>, player?: { state: GameState; input: string }): NonNullable<Turn['exposed']> {
   const present = presentCast(scene)
   const holderOf = (id: string) => {
     const dot = id.indexOf('.')
@@ -121,6 +125,19 @@ export function exposures(content: Pack, scene: NonNullable<GameState['scene']>,
   for (const read of written.plan.reads ?? []) {
     if (read.by === 'player') continue
     for (const id of written.plan.speakers.find((x) => x.id === read.target)?.kept ?? []) add(id, [read.by])
+  }
+  if (player) {
+    for (const id of present) {
+      const c = characterById(content, id)
+      for (const s of c?.secrets ?? []) {
+        const secret = `${id}.${s.id}`
+        const entry = s.codex ? entryById(content.codex, s.codex) : undefined
+        const keywords = entry ? entry.keywords : (s.keywords ?? [])
+        if (!keywords.some((k) => mentions(player.input, k))) continue
+        const knows = (player.state.facts[id] ?? []).includes(s.text) || !!player.state.scene?.told.includes(secret)
+        if (knows) add(secret, present.filter((x) => x !== id))
+      }
+    }
   }
   return [...out].flatMap(([secret, to]) => (to.size > 0 ? [{ secret, to: [...to] }] : []))
 }
@@ -150,7 +167,7 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
   if (written.details && written.details.length > 0) turn.details = written.details
   if (written.plan.reads && written.plan.reads.length > 0) turn.reads = written.plan.reads
   if (written.memories && written.memories.length > 0) turn.memories = written.memories
-  const exposed = exposures(content, scene, written)
+  const exposed = exposures(content, scene, written, { state, input: written.input })
   if (exposed.length > 0) turn.exposed = exposed
   const topics = [...new Set([...(written.topics ?? []), ...exposed.map((e) => e.secret)])]
   if (topics.length > 0) turn.topics = topics
