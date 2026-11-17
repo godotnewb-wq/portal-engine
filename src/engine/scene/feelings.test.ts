@@ -153,6 +153,16 @@ describe('reading through the mask', () => {
     expect(silent.scene!.moods).toEqual(state.scene!.moods)
   })
 
+  it('lets a feeling ease at most one step a turn within its family; a new family or a rise is free (decided 2026-11-16)', () => {
+    const state = withScene(yardScene(), { moods: { ...yardScene().scene!.moods, tobin: felt('sore', 5, 'mad') } })
+    const plan = (feels: object) => validatePlan(fixture, state, reading([], { speakers: [{ id: 'tobin', goal: 'x', feels }] }), ASK)
+    const eased = plan({ shade: 'sore', family: 'mad', intensity: 2 })
+    expect(eased.plan.speakers[0]!.feels!.intensity).toBe(4)
+    expect(eased.corrections).toContain('tobin\'s mad eases at most 1 a turn: 4, not 2')
+    expect(plan({ shade: 'sore', family: 'mad', intensity: 4 }).plan.speakers[0]!.feels!.intensity).toBe(4)
+    expect(plan({ shade: 'glum', family: 'sad', intensity: 1 }).plan.speakers[0]!.feels!.intensity).toBe(1)
+  })
+
   it('refuses a feeling not in the ruleset with a correction, and the one from before carries', () => {
     const { plan, corrections } = validatePlan(fixture, yardScene(), reading([], { speakers: [{ id: 'tobin', goal: 'x', feels: { shade: 'livid', family: 'sad', intensity: 4 } }] }), ASK)
     expect(plan.speakers[0]!.feels).toBeUndefined()

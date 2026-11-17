@@ -1323,7 +1323,9 @@
 {
   "input": "Mara, what will you do with this?",
   "fallback": false,
-  "corrections": [],
+  "corrections": [
+    "mara's mad eases at most 1 a turn: 3, not 2"
+  ],
   "plan": {
     "speakers": [
       {
@@ -1332,7 +1334,7 @@
         "feels": {
           "shade": "sore",
           "family": "mad",
-          "intensity": 2,
+          "intensity": 3,
           "reason": "she wants to know more first"
         },
         "pressure": "driven"
@@ -1528,7 +1530,7 @@
       "mara": {
         "shade": "sore",
         "family": "mad",
-        "intensity": 2,
+        "intensity": 3,
         "reason": "she wants to know more first"
       },
       "tobin": {
@@ -1758,7 +1760,7 @@
           "aftermath": {
             "shade": "sore",
             "family": "mad",
-            "intensity": 2,
+            "intensity": 3,
             "reason": "she wants to know more first"
           }
         }

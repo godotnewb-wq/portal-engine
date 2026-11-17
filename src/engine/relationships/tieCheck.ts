@@ -75,9 +75,10 @@ export function buildTiePrompt(content: Pack, state: GameState): Prompt {
 
 - Most scenes change no relationship: then reply {"ties": []}.
 - Only what happened on screen and was carried through in this scene: vows made, a breakup said and meant, a job taken or quit, a betrayal that ends a friendship. Not what was only talked about, joked about, offered and left open, or felt: feelings are not ties.
+- A tie is what both would still call each other next week. Letting someone help once, giving them an order in the moment, or one favor is not a tie: no boss for one task.
 - turn: the number of the turn it happened on.
-- from: someone who was in the scene, by id. to: someone else who was, or "player" for ${player.name}.
-- add: the tag to becomes for from; end: the tag to stops being for from. Tag ids from the list below. To replace a tag (an engagement becoming a marriage), end the old one and add the new one. Never end and add the same tag.
+- from: someone who was in the scene, by id. to: someone else who was, or "player" for ${player.name}; ${player.name} is never from.
+- add: the tag to becomes for from; end: the tag to stops being for from: read it as "to becomes from's add". Example: when Ada hires Ben for a job, from is ada, to is ben, add "contractor" (Ben becomes Ada's contractor), not "client". Tag ids from the list below. To replace a tag (an engagement becoming a marriage), end the old one and add the new one. Never end and add the same tag.
 - word: one of the added tag's words, for what from calls to; back_word: one of the counterpart's words, for what to calls from. Mind each person's pronouns. Example: when Ada (she/her) marries Ben (he/him), from is ada, to is ben, end is the engagement tag, add the marriage tag, word "husband" and back_word "wife".
 - The other side changes with it: list each change once, from one side.
 - reason: what happened, in a few words; it becomes the note on the relationship.
@@ -142,9 +143,18 @@ export function settleTies(content: Pack, state: GameState, written: WrittenTie[
   const refused: string[] = []
   written.forEach((t, i) => {
     const n = i + 1
+    const isPlayer = (w: string) => norm(w) === 'player' || norm(w) === norm(state.player.name)
+    // The player holds no tags, so a change written from the player's side is turned around (decided 2026-11-16, user,
+    // after the end-of-Milestone-4 bench run 2: a player paying off a debt was written from their side, refused, and the debt stood).
+    if (isPlayer(t.from) && !isPlayer(t.to)) {
+      // A one-sided tag (rival, enemy) says how one person sees the other, so it has no other side to turn to.
+      if ([t.add, t.end].some((x) => def(tagNamed(content, x))?.oneSided)) return refused.push(`${n}: ${state.player.name} holds no tags, and a one-sided tag can't be turned around`)
+      const back = (tag?: string) => (tag && tagNamed(content, tag) ? def(tagNamed(content, tag))!.counterpart : tag)
+      t = { ...t, from: t.to, to: 'player', ...(t.add && { add: back(t.add) }), ...(t.end && { end: back(t.end) }), word: t.back_word, back_word: t.word }
+    }
     const from = who(t.from)
-    const to = norm(t.to) === 'player' || norm(t.to) === norm(state.player.name) ? 'player' : who(t.to)
-    if (!from) return refused.push(`${n}: "${t.from}" wasn't in the scene`)
+    const to = isPlayer(t.to) ? 'player' : who(t.to)
+    if (!from) return refused.push(isPlayer(t.from) ? `${n}: a change can't be between ${state.player.name} and themselves` : `${n}: "${t.from}" wasn't in the scene`)
     if (!to || to === from) return refused.push(`${n}: "${t.to}" wasn't someone else in the scene`)
     const add = tagNamed(content, t.add)
     const end = tagNamed(content, t.end)

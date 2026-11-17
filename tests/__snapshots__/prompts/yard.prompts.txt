@@ -21,7 +21,7 @@ Return only this JSON object:
 - People are in the moment. What they say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line.
 - Feelings on the sheets are words for each meter, toward the player and toward others here. Warmth (warmth): how much they like the other. Bond (bond): how much they would do for the other. Each is a separate feeling; when they pull apart, play the tension.
 - speakers: at most 3 characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone.
-- feels: what the character really feels now, whatever they show: {"shade","family","intensity","reason"}. shade is one of the shades below. family only when the shade is listed under more than one. intensity is 1 to 5; the usual range is given, and the moment can go outside it. reason: what it's about, in a few words. Leave feels out to keep what they felt before. The game works out how much shows.
+- feels: what the character really feels now, whatever they show: {"shade","family","intensity","reason"}. shade is one of the shades below. family only when the shade is listed under more than one. intensity is 1 to 5; the usual range is given, and the moment can go outside it. reason: what it's about, in a few words. Leave feels out to keep what they felt before. The game works out how much shows. A mask hides a feeling; it doesn't lessen it: never lower feels because they are hiding it or look composed. A feeling eases at most one step a turn.
 - Shades by family (usual intensity): sad: glum 1–3, sore 2–4; mad: sore 2–4, livid 4–5; startled (in the moment only): jolted 1–2.
 - To see what someone really feels behind what they show, give the person looking a check with Notice and the one being read as target. The game sets its difficulty. A companion can be the one looking; on success they may tell the player.
 - pressure: how hard their aim for tonight (on their sheet) presses on them right now, one of: idle, keen, driven (weakest first). Most of the time it is idle. It rises when time runs short or events push, and moves at most one step a turn.
@@ -228,7 +228,7 @@ Return only this JSON object:
 - People are in the moment. What they say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line.
 - Feelings on the sheets are words for each meter, toward the player and toward others here. Warmth (warmth): how much they like the other. Bond (bond): how much they would do for the other. Each is a separate feeling; when they pull apart, play the tension.
 - speakers: at most 3 characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone.
-- feels: what the character really feels now, whatever they show: {"shade","family","intensity","reason"}. shade is one of the shades below. family only when the shade is listed under more than one. intensity is 1 to 5; the usual range is given, and the moment can go outside it. reason: what it's about, in a few words. Leave feels out to keep what they felt before. The game works out how much shows.
+- feels: what the character really feels now, whatever they show: {"shade","family","intensity","reason"}. shade is one of the shades below. family only when the shade is listed under more than one. intensity is 1 to 5; the usual range is given, and the moment can go outside it. reason: what it's about, in a few words. Leave feels out to keep what they felt before. The game works out how much shows. A mask hides a feeling; it doesn't lessen it: never lower feels because they are hiding it or look composed. A feeling eases at most one step a turn.
 - Shades by family (usual intensity): sad: glum 1–3, sore 2–4; mad: sore 2–4, livid 4–5; startled (in the moment only): jolted 1–2.
 - To see what someone really feels behind what they show, give the person looking a check with Notice and the one being read as target. The game sets its difficulty. A companion can be the one looking; on success they may tell the player.
 - pressure: how hard their aim for tonight (on their sheet) presses on them right now, one of: idle, keen, driven (weakest first). Most of the time it is idle. It rises when time runs short or events push, and moves at most one step a turn.
@@ -539,7 +539,7 @@ Return only this JSON object:
 - People are in the moment. What they say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line.
 - Feelings on the sheets are words for each meter, toward the player and toward others here. Warmth (warmth): how much they like the other. Bond (bond): how much they would do for the other. Each is a separate feeling; when they pull apart, play the tension.
 - speakers: at most 3 characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone.
-- feels: what the character really feels now, whatever they show: {"shade","family","intensity","reason"}. shade is one of the shades below. family only when the shade is listed under more than one. intensity is 1 to 5; the usual range is given, and the moment can go outside it. reason: what it's about, in a few words. Leave feels out to keep what they felt before. The game works out how much shows.
+- feels: what the character really feels now, whatever they show: {"shade","family","intensity","reason"}. shade is one of the shades below. family only when the shade is listed under more than one. intensity is 1 to 5; the usual range is given, and the moment can go outside it. reason: what it's about, in a few words. Leave feels out to keep what they felt before. The game works out how much shows. A mask hides a feeling; it doesn't lessen it: never lower feels because they are hiding it or look composed. A feeling eases at most one step a turn.
 - Shades by family (usual intensity): sad: glum 1–3, sore 2–4; mad: sore 2–4, livid 4–5; startled (in the moment only): jolted 1–2.
 - To see what someone really feels behind what they show, give the person looking a check with Notice and the one being read as target. The game sets its difficulty. A companion can be the one looking; on success they may tell the player.
 - pressure: how hard their aim for tonight (on their sheet) presses on them right now, one of: idle, keen, driven (weakest first). Most of the time it is idle. It rises when time runs short or events push, and moves at most one step a turn.
@@ -867,7 +867,7 @@ Return only this JSON object:
 - People are in the moment. What they say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line.
 - Feelings on the sheets are words for each meter, toward the player and toward others here. Warmth (warmth): how much they like the other. Bond (bond): how much they would do for the other. Each is a separate feeling; when they pull apart, play the tension.
 - speakers: at most 3 characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone.
-- feels: what the character really feels now, whatever they show: {"shade","family","intensity","reason"}. shade is one of the shades below. family only when the shade is listed under more than one. intensity is 1 to 5; the usual range is given, and the moment can go outside it. reason: what it's about, in a few words. Leave feels out to keep what they felt before. The game works out how much shows.
+- feels: what the character really feels now, whatever they show: {"shade","family","intensity","reason"}. shade is one of the shades below. family only when the shade is listed under more than one. intensity is 1 to 5; the usual range is given, and the moment can go outside it. reason: what it's about, in a few words. Leave feels out to keep what they felt before. The game works out how much shows. A mask hides a feeling; it doesn't lessen it: never lower feels because they are hiding it or look composed. A feeling eases at most one step a turn.
 - Shades by family (usual intensity): sad: glum 1–3, sore 2–4; mad: sore 2–4, livid 4–5; startled (in the moment only): jolted 1–2.
 - To see what someone really feels behind what they show, give the person looking a check with Notice and the one being read as target. The game sets its difficulty. A companion can be the one looking; on success they may tell the player.
 - pressure: how hard their aim for tonight (on their sheet) presses on them right now, one of: idle, keen, driven (weakest first). Most of the time it is idle. It rises when time runs short or events push, and moves at most one step a turn.
@@ -1110,7 +1110,7 @@ Return only this JSON object:
 - People are in the moment. What they say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line.
 - Feelings on the sheets are words for each meter, toward the player and toward others here. Warmth (warmth): how much they like the other. Bond (bond): how much they would do for the other. Each is a separate feeling; when they pull apart, play the tension.
 - speakers: at most 3 characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone.
-- feels: what the character really feels now, whatever they show: {"shade","family","intensity","reason"}. shade is one of the shades below. family only when the shade is listed under more than one. intensity is 1 to 5; the usual range is given, and the moment can go outside it. reason: what it's about, in a few words. Leave feels out to keep what they felt before. The game works out how much shows.
+- feels: what the character really feels now, whatever they show: {"shade","family","intensity","reason"}. shade is one of the shades below. family only when the shade is listed under more than one. intensity is 1 to 5; the usual range is given, and the moment can go outside it. reason: what it's about, in a few words. Leave feels out to keep what they felt before. The game works out how much shows. A mask hides a feeling; it doesn't lessen it: never lower feels because they are hiding it or look composed. A feeling eases at most one step a turn.
 - Shades by family (usual intensity): sad: glum 1–3, sore 2–4; mad: sore 2–4, livid 4–5; startled (in the moment only): jolted 1–2.
 - To see what someone really feels behind what they show, give the person looking a check with Notice and the one being read as target. The game sets its difficulty. A companion can be the one looking; on success they may tell the player.
 - pressure: how hard their aim for tonight (on their sheet) presses on them right now, one of: idle, keen, driven (weakest first). Most of the time it is idle. It rises when time runs short or events push, and moves at most one step a turn.
@@ -1302,7 +1302,7 @@ Tobin ducks out through the gate.
 Mara, what will you do with this?
 
 # Who speaks
-- Mara: in this exchange, keep it quiet until she knows more. Feels sore (mad): she wants to know more first. Nothing shows. Tonight's aim drives what they do: Find out who keeps skimming the tallies.
+- Mara: in this exchange, keep it quiet until she knows more. Feels sore (mad): she wants to know more first. It leaks a little: reads your errors back to you. Tonight's aim drives what they do: Find out who keeps skimming the tallies.
 
 # The conversation, in order
 1. Mara, answering the player: answer (may draw on: She will check the seal log at dawn. [new to the player])
@@ -1322,9 +1322,10 @@ You read a finished scene from a visual-novel RPG and say whether a relationship
 
 - Most scenes change no relationship: then reply {"ties": []}.
 - Only what happened on screen and was carried through in this scene: vows made, a breakup said and meant, a job taken or quit, a betrayal that ends a friendship. Not what was only talked about, joked about, offered and left open, or felt: feelings are not ties.
+- A tie is what both would still call each other next week. Letting someone help once, giving them an order in the moment, or one favor is not a tie: no boss for one task.
 - turn: the number of the turn it happened on.
-- from: someone who was in the scene, by id. to: someone else who was, or "player" for Kit.
-- add: the tag to becomes for from; end: the tag to stops being for from. Tag ids from the list below. To replace a tag (an engagement becoming a marriage), end the old one and add the new one. Never end and add the same tag.
+- from: someone who was in the scene, by id. to: someone else who was, or "player" for Kit; Kit is never from.
+- add: the tag to becomes for from; end: the tag to stops being for from: read it as "to becomes from's add". Example: when Ada hires Ben for a job, from is ada, to is ben, add "contractor" (Ben becomes Ada's contractor), not "client". Tag ids from the list below. To replace a tag (an engagement becoming a marriage), end the old one and add the new one. Never end and add the same tag.
 - word: one of the added tag's words, for what from calls to; back_word: one of the counterpart's words, for what to calls from. Mind each person's pronouns. Example: when Ada (she/her) marries Ben (he/him), from is ada, to is ben, end is the engagement tag, add the marriage tag, word "husband" and back_word "wife".
 - The other side changes with it: list each change once, from one side.
 - reason: what happened, in a few words; it becomes the note on the relationship.
@@ -1402,7 +1403,7 @@ About Mara (person, she/her):
 - Toward Tobin: warmth: civil; bond: loose (she takes him on to keep him close)
 - What changed between people this scene (a Core memory for Mara): Tobin becomes Mara's apprentice (she takes him on to keep him close).
 - Topics that came up this scene: [faction.watch] The Ward Watch; [faction.guild.tallies] How the tallies work.
-- Mood at the end: sore (mad), 2 of 5: she wants to know more first; comfort 2/5.
+- Mood at the end: sore (mad), 3 of 5: she wants to know more first; comfort 2/5.
 
 Place: The Guild Yard, east gate.
 

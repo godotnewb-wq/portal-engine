@@ -97,6 +97,17 @@ describe('the end-of-scene tie check', () => {
     })
   })
 
+  it('turns a change written from the player’s side around, with the counterpart tag and words; a one-sided tag can’t be (decided 2026-11-16)', () => {
+    const owed = { ...played(), playerTies: { mara: { tags: [{ tag: 'hand' }] } } }
+    const { state, applied, refused } = settleTies(fixture, owed, [
+      { from: 'Kit', to: 'mara', end: 'master', reason: 'Kit quits' },
+      { from: 'player', to: 'tobin', add: 'foe', reason: 'Kit swears to bring him down' }
+    ])
+    expect(applied.map((e) => [e.from, e.to, e.ended])).toEqual([['mara', 'player', ['hand']]])
+    expect(state.playerTies['mara']!.tags).toEqual([])
+    expect(refused).toEqual(["2: Kit holds no tags, and a one-sided tag can't be turned around"])
+  })
+
   it('holds an arrangement with the player for their answer, and lets a character make the player a foe on their own', () => {
     const { state: next, pending } = settleTies(fixture, played(), [
       { from: 'mara', to: 'Kit', add: 'hand', reason: 'she hires Kit' },

@@ -132,7 +132,17 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan, inpu
   const feels = (who: string, f: RawPlan['speakers'][number]['feels']) => {
     const read = readFeels(content.ruleset, who, f)
     if (read.problem) early.push(read.problem)
-    return read.feels ? { feels: read.feels } : {}
+    if (!read.feels) return {}
+    // A feeling eases at most one step a turn (decided 2026-11-16, user, after the end-of-Milestone-4 bench run 2: the
+    // director took a heavy masker's composure for calm and dropped her panic from 5 to 3 in one turn, so her mask could
+    // never break). Within the same family only: a feeling of another family is something new.
+    const before = scene.moods[who]
+    const floor = before && before.family === read.feels.family ? before.intensity - EASE_PER_TURN : 0
+    if (read.feels.intensity < floor) {
+      early.push(`${who}'s ${read.feels.family} eases at most ${EASE_PER_TURN} a turn: ${floor}, not ${read.feels.intensity}`)
+      return { feels: { ...read.feels, intensity: floor } }
+    }
+    return { feels: read.feels }
   }
   const shared: SharedPlan = {
     speakers: raw.speakers.map((s) => {
@@ -241,6 +251,9 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan, inpu
     corrections
   }
 }
+
+/** How far a felt feeling may ease in one turn, within its family. */
+const EASE_PER_TURN = 1
 
 /**
  * A feeling from the plan, checked against the ruleset (npc design §7): an unknown shade, a family the shade isn't
