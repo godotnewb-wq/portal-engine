@@ -1603,20 +1603,86 @@
   }
 }
 
-===== relationship changes =====
+===== relationship calls =====
 {
+  "witnesses": [
+    {
+      "id": "mara",
+      "relationship": {
+        "reason": "Kit kept it quiet",
+        "delta": {
+          "warmth": 3,
+          "bond": 0
+        },
+        "others": [
+          {
+            "with": "tobin",
+            "delta": {
+              "warmth": -3,
+              "bond": 0
+            },
+            "reason": "he lied to her"
+          }
+        ],
+        "toward": [
+          {
+            "who": "tobin",
+            "shade": "sore",
+            "family": "mad",
+            "intensity": 3,
+            "reason": "he lied to her"
+          }
+        ],
+        "resolved": [],
+        "ties": [
+          {
+            "with": "tobin",
+            "now": "apprentice",
+            "line": "Check the seal log at dawn. Quietly, before the clerks come in."
+          }
+        ]
+      }
+    },
+    {
+      "id": "tobin",
+      "relationship": {
+        "reason": "Kit let him leave",
+        "delta": {
+          "warmth": 3,
+          "bond": 3
+        },
+        "others": [],
+        "feels": {
+          "shade": "glum",
+          "intensity": 4,
+          "reason": "he gave the seal away"
+        },
+        "toward": [],
+        "resolved": [],
+        "ties": [
+          {
+            "with": "Mara",
+            "now": "master",
+            "line": "Tobin: \"Yes. The horses need water anyway.\""
+          }
+        ]
+      }
+    }
+  ],
   "sceneId": "scene-1200",
   "at": "1970-01-01T00:00:00.000Z",
-  "callId": "scene-1200:ties",
-  "proposed": [
+  "stated": [
     {
-      "turn": 4,
-      "from": "mara",
-      "to": "tobin",
-      "add": "hand",
-      "word": "apprentice",
-      "back_word": "master",
-      "reason": "she takes him on to keep him close"
+      "by": "mara",
+      "with": "tobin",
+      "now": "apprentice",
+      "line": "Check the seal log at dawn. Quietly, before the clerks come in."
+    },
+    {
+      "by": "tobin",
+      "with": "Mara",
+      "now": "master",
+      "line": "Tobin: \"Yes. The horses need water anyway.\""
     }
   ],
   "applied": [
@@ -1628,12 +1694,14 @@
       ],
       "ended": [],
       "word": "apprentice",
-      "reason": "she takes him on to keep him close",
-      "turn": "scene-1200-4"
+      "reason": "",
+      "line": "Check the seal log at dawn. Quietly, before the clerks come in.",
+      "turn": "scene-1200-5"
     }
   ],
   "pending": [],
   "refused": [],
+  "alone": [],
   "answered": []
 }
 
@@ -1663,12 +1731,17 @@
           }
         ],
         "revisited": [],
+        "heard": [
+          {
+            "id": "tobin.after-closing",
+            "memory": "Tobin admitted he let someone into the yard after closing."
+          }
+        ],
         "reason": "Kit kept it quiet",
         "delta": {
           "warmth": 3,
           "bond": 0
         },
-        "learned": [],
         "others": [
           {
             "with": "tobin",
@@ -1688,13 +1761,7 @@
             "reason": "he lied to her"
           }
         ],
-        "resolved": [],
-        "heard": [
-          {
-            "id": "tobin.after-closing",
-            "memory": "Tobin admitted he let someone into the yard after closing."
-          }
-        ]
+        "resolved": []
       },
       "report": {
         "id": "mara",
@@ -1782,7 +1849,6 @@
           "warmth": 3,
           "bond": 3
         },
-        "learned": [],
         "others": [],
         "feels": {
           "shade": "glum",

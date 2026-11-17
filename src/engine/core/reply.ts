@@ -23,8 +23,12 @@ export type LlmReply = string | { text: string; meta?: CallMeta }
 export const replyText = (reply: LlmReply): string => (typeof reply === 'string' ? reply : reply.text)
 export const replyMeta = (reply: LlmReply): CallMeta | undefined => (typeof reply === 'string' ? undefined : reply.meta)
 
-/** What each LLM call is for. `scorer` calls are made by the review tools, never during play. */
-export type CallRole = 'director' | 'writer' | 'rewrite' | 'summary' | 'scorer' | 'consolidation' | 'ties'
+/**
+ * What each LLM call is for. `scorer` calls are made by the review tools, never during play. `relationship` and `memory`
+ * are a witness's two end-of-scene calls (milestone 4c); `summary` and `ties` are the calls they replaced, kept so logs
+ * from before can still be read.
+ */
+export type CallRole = 'director' | 'writer' | 'rewrite' | 'relationship' | 'memory' | 'scorer' | 'consolidation' | 'summary' | 'ties'
 
 /** One LLM call as the logs keep it: the full prompt, the raw reply, timing, and what the platform reported. */
 export interface CallTrace {

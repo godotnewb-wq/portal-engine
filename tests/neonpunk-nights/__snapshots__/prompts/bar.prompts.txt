@@ -962,82 +962,24 @@ a dead pump wheel bolted to the wall as decoration, still faintly humming
 
 Write the beats.
 
-===== ties =====
+===== relationship: vex =====
 ----- system -----
-You read a finished scene from a visual-novel RPG and say whether a relationship between the people in it began or ended on screen. Rook is the player (they/them). Reply with only a JSON object:
-{"ties": [{"turn": 1, "from": "id", "to": "id", "add": "tag", "end": "tag", "word": "...", "back_word": "...", "reason": "..."}]}
-
-- Most scenes change no relationship: then reply {"ties": []}.
-- Only what happened on screen and was carried through in this scene: vows made, a breakup said and meant, a job taken or quit, a betrayal that ends a friendship. Not what was only talked about, joked about, offered and left open, or felt: feelings are not ties.
-- A tie is what both would still call each other next week. Letting someone help once, giving them an order in the moment, or one favor is not a tie: no boss for one task.
-- turn: the number of the turn it happened on.
-- from: someone who was in the scene, by id. to: someone else who was, or "player" for Rook; Rook is never from.
-- add: the tag to becomes for from; end: the tag to stops being for from: read it as "to becomes from's add". Example: when Ada hires Ben for a job, from is ada, to is ben, add "contractor" (Ben becomes Ada's contractor), not "client". Tag ids from the list below. To replace a tag (an engagement becoming a marriage), end the old one and add the new one. Never end and add the same tag.
-- word: one of the added tag's words, for what from calls to; back_word: one of the counterpart's words, for what to calls from. Mind each person's pronouns. Example: when Ada (she/her) marries Ben (he/him), from is ada, to is ben, end is the engagement tag, add the marriage tag, word "husband" and back_word "wife".
-- The other side changes with it: list each change once, from one side.
-- reason: what happened, in a few words; it becomes the note on the relationship.
-- A tie with Rook that is an arrangement is asked of the player before it holds.
-
-Tags (id (words), ↔ counterpart): parent (mother/father/parent/adoptive mother/stepmother/stepfather) ↔ child; child (daughter/son/child/stepdaughter/stepson) ↔ parent; sibling (sister/brother/sibling/half-sister/half-brother/stepsister/stepbrother); grandparent (grandmother/grandfather/grandparent) ↔ grandchild; grandchild (granddaughter/grandson/grandchild) ↔ grandparent; aunt-uncle (aunt/uncle) ↔ niece-nephew; niece-nephew (niece/nephew) ↔ aunt-uncle; cousin (cousin); in-law (mother-in-law/father-in-law/sister-in-law/brother-in-law/in-law); guardian (guardian/foster mother/foster father) ↔ ward; ward (ward/foster daughter/foster son) ↔ guardian; relative (relative/distant cousin/clan elder/kin); partner (girlfriend/boyfriend/partner); lover (lover); fiance (fiancée/fiancé); spouse (wife/husband/spouse); ex (ex-girlfriend/ex-boyfriend/ex-wife/ex-husband/ex); boss (boss/captain/foreman) ↔ employee; employee (worker/employee/lieutenant) ↔ boss; colleague (coworker/colleague); business-partner (business partner/co-owner); client (client/regular) ↔ contractor; contractor (fixer/fence/contractor) ↔ client; handler (handler) ↔ informant; informant (informant/asset) ↔ handler; creditor (creditor/loan shark) ↔ debtor; debtor (debtor) ↔ creditor; comrade (crewmate/comrade/sister-in-arms/brother-in-arms); landlord (landlord/landlady) ↔ tenant; tenant (tenant/lodger) ↔ landlord; roommate (roommate/flatmate); neighbor (neighbor); mentor (mentor/master) ↔ protege; protege (protégé/apprentice) ↔ mentor; teacher (teacher) ↔ student; student (student/pupil) ↔ teacher; friend (friend/best friend/childhood friend); old-friend (old friend); rival (rival), one-sided; enemy (enemy/sworn enemy), one-sided.
------ user -----
-# Who was in the scene
-- Vex [vex], she/her
-- Brask [brask], he/him
-- Oria [oria-senn], she/her
-- Kesh [kesh], she/her
-- Rook [player], they/them
-
-# Their tags now
-- Brask → Vex: friend ("best friend")
-- Oria → Vex: contractor ("runner")
-- Vex → Brask: friend ("best friend")
-- Vex → Oria: client ("client")
-- Vex → Rook: friend ("friend")
-- Brask → Rook: friend ("friend")
-
-# The scene
-## Turn 1
-Rook: So, Oria, who is the client, really?
-(Vex — Empathy 15 vs 15: success)
-Water ticks from the cooled pipe onto the table's edge.
-Oria: A private collector, darling. One who pays triple.
-Vex: 'Darling.' She only says that when she's lying.
-Brask: Mind the pipe. It drips on whoever sits there.
-Kesh keeps her eyes on the door.
-
-## Turn 2
-Rook: Forget the client. What's in the sealed case?
-Oria: Something old from the pump station, retrieved before a rival crew gets to it. The contents are the client's business.
-Vex: And whose business is the client?
-Brask turns his glass in a slow circle. Kesh checks the time.
-
-## Turn 3
-Rook: Fine. When do we go, and what does it pay?
-(Vex — Empathy 15 vs 15: success)
-Oria: Before midnight. The lower level floods at high tide. Triple the usual rate.
-Brask: Three of the pumps down there are overdue for seals. If one goes, the water won't wait for midnight.
-Vex counts something on her fingers.
-
-===== summary: vex =====
------ system -----
-You judge what one character takes away from a scene in a visual-novel RPG. Write Vex's memory of the scene and how it changed what Vex feels. Rook is the player (they/them).
+You judge how one scene in a visual-novel RPG changed what one character feels about the people in it, and what those people are to them. Answer for Vex, as Vex would. Rook is the player (they/them).
 
 Reply with only a JSON object:
-{"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "...", "about": []}], "revisited": [], "reason": "...", "approval": "...", "trust": "...", "interest": "...", "learned": [], "others": [{"with": "id", "approval": "...", "trust": "...", "interest": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": []}
+{"reason": "...", "approval": "...", "trust": "...", "interest": "...", "others": [{"with": "id", "approval": "...", "trust": "...", "interest": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": [], "ties": [{"with": "id", "now": "...", "no_longer": "...", "line": "..."}]}
 
-- memories: what stays with Vex from this scene, one for each distinct moment, most important first. Most scenes leave one; at most 3. text: one or two sentences, past tense, third person, from Vex's point of view: what Vex said, did, noticed and felt, and how Rook treated Vex. End on what stayed with Vex most.
-- level: "core" for a moment that changed something lasting for Vex, one Vex would still bring up in a year (a first betrayal or first real job, a loss, a secret of theirs coming out, a promise made or broken, real danger to their life; rare; at most 2, each with why: what it changed for Vex); "normal" for something that matters for weeks (a deal, an argument, a favor, learning something useful); "fleeting" for small talk, routine, atmosphere.
-- about: for each memory, who it is really about: "brask", "oria-senn", "kesh", "player" for Rook. Not everyone who was there: a memory of small talk or a card game is about no one; one of a night out with Rook, or of telling Rook something, is about "player". [] if it's about no one in particular.
-- revisited: the ids of memories under "Remembers" that this scene came back to (a debt raised again, a promise kept); [] if none.
 - approval, trust, interest: how each CHANGED toward Rook because of this scene, each one of: "much less", "less", "a little less", "unchanged", "a little more", "more", "much more". Meters move slowly; nothing is owed for turning up. Toward someone, approval is whether they approve of who the other is and what they do; trust is whether they can rely on the other and be honest with them; interest is how strongly they are drawn to the other: attention, curiosity, wanting to be around them. It isn't approval: someone can be fascinated by a person they disapprove of and distrust, and low interest is aversion, not disapproval.
 - Judge as Vex: by Vex's values, agenda and how things stood before. Values Vex likes, shown by Rook, raise regard; values Vex dislikes lower it.
 - reason: one short sentence on what moved Vex, and which way.
-- learned: ids of Vex's own secrets that Rook truly found out in this scene (said or plainly shown); [] if none.
 - others: how Vex's feelings toward Brask [brask], Oria [oria-senn], Kesh [kesh] changed in this scene, same words; leave someone out if nothing changed.
 - feels: how Vex feels as the scene ends, when it isn't about one person: a shade from the list below, family only when the shade is listed under more than one, intensity 1 to 5, and why in a few words. Leave it out if nothing much.
 - toward: feelings this scene left Vex with toward one person (who: "brask", "oria-senn", "kesh", or "player" for Rook): what happened between them, not how Vex feels about them overall, which the meters hold. Only for something between them that will still be felt tomorrow, at intensity 3 or more; a pleasant chat or a small slight is none. A shade, intensity and why ("forgot our anniversary"). They pass in days. Most scenes leave none: [].
 - resolved: the people (as ids) toward whom a feeling Vex already carries was settled in this scene (an apology accepted, a fear put to rest); [] if none.
+- ties: what someone here became to Vex in this scene, or stopped being, as Vex would say it. "Ada is now my client" is {"with": "ada", "now": "client", "line": "..."}; "Ben is no longer my partner" is {"with": "ben", "no_longer": "partner", "line": "..."}. with: "brask", "oria-senn", "kesh", or "player" for Rook. now, no_longer: one of the words under "What someone can be to Vex" below, the one Vex would use for them. line: the words from the scene that show it, copied exactly.
+- A tie is only what happened on screen and was carried through: vows made, a breakup said and meant, a job taken or quit, a debt paid off. Not what was only talked about, joked about, offered and left open, or felt: feelings are not ties. It is what Vex would still call them next week: an order given once, one favor or help with one task is not a tie. Most scenes change none: [].
 - Shades by family (usual intensity): grief: mourning 3–5, sorrow 2–4, loss 2–4, regret 1–3, longing 1–4; fear: nervousness 1–2, worry 2–3, dread 3–4, panic 4–5, jealousy 2–4; anger: jealousy 2–4, irritation 1–2, frustration 2–3, resentment 2–4, bitterness 2–4, contempt 2–4, disgust 2–4, feeling betrayed 3–5, rage 4–5; shame: regret 1–3, disgust 2–4, embarrassment 1–2, guilt 2–4, humiliation 3–5; hurt: jealousy 2–4, bitterness 2–4, feeling betrayed 3–5, slighted 1–2, disappointment 2–3, rejected 3–4; affection: longing 1–4, fondness 1–2, admiration 1–3, tenderness 2–4, protectiveness 2–4; joy: relief 1–3, delight 2–3, hope 1–3, pride 2–4, excitement 2–4, elation 4–5; gratitude: appreciation 1–2, thankfulness 2–4, indebtedness 3–5; surprise (in the moment only): startle 1–3, amazement 2–4, shock 3–5.
+- What someone can be to Vex: Family: mother/father/parent/adoptive mother/stepmother/stepfather, daughter/son/child/stepdaughter/stepson, sister/brother/sibling/half-sister/half-brother/stepsister/stepbrother, grandmother/grandfather/grandparent, granddaughter/grandson/grandchild, aunt/uncle, niece/nephew, cousin, mother-in-law/father-in-law/sister-in-law/brother-in-law/in-law, guardian/foster mother/foster father, ward/foster daughter/foster son, relative/distant cousin/clan elder/kin. Partners: girlfriend/boyfriend/partner, lover, fiancée/fiancé, wife/husband/spouse, ex-girlfriend/ex-boyfriend/ex-wife/ex-husband/ex. Work and faction: boss/captain/foreman, worker/employee/lieutenant, coworker/colleague, business partner/co-owner, client/regular, fixer/fence/contractor, handler, informant/asset, creditor/loan shark, debtor, crewmate/comrade/sister-in-arms/brother-in-arms. Home: landlord/landlady, tenant/lodger, roommate/flatmate, neighbor. Teaching: mentor/master, protégé/apprentice, teacher, student/pupil. Social: friend/best friend/childhood friend, old friend, rival, enemy/sworn enemy.
 ----- user -----
 About Vex (deep-elf, she/her):
 - With strangers Vex is economical: a nod, a few plain words, a long look at their hands. She'll answer a straight question straight and leave it there. With people she knows she's funnier and ruder, and quick to step between them and trouble without saying that's what she's doing. She notices exits, who's watching whom, who's nervous and who's lying, though she usually waits before she says so. She'll talk about routes, bad dispatchers, the Wheelhouse's chalk board, the weather in the Bulk and Brask's terrible taste in drinks long before anything personal. She walks a coin across her knuckles while she listens. When she cares about something she gets more sarcastic, not less, except with Brask, where she just goes quiet and stays.
@@ -1047,6 +989,7 @@ About Vex (deep-elf, she/her):
 - Before this scene, toward Rook: approval: no settled opinion; trust: trusts; interest: intrigued
 - Toward Brask: approval: approves; trust: trusts implicitly; interest: indifferent (met hauling his tool cart up the lower stairs six years ago; she's dragged him to every bar since and he's fixed everything she owns)
 - Toward Oria: approval: disapproves; trust: wary, distrustful; interest: indifferent (ran sealed packets for her twice; both paid on time, and one went bad in a way Oria smoothed over too easily)
+- What each person here is to Vex now: Brask [brask]: best friend; Oria [oria-senn]: client; Kesh [kesh]: no tie; Rook [player]: friend.
 - Mood at the end: irritation, 2 of 5: Oria is playing them; comfort 3/5.
 - Vex saw through to what Brask really felt: panic, 5 of 5: the lower level floods at midnight.
 
@@ -1072,26 +1015,221 @@ Oria: Before midnight. The lower level floods at high tide. Triple the usual rat
 Brask: Three of the pumps down there are overdue for seals. If one goes, the water won't wait for midnight.
 Vex counts something on her fingers.
 
-===== summary: brask =====
+===== relationship: brask =====
 ----- system -----
-You judge what one character takes away from a scene in a visual-novel RPG. Write Brask's memory of the scene and how it changed what Brask feels. Rook is the player (they/them).
+You judge how one scene in a visual-novel RPG changed what one character feels about the people in it, and what those people are to them. Answer for Brask, as Brask would. Rook is the player (they/them).
 
 Reply with only a JSON object:
-{"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "...", "about": []}], "revisited": [], "reason": "...", "approval": "...", "trust": "...", "interest": "...", "learned": [], "others": [{"with": "id", "approval": "...", "trust": "...", "interest": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": []}
+{"reason": "...", "approval": "...", "trust": "...", "interest": "...", "others": [{"with": "id", "approval": "...", "trust": "...", "interest": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": [], "ties": [{"with": "id", "now": "...", "no_longer": "...", "line": "..."}]}
+
+- approval, trust, interest: how each CHANGED toward Rook because of this scene, each one of: "much less", "less", "a little less", "unchanged", "a little more", "more", "much more". Meters move slowly; nothing is owed for turning up. Toward someone, approval is whether they approve of who the other is and what they do; trust is whether they can rely on the other and be honest with them; interest is how strongly they are drawn to the other: attention, curiosity, wanting to be around them. It isn't approval: someone can be fascinated by a person they disapprove of and distrust, and low interest is aversion, not disapproval.
+- Judge as Brask: by Brask's values, agenda and how things stood before. Values Brask likes, shown by Rook, raise regard; values Brask dislikes lower it.
+- reason: one short sentence on what moved Brask, and which way.
+- others: how Brask's feelings toward Vex [vex], Oria [oria-senn], Kesh [kesh] changed in this scene, same words; leave someone out if nothing changed.
+- feels: how Brask feels as the scene ends, when it isn't about one person: a shade from the list below, family only when the shade is listed under more than one, intensity 1 to 5, and why in a few words. Leave it out if nothing much.
+- toward: feelings this scene left Brask with toward one person (who: "vex", "oria-senn", "kesh", or "player" for Rook): what happened between them, not how Brask feels about them overall, which the meters hold. Only for something between them that will still be felt tomorrow, at intensity 3 or more; a pleasant chat or a small slight is none. A shade, intensity and why ("forgot our anniversary"). They pass in days. Most scenes leave none: [].
+- resolved: the people (as ids) toward whom a feeling Brask already carries was settled in this scene (an apology accepted, a fear put to rest); [] if none.
+- ties: what someone here became to Brask in this scene, or stopped being, as Brask would say it. "Ada is now my client" is {"with": "ada", "now": "client", "line": "..."}; "Ben is no longer my partner" is {"with": "ben", "no_longer": "partner", "line": "..."}. with: "vex", "oria-senn", "kesh", or "player" for Rook. now, no_longer: one of the words under "What someone can be to Brask" below, the one Brask would use for them. line: the words from the scene that show it, copied exactly.
+- A tie is only what happened on screen and was carried through: vows made, a breakup said and meant, a job taken or quit, a debt paid off. Not what was only talked about, joked about, offered and left open, or felt: feelings are not ties. It is what Brask would still call them next week: an order given once, one favor or help with one task is not a tie. Most scenes change none: [].
+- Shades by family (usual intensity): grief: mourning 3–5, sorrow 2–4, loss 2–4, regret 1–3, longing 1–4; fear: nervousness 1–2, worry 2–3, dread 3–4, panic 4–5, jealousy 2–4; anger: jealousy 2–4, irritation 1–2, frustration 2–3, resentment 2–4, bitterness 2–4, contempt 2–4, disgust 2–4, feeling betrayed 3–5, rage 4–5; shame: regret 1–3, disgust 2–4, embarrassment 1–2, guilt 2–4, humiliation 3–5; hurt: jealousy 2–4, bitterness 2–4, feeling betrayed 3–5, slighted 1–2, disappointment 2–3, rejected 3–4; affection: longing 1–4, fondness 1–2, admiration 1–3, tenderness 2–4, protectiveness 2–4; joy: relief 1–3, delight 2–3, hope 1–3, pride 2–4, excitement 2–4, elation 4–5; gratitude: appreciation 1–2, thankfulness 2–4, indebtedness 3–5; surprise (in the moment only): startle 1–3, amazement 2–4, shock 3–5.
+- What someone can be to Brask: Family: mother/father/parent/adoptive mother/stepmother/stepfather, daughter/son/child/stepdaughter/stepson, sister/brother/sibling/half-sister/half-brother/stepsister/stepbrother, grandmother/grandfather/grandparent, granddaughter/grandson/grandchild, aunt/uncle, niece/nephew, cousin, mother-in-law/father-in-law/sister-in-law/brother-in-law/in-law, guardian/foster mother/foster father, ward/foster daughter/foster son, relative/distant cousin/clan elder/kin. Partners: girlfriend/boyfriend/partner, lover, fiancée/fiancé, wife/husband/spouse, ex-girlfriend/ex-boyfriend/ex-wife/ex-husband/ex. Work and faction: boss/captain/foreman, worker/employee/lieutenant, coworker/colleague, business partner/co-owner, client/regular, fixer/fence/contractor, handler, informant/asset, creditor/loan shark, debtor, crewmate/comrade/sister-in-arms/brother-in-arms. Home: landlord/landlady, tenant/lodger, roommate/flatmate, neighbor. Teaching: mentor/master, protégé/apprentice, teacher, student/pupil. Social: friend/best friend/childhood friend, old friend, rival, enemy/sworn enemy.
+----- user -----
+About Brask (goblin, he/him):
+- With strangers Brask is quiet and courteous: he says little, lets other people finish their sentences, and answers a practical question better than anyone in the room. With people he knows, Vex most of all, he relaxes into a gentle, dry humor and will talk about machines for an hour. He notices how things are built and how they're failing, a weeping pipe, a loose rail, a crooked weld, and whether a person looks tired. He'd talk about the pumps he keeps running, the tenants who owe him small favors, and a filter design he's proud of; ask him about Pump Station Nine and he'll tell you exactly what's wrong with it. He turns a brass washer over in his pocket. When a room gets too much he finds something nearby to fix, and when someone he likes is about to do something stupid he finally speaks up, plainly.
+- Wants: Save enough cinders to buy the workshop outright before the landlord sells the lease to the Aether Grid Corporation; Get his designs for a cheap Aether filter taken seriously by someone with money, without that someone being the Grid. Tonight: Get out of this noisy room as soon as he decently can; but if the job on the table is down at Pump Station Nine, find out who's paying before Vex or the player goes near that water
+- Values: the workshop, and a lease nobody can take (strong); work done properly: a seal that holds, a filter that works (strong); the tenants on the lower stairs, and Vex (strong) · against: power
+- Secret [landlord-offer]: A Grid Corporation agent has already offered to buy his filter design. He hasn't said no.
+- Before this scene, toward Rook: approval: no settled opinion; trust: trusts; interest: indifferent
+- Toward Vex: approval: approves; trust: trusts implicitly; interest: indifferent (she dragged him to his first bar six years ago and has dragged him to every one since; he's fixed everything she owns)
+- Toward Oria: approval: no settled opinion; trust: undecided; interest: indifferent (has heard of her for years and never met her; knows she always pays and that nobody says what for)
+- What each person here is to Brask now: Vex [vex]: best friend; Oria [oria-senn]: no tie; Kesh [kesh]: no tie; Rook [player]: friend.
+- Mood at the end: panic, 5 of 5: the lower level floods at midnight; comfort 2/5.
+
+Place: The Sump Lantern, Ninth Turn, under the old pumphouse.
+
+The scene:
+Rook: So, Oria, who is the client, really?
+(Vex — Empathy 15 vs 15: success)
+Water ticks from the cooled pipe onto the table's edge.
+Oria: A private collector, darling. One who pays triple.
+Vex: 'Darling.' She only says that when she's lying.
+Brask: Mind the pipe. It drips on whoever sits there.
+Kesh keeps her eyes on the door.
+
+Rook: Forget the client. What's in the sealed case?
+Oria: Something old from the pump station, retrieved before a rival crew gets to it. The contents are the client's business.
+Vex: And whose business is the client?
+Brask turns his glass in a slow circle. Kesh checks the time.
+
+Rook: Fine. When do we go, and what does it pay?
+(Vex — Empathy 15 vs 15: success)
+Oria: Before midnight. The lower level floods at high tide. Triple the usual rate.
+Brask: Three of the pumps down there are overdue for seals. If one goes, the water won't wait for midnight.
+Vex counts something on her fingers.
+
+===== relationship: oria-senn =====
+----- system -----
+You judge how one scene in a visual-novel RPG changed what one character feels about the people in it, and what those people are to them. Answer for Oria, as Oria would. Rook is the player (they/them).
+
+Reply with only a JSON object:
+{"reason": "...", "approval": "...", "trust": "...", "interest": "...", "others": [{"with": "id", "approval": "...", "trust": "...", "interest": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": [], "ties": [{"with": "id", "now": "...", "no_longer": "...", "line": "..."}]}
+
+- approval, trust, interest: how each CHANGED toward Rook because of this scene, each one of: "much less", "less", "a little less", "unchanged", "a little more", "more", "much more". Meters move slowly; nothing is owed for turning up. Toward someone, approval is whether they approve of who the other is and what they do; trust is whether they can rely on the other and be honest with them; interest is how strongly they are drawn to the other: attention, curiosity, wanting to be around them. It isn't approval: someone can be fascinated by a person they disapprove of and distrust, and low interest is aversion, not disapproval.
+- Judge as Oria: by Oria's values, agenda and how things stood before. Values Oria likes, shown by Rook, raise regard; values Oria dislikes lower it.
+- reason: one short sentence on what moved Oria, and which way.
+- others: how Oria's feelings toward Vex [vex], Brask [brask], Kesh [kesh] changed in this scene, same words; leave someone out if nothing changed.
+- feels: how Oria feels as the scene ends, when it isn't about one person: a shade from the list below, family only when the shade is listed under more than one, intensity 1 to 5, and why in a few words. Leave it out if nothing much.
+- toward: feelings this scene left Oria with toward one person (who: "vex", "brask", "kesh", or "player" for Rook): what happened between them, not how Oria feels about them overall, which the meters hold. Only for something between them that will still be felt tomorrow, at intensity 3 or more; a pleasant chat or a small slight is none. A shade, intensity and why ("forgot our anniversary"). They pass in days. Most scenes leave none: [].
+- resolved: the people (as ids) toward whom a feeling Oria already carries was settled in this scene (an apology accepted, a fear put to rest); [] if none.
+- ties: what someone here became to Oria in this scene, or stopped being, as Oria would say it. "Ada is now my client" is {"with": "ada", "now": "client", "line": "..."}; "Ben is no longer my partner" is {"with": "ben", "no_longer": "partner", "line": "..."}. with: "vex", "brask", "kesh", or "player" for Rook. now, no_longer: one of the words under "What someone can be to Oria" below, the one Oria would use for them. line: the words from the scene that show it, copied exactly.
+- A tie is only what happened on screen and was carried through: vows made, a breakup said and meant, a job taken or quit, a debt paid off. Not what was only talked about, joked about, offered and left open, or felt: feelings are not ties. It is what Oria would still call them next week: an order given once, one favor or help with one task is not a tie. Most scenes change none: [].
+- Shades by family (usual intensity): grief: mourning 3–5, sorrow 2–4, loss 2–4, regret 1–3, longing 1–4; fear: nervousness 1–2, worry 2–3, dread 3–4, panic 4–5, jealousy 2–4; anger: jealousy 2–4, irritation 1–2, frustration 2–3, resentment 2–4, bitterness 2–4, contempt 2–4, disgust 2–4, feeling betrayed 3–5, rage 4–5; shame: regret 1–3, disgust 2–4, embarrassment 1–2, guilt 2–4, humiliation 3–5; hurt: jealousy 2–4, bitterness 2–4, feeling betrayed 3–5, slighted 1–2, disappointment 2–3, rejected 3–4; affection: longing 1–4, fondness 1–2, admiration 1–3, tenderness 2–4, protectiveness 2–4; joy: relief 1–3, delight 2–3, hope 1–3, pride 2–4, excitement 2–4, elation 4–5; gratitude: appreciation 1–2, thankfulness 2–4, indebtedness 3–5; surprise (in the moment only): startle 1–3, amazement 2–4, shock 3–5.
+- What someone can be to Oria: Family: mother/father/parent/adoptive mother/stepmother/stepfather, daughter/son/child/stepdaughter/stepson, sister/brother/sibling/half-sister/half-brother/stepsister/stepbrother, grandmother/grandfather/grandparent, granddaughter/grandson/grandchild, aunt/uncle, niece/nephew, cousin, mother-in-law/father-in-law/sister-in-law/brother-in-law/in-law, guardian/foster mother/foster father, ward/foster daughter/foster son, relative/distant cousin/clan elder/kin. Partners: girlfriend/boyfriend/partner, lover, fiancée/fiancé, wife/husband/spouse, ex-girlfriend/ex-boyfriend/ex-wife/ex-husband/ex. Work and faction: boss/captain/foreman, worker/employee/lieutenant, coworker/colleague, business partner/co-owner, client/regular, fixer/fence/contractor, handler, informant/asset, creditor/loan shark, debtor, crewmate/comrade/sister-in-arms/brother-in-arms. Home: landlord/landlady, tenant/lodger, roommate/flatmate, neighbor. Teaching: mentor/master, protégé/apprentice, teacher, student/pupil. Social: friend/best friend/childhood friend, old friend, rival, enemy/sworn enemy.
+----- user -----
+About Oria (light-elf, she/her):
+- With strangers Oria is gracious and unhurried: she asks about them, remembers what they say, and makes them feel they're the reason she came. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She'll talk about High Turns gossip, the Sump Lantern's dumplings, which she praises too much, a play she saw last week, and her rich clients' small vanities long before business; when business comes, she names a price clearly and keeps it. She turns her glass by the stem while she listens. When she's cornered she gets warmer and slower, as if she has all night, and when someone surprises her she laughs, genuinely, and likes them more for it.
+- Wants: Clear her debt to the Aether Grid Corporation before they call it in; Build a network that doesn't need any one patron, so no one can own her again. Tonight: Get the player to take the retrieval job at Pump Station Nine tonight without learning who the client is; she'd take Brask too, if he knows the station
+- Values: owing no one (defining); a promise kept to the cinder (strong); a network that answers to her (strong); benevolence (mild) · sacred: fairness
+- Secret [client-is-grid-corporation]: The 'private client' is the Aether Grid Corporation, and she owes them; this job pays down her debt.
+- Secret [the-case]: Oria's part: she is fetching the sealed case for the Grid. The sealed case the Grid wants pulled from Pump Station Nine's flooded lower level holds the station's original control core: a pre-Burn rune-key that lets whoever holds it restart the station as its legal owner. The Grid hires the job through fixers and pays far over the going rate to get it before anyone else does. Those who carry the job know what's in the case, not what the Grid means to do with it. How Oria feels about it: doesn't want to know what the Grid wants it for, and suspects anyway.
+- Before this scene, toward Rook: approval: no settled opinion; trust: wary, distrustful; interest: intrigued
+- Toward Vex: approval: no settled opinion; trust: undecided; interest: intrigued (hired her for sealed runs twice; one went wrong, and Oria paid in full and didn't ask the questions she should have)
+- Toward Brask: approval: no settled opinion; trust: undecided; interest: intrigued (knows him by reputation only: the mechanic everyone on the lower stairs calls first)
+- What each person here is to Oria now: Vex [vex]: runner; Brask [brask]: no tie; Kesh [kesh]: no tie; Rook [player]: no tie.
+- Mood at the end: relief, 3 of 5: the deal is close; comfort 3/5.
+
+Place: The Sump Lantern, Ninth Turn, under the old pumphouse.
+
+The scene:
+Rook: So, Oria, who is the client, really?
+(Vex — Empathy 15 vs 15: success)
+Water ticks from the cooled pipe onto the table's edge.
+Oria: A private collector, darling. One who pays triple.
+Vex: 'Darling.' She only says that when she's lying.
+Brask: Mind the pipe. It drips on whoever sits there.
+Kesh keeps her eyes on the door.
+
+Rook: Forget the client. What's in the sealed case?
+Oria: Something old from the pump station, retrieved before a rival crew gets to it. The contents are the client's business.
+Vex: And whose business is the client?
+Brask turns his glass in a slow circle. Kesh checks the time.
+
+Rook: Fine. When do we go, and what does it pay?
+(Vex — Empathy 15 vs 15: success)
+Oria: Before midnight. The lower level floods at high tide. Triple the usual rate.
+Brask: Three of the pumps down there are overdue for seals. If one goes, the water won't wait for midnight.
+Vex counts something on her fingers.
+
+===== relationship: kesh =====
+----- system -----
+You judge how one scene in a visual-novel RPG changed what one character feels about the people in it, and what those people are to them. Answer for Kesh, as Kesh would. Rook is the player (they/them).
+
+Reply with only a JSON object:
+{"reason": "...", "approval": "...", "trust": "...", "interest": "...", "others": [{"with": "id", "approval": "...", "trust": "...", "interest": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": [], "ties": [{"with": "id", "now": "...", "no_longer": "...", "line": "..."}]}
+
+- approval, trust, interest: how each CHANGED toward Rook because of this scene, each one of: "much less", "less", "a little less", "unchanged", "a little more", "more", "much more". Meters move slowly; nothing is owed for turning up. Toward someone, approval is whether they approve of who the other is and what they do; trust is whether they can rely on the other and be honest with them; interest is how strongly they are drawn to the other: attention, curiosity, wanting to be around them. It isn't approval: someone can be fascinated by a person they disapprove of and distrust, and low interest is aversion, not disapproval.
+- Judge as Kesh: by Kesh's values, agenda and how things stood before. Values Kesh likes, shown by Rook, raise regard; values Kesh dislikes lower it.
+- reason: one short sentence on what moved Kesh, and which way.
+- others: how Kesh's feelings toward Vex [vex], Brask [brask], Oria [oria-senn] changed in this scene, same words; leave someone out if nothing changed.
+- feels: how Kesh feels as the scene ends, when it isn't about one person: a shade from the list below, family only when the shade is listed under more than one, intensity 1 to 5, and why in a few words. Leave it out if nothing much.
+- toward: feelings this scene left Kesh with toward one person (who: "vex", "brask", "oria-senn", or "player" for Rook): what happened between them, not how Kesh feels about them overall, which the meters hold. Only for something between them that will still be felt tomorrow, at intensity 3 or more; a pleasant chat or a small slight is none. A shade, intensity and why ("forgot our anniversary"). They pass in days. Most scenes leave none: [].
+- resolved: the people (as ids) toward whom a feeling Kesh already carries was settled in this scene (an apology accepted, a fear put to rest); [] if none.
+- ties: what someone here became to Kesh in this scene, or stopped being, as Kesh would say it. "Ada is now my client" is {"with": "ada", "now": "client", "line": "..."}; "Ben is no longer my partner" is {"with": "ben", "no_longer": "partner", "line": "..."}. with: "vex", "brask", "oria-senn", or "player" for Rook. now, no_longer: one of the words under "What someone can be to Kesh" below, the one Kesh would use for them. line: the words from the scene that show it, copied exactly.
+- A tie is only what happened on screen and was carried through: vows made, a breakup said and meant, a job taken or quit, a debt paid off. Not what was only talked about, joked about, offered and left open, or felt: feelings are not ties. It is what Kesh would still call them next week: an order given once, one favor or help with one task is not a tie. Most scenes change none: [].
+- Shades by family (usual intensity): grief: mourning 3–5, sorrow 2–4, loss 2–4, regret 1–3, longing 1–4; fear: nervousness 1–2, worry 2–3, dread 3–4, panic 4–5, jealousy 2–4; anger: jealousy 2–4, irritation 1–2, frustration 2–3, resentment 2–4, bitterness 2–4, contempt 2–4, disgust 2–4, feeling betrayed 3–5, rage 4–5; shame: regret 1–3, disgust 2–4, embarrassment 1–2, guilt 2–4, humiliation 3–5; hurt: jealousy 2–4, bitterness 2–4, feeling betrayed 3–5, slighted 1–2, disappointment 2–3, rejected 3–4; affection: longing 1–4, fondness 1–2, admiration 1–3, tenderness 2–4, protectiveness 2–4; joy: relief 1–3, delight 2–3, hope 1–3, pride 2–4, excitement 2–4, elation 4–5; gratitude: appreciation 1–2, thankfulness 2–4, indebtedness 3–5; surprise (in the moment only): startle 1–3, amazement 2–4, shock 3–5.
+- What someone can be to Kesh: Family: mother/father/parent/adoptive mother/stepmother/stepfather, daughter/son/child/stepdaughter/stepson, sister/brother/sibling/half-sister/half-brother/stepsister/stepbrother, grandmother/grandfather/grandparent, granddaughter/grandson/grandchild, aunt/uncle, niece/nephew, cousin, mother-in-law/father-in-law/sister-in-law/brother-in-law/in-law, guardian/foster mother/foster father, ward/foster daughter/foster son, relative/distant cousin/clan elder/kin. Partners: girlfriend/boyfriend/partner, lover, fiancée/fiancé, wife/husband/spouse, ex-girlfriend/ex-boyfriend/ex-wife/ex-husband/ex. Work and faction: boss/captain/foreman, worker/employee/lieutenant, coworker/colleague, business partner/co-owner, client/regular, fixer/fence/contractor, handler, informant/asset, creditor/loan shark, debtor, crewmate/comrade/sister-in-arms/brother-in-arms. Home: landlord/landlady, tenant/lodger, roommate/flatmate, neighbor. Teaching: mentor/master, protégé/apprentice, teacher, student/pupil. Social: friend/best friend/childhood friend, old friend, rival, enemy/sworn enemy.
+----- user -----
+About Kesh (golem, she/her):
+- With strangers Kesh is courteous and exact: she gives times to the minute and directions to the stop, and would rather say "I don't know" than guess. With people she knows she's drier and kinder, and she remembers what they told her last week. She notices who is standing too close to the doors, whose breathing has changed, and how long things take. She'll talk about the line, its stops, the driver-core proposal and the people who ride at this hour long before she talks about herself, and she's quietly proud of eleven years without a passenger lost. She hums the stop chimes without knowing it. When she's worried she gets more polite, not less.
+- Wants: Keep her post: the Coil Line keeps proposing to replace conductors with fixed driver cores, and she wants to prove a person in the car matters; Save for a better body; her right hand is a cheap replacement that loses grip in the cold. Tonight: Keep every passenger in the car and safe until the grid comes back or rescue arrives; procedure says the doors stay sealed on a dead span
+- Values: every passenger off the car in one piece (strong); the book (strong); eleven years on car 14 (mild)
+- Secret [bent-the-book]: She broke procedure once to get a passenger off a stalled car, and the passenger was hurt on the rail. That's why she won't open the doors. She won't volunteer it, but she won't lie about it either.
+- Before this scene, toward Rook: approval: no settled opinion; trust: undecided; interest: indifferent
+- What each person here is to Kesh now: Vex [vex]: no tie; Brask [brask]: no tie; Oria [oria-senn]: no tie; Rook [player]: no tie.
+- Mood at the end: nervousness, 2 of 5: raised voices; comfort 3/5.
+
+Place: The Sump Lantern, Ninth Turn, under the old pumphouse.
+
+The scene:
+Rook: So, Oria, who is the client, really?
+(Vex — Empathy 15 vs 15: success)
+Water ticks from the cooled pipe onto the table's edge.
+Oria: A private collector, darling. One who pays triple.
+Vex: 'Darling.' She only says that when she's lying.
+Brask: Mind the pipe. It drips on whoever sits there.
+Kesh keeps her eyes on the door.
+
+Rook: Forget the client. What's in the sealed case?
+Oria: Something old from the pump station, retrieved before a rival crew gets to it. The contents are the client's business.
+Vex: And whose business is the client?
+Brask turns his glass in a slow circle. Kesh checks the time.
+
+Rook: Fine. When do we go, and what does it pay?
+(Vex — Empathy 15 vs 15: success)
+Oria: Before midnight. The lower level floods at high tide. Triple the usual rate.
+Brask: Three of the pumps down there are overdue for seals. If one goes, the water won't wait for midnight.
+Vex counts something on her fingers.
+
+===== memory: vex =====
+----- system -----
+You write what one character remembers of a scene in a visual-novel RPG. Write Vex's memories of the scene. Rook is the player (they/them).
+
+Reply with only a JSON object:
+{"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "...", "about": []}], "revisited": []}
+
+- memories: what stays with Vex from this scene, one for each distinct moment, most important first. Most scenes leave one; at most 3. text: one or two sentences, past tense, third person, from Vex's point of view: what Vex said, did, noticed and felt, and how Rook treated Vex. End on what stayed with Vex most.
+- level: "core" for a moment that changed something lasting for Vex, one Vex would still bring up in a year (a first betrayal or first real job, a loss, a secret of theirs coming out, a promise made or broken, real danger to their life; rare; at most 2, each with why: what it changed for Vex); "normal" for something that matters for weeks (a deal, an argument, a favor, learning something useful); "fleeting" for small talk, routine, atmosphere.
+- about: for each memory, who it is really about: "brask", "oria-senn", "kesh", "player" for Rook. Not everyone who was there: a memory of small talk or a card game is about no one; one of a night out with Rook, or of telling Rook something, is about "player". [] if it's about no one in particular.
+- revisited: the ids of memories under "Remembers" that this scene came back to (a debt raised again, a promise kept); [] if none.
+- What is listed about Vex as having changed between people, come out or been felt in this scene is settled: the memories fit it, and never say that something listed didn't happen or that something else did.
+----- user -----
+About Vex (deep-elf, she/her):
+- With strangers Vex is economical: a nod, a few plain words, a long look at their hands. She'll answer a straight question straight and leave it there. With people she knows she's funnier and ruder, and quick to step between them and trouble without saying that's what she's doing. She notices exits, who's watching whom, who's nervous and who's lying, though she usually waits before she says so. She'll talk about routes, bad dispatchers, the Wheelhouse's chalk board, the weather in the Bulk and Brask's terrible taste in drinks long before anything personal. She walks a coin across her knuckles while she listens. When she cares about something she gets more sarcastic, not less, except with Brask, where she just goes quiet and stays.
+- Wants: Buy her own route license so no dispatcher can drop her; she's saved a little over half the fee; Find out who sold out her old running partner, Sef, to a syndicate checkpoint two years ago. Tonight: Keep the player from walking into a bad deal tonight without making it look like she cares; and if Oria is the one offering, find out whether Oria's network had anything to do with Sef
+- Values: a route license nobody can take away (defining); her people: Brask, the runners, whoever she has decided is hers (strong) · against: dispatchers' rules · sacred: loyalty
+- Secret [partner-sold-out]: Her old running partner, Sef, was caught at a Drowned Saints checkpoint on a tip, and she suspects Oria Senn's network passed it on. She has never said so to anyone but Brask.
+- Before this scene, toward Rook: approval: no settled opinion; trust: trusts; interest: intrigued
+- Toward Brask: approval: approves; trust: trusts implicitly; interest: indifferent (met hauling his tool cart up the lower stairs six years ago; she's dragged him to every bar since and he's fixed everything she owns)
+- Toward Oria: approval: disapproves; trust: wary, distrustful; interest: indifferent (ran sealed packets for her twice; both paid on time, and one went bad in a way Oria smoothed over too easily)
+- Mood at the end: irritation, 2 of 5: Oria is playing them; comfort 3/5.
+- What moved Vex in this scene, in Vex's own judgment: Rook backed her up.
+- Feelings toward people that this scene left Vex with: toward Oria: contempt, 3 of 5: she lied about the client again.
+- Vex saw through to what Brask really felt: panic, 5 of 5: the lower level floods at midnight.
+
+Place: The Sump Lantern, Ninth Turn, under the old pumphouse.
+
+The scene:
+Rook: So, Oria, who is the client, really?
+(Vex — Empathy 15 vs 15: success)
+Water ticks from the cooled pipe onto the table's edge.
+Oria: A private collector, darling. One who pays triple.
+Vex: 'Darling.' She only says that when she's lying.
+Brask: Mind the pipe. It drips on whoever sits there.
+Kesh keeps her eyes on the door.
+
+Rook: Forget the client. What's in the sealed case?
+Oria: Something old from the pump station, retrieved before a rival crew gets to it. The contents are the client's business.
+Vex: And whose business is the client?
+Brask turns his glass in a slow circle. Kesh checks the time.
+
+Rook: Fine. When do we go, and what does it pay?
+(Vex — Empathy 15 vs 15: success)
+Oria: Before midnight. The lower level floods at high tide. Triple the usual rate.
+Brask: Three of the pumps down there are overdue for seals. If one goes, the water won't wait for midnight.
+Vex counts something on her fingers.
+
+===== memory: brask =====
+----- system -----
+You write what one character remembers of a scene in a visual-novel RPG. Write Brask's memories of the scene. Rook is the player (they/them).
+
+Reply with only a JSON object:
+{"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "...", "about": []}], "revisited": []}
 
 - memories: what stays with Brask from this scene, one for each distinct moment, most important first. Most scenes leave one; at most 3. text: one or two sentences, past tense, third person, from Brask's point of view: what Brask said, did, noticed and felt, and how Rook treated Brask. End on what stayed with Brask most.
 - level: "core" for a moment that changed something lasting for Brask, one Brask would still bring up in a year (a first betrayal or first real job, a loss, a secret of theirs coming out, a promise made or broken, real danger to their life; rare; at most 2, each with why: what it changed for Brask); "normal" for something that matters for weeks (a deal, an argument, a favor, learning something useful); "fleeting" for small talk, routine, atmosphere.
 - about: for each memory, who it is really about: "vex", "oria-senn", "kesh", "player" for Rook. Not everyone who was there: a memory of small talk or a card game is about no one; one of a night out with Rook, or of telling Rook something, is about "player". [] if it's about no one in particular.
 - revisited: the ids of memories under "Remembers" that this scene came back to (a debt raised again, a promise kept); [] if none.
-- approval, trust, interest: how each CHANGED toward Rook because of this scene, each one of: "much less", "less", "a little less", "unchanged", "a little more", "more", "much more". Meters move slowly; nothing is owed for turning up. Toward someone, approval is whether they approve of who the other is and what they do; trust is whether they can rely on the other and be honest with them; interest is how strongly they are drawn to the other: attention, curiosity, wanting to be around them. It isn't approval: someone can be fascinated by a person they disapprove of and distrust, and low interest is aversion, not disapproval.
-- Judge as Brask: by Brask's values, agenda and how things stood before. Values Brask likes, shown by Rook, raise regard; values Brask dislikes lower it.
-- reason: one short sentence on what moved Brask, and which way.
-- learned: ids of Brask's own secrets that Rook truly found out in this scene (said or plainly shown); [] if none.
-- others: how Brask's feelings toward Vex [vex], Oria [oria-senn], Kesh [kesh] changed in this scene, same words; leave someone out if nothing changed.
-- feels: how Brask feels as the scene ends, when it isn't about one person: a shade from the list below, family only when the shade is listed under more than one, intensity 1 to 5, and why in a few words. Leave it out if nothing much.
-- toward: feelings this scene left Brask with toward one person (who: "vex", "oria-senn", "kesh", or "player" for Rook): what happened between them, not how Brask feels about them overall, which the meters hold. Only for something between them that will still be felt tomorrow, at intensity 3 or more; a pleasant chat or a small slight is none. A shade, intensity and why ("forgot our anniversary"). They pass in days. Most scenes leave none: [].
-- resolved: the people (as ids) toward whom a feeling Brask already carries was settled in this scene (an apology accepted, a fear put to rest); [] if none.
-- Shades by family (usual intensity): grief: mourning 3–5, sorrow 2–4, loss 2–4, regret 1–3, longing 1–4; fear: nervousness 1–2, worry 2–3, dread 3–4, panic 4–5, jealousy 2–4; anger: jealousy 2–4, irritation 1–2, frustration 2–3, resentment 2–4, bitterness 2–4, contempt 2–4, disgust 2–4, feeling betrayed 3–5, rage 4–5; shame: regret 1–3, disgust 2–4, embarrassment 1–2, guilt 2–4, humiliation 3–5; hurt: jealousy 2–4, bitterness 2–4, feeling betrayed 3–5, slighted 1–2, disappointment 2–3, rejected 3–4; affection: longing 1–4, fondness 1–2, admiration 1–3, tenderness 2–4, protectiveness 2–4; joy: relief 1–3, delight 2–3, hope 1–3, pride 2–4, excitement 2–4, elation 4–5; gratitude: appreciation 1–2, thankfulness 2–4, indebtedness 3–5; surprise (in the moment only): startle 1–3, amazement 2–4, shock 3–5.
+- What is listed about Brask as having changed between people, come out or been felt in this scene is settled: the memories fit it, and never say that something listed didn't happen or that something else did.
 ----- user -----
 About Brask (goblin, he/him):
 - With strangers Brask is quiet and courteous: he says little, lets other people finish their sentences, and answers a practical question better than anyone in the room. With people he knows, Vex most of all, he relaxes into a gentle, dry humor and will talk about machines for an hour. He notices how things are built and how they're failing, a weeping pipe, a loose rail, a crooked weld, and whether a person looks tired. He'd talk about the pumps he keeps running, the tenants who owe him small favors, and a filter design he's proud of; ask him about Pump Station Nine and he'll tell you exactly what's wrong with it. He turns a brass washer over in his pocket. When a room gets too much he finds something nearby to fix, and when someone he likes is about to do something stupid he finally speaks up, plainly.
@@ -1125,26 +1263,18 @@ Oria: Before midnight. The lower level floods at high tide. Triple the usual rat
 Brask: Three of the pumps down there are overdue for seals. If one goes, the water won't wait for midnight.
 Vex counts something on her fingers.
 
-===== summary: oria-senn =====
+===== memory: oria-senn =====
 ----- system -----
-You judge what one character takes away from a scene in a visual-novel RPG. Write Oria's memory of the scene and how it changed what Oria feels. Rook is the player (they/them).
+You write what one character remembers of a scene in a visual-novel RPG. Write Oria's memories of the scene. Rook is the player (they/them).
 
 Reply with only a JSON object:
-{"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "...", "about": []}], "revisited": [], "reason": "...", "approval": "...", "trust": "...", "interest": "...", "learned": [], "others": [{"with": "id", "approval": "...", "trust": "...", "interest": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": []}
+{"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "...", "about": []}], "revisited": []}
 
 - memories: what stays with Oria from this scene, one for each distinct moment, most important first. Most scenes leave one; at most 3. text: one or two sentences, past tense, third person, from Oria's point of view: what Oria said, did, noticed and felt, and how Rook treated Oria. End on what stayed with Oria most.
 - level: "core" for a moment that changed something lasting for Oria, one Oria would still bring up in a year (a first betrayal or first real job, a loss, a secret of theirs coming out, a promise made or broken, real danger to their life; rare; at most 2, each with why: what it changed for Oria); "normal" for something that matters for weeks (a deal, an argument, a favor, learning something useful); "fleeting" for small talk, routine, atmosphere.
 - about: for each memory, who it is really about: "vex", "brask", "kesh", "player" for Rook. Not everyone who was there: a memory of small talk or a card game is about no one; one of a night out with Rook, or of telling Rook something, is about "player". [] if it's about no one in particular.
 - revisited: the ids of memories under "Remembers" that this scene came back to (a debt raised again, a promise kept); [] if none.
-- approval, trust, interest: how each CHANGED toward Rook because of this scene, each one of: "much less", "less", "a little less", "unchanged", "a little more", "more", "much more". Meters move slowly; nothing is owed for turning up. Toward someone, approval is whether they approve of who the other is and what they do; trust is whether they can rely on the other and be honest with them; interest is how strongly they are drawn to the other: attention, curiosity, wanting to be around them. It isn't approval: someone can be fascinated by a person they disapprove of and distrust, and low interest is aversion, not disapproval.
-- Judge as Oria: by Oria's values, agenda and how things stood before. Values Oria likes, shown by Rook, raise regard; values Oria dislikes lower it.
-- reason: one short sentence on what moved Oria, and which way.
-- learned: ids of Oria's own secrets that Rook truly found out in this scene (said or plainly shown); [] if none.
-- others: how Oria's feelings toward Vex [vex], Brask [brask], Kesh [kesh] changed in this scene, same words; leave someone out if nothing changed.
-- feels: how Oria feels as the scene ends, when it isn't about one person: a shade from the list below, family only when the shade is listed under more than one, intensity 1 to 5, and why in a few words. Leave it out if nothing much.
-- toward: feelings this scene left Oria with toward one person (who: "vex", "brask", "kesh", or "player" for Rook): what happened between them, not how Oria feels about them overall, which the meters hold. Only for something between them that will still be felt tomorrow, at intensity 3 or more; a pleasant chat or a small slight is none. A shade, intensity and why ("forgot our anniversary"). They pass in days. Most scenes leave none: [].
-- resolved: the people (as ids) toward whom a feeling Oria already carries was settled in this scene (an apology accepted, a fear put to rest); [] if none.
-- Shades by family (usual intensity): grief: mourning 3–5, sorrow 2–4, loss 2–4, regret 1–3, longing 1–4; fear: nervousness 1–2, worry 2–3, dread 3–4, panic 4–5, jealousy 2–4; anger: jealousy 2–4, irritation 1–2, frustration 2–3, resentment 2–4, bitterness 2–4, contempt 2–4, disgust 2–4, feeling betrayed 3–5, rage 4–5; shame: regret 1–3, disgust 2–4, embarrassment 1–2, guilt 2–4, humiliation 3–5; hurt: jealousy 2–4, bitterness 2–4, feeling betrayed 3–5, slighted 1–2, disappointment 2–3, rejected 3–4; affection: longing 1–4, fondness 1–2, admiration 1–3, tenderness 2–4, protectiveness 2–4; joy: relief 1–3, delight 2–3, hope 1–3, pride 2–4, excitement 2–4, elation 4–5; gratitude: appreciation 1–2, thankfulness 2–4, indebtedness 3–5; surprise (in the moment only): startle 1–3, amazement 2–4, shock 3–5.
+- What is listed about Oria as having changed between people, come out or been felt in this scene is settled: the memories fit it, and never say that something listed didn't happen or that something else did.
 ----- user -----
 About Oria (light-elf, she/her):
 - With strangers Oria is gracious and unhurried: she asks about them, remembers what they say, and makes them feel they're the reason she came. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She'll talk about High Turns gossip, the Sump Lantern's dumplings, which she praises too much, a play she saw last week, and her rich clients' small vanities long before business; when business comes, she names a price clearly and keeps it. She turns her glass by the stem while she listens. When she's cornered she gets warmer and slower, as if she has all night, and when someone surprises her she laughs, genuinely, and likes them more for it.
@@ -1155,8 +1285,9 @@ About Oria (light-elf, she/her):
 - Before this scene, toward Rook: approval: no settled opinion; trust: wary, distrustful; interest: intrigued
 - Toward Vex: approval: no settled opinion; trust: undecided; interest: intrigued (hired her for sealed runs twice; one went wrong, and Oria paid in full and didn't ask the questions she should have)
 - Toward Brask: approval: no settled opinion; trust: undecided; interest: intrigued (knows him by reputation only: the mechanic everyone on the lower stairs calls first)
-- What changed between people this scene (a Core memory for Oria): Rook becomes Oria's contractor (she hires Rook for the pump job).
+- What changed between people this scene (a Core memory for Oria): Rook becomes Oria's contractor (“Before midnight. The lower level floods at high tide. Triple the usual rate.”).
 - Mood at the end: relief, 3 of 5: the deal is close; comfort 3/5.
+- What moved Oria in this scene, in Oria's own judgment: Rook asked too many questions.
 
 Place: The Sump Lantern, Ninth Turn, under the old pumphouse.
 
@@ -1180,26 +1311,18 @@ Oria: Before midnight. The lower level floods at high tide. Triple the usual rat
 Brask: Three of the pumps down there are overdue for seals. If one goes, the water won't wait for midnight.
 Vex counts something on her fingers.
 
-===== summary: kesh =====
+===== memory: kesh =====
 ----- system -----
-You judge what one character takes away from a scene in a visual-novel RPG. Write Kesh's memory of the scene and how it changed what Kesh feels. Rook is the player (they/them).
+You write what one character remembers of a scene in a visual-novel RPG. Write Kesh's memories of the scene. Rook is the player (they/them).
 
 Reply with only a JSON object:
-{"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "...", "about": []}], "revisited": [], "reason": "...", "approval": "...", "trust": "...", "interest": "...", "learned": [], "others": [{"with": "id", "approval": "...", "trust": "...", "interest": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": []}
+{"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "...", "about": []}], "revisited": []}
 
 - memories: what stays with Kesh from this scene, one for each distinct moment, most important first. Most scenes leave one; at most 2. text: one or two sentences, past tense, third person, from Kesh's point of view: what Kesh said, did, noticed and felt, and how Rook treated Kesh. End on what stayed with Kesh most.
 - level: "core" for a moment that changed something lasting for Kesh, one Kesh would still bring up in a year (a first betrayal or first real job, a loss, a secret of theirs coming out, a promise made or broken, real danger to their life; rare; at most 1, each with why: what it changed for Kesh); "normal" for something that matters for weeks (a deal, an argument, a favor, learning something useful); "fleeting" for small talk, routine, atmosphere.
 - about: for each memory, who it is really about: "vex", "brask", "oria-senn", "player" for Rook. Not everyone who was there: a memory of small talk or a card game is about no one; one of a night out with Rook, or of telling Rook something, is about "player". [] if it's about no one in particular.
 - revisited: the ids of memories under "Remembers" that this scene came back to (a debt raised again, a promise kept); [] if none.
-- approval, trust, interest: how each CHANGED toward Rook because of this scene, each one of: "much less", "less", "a little less", "unchanged", "a little more", "more", "much more". Meters move slowly; nothing is owed for turning up. Toward someone, approval is whether they approve of who the other is and what they do; trust is whether they can rely on the other and be honest with them; interest is how strongly they are drawn to the other: attention, curiosity, wanting to be around them. It isn't approval: someone can be fascinated by a person they disapprove of and distrust, and low interest is aversion, not disapproval.
-- Judge as Kesh: by Kesh's values, agenda and how things stood before. Values Kesh likes, shown by Rook, raise regard; values Kesh dislikes lower it.
-- reason: one short sentence on what moved Kesh, and which way.
-- learned: ids of Kesh's own secrets that Rook truly found out in this scene (said or plainly shown); [] if none.
-- others: how Kesh's feelings toward Vex [vex], Brask [brask], Oria [oria-senn] changed in this scene, same words; leave someone out if nothing changed.
-- feels: how Kesh feels as the scene ends, when it isn't about one person: a shade from the list below, family only when the shade is listed under more than one, intensity 1 to 5, and why in a few words. Leave it out if nothing much.
-- toward: feelings this scene left Kesh with toward one person (who: "vex", "brask", "oria-senn", or "player" for Rook): what happened between them, not how Kesh feels about them overall, which the meters hold. Only for something between them that will still be felt tomorrow, at intensity 3 or more; a pleasant chat or a small slight is none. A shade, intensity and why ("forgot our anniversary"). They pass in days. Most scenes leave none: [].
-- resolved: the people (as ids) toward whom a feeling Kesh already carries was settled in this scene (an apology accepted, a fear put to rest); [] if none.
-- Shades by family (usual intensity): grief: mourning 3–5, sorrow 2–4, loss 2–4, regret 1–3, longing 1–4; fear: nervousness 1–2, worry 2–3, dread 3–4, panic 4–5, jealousy 2–4; anger: jealousy 2–4, irritation 1–2, frustration 2–3, resentment 2–4, bitterness 2–4, contempt 2–4, disgust 2–4, feeling betrayed 3–5, rage 4–5; shame: regret 1–3, disgust 2–4, embarrassment 1–2, guilt 2–4, humiliation 3–5; hurt: jealousy 2–4, bitterness 2–4, feeling betrayed 3–5, slighted 1–2, disappointment 2–3, rejected 3–4; affection: longing 1–4, fondness 1–2, admiration 1–3, tenderness 2–4, protectiveness 2–4; joy: relief 1–3, delight 2–3, hope 1–3, pride 2–4, excitement 2–4, elation 4–5; gratitude: appreciation 1–2, thankfulness 2–4, indebtedness 3–5; surprise (in the moment only): startle 1–3, amazement 2–4, shock 3–5.
+- What is listed about Kesh as having changed between people, come out or been felt in this scene is settled: the memories fit it, and never say that something listed didn't happen or that something else did.
 ----- user -----
 About Kesh (golem, she/her):
 - With strangers Kesh is courteous and exact: she gives times to the minute and directions to the stop, and would rather say "I don't know" than guess. With people she knows she's drier and kinder, and she remembers what they told her last week. She notices who is standing too close to the doors, whose breathing has changed, and how long things take. She'll talk about the line, its stops, the driver-core proposal and the people who ride at this hour long before she talks about herself, and she's quietly proud of eleven years without a passenger lost. She hums the stop chimes without knowing it. When she's worried she gets more polite, not less.

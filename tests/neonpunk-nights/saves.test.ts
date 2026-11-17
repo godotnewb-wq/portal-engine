@@ -16,6 +16,7 @@ const tempDir = () => join(mkdtempSync(join(tmpdir(), 'npn-saves-')), 'saves')
 function playedGame() {
   const state = barScene(4)
   state.scene!.turns.push({ id: 't1', player: 'Hi.', beats: [{ kind: 'narration', text: 'The pipe drips.' }], checks: [], speakers: [], texture: [] })
+  state.scene!.told.push('oria-senn.client-is-grid-corporation')
   return applySummaries(content, state, [
     {
       id: 'oria-senn',
@@ -23,7 +24,6 @@ function playedGame() {
         ...plainSummary(content, state, 'oria-senn'),
         memories: [{ text: 'Oria was caught lying.', level: 'core', why: 'caught in public' }],
         delta: { approval: -4, trust: -8, interest: 1 },
-        learned: ['client-is-grid-corporation'],
         others: [{ with: 'brask', delta: { approval: 1, trust: 0, interest: 0 }, reason: '' }]
       }
     }

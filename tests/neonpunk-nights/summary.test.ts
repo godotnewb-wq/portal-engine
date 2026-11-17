@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { GameStateSchema, type GameState } from '@engine/state'
 import { buildDirectorPrompt } from '@engine/scene'
 import { selectMemories } from '@engine/memory'
-import { applySummaries, buildSummaryPrompt, parseSummary, plainSummary, transcript, witnesses } from '@engine/relationships'
+import { applySummaries, buildMemoryPrompt, buildRelationshipPrompt, parseSummary, plainSummary, transcript, witnesses } from '@engine/relationships'
 import { barScene, content } from './support'
 
 /** The bar scene after the worked example's turn, with Brask having left. */
@@ -36,15 +36,16 @@ describe('summary prompt', () => {
     expect(text).toMatch(/Oria: A private collector/)
   })
 
-  it('asks one witness for their memory, meters, secrets learned and feelings toward the others', () => {
-    const { system, user } = buildSummaryPrompt(content, playedScene(), 'oria-senn')
+  it('asks one witness for their meters and feelings toward the others, then for their memory', () => {
+    const { system, user } = buildRelationshipPrompt(content, playedScene(), 'oria-senn')
+    expect(buildMemoryPrompt(content, playedScene(), 'oria-senn').system).not.toMatch(/approval|"learned"/)
     expect(system).toMatch(/"much less", "less", "a little less", "unchanged"/)
     expect(system).toMatch(/Vex \[vex\]/)
     expect(user).toMatch(/Secret \[client-is-grid-corporation\]/)
     expect(user).toMatch(/toward Rook: approval: no settled opinion; trust: wary, distrustful; interest: intrigued/)
     expect(user).toMatch(/Toward Vex: approval: no settled opinion; trust: undecided; interest: intrigued \(hired her for sealed runs twice;/)
     expect(user).not.toMatch(/-?\d+–-?\d+|approval -?\d/)
-    expect(buildSummaryPrompt(content, playedScene(), 'brask').user).toMatch(/left before the scene was over/)
+    expect(buildMemoryPrompt(content, playedScene(), 'brask').user).toMatch(/left before the scene was over/)
   })
 })
 
@@ -57,11 +58,10 @@ describe('parseSummary', () => {
       approval: 'a little less',
       trust: 'much_less',
       interest: 'more',
-      learned: ['client-is-grid-corporation'],
       others: [{ with: 'vex', approval: 'less', trust: 'unchanged', interest: 'sideways', reason: 'She exposed me.' }]
     }))
     // The shape before milestone 4b, one memory: read as a list of one, its reason standing in as why for Core.
-    expect(s).toMatchObject({ memories: [{ level: 'core', why: 'Rook pressed her in public.' }], delta: { approval: -1, trust: -8, interest: 4 }, learned: ['client-is-grid-corporation'] })
+    expect(s).toMatchObject({ memories: [{ level: 'core', why: 'Rook pressed her in public.' }], delta: { approval: -1, trust: -8, interest: 4 } })
     expect(s.others).toEqual([{ with: 'vex', delta: { approval: -4, trust: 0, interest: 0 }, reason: 'She exposed me.' }])
   })
 
@@ -76,7 +76,9 @@ describe('parseSummary', () => {
 
 describe('applySummaries', () => {
   it('stores memories, moves meters, records real secrets, updates relations and clears the scene', () => {
+    // Her secret was given away on screen: that record, not the witness's say, is what the player found out (milestone 4c).
     const state = playedScene()
+    state.scene!.told.push('oria-senn.client-is-grid-corporation')
     const { state: next, reports } = applySummaries(content, state, [
       {
         id: 'oria-senn',
@@ -85,7 +87,6 @@ describe('applySummaries', () => {
           revisited: [],
           reason: 'Pressed in public.',
           delta: { approval: -4, trust: -1, interest: 1 },
-          learned: ['client-is-grid-corporation', 'made-up-secret'],
           others: [{ with: 'Vex', delta: { approval: -8, trust: -4, interest: 0 }, reason: 'She exposed me.' }],
           toward: [],
           resolved: []
@@ -134,7 +135,8 @@ describe('memories in later scenes', () => {
 
   it('reach the director, with the secrets the player already knows', () => {
     const state = playedScene()
-    const { state: after } = applySummaries(content, state, [{ id: 'oria-senn', summary: { ...plainSummary(content, state, 'oria-senn'), memories: [{ text: 'Oria was caught lying.', level: 'fleeting', why: '' }], learned: ['client-is-grid-corporation'] } }])
+    state.scene!.told.push('oria-senn.client-is-grid-corporation')
+    const { state: after } = applySummaries(content, state, [{ id: 'oria-senn', summary: { ...plainSummary(content, state, 'oria-senn'), memories: [{ text: 'Oria was caught lying.', level: 'fleeting', why: '' }] } }])
     const again = { ...after, scene: barScene(3).scene }
     const { system } = buildDirectorPrompt(content, again, 'Hello again.')
     // The player found out her secret: a game-forced Core memory (memory §4).

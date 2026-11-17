@@ -1,7 +1,7 @@
-import { caresAbout, feelingWords, shadeList, type Character, type Meters } from '@engine/characters'
+import { caresAbout, feelingWords, tagWord, type Character, type Meters } from '@engine/characters'
 import { meterWords, type Ruleset } from '@engine/rules'
-import { absenceWords, agoWords, carrying, daysSince, tieWords, towardName, type GameState, type Memory, type Relation } from '@engine/state'
-import { applyCarried, fade, whoIs, type CarriedReport, type WrittenFeeling } from './aftermath'
+import { absenceWords, agoWords, carrying, daysSince, tagsToward, tieWords, towardName, type GameState, type Memory, type Relation } from '@engine/state'
+import { applyCarried, carried, fade, whoIs, type CarriedReport, type WrittenFeeling } from './aftermath'
 import { characterById, locationById, type Pack } from '@engine/pack'
 import { entryById } from '@engine/codex'
 import type { Prompt } from '@engine/core'
@@ -13,7 +13,7 @@ import { firstName } from '@engine/core'
  * each word to a number.
  */
 export type MeterDelta = Record<string, number>
-const noChange = (r: Ruleset): MeterDelta => Object.fromEntries(r.meters.list.map((m) => [m.id, 0]))
+export const noChange = (r: Ruleset): MeterDelta => Object.fromEntries(r.meters.list.map((m) => [m.id, 0]))
 
 /**
  * What a witness saw through to this scene (npc design §7, milestone 4b): the reading checks they won, latest per
@@ -50,6 +50,24 @@ export function transcript(content: Pack, state: GameState): string {
     .join('\n\n')
 }
 
+/**
+ * The scale words and what each meter means, for the calls that judge how feelings moved (the relationship call, and
+ * the summary's meter fields before milestone 4c).
+ */
+export function meterTask(r: Ruleset): { fields: string; names: string; meaning: string; words: string } {
+  return {
+    fields: r.meters.list.map((m) => `"${m.id}": "..."`).join(', '),
+    names: r.meters.list.map((m) => m.id).join(', '),
+    meaning: r.meters.list.map((m) => `${m.id} is ${m.description}`).join('; '),
+    words: r.wordScale.map((w) => `"${w.word}"`).join(', ')
+  }
+}
+
+/**
+ * The memory call's task (memory §3; milestone 4c: the end-of-scene summary split in two, and this half writes what the
+ * witness remembers). What changed between people and which secrets came out are the game's records, given as facts;
+ * how the witness's feelings moved is their own relationship call's answer, given so the memory fits it.
+ */
 function task(content: Pack, state: GameState, c: Character, others: Character[]): string {
   const r = content.ruleset
   const heard = exposedTo(content, state, c).length > 0
@@ -58,27 +76,16 @@ function task(content: Pack, state: GameState, c: Character, others: Character[]
   const core = r.memory.core[c.tier]
   const player = state.player.name
   const me = firstName(c.name)
-  const words = r.wordScale.map((w) => `"${w.word}"`).join(', ')
-  const meterFields = r.meters.list.map((m) => `"${m.id}": "..."`).join(', ')
-  const meterNames = r.meters.list.map((m) => m.id).join(', ')
-  const meaning = r.meters.list.map((m) => `${m.id} is ${m.description}`).join('; ')
-  return `You judge what one character takes away from a scene in a visual-novel RPG. Write ${me}'s memory of the scene and how it changed what ${me} feels. ${player} is the player (${state.player.pronouns}).
+  return `You write what one character remembers of a scene in a visual-novel RPG. Write ${me}'s memories of the scene. ${player} is the player (${state.player.pronouns}).
 
 Reply with only a JSON object:
-{"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "...", "about": []${topics ? ', "topics": []' : ''}}], "revisited": [], "reason": "...", ${meterFields}, "learned": [], "others": [{"with": "id", ${meterFields}, "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": []${heard ? ', "heard": [{"id": "...", "memory": "..."}]' : ''}}
+{"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "...", "about": []${topics ? ', "topics": []' : ''}}], "revisited": []${heard ? ', "heard": [{"id": "...", "memory": "..."}]' : ''}}
 
 - memories: what stays with ${me} from this scene, one for each distinct moment, most important first. Most scenes leave one; at most ${perScene}. text: one or two sentences, past tense, third person, from ${me}'s point of view: what ${me} said, did, noticed and felt, and how ${player} treated ${me}. End on what stayed with ${me} most.
 - level: "core" for a moment that changed something lasting for ${me}, one ${me} would still bring up in a year (a first betrayal or first real job, a loss, a secret of theirs coming out, a promise made or broken, real danger to their life; rare; at most ${core}, each with why: what it changed for ${me}); "normal" for something that matters for weeks (a deal, an argument, a favor, learning something useful); "fleeting" for small talk, routine, atmosphere.
 - about: for each memory, who it is really about: ${[...others.map((o) => `"${o.id}"`), `"player" for ${player}`].join(', ')}. Not everyone who was there: a memory of small talk or a card game is about no one; one of a night out with ${player}, or of telling ${player} something, is about "player". [] if it's about no one in particular.
 ${topics ? `- topics: for each memory, the ids of the topics that came up this scene that it is about; [] if none.\n` : ''}- revisited: the ids of memories under "Remembers" that this scene came back to (a debt raised again, a promise kept); [] if none.${heard ? `\n- heard: every one of the other people's secrets listed as coming out in front of ${me} (${me} took each in), each with memory: one sentence, past tense, from ${me}'s point of view, of learning it.` : ''}
-- ${meterNames}: how each CHANGED toward ${player} because of this scene, each one of: ${words}. Meters move slowly; nothing is owed for turning up. Toward someone, ${meaning}.
-- Judge as ${me}: by ${me}'s values, agenda and how things stood before. Values ${me} likes, shown by ${player}, raise regard; values ${me} dislikes lower it.
-- reason: one short sentence on what moved ${me}, and which way.
-- learned: ids of ${me}'s own secrets that ${player} truly found out in this scene (said or plainly shown); [] if none.${others.length > 0 ? `\n- others: how ${me}'s feelings toward ${others.map((o) => `${firstName(o.name)} [${o.id}]`).join(', ')} changed in this scene, same words; leave someone out if nothing changed.` : '\n- others: [].'}
-- feels: how ${me} feels as the scene ends, when it isn't about one person: a shade from the list below, family only when the shade is listed under more than one, intensity 1 to 5, and why in a few words. Leave it out if nothing much.
-- toward: feelings this scene left ${me} with toward one person (who: ${[...others.map((o) => `"${o.id}"`), `or "player" for ${player}`].join(', ')}): what happened between them, not how ${me} feels about them overall, which the meters hold. Only for something between them that will still be felt tomorrow, at intensity ${r.people.aftermath.towardMin} or more; a pleasant chat or a small slight is none. A shade, intensity and why ("forgot our anniversary"). They pass in days. Most scenes leave none: [].
-- resolved: the people (as ids) toward whom a feeling ${me} already carries was settled in this scene (an apology accepted, a fear put to rest); [] if none.
-- Shades by family (usual intensity): ${shadeList(r)}.`
+- What is listed about ${me} as having changed between people, come out or been felt in this scene is settled: the memories fit it, and never say that something listed didn't happen or that something else did.`
 }
 
 /**
@@ -86,7 +93,7 @@ ${topics ? `- topics: for each memory, the ids of the topics that came up this s
  * the feelings toward people here that ended within the history window (so a repeat is seen as one), and how long it
  * had been since they saw the player when that is something they would notice.
  */
-function carriedLines(content: Pack, state: GameState, c: Character, others: Character[]): string[] {
+export function carriedLines(content: Pack, state: GameState, c: Character, others: Character[]): string[] {
   const me = firstName(c.name)
   const { general, toward } = carrying(content, state, c.id)
   const people = [...others.map((o) => o.id), 'player']
@@ -108,7 +115,7 @@ function carriedLines(content: Pack, state: GameState, c: Character, others: Cha
 /** Tie changes this scene that involve them (relationships §3): each is a Core memory, which the summary is told. */
 function tieLines(content: Pack, state: GameState, c: Character): string[] {
   const events = tieEventsFor(state, c.id)
-  return events.length > 0 ? [`- What changed between people this scene (a Core memory for ${firstName(c.name)}): ${events.map((e) => `${tieWords(content, state, { from: e.from, to: e.to, ...(e.added[0] && { add: e.added[0] }), ...(e.word && { word: e.word }), ...(e.ended[0] && { end: e.ended[0] }), reason: e.reason })}${e.reason ? ` (${e.reason})` : ''}`).join('; ')}.`] : []
+  return events.length > 0 ? [`- What changed between people this scene (a Core memory for ${firstName(c.name)}): ${events.map((e) => `${tieWords(content, state, { from: e.from, to: e.to, ...(e.added[0] && { add: e.added[0] }), ...(e.word && { word: e.word }), ...(e.ended[0] && { end: e.ended[0] }), reason: e.reason })}${e.reason ? ` (${e.reason})` : e.line ? ` (“${e.line}”)` : ''}`).join('; ')}.`] : []
 }
 
 /** Their own secrets said on screen this scene (memory §4: one of their secrets revealed forces a Core memory). */
@@ -154,7 +161,53 @@ export function sceneTopics(content: Pack, state: GameState): { id: string; titl
 /** The scene's tie changes a character is part of, either side. */
 const tieEventsFor = (state: GameState, id: string) => state.scene!.tieEvents.filter((e) => e.from === id || e.to === id)
 
-function about(content: Pack, state: GameState, c: Character, others: Character[]): string {
+/**
+ * What a witness's relationship call said, for their memory call (milestone 4c; decided 2026-11-16, user): the two
+ * can't disagree when the second is shown the first. Feelings the ruleset doesn't know, or toward a person and too
+ * weak to carry, are left out, as they are when the scene closes.
+ */
+function judgedLines(content: Pack, state: GameState, c: Character): string[] {
+  const r = content.ruleset
+  const judged = state.scene!.judged?.[c.id]
+  if (!judged) return []
+  const me = firstName(c.name)
+  const feeling = (w: WrittenFeeling | undefined) => {
+    const f = carried(r, w)
+    return f && typeof f !== 'string' ? f : undefined
+  }
+  const general = feeling(judged.feels)
+  const toward = judged.toward.flatMap((w) => {
+    const f = feeling(w)
+    const who = typeof w.who === 'string' ? whoIs(content, state, c.id, w.who) : undefined
+    return f && who && f.intensity >= r.people.aftermath.towardMin ? [`toward ${towardName(content, state, who)}: ${feelingWords(r, f)}`] : []
+  })
+  const resolved = judged.resolved.flatMap((w) => {
+    const who = whoIs(content, state, c.id, w)
+    return who ? [towardName(content, state, who)] : []
+  })
+  return [
+    judged.reason && `- What moved ${me} in this scene, in ${me}'s own judgment: ${sentence(judged.reason)}`,
+    general && `- ${me} leaves the scene feeling: ${feelingWords(r, general)}.`,
+    toward.length > 0 && `- Feelings toward people that this scene left ${me} with: ${toward.join('; ')}.`,
+    resolved.length > 0 && `- A feeling ${me} carried was settled in this scene with: ${resolved.join(', ')}.`
+  ].filter((x): x is string => !!x)
+}
+
+const sentence = (t: string) => (/[.!?]["'’”)]?$/.test(t.trim()) ? t.trim() : `${t.trim()}.`)
+
+/** What each person in the scene is to a witness now, in the tags' words, for their relationship call (relationships §3). */
+function tiesNow(content: Pack, state: GameState, c: Character, others: Character[]): string {
+  const held = (to: string) => tagsToward(state, c.id, to).map((t) => tagWord(content.ruleset, t))
+  const people = [...others.map((o) => ({ label: `${firstName(o.name)} [${o.id}]`, words: held(o.id) })), { label: `${state.player.name} [player]`, words: held('player') }]
+  return `- What each person here is to ${firstName(c.name)} now: ${people.map((p) => `${p.label}: ${p.words.length > 0 ? p.words.join(', ') : 'no tie'}`).join('; ')}.`
+}
+
+/**
+ * A witness as their end-of-scene calls see them. Both calls get who they are, how things stood and how the scene left
+ * them. The relationship call also gets what each person here is to them now; the memory call gets the game's records
+ * of the scene (tie changes, secrets that came out, topics) and what the relationship call said.
+ */
+export function about(content: Pack, state: GameState, c: Character, others: Character[], part: 'relationship' | 'memory'): string {
   const r = content.ruleset
   const me = firstName(c.name)
   const meters = state.meters[c.id]!
@@ -164,6 +217,7 @@ function about(content: Pack, state: GameState, c: Character, others: Character[
     return rel ? [`- Toward ${firstName(o.name)}: ${meterWords(r, rel.meters)}${rel.note ? ` (${rel.note})` : ''}`] : []
   })
   const scene = state.scene!
+  const memory = part === 'memory'
   return [
     `About ${me} (${c.species}, ${c.pronouns}):`,
     `- ${c.portrait}`,
@@ -172,34 +226,36 @@ function about(content: Pack, state: GameState, c: Character, others: Character[
     ...c.secrets.map((s) => `- Secret [${s.id}]: ${s.text}`),
     `- Before this scene, toward ${state.player.name}: ${meterWords(r, meters)}`,
     ...relations,
+    !memory && tiesNow(content, state, c, others),
     memories.length > 0 && `- Remembers:\n${memories.map((m) => `  - [${m.id}] (${m.level}) ${m.text}`).join('\n')}`,
     ...carriedLines(content, state, c, others),
-    ...tieLines(content, state, c),
-    ...revealedSecrets(state, c).map((s) => `- ${me}'s secret [${s.id}] came out on screen this scene (a Core memory for ${me}).`),
+    ...(memory ? tieLines(content, state, c) : []),
+    ...revealedSecrets(state, c).map((s) => `- ${me}'s secret [${s.id}] came out on screen this scene${memory ? ` (a Core memory for ${me})` : ''}.`),
     ...(() => {
-      const topics = sceneTopics(content, state)
+      const topics = memory ? sceneTopics(content, state) : []
       return topics.length > 0 ? [`- Topics that came up this scene: ${topics.map((t) => `[${t.id}] ${t.title}`).join('; ')}.`] : []
     })(),
     ...(() => {
-      const heard = exposedTo(content, state, c)
+      const heard = memory ? exposedTo(content, state, c) : []
       return heard.length > 0 ? [`- Other people's secrets that came out in front of ${me} this scene:\n${heard.map((h) => `  - [${h.id}] ${firstName(h.holder.name)}: ${h.text}`).join('\n')}`] : []
     })(),
     `- Mood at the end: ${feelingWords(r, scene.moods[c.id])}; comfort ${scene.comfort[c.id] ?? 3}/5.`,
+    ...(memory ? judgedLines(content, state, c) : []),
     ...reads(state, c.id).map((x) => `- ${me} saw through to what ${firstName(others.find((o) => o.id === x.target)?.name ?? x.target)} really felt: ${feelingWords(r, x.feeling)}.`),
-    scene.departed.includes(c.id) && `- ${me} left before the scene was over; the memory ends with leaving.`
+    scene.departed.includes(c.id) && `- ${me} left before the scene was over${memory ? '; the memory ends with leaving' : ''}.`
   ]
     .filter(Boolean)
     .join('\n')
 }
 
-/** The prompt for one witness's end-of-scene summary (outside the turn budget; one per witness, in parallel). */
-export function buildSummaryPrompt(content: Pack, state: GameState, id: string): Prompt {
+/** The prompt for one witness's memory call (outside the turn budget; one per witness, in parallel, after the player's answers). */
+export function buildMemoryPrompt(content: Pack, state: GameState, id: string): Prompt {
   const c = characterById(content, id)!
   const others = witnesses(state).filter((x) => x !== id).map((x) => characterById(content, x)!)
   const location = locationById(content, state.scene!.locationId)!
   return {
     system: task(content, state, c, others),
-    user: [about(content, state, c, others), `Place: ${location.name}, ${location.district}.`, `The scene:\n${transcript(content, state) || '(Nothing much was said.)'}`].join('\n\n')
+    user: [about(content, state, c, others, 'memory'), `Place: ${location.name}, ${location.district}.`, `The scene:\n${transcript(content, state) || '(Nothing much was said.)'}`].join('\n\n')
   }
 }
 
@@ -211,7 +267,7 @@ const word = (r: Ruleset, value: unknown): number => {
   return r.wordScale.find((w) => normalize(w.word) === normalize(value))?.value ?? 0
 }
 
-const deltaOf = (r: Ruleset, given: Record<string, unknown>): MeterDelta => Object.fromEntries(r.meters.list.map((m) => [m.id, word(r, given[m.id])]))
+export const deltaOf = (r: Ruleset, given: Record<string, unknown>): MeterDelta => Object.fromEntries(r.meters.list.map((m) => [m.id, word(r, given[m.id])]))
 
 /** A memory as the summary writes it: its text, a level, and why, for Core. */
 export interface WrittenMemory {
@@ -232,7 +288,6 @@ export interface Summary {
   /** What moved their meters. */
   reason: string
   delta: MeterDelta
-  learned: string[]
   others: { with: string; delta: MeterDelta; reason: string }[]
   /** How they feel as the scene ends, when it isn't about one person (milestone 4b). */
   feels?: WrittenFeeling
@@ -271,7 +326,7 @@ export function parseSummary(r: Ruleset, reply: string): Summary {
         memory = ''
       }
     }
-    return { memories: memory ? [{ text: memory, level: 'normal', why: '' }] : [], revisited: [], reason: '', delta: noChange(r), learned: [], others: [], toward: [], resolved: [] }
+    return { memories: memory ? [{ text: memory, level: 'normal', why: '' }] : [], revisited: [], reason: '', delta: noChange(r), others: [], toward: [], resolved: [] }
   }
   const given = raw as Record<string, unknown>
   const level = (x: unknown) => LEVELS.find((l) => l === text(x).toLowerCase()) ?? 'normal'
@@ -286,7 +341,6 @@ export function parseSummary(r: Ruleset, reply: string): Summary {
     revisited: Array.isArray(given['revisited']) ? given['revisited'].filter((x): x is string => typeof x === 'string').map((x) => x.trim()) : [],
     reason: text(given['reason']),
     delta: deltaOf(r, given),
-    learned: Array.isArray(given['learned']) ? given['learned'].filter((x): x is string => typeof x === 'string').map((x) => x.trim()) : [],
     others: Array.isArray(given['others'])
       ? given['others'].flatMap((o) => {
           if (typeof o !== 'object' || o === null || typeof (o as { with?: unknown }).with !== 'string') return []
@@ -301,13 +355,13 @@ export function parseSummary(r: Ruleset, reply: string): Summary {
   }
 }
 
-const isObject = (x: unknown): x is Record<string, unknown> => typeof x === 'object' && x !== null && !Array.isArray(x)
+export const isObject = (x: unknown): x is Record<string, unknown> => typeof x === 'object' && x !== null && !Array.isArray(x)
 
 /** When a witness's summary can't be had, the game writes a plain memory and changes nothing. */
 export function plainSummary(content: Pack, state: GameState, id: string): Summary {
   const c = characterById(content, id)!
   const location = locationById(content, state.scene!.locationId)!
-  return { memories: [{ text: `${firstName(c.name)} spent time with ${state.player.name} at ${location.name}.`, level: 'fleeting', why: '' }], revisited: [], reason: '', delta: noChange(content.ruleset), learned: [], others: [], toward: [], resolved: [] }
+  return { memories: [{ text: `${firstName(c.name)} spent time with ${state.player.name} at ${location.name}.`, level: 'fleeting', why: '' }], revisited: [], reason: '', delta: noChange(content.ruleset), others: [], toward: [], resolved: [] }
 }
 
 /** Moves each meter by its change, kept within the ruleset's range. */
@@ -337,7 +391,7 @@ export interface WitnessReport {
   others: { with: string; before: Meters; after: Meters; reason: string }[]
   /** What they carry out of the scene: aftermath, feelings toward people, what was resolved (milestone 4b). Not shown to the player. */
   carried?: CarriedReport
-  /** Set when the summary call failed and the game wrote a plain memory. */
+  /** Set when one of their calls failed: the memory call (the game wrote a plain memory) or the relationship call (nothing moved). */
   error?: string
 }
 
@@ -361,7 +415,7 @@ function makeMemories(content: Pack, state: GameState, c: Character, summary: Su
   const short = (t: string) => `"${t.split(/\s+/).slice(0, 6).join(' ')}…"`
   const forced = [
     ...tieEventsFor(state, c.id).map(() => 'a relationship tag began or ended'),
-    ...new Set([...revealedSecrets(state, c).map((s) => s.id), ...learned].map(() => 'a secret of theirs came out'))
+    ...new Set(learned.map(() => 'a secret of theirs came out'))
   ][0]
   const peak = Math.max(scene.peaks[c.id] ?? 0, scene.moods[c.id]?.intensity ?? 0, Number(summary.feels?.intensity) || 0, ...summary.toward.map((t) => Number(t.intensity) || 0))
   let written = summary.memories
@@ -489,7 +543,9 @@ export function applySummaries(content: Pack, state: GameState, summaries: { id:
     const after = addMeters(r, meters[id]!, summary.delta)
     meters = { ...meters, [id]: after }
 
-    const learnedSecrets = c.secrets.filter((s) => summary.learned.some((l) => l.toLowerCase() === s.id))
+    // What the player found out is the game's record of what came out on screen, not the witness's say (milestone 4c;
+    // decided 2026-11-16, user): each of their secrets given away this scene.
+    const learnedSecrets = revealedSecrets(state, c)
     if (learnedSecrets.length > 0) facts[id] = [...new Set([...(facts[id] ?? []), ...learnedSecrets.map((s) => s.text)])]
 
     const made = makeMemories(content, state, c, summary, memories, learnedSecrets.map((s) => s.id))

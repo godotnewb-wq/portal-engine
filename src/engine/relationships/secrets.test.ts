@@ -5,7 +5,7 @@ import { applyTurn, buildBriefs, canSay, exposures, givesAway, knowerIn, parsePl
 import { GameStateSchema, startScene, type GameState } from '@engine/state'
 import type { CheckResult } from '@engine/rules'
 import { fixture, yardScene } from '@tests/fixture'
-import { applySummaries, buildSummaryPrompt, plainSummary, type Summary } from './summary'
+import { applySummaries, buildMemoryPrompt, plainSummary, type Summary } from './summary'
 
 // Milestone 4b, task 5b: secrets learned in play, who knows them, and dormant secrets (decided 2026-11-13).
 const ASK = 'Tobin, who did you let in?'
@@ -91,15 +91,15 @@ describe('learning a secret', () => {
   const told = said(yardScene(), tells, 'tobin')
 
   it('offers the summary what came out in front of them, and keeps what they took in as a memory of at least Normal with the secret', () => {
-    expect(buildSummaryPrompt(fixture, told, 'mara').user).toContain("- Other people's secrets that came out in front of Mara this scene:\n  - [tobin.after-closing] Tobin: Tobin let someone into the yard after closing.")
-    expect(buildSummaryPrompt(fixture, told, 'mara').system).toContain("- heard: every one of the other people's secrets listed as coming out in front of Mara")
-    expect(buildSummaryPrompt(fixture, told, 'tobin').system).not.toContain('- heard:')
+    expect(buildMemoryPrompt(fixture, told, 'mara').user).toContain("- Other people's secrets that came out in front of Mara this scene:\n  - [tobin.after-closing] Tobin: Tobin let someone into the yard after closing.")
+    expect(buildMemoryPrompt(fixture, told, 'mara').system).toContain("- heard: every one of the other people's secrets listed as coming out in front of Mara")
+    expect(buildMemoryPrompt(fixture, told, 'tobin').system).not.toContain('- heard:')
     const { state, reports } = end(told, 'mara', { memories: [{ text: 'A long night.', level: 'fleeting', why: '' }], heard: [{ id: 'tobin.after-closing', memory: 'Tobin let someone in after closing.' }, { id: 'tobin.made-up', memory: 'x' }] })
     expect(state.memories.map((m) => [m.id, m.level, m.secret, m.about])).toEqual([['mara.m1', 'fleeting', undefined, ['player', 'tobin']], ['mara.m2', 'normal', 'tobin.after-closing', ['tobin']]])
     expect(reports[0]!).toMatchObject({ heard: ['tobin.after-closing'], memoryNotes: ['heard "tobin.made-up": it didn\'t come out in front of them this scene'] })
     // Once learned, it isn't offered again.
     const again = { ...said(state.scene ? state : startScene(fixture, state, 'the-yard', ['mara', 'tobin']), tells, 'tobin') }
-    expect(buildSummaryPrompt(fixture, again, 'mara').user).not.toContain("Other people's secrets")
+    expect(buildMemoryPrompt(fixture, again, 'mara').user).not.toContain("Other people's secrets")
   })
 
   it('teaches it to everyone present even when the summary leaves it out of heard (decided 2026-11-16)', () => {

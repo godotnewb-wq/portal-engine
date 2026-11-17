@@ -76,7 +76,9 @@ export const TieChangeSchema = z.object({
   word: z.string().optional(),
   backWord: z.string().optional(),
   end: z.string().optional(),
-  reason: z.string().default('')
+  reason: z.string().default(''),
+  /** The words from the scene that show it, as the witness who reported it quoted them (milestone 4c). */
+  line: z.string().optional()
 })
 export type TieChange = z.infer<typeof TieChangeSchema>
 
@@ -89,10 +91,31 @@ export const TieEventSchema = z.object({
   /** The word for the tag added, as `from` words it. */
   word: z.string().optional(),
   reason: z.string().default(''),
+  /** The words from the scene that show it (milestone 4c). */
+  line: z.string().optional(),
   /** The turn it happened on. */
   turn: z.string().optional()
 })
 export type TieEvent = z.infer<typeof TieEventSchema>
+
+/** A feeling as an end-of-scene call wrote it, before it is checked against the ruleset. */
+const WrittenFeelingSchema = z.object({ who: z.string().optional(), shade: z.unknown().optional(), family: z.unknown().optional(), intensity: z.unknown().optional(), reason: z.unknown().optional() })
+
+/**
+ * What a witness's relationship call said (milestone 4c): how their meters moved, in numbers the ruleset gave the
+ * words, and the feelings they leave with. Kept on the scene between that call and the memory call, across the
+ * player's answers. `error`: the call failed, and nothing changes for them.
+ */
+export const JudgmentSchema = z.object({
+  reason: z.string().default(''),
+  delta: z.record(z.string(), z.number()).default({}),
+  others: z.array(z.object({ with: z.string(), delta: z.record(z.string(), z.number()), reason: z.string().default('') })).default([]),
+  feels: WrittenFeelingSchema.optional(),
+  toward: z.array(WrittenFeelingSchema).default([]),
+  resolved: z.array(z.string()).default([]),
+  error: z.string().optional()
+})
+export type Judgment = z.infer<typeof JudgmentSchema>
 
 /** A scene in progress. Prompts are rebuilt from this every turn, never from a growing chat log. */
 export const SceneSchema = z.object({
@@ -133,6 +156,11 @@ export const SceneSchema = z.object({
   /** The strongest intensity each character felt in the scene (the director's `feels`), for the memory over-grading guard. */
   peaks: z.record(z.string(), z.number().int()).default({}),
   /** Tie changes that happened in the scene (relationships §3): each forces a Core memory for both sides at its end. */
-  tieEvents: z.array(TieEventSchema).default([])
+  tieEvents: z.array(TieEventSchema).default([]),
+  /**
+   * Each witness's relationship call, once the scene's end has asked them (milestone 4c). Absent until then; the
+   * memory calls read it, and the meters move when the scene closes.
+   */
+  judged: z.record(z.string(), JudgmentSchema).optional()
 })
 export type Scene = z.infer<typeof SceneSchema>

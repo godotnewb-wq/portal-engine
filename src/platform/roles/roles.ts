@@ -57,7 +57,7 @@ export function turnLlm(settings: Settings): TurnLlm {
   }
 }
 
-/** The end-of-scene summary call: low temperature, JSON. */
+/** The end-of-scene calls (a witness's relationship call and memory call) and consolidation: low temperature, JSON. */
 export function summaryLlm(settings: Settings): Summarize {
   return (prompt) => judged(settings, 'summary', prompt, SUMMARY_MIN_TOKENS)
 }

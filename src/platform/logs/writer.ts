@@ -2,7 +2,7 @@ import { appendFileSync, existsSync, mkdirSync, readFileSync, renameSync, writeF
 import { randomBytes } from 'node:crypto'
 import { join } from 'node:path'
 import type { CallTrace } from '@engine/core'
-import type { ConsolidationTrace, SceneEndTrace, TieCheckTrace } from '@engine/relationships'
+import type { ConsolidationTrace, SceneEndTrace, RelationshipTrace } from '@engine/relationships'
 import type { TurnTrace } from '@engine/scene'
 import type { FlagRecord, ScoreRecord } from '@engine/review'
 import { FILES, sessionName, splitPrompt, type CallRecord, type ErrorRecord, type PromptRecord, type SceneRecord, type SessionRecord, type TurnRecord } from './records'
@@ -79,8 +79,11 @@ export class LogSession {
     this.append(FILES.scenes, { type: 'end', ...rest, calls: this.calls(calls) } satisfies SceneRecord)
   }
 
-  /** The end-of-scene tie check (milestone 4b): what was proposed, applied, held for the player and refused. */
-  ties(trace: TieCheckTrace): void {
+  /**
+   * The witnesses' relationship calls and the ties settled from them (milestone 4c; the tie check's record before it):
+   * what each said, and what was applied, held for the player, refused or reported by one side alone.
+   */
+  ties(trace: RelationshipTrace): void {
     const { calls, ...rest } = trace
     this.append(FILES.scenes, { type: 'ties', ...rest, calls: this.calls(calls) } satisfies SceneRecord)
   }

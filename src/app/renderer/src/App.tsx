@@ -107,9 +107,10 @@ export function App() {
   }
 
   /**
-   * Closing a scene where nothing was said needs no summaries. Otherwise the relationship changes are read from the
-   * scene first (milestone 4b); any the player must agree to are asked before the summaries, so memories match the
-   * answer; then every witness writes theirs. A failed tie check changes nothing, and the scene still ends.
+   * Closing a scene where nothing was said needs no calls. Otherwise every witness first says how the scene moved them
+   * and what changed between people (milestone 4c); any change the player must agree to is asked next, so memories
+   * match the answer; then every witness writes what they remember. A failed first half changes nothing, and the scene
+   * still ends.
    */
   const endScene = async () => {
     if (!state?.scene) return
@@ -121,7 +122,7 @@ export function App() {
     setScreen('ending')
     setError('')
     const checked = await window.api.sceneTies(state)
-    if (!checked.ok) console.error('Tie check failed:', checked.error)
+    if (!checked.ok) console.error('Relationship calls failed:', checked.error)
     const next = checked.ok ? checked.state : state
     setState(next)
     if (next.scene && next.scene.pendingTies.length > 0) setScreen('ties')

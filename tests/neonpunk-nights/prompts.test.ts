@@ -114,18 +114,17 @@ NARRATION: Vex counts something on her fingers.
 ]
 
 const SUMMARIES = {
-  vex: { toward: [{ who: 'oria-senn', shade: 'contempt', intensity: 3, reason: 'she lied about the client again' }], memory: 'Oria lied about the client again, and Rook pushed her on it.', level: 'normal', reason: 'Rook backed her up', approval: 'a little more', trust: 'unchanged', interest: 'unchanged', learned: [], others: [{ with: 'oria-senn', approval: 'less', trust: 'less', interest: 'unchanged', reason: 'she lied again' }] },
-  brask: { memories: [{ text: 'Oria offered Rook a flooded pump job with a midnight deadline.', level: 'normal' }, { text: 'The lower level floods at midnight and nobody listened.', level: 'core', why: 'he was afraid for the job' }, { text: 'Kesh left early.', level: 'fleeting' }, { text: 'One too many.', level: 'fleeting' }], reason: '', approval: 'unchanged', trust: 'unchanged', interest: 'unchanged', learned: [], others: [] },
-  'oria-senn': { toward: [{ who: 'player', shade: 'resentment', intensity: 2, reason: 'Rook kept asking about the client' }], memory: 'Rook is asking about the client; I need to close this before Vex pushes harder.', level: 'normal', reason: 'Rook asked too many questions', approval: 'a little less', trust: 'unchanged', interest: 'unchanged', learned: [], others: [] },
+  vex: { toward: [{ who: 'oria-senn', shade: 'contempt', intensity: 3, reason: 'she lied about the client again' }], memory: 'Oria lied about the client again, and Rook pushed her on it.', level: 'normal', reason: 'Rook backed her up', approval: 'a little more', trust: 'unchanged', interest: 'unchanged', others: [{ with: 'oria-senn', approval: 'less', trust: 'less', interest: 'unchanged', reason: 'she lied again' }] },
+  brask: { memories: [{ text: 'Oria offered Rook a flooded pump job with a midnight deadline.', level: 'normal' }, { text: 'The lower level floods at midnight and nobody listened.', level: 'core', why: 'he was afraid for the job' }, { text: 'Kesh left early.', level: 'fleeting' }, { text: 'One too many.', level: 'fleeting' }], reason: '', approval: 'unchanged', trust: 'unchanged', interest: 'unchanged', others: [] },
+  'oria-senn': { toward: [{ who: 'player', shade: 'resentment', intensity: 2, reason: 'Rook kept asking about the client' }], memory: 'Rook is asking about the client; I need to close this before Vex pushes harder.', level: 'normal', reason: 'Rook asked too many questions', approval: 'a little less', trust: 'unchanged', interest: 'unchanged', ties: [{ with: 'player', now: 'contractor', line: 'Before midnight. The lower level floods at high tide. Triple the usual rate.' }], others: [] },
   kesh: 'Strangers in the bar talked about a job at a pump station.'
 }
 
 describe('prompt snapshots: Neonpunk Nights', () => {
   it('the crowded bar scene sends the same prompts and decides the same things', async () => {
     const start = startScene(content, createInitialState(content, 11), 'sump-lantern', ['vex', 'brask', 'oria-senn', 'kesh'])
-    // Oria hires the player: an arrangement with the player, read from the scene and asked of them before the summaries.
-    const ties = { reply: { ties: [{ turn: 3, from: 'oria-senn', to: 'player', add: 'contractor', reason: 'she hires Rook for the pump job' }] }, answer: true }
-    const played = await playScene(content, start, TURNS, SUMMARIES, ties)
+    // Oria hires the player: an arrangement with the player, stated in her relationship call and asked of them before the memory calls.
+    const played = await playScene(content, start, TURNS, SUMMARIES)
     await expect(played.prompts).toMatchFileSnapshot('./__snapshots__/prompts/bar.prompts.txt')
     await expect(played.record).toMatchFileSnapshot('./__snapshots__/prompts/bar.record.txt')
   })

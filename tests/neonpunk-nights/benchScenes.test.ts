@@ -86,6 +86,23 @@ describe('run-only starting state', () => {
   })
 })
 
+/**
+ * The mock, with some witnesses stating a tie in their relationship call after the scenario's first scene (keyed by the
+ * first name their prompt opens with), quoting the player's first words as the line that shows it.
+ */
+function stating(scenario: Scenario, ties: Record<string, { with: string; now?: string; no_longer?: string }>): BenchLlm {
+  const said = new Set<string>()
+  return {
+    ...mockLlm(),
+    summarize: async (p) => {
+      const who = p.user.match(/^About (\S+)/)?.[1] ?? ''
+      if (!p.system.startsWith('You judge how one scene') || !ties[who] || said.has(who)) return mockLlm().summarize(p)
+      said.add(who)
+      return JSON.stringify({ approval: 'unchanged', trust: 'unchanged', interest: 'unchanged', ties: [{ ...ties[who], line: scenario.turns[0]! }] })
+    }
+  }
+}
+
 describe('scenarios with several scenes', () => {
   it('runs Next day, saves and reloads between scenes, and names each scene after the scenario', async () => {
     const run = await runScenario(content, twoScenes(), mockLlm())
@@ -119,13 +136,11 @@ describe('scenarios with several scenes', () => {
   })
 
   it('reads relationship changes at the end of each scene and answers one that needs the player’s agreement as the scenario says', async () => {
-    const asking: BenchLlm = {
-      ...mockLlm(),
-      summarize: async (p) => (p.system.startsWith('You read a finished scene') ? JSON.stringify({ ties: [{ turn: 1, from: 'vex', to: 'player', add: 'partner', reason: 'they got together' }] }) : mockLlm().summarize(p))
-    }
-    const yes = await runScenario(content, twoScenes({ later: [] }), asking)
+    const scenario = twoScenes({ later: [] })
+    const asking = stating(scenario, { Vex: { with: 'player', now: 'partner' } })
+    const yes = await runScenario(content, scenario, asking)
     expect(yes.state!.playerTies['vex']!.tags.map((t) => t.tag)).toEqual(['friend', 'partner'])
-    const no = await runScenario(content, twoScenes({ later: [], answerTies: 'no' }), asking)
+    const no = await runScenario(content, twoScenes({ later: [], answerTies: 'no' }), stating(scenario, { Vex: { with: 'player', now: 'partner' } }))
     expect(no.state!.playerTies['vex']!.tags.map((t) => t.tag)).toEqual(['friend'])
   })
 
@@ -161,42 +176,36 @@ describe('the 4b scenarios, as the game sets them up', () => {
   })
 
   it('wedding and breakup: the tag changes on both sides and the next scene’s sheet shows it (acceptance 4)', async () => {
-    // The tie check reads scene 1 and finds the change; nothing in scene 2.
-    const vows = (from: string, to: string, end: string, add: string): BenchLlm => {
-      let checks = 0
-      return {
-        ...mockLlm(),
-        summarize: async (p) => (p.system.startsWith('You read a finished scene') ? JSON.stringify({ ties: checks++ === 0 ? [{ from, to, end, add, reason: 'on screen' }] : [] }) : mockLlm().summarize(p))
-      }
-    }
-    const wedding = await runScenario(content, named('tie-wedding'), vows('kesh', 'teo-varrin', 'fiance', 'spouse'))
+    // Both of them state the marriage after scene 1, and the engagement ends with it; nothing in scene 2.
+    const wedding = await runScenario(content, named('tie-wedding'), stating(named('tie-wedding'), { Kesh: { with: 'teo-varrin', now: 'spouse' }, Teo: { with: 'kesh', now: 'spouse' } }))
     expect(tagsToward(wedding.state!, 'kesh', 'teo-varrin').map((t) => t.tag)).toEqual(['spouse'])
     expect(tagsToward(wedding.state!, 'teo-varrin', 'kesh').map((t) => t.tag)).toEqual(['spouse'])
     expect(wedding.scenes![0]!.sceneEnd!.witnesses.find((w) => w.id === 'kesh')!.report!.level).toBe('core')
     expect(directorPrompt(wedding, 'tie-wedding-s2-1')).toMatch(/Toward others here: Teo: spouse/)
-    const breakup = await runScenario(content, named('tie-breakup'), vows('dunmar', 'brask', 'partner', 'ex'))
+    // One of them saying it is over is enough, and it leaves an ex on both sides.
+    const breakup = await runScenario(content, named('tie-breakup'), stating(named('tie-breakup'), { Dunmar: { with: 'brask', no_longer: 'partner' } }))
     expect(tagsToward(breakup.state!, 'dunmar', 'brask').map((t) => t.tag)).toEqual(['contractor', 'ex'])
     expect(tagsToward(breakup.state!, 'brask', 'dunmar').map((t) => t.tag)).toEqual(['client', 'ex'])
+    // Only one of them stating the marriage changes nothing, and the report says so.
+    const half = await runScenario(content, named('tie-wedding'), stating(named('tie-wedding'), { Kesh: { with: 'teo-varrin', now: 'wife' } }))
+    expect(tagsToward(half.state!, 'kesh', 'teo-varrin').map((t) => t.tag)).toEqual(['fiance'])
+    expect(renderReport(content, { ...(await runBench(content, [], mockLlm(), 'test', { all: 'mock' })), scenarios: [half] })).toContain("- One side only, no change: Kesh says Teo is now Kesh's wife; Teo doesn't say Kesh is now Teo's ")
   })
 
   it('learned secret: the player, who knows it, names it, and it comes out in front of Brask (acceptance 8, the game’s half)', async () => {
     const s = named('secret-learned')
     expect(seededState(content, s).facts['oria-senn']).toEqual([content.characters.find((c) => c.id === 'oria-senn')!.secrets.find((x) => x.id === 'the-case')!.text])
     const run = await runScenario(content, s, mockLlm())
-    // Brask's summary is asked whether he took it in; Oria's, its holder's, isn't.
-    const asked = (id: string) => callsOf(run).find((c) => c.role === 'summary' && c.id.endsWith(`:summary:${id}`))!.prompt
+    // Brask's memory call is asked for his memory of learning it; Oria's, its holder's, isn't.
+    const asked = (id: string) => callsOf(run).find((c) => c.role === 'memory' && c.id.endsWith(`:memory:${id}`))!.prompt
     expect(asked('brask').system).toContain('- heard:')
     expect(asked('brask').user).toMatch(/oria-senn\.the-case/)
     expect(asked('oria-senn').system).not.toContain('- heard:')
     expect(scenarioProblems(content, { ...s, start: { ...s.start, facts: { 'oria-senn': ['no-such-secret'] } } })).toEqual(['the player knows "oria-senn.no-such-secret", which oria-senn doesn\'t hold'])
   })
 
-  it('player breakup: the tie check ends partner and adds ex from Vex toward Rook, with no question asked', async () => {
-    const llm: BenchLlm = {
-      ...mockLlm(),
-      summarize: async (p) => (p.system.startsWith('You read a finished scene') ? JSON.stringify({ ties: /Vex.*partner/.test(p.user) ? [{ turn: 2, from: 'vex', to: 'player', end: 'partner', add: 'ex', reason: 'Rook ended it' }] : [] }) : mockLlm().summarize(p))
-    }
-    const run = await runScenario(content, named('tie-breakup-player'), llm)
+  it('player breakup: Vex stating it ends partner and leaves ex toward Rook, with no question asked', async () => {
+    const run = await runScenario(content, named('tie-breakup-player'), stating(named('tie-breakup-player'), { Vex: { with: 'player', no_longer: 'partner' } }))
     expect(run.scenes![0]!.ties!.applied).toMatchObject([{ from: 'vex', to: 'player', added: ['ex'], ended: ['partner'] }])
     expect(run.scenes![0]!.ties!.pending).toEqual([])
     expect(run.state!.playerTies['vex']!.tags.map((t) => t.tag)).toEqual(['ex'])

@@ -44,9 +44,14 @@ function changed(content: Pack, tags: TieTag[], add: TieTag | undefined, end: st
 /**
  * A tag that ends as the one being added ends with it (decided 2026-11-16, user, after the end-of-Milestone-4 bench
  * run 3: a breakup written as "end contractor, add ex" left the pair partners and exes at once). Adding ex ends partner.
+ * So does any tag of a group the ruleset marks `oneAtATime`, when another of that group begins: a spouse ends a fiancé.
  */
 function superseded(content: Pack, tags: TieTag[], add: string | undefined): { kept: TieTag[]; ended: string[] } {
-  const ends = (t: TieTag) => !!add && content.ruleset.ties.tags.find((x) => x.id === t.tag)?.endsAs === add
+  const r = content.ruleset.ties
+  const def = (id?: string) => r.tags.find((x) => x.id === id)
+  // A group that holds one tag at a time (milestone 4c): the tag that begins there ends the one held.
+  const single = r.groups.find((g) => g.id === def(add)?.group)?.oneAtATime ?? false
+  const ends = (t: TieTag) => !!add && t.tag !== add && (def(t.tag)?.endsAs === add || (single && def(t.tag)?.group === def(add)!.group))
   return { kept: tags.filter((t) => !ends(t)), ended: tags.filter(ends).map((t) => t.tag) }
 }
 
@@ -118,7 +123,7 @@ export function applyTie(content: Pack, state: GameState, c: TieChange, turn?: s
     }
     set(c.to, c.from, theirs)
   }
-  return { state: view(), event: { from: c.from, to: c.to, added, ended, ...(c.word && { word: c.word }), reason: c.reason, ...(turn && { turn }) } }
+  return { state: view(), event: { from: c.from, to: c.to, added, ended, ...(c.word && { word: c.word }), reason: c.reason, ...(c.line && { line: c.line }), ...(turn && { turn }) } }
 }
 
 /**

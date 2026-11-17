@@ -8,7 +8,7 @@ import { mockLlm } from '../bench/mock'
 import type { GameState } from '@engine/state'
 import type { RendererApi, SceneEvent } from '@app/ipc'
 import { runTurn, type TurnLlm } from '@engine/scene'
-import { endScene } from '@engine/relationships'
+import { endScene, judgeScene } from '@engine/relationships'
 import { currentFlags, type FlagRecord } from '@engine/review'
 import type { TurnDetails } from '@platform/logs'
 import { cleanLoreBudgets, type LoreBudgetOverrides } from '@engine/rules'
@@ -103,6 +103,20 @@ const flagged: FlagRecord[] = []
 
 const saved = new Map<string, { pack: string; slotId: string; savedAt: string; name?: string; state: GameState }>()
 
+/**
+ * The canned end-of-scene replies. Each holds a witness's relationship answers and their memory together; the two calls
+ * each read their own fields from it.
+ */
+function cannedSummarize() {
+  // Keyed by the first name each summary prompt opens with ("About Vex …").
+  const summaries: Record<string, object> = {
+    Vex: { memory: 'Vex caught Oria lying about the client and called it out in front of Rook, who backed her.', level: 'normal', reason: 'Rook trusted her read over Oria\'s polish.', approval: 'more', trust: 'a little more', interest: 'a little more', others: [{ with: 'oria-senn', approval: 'less', trust: 'a little less', interest: 'unchanged', reason: 'Same old Oria.' }] },
+    Brask: { memory: 'Brask sat through a loud night at the Sump Lantern while Oria lied and Vex called it; nobody asked him anything.', level: 'fleeting', reason: 'Too loud, and nobody noticed he wanted to go.', approval: 'unchanged', trust: 'unchanged', interest: 'unchanged' },
+    Oria: { memory: 'Oria was caught in her "darling" by a Courier and had to admit the client was corporate.', level: 'normal', reason: 'Rook pushed her in public.', approval: 'a little less', trust: 'unchanged', interest: 'a little more', others: [{ with: 'vex', approval: 'less', trust: 'unchanged', interest: 'unchanged', reason: 'She sees through me.' }] }
+  }
+  return content.manifest.id === 'neonpunk-nights' ? async (prompt: { user: string }) => JSON.stringify(summaries[prompt.user.match(/^About (\w+)/)![1]!]) : mockLlm().summarize
+}
+
 const api: RendererApi = {
   getSettings: async () => toView(SettingsSchema.parse({})),
   saveSettings: async () => toView(SettingsSchema.parse({})),
@@ -124,16 +138,10 @@ const api: RendererApi = {
     return { ok: true, state: outcome.state, beats: outcome.beats, checks: outcome.plan.checks.flatMap((c) => (c.line ? [c.line] : [])), calls: outcome.calls, corrections: outcome.corrections, rewrite: outcome.problems.map((p) => p.fix), details }
   },
   consolidate: async (state) => ({ ok: true, state, merged: 0 }),
-  sceneTies: async (state) => ({ ok: true, state }),
+  sceneTies: async (state) => ({ ok: true, state: (await judgeScene(content, state, cannedSummarize())).state }),
   sceneEnd: async (state) => {
     await wait(600)
-    // Keyed by the first name each summary prompt opens with ("About Vex …").
-    const summaries: Record<string, object> = {
-      Vex: { memory: 'Vex caught Oria lying about the client and called it out in front of Rook, who backed her.', level: 'normal', reason: 'Rook trusted her read over Oria\'s polish.', approval: 'more', trust: 'a little more', interest: 'a little more', others: [{ with: 'oria-senn', approval: 'less', trust: 'a little less', interest: 'unchanged', reason: 'Same old Oria.' }] },
-      Brask: { memory: 'Brask sat through a loud night at the Sump Lantern while Oria lied and Vex called it; nobody asked him anything.', level: 'fleeting', reason: 'Too loud, and nobody noticed he wanted to go.', approval: 'unchanged', trust: 'unchanged', interest: 'unchanged' },
-      Oria: { memory: 'Oria was caught in her "darling" by a Courier and had to admit the client was corporate.', level: 'normal', reason: 'Rook pushed her in public.', approval: 'a little less', trust: 'unchanged', interest: 'a little more', learned: [], others: [{ with: 'vex', approval: 'less', trust: 'unchanged', interest: 'unchanged', reason: 'She sees through me.' }] }
-    }
-    const summarize = content.manifest.id === 'neonpunk-nights' ? async (prompt: { user: string }) => JSON.stringify(summaries[prompt.user.match(/^About (\w+)/)![1]!]) : mockLlm().summarize
+    const summarize = cannedSummarize()
     const { state: next, reports } = await endScene(content, state, summarize)
     return { ok: true, state: next, reports }
   },

@@ -1669,18 +1669,97 @@
   }
 }
 
-===== relationship changes =====
+===== relationship calls =====
 {
+  "witnesses": [
+    {
+      "id": "vex",
+      "relationship": {
+        "reason": "Rook backed her up",
+        "delta": {
+          "approval": 1,
+          "trust": 0,
+          "interest": 0
+        },
+        "others": [
+          {
+            "with": "oria-senn",
+            "delta": {
+              "approval": -4,
+              "trust": -4,
+              "interest": 0
+            },
+            "reason": "she lied again"
+          }
+        ],
+        "toward": [
+          {
+            "who": "oria-senn",
+            "shade": "contempt",
+            "intensity": 3,
+            "reason": "she lied about the client again"
+          }
+        ],
+        "resolved": [],
+        "ties": []
+      }
+    },
+    {
+      "id": "brask",
+      "relationship": {
+        "reason": "",
+        "delta": {
+          "approval": 0,
+          "trust": 0,
+          "interest": 0
+        },
+        "others": [],
+        "toward": [],
+        "resolved": [],
+        "ties": []
+      }
+    },
+    {
+      "id": "oria-senn",
+      "relationship": {
+        "reason": "Rook asked too many questions",
+        "delta": {
+          "approval": -1,
+          "trust": 0,
+          "interest": 0
+        },
+        "others": [],
+        "toward": [
+          {
+            "who": "player",
+            "shade": "resentment",
+            "intensity": 2,
+            "reason": "Rook kept asking about the client"
+          }
+        ],
+        "resolved": [],
+        "ties": [
+          {
+            "with": "player",
+            "now": "contractor",
+            "line": "Before midnight. The lower level floods at high tide. Triple the usual rate."
+          }
+        ]
+      }
+    },
+    {
+      "id": "kesh",
+      "error": "the reply was not a JSON object"
+    }
+  ],
   "sceneId": "scene-1200",
   "at": "1970-01-01T00:00:00.000Z",
-  "callId": "scene-1200:ties",
-  "proposed": [
+  "stated": [
     {
-      "turn": 3,
-      "from": "oria-senn",
-      "to": "player",
-      "add": "contractor",
-      "reason": "she hires Rook for the pump job"
+      "by": "oria-senn",
+      "with": "player",
+      "now": "contractor",
+      "line": "Before midnight. The lower level floods at high tide. Triple the usual rate."
     }
   ],
   "applied": [],
@@ -1689,16 +1768,21 @@
       "from": "oria-senn",
       "to": "player",
       "add": "contractor",
-      "reason": "she hires Rook for the pump job"
+      "word": "contractor",
+      "reason": "",
+      "line": "Before midnight. The lower level floods at high tide. Triple the usual rate."
     }
   ],
   "refused": [],
+  "alone": [],
   "answered": [
     {
       "from": "oria-senn",
       "to": "player",
       "add": "contractor",
-      "reason": "she hires Rook for the pump job",
+      "word": "contractor",
+      "reason": "",
+      "line": "Before midnight. The lower level floods at high tide. Triple the usual rate.",
       "accepted": true
     }
   ]
@@ -1724,7 +1808,6 @@
           "trust": 0,
           "interest": 0
         },
-        "learned": [],
         "others": [
           {
             "with": "oria-senn",
@@ -1838,7 +1921,6 @@
           "trust": 0,
           "interest": 0
         },
-        "learned": [],
         "others": [],
         "toward": [],
         "resolved": []
@@ -1912,7 +1994,6 @@
           "trust": 0,
           "interest": 0
         },
-        "learned": [],
         "others": [],
         "toward": [
           {
@@ -1983,11 +2064,11 @@
           "trust": 0,
           "interest": 0
         },
-        "learned": [],
         "others": [],
         "toward": [],
         "resolved": []
       },
+      "error": "relationship call: the reply was not a JSON object",
       "report": {
         "id": "kesh",
         "memory": "Strangers in the bar talked about a job at a pump station.",
@@ -2019,7 +2100,8 @@
           "toward": [],
           "resolved": [],
           "dropped": []
-        }
+        },
+        "error": "relationship call: the reply was not a JSON object"
       }
     }
   ]

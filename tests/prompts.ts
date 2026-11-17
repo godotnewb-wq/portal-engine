@@ -2,7 +2,7 @@ import type { Prompt } from '@engine/core'
 import type { Pack } from '@engine/pack'
 import type { GameState } from '@engine/state'
 import { runTurn, type TurnLlm } from '@engine/scene'
-import { checkTies, endScene, witnesses } from '@engine/relationships'
+import { endScene, judgeScene, witnesses } from '@engine/relationships'
 import { answerTie } from '@engine/state'
 
 /**
@@ -21,7 +21,7 @@ export interface ScriptedTurn {
 export interface PlayedScene {
   /** Every prompt, in the order sent. */
   prompts: string
-  /** What each turn decided, and the end-of-scene summaries. */
+  /** What each turn decided, and what the end of the scene did. */
   record: string
   state: GameState
 }
@@ -31,13 +31,12 @@ const lf = (s: string) => s.replace(/\r\n?/g, '\n')
 const json = (value: unknown) => lf(JSON.stringify(value, null, 2))
 const promptText = (heading: string, p: Prompt) => `===== ${heading} =====\n----- system -----\n${lf(p.system)}\n----- user -----\n${lf(p.user)}\n`
 
-/** The end-of-scene tie check's reply, and how the player answers any change that waits on them (milestone 4b). */
-export interface ScriptedTies {
-  reply: object | string
-  answer?: boolean
-}
-
-export async function playScene(content: Pack, start: GameState, turns: ScriptedTurn[], summaries: Record<string, object | string> = {}, ties: ScriptedTies = { reply: { ties: [] } }): Promise<PlayedScene> {
+/**
+ * `replies`: each witness's end-of-scene reply, by id. One reply holds both of their calls' answers (the relationship
+ * call's meters, feelings and ties, and the memory call's memories), and each call reads its own fields from it.
+ * `answer`: how the player answers any relationship change that waits on them (milestone 4b); yes by default.
+ */
+export async function playScene(content: Pack, start: GameState, turns: ScriptedTurn[], replies: Record<string, object | string> = {}, answer = true): Promise<PlayedScene> {
   const prompts: string[] = []
   const record: string[] = []
   let state = start
@@ -78,31 +77,36 @@ export async function playScene(content: Pack, start: GameState, turns: Scripted
       })}\n`
     )
   }
-  // The tie check reads the finished scene; changes waiting on the player are answered before the summaries.
-  const checked = await checkTies(
+  const replyOf = (id: string) => {
+    const reply = replies[id]
+    return reply === undefined ? '' : typeof reply === 'string' ? reply : JSON.stringify(reply)
+  }
+  // Both halves ask every witness at once, in witness order, so the nth call is the nth witness.
+  const order = witnesses(state)
+  let asked = 0
+  // The relationship calls, and the ties settled from them; changes waiting on the player are answered before the memory calls.
+  const judged = await judgeScene(
     content,
     state,
     async (prompt) => {
-      prompts.push(promptText('ties', prompt))
-      return typeof ties.reply === 'string' ? ties.reply : JSON.stringify(ties.reply)
+      const id = order[asked++]!
+      prompts.push(promptText(`relationship: ${id}`, prompt))
+      return replyOf(id)
     },
     () => 0
   )
-  state = checked.state
-  while (state.scene!.pendingTies.length > 0) state = answerTie(content, state, 0, ties.answer ?? true)
-  const { calls: _calls, ...tieRecord } = checked.trace
-  record.push(`===== relationship changes =====\n${json({ ...tieRecord, answered: state.scene!.answered })}\n`)
-  // endScene asks for every witness's summary at once, in witness order, so the nth call is the nth witness.
-  const order = witnesses(state)
-  let asked = 0
+  state = judged.state
+  while (state.scene!.pendingTies.length > 0) state = answerTie(content, state, 0, answer)
+  const { calls: _calls, witnesses: said, ...tieRecord } = judged.trace
+  record.push(`===== relationship calls =====\n${json({ witnesses: said.map(({ callId: _c, ...w }) => w), ...tieRecord, answered: state.scene!.answered })}\n`)
+  asked = 0
   const ended = await endScene(
     content,
     state,
     async (prompt) => {
       const id = order[asked++]!
-      prompts.push(promptText(`summary: ${id}`, prompt))
-      const reply = summaries[id]
-      return reply === undefined ? '' : typeof reply === 'string' ? reply : JSON.stringify(reply)
+      prompts.push(promptText(`memory: ${id}`, prompt))
+      return replyOf(id)
     },
     () => 0
   )

@@ -3,7 +3,7 @@ import { mkdirSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Pack } from '@engine/pack'
 import { TracedError } from '@engine/core'
-import { checkTies, consolidate, endScene } from '@engine/relationships'
+import { consolidate, endScene, judgeScene } from '@engine/relationships'
 import { runTurn } from '@engine/scene'
 import { FlagSchema } from '@engine/review'
 import { detailsOf, PlayLogs, roleModels, type FlagInput } from '@platform/logs'
@@ -203,15 +203,16 @@ app.whenReady().then(() => {
     }
   })
 
-  // The end-of-scene tie check, before the summaries, with the summary model (relationships §3; milestone 4b). A failed
-  // call changes nothing and is logged; the scene still ends.
+  // The first half of a scene's end, with the summary model (relationships §3; milestone 4c): every witness's
+  // relationship call, and the ties settled from them. A failed call changes nothing for that witness and is logged;
+  // the scene still ends.
   ipcMain.handle(IPC.sceneTies, async (_event, raw: unknown): Promise<SceneTiesResponse> => {
     if (turning) return { ok: false, error: 'A turn is still running.' }
     turning = true
     try {
       const { pack, logs } = current()
       const state = GameStateSchema.parse(raw)
-      const { state: next, trace } = await checkTies(pack, state, summaryLlm(settings.get()))
+      const { state: next, trace } = await judgeScene(pack, state, summaryLlm(settings.get()))
       if (trace.calls.length > 0) logs.ties(trace)
       return { ok: true, state: next }
     } catch (error) {

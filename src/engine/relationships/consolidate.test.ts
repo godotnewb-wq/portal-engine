@@ -5,7 +5,7 @@ import { applyTurn, parsePlan, parseReply, validatePlan } from '@engine/scene'
 import { MINUTES_PER_DAY, type GameState, type Memory } from '@engine/state'
 import { fixture, yardScene } from '@tests/fixture'
 import { applyConsolidation, consolidate, consolidationGroups, parseConsolidation, subjectsOf } from './consolidate'
-import { applySummaries, buildSummaryPrompt, plainSummary } from './summary'
+import { applySummaries, buildMemoryPrompt, plainSummary } from './summary'
 
 // Milestone 4b, task 5c: topic tagging and consolidation (memory §7; decided 2026-11-13).
 const DAY = MINUTES_PER_DAY
@@ -103,7 +103,7 @@ describe('topics', () => {
     const p = validatePlan(fixture, base, parsePlan(JSON.stringify({ speakers: [{ id: 'tobin', goal: 'x' }], moves: [{ who: 'tobin', answers: 'player', move: 'reveal', uses: ['tobin.after-closing'] }] }))!, 'x').plan
     const state = applyTurn(fixture, base, { id: 't1', input: 'x', plan: p, beats: [{ kind: 'dialogue', speaker: 'tobin', text: 'x' }], tags: parseReply('', []).tags, dice: 1, topics: ['faction.guild'] })
     expect(state.scene!.turns[0]!.topics).toEqual(['faction.guild', 'tobin.after-closing'])
-    const prompt = buildSummaryPrompt(fixture, state, 'mara')
+    const prompt = buildMemoryPrompt(fixture, state, 'mara')
     expect(prompt.user).toContain("- Topics that came up this scene: [faction.guild] The Guild; [tobin.after-closing] Tobin's secret.")
     expect(prompt.system).toContain('- topics: for each memory, the ids of the topics that came up this scene that it is about')
     const { state: next, reports } = applySummaries(fixture, state, [{ id: 'mara', summary: { ...plainSummary(fixture, state, 'mara'), memories: [{ text: 'Tobin let someone in.', level: 'normal', why: '', topics: ['tobin.after-closing', 'faction.watch'] }] } }])

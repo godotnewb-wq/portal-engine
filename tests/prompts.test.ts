@@ -6,9 +6,9 @@ import { playScene, type ScriptedTurn } from './prompts'
  * Prompt snapshots on the test-fixture pack (milestone 3.6, task 2). Five turns cover: a lie with a reading check and
  * a move gated on it, a move gated on a check that doesn't exist, a fact planned for a move nobody voiced, a player
  * check, a rewrite, a salvaged rewrite whose dropped speaker left tags behind, a planned departure, an unplanned
- * LEAVES tag, the running summary once turns leave the verbatim window, and the end-of-scene summaries, with a
- * feeling toward someone and a general aftermath carried out of the scene, and a tie change read from the scene at its
- * end (Mara takes Tobin on), mirrored on his side and making both memories Core; Tobin's secret coming out in front of Mara, which she learns
+ * LEAVES tag, the running summary once turns leave the verbatim window, and the end of the scene: each witness's
+ * relationship call and memory call (milestone 4c), with a feeling toward someone and a general aftermath carried out of
+ * the scene, and a tie both of them state (Mara takes Tobin on), each side with its own word and both memories Core; Tobin's secret coming out in front of Mara, which she learns
  * (milestone 4b), and her memory tagged with a topic that came up (and one that didn't, dropped) and with who it is
  * about.
  */
@@ -147,14 +147,13 @@ NARRATION: She glances at the gate Tobin left by.
 ]
 
 const SUMMARIES = {
-  mara: { heard: [{ id: 'tobin.after-closing', memory: 'Tobin admitted he let someone into the yard after closing.' }], memories: [{ text: 'Tobin let someone with a Guild seal into the yard after closing; Kit got it out of him.', level: 'normal', about: ['tobin'], topics: ['tobin.after-closing', 'faction.navy'] }, { text: 'Tobin is my apprentice now.', level: 'core', why: 'she took him on' }], reason: 'Kit kept it quiet', warmth: 'warmer', bond: 'same', learned: [], others: [{ with: 'tobin', warmth: 'colder', bond: 'same', reason: 'he lied to her' }], toward: [{ who: 'tobin', shade: 'sore', family: 'mad', intensity: 3, reason: 'he lied to her' }] },
-  tobin: { feels: { shade: 'glum', intensity: 4, reason: 'he gave the seal away' }, memories: [{ text: 'I told Kit about the seal. Mara heard.', level: 'core', why: 'his secret came out' }], reason: 'Kit let him leave', warmth: 'warmer', bond: 'warmer', learned: [], others: [] }
+  mara: { heard: [{ id: 'tobin.after-closing', memory: 'Tobin admitted he let someone into the yard after closing.' }], memories: [{ text: 'Tobin let someone with a Guild seal into the yard after closing; Kit got it out of him.', level: 'normal', about: ['tobin'], topics: ['tobin.after-closing', 'faction.navy'] }, { text: 'Tobin is my apprentice now.', level: 'core', why: 'she took him on' }], reason: 'Kit kept it quiet', warmth: 'warmer', bond: 'same', ties: [{ with: 'tobin', now: 'apprentice', line: 'Check the seal log at dawn. Quietly, before the clerks come in.' }], others: [{ with: 'tobin', warmth: 'colder', bond: 'same', reason: 'he lied to her' }], toward: [{ who: 'tobin', shade: 'sore', family: 'mad', intensity: 3, reason: 'he lied to her' }] },
+  tobin: { feels: { shade: 'glum', intensity: 4, reason: 'he gave the seal away' }, memories: [{ text: 'I told Kit about the seal. Mara heard.', level: 'core', why: 'his secret came out' }], reason: 'Kit let him leave', warmth: 'warmer', bond: 'warmer', ties: [{ with: 'Mara', now: 'master', line: 'Tobin: "Yes. The horses need water anyway."' }], others: [] }
 }
 
 describe('prompt snapshots: test fixture', () => {
   it('the yard scene sends the same prompts and decides the same things', async () => {
-    const ties = { reply: { ties: [{ turn: 4, from: 'mara', to: 'tobin', add: 'hand', word: 'apprentice', back_word: 'master', reason: 'she takes him on to keep him close' }] } }
-    const played = await playScene(fixture, yardScene(13), TURNS, SUMMARIES, ties)
+    const played = await playScene(fixture, yardScene(13), TURNS, SUMMARIES)
     await expect(played.prompts).toMatchFileSnapshot('./__snapshots__/prompts/yard.prompts.txt')
     await expect(played.record).toMatchFileSnapshot('./__snapshots__/prompts/yard.record.txt')
   })

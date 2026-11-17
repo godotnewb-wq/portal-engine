@@ -1,5 +1,5 @@
 import type { Beat } from '@engine/state'
-import { parseConsolidation, type SceneEndTrace, type TieCheckTrace, type WitnessReport } from '@engine/relationships'
+import { parseConsolidation, type RelationshipTrace, type SceneEndTrace, type WitnessReport } from '@engine/relationships'
 import { feelingLabel, type Meters } from '@engine/characters'
 import type { Pack } from '@engine/pack'
 import { lineText, moodOf, planLines, type TurnTrace } from '@engine/scene'
@@ -27,7 +27,7 @@ const average = (xs: number[]) => (xs.length === 0 ? 0 : Math.round(xs.reduce((a
 /** The numbers that show at a glance whether a change made things better or worse. */
 export function stats(run: ScenarioRun) {
   // Turn calls only: summaries and consolidation run between scenes.
-  const turnCalls = callsOf(run).filter((c) => c.role !== 'summary' && c.role !== 'consolidation' && c.role !== 'ties')
+  const turnCalls = callsOf(run).filter((c) => !['relationship', 'memory', 'summary', 'consolidation', 'ties'].includes(c.role))
   return {
     turns: run.turns.length,
     calls: turnCalls.length,
@@ -136,14 +136,20 @@ function nightLines(names: Names, s: SceneRun): string[] {
   return groups.length > 0 ? ['Overnight, consolidation:', '', ...groups, ''] : []
 }
 
-/** The end-of-scene tie check (milestone 4b): what changed, what waited for the player and their answer, what was refused. */
-function tieLines(names: Names, location: string, ties: TieCheckTrace | undefined, end: SceneEndTrace | undefined, heading: string): string[] {
+/**
+ * Relationship changes at a scene's end (milestone 4c: settled from the witnesses' relationship calls; before it, one
+ * tie check): what changed, what waited for the player and their answer, what was refused, what only one side said.
+ * Runs from before 4c have no `alone` or `witnesses`, and may have the tie check's `error`.
+ */
+function tieLines(names: Names, location: string, ties: (RelationshipTrace & { error?: string }) | undefined, end: SceneEndTrace | undefined, heading: string): string[] {
   if (!ties) return []
   const name = (id: string) => names(location, id)
   const lines = [
-    ...ties.applied.map((e) => `- ${name(e.from)} → ${name(e.to)}: ${[...e.added.map((t) => `+${t}`), ...e.ended.map((t) => `−${t}`)].join(' ')}${e.word ? ` ("${e.word}")` : ''}${e.reason ? ` — ${e.reason}` : ''}`),
+    ...ties.applied.map((e) => `- ${name(e.from)} → ${name(e.to)}: ${[...e.added.map((t) => `+${t}`), ...e.ended.map((t) => `−${t}`)].join(' ')}${e.word ? ` ("${e.word}")` : ''}${e.reason ? ` — ${e.reason}` : e.line ? ` — “${e.line}”` : ''}`),
     ...(end?.answered ?? []).map((a) => `- Asked the player: ${name(a.change.from)} → ${name(a.change.to)}${a.change.add ? ` +${a.change.add}` : ''}${a.change.end ? ` −${a.change.end}` : ''}: ${a.accepted ? 'yes' : 'no'}`),
     ...ties.refused.map((x) => `- Refused ${x}`),
+    ...(ties.alone ?? []).map((x) => `- One side only, no change: ${x}`),
+    ...(ties.witnesses ?? []).flatMap((w) => (w.error ? [`- ⚠ ${name(w.id)}'s relationship call failed: ${w.error}`] : [])),
     ...(ties.error ? [`- ⚠ tie check failed: ${ties.error}`] : [])
   ]
   return [`${heading} Relationship changes`, '', ...(lines.length > 0 ? lines : ['None.']), '']
@@ -199,7 +205,7 @@ function afterLines(names: Names, location: string, end: SceneEndTrace | undefin
     for (const t of c?.toward ?? []) lines.push(`  - Carries toward ${name(t.toward)}: ${feelingLabel(t.feeling)}${t.renewed ? ' (renewed)' : ''}${t.repeat ? ` — repeat ${t.repeat.count}: ${t.repeat.meter} ${t.repeat.change > 0 ? '+' : ''}${t.repeat.change}` : ''}`)
     for (const who of c?.resolved ?? []) lines.push(`  - Resolved toward ${name(who)}`)
     for (const d of c?.dropped ?? []) lines.push(`  - Dropped: ${d}`)
-    if (r.error) lines.push(`  - ⚠ summary failed: ${r.error}`)
+    if (r.error) lines.push(`  - ⚠ failed: ${r.error}`)
   }
   lines.push('')
   return lines

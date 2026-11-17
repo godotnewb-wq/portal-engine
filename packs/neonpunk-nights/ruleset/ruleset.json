@@ -346,7 +346,7 @@
     "agreement": ["partner", "lover", "fiance", "spouse", "boss", "employee", "business-partner", "client", "contractor", "handler", "informant", "creditor", "debtor", "landlord", "tenant", "roommate", "mentor", "protege", "teacher", "student"],
     "groups": [
       { "id": "family", "name": "Family" },
-      { "id": "partners", "name": "Partners" },
+      { "id": "partners", "name": "Partners", "oneAtATime": true },
       { "id": "work", "name": "Work and faction" },
       { "id": "home", "name": "Home" },
       { "id": "teaching", "name": "Teaching" },

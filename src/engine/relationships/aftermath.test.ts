@@ -4,7 +4,8 @@ import { buildBriefs } from '@engine/scene'
 import { rulesetProblems } from '@engine/rules'
 import { fixture, yardScene } from '@tests/fixture'
 import { dailyUpkeep, nextDay } from './aftermath'
-import { applySummaries, buildSummaryPrompt, parseSummary, plainSummary, type Summary } from './summary'
+import { applySummaries, buildMemoryPrompt, parseSummary, plainSummary, type Summary } from './summary'
+import { buildRelationshipPrompt } from './relationship'
 
 // Milestone 4b, task 3: mood and aftermath across scenes (npc design §7; decided 2026-11-13).
 const R = fixture.ruleset
@@ -39,7 +40,7 @@ describe('what a summary leaves a witness carrying', () => {
     const { state: next, reports } = end(state, summary(state, 'mara', { toward: [{ who: 'Kit', shade: 'glum', intensity: 2, reason: 'a small slight' }] }))
     expect(next.aftermath).toEqual([])
     expect(reports[0]!.carried!.dropped).toEqual([`toward player: "glum" at 2 is below ${R.people.aftermath.towardMin}`])
-    expect(buildSummaryPrompt(fixture, state, 'mara').system).toContain(`at intensity ${R.people.aftermath.towardMin} or more; a pleasant chat or a small slight is none`)
+    expect(buildRelationshipPrompt(fixture, state, 'mara').system).toContain(`at intensity ${R.people.aftermath.towardMin} or more; a pleasant chat or a small slight is none`)
   })
 
   it('refuses a feeling toward themselves or nobody, a shade not listed, and surprise, which is felt in the moment only', () => {
@@ -89,7 +90,7 @@ describe('a tie change on screen (relationships §3, task 4)', () => {
   it('makes both sides’ memories Core, whatever the summary chose, and tells the summary what changed', () => {
     const base = yardScene()
     const state = { ...base, scene: { ...base.scene!, tieEvents: [{ from: 'mara', to: 'tobin', added: ['hand'], ended: [], word: 'apprentice', reason: 'she takes him on' }] } }
-    expect(buildSummaryPrompt(fixture, state, 'tobin').user).toContain("- What changed between people this scene (a Core memory for Tobin): Tobin becomes Mara's apprentice (she takes him on).")
+    expect(buildMemoryPrompt(fixture, state, 'tobin').user).toContain("- What changed between people this scene (a Core memory for Tobin): Tobin becomes Mara's apprentice (she takes him on).")
     const { state: next, reports } = end(state, summary(state, 'mara', { memories: [{ text: 'I took Tobin on.', level: 'fleeting', why: '' }] }), summary(state, 'tobin', { memories: [{ text: 'Mara took me on.', level: 'normal', why: '' }] }))
     expect(next.memories.map((m) => [m.owner, m.level])).toEqual([['mara', 'core'], ['tobin', 'core']])
     expect(reports.map((x) => x.level)).toEqual(['core', 'core'])
@@ -190,7 +191,8 @@ describe('in the prompts', () => {
 
   it('gives the summary what they carry, the feelings toward people here that passed, and asks for feels, toward and resolved', () => {
     const state = { ...yardScene(), aftermath: [carried('mara', { toward: 'tobin', family: 'mad', shade: 'livid', intensity: 4, reason: 'he lied' })], endedFeelings: [{ owner: 'mara', toward: 'player', family: 'mad', at: yardScene().time - 2 * DAY, how: 'faded' as const }] }
-    const { system, user } = buildSummaryPrompt(fixture, state, 'mara')
+    const { system, user } = buildRelationshipPrompt(fixture, state, 'mara')
+    expect(buildMemoryPrompt(fixture, state, 'mara').user).toContain('- Feelings toward people, from before: toward Tobin: livid, 4 of 5: he lied (today).')
     expect(user).toContain('- Feelings toward people, from before: toward Tobin: livid, 4 of 5: he lied (today).')
     expect(user).toContain('- Earlier feelings toward people here that have passed: mad toward Kit, once (last 2 days ago).')
     expect(system).toContain('- toward: feelings this scene left Mara with toward one person (who: "tobin", or "player" for Kit)')

@@ -5,7 +5,7 @@ import { buildBriefs, applyTurn, parseReply, validatePlan, parsePlan } from '@en
 import { MINUTES_PER_DAY, type GameState, type Memory } from '@engine/state'
 import { fixture, yardScene } from '@tests/fixture'
 import { dailyUpkeep } from './aftermath'
-import { applySummaries, buildSummaryPrompt, plainSummary, type Summary, type WrittenMemory } from './summary'
+import { applySummaries, buildMemoryPrompt, plainSummary, type Summary, type WrittenMemory } from './summary'
 
 // Milestone 4b, task 5a: the Memory Bank's shape, levels, limits and fading, and relevance-based recall (memory §3–6).
 const R = fixture.ruleset
@@ -74,7 +74,7 @@ describe('memories from a scene', () => {
     // Her meters toward the player moved, or she carries a feeling toward him: about the player too.
     expect(focus({ memories: [written('Kit was kind.')], delta: { warmth: 3, bond: 0 } })).toEqual([['player']])
     expect(focus({ memories: [written('Kit forgot.')], toward: [{ who: 'player', shade: 'glum', intensity: 2 }] })).toEqual([['player']])
-    expect(buildSummaryPrompt(fixture, state, 'mara').system).toContain('- about: for each memory, who it is really about: "tobin", "player" for Kit.')
+    expect(buildMemoryPrompt(fixture, state, 'mara').system).toContain('- about: for each memory, who it is really about: "tobin", "player" for Kit.')
   })
 
   it('needs a reason for Core, holds to the Core limit, and downgrades Core when nothing felt was strong (the guard)', () => {
@@ -92,7 +92,7 @@ describe('memories from a scene', () => {
   it('forces Core for a secret of theirs said on screen, outside the limits, and tells the summary', () => {
     const base = yardScene()
     const state = { ...base, scene: { ...base.scene!, told: ['tobin.after-closing'] } }
-    expect(buildSummaryPrompt(fixture, state, 'tobin').user).toContain("- Tobin's secret [after-closing] came out on screen this scene (a Core memory for Tobin).")
+    expect(buildMemoryPrompt(fixture, state, 'tobin').user).toContain("- Tobin's secret [after-closing] came out on screen this scene (a Core memory for Tobin).")
     const { state: next } = end(state, 'tobin', { memories: [written('He told.', 'fleeting'), written('Also this.', 'core', 'x')] })
     expect(next.memories.map((m) => [m.level, m.reason])).toEqual([['core', 'a secret of theirs came out'], ['normal', undefined]])
   })
@@ -142,7 +142,7 @@ describe('memories from a scene', () => {
     expect(briefs.trace.memories!['mara']).toBeGreaterThan(0)
     const plan = validatePlan(fixture, state, parsePlan(JSON.stringify({ speakers: [{ id: 'mara', goal: 'x' }], moves: [{ who: 'mara', answers: 'player', move: 'answer' }] }))!, 'x').plan
     const next = applyTurn(fixture, state, { id: 't1', input: 'x', plan, beats: [], tags: parseReply('', []).tags, dice: 1, memories: ['mara.m1'] })
-    const user = buildSummaryPrompt(fixture, next, 'mara').user
+    const user = buildMemoryPrompt(fixture, next, 'mara').user
     expect(user).toContain('- Remembers:\n  - [mara.m2] (normal) Tobin owes the yard a week.\n  - [mara.m1] (fleeting) The second ledger was moved to the tally office.')
   })
 

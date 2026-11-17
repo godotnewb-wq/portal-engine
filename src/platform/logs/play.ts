@@ -2,7 +2,7 @@ import { existsSync, readdirSync } from 'node:fs'
 import { join } from 'node:path'
 import type { CallTrace } from '@engine/core'
 import type { Pack } from '@engine/pack'
-import type { ConsolidationTrace, SceneEndTrace, TieCheckTrace } from '@engine/relationships'
+import type { ConsolidationTrace, SceneEndTrace, RelationshipTrace } from '@engine/relationships'
 import { promptSources, type TurnTrace } from '@engine/scene'
 import { currentFlags, FlagSchema, type Flag, type FlagRecord, type ScoreRecord } from '@engine/review'
 import { findSessions, readFlags, readSession } from './reader'
@@ -130,8 +130,8 @@ export class PlayLogs {
     this.open()?.sceneEnd(trace)
   }
 
-  /** The end-of-scene tie check (milestone 4b), in the scenes file before the scene's end. */
-  ties(trace: TieCheckTrace): void {
+  /** The relationship calls and the ties settled from them (milestone 4c), in the scenes file before the scene's end. */
+  ties(trace: RelationshipTrace): void {
     this.open()?.ties(trace)
   }
 

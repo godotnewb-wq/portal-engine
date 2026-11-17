@@ -2,7 +2,8 @@ import type { BenchLlm } from './run'
 
 /**
  * A stand-in LLM for running the bench without a model: the director's reply is unreadable (so the game plans each
- * turn), and the writer voices whoever the plan says speaks. Each witness remembers one Normal moment about the player,
+ * turn), and the writer voices whoever the plan says speaks. Each witness warms a little to the player, states no change
+ * in what anyone is to them, and remembers one Normal moment about the player,
  * so a long multi-scene run has something to consolidate, and consolidation merges whatever it is given. Proves the
  * harness, not the prose.
  */
@@ -20,13 +21,13 @@ export function mockLlm(): BenchLlm {
       }
     },
     summarize: async (prompt) => {
-      if (prompt.system.startsWith('You read a finished scene')) return JSON.stringify({ ties: [] })
+      if (prompt.system.startsWith('You judge how one scene')) return JSON.stringify({ reason: '', approval: 'unchanged', trust: 'unchanged', interest: 'a little more', others: [], toward: [], resolved: [], ties: [] })
       if (prompt.system.startsWith('You merge')) {
         const who = prompt.user.match(/^(\S+)'s memories/)?.[1] ?? 'Someone'
         return JSON.stringify({ text: `${who} remembers ${prompt.user.split('\n').length - 1} mock scenes as one.` })
       }
       const who = prompt.user.match(/^About (\S+)/)?.[1] ?? 'Someone'
-      return JSON.stringify({ memories: [{ text: `${who} remembers a mock scene.`, level: 'normal', why: '', about: ['player'] }], revisited: [], approval: 'unchanged', trust: 'unchanged', interest: 'a little more' })
+      return JSON.stringify({ memories: [{ text: `${who} remembers a mock scene.`, level: 'normal', why: '', about: ['player'] }], revisited: [] })
     }
   }
 }

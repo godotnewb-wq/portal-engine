@@ -1315,84 +1315,24 @@ stacked crates
 
 Write the beats.
 
-===== ties =====
+===== relationship: mara =====
 ----- system -----
-You read a finished scene from a visual-novel RPG and say whether a relationship between the people in it began or ended on screen. Kit is the player (they/them). Reply with only a JSON object:
-{"ties": [{"turn": 1, "from": "id", "to": "id", "add": "tag", "end": "tag", "word": "...", "back_word": "...", "reason": "..."}]}
-
-- Most scenes change no relationship: then reply {"ties": []}.
-- Only what happened on screen and was carried through in this scene: vows made, a breakup said and meant, a job taken or quit, a betrayal that ends a friendship. Not what was only talked about, joked about, offered and left open, or felt: feelings are not ties.
-- A tie is what both would still call each other next week. Letting someone help once, giving them an order in the moment, or one favor is not a tie: no boss for one task.
-- turn: the number of the turn it happened on.
-- from: someone who was in the scene, by id. to: someone else who was, or "player" for Kit; Kit is never from.
-- add: the tag to becomes for from; end: the tag to stops being for from: read it as "to becomes from's add". Example: when Ada hires Ben for a job, from is ada, to is ben, add "contractor" (Ben becomes Ada's contractor), not "client". Tag ids from the list below. To replace a tag (an engagement becoming a marriage), end the old one and add the new one. Never end and add the same tag.
-- word: one of the added tag's words, for what from calls to; back_word: one of the counterpart's words, for what to calls from. Mind each person's pronouns. Example: when Ada (she/her) marries Ben (he/him), from is ada, to is ben, end is the engagement tag, add the marriage tag, word "husband" and back_word "wife".
-- The other side changes with it: list each change once, from one side.
-- reason: what happened, in a few words; it becomes the note on the relationship.
-- A tie with Kit that is an arrangement is asked of the player before it holds.
-
-Tags (id (words), ↔ counterpart): elder (older sister/older brother) ↔ younger; younger (younger sister/younger brother) ↔ elder; master (master) ↔ hand; hand (hand/apprentice) ↔ master; foe (foe), one-sided.
------ user -----
-# Who was in the scene
-- Mara [mara], she/her
-- Tobin [tobin], he/him
-- Kit [player], they/them
-
-# Their tags now
-- Mara → Tobin: foe ("rival")
-- Tobin → Kit: master ("employer")
-
-# The scene
-## Turn 1
-Kit: Who was in the yard last night?
-(Mara — Notice 16 vs 13: success)
-The gate creaks somewhere behind the crates.
-Tobin: The horses were restless. I sang to them.
-Mara: You were here after closing, Tobin. I saw the lamp.
-
-## Turn 2
-Kit: I'm not the Watch. Tell me who you let into the yard after closing, and I'll keep it quiet.
-(Kit — Talk 12 vs 13: success at a cost (+1: Mara))
-Tobin hums, then stops himself.
-Tobin: Someone with a Guild seal knocked. I couldn't say no to the seal.
-Mara's pen stops over the tally.
-
-## Turn 3
-Kit: Whose seal was it?
-Mara: Only clerks carry Guild seals. That makes it six people.
-
-## Turn 4
-Kit: Tobin, you should go before the clerk sees you.
-Tobin: Yes. The horses need water anyway.
-Tobin ducks out through the gate.
-
-## Turn 5
-Kit: Mara, what will you do with this?
-Mara closes the tally book and tucks the pen behind her ear.
-Mara: Check the seal log at dawn. Quietly, before the clerks come in.
-She glances at the gate Tobin left by.
-
-===== summary: mara =====
------ system -----
-You judge what one character takes away from a scene in a visual-novel RPG. Write Mara's memory of the scene and how it changed what Mara feels. Kit is the player (they/them).
+You judge how one scene in a visual-novel RPG changed what one character feels about the people in it, and what those people are to them. Answer for Mara, as Mara would. Kit is the player (they/them).
 
 Reply with only a JSON object:
-{"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "...", "about": [], "topics": []}], "revisited": [], "reason": "...", "warmth": "...", "bond": "...", "learned": [], "others": [{"with": "id", "warmth": "...", "bond": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": []}
+{"reason": "...", "warmth": "...", "bond": "...", "others": [{"with": "id", "warmth": "...", "bond": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": [], "ties": [{"with": "id", "now": "...", "no_longer": "...", "line": "..."}]}
 
-- memories: what stays with Mara from this scene, one for each distinct moment, most important first. Most scenes leave one; at most 3. text: one or two sentences, past tense, third person, from Mara's point of view: what Mara said, did, noticed and felt, and how Kit treated Mara. End on what stayed with Mara most.
-- level: "core" for a moment that changed something lasting for Mara, one Mara would still bring up in a year (a first betrayal or first real job, a loss, a secret of theirs coming out, a promise made or broken, real danger to their life; rare; at most 2, each with why: what it changed for Mara); "normal" for something that matters for weeks (a deal, an argument, a favor, learning something useful); "fleeting" for small talk, routine, atmosphere.
-- about: for each memory, who it is really about: "tobin", "player" for Kit. Not everyone who was there: a memory of small talk or a card game is about no one; one of a night out with Kit, or of telling Kit something, is about "player". [] if it's about no one in particular.
-- topics: for each memory, the ids of the topics that came up this scene that it is about; [] if none.
-- revisited: the ids of memories under "Remembers" that this scene came back to (a debt raised again, a promise kept); [] if none.
 - warmth, bond: how each CHANGED toward Kit because of this scene, each one of: "colder", "same", "warmer". Meters move slowly; nothing is owed for turning up. Toward someone, warmth is how much they like the other; bond is how much they would do for the other.
 - Judge as Mara: by Mara's values, agenda and how things stood before. Values Mara likes, shown by Kit, raise regard; values Mara dislikes lower it.
 - reason: one short sentence on what moved Mara, and which way.
-- learned: ids of Mara's own secrets that Kit truly found out in this scene (said or plainly shown); [] if none.
 - others: how Mara's feelings toward Tobin [tobin] changed in this scene, same words; leave someone out if nothing changed.
 - feels: how Mara feels as the scene ends, when it isn't about one person: a shade from the list below, family only when the shade is listed under more than one, intensity 1 to 5, and why in a few words. Leave it out if nothing much.
 - toward: feelings this scene left Mara with toward one person (who: "tobin", or "player" for Kit): what happened between them, not how Mara feels about them overall, which the meters hold. Only for something between them that will still be felt tomorrow, at intensity 3 or more; a pleasant chat or a small slight is none. A shade, intensity and why ("forgot our anniversary"). They pass in days. Most scenes leave none: [].
 - resolved: the people (as ids) toward whom a feeling Mara already carries was settled in this scene (an apology accepted, a fear put to rest); [] if none.
+- ties: what someone here became to Mara in this scene, or stopped being, as Mara would say it. "Ada is now my client" is {"with": "ada", "now": "client", "line": "..."}; "Ben is no longer my partner" is {"with": "ben", "no_longer": "partner", "line": "..."}. with: "tobin", or "player" for Kit. now, no_longer: one of the words under "What someone can be to Mara" below, the one Mara would use for them. line: the words from the scene that show it, copied exactly.
+- A tie is only what happened on screen and was carried through: vows made, a breakup said and meant, a job taken or quit, a debt paid off. Not what was only talked about, joked about, offered and left open, or felt: feelings are not ties. It is what Mara would still call them next week: an order given once, one favor or help with one task is not a tie. Most scenes change none: [].
 - Shades by family (usual intensity): sad: glum 1–3, sore 2–4; mad: sore 2–4, livid 4–5; startled (in the moment only): jolted 1–2.
+- What someone can be to Mara: Blood: older sister/older brother, younger sister/younger brother. Trade: master, hand/apprentice, foe.
 ----- user -----
 About Mara (person, she/her):
 - With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
@@ -1400,9 +1340,8 @@ About Mara (person, she/her):
 - Values: a ledger that balances (much) · rages: law
 - Secret [two-books]: Mara's part: she keeps the second ledger. A second ledger records what the yard really takes in. It is kept in the tally office, under the floor. How Mara feels about it: would rather lose her post than see it found.
 - Before this scene, toward Kit: warmth: civil; bond: loose
-- Toward Tobin: warmth: civil; bond: loose (she takes him on to keep him close)
-- What changed between people this scene (a Core memory for Mara): Tobin becomes Mara's apprentice (she takes him on to keep him close).
-- Topics that came up this scene: [faction.watch] The Ward Watch; [faction.guild.tallies] How the tallies work.
+- Toward Tobin: warmth: civil; bond: loose (has known him since the guild took him on)
+- What each person here is to Mara now: Tobin [tobin]: rival; Kit [player]: no tie.
 - Mood at the end: sore (mad), 3 of 5: she wants to know more first; comfort 2/5.
 
 Place: The Guild Yard, east gate.
@@ -1432,27 +1371,24 @@ Mara closes the tally book and tucks the pen behind her ear.
 Mara: Check the seal log at dawn. Quietly, before the clerks come in.
 She glances at the gate Tobin left by.
 
-===== summary: tobin =====
+===== relationship: tobin =====
 ----- system -----
-You judge what one character takes away from a scene in a visual-novel RPG. Write Tobin's memory of the scene and how it changed what Tobin feels. Kit is the player (they/them).
+You judge how one scene in a visual-novel RPG changed what one character feels about the people in it, and what those people are to them. Answer for Tobin, as Tobin would. Kit is the player (they/them).
 
 Reply with only a JSON object:
-{"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "...", "about": [], "topics": []}], "revisited": [], "reason": "...", "warmth": "...", "bond": "...", "learned": [], "others": [{"with": "id", "warmth": "...", "bond": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": []}
+{"reason": "...", "warmth": "...", "bond": "...", "others": [{"with": "id", "warmth": "...", "bond": "...", "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": [], "ties": [{"with": "id", "now": "...", "no_longer": "...", "line": "..."}]}
 
-- memories: what stays with Tobin from this scene, one for each distinct moment, most important first. Most scenes leave one; at most 2. text: one or two sentences, past tense, third person, from Tobin's point of view: what Tobin said, did, noticed and felt, and how Kit treated Tobin. End on what stayed with Tobin most.
-- level: "core" for a moment that changed something lasting for Tobin, one Tobin would still bring up in a year (a first betrayal or first real job, a loss, a secret of theirs coming out, a promise made or broken, real danger to their life; rare; at most 1, each with why: what it changed for Tobin); "normal" for something that matters for weeks (a deal, an argument, a favor, learning something useful); "fleeting" for small talk, routine, atmosphere.
-- about: for each memory, who it is really about: "mara", "player" for Kit. Not everyone who was there: a memory of small talk or a card game is about no one; one of a night out with Kit, or of telling Kit something, is about "player". [] if it's about no one in particular.
-- topics: for each memory, the ids of the topics that came up this scene that it is about; [] if none.
-- revisited: the ids of memories under "Remembers" that this scene came back to (a debt raised again, a promise kept); [] if none.
 - warmth, bond: how each CHANGED toward Kit because of this scene, each one of: "colder", "same", "warmer". Meters move slowly; nothing is owed for turning up. Toward someone, warmth is how much they like the other; bond is how much they would do for the other.
 - Judge as Tobin: by Tobin's values, agenda and how things stood before. Values Tobin likes, shown by Kit, raise regard; values Tobin dislikes lower it.
 - reason: one short sentence on what moved Tobin, and which way.
-- learned: ids of Tobin's own secrets that Kit truly found out in this scene (said or plainly shown); [] if none.
 - others: how Tobin's feelings toward Mara [mara] changed in this scene, same words; leave someone out if nothing changed.
 - feels: how Tobin feels as the scene ends, when it isn't about one person: a shade from the list below, family only when the shade is listed under more than one, intensity 1 to 5, and why in a few words. Leave it out if nothing much.
 - toward: feelings this scene left Tobin with toward one person (who: "mara", or "player" for Kit): what happened between them, not how Tobin feels about them overall, which the meters hold. Only for something between them that will still be felt tomorrow, at intensity 3 or more; a pleasant chat or a small slight is none. A shade, intensity and why ("forgot our anniversary"). They pass in days. Most scenes leave none: [].
 - resolved: the people (as ids) toward whom a feeling Tobin already carries was settled in this scene (an apology accepted, a fear put to rest); [] if none.
+- ties: what someone here became to Tobin in this scene, or stopped being, as Tobin would say it. "Ada is now my client" is {"with": "ada", "now": "client", "line": "..."}; "Ben is no longer my partner" is {"with": "ben", "no_longer": "partner", "line": "..."}. with: "mara", or "player" for Kit. now, no_longer: one of the words under "What someone can be to Tobin" below, the one Tobin would use for them. line: the words from the scene that show it, copied exactly.
+- A tie is only what happened on screen and was carried through: vows made, a breakup said and meant, a job taken or quit, a debt paid off. Not what was only talked about, joked about, offered and left open, or felt: feelings are not ties. It is what Tobin would still call them next week: an order given once, one favor or help with one task is not a tie. Most scenes change none: [].
 - Shades by family (usual intensity): sad: glum 1–3, sore 2–4; mad: sore 2–4, livid 4–5; startled (in the moment only): jolted 1–2.
+- What someone can be to Tobin: Blood: older sister/older brother, younger sister/younger brother. Trade: master, hand/apprentice, foe.
 ----- user -----
 About Tobin (automaton, he/him):
 - With strangers Tobin is shy; with friends he talks about the yard horses.
@@ -1460,10 +1396,117 @@ About Tobin (automaton, he/him):
 - Values: kin (some)
 - Secret [after-closing]: Tobin let someone into the yard after closing.
 - Before this scene, toward Kit: warmth: civil; bond: loose
-- Toward Mara: warmth: civil; bond: loose (she takes him on to keep him close)
-- What changed between people this scene (a Core memory for Tobin): Tobin becomes Mara's apprentice (she takes him on to keep him close).
+- What each person here is to Tobin now: Mara [mara]: no tie; Kit [player]: employer.
+- Mood at the end: jolted, 2 of 5; comfort 3/5.
+- Tobin left before the scene was over.
+
+Place: The Guild Yard, east gate.
+
+The scene:
+Kit: Who was in the yard last night?
+(Mara — Notice 16 vs 13: success)
+The gate creaks somewhere behind the crates.
+Tobin: The horses were restless. I sang to them.
+Mara: You were here after closing, Tobin. I saw the lamp.
+
+Kit: I'm not the Watch. Tell me who you let into the yard after closing, and I'll keep it quiet.
+(Kit — Talk 12 vs 13: success at a cost (+1: Mara))
+Tobin hums, then stops himself.
+Tobin: Someone with a Guild seal knocked. I couldn't say no to the seal.
+Mara's pen stops over the tally.
+
+Kit: Whose seal was it?
+Mara: Only clerks carry Guild seals. That makes it six people.
+
+Kit: Tobin, you should go before the clerk sees you.
+Tobin: Yes. The horses need water anyway.
+Tobin ducks out through the gate.
+
+Kit: Mara, what will you do with this?
+Mara closes the tally book and tucks the pen behind her ear.
+Mara: Check the seal log at dawn. Quietly, before the clerks come in.
+She glances at the gate Tobin left by.
+
+===== memory: mara =====
+----- system -----
+You write what one character remembers of a scene in a visual-novel RPG. Write Mara's memories of the scene. Kit is the player (they/them).
+
+Reply with only a JSON object:
+{"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "...", "about": [], "topics": []}], "revisited": []}
+
+- memories: what stays with Mara from this scene, one for each distinct moment, most important first. Most scenes leave one; at most 3. text: one or two sentences, past tense, third person, from Mara's point of view: what Mara said, did, noticed and felt, and how Kit treated Mara. End on what stayed with Mara most.
+- level: "core" for a moment that changed something lasting for Mara, one Mara would still bring up in a year (a first betrayal or first real job, a loss, a secret of theirs coming out, a promise made or broken, real danger to their life; rare; at most 2, each with why: what it changed for Mara); "normal" for something that matters for weeks (a deal, an argument, a favor, learning something useful); "fleeting" for small talk, routine, atmosphere.
+- about: for each memory, who it is really about: "tobin", "player" for Kit. Not everyone who was there: a memory of small talk or a card game is about no one; one of a night out with Kit, or of telling Kit something, is about "player". [] if it's about no one in particular.
+- topics: for each memory, the ids of the topics that came up this scene that it is about; [] if none.
+- revisited: the ids of memories under "Remembers" that this scene came back to (a debt raised again, a promise kept); [] if none.
+- What is listed about Mara as having changed between people, come out or been felt in this scene is settled: the memories fit it, and never say that something listed didn't happen or that something else did.
+----- user -----
+About Mara (person, she/her):
+- With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
+- Wants: Become the Guild's chief clerk. Tonight: Find out who keeps skimming the tallies
+- Values: a ledger that balances (much) · rages: law
+- Secret [two-books]: Mara's part: she keeps the second ledger. A second ledger records what the yard really takes in. It is kept in the tally office, under the floor. How Mara feels about it: would rather lose her post than see it found.
+- Before this scene, toward Kit: warmth: civil; bond: loose
+- Toward Tobin: warmth: civil; bond: loose (has known him since the guild took him on)
+- What changed between people this scene (a Core memory for Mara): Tobin becomes Mara's apprentice (“Check the seal log at dawn. Quietly, before the clerks come in.”).
+- Topics that came up this scene: [faction.watch] The Ward Watch; [faction.guild.tallies] How the tallies work.
+- Mood at the end: sore (mad), 3 of 5: she wants to know more first; comfort 2/5.
+- What moved Mara in this scene, in Mara's own judgment: Kit kept it quiet.
+- Feelings toward people that this scene left Mara with: toward Tobin: sore (mad), 3 of 5: he lied to her.
+
+Place: The Guild Yard, east gate.
+
+The scene:
+Kit: Who was in the yard last night?
+(Mara — Notice 16 vs 13: success)
+The gate creaks somewhere behind the crates.
+Tobin: The horses were restless. I sang to them.
+Mara: You were here after closing, Tobin. I saw the lamp.
+
+Kit: I'm not the Watch. Tell me who you let into the yard after closing, and I'll keep it quiet.
+(Kit — Talk 12 vs 13: success at a cost (+1: Mara))
+Tobin hums, then stops himself.
+Tobin: Someone with a Guild seal knocked. I couldn't say no to the seal.
+Mara's pen stops over the tally.
+
+Kit: Whose seal was it?
+Mara: Only clerks carry Guild seals. That makes it six people.
+
+Kit: Tobin, you should go before the clerk sees you.
+Tobin: Yes. The horses need water anyway.
+Tobin ducks out through the gate.
+
+Kit: Mara, what will you do with this?
+Mara closes the tally book and tucks the pen behind her ear.
+Mara: Check the seal log at dawn. Quietly, before the clerks come in.
+She glances at the gate Tobin left by.
+
+===== memory: tobin =====
+----- system -----
+You write what one character remembers of a scene in a visual-novel RPG. Write Tobin's memories of the scene. Kit is the player (they/them).
+
+Reply with only a JSON object:
+{"memories": [{"text": "...", "level": "core|normal|fleeting", "why": "...", "about": [], "topics": []}], "revisited": []}
+
+- memories: what stays with Tobin from this scene, one for each distinct moment, most important first. Most scenes leave one; at most 2. text: one or two sentences, past tense, third person, from Tobin's point of view: what Tobin said, did, noticed and felt, and how Kit treated Tobin. End on what stayed with Tobin most.
+- level: "core" for a moment that changed something lasting for Tobin, one Tobin would still bring up in a year (a first betrayal or first real job, a loss, a secret of theirs coming out, a promise made or broken, real danger to their life; rare; at most 1, each with why: what it changed for Tobin); "normal" for something that matters for weeks (a deal, an argument, a favor, learning something useful); "fleeting" for small talk, routine, atmosphere.
+- about: for each memory, who it is really about: "mara", "player" for Kit. Not everyone who was there: a memory of small talk or a card game is about no one; one of a night out with Kit, or of telling Kit something, is about "player". [] if it's about no one in particular.
+- topics: for each memory, the ids of the topics that came up this scene that it is about; [] if none.
+- revisited: the ids of memories under "Remembers" that this scene came back to (a debt raised again, a promise kept); [] if none.
+- What is listed about Tobin as having changed between people, come out or been felt in this scene is settled: the memories fit it, and never say that something listed didn't happen or that something else did.
+----- user -----
+About Tobin (automaton, he/him):
+- With strangers Tobin is shy; with friends he talks about the yard horses.
+- Wants: Earn his own key to the gate. Tonight: Keep anyone from asking about last night
+- Values: kin (some)
+- Secret [after-closing]: Tobin let someone into the yard after closing.
+- Before this scene, toward Kit: warmth: civil; bond: loose
+- Toward Mara: warmth: civil; bond: loose
+- What changed between people this scene (a Core memory for Tobin): Tobin becomes Mara's apprentice (“Check the seal log at dawn. Quietly, before the clerks come in.”).
 - Topics that came up this scene: [faction.watch] The Ward Watch; [faction.guild.tallies] How the tallies work.
 - Mood at the end: jolted, 2 of 5; comfort 3/5.
+- What moved Tobin in this scene, in Tobin's own judgment: Kit let him leave.
+- Tobin leaves the scene feeling: glum, 4 of 5: he gave the seal away.
 - Tobin left before the scene was over; the memory ends with leaving.
 
 Place: The Guild Yard, east gate.

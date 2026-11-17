@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Pack } from '@engine/pack'
 import { TracedError, type CallTrace } from '@engine/core'
-import { checkTies, consolidate, endScene, nextDay, type ConsolidationTrace, type SceneEndTrace, type Summarize, type TieCheckTrace } from '@engine/relationships'
+import { consolidate, endScene, judgeScene, nextDay, type ConsolidationTrace, type RelationshipTrace, type SceneEndTrace, type Summarize } from '@engine/relationships'
 import { answerTie, GameStateSchema, type GameState } from '@engine/state'
 import { promptSources, runTurn, type TurnLlm, type TurnTrace } from '@engine/scene'
 import { callTrace, LogSession, promptVersion, readSession, type SessionRecord } from '@platform/logs'
@@ -27,8 +27,8 @@ export interface SceneRun {
   cast: string[]
   days: number
   consolidations: ConsolidationTrace[]
-  /** The end-of-scene tie check (milestone 4b), before the summaries. */
-  ties?: TieCheckTrace
+  /** The witnesses' relationship calls and the ties settled from them (milestone 4c), before the memory calls. */
+  ties?: RelationshipTrace
   sceneEnd?: SceneEndTrace
 }
 
@@ -50,8 +50,8 @@ export interface ScenarioRun {
   session: string
   /** Every turn, across all its scenes. */
   turns: TurnTrace[]
-  /** A one-scene scenario's tie check and summaries; a scenario with several keeps each scene's under `scenes`. */
-  ties?: TieCheckTrace
+  /** A one-scene scenario's relationship calls and its close; a scenario with several keeps each scene's under `scenes`. */
+  ties?: RelationshipTrace
   sceneEnd?: SceneEndTrace
   /** A scenario with several scenes (milestone 4b): each one, in order. Absent for one scene. */
   scenes?: SceneRun[]
@@ -184,9 +184,9 @@ export async function runScenario(content: Pack, scenario: Scenario, llm: BenchL
         if (state.scene?.ended) break
       }
       if (scenario.summaries) {
-        // As the app does: relationship changes read from the scene, the player's answers, then the summaries.
+        // As the app does: the relationship calls and the ties settled from them, the player's answers, then the memory calls.
         where = 'scene-end'
-        const checked = await checkTies(played, state, llm.summarize)
+        const checked = await judgeScene(played, state, llm.summarize)
         state = answerAll(played, checked.state, scenario.answerTies)
         if (checked.trace.calls.length > 0) {
           if (run.scenes) part.ties = checked.trace
@@ -262,7 +262,7 @@ export const metricInputOf = (run: ScenarioRun) => ({ session: run.session, turn
 export const turnsOf = (run: ScenarioRun, scene: SceneRun): TurnTrace[] => run.turns.filter((t) => t.sceneId === scene.id)
 
 /**
- * Every call of a scenario run in order: turns first, then the scene end (the tie check, then the summaries), then any that failed. With several scenes,
+ * Every call of a scenario run in order: turns first, then the scene end (the relationship calls, then the memory calls), then any that failed. With several scenes,
  * scene by scene: the nights' consolidations before it, its turns, its summaries.
  */
 export function callsOf(run: ScenarioRun): CallTrace[] {

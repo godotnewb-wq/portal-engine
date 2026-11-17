@@ -163,7 +163,12 @@ export const TiesRulesSchema = z.object({
    * such as partner, spouse, employer, landlord. Family tags always need it; one-sided tags (rival, enemy) never do.
    */
   agreement: z.array(id).default([]),
-  groups: z.array(z.object({ id, name: z.string().min(1) })).min(1),
+  /**
+   * `oneAtATime`: two people hold at most one tag of the group toward each other, so a tag that begins there ends the
+   * one held (milestone 4c; decided 2026-11-16, user): an engagement that becomes a marriage needs no one to say the
+   * engagement ended.
+   */
+  groups: z.array(z.object({ id, name: z.string().min(1), oneAtATime: z.boolean().default(false) })).min(1),
   tags: z
     .array(
       z.object({
