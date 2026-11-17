@@ -435,11 +435,12 @@
         "id": "partner",
         "group": "partners",
         "counterpart": "partner",
-        "words": ["girlfriend", "boyfriend", "partner"]
+        "words": ["girlfriend", "boyfriend", "partner"],
+        "endsAs": "ex"
       },
-      { "id": "lover", "group": "partners", "counterpart": "lover", "words": ["lover"] },
-      { "id": "fiance", "group": "partners", "counterpart": "fiance", "words": ["fiancée", "fiancé"] },
-      { "id": "spouse", "group": "partners", "counterpart": "spouse", "words": ["wife", "husband", "spouse"] },
+      { "id": "lover", "group": "partners", "counterpart": "lover", "words": ["lover"], "endsAs": "ex" },
+      { "id": "fiance", "group": "partners", "counterpart": "fiance", "words": ["fiancée", "fiancé"], "endsAs": "ex" },
+      { "id": "spouse", "group": "partners", "counterpart": "spouse", "words": ["wife", "husband", "spouse"], "endsAs": "ex" },
       {
         "id": "ex",
         "group": "partners",

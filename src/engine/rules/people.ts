@@ -172,7 +172,13 @@ export const TiesRulesSchema = z.object({
         counterpart: id,
         words: z.array(word).min(1),
         oneSided: z.boolean().default(false),
-        family: z.boolean().default(false)
+        family: z.boolean().default(false),
+        /**
+         * The tag this one becomes when it ends on its own, with nothing begun in its place (decided 2026-11-16, user,
+         * after the end-of-Milestone-4 bench run 2: breakups left nothing behind). Partner, lover, fiancé and spouse
+         * end as ex. Not when the pair still holds another tag of the same group (a fiancé who becomes a spouse).
+         */
+        endsAs: id.optional()
       })
     )
     .min(1)
@@ -279,6 +285,8 @@ export function peopleProblems(p: PeopleRules, t: TiesRules, meters: string[], c
     if (!tags.includes(x.counterpart)) problems.push(`tag "${x.id}" has unknown counterpart "${x.counterpart}"`)
     else if (c!.counterpart !== x.id) problems.push(`tag "${x.id}"'s counterpart "${x.counterpart}" doesn't point back to it`)
     else if (c!.oneSided !== x.oneSided || c!.family !== x.family) problems.push(`tag "${x.id}" and its counterpart "${x.counterpart}" disagree on oneSided or family`)
+    if (x.endsAs && !tags.includes(x.endsAs)) problems.push(`tag "${x.id}" ends as unknown tag "${x.endsAs}"`)
+    else if (x.endsAs === x.id) problems.push(`tag "${x.id}" ends as itself`)
   }
   return problems
 }

@@ -30,6 +30,11 @@ describe('peopleProblems', () => {
     expect(peopleProblems(P, { ...T, agreement: ['hand', 'spouse'] }, meters)).toEqual(['ties.agreement names unknown tag "spouse"'])
   })
 
+  it('names only a known, different tag for a tag to end as (decided 2026-11-16)', () => {
+    const tags = T.tags.map((t, i) => (i === 0 ? { ...t, endsAs: 'ex' } : i === 1 ? { ...t, endsAs: t.id } : t))
+    expect(peopleProblems(P, { ...T, tags }, meters)).toEqual([`tag "${T.tags[0]!.id}" ends as unknown tag "ex"`, `tag "${T.tags[1]!.id}" ends as itself`])
+  })
+
   it('checks how feelings show and are read against the meters, tags, masking and its axis (milestone 4b)', () => {
     const visibility = { ...P.visibility, trustMeter: 'trust', guardedTags: ['enemy'], bands: [{ word: 'hidden', max: 1, shows: 'x' }, { word: 'some', max: 1, shows: 'y' }, { word: 'all', max: 3, shows: 'z' }] }
     const reading = { ...P.reading, difficulty: { bare: 'routine', thin: 'tough', bulky: 'grim' }, harder: ['shut'] }

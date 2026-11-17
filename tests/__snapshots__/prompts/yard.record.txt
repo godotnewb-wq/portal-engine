@@ -705,8 +705,7 @@
       }
     },
     "told": [
-      "mara.k1",
-      "tobin.after-closing"
+      "mara.k1"
     ],
     "newFacts": [
       {
@@ -877,15 +876,10 @@
         "holder": "tobin",
         "id": "tobin.after-closing",
         "kind": "personal",
-        "form": "off",
+        "form": "full",
         "priority": "kept",
         "cueTokens": 22,
-        "expansionTokens": 0,
-        "knownBy": [
-          "mara",
-          "player"
-        ],
-        "off": "known"
+        "expansionTokens": 0
       }
     ]
   },
@@ -897,7 +891,7 @@
     "dropped": [],
     "recurring": {
       "mara": 213,
-      "tobin": 115
+      "tobin": 137
     },
     "memories": {}
   },
@@ -995,8 +989,7 @@
       }
     },
     "told": [
-      "mara.k1",
-      "tobin.after-closing"
+      "mara.k1"
     ],
     "newFacts": [
       {
@@ -1174,14 +1167,9 @@
         "holder": "tobin",
         "id": "tobin.after-closing",
         "kind": "personal",
-        "form": "off",
+        "form": "cue",
         "cueTokens": 22,
-        "expansionTokens": 0,
-        "knownBy": [
-          "mara",
-          "player"
-        ],
-        "off": "known"
+        "expansionTokens": 0
       }
     ]
   },
@@ -1218,7 +1206,7 @@
     "dropped": [],
     "recurring": {
       "mara": 213,
-      "tobin": 115
+      "tobin": 137
     },
     "memories": {}
   },
@@ -1295,8 +1283,7 @@
       }
     },
     "told": [
-      "mara.k1",
-      "tobin.after-closing"
+      "mara.k1"
     ],
     "newFacts": [
       {
@@ -1573,8 +1560,7 @@
       }
     },
     "told": [
-      "mara.k1",
-      "tobin.after-closing"
+      "mara.k1"
     ],
     "newFacts": [
       {
@@ -1722,20 +1708,14 @@
             "id": "mara.m2",
             "text": "Tobin is my apprentice now.",
             "level": "core"
-          },
-          {
-            "id": "mara.m3",
-            "text": "Tobin admitted he let someone into the yard after closing.",
-            "level": "normal"
           }
         ],
         "revisited": [],
         "memoryNotes": [
-          "dropped topics that didn't come up: faction.navy"
+          "dropped topics that didn't come up: tobin.after-closing, faction.navy",
+          "heard \"tobin.after-closing\": it didn't come out in front of them this scene"
         ],
-        "heard": [
-          "tobin.after-closing"
-        ],
+        "heard": [],
         "reason": "Kit kept it quiet",
         "before": {
           "warmth": 2,

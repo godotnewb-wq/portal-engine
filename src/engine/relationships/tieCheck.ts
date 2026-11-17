@@ -1,7 +1,7 @@
 import { firstName, traced, type CallTrace, type Prompt } from '@engine/core'
 import { tagWord } from '@engine/characters'
 import { characterById, locationById, type Pack } from '@engine/pack'
-import { applyTie, needsAgreement, tagNamed, tieProblem, type GameState, type TieChange, type TieEvent } from '@engine/state'
+import { applyTie, needsAgreement, tagNamed, tagsToward, tieProblem, type GameState, type TieChange, type TieEvent } from '@engine/state'
 import type { Summarize } from './endScene'
 import { witnesses } from './summary'
 
@@ -122,7 +122,9 @@ export function parseTies(reply: string): WrittenTie[] | undefined {
  * been in the scene (the player as `to` only); tags by id or word; the usual rules (`tieProblem`), including that ending
  * and re-adding one tag changes nothing. An arrangement with the player waits in `pendingTies` for their answer; the
  * rest apply now as tie events, each forcing a Core memory for both in the summaries. A word that isn't one of the
- * tag's words is left out, and the tag's own word shows.
+ * tag's words is left out, and the tag's own word shows. Once all are settled, a tag that ended with nothing begun in
+ * its place becomes its `endsAs` tag (partner → ex) on both sides, as part of the same event, unless the pair still
+ * holds a tag of its group (decided 2026-11-16, user).
  */
 export function settleTies(content: Pack, state: GameState, written: WrittenTie[]): { state: GameState; applied: TieEvent[]; pending: TieChange[]; refused: string[] } {
   const scene = state.scene!
@@ -158,6 +160,17 @@ export function settleTies(content: Pack, state: GameState, written: WrittenTie[
     const done = applyTie(content, next, change, turn ?? scene.turns.at(-1)?.id)
     next = done.state
     applied.push(done.event)
+  })
+  applied.forEach((ev, i) => {
+    if (ev.added.length > 0) return
+    for (const end of ev.ended) {
+      const after = def(def(end)?.endsAs)
+      if (!after || tagsToward(next, ev.from, ev.to).some((t) => def(t.tag)?.group === def(end)!.group)) continue
+      const change: TieChange = { from: ev.from, to: ev.to, add: after.id, reason: ev.reason }
+      if (tieProblem(content, next, change)) continue
+      next = applyTie(content, next, change, ev.turn).state
+      applied[i] = { ...applied[i]!, added: [...applied[i]!.added, after.id] }
+    }
   })
   const s = next.scene!
   return { state: { ...next, scene: { ...s, tieEvents: [...s.tieEvents, ...applied], pendingTies: [...s.pendingTies, ...pending] } }, applied, pending, refused }

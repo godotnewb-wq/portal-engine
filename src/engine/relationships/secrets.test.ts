@@ -51,13 +51,12 @@ describe('a secret coming out on screen', () => {
       expect(run(by('dodge'), 'Someone came by after closing? No idea.', keyed)).toEqual(none)
     })
 
-    it('a reveal or a concede gives it away, unless the holder is keeping it with a lie or a deflection', () => {
+    it('a reveal or a concede gives it away, unless the holder is keeping it, whatever the approach', () => {
       expect(run(by('reveal'))).toEqual(out)
       expect(run(by('concede'))).toEqual(out)
       expect(run(by('concede', { keeps: ['tobin.after-closing'], touched: 'after closing', approach: 'lie' }))).toEqual(none)
       expect(run(by('reveal', { keeps: ['tobin.after-closing'], touched: 'after closing', approach: 'deflect' }))).toEqual(none)
-      // A partial truth hands over the true part, so a concede made that way still counts.
-      expect(run(by('concede', { keeps: ['tobin.after-closing'], touched: 'after closing', approach: 'partial truth' }))).toEqual(out)
+      expect(run(by('concede', { keeps: ['tobin.after-closing'], touched: 'after closing', approach: 'partial truth' }))).toEqual(none)
     })
 
     it('an answer gives it away only when the spoken line names the secret by its keywords', () => {
@@ -93,7 +92,7 @@ describe('learning a secret', () => {
 
   it('offers the summary what came out in front of them, and keeps what they took in as a memory of at least Normal with the secret', () => {
     expect(buildSummaryPrompt(fixture, told, 'mara').user).toContain("- Other people's secrets that came out in front of Mara this scene:\n  - [tobin.after-closing] Tobin: Tobin let someone into the yard after closing.")
-    expect(buildSummaryPrompt(fixture, told, 'mara').system).toContain('- heard: of the other people\'s secrets listed as coming out in front of Mara')
+    expect(buildSummaryPrompt(fixture, told, 'mara').system).toContain("- heard: every one of the other people's secrets listed as coming out in front of Mara")
     expect(buildSummaryPrompt(fixture, told, 'tobin').system).not.toContain('- heard:')
     const { state, reports } = end(told, 'mara', { memories: [{ text: 'A long night.', level: 'fleeting', why: '' }], heard: [{ id: 'tobin.after-closing', memory: 'Tobin let someone in after closing.' }, { id: 'tobin.made-up', memory: 'x' }] })
     expect(state.memories.map((m) => [m.id, m.level, m.secret, m.about])).toEqual([['mara.m1', 'fleeting', undefined, ['player', 'tobin']], ['mara.m2', 'normal', 'tobin.after-closing', ['tobin']]])
@@ -101,6 +100,14 @@ describe('learning a secret', () => {
     // Once learned, it isn't offered again.
     const again = { ...said(state.scene ? state : startScene(fixture, state, 'the-yard', ['mara', 'tobin']), tells, 'tobin') }
     expect(buildSummaryPrompt(fixture, again, 'mara').user).not.toContain("Other people's secrets")
+  })
+
+  it('teaches it to everyone present even when the summary leaves it out of heard (decided 2026-11-16)', () => {
+    const { state, reports } = end(told, 'mara', { memories: [{ text: 'A long night.', level: 'fleeting', why: '' }], heard: [] })
+    expect(state.memories.map((m) => [m.level, m.secret, m.text])).toEqual([['fleeting', undefined, 'A long night.'], ['normal', 'tobin.after-closing', "Mara learned Tobin's secret: Tobin let someone into the yard after closing."]])
+    expect(reports[0]!).toMatchObject({ heard: ['tobin.after-closing'], memoryNotes: ['heard "tobin.after-closing": left out of the summary, learned all the same'] })
+    // A failed summary call (the plain summary) learns it too.
+    expect(end(told, 'mara', {}).state.memories.some((m) => m.secret === 'tobin.after-closing')).toBe(true)
   })
 
   it('carries a linked secret’s codex pointer, so the knowledge filter counts the learner, and the knowledge outlasts recall', () => {

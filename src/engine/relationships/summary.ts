@@ -70,7 +70,7 @@ Reply with only a JSON object:
 - memories: what stays with ${me} from this scene, one for each distinct moment, most important first. Most scenes leave one; at most ${perScene}. text: one or two sentences, past tense, third person, from ${me}'s point of view: what ${me} said, did, noticed and felt, and how ${player} treated ${me}. End on what stayed with ${me} most.
 - level: "core" for a moment that changed something lasting for ${me}, one ${me} would still bring up in a year (a first betrayal or first real job, a loss, a secret of theirs coming out, a promise made or broken, real danger to their life; rare; at most ${core}, each with why: what it changed for ${me}); "normal" for something that matters for weeks (a deal, an argument, a favor, learning something useful); "fleeting" for small talk, routine, atmosphere.
 - about: for each memory, who it is really about: ${[...others.map((o) => `"${o.id}"`), `"player" for ${player}`].join(', ')}. Not everyone who was there: a memory of small talk or a card game is about no one; one of a night out with ${player}, or of telling ${player} something, is about "player". [] if it's about no one in particular.
-${topics ? `- topics: for each memory, the ids of the topics that came up this scene that it is about; [] if none.\n` : ''}- revisited: the ids of memories under "Remembers" that this scene came back to (a debt raised again, a promise kept); [] if none.${heard ? `\n- heard: of the other people's secrets listed as coming out in front of ${me}, the ids of those ${me} truly took in, each with memory: one sentence, past tense, from ${me}'s point of view, of learning it; [] if none.` : ''}
+${topics ? `- topics: for each memory, the ids of the topics that came up this scene that it is about; [] if none.\n` : ''}- revisited: the ids of memories under "Remembers" that this scene came back to (a debt raised again, a promise kept); [] if none.${heard ? `\n- heard: every one of the other people's secrets listed as coming out in front of ${me} (${me} took each in), each with memory: one sentence, past tense, from ${me}'s point of view, of learning it.` : ''}
 - ${meterNames}: how each CHANGED toward ${player} because of this scene, each one of: ${words}. Meters move slowly; nothing is owed for turning up. Toward someone, ${meaning}.
 - Judge as ${me}: by ${me}'s values, agenda and how things stood before. Values ${me} likes, shown by ${player}, raise regard; values ${me} dislikes lower it.
 - reason: one short sentence on what moved ${me}, and which way.
@@ -438,6 +438,25 @@ function makeMemories(content: Pack, state: GameState, c: Character, summary: Su
     const made: Memory = { id: memoryId(memories, c.id), owner: c.id, text, level: 'normal', scene: scene.id, place, at: state.time, revisits: 0, fadeFrom: state.time, about: [e.holder.id], focus: [e.holder.id], inRecall: true, secret: e.id, ...(e.codex && { codex: e.codex }), topics: [e.id] }
     memories = [...memories, made]
     mine.push(made)
+    heard.push(e.id)
+  }
+  // Everyone present takes in a secret that came out in front of them (decided 2026-11-16, user, after the
+  // end-of-Milestone-4 bench run 2: a summary left one out of `heard` though its memory was about it). One the summary
+  // left out is learned all the same: a memory of theirs from this scene tagged with it carries it (at least Normal),
+  // or the game writes a plain one.
+  for (const e of exposed.filter((x) => !heard.includes(x.id))) {
+    const tagged = mine.find((m) => !m.secret && (m.topics ?? []).includes(e.id))
+    const carry = { secret: e.id, ...(e.codex && { codex: e.codex }) }
+    if (tagged) {
+      const made: Memory = { ...tagged, ...carry, level: tagged.level === 'fleeting' ? 'normal' : tagged.level }
+      memories = memories.map((m) => (m === tagged ? made : m))
+      mine[mine.indexOf(tagged)] = made
+    } else {
+      const made: Memory = { id: memoryId(memories, c.id), owner: c.id, text: `${firstName(c.name)} learned ${firstName(e.holder.name)}'s secret: ${e.text}`, level: 'normal', scene: scene.id, place, at: state.time, revisits: 0, fadeFrom: state.time, about: [e.holder.id], focus: [e.holder.id], inRecall: true, ...carry, topics: [e.id] }
+      memories = [...memories, made]
+      mine.push(made)
+    }
+    notes.push(`heard "${e.id}": left out of the summary, learned all the same`)
     heard.push(e.id)
   }
   return { memories, mine, revisited, notes, heard }

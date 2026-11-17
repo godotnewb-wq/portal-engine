@@ -108,6 +108,8 @@ describe('topics', () => {
     expect(prompt.system).toContain('- topics: for each memory, the ids of the topics that came up this scene that it is about')
     const { state: next, reports } = applySummaries(fixture, state, [{ id: 'mara', summary: { ...plainSummary(fixture, state, 'mara'), memories: [{ text: 'Tobin let someone in.', level: 'normal', why: '', topics: ['tobin.after-closing', 'faction.watch'] }] } }])
     expect(next.memories[0]!.topics).toEqual(['tobin.after-closing'])
-    expect(reports[0]!.memoryNotes).toEqual(["dropped topics that didn't come up: faction.watch"])
+    // The summary left the secret out of `heard`, but its memory is about it, so that memory carries it (as in the end-of-Milestone-4 bench run 2).
+    expect(next.memories.map((m) => m.secret)).toEqual(['tobin.after-closing'])
+    expect(reports[0]!.memoryNotes).toEqual(["dropped topics that didn't come up: faction.watch", 'heard "tobin.after-closing": left out of the summary, learned all the same'])
   })
 })

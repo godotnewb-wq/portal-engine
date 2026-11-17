@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { buildDirectorPrompt, applyTurn, parsePlan, parseReply, validatePlan } from '@engine/scene'
+import type { Pack } from '@engine/pack'
 import { answerTie, tagsToward, tieQuestion, type GameState } from '@engine/state'
 import { fixture, yardScene } from '@tests/fixture'
 import { buildTiePrompt, checkTies, parseTies, settleTies } from './tieCheck'
@@ -45,6 +46,55 @@ describe('the end-of-scene tie check', () => {
     expect(refused).toEqual(['3: "pell" wasn\'t someone else in the scene', '4: no tag "cousin"', '5: it ends and adds "elder", which changes nothing'])
     expect(tagsToward(next, 'mara', 'tobin').map((t) => t.tag)).toEqual(['foe', 'elder'])
     expect(next.scene!.tieEvents).toEqual(applied)
+  })
+
+  describe('a partner tag that ends on its own leaves an ex behind (decided 2026-11-16)', () => {
+    const partners: Pack = {
+      ...fixture,
+      ruleset: {
+        ...fixture.ruleset,
+        ties: {
+          ...fixture.ruleset.ties,
+          groups: [...fixture.ruleset.ties.groups, { id: 'partners', name: 'Partners' }],
+          tags: [
+            ...fixture.ruleset.ties.tags,
+            ...['partner', 'fiance', 'spouse'].map((id) => ({ id, group: 'partners', counterpart: id, words: [id], oneSided: false, family: false, endsAs: 'ex' })),
+            { id: 'ex', group: 'partners', counterpart: 'ex', words: ['ex'], oneSided: false, family: false }
+          ]
+        }
+      }
+    }
+    /** The yard with Mara and Tobin holding `tag` toward each other, and Mara holding it toward the player. */
+    const holding = (tag: string): GameState => {
+      const s = played()
+      const relations = s.relations.filter((x) => !(x.from === 'mara' && x.to === 'tobin') && !(x.from === 'tobin' && x.to === 'mara'))
+      const rel = (from: string, to: string) => ({ from, to, meters: { ...fixture.ruleset.relations.start }, tags: [{ tag }] })
+      return { ...s, relations: [...relations, rel('mara', 'tobin'), rel('tobin', 'mara')], playerTies: { ...s.playerTies, mara: { tags: [{ tag }] } } }
+    }
+    const tags = (s: GameState, from: string, to: string) => tagsToward(s, from, to).map((t) => t.tag)
+
+    it('adds ex on both sides, as part of the breakup’s own event', () => {
+      const { state, applied } = settleTies(partners, holding('partner'), [{ from: 'mara', to: 'tobin', end: 'partner', reason: 'they split' }])
+      expect([tags(state, 'mara', 'tobin'), tags(state, 'tobin', 'mara')]).toEqual([['ex'], ['ex']])
+      expect(applied.map((e) => [e.added, e.ended])).toEqual([[['ex'], ['partner']]])
+      expect(state.scene!.tieEvents).toEqual(applied)
+    })
+
+    it('adds ex toward the player too', () => {
+      const { state } = settleTies(partners, holding('spouse'), [{ from: 'mara', to: 'player', end: 'spouse', reason: 'divorce' }])
+      expect(tags(state, 'mara', 'player')).toEqual(['ex'])
+    })
+
+    it('adds nothing when the pair moves on to another partner tag, in the same change or another', () => {
+      const one = settleTies(partners, holding('fiance'), [{ from: 'mara', to: 'tobin', end: 'fiance', add: 'spouse', reason: 'wed' }])
+      expect(tags(one.state, 'mara', 'tobin')).toEqual(['spouse'])
+      const two = settleTies(partners, holding('fiance'), [
+        { from: 'mara', to: 'tobin', end: 'fiance', reason: 'no longer engaged' },
+        { from: 'mara', to: 'tobin', add: 'spouse', reason: 'wed' }
+      ])
+      expect(tags(two.state, 'mara', 'tobin')).toEqual(['spouse'])
+      expect(two.applied.map((e) => e.added)).toEqual([[], ['spouse']])
+    })
   })
 
   it('holds an arrangement with the player for their answer, and lets a character make the player a foe on their own', () => {

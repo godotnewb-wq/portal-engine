@@ -113,8 +113,8 @@ function secretOf(content: Pack, id: string): { holder: string; keywords: string
  * friend who heard the dodge). A move's
  * `uses` is a pool it may draw on, not what was said, so a secret needs more than being listed:
  * - the holder's own secret comes out on a **reveal** or **concede**, or on an **answer** whose spoken line names it by
- *   its keywords, and never while the holder keeps it that turn by lying or deflecting (keeping it with a partial truth
- *   still gives part of it away);
+ *   its keywords, and never while the holder keeps it that turn, whatever the approach (a partial truth hides the
+ *   secret too; decided 2026-11-16, user);
  * - someone else's secret (a learner telling it) comes out on any move but a **dodge** or **refuse**.
  * Other facts are said whenever a voiced move draws on them, as before.
  */
@@ -122,7 +122,7 @@ export function givesAway(content: Pack, written: Pick<TurnWritten, 'plan' | 'be
   const secret = secretOf(content, id)
   if (!secret) return true
   if (m.who !== secret.holder) return m.move !== 'dodge' && m.move !== 'refuse'
-  const hiding = written.plan.speakers.some((s) => s.id === m.who && (s.kept ?? []).includes(id) && s.approach !== 'partial truth')
+  const hiding = written.plan.speakers.some((s) => s.id === m.who && (s.kept ?? []).includes(id))
   if (hiding) return false
   if (m.move === 'reveal' || m.move === 'concede') return true
   if (m.move !== 'answer') return false
