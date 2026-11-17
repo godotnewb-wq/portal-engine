@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { entryById, knows } from '@engine/codex'
 import { characterById, type Pack } from '@engine/pack'
-import { applyTurn, buildBriefs, canSay, exposures, knowerIn, parsePlan, parseReply, sceneFacts, settlePlan, turnLore, validatePlan, type BeatPlan } from '@engine/scene'
+import { applyTurn, buildBriefs, canSay, exposures, givesAway, knowerIn, parsePlan, parseReply, sceneFacts, settlePlan, turnLore, validatePlan, type BeatPlan } from '@engine/scene'
 import { GameStateSchema, startScene, type GameState } from '@engine/state'
 import type { CheckResult } from '@engine/rules'
 import { fixture, yardScene } from '@tests/fixture'
@@ -36,6 +36,44 @@ describe('a secret coming out on screen', () => {
   })
 
   // Decided 2026-11-15 (user), after the bench: the player named a secret to its holder's face, and no one could learn it.
+  describe('which moves give a secret away (decided 2026-11-16)', () => {
+    const keyed: Pack = { ...fixture, characters: fixture.characters.map((c) => (c.id === 'tobin' ? { ...c, secrets: c.secrets.map((s) => ({ ...s, keywords: ['after closing'] })) } : c)) }
+    const by = (move: string, extra: object = {}) =>
+      validatePlan(fixture, yardScene(), parsePlan(JSON.stringify({ speakers: [{ id: 'tobin', goal: 'get through it', ...extra }], moves: [{ who: 'tobin', answers: 'player', move, uses: ['tobin.after-closing'] }] }))!, 'Tobin, who came by after closing?').plan
+    const run = (p: BeatPlan, text = 'x', pack: Pack = fixture) => {
+      const state = applyTurn(pack, yardScene(), { id: 't1', input: ASK, plan: p, beats: [{ kind: 'dialogue', speaker: 'tobin', text }], tags: parseReply('', []).tags, dice: 1 })
+      return { exposed: state.scene!.turns[0]!.exposed ?? [], told: state.scene!.told }
+    }
+    const none = { exposed: [], told: [] }
+    const out = { exposed: [{ secret: 'tobin.after-closing', to: ['mara'] }], told: ['tobin.after-closing'] }
+
+    it('a dodge drawing on the holder’s own secret gives nothing away: no exposure, so no forced Core memory', () => {
+      expect(run(by('dodge'), 'Someone came by after closing? No idea.', keyed)).toEqual(none)
+    })
+
+    it('a reveal or a concede gives it away, unless the holder is keeping it with a lie or a deflection', () => {
+      expect(run(by('reveal'))).toEqual(out)
+      expect(run(by('concede'))).toEqual(out)
+      expect(run(by('concede', { keeps: ['tobin.after-closing'], touched: 'after closing', approach: 'lie' }))).toEqual(none)
+      expect(run(by('reveal', { keeps: ['tobin.after-closing'], touched: 'after closing', approach: 'deflect' }))).toEqual(none)
+      // A partial truth hands over the true part, so a concede made that way still counts.
+      expect(run(by('concede', { keeps: ['tobin.after-closing'], touched: 'after closing', approach: 'partial truth' }))).toEqual(out)
+    })
+
+    it('an answer gives it away only when the spoken line names the secret by its keywords', () => {
+      expect(run(by('answer'), 'I was home all night.', keyed)).toEqual(none)
+      expect(run(by('answer'), 'Fine. I let someone in after closing.', keyed)).toEqual(out)
+      expect(run(by('answer', { keeps: ['tobin.after-closing'], touched: 'after closing', approach: 'lie' }), 'Nobody came in after closing.', keyed)).toEqual(none)
+    })
+
+    it('someone telling another’s secret gives it away on any move but a dodge or a refusal', () => {
+      const written = { plan: tells, beats: [] }
+      const move = (m: string) => ({ who: 'mara', answers: 'player' as const, move: m, says: [] })
+      expect(['answer', 'reveal', 'offer', 'push back'].map((m) => givesAway(fixture, written, move(m), 'tobin.after-closing'))).toEqual([true, true, true, true])
+      expect(['dodge', 'refuse'].map((m) => givesAway(fixture, written, move(m), 'tobin.after-closing'))).toEqual([false, false])
+    })
+  })
+
   it('comes out when the player says it by its keywords, but only a secret the player knows', () => {
     const keyed: Pack = { ...fixture, characters: fixture.characters.map((c) => (c.id === 'tobin' ? { ...c, secrets: c.secrets.map((s) => ({ ...s, keywords: ['after closing'] })) } : c)) }
     const quiet = { plan: plan({ speakers: [{ id: 'mara', goal: 'listen' }], moves: [{ who: 'mara', answers: 'player', move: 'answer' }] }), beats: [] }

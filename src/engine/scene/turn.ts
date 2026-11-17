@@ -4,7 +4,7 @@ import { characterById, type Pack } from '@engine/pack'
 import { entryById, mentions } from '@engine/codex'
 import { firstName } from '@engine/core'
 import { RECENT_TURNS, turnText } from './director'
-import { presentCast, type BeatPlan } from './planShape'
+import { presentCast, type BeatPlan, type Move } from './planShape'
 
 /** In-game minutes a turn of talk takes (tune). */
 export const MINUTES_PER_TURN = 3
@@ -97,9 +97,42 @@ export function showDepartures(content: Pack, plan: BeatPlan, beats: Beat[]): { 
   return { beats: [...beats, ...added.map((a) => a.beat)], added }
 }
 
+/** A character's secret by its fact id (`<holder>.<secret>`), with its holder and the words that name it. */
+function secretOf(content: Pack, id: string): { holder: string; keywords: string[] } | undefined {
+  const dot = id.indexOf('.')
+  const c = dot > 0 ? characterById(content, id.slice(0, dot)) : undefined
+  const s = c?.secrets.find((x) => `${c.id}.${x.id}` === id)
+  if (!c || !s) return undefined
+  const entry = s.codex ? entryById(content.codex, s.codex) : undefined
+  return { holder: c.id, keywords: entry ? entry.keywords : (s.keywords ?? []) }
+}
+
+/**
+ * Whether a voiced move gives away a fact it drew on (decided 2026-11-16, user, after the end-of-Milestone-4 bench run
+ * 2: a dodge that drew on a character's secret counted as telling it, forced them a Core memory and taught it to the
+ * friend who heard the dodge). A move's
+ * `uses` is a pool it may draw on, not what was said, so a secret needs more than being listed:
+ * - the holder's own secret comes out on a **reveal** or **concede**, or on an **answer** whose spoken line names it by
+ *   its keywords, and never while the holder keeps it that turn by lying or deflecting (keeping it with a partial truth
+ *   still gives part of it away);
+ * - someone else's secret (a learner telling it) comes out on any move but a **dodge** or **refuse**.
+ * Other facts are said whenever a voiced move draws on them, as before.
+ */
+export function givesAway(content: Pack, written: Pick<TurnWritten, 'plan' | 'beats'>, m: Move, id: string): boolean {
+  const secret = secretOf(content, id)
+  if (!secret) return true
+  if (m.who !== secret.holder) return m.move !== 'dodge' && m.move !== 'refuse'
+  const hiding = written.plan.speakers.some((s) => s.id === m.who && (s.kept ?? []).includes(id) && s.approach !== 'partial truth')
+  if (hiding) return false
+  if (m.move === 'reveal' || m.move === 'concede') return true
+  if (m.move !== 'answer') return false
+  const spoken = written.beats.flatMap((b) => (b.kind === 'dialogue' && b.speaker === m.who ? [b.text] : [])).join(' ')
+  return secret.keywords.some((k) => mentions(spoken, k))
+}
+
 /**
  * Secrets that came out on screen this turn, and who they came out in front of (milestone 4b; decided 2026-11-13): a
- * move whose speaker had a line used one, in front of everyone present but its holder; or a reading check saw through
+ * move whose speaker had a line gave one away (`givesAway`), in front of everyone present but its holder; or a reading check saw through
  * someone keeping one, for the reader (the player keeps no memories, so a player's read records nothing). Given the
  * state and the player's words, also a secret the player knows (learned, or said on screen) that their words bring up
  * by its keywords, in front of everyone present but its holder (decided 2026-11-15, user: you can only spread what you
@@ -107,19 +140,14 @@ export function showDepartures(content: Pack, plan: BeatPlan, beats: Beat[]): { 
  */
 export function exposures(content: Pack, scene: NonNullable<GameState['scene']>, written: Pick<TurnWritten, 'plan' | 'beats'>, player?: { state: GameState; input: string }): NonNullable<Turn['exposed']> {
   const present = presentCast(scene)
-  const holderOf = (id: string) => {
-    const dot = id.indexOf('.')
-    const c = dot > 0 ? characterById(content, id.slice(0, dot)) : undefined
-    return c?.secrets.some((s) => `${c.id}.${s.id}` === id) ? c.id : undefined
-  }
   const voiced = new Set(written.beats.flatMap((b) => (b.kind === 'dialogue' ? [b.speaker] : [])))
   const out = new Map<string, Set<string>>()
   const add = (secret: string, to: string[]) => out.set(secret, new Set([...(out.get(secret) ?? []), ...to]))
   for (const m of written.plan.moves ?? []) {
     if (!voiced.has(m.who)) continue
     for (const s of m.says) {
-      const holder = s.id ? holderOf(s.id) : undefined
-      if (holder) add(s.id!, present.filter((x) => x !== holder))
+      const holder = s.id ? secretOf(content, s.id)?.holder : undefined
+      if (holder && givesAway(content, written, m, s.id!)) add(s.id!, present.filter((x) => x !== holder))
     }
   }
   for (const read of written.plan.reads ?? []) {
@@ -185,10 +213,12 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
   const summary = dropped ? `${scene.summary}\n\n${turnText(content, state.player.name, dropped)}`.trim().slice(-SUMMARY_CHARS) : scene.summary
 
   // What was said on screen joins the scene's common ground: a fact is introduced the first time, and anyone present
-  // can repeat it after. Only moves whose speaker actually had a line count, in case the writer or salvage dropped one.
+  // can repeat it after. Only moves whose speaker actually had a line count, in case the writer or salvage dropped one,
+  // and a secret only when the move gave it away (`givesAway`): this list also forces the holder's Core memory and
+  // tells the game the player knows it.
   const voiced = new Set(written.beats.flatMap((b) => (b.kind === 'dialogue' ? [b.speaker] : [])))
   const said = (written.plan.moves ?? []).filter((m) => voiced.has(m.who))
-  const told = [...new Set([...scene.told, ...said.flatMap((m) => m.says.flatMap((s) => (s.id ? [s.id] : [])))])]
+  const told = [...new Set([...scene.told, ...said.flatMap((m) => m.says.flatMap((s) => (s.id && givesAway(content, written, m, s.id) ? [s.id] : [])))])]
   const newFacts = [...scene.newFacts]
   for (const m of said)
     for (const s of m.says)
