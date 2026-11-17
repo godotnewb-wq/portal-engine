@@ -80,6 +80,12 @@ describe('the end-of-scene tie check', () => {
       expect(state.scene!.tieEvents).toEqual(applied)
     })
 
+    it('ends partner when ex is added outright, on both sides (run 3: the pair were left partners and exes)', () => {
+      const { state, applied } = settleTies(partners, holding('partner'), [{ from: 'mara', to: 'tobin', add: 'ex', reason: 'they split' }])
+      expect([tags(state, 'mara', 'tobin'), tags(state, 'tobin', 'mara')]).toEqual([['ex'], ['ex']])
+      expect(applied.map((e) => [e.added, e.ended])).toEqual([[['ex'], ['partner']]])
+    })
+
     it('adds ex toward the player too', () => {
       const { state } = settleTies(partners, holding('spouse'), [{ from: 'mara', to: 'player', end: 'spouse', reason: 'divorce' }])
       expect(tags(state, 'mara', 'player')).toEqual(['ex'])

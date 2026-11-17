@@ -41,6 +41,15 @@ function changed(content: Pack, tags: TieTag[], add: TieTag | undefined, end: st
   return { tags: next.filter((t) => t !== oldest), dropped: oldest.tag }
 }
 
+/**
+ * A tag that ends as the one being added ends with it (decided 2026-11-16, user, after the end-of-Milestone-4 bench
+ * run 3: a breakup written as "end contractor, add ex" left the pair partners and exes at once). Adding ex ends partner.
+ */
+function superseded(content: Pack, tags: TieTag[], add: string | undefined): { kept: TieTag[]; ended: string[] } {
+  const ends = (t: TieTag) => !!add && content.ruleset.ties.tags.find((x) => x.id === t.tag)?.endsAs === add
+  return { kept: tags.filter((t) => !ends(t)), ended: tags.filter(ends).map((t) => t.tag) }
+}
+
 /** What's wrong with a change before it is applied, or nothing: unknown tags, ending a tag not held, adding one held, or no room. */
 export function tieProblem(content: Pack, state: GameState, c: TieChange): string | undefined {
   const r = content.ruleset.ties
@@ -51,12 +60,12 @@ export function tieProblem(content: Pack, state: GameState, c: TieChange): strin
   if (c.add && c.add === c.end) return `it ends and adds "${c.add}", which changes nothing`
   if (c.add && !def(c.add)) return `no tag "${c.add}"`
   if (c.end && !def(c.end)) return `no tag "${c.end}"`
-  const held = tagsToward(state, c.from, c.to)
-  if (c.end && !held.some((t) => t.tag === c.end)) return `${c.from} doesn't hold "${c.end}" toward ${c.to}`
+  const held = superseded(content, tagsToward(state, c.from, c.to), c.add).kept
+  if (c.end && !tagsToward(state, c.from, c.to).some((t) => t.tag === c.end)) return `${c.from} doesn't hold "${c.end}" toward ${c.to}`
   if (c.add && held.some((t) => t.tag === c.add)) return `${c.from} already holds "${c.add}" toward ${c.to}`
   const mine = changed(content, held, c.add ? { tag: c.add } : undefined, c.end)
   if ('problem' in mine) return `${c.from} toward ${c.to}: ${mine.problem}`
-  const back = c.to !== 'player' && c.add && !def(c.add)!.oneSided ? changed(content, tagsToward(state, c.to, c.from), { tag: def(c.add)!.counterpart }, c.end && !def(c.end)!.oneSided ? def(c.end)!.counterpart : undefined) : undefined
+  const back = c.to !== 'player' && c.add && !def(c.add)!.oneSided ? changed(content, superseded(content, tagsToward(state, c.to, c.from), def(c.add)!.counterpart).kept, { tag: def(c.add)!.counterpart }, c.end && !def(c.end)!.oneSided ? def(c.end)!.counterpart : undefined) : undefined
   if (back && 'problem' in back) return `${c.to} toward ${c.from}: ${back.problem}`
   return undefined
 }
@@ -84,19 +93,21 @@ export function applyTie(content: Pack, state: GameState, c: TieChange, turn?: s
   const added: string[] = []
   const ended: string[] = []
 
-  const mine = changed(content, tagsToward(state, c.from, c.to), c.add ? tag(c.add, c.word) : undefined, c.end)
+  const before = superseded(content, tagsToward(state, c.from, c.to), c.add)
+  const mine = changed(content, before.kept, c.add ? tag(c.add, c.word) : undefined, c.end)
   if ('problem' in mine) throw new Error(mine.problem)
   set(c.from, c.to, mine.tags)
   if (c.add) added.push(c.add)
   if (c.end) ended.push(c.end)
+  ended.push(...before.ended.filter((x) => x !== c.end))
   if (mine.dropped) ended.push(mine.dropped)
 
   if (c.to !== 'player') {
     // The other side: the counterpart of what began and of what ended (one-sided tags have none).
     const mirror = (id?: string) => (id && !def(id)!.oneSided ? def(id)!.counterpart : undefined)
     const endBack = [mirror(c.end), mirror(mine.dropped)].filter((x): x is string => !!x)
-    let theirs = tagsToward(view(), c.to, c.from).filter((t) => !endBack.includes(t.tag))
     const addBack = mirror(c.add)
+    let theirs = superseded(content, tagsToward(view(), c.to, c.from), addBack).kept.filter((t) => !endBack.includes(t.tag))
     if (addBack) {
       const back = changed(content, theirs, tag(addBack, c.backWord), undefined)
       if ('problem' in back) throw new Error(back.problem)
