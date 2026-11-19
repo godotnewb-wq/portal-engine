@@ -7,7 +7,8 @@ import { characterById, type Pack } from '@engine/pack'
 import { firstName } from '@engine/core'
 import type { Tags } from './beats'
 import type { Problem } from './checks'
-import type { BeatPlan } from './planShape'
+import { presentCast, type BeatPlan } from './planShape'
+import { feelingsNow, shown, type Shown } from './feelings'
 import type { LoreTrace } from './lore'
 import type { BriefTrace } from './brief'
 
@@ -38,6 +39,12 @@ export interface TurnTrace {
   lore?: LoreTrace
   /** What the director's briefs carried: always-on cost per character, optional detail chosen and why, and cuts (milestone 4a); older logs have none. */
   brief?: BriefTrace
+  /**
+   * How much each feeling showed this turn and why (npc design §7; milestone 4d, for Turn details' People tab): each
+   * character present with a feeling, its masking for that family, the audience and why, the visibility number and its
+   * band, as the writer was told. Older logs have none.
+   */
+  shown?: ShownTrace[]
   /** `reshaped`: lines of the shown reply where code split speech from action (round 0 F1). */
   writer: { callId: string; reshaped?: number[] }
   /** What the code checks found in the draft; the rewrite was asked to fix these. */
@@ -57,6 +64,24 @@ export interface TurnTrace {
   tags: { parsed: Tags; dropped: string[] }
   cost: { calls: number; ms: number; tokens?: { input: number; output: number } }
   calls: CallTrace[]
+}
+
+/** One character's feeling as it showed in a turn: `Shown` without the writer's sentence for the band. */
+export type ShownTrace = Omit<Shown, 'shows'>
+
+/**
+ * Everyone present with a feeling, as it showed once the turn's plan applied: the same numbers the writer's brief
+ * gives in words (`writer.ts`).
+ */
+export function shownTraces(content: Pack, state: GameState, plan: Pick<BeatPlan, 'speakers' | 'reactions'>): ShownTrace[] {
+  const felt = feelingsNow(state, plan)
+  return presentCast(state.scene!).flatMap((id) => {
+    const f = felt[id]
+    const s = f && shown(content, state, id, f)
+    if (!s) return []
+    const { shows: _shows, ...rest } = s
+    return [rest]
+  })
 }
 
 /** How someone in the scene stood, before or after a turn. */

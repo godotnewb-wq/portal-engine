@@ -8,7 +8,7 @@ import { checkReply, droppedBeats, loreProblems, salvaged, withoutSpeech, type P
 import { fallbackPlan, parsePlan, settlePlan, validatePlan } from './plan'
 import type { BeatPlan } from './planShape'
 import { resolvePlan, type ResolveOptions } from './resolve'
-import { castSnapshot, checkTraces, planItems, type BeatTrace, type TurnTrace } from './trace'
+import { castSnapshot, checkTraces, planItems, shownTraces, type BeatTrace, type TurnTrace } from './trace'
 import { activeSecrets } from './secrets'
 import { acceptTags, applyTurn, showDepartures } from './turn'
 import { buildRewritePrompt, buildWriterPrompt, sceneSpeakers } from './writer'
@@ -168,6 +168,10 @@ export async function runTurn(
       checks: checkTraces(plan),
       lore: loreTrace(lore),
       brief: briefs.trace,
+      ...(() => {
+        const shown = shownTraces(content, state, plan)
+        return shown.length > 0 ? { shown } : {}
+      })(),
       writer: { callId: `${turnId}:writer`, ...(parsed.reshaped.length > 0 && { reshaped: parsed.reshaped }) },
       findings: problems,
       ...(rewritten && {

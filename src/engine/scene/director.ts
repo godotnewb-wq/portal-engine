@@ -83,6 +83,7 @@ export function buildBriefs(content: Pack, state: GameState, input: string, lore
   const sheets: Record<string, string> = {}
   const recurring: Record<string, number> = {}
   const memories: Record<string, number> = {}
+  const recalled: Record<string, string[]> = {}
   for (const id of present) {
     const c = characterById(content, id)
     if (!c) continue
@@ -91,8 +92,10 @@ export function buildBriefs(content: Pack, state: GameState, input: string, lore
     recurring[id] = tokensOf(sheet(content, state, c, lore.secrets, []))
     const line = rememberedLine(content, state, c)
     if (line) memories[id] = tokensOf(line)
+    const ids = recall(content.ruleset, state, c).map((m) => m.id)
+    if (ids.length > 0) recalled[id] = ids
   }
-  return { sheets, details, trace: { ...trace, recurring, memories } }
+  return { sheets, details, trace: { ...trace, recurring, memories, ...(Object.keys(recalled).length > 0 && { recalled }) } }
 }
 
 export function buildDirectorPrompt(content: Pack, state: GameState, input: string, lore: TurnLore = turnLore(content, state, input), briefs: Briefs = buildBriefs(content, state, input, lore)): Prompt {

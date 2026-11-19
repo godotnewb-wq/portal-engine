@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { TracedError, type Prompt } from '@engine/core'
+import { MemorySchema } from '@engine/state'
 import { fixture, yardScene } from '@tests/fixture'
 import { runTurn, type TurnLlm } from './runTurn'
 import { planItems } from './trace'
@@ -216,5 +217,19 @@ describe('planned departures', () => {
     const { beats, trace } = await runTurn(fixture, yardScene(), ASK, recorded(wrong, wrong).llm)
     expect(trace.rewrite?.salvage).toBeDefined()
     expect(beats.map((b) => b.text)).toEqual(['Rain on the crates.', 'Tobin heads off across the yard.'])
+  })
+})
+
+// Milestone 4d task 1: what Turn details' People tab needs that the trace didn't log.
+describe('how feelings showed, and the memories recalled into the briefs', () => {
+  it('logs each feeling with its masking, audience, visibility and band, and the memories recalled, by id', async () => {
+    const write: TurnLlm = { direct: async () => PLAN, write: async (_p: Prompt, onDelta) => (onDelta(CLEAN), CLEAN) }
+    const state = yardScene()
+    const remembering = { ...state, memories: [MemorySchema.parse({ id: 'mara.m1', owner: 'mara', text: 'Tobin hums when he lies.', level: 'core', at: 0, fadeFrom: 0 })] }
+    const { trace } = await runTurn(fixture, remembering, 'Tobin, who came by after closing?', write, () => {})
+    const mara = trace.shown?.find((s) => s.id === 'mara')
+    expect(mara).toMatchObject({ feeling: { shade: 'livid', intensity: 4 }, masking: expect.any(String), audience: { value: expect.any(Number) }, visibility: expect.any(Number), band: expect.any(String) })
+    expect(mara).not.toHaveProperty('shows')
+    expect(trace.brief?.recalled).toEqual({ mara: ['mara.m1'] })
   })
 })

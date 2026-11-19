@@ -55,6 +55,8 @@ export interface BriefTrace {
   dropped: string[]
   /** Estimated tokens of each character's recalled memories, reported apart (memory §6; milestone 4b). */
   memories?: Record<string, number>
+  /** The memories recalled into each character's brief, by id (milestone 4d: Turn details' People tab). Older logs have none. */
+  recalled?: Record<string, string[]>
 }
 
 export interface Briefs {
