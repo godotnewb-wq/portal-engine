@@ -17,6 +17,8 @@ export function SceneEndDetails({ content, details, onClose }: { content: Pack; 
   const meter = (id: string) => content.ruleset.meters.list.find((m) => m.id === id)?.name ?? id
   const ties = details.ties
   const end = details.end
+  // Each witness's two calls, named for the Calls tab: the traces pair every witness with their call's id.
+  const about = new Map([...(ties?.witnesses ?? []), ...(end?.witnesses ?? [])].map((w) => [w.callId, name(w.id)]))
   const failed = [...(ties?.witnesses ?? []), ...(end?.witnesses ?? [])].filter((w) => w.error).length
   const tabs: DetailsTab[] = [
     {
@@ -226,7 +228,7 @@ export function SceneEndDetails({ content, details, onClose }: { content: Pack; 
           <h3>
             Calls <small>(click a call for its prompt and reply)</small>
           </h3>
-          <CallList calls={[...(ties?.calls ?? []), ...(end?.calls ?? [])]} {...(details.session && { session: details.session })} />
+          <CallList calls={[...(ties?.calls ?? []), ...(end?.calls ?? [])]} about={about} {...(details.session && { session: details.session })} />
         </section>
       )
     }

@@ -60,7 +60,11 @@ export const NotRecorded = ({ what }: { what: string }) => <p className="muted n
  * Calls with what each cost and who answered; a click opens its prompt and reply, read back from the session's log
  * (`session`), which isn't kept with logging off.
  */
-export function CallList({ calls, session }: { calls: CallSummary[]; session?: string }) {
+/**
+ * The calls, each opening to its prompt and reply. `about` names whom a call is about by its id, where the role alone
+ * doesn't tell calls apart (a witness's relationship and memory calls at the scene's end).
+ */
+export function CallList({ calls, session, about }: { calls: CallSummary[]; session?: string; about?: ReadonlyMap<string, string> }) {
   const [open, setOpen] = useState<string | null>(null)
   const [texts, setTexts] = useState<Map<string, CallText | null>>(new Map())
   const toggle = (id: string) => {
@@ -73,7 +77,7 @@ export function CallList({ calls, session }: { calls: CallSummary[]; session?: s
       {calls.map((c) => (
         <li key={c.id}>
           <button className="call-row mono" onClick={() => toggle(c.id)} aria-expanded={open === c.id}>
-            {open === c.id ? '▾' : '▸'} {c.role}: {c.model ?? '?'} · {c.ms} ms{c.firstTextMs !== undefined && ` (first text ${c.firstTextMs} ms)`}
+            {open === c.id ? '▾' : '▸'} {c.role}{about?.has(c.id) && ` · ${about.get(c.id)}`}: {c.model ?? '?'} · {c.ms} ms{c.firstTextMs !== undefined && ` (first text ${c.firstTextMs} ms)`}
             {c.tokens && ` · ${c.tokens.input ?? '?'}→${c.tokens.output ?? '?'} tok`}
             {c.restarted && ' · restarted on fallback profile'}
             {c.jsonRetried && ' · retried without JSON mode'}
