@@ -183,8 +183,8 @@ describe('benchSettings', () => {
   it('reads one endpoint from the environment; unset roles borrow the writer', () => {
     const settings = benchSettings(undefined, { BENCH_BASE_URL: 'http://x/v1', BENCH_API_KEY: 'k', BENCH_MODEL: 'strong', BENCH_DIRECTOR_MODEL: 'fast' })
     expect(settings.writer).toMatchObject({ baseUrl: 'http://x/v1', apiKey: 'k', model: 'strong' })
-    expect(modelsOf(settings)).toEqual({ director: 'fast', writer: 'strong', summary: 'strong' })
-    expect(modelsOf(SettingsSchema.parse({}))).toEqual({ director: '(none)', writer: '(none)', summary: '(none)' })
+    expect(modelsOf(settings)).toEqual({ director: 'fast', writer: 'strong', bookkeeper: 'strong', summary: 'strong' })
+    expect(modelsOf(SettingsSchema.parse({}))).toEqual({ director: '(none)', writer: '(none)', bookkeeper: '(none)', summary: '(none)' })
   })
 })
 

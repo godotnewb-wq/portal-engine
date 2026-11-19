@@ -40,7 +40,10 @@ describe('what the bookkeeper is shown', () => {
 
   it('numbers the lines, lists the secrets and checks, and takes the new-detail limit from the ruleset', () => {
     const p = buildBookkeeperPrompt(fixture, yardScene(), turn([say('tobin', 'Nothing happened.'), narrate('Mara looks away.')]))
-    expect(p.user).toContain(`[${TOBIN}] Tobin's: ${tobinText}`)
+    expect(p.user).toContain(`[${TOBIN}] Tobin's secret: ${tobinText.replace(/\.$/, '')}. In full: ${tobinText}`)
+    // A linked secret is named by its codex title: what is hidden, apart from the background in full.
+    expect(p.user).toMatch(/\[mara\.two-books\] Mara's secret: [a-z][^.]*\. In full: /)
+    expect(p.system).toContain('Only the hidden part counts')
     expect(p.user).toContain('1. Tobin: "Nothing happened."')
     expect(p.user).toContain('2. (narration) Mara looks away.')
     expect(p.user).toContain('(player): What happened last night?')
@@ -128,17 +131,21 @@ describe('when a secret comes out (J, K)', () => {
     expect(r.unresolved).toMatchObject([{ why: "the bookkeeper couldn't tell" }])
   })
 
-  it('turns down what it can’t check: an unlisted secret, a line that isn’t there, words not in the line, an answer that comes after', () => {
+  it('turns down what it can’t check: an unlisted secret, a line that isn’t there, a way it came up that isn’t one, words in no line', () => {
     const beats = [say('tobin', 'I did.')]
-    const r = check(yardScene(), beats, [
-      { id: 'tobin.nothing' },
-      { at: 4, words: 'I did' },
-      { at: 1, how: 'shouted', words: 'I did' },
-      { at: 1, words: 'I let her in' },
-      { at: 1, words: 'I did', answers: 1 }
-    ])
+    const r = check(yardScene(), beats, [{ id: 'tobin.nothing' }, { at: 4, words: 'I did' }, { at: 1, how: 'shouted', words: 'I did' }, { at: 1, words: 'I let her in' }])
     expect(r.out).toEqual([])
-    expect(r.refused).toHaveLength(5)
+    expect(r.refused).toHaveLength(4)
+  })
+
+  it('takes words from the one line they are in, and leaves out an answer that isn’t before it, keeping the observation', () => {
+    const input = 'Did you let her in? Tobin let someone in after closing.'
+    const knowing = { ...yardScene(), facts: { tobin: [tobinText] } }
+    const moved = check(knowing, [say('mara', 'Well?')], [{ at: 1, words: 'Tobin let someone in after closing', answers: 'player' }], { input })
+    expect(moved.out).toMatchObject([{ by: 'player', at: 'player' }])
+    expect(moved.refused.join(' | ')).toMatch(/is in the player's words, not line 1; taken from there.*isn't before it; left out/)
+    const r = check(yardScene(), [say('tobin', 'I did.')], [{ at: 1, words: 'I did', answers: 1 }])
+    expect(r.out).toMatchObject([{ by: 'tobin', at: 1 }])
     // Punctuation, case and ellipses don't decide a match.
     expect(check(yardScene(), [say('tobin', 'Yes — I did, all right? I let her in.')], [{ words: 'yes i did ... i let her in' }]).out).toHaveLength(1)
   })

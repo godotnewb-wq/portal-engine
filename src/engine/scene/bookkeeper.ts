@@ -35,6 +35,12 @@ export interface Candidate {
   id: string
   holder: string
   text: string
+  /**
+   * What is hidden, in a few words: a linked secret's codex title ("What the sealed case holds"), a personal one's
+   * summary or first sentence. Only this coming out counts (bench run of 2026-11-19: with the full text alone, the
+   * bookkeeper took talk about the job around a secret for the secret).
+   */
+  hidden: string
 }
 
 /** One secret observation as the bookkeeper wrote it, before the game checks it. */
@@ -72,7 +78,13 @@ function secretById(content: Pack, id: string): Candidate | undefined {
   const dot = id.indexOf('.')
   const c = dot > 0 ? characterById(content, id.slice(0, dot)) : undefined
   const s = c?.secrets.find((x) => `${c.id}.${x.id}` === id)
-  return c && s ? { id, holder: c.id, text: s.text } : undefined
+  if (!c || !s) return undefined
+  const title = s.codex ? content.codex.find((e) => e.id === s.codex)?.title : undefined
+  // A codex title reads as a phrase ("What the sealed case holds"), so it goes in lower case after "secret:"; a
+  // summary or sentence keeps its case, since it may start with a name.
+  const trim = (t: string) => t.replace(/[.\s]+$/, '')
+  const hidden = title ? trim(title).charAt(0).toLowerCase() + trim(title).slice(1) : trim(s.summary ?? s.text.split(/(?<=[.!?])\s/)[0] ?? s.text)
+  return { id, holder: c.id, text: s.text, hidden }
 }
 
 /**
@@ -103,12 +115,12 @@ function task(content: Pack, limit: number): string {
 Reply with only a JSON object:
 {"secrets": [{"id": "...", "at": 1, "how": "stated", "words": "...", "answers": "player"}], "new": [{"text": "...", "at": 1}], "changed": "...", "moods": [{"id": "...", "shade": "...", "family": "...", "intensity": 1}], "checks": [{"id": "...", "honored": true, "note": "..."}]}
 
-- secrets: each secret from the list that this turn's lines or narration touched, in the order it happened. id: from the list. at: "player" for the player's words, or the number of the line. words: the words that did it, copied exactly from that line. how is one of:
-  - "stated": said as something known, outright or by confirming it ("Yes, that's what's in it", answering a question about it). Then answers: what it confirms, "player", a line's number, or "earlier" for the turn before.
-  - "guess": asked about, guessed at, suspected, denied or hinted at; not said as known, even when the guess is right.
-  - "evidence": the prose shows the fact itself, so anyone looking would know (a box opened and its contents seen, a letter read out).
+- secrets: each secret from the list whose hidden part this turn's lines or narration touched, in the order it happened. Each is listed by what is hidden, then in full. Only the hidden part counts: the background around it (a job, a place, a price, who is involved, what people there already know) is not the secret, and talk about it is none of these. id: from the list. at: "player" for the player's words, or the number of the line. words: the words that did it, copied exactly from that line. how is one of:
+  - "stated": the hidden part said as something known, outright or by confirming it ("Yes, that's what's in it", answering a question about it). Then answers: what it confirms, "player", an earlier line's number, or "earlier" for the turn before.
+  - "guess": asked about, guessed at, suspected, denied or hinted at; not said as known, even when the guess is right. Saying one doesn't know, or won't say, is never "stated".
+  - "evidence": the prose shows the hidden part itself, so anyone looking would know (a box opened and its contents seen, a letter read out).
   - "unclear": you can't tell which.
-  A line that only shares a word or a subject with a secret is none of these; leave it out. Most turns touch none: [].
+  Most turns touch none: [].
 - new: concrete details a line states as settled that no secret and no earlier turn holds: a price, a time, a place, a name, a promise. At most ${limit}, each in a few plain words, with the line it is from. A guess, or anything about a secret, is not a detail. Most turns have none: [].
 - changed: one sentence on what is actually different after this turn; "" if nothing is.
 - moods: each character present whose feeling the prose shows: where it seemed to land, as a shade from the list below (family only when the shade is listed under more than one) and intensity 1 to 5. Leave out anyone it doesn't show.
@@ -128,7 +140,7 @@ export function buildBookkeeperPrompt(content: Pack, before: GameState, written:
     system: task(content, content.ruleset.bookkeeper.newDetails),
     user: [
       `Present: ${[...present, `and the player, ${player} (${before.player.pronouns})`].join(', ')}.`,
-      `Secrets to watch:\n${candidates.length > 0 ? candidates.map((c) => `- [${c.id}] ${firstName(characterById(content, c.holder)!.name)}'s: ${c.text}`).join('\n') : '(none)'}`,
+      `Secrets to watch:\n${candidates.length > 0 ? candidates.map((c) => `- [${c.id}] ${firstName(characterById(content, c.holder)!.name)}'s secret: ${c.hidden}. In full: ${c.text}`).join('\n') : '(none)'}`,
       `Checks this turn:\n${checks.length > 0 ? checks.map((c) => `- [${c.id}] ${c.line}. Stakes: ${c.stakes}`).join('\n') : '(none)'}`,
       earlier && `Earlier:\n${turnText(content, player, earlier)}`,
       `This turn:\n${player} (player): ${written.input}\n${numbered(content, written.beats)}`
@@ -219,13 +231,22 @@ export function checkBookkeeping(content: Pack, before: GameState, written: Turn
     if (!candidates.has(o.id)) return refuse(`${what}: not on the list`)
     if (at === undefined) return refuse(`${what}: no such line (${str(o.at) || 'none given'})`)
     if (!(SECRET_HOW as readonly string[]).includes(o.how)) return refuse(`${what}: "${o.how}" isn't a way it came up`)
-    if (!quoted(o.words, lineOf(at))) return refuse(`${what}: "${o.words}" isn't in ${where(at)}`)
+    // Words that aren't in the line given but are in exactly one other line moved there: who said them comes from
+    // where they are, never from the reply (bench run of 2026-11-19: the player's words given as line 1).
+    let found: 'player' | number = at
+    if (!quoted(o.words, lineOf(at))) {
+      const elsewhere = (['player', ...written.beats.map((_, i) => i + 1)] as ('player' | number)[]).filter((x) => quoted(o.words, lineOf(x)))
+      if (elsewhere.length !== 1) return refuse(`${what}: "${o.words}" isn't in ${where(at)}`)
+      found = elsewhere[0]!
+      refused.push(`${what}: "${o.words}" is in ${where(found)}, not ${where(at)}; taken from there`)
+    }
+    // What it answers only says what a "yes" confirms; one that isn't before it is dropped, not the observation.
     if (o.answers !== undefined) {
       const answers = str(o.answers).toLowerCase() === 'earlier' ? 'earlier' : readAt(o.answers, written.beats)
-      const fits = answers === 'earlier' ? scene.turns.length > 0 : answers !== undefined && order(answers) < order(at)
-      if (!fits) return refuse(`${what}: what it answers (${str(o.answers)}) isn't before it`)
+      const fits = answers === 'earlier' ? scene.turns.length > 0 : answers !== undefined && order(answers) < order(found)
+      if (!fits) refused.push(`${what}: what it answers (${str(o.answers)}) isn't before it; left out`)
     }
-    return [{ ...o, at, how: o.how as SecretHow }]
+    return [{ ...o, at: found, how: o.how as SecretHow }]
   })
   const done = new Set<string>()
   for (const o of observed.sort((a, b) => order(a.at) - order(b.at))) {

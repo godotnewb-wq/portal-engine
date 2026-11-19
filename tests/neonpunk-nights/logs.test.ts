@@ -9,7 +9,7 @@ import { compareRuns } from '../../tools/bench/report'
 import { mockLlm, readRun, runBench, writeRun, type BenchRun } from '../../tools/bench/run'
 import { loadScenarios, scenarioState, ScenarioSchema } from '../../tools/bench/scenario'
 import { flagsFor, metricInput } from '../../tools/logs/load'
-import { copiedFromPlan, exchangeShape, gestureRepeats, metrics, relevanceOf, renderMetrics, repeatedPhrases } from '../../tools/logs/metrics'
+import { compareMetrics, copiedFromPlan, exchangeShape, gestureRepeats, metrics, relevanceOf, renderMetrics, repeatedPhrases } from '../../tools/logs/metrics'
 import { blindTest, renderFlags } from '../../tools/logs/review'
 import { toScenario } from '../../tools/logs/scenario'
 import { scoreSession, type Scorer } from '../../tools/logs/score'
@@ -184,5 +184,20 @@ describe('bench metrics (milestone 2, B4)', () => {
     expect(md).toMatch(/## Metrics \(matching scenario plays\)\n\n\| Metric \| A \| B \| Change \|/)
     expect(md).toMatch(/\| beats flagged bad \| 17% \| 0% \| -17 pts ✓ \|/)
     expect(readFileSync(join(out, 'run.json'), 'utf8')).not.toMatch(/"turns":/)
+  })
+})
+
+// Milestone 4c: the rubric is an acceptance check, so a comparison shows the AI scores, with the mean over every score.
+describe('AI scores in a comparison', () => {
+  it('gives the mean over every score and each item, for both runs', () => {
+    const scored = (scores: number[]) =>
+      metrics([{ session: 's', turns: [], calls: [], flags: [], errors: [], scores: [{ turnSession: 's', turnId: 't1', scorer: { version: SCORER_VERSION, profile: 'p', model: 'm' }, at: '2026-11-19T00:00:00Z', items: scores.map((score, i) => ({ id: i + 1, score, reason: '' })), beats: [] }] }])
+    const a = scored([4, 2])
+    expect(a.ai.mean).toBe(3)
+    expect(renderMetrics(a, (id) => id)).toContain('mean over every score 3')
+    const md = compareMetrics(a, scored([5, 4]))
+    expect(md).toContain('| AI score, mean over every score | 3 | 4.50 | +1.50 ✓ |')
+    expect(md).toMatch(/\| AI score 1\. [^|]+ \| 4 \| 5 \| \+1 ✓ \|/)
+    expect(compareMetrics(metrics([]), metrics([]))).not.toContain('AI score')
   })
 })

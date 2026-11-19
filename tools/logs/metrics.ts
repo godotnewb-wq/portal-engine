@@ -136,6 +136,8 @@ export interface Metrics {
   }
   ai: {
     turnsScored: number
+    /** The mean over every score given (the milestone-4 plan's "rubric mean over every score"); NaN when none. */
+    mean: number
     items: Record<string, number>
     /** Of beats both a person and the scorer marked, how often they agreed on the rating. */
     agreement: { both: number; same: number; humanBadMarkedBad: number; humanBad: number; aiBadFlaggedBad: number; aiBad: number }
@@ -294,6 +296,10 @@ export function metrics(inputs: MetricInput[]): Metrics {
     },
     ai: {
       turnsScored: scores.length,
+      mean: (() => {
+        const all = scores.flatMap((s) => s.items.map((i) => i.score))
+        return all.length > 0 ? all.reduce((a, b) => a + b, 0) / all.length : Number.NaN
+      })(),
       items: Object.fromEntries(
         RUBRIC.flatMap((item) => {
           const xs = scores.flatMap((s) => s.items.filter((i) => i.id === item.id).map((i) => i.score))
@@ -407,7 +413,7 @@ export function renderMetrics(m: Metrics, nameOf: (id: string) => string = (id) 
     `- **Flags:** ${m.flags.beatsFlagged} beats, ${m.flags.turnFlags} turns; reasons ${list(m.flags.byReason)}`,
     `- **Flags by speaker:** ${Object.entries(m.flags.bySpeaker).map(([k, v]) => `${nameOf(k)} ${v.good}/${v.meh}/${v.bad} (good/meh/bad)`).join(', ') || '—'}`,
     `- **Bad flags by kind:** ${Object.entries(m.flags.byKind).map(([k, v]) => `${k} ${v.bad}/${v.beats}`).join(', ') || '—'}; **by source:** ${Object.entries(m.flags.bySource).map(([k, v]) => `${k} ${v.bad}/${v.beats}`).join(', ') || '—'}`,
-    `- **AI scores:** ${m.ai.turnsScored} turns; ${Object.entries(m.ai.items).sort((x, y) => parseInt(x[0]) - parseInt(y[0])).map(([k, v]) => `${k} ${num(v)}`).join(', ') || '—'}`,
+    `- **AI scores:** ${m.ai.turnsScored} turns${Number.isNaN(m.ai.mean) ? '' : `, mean over every score ${num(m.ai.mean)}`}; ${Object.entries(m.ai.items).sort((x, y) => parseInt(x[0]) - parseInt(y[0])).map(([k, v]) => `${k} ${num(v)}`).join(', ') || '—'}`,
     `- **AI vs people:** same rating on ${a.same} of ${a.both} beats both marked; scorer marked bad ${a.humanBadMarkedBad} of ${a.humanBad} beats people flagged bad; people flagged bad ${a.aiBadFlaggedBad} of ${a.aiBad} beats the scorer marked bad`,
     `- **Errors:** ${list(m.errors)}`
   ].join('\n')
@@ -425,6 +431,13 @@ export function compareMetrics(a: Metrics, b: Metrics): string {
       const d = Number.isNaN(va) || Number.isNaN(vb) ? 0 : vb - va
       const mark = d === 0 || better === 'info' ? '' : (better === 'lower') === d < 0 ? ' ✓' : ' ✗'
       return `| ${name} | ${show(va)} | ${show(vb)} | ${d === 0 ? '—' : `${d > 0 ? '+' : ''}${isRate(name) ? `${Math.round(d * 100)} pts` : num(d)}${mark}`} |`
-    })
+    }),
+    // The AI scores (milestone 4c: the rubric is an acceptance check, so a comparison shows it), higher is better.
+    ...(a.ai.turnsScored > 0 || b.ai.turnsScored > 0
+      ? [['AI score, mean over every score', a.ai.mean, b.ai.mean] as const, ...[...new Set([...Object.keys(a.ai.items), ...Object.keys(b.ai.items)])].sort((x, y) => parseInt(x) - parseInt(y)).map((k) => [`AI score ${k}`, a.ai.items[k] ?? Number.NaN, b.ai.items[k] ?? Number.NaN] as const)].map(([name, va, vb]) => {
+          const d = Number.isNaN(va) || Number.isNaN(vb) ? 0 : vb - va
+          return `| ${name} | ${Number.isNaN(va) ? '—' : num(va)} | ${Number.isNaN(vb) ? '—' : num(vb)} | ${d === 0 ? '—' : `${d > 0 ? '+' : ''}${num(d)}${d > 0 ? ' ✓' : ' ✗'}`} |`
+        })
+      : [])
   ].join('\n')
 }
