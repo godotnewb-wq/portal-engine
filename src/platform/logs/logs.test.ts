@@ -3,7 +3,7 @@ import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { describe, expect, it } from 'vitest'
 import { SettingsSchema } from '@llm'
-import { runTurn, type TurnLlm } from '@engine/scene'
+import { bookkeep, runTurn, type TurnLlm } from '@engine/scene'
 import { endScene } from '@engine/relationships'
 import { fixture, yardScene } from '@tests/fixture'
 import { FILES, findSessions, joinSections, LogSession, PlayLogs, promptOf, readSession, roleModels, sections } from '.'
@@ -76,10 +76,25 @@ describe('LogSession (milestone 2, A2)', () => {
     expect(findSessions(dir)).toEqual([log.dir])
   })
 
+  it('keeps each turn’s bookkeeper: its records, its call by id, and whether the turn stopped waiting (milestone 4c)', async () => {
+    const log = LogSession.open(root(), info)
+    const turn = await runTurn(fixture, yardScene(), 'Tobin?', llm, () => {}, { log: log.id })
+    const written = { id: turn.trace.turnId, input: 'Tobin?', beats: turn.beats, plan: turn.plan }
+    const kept = await bookkeep(fixture, yardScene(), written, async () => '{"secrets": [], "changed": "Mara presses him."}')
+    log.bookkeeping(kept.trace)
+    log.bookkeeping({ ...kept.trace, turnId: 'late-turn', calls: [] }, true)
+    const read = readSession(log.dir)
+    expect(read.bookkeeping).toMatchObject([
+      { turnId: turn.trace.turnId, calls: [`${turn.trace.turnId}:bookkeeper`], records: { source: 'bookkeeper', changed: 'Mara presses him.' } },
+      { turnId: 'late-turn', calls: [], late: true }
+    ])
+    expect(read.calls.get(`${turn.trace.turnId}:bookkeeper`)).toMatchObject({ role: 'bookkeeper' })
+  })
+
   it('never writes an API key: session models carry profile, model and temperature only', () => {
     const settings = SettingsSchema.parse({ writer: { baseUrl: 'https://x.example/v1?key=sk-secret', apiKey: 'sk-secret', model: 'strong' }, director: { baseUrl: 'https://x', apiKey: 'sk-other', model: 'fast' } })
     const models = roleModels(settings)
-    expect(models).toEqual({ director: { profile: 'director', model: 'fast', temperature: 0.8 }, writer: { profile: 'writer', model: 'strong', temperature: 0.8 }, summary: { profile: 'writer', model: 'strong', temperature: 0.8 } })
+    expect(models).toEqual({ director: { profile: 'director', model: 'fast', temperature: 0.8 }, writer: { profile: 'writer', model: 'strong', temperature: 0.8 }, bookkeeper: { profile: 'writer', model: 'strong', temperature: 0.8 }, summary: { profile: 'writer', model: 'strong', temperature: 0.8 } })
     const log = LogSession.open(root(), { ...info, models })
     log.close()
     expect(readFileSync(join(log.dir, FILES.session), 'utf8')).not.toMatch(/sk-|x\.example/)

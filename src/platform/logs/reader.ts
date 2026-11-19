@@ -2,7 +2,7 @@ import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import type { CallTrace, Prompt } from '@engine/core'
 import { FlagRecordSchema, type FlagRecord, type ScoreRecord } from '@engine/review'
-import { FILES, joinSections, type CallRecord, type ErrorRecord, type PromptRecord, type SceneRecord, type SessionRecord, type TurnRecord } from './records'
+import { FILES, joinSections, type BookkeepingRecord, type CallRecord, type ErrorRecord, type PromptRecord, type SceneRecord, type SessionRecord, type TurnRecord } from './records'
 
 /** One session's files, read and joined by id. */
 export interface SessionLog {
@@ -15,6 +15,8 @@ export interface SessionLog {
   flags: FlagRecord[]
   scores: ScoreRecord[]
   errors: ErrorRecord[]
+  /** Each turn's bookkeeper (milestone 4c); none in older sessions. */
+  bookkeeping: BookkeepingRecord[]
   /** Lines that couldn't be read (a crash mid-write leaves a half line). */
   unreadable: number
 }
@@ -55,6 +57,7 @@ export function readSession(dir: string): SessionLog {
     flags,
     scores: lines<ScoreRecord>(dir, FILES.scores, counter),
     errors: lines<ErrorRecord>(dir, FILES.errors, counter),
+    bookkeeping: lines<BookkeepingRecord>(dir, FILES.bookkeeping, counter),
     unreadable: counter.n
   }
 }

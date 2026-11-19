@@ -5,7 +5,7 @@ import { TracedError, type CallTrace, type LlmReply, type Prompt } from '@engine
 import { bookkeepWithin } from '@platform/roles'
 import { consolidate, endScene, judgeScene, nextDay, type ConsolidationTrace, type RelationshipTrace, type SceneEndTrace, type Summarize } from '@engine/relationships'
 import { answerTie, GameStateSchema, type GameState } from '@engine/state'
-import { applyRecords, promptSources, runTurn, type TurnLlm, type TurnTrace } from '@engine/scene'
+import { applyRecords, promptSources, runTurn, type BookkeeperTrace, type TurnLlm, type TurnTrace } from '@engine/scene'
 import { callTrace, LogSession, promptVersion, readSession, type SessionRecord } from '@platform/logs'
 import type { FlagRecord, ScoreRecord } from '@engine/review'
 import { loreBudgets, type LoreBudgetOverrides, type LoreBudgets } from '@engine/rules'
@@ -51,6 +51,8 @@ export interface ScenarioRun {
   session: string
   /** Every turn, across all its scenes. */
   turns: TurnTrace[]
+  /** Each turn's bookkeeper (milestone 4c), in turn order; absent when the run had none. */
+  bookkeeping?: BookkeepingRun[]
   /** A one-scene scenario's relationship calls and its close; a scenario with several keeps each scene's under `scenes`. */
   ties?: RelationshipTrace
   sceneEnd?: SceneEndTrace
@@ -66,6 +68,9 @@ export interface ScenarioRun {
   flags?: FlagRecord[]
   scores?: ScoreRecord[]
 }
+
+/** A turn's bookkeeper as the bench keeps it: the trace, and whether the turn stopped waiting for it. */
+export type BookkeepingRun = BookkeeperTrace & { late?: boolean }
 
 export interface BenchRun {
   label: string
@@ -190,6 +195,8 @@ export async function runScenario(content: Pack, scenario: Scenario, llm: BenchL
         if (llm.bookkeeper) {
           const last = outcome.state.scene!.turns.at(-1)!
           const kept = await bookkeepWithin(played, state, { id: last.id, input, beats: last.beats, plan: outcome.plan }, llm.bookkeeper.call, llm.bookkeeper.waitMs)
+          ;(run.bookkeeping ??= []).push({ ...kept.trace, ...(kept.late && { late: true }) })
+          session?.bookkeeping(kept.trace, kept.late)
           state = applyRecords(outcome.state, kept.records)
         } else state = outcome.state
         if (state.scene?.ended) break
@@ -273,13 +280,15 @@ export const metricInputOf = (run: ScenarioRun) => ({ session: run.session, turn
 export const turnsOf = (run: ScenarioRun, scene: SceneRun): TurnTrace[] => run.turns.filter((t) => t.sceneId === scene.id)
 
 /**
- * Every call of a scenario run in order: turns first, then the scene end (the relationship calls, then the memory calls), then any that failed. With several scenes,
+ * Every call of a scenario run in order: turns first (each with its bookkeeper's), then the scene end (the relationship calls, then the memory calls), then any that failed. With several scenes,
  * scene by scene: the nights' consolidations before it, its turns, its summaries.
  */
 export function callsOf(run: ScenarioRun): CallTrace[] {
+  // Each turn's calls, then its bookkeeper's (milestone 4c).
+  const turn = (t: TurnTrace) => [...t.calls, ...(run.bookkeeping?.find((b) => b.turnId === t.turnId)?.calls ?? [])]
   const played = run.scenes
-    ? run.scenes.flatMap((s) => [...s.consolidations.flatMap((c) => c.calls), ...turnsOf(run, s).flatMap((t) => t.calls), ...(s.ties?.calls ?? []), ...(s.sceneEnd?.calls ?? [])])
-    : [...run.turns.flatMap((t) => t.calls), ...(run.ties?.calls ?? []), ...(run.sceneEnd?.calls ?? [])]
+    ? run.scenes.flatMap((s) => [...s.consolidations.flatMap((c) => c.calls), ...turnsOf(run, s).flatMap(turn), ...(s.ties?.calls ?? []), ...(s.sceneEnd?.calls ?? [])])
+    : [...run.turns.flatMap(turn), ...(run.ties?.calls ?? []), ...(run.sceneEnd?.calls ?? [])]
   return [...played, ...(run.errorCalls ?? [])]
 }
 
@@ -344,6 +353,7 @@ export function readRun(dir: string): BenchRun {
       seed: b.seed,
       session: entry.session,
       turns: log.turns.map((t) => ({ ...t, calls: calls(t.calls) })),
+      ...(log.bookkeeping.length > 0 && { bookkeeping: log.bookkeeping.map(({ calls: ids, ...rest }) => ({ ...rest, calls: calls(ids) })) }),
       ...(scenes ? { scenes } : { ...(ties && { ties: { ...ties, calls: calls(ties.calls) } }), ...(end && { sceneEnd: { ...end, calls: calls(end.calls) } }) }),
       ...(entry.error && { error: entry.error }),
       ...(failed?.calls && { errorCalls: calls(failed.calls) }),

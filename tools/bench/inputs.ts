@@ -39,7 +39,7 @@ export function sourceRevision(root: string): RunInputs['source'] {
 }
 
 /** The settings each role really ran with (an unset role borrows the writer's profile), minus the key. */
-export function roleSettings(settings: Settings, roles: readonly ('director' | 'writer' | 'summary' | 'scorer')[]): Record<string, RoleSettings> {
+export function roleSettings(settings: Settings, roles: readonly ('director' | 'writer' | 'bookkeeper' | 'summary' | 'scorer')[]): Record<string, RoleSettings> {
   const out: Record<string, RoleSettings> = {}
   for (const role of roles) {
     const profile = profileFor(settings, role)

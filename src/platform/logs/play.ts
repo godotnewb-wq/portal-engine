@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import type { CallTrace } from '@engine/core'
 import type { Pack } from '@engine/pack'
 import type { ConsolidationTrace, SceneEndTrace, RelationshipTrace } from '@engine/relationships'
-import { promptSources, type TurnTrace } from '@engine/scene'
+import { promptSources, type BookkeeperTrace, type TurnTrace } from '@engine/scene'
 import { currentFlags, FlagSchema, type Flag, type FlagRecord, type ScoreRecord } from '@engine/review'
 import { findSessions, readFlags, readSession } from './reader'
 import { promptVersion, type CallRecord, type SessionRecord, type TurnRecord } from './records'
@@ -133,6 +133,11 @@ export class PlayLogs {
   /** The relationship calls and the ties settled from them (milestone 4c), in the scenes file before the scene's end. */
   ties(trace: RelationshipTrace): void {
     this.open()?.ties(trace)
+  }
+
+  /** A turn's bookkeeper (milestone 4c), once it answered, failed or the turn stopped waiting. */
+  bookkeeping(trace: BookkeeperTrace, late = false): void {
+    this.open()?.bookkeeping(trace, late)
   }
 
   /** A consolidation run between scenes (milestone 4b): its groups and calls, in the scenes file. */

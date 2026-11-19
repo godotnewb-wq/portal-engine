@@ -3,9 +3,9 @@ import { randomBytes } from 'node:crypto'
 import { join } from 'node:path'
 import type { CallTrace } from '@engine/core'
 import type { ConsolidationTrace, SceneEndTrace, RelationshipTrace } from '@engine/relationships'
-import type { TurnTrace } from '@engine/scene'
+import type { BookkeeperTrace, TurnTrace } from '@engine/scene'
 import type { FlagRecord, ScoreRecord } from '@engine/review'
-import { FILES, sessionName, splitPrompt, type CallRecord, type ErrorRecord, type PromptRecord, type SceneRecord, type SessionRecord, type TurnRecord } from './records'
+import { FILES, sessionName, splitPrompt, type BookkeepingRecord, type CallRecord, type ErrorRecord, type PromptRecord, type SceneRecord, type SessionRecord, type TurnRecord } from './records'
 
 /**
  * Writes one session's folder (milestone 2, A2). Every `.jsonl` line is appended as soon as it happens, so a crash
@@ -86,6 +86,12 @@ export class LogSession {
   ties(trace: RelationshipTrace): void {
     const { calls, ...rest } = trace
     this.append(FILES.scenes, { type: 'ties', ...rest, calls: this.calls(calls) } satisfies SceneRecord)
+  }
+
+  /** A turn's bookkeeper (milestone 4c): its records and call, and whether the turn stopped waiting for it. */
+  bookkeeping(trace: BookkeeperTrace, late = false): void {
+    const { calls, ...rest } = trace
+    this.append(FILES.bookkeeping, { ...rest, calls: this.calls(calls), ...(late && { late }) } satisfies BookkeepingRecord)
   }
 
   consolidation(trace: ConsolidationTrace): void {

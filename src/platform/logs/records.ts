@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 import { isConfigured, profileFor, type LlmRole, type Settings } from '@llm'
 import type { CallTrace, Prompt } from '@engine/core'
 import type { ConsolidationTrace, SceneEndTrace, RelationshipTrace } from '@engine/relationships'
-import type { TurnTrace } from '@engine/scene'
+import type { BookkeeperTrace, TurnTrace } from '@engine/scene'
 
 /**
  * The log layout (milestone 2, A2): a folder per session, a file per concern, each file with one writer, joined by
@@ -16,7 +16,8 @@ export const FILES = {
   scenes: 'scenes.jsonl',
   flags: 'flags.jsonl',
   scores: 'scores.jsonl',
-  errors: 'errors.jsonl'
+  errors: 'errors.jsonl',
+  bookkeeping: 'bookkeeping.jsonl'
 } as const
 
 /** The model a role used, never its key, headers or address. */
@@ -55,6 +56,12 @@ export interface PromptRecord {
   id: string
   text: string
 }
+
+/**
+ * `bookkeeping.jsonl` (milestone 4c): one line per turn, the bookkeeper's records as the game kept them (or the plan's,
+ * with why), its call by id, and `late` when the turn stopped waiting for it.
+ */
+export type BookkeepingRecord = Omit<BookkeeperTrace, 'calls'> & { calls: string[]; late?: boolean }
 
 /** `scenes.jsonl`. */
 export type SceneRecord =
@@ -108,7 +115,7 @@ export function sessionName(at: Date, random: string): string {
  * The model each role will use, for `session.json`: the profile it goes to and that profile's model and
  * temperature. Keys and addresses are left out on purpose; this is the only way settings reach a log.
  */
-export function roleModels(settings: Settings, roles: readonly LlmRole[] = ['director', 'writer', 'summary']): Record<string, RoleModel> {
+export function roleModels(settings: Settings, roles: readonly LlmRole[] = ['director', 'writer', 'bookkeeper', 'summary']): Record<string, RoleModel> {
   const models: Record<string, RoleModel> = {}
   for (const role of roles) {
     const id = profileFor(settings, role)

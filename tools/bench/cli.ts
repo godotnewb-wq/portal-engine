@@ -91,8 +91,8 @@ async function main(): Promise<void> {
     if (!isConfigured(settings.writer)) throw new Error('No model set up for the bench. Create bench.config.json (same shape as the app settings) or set BENCH_BASE_URL and BENCH_MODEL. Or run with --mock.')
     llm = { turn: turnLlm(settings), summarize: summaryLlm(settings), bookkeeper: { call: bookkeeperLlm(settings), waitMs: bookkeeperWaitMs(settings) } }
     models = modelsOf(settings)
-    sessionModels = roleModels(settings, ['director', 'writer', 'summary', ...(flag('--score') ? (['scorer'] as const) : [])])
-    roles = roleSettings(settings, ['director', 'writer', 'summary', ...(flag('--score') ? (['scorer'] as const) : [])])
+    sessionModels = roleModels(settings, ['director', 'writer', 'bookkeeper', 'summary', ...(flag('--score') ? (['scorer'] as const) : [])])
+    roles = roleSettings(settings, ['director', 'writer', 'bookkeeper', 'summary', ...(flag('--score') ? (['scorer'] as const) : [])])
     scorer = scorerLlm(settings)
   }
 

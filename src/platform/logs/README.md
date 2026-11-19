@@ -12,6 +12,7 @@ Play and bench logs (milestone 2, A2): a folder per session, a file per concern,
   flags.jsonl    the player's flags (newer replaces older on the same beat)
   scores.jsonl   AI scores, each with its scorer version
   errors.jsonl   failed calls, unreadable replies, caught errors
+  bookkeeping.jsonl  each turn's bookkeeper (milestone 4c): the records the game kept, its call by id, why it fell back, `late` when the turn stopped waiting
 ```
 
 **Public API** (`@platform/logs`): `LogSession` (`open`, `resume`, `turn`, `sceneStart`, `sceneEnd`, `error`, `flag`, `score`, `close`), `readSession`, `readFlags`, `findSessions`, `PlayLogs` (the app's session lifecycle, flags and turn details), `promptOf`, `callTrace`, `promptVersion`, the record types, `sections` / `joinSections`.

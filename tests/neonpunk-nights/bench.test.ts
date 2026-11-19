@@ -95,7 +95,12 @@ describe('runBench (acceptance 9: the bench runs its scenarios)', () => {
     expect(log.session).toMatchObject({ kind: 'bench', bench: { scenario: 'deception-caught', repeat: 1, forceNatural: 18 }, endedAt: expect.any(String) })
     expect(log.turns.map((t) => t.turnId)).toEqual(['deception-caught-1', 'deception-caught-2', 'deception-caught-3'])
     expect(log.scenes.map((s) => s.type)).toEqual(['start', 'ties', 'end'])
+    // Each turn's bookkeeper (milestone 4c): a line per turn, its call with the others, read back with the run.
+    expect(log.bookkeeping.map((b) => b.turnId)).toEqual(['deception-caught-1', 'deception-caught-2', 'deception-caught-3'])
+    expect(log.bookkeeping.every((b) => b.records.source === 'bookkeeper')).toBe(true)
     const back = readRun(out)
+    expect(back.scenarios[0]!.bookkeeping).toHaveLength(3)
+    expect(callsOf(back.scenarios[0]!).filter((c) => c.role === 'bookkeeper')).toHaveLength(3)
     expect(renderReport(content, back)).toBe(renderReport(content, bench))
     expect(back.scenarios[0]!.turns[0]!.calls[0]!.prompt).toEqual(bench.scenarios[0]!.turns[0]!.calls[0]!.prompt)
   })
@@ -242,5 +247,38 @@ describe('run inputs and comparability', () => {
     const [colA, colB] = turn.split('\n').find((l) => l.startsWith('| ') && !l.startsWith('| A |'))!.split(' | ')
     expect(colA).toContain('**Oria:**')
     expect(colB).toContain('**Oriana:**')
+  })
+})
+
+describe('the bookkeeper in the report (milestone 4c task 4)', () => {
+  it('counts what came out, leaks, fallbacks and the logged mismatches, and shows each turn’s records', async () => {
+    const bench = await runBench(content, [scenarios.find((s) => s.id === 'deception-caught')!], mockLlm(), 'test', { all: 'mock' })
+    const run = bench.scenarios[0]!
+    const [first, second] = [run.turns[0]!, run.turns[1]!]
+    const felt = { shade: 'worry', family: 'fear', intensity: 2 }
+    first.director.plan.speakers[0] = { ...first.director.plan.speakers[0]!, feels: felt }
+    const who = first.director.plan.speakers[0]!.id
+    const records = run.bookkeeping!
+    records[0] = {
+      ...records[0]!,
+      records: {
+        ...records[0]!.records,
+        leaks: [{ secret: 'oria-senn.the-case', by: who, at: 1, words: 'x', why: `${who} couldn't know it` }],
+        moods: [{ id: who, feeling: { shade: 'rage', family: 'anger', intensity: 5 } }],
+        checks: [{ id: 'c1', honored: false, note: 'played as a success' }],
+        changed: 'Everyone knows.'
+      }
+    }
+    records[1] = { ...records[1]!, turnId: second.turnId, late: true, error: 'no answer within 30 seconds', records: { ...records[1]!.records, source: 'plan', unaudited: true } }
+    const report = renderReport(content, bench)
+    expect(report).toContain('## Bookkeeper')
+    expect(report).toMatch(/\| deception-caught \| 3 \| 0 \| 1 \| 0 \| 1 \| 0 \| 0 \| \d \| 1 \| 1 \| 0 \|/)
+    expect(report).toContain('⚠ Leak: `oria-senn.the-case`')
+    expect(report).toContain('Mood: ')
+    expect(report).toContain('Check not honored: c1 — played as a success')
+    expect(report).toContain('⚠ plan-based (unaudited): the turn stopped waiting — no answer within 30 seconds')
+    expect(report).toContain('## Tokens by role')
+    expect(report).toMatch(/\| bookkeeper \| 3 \|/)
+    expect(compareRuns(content, bench, bench)).toContain('## Tokens by role (matching scenario plays)')
   })
 })

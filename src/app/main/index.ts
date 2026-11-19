@@ -185,10 +185,12 @@ app.whenReady().then(() => {
       try {
         const outcome = await runTurn(pack, state, input.trim(), turnLlm(settings.get()), send, { ...(turnId && { turnId }), ...(session && { log: session }), loreBudgets: settings.getLoreBudgets() })
         const details = logs.turn(outcome.trace, { location: scene!.locationId, cast: scene!.cast }) ?? detailsOf('', outcome.trace)
-        // The turn is shown now; its bookkeeper reads it while the player does. Its log record is task 4's.
+        // The turn is shown now; its bookkeeper reads it while the player does, and is logged when it is done.
         const last = outcome.state.scene!.turns.at(-1)!
         const now = settings.get()
-        record(last.id, bookkeepWithin(pack, state, { id: last.id, input: input.trim(), beats: last.beats, plan: outcome.plan }, bookkeeperLlm(now), bookkeeperWaitMs(now)))
+        const done = bookkeepWithin(pack, state, { id: last.id, input: input.trim(), beats: last.beats, plan: outcome.plan }, bookkeeperLlm(now), bookkeeperWaitMs(now))
+        void done.then((kept) => logs.bookkeeping(kept.trace, kept.late))
+        record(last.id, done)
         return {
           ok: true,
           state: outcome.state,

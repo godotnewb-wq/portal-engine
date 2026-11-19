@@ -5,6 +5,7 @@ import type { Pack } from '@engine/pack'
 import { lineText, moodOf, planLines, type TurnTrace } from '@engine/scene'
 import { callsOf, metricInputOf, nameIn, turnsOf, type BenchRun, type SceneRun, type ScenarioRun } from './run'
 import { comparability } from './inputs'
+import { bookkeepingOf, RECORD_HEADS, recordLines, recordRow, renderTokens } from './records'
 import { compareMetrics, metrics, renderMetrics } from '../logs/metrics'
 
 /** How a run names people: as recorded when it ran, else from the pack loaded now (runs from before names were recorded). */
@@ -26,8 +27,9 @@ const average = (xs: number[]) => (xs.length === 0 ? 0 : Math.round(xs.reduce((a
 
 /** The numbers that show at a glance whether a change made things better or worse. */
 export function stats(run: ScenarioRun) {
-  // Turn calls only: summaries and consolidation run between scenes.
-  const turnCalls = callsOf(run).filter((c) => !['relationship', 'memory', 'summary', 'consolidation', 'ties'].includes(c.role))
+  // Turn calls only: summaries and consolidation run between scenes, and the bookkeeper after the turn is shown
+  // (milestone 4c), so "Calls" stays the turn's own two or three; its own numbers are in the Bookkeeper section.
+  const turnCalls = callsOf(run).filter((c) => !['relationship', 'memory', 'summary', 'consolidation', 'ties', 'bookkeeper'].includes(c.role))
   return {
     turns: run.turns.length,
     calls: turnCalls.length,
@@ -105,6 +107,7 @@ function briefLines(turn: TurnTrace): string[] {
 }
 
 function scenarioSection(names: Names, run: ScenarioRun, repeats: boolean, budgets?: BenchRun['loreBudgets']): string {
+  const turnLines = (n: Names, location: string, turns: TurnTrace[], heading: string, b?: BenchRun['loreBudgets']) => turnSection(n, location, turns, heading, b, run)
   const lines = [`## ${run.title} (\`${run.id}\`${repeats ? `, #${run.repeat}, seed ${run.seed}` : ''})`, '', `> ${run.watchFor}`, '']
   if (run.forceNatural !== undefined) lines.push(`Checks forced to a natural ${run.forceNatural}.`, '')
   const missed = missedCheck(run)
@@ -155,8 +158,8 @@ function tieLines(names: Names, location: string, ties: (RelationshipTrace & { e
   return [`${heading} Relationship changes`, '', ...(lines.length > 0 ? lines : ['None.']), '']
 }
 
-/** A scene's turns as the report shows them. */
-function turnLines(names: Names, location: string, turns: TurnTrace[], heading: string, budgets?: BenchRun['loreBudgets']): string[] {
+/** A scene's turns as the report shows them, each with its bookkeeper's records when the run had one (milestone 4c). */
+function turnSection(names: Names, location: string, turns: TurnTrace[], heading: string, budgets?: BenchRun['loreBudgets'], run?: ScenarioRun): string[] {
   const name = (id: string) => names(location, id)
   const lines: string[] = []
   turns.forEach((t, i) => {
@@ -178,6 +181,8 @@ function turnLines(names: Names, location: string, turns: TurnTrace[], heading: 
     const brief = briefLines(t)
     if (brief.length > 0) lines.push('<details><summary>Briefs</summary>', '', ...brief.map((line) => '- ' + line), '', '</details>', '')
     lines.push(...shown(t).map((b, n) => `${n + 1}. ${beatLine(names, location, b)}`), '')
+    const records = run ? recordLines(name, t, bookkeepingOf(run, t.turnId)) : []
+    if (records.length > 0) lines.push('<details><summary>Records</summary>', '', ...records.map((line) => '- ' + line), '', '</details>', '')
     if (fixes(t).length > 0) lines.push(`Rewrite asked to fix: ${fixes(t).map((f) => `"${f}"`).join(' ')}`, '')
     if (left(t).length > 0) lines.push(`Still wrong after the rewrite (salvaged): ${left(t).map((f) => `"${f}"`).join(' ')}`, '')
     lines.push(`*${t.cost.calls} calls, ${t.cost.ms} ms*`, '')
@@ -254,6 +259,11 @@ export function renderReport(content: Pack, bench: BenchRun): string {
     '',
     renderMetrics(metrics(bench.scenarios.map(metricInputOf)), (id) => names(bench.scenarios[0]?.location ?? '', id)),
     '',
+    ...(bench.scenarios.some((run) => run.bookkeeping) ? ['## Bookkeeper', '', `| ${RECORD_HEADS.join(' | ')} |`, `|${RECORD_HEADS.map(() => '---').join('|')}|`, ...bench.scenarios.map((run) => recordRow(runName(run, repeats), run)), ''] : []),
+    '## Tokens by role',
+    '',
+    renderTokens(bench.scenarios),
+    '',
     ...bench.scenarios.map((run) => scenarioSection(names, run, repeats, bench.loreBudgets))
   ].join('\n')
 }
@@ -297,6 +307,15 @@ export function compareRuns(content: Pack, a: BenchRun, b: BenchRun): string {
   }
   // Metrics over the plays whose inputs match, so a scenario only one run played, or one that changed, doesn't skew the difference.
   lines.push('', '## Metrics (matching scenario plays)', '', compareMetrics(metrics(c.matched.map(([ra]) => metricInputOf(ra))), metrics(c.matched.map(([, rb]) => metricInputOf(rb)))))
+  // Cost by role over the matching plays (milestone 4c: reported against the baseline, with no pass mark).
+  lines.push('', '## Tokens by role (matching scenario plays)', '', '**A**', '', renderTokens(c.matched.map(([ra]) => ra)), '', '**B**', '', renderTokens(c.matched.map(([, rb]) => rb)))
+  if (a.scenarios.some((s) => s.bookkeeping) || b.scenarios.some((s) => s.bookkeeping)) {
+    lines.push('', '## Bookkeeper', '', `| Run | ${RECORD_HEADS.join(' | ')} |`, `|---|${RECORD_HEADS.map(() => '---').join('|')}|`)
+    for (const id of ids) {
+      for (const ra of a.scenarios.filter((s) => s.id === id && s.bookkeeping)) lines.push(`| A ${recordRow(runName(ra, repeats), ra)}`)
+      for (const rb of b.scenarios.filter((s) => s.id === id && s.bookkeeping)) lines.push(`| B ${recordRow(runName(rb, repeats), rb)}`)
+    }
+  }
   lines.push('')
   for (const id of ids) {
     const ra = a.scenarios.find((s) => s.id === id)
