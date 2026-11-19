@@ -24,6 +24,45 @@ export const RolledCheckSchema = z.object({
 })
 export type RolledCheck = z.infer<typeof RolledCheckSchema>
 
+/** Where a record came from in a turn: the player's words, or a beat by its 1-based number. */
+const AtSchema = z.union([z.literal('player'), z.number().int().positive()])
+
+/**
+ * A secret the bookkeeper saw come out (milestone 4c, decided 2026-11-18, user, J–L): `confirmed` by someone who could
+ * say it (its holder not keeping it, someone who knew it, or the player who knew it), or `discovered` when the prose
+ * showed the fact itself. `by` is a character id, `player`, or `narration`; `to` is everyone present but its holder.
+ */
+const SecretOutSchema = z.object({ secret: z.string(), by: z.string(), at: AtSchema, words: z.string(), how: z.enum(['confirmed', 'discovered']), to: z.array(z.string()) })
+/** A secret that came up without coming out: a guess, a leak (said as known by someone who couldn't know it), or a case left for review. */
+const SecretNoteSchema = z.object({ secret: z.string(), by: z.string(), at: AtSchema, words: z.string(), why: z.string().optional() })
+
+/**
+ * What a turn did on screen, as the bookkeeper recorded it after the turn was shown (milestone 4c), or as the plan
+ * gives it when that call failed (`source: 'plan'`). Only `out` teaches anyone a secret; a leak is the speaker's claim
+ * and teaches no one (decided 2026-11-18, user).
+ */
+export const BookkeepingSchema = z.object({
+  source: z.enum(['bookkeeper', 'plan']),
+  out: z.array(SecretOutSchema).default([]),
+  leaks: z.array(SecretNoteSchema).default([]),
+  guesses: z.array(SecretNoteSchema).default([]),
+  /** Secrets the game couldn't settle: the bookkeeper couldn't tell, or a holder said one they were keeping. */
+  unresolved: z.array(SecretNoteSchema).default([]),
+  /** Concrete details the prose stated as settled that no fact holds; anyone present may repeat them. */
+  new: z.array(z.object({ text: z.string(), by: z.string() })).default([]),
+  /** What is actually different after the turn; compared with the director's `change` in the logs, read by no prompt. */
+  changed: z.string().optional(),
+  /** Where each feeling the prose showed seemed to land; logged against the director's `feels`, never applied. */
+  moods: z.array(z.object({ id: z.string(), feeling: FeelingSchema })).default([]),
+  /** Whether the prose kept each check's result; logged only. */
+  checks: z.array(z.object({ id: z.string(), honored: z.boolean(), note: z.string().optional() })).default([]),
+  /** What the bookkeeper said that the game turned down, with why. */
+  refused: z.array(z.string()).default([]),
+  /** A plan-based record: the bookkeeper failed, timed out or couldn't be read, so its secrets weren't audited. */
+  unaudited: z.boolean().optional()
+})
+export type Bookkeeping = z.infer<typeof BookkeepingSchema>
+
 export const TurnSchema = z.object({
   /** Unique within its scene's game, so a turn read back after loading a save can still be flagged in the logs. */
   id: z.string().min(1),

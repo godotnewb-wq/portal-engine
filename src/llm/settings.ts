@@ -5,10 +5,11 @@ import { z } from 'zod'
 
 /**
  * The jobs an LLM does. `director` plans each turn (fast, JSON), `writer` writes the beats (strong, streamed),
- * `summary` writes memories after a scene (low temperature), `scorer` rates logged turns after play (never during a
- * turn), `nsfw` takes over any of them when its own declines.
+ * `bookkeeper` records what each turn did on screen while the player reads (milestone 4c), `summary` writes memories
+ * after a scene (low temperature), `scorer` rates logged turns after play (never during a turn), `nsfw` takes over any
+ * of them when its own declines.
  */
-export const LLM_PROFILE_IDS = ['director', 'writer', 'summary', 'scorer', 'nsfw'] as const
+export const LLM_PROFILE_IDS = ['director', 'writer', 'bookkeeper', 'summary', 'scorer', 'nsfw'] as const
 export type LlmProfileId = (typeof LLM_PROFILE_IDS)[number]
 export type LlmRole = Exclude<LlmProfileId, 'nsfw'>
 
@@ -60,6 +61,9 @@ export type LlmProfile = z.infer<typeof LlmProfileSchema>
 const ROLE_DEFAULTS: Record<LlmProfileId, Partial<LlmProfile>> = {
   director: { temperature: 0.3, maxTokens: 4000 },
   writer: { temperature: 0.9, maxTokens: 1200 },
+  // The next turn waits for the bookkeeper up to this profile's timeout, so it starts short (milestone 4c, decided
+  // 2026-11-16: a slow record is worth less than the plan-based one). A borrowed profile brings its own (decision A).
+  bookkeeper: { temperature: 0.2, maxTokens: 1500, timeoutSeconds: 30 },
   summary: { temperature: 0.2, maxTokens: 2000 },
   scorer: { temperature: 0.2, maxTokens: 1500 },
   nsfw: { temperature: 0.9, maxTokens: 1200 }
@@ -68,6 +72,7 @@ const ROLE_DEFAULTS: Record<LlmProfileId, Partial<LlmProfile>> = {
 export const SettingsSchema = z.object({
   director: LlmProfileSchema.prefault(ROLE_DEFAULTS.director),
   writer: LlmProfileSchema.prefault(ROLE_DEFAULTS.writer),
+  bookkeeper: LlmProfileSchema.prefault(ROLE_DEFAULTS.bookkeeper),
   summary: LlmProfileSchema.prefault(ROLE_DEFAULTS.summary),
   scorer: LlmProfileSchema.prefault(ROLE_DEFAULTS.scorer),
   nsfw: LlmProfileSchema.prefault(ROLE_DEFAULTS.nsfw)
@@ -87,6 +92,7 @@ export const LlmProfileUpdateSchema = LlmProfileSchema.omit({ apiKey: true }).ex
 export const SettingsUpdateSchema = z.object({
   director: LlmProfileUpdateSchema,
   writer: LlmProfileUpdateSchema,
+  bookkeeper: LlmProfileUpdateSchema,
   summary: LlmProfileUpdateSchema,
   scorer: LlmProfileUpdateSchema,
   nsfw: LlmProfileUpdateSchema
@@ -112,6 +118,7 @@ export function toView(settings: Settings): SettingsView {
   return {
     director: view(settings.director),
     writer: view(settings.writer),
+    bookkeeper: view(settings.bookkeeper),
     summary: view(settings.summary),
     scorer: view(settings.scorer),
     nsfw: view(settings.nsfw)
@@ -125,11 +132,11 @@ export function isConfigured(profile: { baseUrl: string; model: string }): boole
 
 /**
  * The profile a role is sent to. A role left unset borrows the writer's, so one endpoint is enough to play; the
- * scorer, a judge like the summaries, borrows the summary profile first. (The `nsfw` profile is only the fallback for a
- * model that declines; see the router.)
+ * scorer and the bookkeeper, judges like the summaries, borrow the summary profile first. (The `nsfw` profile is only
+ * the fallback for a model that declines; see the router.)
  */
 export function profileFor(settings: Record<LlmProfileId, { baseUrl: string; model: string }>, role: LlmRole): LlmProfileId {
   if (isConfigured(settings[role])) return role
-  if (role === 'scorer' && isConfigured(settings.summary)) return 'summary'
+  if ((role === 'scorer' || role === 'bookkeeper') && isConfigured(settings.summary)) return 'summary'
   return 'writer'
 }

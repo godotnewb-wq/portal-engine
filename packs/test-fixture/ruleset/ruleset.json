@@ -149,5 +149,6 @@
   },
   "pressures": ["idle", "keen", "driven"],
   "narration": { "departure": "{name} heads off across the yard." },
+  "bookkeeper": { "newDetails": 2 },
   "clock": { "morning": 360 }
 }

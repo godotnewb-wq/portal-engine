@@ -500,5 +500,6 @@
   },
   "pressures": ["background", "pressing", "urgent"],
   "narration": { "departure": "{name} leaves." },
+  "bookkeeper": { "newDetails": 3 },
   "clock": { "morning": 480 }
 }

@@ -1,5 +1,5 @@
 import type { Settings } from '@llm'
-import { complete, stream, type CallInfo, type LlmRole, type RoutedReply } from '@llm'
+import { complete, profileFor, stream, type CallInfo, type LlmRole, type RoutedReply } from '@llm'
 import type { Summarize } from '@engine/relationships'
 import type { TurnLlm } from '@engine/scene'
 import type { CallMeta, Prompt } from '@engine/core'
@@ -36,6 +36,7 @@ function metaOf(settings: Settings, routed: RoutedReply, info: CallInfo): CallMe
 export const DIRECTOR_MIN_TOKENS = 4000
 export const SUMMARY_MIN_TOKENS = 2000
 export const SCORER_MIN_TOKENS = 3000
+export const BOOKKEEPER_MIN_TOKENS = 1500
 
 /** A JSON call through a role's profile, with its metadata. `minTokens` raises the profile's reply limit if it is lower. */
 async function judged(settings: Settings, role: LlmRole, prompt: Prompt, minTokens?: number) {
@@ -56,6 +57,21 @@ export function turnLlm(settings: Settings): TurnLlm {
     }
   }
 }
+
+/**
+ * The bookkeeper's call after each turn (milestone 4c): JSON, through its own profile, else the summary's, else the
+ * writer's.
+ */
+export function bookkeeperLlm(settings: Settings): (prompt: Prompt) => Promise<{ text: string; meta: CallMeta }> {
+  return (prompt) => judged(settings, 'bookkeeper', prompt, BOOKKEEPER_MIN_TOKENS)
+}
+
+/**
+ * How long the next turn, the scene's end or a save waits for a turn's bookkeeper (milestone 4c, decided 2026-11-18,
+ * user, decision A): the timeout of the profile that answers it, its own when set (30 seconds by default), else the
+ * borrowed profile's own. Past it the call has timed out anyway, so the turn keeps its plan-based records.
+ */
+export const bookkeeperWaitMs = (settings: Settings): number => settings[profileFor(settings, 'bookkeeper')].timeoutSeconds * 1000
 
 /** The end-of-scene calls (a witness's relationship call and memory call) and consolidation: low temperature, JSON. */
 export function summaryLlm(settings: Settings): Summarize {

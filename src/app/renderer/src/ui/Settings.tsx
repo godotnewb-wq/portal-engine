@@ -7,6 +7,7 @@ import { Button } from './Button'
 const LABEL: Record<LlmProfileId, { name: string; hint: string }> = {
   director: { name: 'Director', hint: 'Plans each turn as JSON. A fast, cheap model. Falls back to the Writer if unset.' },
   writer: { name: 'Scene writer', hint: 'Writes the beats, streamed. Your strongest creative model.' },
+  bookkeeper: { name: 'Bookkeeper', hint: 'Records what each turn did on screen, while you read. Falls back to Summaries, then the Writer, if unset; a borrowed profile keeps its own timeout, which is how long the next turn may wait.' },
   summary: { name: 'Summaries', hint: 'Writes memories after a scene. Falls back to the Writer if unset.' },
   scorer: { name: 'Scorer', hint: 'Rates logged turns after play, never during a turn. Falls back to Summaries, then the Writer, if unset.' },
   nsfw: { name: 'NSFW fallback', hint: 'Takes over any role whose model declines.' }

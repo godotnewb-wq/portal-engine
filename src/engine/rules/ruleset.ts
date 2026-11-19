@@ -189,7 +189,12 @@ export const RulesetSchema = z.object({
       absentPerScene: z.number().int().min(0).default(6),
       closeTies: z.number().int().min(0).default(3)
     })
-    .default({ detailTokens: 500, absentPerCharacter: 3, absentPerScene: 6, closeTies: 3 })
+    .default({ detailTokens: 500, absentPerCharacter: 3, absentPerScene: 6, closeTies: 3 }),
+  /**
+   * The bookkeeper's records after each turn (milestone 4c; *tune*): the most new details (a price, a time, a place, a
+   * name, a promise) it may record from one turn's prose.
+   */
+  bookkeeper: z.object({ newDetails: z.number().int().min(0).default(3) }).default({ newDetails: 3 })
 })
 export type Ruleset = z.infer<typeof RulesetSchema>
 

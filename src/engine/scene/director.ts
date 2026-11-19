@@ -183,7 +183,7 @@ function rememberedLine(content: Pack, state: GameState, c: Character): string {
 }
 
 /** Who said a line, by the name the scene knows them by: a character's first name, a walk-on's name or label. */
-function speakerName(content: Pack, id: string): string {
+export function speakerName(content: Pack, id: string): string {
   const c = characterById(content, id)
   if (c) return c.name.split(/\s+/)[0]!
   const w = content.locations.flatMap((l) => l.walkOns).find((x) => x.id === id)
