@@ -52,7 +52,7 @@ describe('prompts take the pack’s slots', () => {
     const { system } = buildDirectorPrompt(fixture, state, 'Hello.')
     expect(system).toMatch(/# World: Testhold\nTesthold is a small walled town/)
     expect(system).toMatch(/# Tone\nPlain and brisk\./)
-    expect(system).toMatch(/skill is one of: fight, sneak, notice, talk, bluff\. difficulty is one of: routine, tough, grim\./)
+    expect(system).toMatch(/skill is one of: fight, sneak, notice, talk, bluff\. difficulty is one of: routine, tough, grim; leave it out for a check that reads someone/)
     expect(system).toMatch(/Toward the player: warmth: civil; bond: loose/)
     expect(system).toMatch(/Warmth \(warmth\): how much they like the other\. Bond \(bond\): how much they would do for the other\. Each is a separate feeling/)
     expect(system).not.toMatch(/warmth -?\d|\(-?\d+–-?\d+\)/)

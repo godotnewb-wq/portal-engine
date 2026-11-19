@@ -341,10 +341,11 @@ function validateShared(content: Pack, state: GameState, raw: SharedPlan): { pla
       fix(`check "${c.id}": ${who} can't read themselves; it has no target`)
       target = undefined
     }
-    if (target && skill === r.people.reading.skill && difficulty) {
+    // Since milestone 4c the director is asked to leave it out; one it gives anyway is corrected when it differs.
+    if (target && skill === r.people.reading.skill) {
       const set = readingDifficulty(r, characterById(content, target)!, felt[target])
-      if (set !== difficulty) fix(`check "${c.id}": reading ${target} is ${set}, not ${difficulty}, by their masking`)
-      difficulty = set
+      if (difficulty && set !== difficulty) fix(`check "${c.id}": reading ${target} is ${set}, not ${difficulty}, by their masking`)
+      difficulty = difficultyNamed(r, set)
     }
     if (!who) fix(`dropped check "${c.id}": "${c.who}" is not present`)
     else if (!skill) fix(`dropped check "${c.id}": no skill "${c.skill}"`)

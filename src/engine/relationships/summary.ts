@@ -24,6 +24,17 @@ function reads(state: GameState, id: string): { target: string; feeling: NonNull
   return [...new Map(all.map((x) => [x.target, x])).values()]
 }
 
+/**
+ * What someone said in front of this witness as if they knew it, about a secret they couldn't know, that nobody
+ * confirmed afterward (milestone 4c, decision L): a claim, which the end-of-scene calls are told about so a memory can
+ * hold it as a claim, never as a fact, and no one learns the secret from it.
+ */
+function claims(content: Pack, state: GameState, id: string): string[] {
+  const scene = state.scene!
+  const name = (who: string) => firstName(characterById(content, who)?.name ?? who)
+  return scene.turns.flatMap((t) => (t.records?.leaks ?? []).filter((l) => l.by !== id && l.by !== 'narration' && l.by !== 'player' && !scene.told.includes(l.secret)).map((l) => `${name(l.by)} said, as if they knew it, "${l.words}"`))
+}
+
 /** Everyone who saw the scene: those still here and those who left part-way. */
 export function witnesses(state: GameState): string[] {
   const scene = state.scene!
@@ -85,7 +96,8 @@ Reply with only a JSON object:
 - level: "core" for a moment that changed something lasting for ${me}, one ${me} would still bring up in a year (a first betrayal or first real job, a loss, a secret of theirs coming out, a promise made or broken, real danger to their life; rare; at most ${core}, each with why: what it changed for ${me}); "normal" for something that matters for weeks (a deal, an argument, a favor, learning something useful); "fleeting" for small talk, routine, atmosphere.
 - about: for each memory, who it is really about: ${[...others.map((o) => `"${o.id}"`), `"player" for ${player}`].join(', ')}. Not everyone who was there: a memory of small talk or a card game is about no one; one of a night out with ${player}, or of telling ${player} something, is about "player". [] if it's about no one in particular.
 ${topics ? `- topics: for each memory, the ids of the topics that came up this scene that it is about; [] if none.\n` : ''}- revisited: the ids of memories under "Remembers" that this scene came back to (a debt raised again, a promise kept); [] if none.${heard ? `\n- heard: every one of the other people's secrets listed as coming out in front of ${me} (${me} took each in), each with memory: one sentence, past tense, from ${me}'s point of view, of learning it.` : ''}
-- What is listed about ${me} as having changed between people, come out or been felt in this scene is settled: the memories fit it, and never say that something listed didn't happen or that something else did.`
+- What is listed about ${me} as having changed between people, come out or been felt in this scene is settled: the memories fit it, and never say that something listed didn't happen or that something else did.
+- A guess, a suspicion or a claim nobody confirmed stays one in the memory ("Ben claimed…", "${me} wondered whether…"), never a fact ${me} learned.`
 }
 
 /**
@@ -241,6 +253,10 @@ export function about(content: Pack, state: GameState, c: Character, others: Cha
     })(),
     `- Mood at the end: ${feelingWords(r, scene.moods[c.id])}; comfort ${scene.comfort[c.id] ?? 3}/5.`,
     ...(memory ? judgedLines(content, state, c) : []),
+    ...(() => {
+      const said = claims(content, state, c.id)
+      return said.length > 0 ? [`- Claimed in front of ${me} this scene and never confirmed (claims, not facts):\n${said.map((x) => `  - ${x}`).join('\n')}`] : []
+    })(),
     ...reads(state, c.id).map((x) => `- ${me} saw through to what ${firstName(others.find((o) => o.id === x.target)?.name ?? x.target)} really felt: ${feelingWords(r, x.feeling)}${x.hiding ? `, and saw that ${firstName(others.find((o) => o.id === x.target)?.name ?? x.target)} was hiding something, though not what` : ''}.`),
     scene.departed.includes(c.id) && `- ${me} left before the scene was over${memory ? '; the memory ends with leaving' : ''}.`
   ]

@@ -5,14 +5,16 @@ import type { GameState } from '@engine/state'
 import type { Degree } from '@engine/rules'
 import { characterById, locationById, type Pack } from '@engine/pack'
 import type { Speaker } from './beats'
-import { RECENT_TURNS, turnText } from './director'
+import { RECENT_TURNS, speakerName, turnText } from './director'
+import { secretCandidates } from './bookkeeper'
 import { sceneFacts } from './facts'
 import { childGuard } from './guard'
 import { presentCast, type BeatPlan, type Move, type PlannedCheck } from './planShape'
 import { feelingsNow, feltWords, shown, shownWords } from './feelings'
 import { BEATS } from './style'
 import { recentlyUsed } from './repeats'
-import { writerStage } from '@engine/codex'
+import { entryById, mentions, writerStage } from '@engine/codex'
+import { knowersOf } from '@engine/memory'
 
 /** Everyone a beat or tag may name in this scene: the cast present, the walk-ons, and the player. */
 export function sceneSpeakers(content: Pack, state: GameState): Speaker[] {
@@ -39,6 +41,7 @@ export const WRITER_STYLE = `How it should read:
 - People talk like people: complete, plain sentences that someone hearing them for the first time can follow.
 - Each line answers the line before it: what that person actually said and meant. A question gets an answer, or a dodge the reader can see, in its own terms.
 - People are in the moment. Their aims and secrets show in what they choose, avoid or notice, rarely in what they say outright.
+- What each person knows comes first. Someone who doesn't know a secret may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it. If a note in the brief would have someone say what they can't know, keep its purpose with a question or a guess.
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - A move's facts are there to draw on if the line needs them, never to recite. A line can bring nothing new; what matters is that it answers. A fact marked new hasn't been said to the player yet: if it's used, say what it is.
 - Each character sounds like their voice card. The card wins over everything else.
@@ -60,6 +63,53 @@ export const WRITER_FORMAT = `Output format, nothing else:
 
 /** "Ada", "Ada and Ben", "Ada, Ben and Cy". */
 const listed = (names: string[]): string => (names.length <= 1 ? (names[0] ?? '') : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`)
+
+/**
+ * Who knows each secret in play this turn, for the writer (milestone 4c, decision L, 2026-11-18, user): one line per
+ * secret the brief gives it (kept by a speaker, or one a move may draw on), naming who here knows it and who doesn't,
+ * so a guess stays a guess and a claim isn't voiced by someone who can't know it. A secret the brief doesn't give
+ * gets a line too when a note of the director's (a speaker's aim, a move's new detail, the turn's change) uses one of
+ * its keywords: a reminder that the plan touched it, never its content. A keyword only ever adds a reminder; nothing is
+ * cut. No line when everyone here already knows it.
+ */
+export function knowledgeLines(content: Pack, state: GameState, plan: BeatPlan): string[] {
+  const scene = state.scene!
+  const present = presentCast(scene)
+  const name = (id: string) => firstName(characterById(content, id)?.name ?? id)
+  const moves = plan.moves ?? []
+  const given = new Map<string, string>()
+  for (const s of plan.speakers) for (const id of s.kept ?? []) given.set(id, `which ${name(s.id)} is keeping`)
+  moves.forEach((m, i) => {
+    for (const x of m.says) if (x.id && !given.has(x.id) && content.characters.some((c) => c.secrets.some((y) => `${c.id}.${y.id}` === x.id))) given.set(x.id, `which move ${i + 1} may draw on`)
+  })
+  const notes = [...plan.speakers.map((s) => s.intent), ...moves.flatMap((m) => m.says.filter((x) => !x.id).map((x) => x.text)), plan.change ?? ''].join('\n')
+  return secretCandidates(content, state).flatMap((secret) => {
+    const knows = new Set([secret.holder, ...knowersOf(state, secret.id, secret.text)])
+    const unaware = present.filter((id) => !knows.has(id))
+    if (unaware.length === 0 || scene.told.includes(secret.id)) return []
+    const knowing = present.filter((id) => knows.has(id))
+    const them = unaware.length === 1 ? name(unaware[0]!) : 'they'
+    const who = `${knowing.length === 0 ? 'Nobody here knows it.' : knowing.length === 1 ? `Only ${name(knowing[0]!)} knows it here.` : `${listed(knowing.map(name))} know it.`} ${listed(unaware.map(name))} ${unaware.length === 1 ? "doesn't" : "don't"}, so ${them} may ask about it, guess or deny it, but never say it as something known.`
+    const subject = `${name(secret.holder)}'s secret`
+    if (given.has(secret.id)) return [`- ${subject}, ${given.get(secret.id)}. ${who}`]
+    const c = characterById(content, secret.holder)!
+    const s = c.secrets.find((x) => `${c.id}.${x.id}` === secret.id)!
+    const keywords = s.codex ? (entryById(content.codex, s.codex)?.keywords ?? []) : (s.keywords ?? [])
+    return keywords.some((k) => mentions(notes, k)) ? [`- The plan touches ${subject}, which this brief doesn't give you. ${who}`] : []
+  })
+}
+
+/**
+ * What someone said this scene as if they knew it, about a secret they couldn't know, and nobody has confirmed since
+ * (milestone 4c, decision L): their claim, never a fact. Later prompts carry it as a claim so others can doubt or deny
+ * it, rather than treating the line as unsaid or as true. Narration and the player don't make claims.
+ */
+export function claimLines(content: Pack, state: GameState): string[] {
+  const scene = state.scene!
+  return scene.turns.flatMap((t, i) =>
+    (t.records?.leaks ?? []).filter((l) => l.by !== 'narration' && l.by !== 'player' && !scene.told.includes(l.secret)).map((l) => `- ${speakerName(content, l.by)} said, as if they knew it, "${l.words}" (turn ${i + 1}). Nobody has confirmed it.`)
+  )
+}
 
 /** The writer's brief: the facts in play as facts, the moves as moves, and nothing in planner prose. */
 export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPlan, input: string): Prompt {
@@ -119,6 +169,8 @@ export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPla
       s.hiding && ` Keeping to themselves: ${s.hiding} (${s.approach ?? 'deflect'}).${s.tell ? ` It shows only as: ${s.tell}. Show it; nobody remarks on it unless their check to read them succeeded.` : ' It doesn\'t show.'}`
     ].join('')
   const ties = speakerTies(content, state, plan)
+  const knowledge = knowledgeLines(content, state, plan)
+  const claims = claimLines(content, state)
   const recent = Object.entries(recentlyUsed(content, scene)).map(([id, u]) =>
     `- ${nameOf(id)}: ${[...u.slang.map((t) => `"${t}"`), ...u.gestures].join('; ')}`
   )
@@ -126,6 +178,7 @@ export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPla
   const user = [
     `# Where you are\n${location.name}. ${location.description}`,
     told.length > 0 ? `# What the player has been told this scene\n${told.map((f) => `- ${f.text}`).join('\n')}` : '# What the player has been told this scene\nNothing yet beyond what they can see.',
+    claims.length > 0 && `# Claimed but never confirmed (claims, not facts: anyone may doubt or deny them)\n${claims.join('\n')}`,
     scene.summary && `# Earlier in the scene\n${scene.summary}`,
     scene.turns.length > 0 && `# Last turns\n${scene.turns.slice(-RECENT_TURNS).map((t) => turnText(content, state.player.name, t)).join('\n\n')}`,
     `# The player says or does\n${input}`,
@@ -133,6 +186,7 @@ export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPla
     plan.speakers.length > 0 && `# Who speaks\n${plan.speakers.map(speakerLine).join('\n')}`,
     ties.length > 0 && `# How the speakers stand with the others here (facts about them, not how to play them)\n${ties.join('\n')}`,
     moves.length > 0 && `# The conversation, in order\n${moves.map((m, i) => `${i + 1}. ${nameOf(m.who)}, answering ${answering(m)}: ${m.move}${m.says.length > 0 ? ` (may draw on: ${said(m)})` : ''}${m.needs ? ' (the check succeeded)' : ''}`).join('\n')}`,
+    knowledge.length > 0 && `# Who knows what\n${knowledge.join('\n')}`,
     plan.lore && plan.lore.length > 0 && `# About the world, to draw on only if it fits (some, all or none; never recite)\n${plan.lore.map((l) => `- ${l.line}${l.who ? ` (only ${nameOf(l.who)} would say this)` : ''}`).join('\n')}`,
     plan.change && `# By the end of the turn\n${plan.change}`,
     plan.leaves.length > 0 && `# Leaving this turn\n${listed(plan.leaves.map(nameOf))} ${plan.leaves.length === 1 ? 'leaves' : 'leave'}. Show them going.`,

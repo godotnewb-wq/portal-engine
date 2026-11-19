@@ -19,7 +19,8 @@ export const PlannedCheckSchema = z.object({
   id: z.string(),
   who: z.string(),
   skill: z.string(),
-  difficulty: z.string(),
+  /** Left out for a reading check, whose difficulty the game sets (milestone 4c). */
+  difficulty: text,
   /** Who is being read, for a check that reads someone (milestone 4b). */
   target: z.string().optional().catch(undefined),
   stakes: text,

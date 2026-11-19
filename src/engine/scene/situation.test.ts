@@ -78,7 +78,7 @@ describe('the situation plan', () => {
     const director = buildDirectorPrompt(fixture, state, 'Tobin, who came by?')
     expect(director.system).toMatch(/- \[mara\.k1\] Tobin was in the yard after closing/)
     expect(director.system).toMatch(/Secret \[tobin\.after-closing\]/)
-    expect(director.system).toMatch(/The player leads\. Start from what the player just said or did: move 1 answers it/)
+    expect(director.system).toMatch(/The player leads, and people are in the moment\. Move 1 answers what the player just said or did, in its own terms/)
     expect(director.user).toMatch(/# Nothing has been said on screen yet\./)
     const { plan: p } = validatePlan(fixture, state, parsePlan(plan())!, 'Tobin, who came by?')
     const writer = buildWriterPrompt(fixture, state, settlePlan(fixture, state, p), 'Tobin, who came by?')

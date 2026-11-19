@@ -1,5 +1,5 @@
 import { firstName, type Prompt } from '@engine/core'
-import { shadeList, type Character } from '@engine/characters'
+import type { Character } from '@engine/characters'
 import type { GameState, Turn } from '@engine/state'
 import { type Ruleset } from '@engine/rules'
 import { characterById, locationById, type Pack } from '@engine/pack'
@@ -14,6 +14,14 @@ import { cueSecretLine, fullSecretLine, type SecretShown } from './secrets'
 import { willingHelpers, wouldDisclose } from './resolve'
 import { childGuard } from './guard'
 import { recurringLines, selectDetails, type BriefDetail, type Briefs } from './brief'
+import { claimLines } from './writer'
+
+/**
+ * The shades by family for the director, words only (milestone 4c trim): the usual intensities are left to the game,
+ * which marks one outside them, so the list costs less on every turn.
+ */
+const shadeNames = (r: Ruleset): string =>
+  r.people.emotions.families.map((f) => `${f.name.toLowerCase()}${f.moodOnly ? ' (in the moment only)' : ''}: ${r.people.emotions.shades.filter((x) => x.families.includes(f.id)).map((x) => x.word).join(', ')}`).join('; ')
 
 /** How many past turns go into prompts verbatim; older ones live in the running summary. */
 export const RECENT_TURNS = 3
@@ -41,20 +49,19 @@ ${loreLines > 0 ? '  "lore": [{"entry","who","line"}],\n' : ''}  "change": "..."
   "texture": [], "avoid": [], "leaves": [], "end_scene": false
 }
 
-- The player leads. Start from what the player just said or did: move 1 answers it, in its own terms. A character's own aims come in after that, or in a later turn, unless something urgent cuts in.
+- The player leads, and people are in the moment. Move 1 answers what the player just said or did, in its own terms; what people say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line: they come in after that, or in a later turn, unless something urgent cuts in.
 - player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking and asking are not uncertain.
-- checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most ${MAX_CHECKS}. who is "player" or a character id. skill is one of: ${r.skills.map((x) => x.id).join(', ')}. difficulty is one of: ${r.difficulties.map((d) => d.word).join(', ')}. target: the character being read, for a check that reads someone. stakes says what success means. Companions in the player's party help on their own when they are willing and trained; the game works it out.
-- People are in the moment. What they say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line.
+- checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most ${MAX_CHECKS}. who is "player" or a character id. skill is one of: ${r.skills.map((x) => x.id).join(', ')}. difficulty is one of: ${r.difficulties.map((d) => d.word).join(', ')}; leave it out for a check that reads someone, since the game sets it. target: the character being read, for a check that reads someone. stakes says what success means. Companions in the player's party help on their own when they are willing and trained; the game works it out.
 - Feelings on the sheets are words for each meter, toward the player and toward others here. ${r.meters.list.map((m) => `${m.name} (${m.id}): ${m.description}.`).join(' ')} Each is a separate feeling; when they pull apart, play the tension.
 - speakers: at most ${MAX_SPEAKERS} characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone.
-- feels: what the character really feels now, whatever they show: {"shade","family","intensity","reason"}. shade is one of the shades below. family only when the shade is listed under more than one. intensity is 1 to 5; the usual range is given, and the moment can go outside it. reason: what it's about, in a few words. Leave feels out to keep what they felt before. The game works out how much shows. A mask hides a feeling; it doesn't lessen it: never lower feels because they are hiding it or look composed. A feeling eases at most one step a turn.
-- Shades by family (usual intensity): ${shadeList(r)}.
-- To see what someone really feels behind what they show, give the person looking a check with ${r.skills.find((s) => s.id === r.people.reading.skill)?.name ?? r.people.reading.skill} and the one being read as target. The game sets its difficulty. A companion can be the one looking; on success they may tell the player.
-- pressure: how hard their aim for tonight (on their sheet) presses on them right now, one of: ${r.pressures.join(', ')} (weakest first). Most of the time it is ${r.pressures[0]}. It rises when time runs short or events push, and moves at most one step a turn.
+- feels: what the character really feels now, whatever they show: {"shade","family","intensity","reason"}. shade is one of the shades below. family only when the shade is listed under more than one. intensity is 1 to 5. reason: what it's about, in a few words. Leave feels out to keep what they felt before. The game works out how much shows. A mask hides a feeling; it doesn't lessen it: never lower feels because they are hiding it or look composed. A feeling eases at most one step a turn.
+- Shades by family: ${shadeNames(r)}.
+- To see what someone really feels behind what they show, give the person looking a check with ${r.skills.find((s) => s.id === r.people.reading.skill)?.name ?? r.people.reading.skill} and the one being read as target. A companion can be the one looking; on success they may tell the player.
+- pressure: how hard their aim for tonight (on their sheet) presses on them right now, one of: ${r.pressures.join(', ')} (weakest first). Most of the time it is ${r.pressures[0]}. It rises when time runs short or events push.
 - keeps: ids of their own secrets, only when what was just said or done touches one; touched: the words that touched it, as said. Most turns nobody keeps anything. approach: lie, deflect or partial truth. A secret marked "in short" is shown as a brief cue; keep it by its id all the same, and the writer will get the whole secret.
+- A plan gives nobody knowledge. Someone may ask about another's secret, guess, suspect or deny it, and that needs nothing in uses; a secret is confirmed only by its holder, by someone who knows it, or by what is shown on screen.
 - When someone lies or deflects about a kept secret and someone present could see through it, give the person reading them a check with the skill that fits. If a character is reading the speaker, set who to that character's id. Simply asking a question does not make the player the one reading the speaker. Put the check id in needs on the reader's move that sees through the dodge. They can still question the answer or show distrust without that move. Success lets them recognize the dodge, not learn the secret itself. Example: the player asks a question, Ada dodges, and Ben studies Ada. Set player_action.uncertain to false. Give the check id read-ada to who: ben. Leave needs blank on Ada's dodge. Put needs: read-ada on Ben's move where he realizes Ada dodged.
-- moves: the conversation in order, at most ${MAX_LINES}. who: a speaker. answers: "player", or the number of an earlier move (1 is the first). move: one of ${MOVE_KINDS.join(', ')}. uses: ids of facts the line may draw on, if it needs any: a pool to pick from, not a list to recite. Plenty of lines need none. A speaker can use only their own facts, the place's, and facts already said on screen. A line that gives a speaker's own secret away is a reveal or a concede; a dodge never does. new: anything the line needs that no fact holds (a price, a time, a plan), in at most ${NEW_FACT_WORDS} plain words; never a line of dialogue. needs: the id of a check the move depends on; it happens only if the check succeeds.
-- A move answers the move before it, or the player. A speaker can have two moves when someone answers them.
+- moves: the conversation in order, at most ${MAX_LINES}. who: a speaker. answers: "player", or the number of an earlier move (1 is the first). move: one of ${MOVE_KINDS.join(', ')}. uses: ids of facts the line may draw on, if it needs any: a pool to pick from, not a list to recite. Plenty of lines need none. A speaker can use only their own facts, the place's, and facts already said on screen. A line that gives a speaker's own secret away is a reveal or a concede; a dodge never does. new: anything the line needs that no fact holds (a price, a time, a plan), in at most ${NEW_FACT_WORDS} plain words; never a line of dialogue. needs: the id of a check the move depends on; it happens only if the check succeeds. A speaker can have two moves when someone answers them.
 - framing: only when it matters, how a speaker colours what they say about the world (e.g. "bitter, street-level view").
 ${loreLines > 0 ? `- lore: at most ${loreLines} facts of world lore the writer may draw on this turn, when the conversation turns to the world; usually none. entry: the [id] of a lore entry given above. line: the fact in plain words, at most ${LORE_LINE_WORDS}, never dialogue. An insider entry needs who: a speaker it says knows it. A lore line is something to draw on, not a line to say.\n` : ''}- Don't repeat a fact already said unless someone asks again. A question asked and not answered gets an answer or a visible dodge.
 - change: what is different at the end of this turn: something decided, conceded, refused, revealed or learned. A check result that matters changes it.
@@ -123,6 +130,7 @@ export function buildDirectorPrompt(content: Pack, state: GameState, input: stri
     .filter((c) => quiet[c.id]! >= QUIET_TURNS)
     .map((c) => `- ${c.name} [id: ${c.id}], silent ${quiet[c.id]} turns. Trade: ${c.role}. Tonight: ${c.agenda.current}. Wants: ${c.agenda.longTerm.join('; ')}.`)
   const said = facts.filter((f) => f.kind === 'said' || scene.told.includes(f.id))
+  const claims = claimLines(content, state)
   // The assist gate in words (core rules §1): which companions present would back the player up, never the numbers.
   const willing = willingHelpers(content, state, 'player')
   const backing = state.party
@@ -132,6 +140,7 @@ export function buildDirectorPrompt(content: Pack, state: GameState, input: stri
     scene.summary && `# Earlier in the scene\n${scene.summary}`,
     recent.length > 0 ? `# Last turns\n${recent.map((t) => turnText(content, player.name, t)).join('\n\n')}` : '# The scene opens now.',
     said.length > 0 ? `# Already said on screen (anyone present can use these)\n${said.map((f) => `- [${f.id}] ${f.text}`).join('\n')}` : '# Nothing has been said on screen yet.',
+    claims.length > 0 && `# Claimed but never confirmed (claims, not facts: anyone may doubt or deny them)\n${claims.join('\n')}`,
     `# Turns since each last spoke\n${present.map((id) => `${id}: ${quiet[id]}`).join(', ')}`,
     backing.length > 0 && `# Help with the player's checks\n${backing.join(' ')}`,
     Object.keys(scene.pressures).length > 0 && `# Pressure now\n${present.filter((id) => scene.pressures[id] !== undefined).map((id) => `${id}: ${content.ruleset.pressures[scene.pressures[id]!]}`).join(', ')}`,
