@@ -20,6 +20,8 @@ export function mockLlm(): BenchLlm {
         return reply
       }
     },
+    // The mock bookkeeper records nothing, so the harness runs the call and the records without a model.
+    bookkeeper: { call: async () => JSON.stringify({ secrets: [], new: [], changed: '', moods: [], checks: [] }), waitMs: 30_000 },
     summarize: async (prompt) => {
       if (prompt.system.startsWith('You judge how one scene')) return JSON.stringify({ reason: '', approval: 'unchanged', trust: 'unchanged', interest: 'a little more', others: [], toward: [], resolved: [], ties: [] })
       if (prompt.system.startsWith('You merge')) {

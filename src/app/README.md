@@ -2,7 +2,7 @@
 
 The Electron app. It shows state and forwards input; it holds no game logic.
 
-- `main/`: creates the window; owns the chosen pack, its save store and its play logs (`PlayLogs`); IPC handlers for packs, settings, turns, scene ends, saves, log sessions, flags and turn details.
+- `main/`: creates the window; owns the chosen pack, its save store and its play logs (`PlayLogs`); IPC handlers for packs, settings, turns, scene ends, saves, log sessions, flags and turn details. **The bookkeeper** (milestone 4c): when a turn is returned, the main process starts its bookkeeper call and holds it by the turn's id; the next turn, either half of the scene's end and a save wait for it (up to the answering profile's timeout), apply its records to the state they were sent, and send `catching-up` / `caught-up` scene events while they wait, which the scene screen shows as "Catching up…". The call doesn't hold the one-turn lock; a state whose last turn isn't the held one ignores it.
 - `preload/`: exposes the IPC as `window.api` (the contract is `ipc.ts`).
 - `renderer/`: React screens. The pack picker comes first, then the pack's title screen, the scene, the summary, saves and settings. Reading logic is in `ui/reading.ts`.
 

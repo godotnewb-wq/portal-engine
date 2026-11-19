@@ -465,9 +465,11 @@ export function settlePlan(content: Pack, state: GameState, plan: BeatPlan): Bea
   // A reading check that succeeded sees through to what the target feels (npc design §7): the writer may show the
   // reader noticing it, and the reader's end-of-scene memory may hold it.
   const felt = feelingsNow(state, plan)
-  const reads: Read[] = plan.checks.flatMap((c) =>
-    c.target && c.skill === content.ruleset.people.reading.skill && passed.has(c.id) && felt[c.target] ? [{ by: c.who, target: c.target, feeling: felt[c.target]! }] : []
-  )
+  // Since milestone 4c the reader also sees that something is hidden when the one read is keeping a secret, never what.
+  const reads: Read[] = plan.checks.flatMap((c) => {
+    const hiding = !!plan.speakers.find((s) => s.id === c.target)?.kept?.length
+    return c.target && c.skill === content.ruleset.people.reading.skill && passed.has(c.id) && felt[c.target] ? [{ by: c.who, target: c.target, feeling: felt[c.target]!, ...(hiding && { hiding }) }] : []
+  })
   return { ...plan, speakers, ...(moves && { moves }), exchange, ...(reads.length > 0 && { reads }) }
 }
 

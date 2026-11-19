@@ -1,10 +1,11 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { join } from 'node:path'
 import type { Pack } from '@engine/pack'
-import { TracedError, type CallTrace } from '@engine/core'
+import { TracedError, type CallTrace, type LlmReply, type Prompt } from '@engine/core'
+import { bookkeepWithin } from '@platform/roles'
 import { consolidate, endScene, judgeScene, nextDay, type ConsolidationTrace, type RelationshipTrace, type SceneEndTrace, type Summarize } from '@engine/relationships'
 import { answerTie, GameStateSchema, type GameState } from '@engine/state'
-import { promptSources, runTurn, type TurnLlm, type TurnTrace } from '@engine/scene'
+import { applyRecords, promptSources, runTurn, type TurnLlm, type TurnTrace } from '@engine/scene'
 import { callTrace, LogSession, promptVersion, readSession, type SessionRecord } from '@platform/logs'
 import type { FlagRecord, ScoreRecord } from '@engine/review'
 import { loreBudgets, type LoreBudgetOverrides, type LoreBudgets } from '@engine/rules'
@@ -89,6 +90,11 @@ export interface BenchRun {
 export interface BenchLlm {
   turn: TurnLlm
   summarize: Summarize
+  /**
+   * The bookkeeper's call after each turn (milestone 4c), and how long to wait for it (the answering profile's
+   * timeout, as in play; decision I). Left out, turns keep the plan's records.
+   */
+  bookkeeper?: { call: (prompt: Prompt) => Promise<LlmReply>; waitMs: number }
 }
 
 export interface BenchOptions {
@@ -180,7 +186,12 @@ export async function runScenario(content: Pack, scenario: Scenario, llm: BenchL
         run.turns.push(outcome.trace)
         turnInScene++
         session?.turn(outcome.trace)
-        state = outcome.state
+        // As the app does, before the next turn: the bookkeeper reads the turn and its records replace the plan's.
+        if (llm.bookkeeper) {
+          const last = outcome.state.scene!.turns.at(-1)!
+          const kept = await bookkeepWithin(played, state, { id: last.id, input, beats: last.beats, plan: outcome.plan }, llm.bookkeeper.call, llm.bookkeeper.waitMs)
+          state = applyRecords(outcome.state, kept.records)
+        } else state = outcome.state
         if (state.scene?.ended) break
       }
       if (scenario.summaries) {

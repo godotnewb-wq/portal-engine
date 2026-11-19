@@ -4,13 +4,13 @@ import { join } from 'node:path'
 import type { Pack } from '@engine/pack'
 import { TracedError } from '@engine/core'
 import { consolidate, endScene, judgeScene } from '@engine/relationships'
-import { runTurn } from '@engine/scene'
+import { applyRecords, runTurn } from '@engine/scene'
 import { FlagSchema } from '@engine/review'
 import { detailsOf, PlayLogs, roleModels, type FlagInput } from '@platform/logs'
-import { GameStateSchema, SaveRequestSchema, SlotIdSchema, stateProblems } from '@engine/state'
+import { GameStateSchema, SaveRequestSchema, SlotIdSchema, stateProblems, type GameState } from '@engine/state'
 import { chatCompletion, isConfigured, listModels, ListModelsRequestSchema, LLM_PROFILE_IDS, SettingsUpdateSchema, toView, type LlmProfileId } from '@llm'
 import { discoverPacks, type PackListing, type PackSource } from '@platform/packs'
-import { summaryLlm, turnLlm } from '@platform/roles'
+import { bookkeeperLlm, bookkeeperWaitMs, bookkeepWithin, summaryLlm, turnLlm } from '@platform/roles'
 import { SaveStore } from '@platform/saves'
 import { SettingsStore, type KeyCipher } from '@platform/settings'
 import {
@@ -143,17 +143,41 @@ app.whenReady().then(() => {
 
   // One turn at a time: a second request while one runs would be answered from a stale state.
   let turning = false
+
+  // The last turn's bookkeeper (milestone 4c, decision B, 2026-11-18): started as soon as the turn is returned, so it
+  // runs while the player reads, and held by the turn's id. It doesn't hold `turning`. The next turn, either half of
+  // the scene's end and a save wait for it (up to its timeout, decisions A and C) and apply its records to the state
+  // they were sent; applying them is idempotent, so the save's copy and the next turn's agree. A state whose last turn
+  // isn't this one (a save loaded, a new game) ignores it.
+  let recording: { turnId: string; done: Promise<Awaited<ReturnType<typeof bookkeepWithin>>>; settled: boolean } | null = null
+  const record = (turnId: string, done: Promise<Awaited<ReturnType<typeof bookkeepWithin>>>) => {
+    const held = { turnId, done, settled: false }
+    void done.finally(() => (held.settled = true))
+    recording = held
+  }
+  const recorded = async (state: GameState, notify: (event: SceneEvent) => void): Promise<GameState> => {
+    const pending = recording
+    if (!pending || state.scene?.turns.at(-1)?.id !== pending.turnId) return state
+    if (pending.settled) return applyRecords(state, (await pending.done).records)
+    notify({ type: 'catching-up' })
+    try {
+      return applyRecords(state, (await pending.done).records)
+    } finally {
+      notify({ type: 'caught-up' })
+    }
+  }
+  const tell = (event: Electron.IpcMainInvokeEvent) => (sceneEvent: SceneEvent) => {
+    if (!event.sender.isDestroyed()) event.sender.send(IPC.sceneEvent, sceneEvent)
+  }
   ipcMain.handle(IPC.sceneTurn, async (event, request: unknown): Promise<SceneTurnResponse> => {
     if (turning) return { ok: false, error: 'A turn is already running.' }
     turning = true
     try {
       const { pack, logs } = current()
       const { state: raw, input } = request as { state: unknown; input: unknown }
-      const state = GameStateSchema.parse(raw)
       if (typeof input !== 'string' || input.trim().length === 0) return { ok: false, error: 'Say or do something first.' }
-      const send = (sceneEvent: SceneEvent) => {
-        if (!event.sender.isDestroyed()) event.sender.send(IPC.sceneEvent, sceneEvent)
-      }
+      const send = tell(event)
+      const state = await recorded(GameStateSchema.parse(raw), send)
       const session = logs.sessionForTurn()
       const scene = state.scene
       // Scene ids are random and unique; the number makes the turn id read in order.
@@ -161,6 +185,10 @@ app.whenReady().then(() => {
       try {
         const outcome = await runTurn(pack, state, input.trim(), turnLlm(settings.get()), send, { ...(turnId && { turnId }), ...(session && { log: session }), loreBudgets: settings.getLoreBudgets() })
         const details = logs.turn(outcome.trace, { location: scene!.locationId, cast: scene!.cast }) ?? detailsOf('', outcome.trace)
+        // The turn is shown now; its bookkeeper reads it while the player does. Its log record is task 4's.
+        const last = outcome.state.scene!.turns.at(-1)!
+        const now = settings.get()
+        record(last.id, bookkeepWithin(pack, state, { id: last.id, input: input.trim(), beats: last.beats, plan: outcome.plan }, bookkeeperLlm(now), bookkeeperWaitMs(now)))
         return {
           ok: true,
           state: outcome.state,
@@ -182,15 +210,16 @@ app.whenReady().then(() => {
     }
   })
 
-  ipcMain.handle(IPC.sceneEnd, async (_event, raw: unknown): Promise<SceneEndResponse> => {
+  ipcMain.handle(IPC.sceneEnd, async (event, raw: unknown): Promise<SceneEndResponse> => {
     if (turning) return { ok: false, error: 'A turn is still running.' }
     turning = true
     try {
       const { pack, logs } = current()
-      const state = GameStateSchema.parse(raw)
+      const state = await recorded(GameStateSchema.parse(raw), tell(event))
       try {
         const { state: next, reports, trace } = await endScene(pack, state, summaryLlm(settings.get()))
         logs.sceneEnd(trace)
+        recording = null
         return { ok: true, state: next, reports }
       } catch (error) {
         logs.error('scene-end', (error as Error).message, { ...(state.scene && { sceneId: state.scene.id }), ...(error instanceof TracedError && { calls: error.calls }) })
@@ -206,12 +235,12 @@ app.whenReady().then(() => {
   // The first half of a scene's end, with the summary model (relationships §3; milestone 4c): every witness's
   // relationship call, and the ties settled from them. A failed call changes nothing for that witness and is logged;
   // the scene still ends.
-  ipcMain.handle(IPC.sceneTies, async (_event, raw: unknown): Promise<SceneTiesResponse> => {
+  ipcMain.handle(IPC.sceneTies, async (event, raw: unknown): Promise<SceneTiesResponse> => {
     if (turning) return { ok: false, error: 'A turn is still running.' }
     turning = true
     try {
       const { pack, logs } = current()
-      const state = GameStateSchema.parse(raw)
+      const state = await recorded(GameStateSchema.parse(raw), tell(event))
       const { state: next, trace } = await judgeScene(pack, state, summaryLlm(settings.get()))
       if (trace.calls.length > 0) logs.ties(trace)
       return { ok: true, state: next }
@@ -246,10 +275,11 @@ app.whenReady().then(() => {
   })
 
   ipcMain.handle(IPC.listSaves, () => (playing ? playing.saves.list() : []))
-  ipcMain.handle(IPC.saveGame, (_event, request: unknown): SaveResponse => {
+  // A save waits for the last turn's bookkeeper like the next turn does (milestone 4c, decision C), so it keeps the records.
+  ipcMain.handle(IPC.saveGame, async (event, request: unknown): Promise<SaveResponse> => {
     try {
       const { slotId, state, name } = SaveRequestSchema.parse(request)
-      return { ok: true, summary: current().saves.save(slotId, state, new Date(), name) }
+      return { ok: true, summary: current().saves.save(slotId, await recorded(state, tell(event)), new Date(), name) }
     } catch (error) {
       return { ok: false, error: (error as Error).message }
     }

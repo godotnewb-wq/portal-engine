@@ -32,7 +32,7 @@ import { mockLlm, readRun, runBench, writeRun, type BenchLlm } from './run'
 import { roleSettings, sourceRevision, type RunInputs } from './inputs'
 import { scoreSession, type Scorer } from '../logs/score'
 import { loadScenarios, scenarioFile } from './scenario'
-import { scorerLlm, summaryLlm, turnLlm } from '@platform/roles'
+import { bookkeeperLlm, bookkeeperWaitMs, scorerLlm, summaryLlm, turnLlm } from '@platform/roles'
 
 const root = resolve(__dirname, '../..')
 const args = process.argv.slice(2)
@@ -89,7 +89,7 @@ async function main(): Promise<void> {
   } else {
     const settings = benchSettings(option('--config') ?? join(root, 'bench.config.json'), process.env)
     if (!isConfigured(settings.writer)) throw new Error('No model set up for the bench. Create bench.config.json (same shape as the app settings) or set BENCH_BASE_URL and BENCH_MODEL. Or run with --mock.')
-    llm = { turn: turnLlm(settings), summarize: summaryLlm(settings) }
+    llm = { turn: turnLlm(settings), summarize: summaryLlm(settings), bookkeeper: { call: bookkeeperLlm(settings), waitMs: bookkeeperWaitMs(settings) } }
     models = modelsOf(settings)
     sessionModels = roleModels(settings, ['director', 'writer', 'summary', ...(flag('--score') ? (['scorer'] as const) : [])])
     roles = roleSettings(settings, ['director', 'writer', 'summary', ...(flag('--score') ? (['scorer'] as const) : [])])

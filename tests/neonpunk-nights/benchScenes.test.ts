@@ -192,10 +192,19 @@ describe('the 4b scenarios, as the game sets them up', () => {
     expect(renderReport(content, { ...(await runBench(content, [], mockLlm(), 'test', { all: 'mock' })), scenarios: [half] })).toContain("- One side only, no change: Kesh says Teo is now Kesh's wife; Teo doesn't say Kesh is now Teo's ")
   })
 
-  it('learned secret: the player, who knows it, names it, and it comes out in front of Brask (acceptance 8, the game’s half)', async () => {
+  it('learned secret: the player, who knows it, says it, and it comes out in front of Brask (acceptance 8, the game’s half)', async () => {
     const s = named('secret-learned')
     expect(seededState(content, s).facts['oria-senn']).toEqual([content.characters.find((c) => c.id === 'oria-senn')!.secrets.find((x) => x.id === 'the-case')!.text])
-    const run = await runScenario(content, s, mockLlm())
+    // Since milestone 4c the bookkeeper reads that the player said it as known; the game knows the player knew it.
+    const words = "That's a Grid control core"
+    const llm: BenchLlm = {
+      ...mockLlm(),
+      bookkeeper: { waitMs: 30_000, call: async (p) => JSON.stringify({ secrets: p.user.split('This turn:')[1]!.includes(words) ? [{ id: 'oria-senn.the-case', at: 'player', how: 'stated', words }] : [] }) }
+    }
+    const run = await runScenario(content, s, llm)
+    expect(run.state!.memories.some((m) => m.owner === 'brask' && m.secret === 'oria-senn.the-case')).toBe(true)
+    // The mock bookkeeper records nothing, so nobody learns it.
+    expect((await runScenario(content, s, mockLlm())).state!.memories.some((m) => m.secret === 'oria-senn.the-case')).toBe(false)
     // Brask's memory call is asked for his memory of learning it; Oria's, its holder's, isn't.
     const asked = (id: string) => callsOf(run).find((c) => c.role === 'memory' && c.id.endsWith(`:memory:${id}`))!.prompt
     expect(asked('brask').system).toContain('- heard:')

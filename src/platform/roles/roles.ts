@@ -1,8 +1,10 @@
 import type { Settings } from '@llm'
 import { complete, profileFor, stream, type CallInfo, type LlmRole, type RoutedReply } from '@llm'
 import type { Summarize } from '@engine/relationships'
-import type { TurnLlm } from '@engine/scene'
-import type { CallMeta, Prompt } from '@engine/core'
+import { bookkeep, planBookkeeping, type BookkeeperTrace, type TurnLlm } from '@engine/scene'
+import type { Pack } from '@engine/pack'
+import type { Bookkeeping, GameState } from '@engine/state'
+import type { CallMeta, LlmReply, Prompt } from '@engine/core'
 
 /** Gathers what the LLM client reports during a call, to hand to the engine with the reply. */
 function collector() {
@@ -81,4 +83,29 @@ export function summaryLlm(settings: Settings): Summarize {
 /** The AI scorer's call (milestone 2, A5): JSON, after play only. */
 export function scorerLlm(settings: Settings): (prompt: Prompt) => Promise<{ text: string; meta: CallMeta }> {
   return (prompt) => judged(settings, 'scorer', prompt, SCORER_MIN_TOKENS)
+}
+
+/**
+ * Runs a turn's bookkeeper and gives up past `waitMs` from when it started (milestone 4c, decisions A, B and I):
+ * then the turn keeps the plan's records, the trace says it was late, and a reply that comes after is discarded. The
+ * app starts this as soon as a turn is shown and awaits it before the next turn, the scene's end or a save; the bench
+ * awaits it at once, so a slow provider falls back there exactly as in play.
+ */
+export async function bookkeepWithin(
+  content: Pack,
+  before: GameState,
+  written: Parameters<typeof bookkeep>[2],
+  call: (prompt: Prompt) => Promise<LlmReply>,
+  waitMs: number,
+  now: () => number = Date.now
+): Promise<{ records: Bookkeeping; trace: BookkeeperTrace; late: boolean }> {
+  let timer: ReturnType<typeof setTimeout> | undefined
+  const late = new Promise<'late'>((resolve) => {
+    timer = setTimeout(() => resolve('late'), waitMs)
+  })
+  const done = await Promise.race([bookkeep(content, before, written, call, now), late])
+  clearTimeout(timer)
+  if (done !== 'late') return { ...done, late: false }
+  const records = planBookkeeping(content, before, written)
+  return { records, trace: { turnId: written.id, at: new Date(now()).toISOString(), calls: [], records, error: `no answer within ${Math.round(waitMs / 1000)} seconds` }, late: true }
 }

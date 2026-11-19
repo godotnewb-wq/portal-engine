@@ -70,7 +70,12 @@ export type SceneTurnResponse =
   | { ok: false; error: string }
 
 /** Streamed while a turn runs: the engine's turn events, passed through. */
-export type SceneEvent = TurnEvent
+/**
+ * What the screen hears while a request runs: the turn's own events, and since milestone 4c `catching-up` while it
+ * waits for the last turn's bookkeeper and `caught-up` once that is done (decided 2026-11-16: a pause shouldn't look
+ * like a hang).
+ */
+export type SceneEvent = TurnEvent | { type: 'catching-up' } | { type: 'caught-up' }
 
 /** Consolidation's result: the new state, with any memories merged (milestone 4b). */
 /**

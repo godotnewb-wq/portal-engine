@@ -119,6 +119,8 @@ export interface Read {
   by: string
   target: string
   feeling: Feeling
+  /** The one read was keeping a secret: the reader saw that something was hidden, never what (milestone 4c). */
+  hiding?: boolean
 }
 
 /** The validated plan. `exchange` is derived from `moves`, for read-outs and the beat trace. */

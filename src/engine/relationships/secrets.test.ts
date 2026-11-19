@@ -1,8 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import { entryById, knows } from '@engine/codex'
 import { characterById, type Pack } from '@engine/pack'
-import { applyTurn, buildBriefs, canSay, exposures, givesAway, knowerIn, parsePlan, parseReply, sceneFacts, settlePlan, turnLore, validatePlan, type BeatPlan } from '@engine/scene'
-import { GameStateSchema, startScene, type GameState } from '@engine/state'
+import { applyRecords, applyTurn, buildBriefs, canSay, knowerIn, parsePlan, parseReply, sceneFacts, settlePlan, turnLore, validatePlan, type BeatPlan } from '@engine/scene'
+import { BookkeepingSchema, GameStateSchema, startScene, type Bookkeeping, type GameState } from '@engine/state'
 import type { CheckResult } from '@engine/rules'
 import { fixture, yardScene } from '@tests/fixture'
 import { applySummaries, buildMemoryPrompt, plainSummary, type Summary } from './summary'
@@ -14,76 +14,68 @@ const said = (state: GameState, p: BeatPlan, speaker: string) => applyTurn(fixtu
 const end = (state: GameState, id: string, over: Partial<Summary>) => applySummaries(fixture, state, [{ id, summary: { ...plainSummary(fixture, state, id), ...over } }])
 const tells = plan({ speakers: [{ id: 'tobin', goal: 'come clean' }], moves: [{ who: 'tobin', answers: 'player', move: 'reveal', uses: ['tobin.after-closing'] }] })
 
+// Since milestone 4c (decisions J–L, 2026-11-18, user) a secret comes out through the turn's records: the bookkeeper's,
+// or the plan's until it answers and when it fails. The plan gives only a holder's voiced reveal or concede, not kept;
+// the bookkeeper's own rules are tested in @engine/scene's bookkeeper.test.ts.
 describe('a secret coming out on screen', () => {
-  it('comes out in front of everyone present but its holder, and only when its speaker had a line', () => {
-    expect(exposures(fixture, yardScene().scene!, { plan: tells, beats: [{ kind: 'dialogue', speaker: 'tobin', text: 'x' }] })).toEqual([{ secret: 'tobin.after-closing', to: ['mara'] }])
-    expect(exposures(fixture, yardScene().scene!, { plan: tells, beats: [] })).toEqual([])
-    expect(said(yardScene(), tells, 'tobin').scene!.turns[0]!.exposed).toEqual([{ secret: 'tobin.after-closing', to: ['mara'] }])
+  const by = (move: string, extra: object = {}) =>
+    validatePlan(fixture, yardScene(), parsePlan(JSON.stringify({ speakers: [{ id: 'tobin', goal: 'get through it', ...extra }], moves: [{ who: 'tobin', answers: 'player', move, uses: ['tobin.after-closing'] }] }))!, 'Tobin, who came by after closing?').plan
+  const run = (p: BeatPlan, text = 'x', input = ASK, state = yardScene()) => {
+    const next = applyTurn(fixture, state, { id: 't1', input, plan: p, beats: text ? [{ kind: 'dialogue', speaker: 'tobin', text }] : [], tags: parseReply('', []).tags, dice: 1 })
+    return { exposed: next.scene!.turns.at(-1)!.exposed ?? [], told: next.scene!.told }
+  }
+  const none = { exposed: [], told: [] }
+  const out = { exposed: [{ secret: 'tobin.after-closing', to: ['mara'] }], told: ['tobin.after-closing'] }
+
+  it('until the bookkeeper answers, comes out on its holder’s voiced reveal or concede, unless they keep it, whatever the approach', () => {
+    expect(run(by('reveal'))).toEqual(out)
+    expect(run(by('concede'))).toEqual(out)
+    expect(run(by('reveal'), '')).toEqual(none)
+    expect(run(by('concede', { keeps: ['tobin.after-closing'], touched: 'after closing', approach: 'lie' }))).toEqual(none)
+    expect(run(by('reveal', { keeps: ['tobin.after-closing'], touched: 'after closing', approach: 'partial truth' }))).toEqual(none)
+    expect(said(yardScene(), tells, 'tobin').scene!.turns[0]!.records).toMatchObject({ source: 'plan', unaudited: true })
   })
 
-  it('comes out to a character whose reading check sees through someone keeping it, and to no one for the player’s', () => {
-    const keeping = (who: string) => {
-      const p = validatePlan(fixture, yardScene(), parsePlan(JSON.stringify({
-        player_action: { doing: 'presses Tobin', uncertain: true },
-        speakers: [{ id: 'tobin', goal: 'dodge', keeps: ['tobin.after-closing'], touched: 'after closing', approach: 'lie' }],
-        moves: [{ who: 'tobin', answers: 'player', move: 'dodge' }],
-        checks: [{ id: 'look', who, skill: 'notice', difficulty: 'tough', target: 'tobin', stakes: 'sees he is lying' }]
-      }))!, 'Tobin, who came by after closing?').plan
-      return settlePlan(fixture, yardScene(), { ...p, checks: p.checks.map((c) => ({ ...c, result: { degree: 'success', natural: 15, total: 15, dc: 13 } as CheckResult })) })
-    }
-    expect(exposures(fixture, yardScene().scene!, { plan: keeping('mara'), beats: [] })).toEqual([{ secret: 'tobin.after-closing', to: ['mara'] }])
-    expect(exposures(fixture, yardScene().scene!, { plan: keeping('player'), beats: [] })).toEqual([])
-  })
-
-  // Decided 2026-11-15 (user), after the bench: the player named a secret to its holder's face, and no one could learn it.
-  describe('which moves give a secret away (decided 2026-11-16)', () => {
-    const keyed: Pack = { ...fixture, characters: fixture.characters.map((c) => (c.id === 'tobin' ? { ...c, secrets: c.secrets.map((s) => ({ ...s, keywords: ['after closing'] })) } : c)) }
-    const by = (move: string, extra: object = {}) =>
-      validatePlan(fixture, yardScene(), parsePlan(JSON.stringify({ speakers: [{ id: 'tobin', goal: 'get through it', ...extra }], moves: [{ who: 'tobin', answers: 'player', move, uses: ['tobin.after-closing'] }] }))!, 'Tobin, who came by after closing?').plan
-    const run = (p: BeatPlan, text = 'x', pack: Pack = fixture) => {
-      const state = applyTurn(pack, yardScene(), { id: 't1', input: ASK, plan: p, beats: [{ kind: 'dialogue', speaker: 'tobin', text }], tags: parseReply('', []).tags, dice: 1 })
-      return { exposed: state.scene!.turns[0]!.exposed ?? [], told: state.scene!.told }
-    }
-    const none = { exposed: [], told: [] }
-    const out = { exposed: [{ secret: 'tobin.after-closing', to: ['mara'] }], told: ['tobin.after-closing'] }
-
-    it('a dodge drawing on the holder’s own secret gives nothing away: no exposure, so no forced Core memory', () => {
-      expect(run(by('dodge'), 'Someone came by after closing? No idea.', keyed)).toEqual(none)
-    })
-
-    it('a reveal or a concede gives it away, unless the holder is keeping it, whatever the approach', () => {
-      expect(run(by('reveal'))).toEqual(out)
-      expect(run(by('concede'))).toEqual(out)
-      expect(run(by('concede', { keeps: ['tobin.after-closing'], touched: 'after closing', approach: 'lie' }))).toEqual(none)
-      expect(run(by('reveal', { keeps: ['tobin.after-closing'], touched: 'after closing', approach: 'deflect' }))).toEqual(none)
-      expect(run(by('concede', { keeps: ['tobin.after-closing'], touched: 'after closing', approach: 'partial truth' }))).toEqual(none)
-    })
-
-    it('an answer gives it away only when the spoken line names the secret by its keywords', () => {
-      expect(run(by('answer'), 'I was home all night.', keyed)).toEqual(none)
-      expect(run(by('answer'), 'Fine. I let someone in after closing.', keyed)).toEqual(out)
-      expect(run(by('answer', { keeps: ['tobin.after-closing'], touched: 'after closing', approach: 'lie' }), 'Nobody came in after closing.', keyed)).toEqual(none)
-    })
-
-    it('someone telling another’s secret gives it away on any move but a dodge or a refusal', () => {
-      const written = { plan: tells, beats: [] }
-      const move = (m: string) => ({ who: 'mara', answers: 'player' as const, move: m, says: [] })
-      expect(['answer', 'reveal', 'offer', 'push back'].map((m) => givesAway(fixture, written, move(m), 'tobin.after-closing'))).toEqual([true, true, true, true])
-      expect(['dodge', 'refuse'].map((m) => givesAway(fixture, written, move(m), 'tobin.after-closing'))).toEqual([false, false])
-    })
-  })
-
-  it('comes out when the player says it by its keywords, but only a secret the player knows', () => {
-    const keyed: Pack = { ...fixture, characters: fixture.characters.map((c) => (c.id === 'tobin' ? { ...c, secrets: c.secrets.map((s) => ({ ...s, keywords: ['after closing'] })) } : c)) }
-    const quiet = { plan: plan({ speakers: [{ id: 'mara', goal: 'listen' }], moves: [{ who: 'mara', answers: 'player', move: 'answer' }] }), beats: [] }
-    const text = keyed.characters.find((c) => c.id === 'tobin')!.secrets[0]!.text
+  it('no longer comes out on a dodge, an answer naming it, someone else’s telling, or the player saying it by its keywords', () => {
+    expect(run(by('dodge'), 'Someone came by after closing? No idea.')).toEqual(none)
+    expect(run(by('answer'), 'Fine. I let someone in after closing.')).toEqual(none)
+    const text = fixture.characters.find((c) => c.id === 'tobin')!.secrets[0]!.text
     const knowing = { ...yardScene(), facts: { tobin: [text] } }
-    const input = 'Mara, Tobin let someone in after closing.'
-    expect(exposures(keyed, knowing.scene!, quiet, { state: knowing, input })).toEqual([{ secret: 'tobin.after-closing', to: ['mara'] }])
-    // A guess: the player never learned it, so it doesn't spread.
-    expect(exposures(keyed, yardScene().scene!, quiet, { state: yardScene(), input })).toEqual([])
-    // Said but not by its keywords.
-    expect(exposures(keyed, knowing.scene!, quiet, { state: knowing, input: 'Mara, ask Tobin about last night.' })).toEqual([])
+    const quiet = plan({ speakers: [{ id: 'mara', goal: 'listen' }], moves: [{ who: 'mara', answers: 'player', move: 'answer' }] })
+    expect(run(quiet, '', 'Mara, Tobin let someone in after closing.', knowing)).toEqual(none)
+  })
+
+  it('a reading check that sees through someone keeping one shows that something is hidden, never what', () => {
+    const p = validatePlan(fixture, yardScene(), parsePlan(JSON.stringify({
+      player_action: { doing: 'presses Tobin', uncertain: true },
+      speakers: [{ id: 'tobin', goal: 'dodge', keeps: ['tobin.after-closing'], touched: 'after closing', approach: 'lie' }],
+      moves: [{ who: 'tobin', answers: 'player', move: 'dodge' }],
+      checks: [{ id: 'look', who: 'mara', skill: 'notice', difficulty: 'tough', target: 'tobin', stakes: 'sees he is lying' }]
+    }))!, 'Tobin, who came by after closing?').plan
+    const settled = settlePlan(fixture, yardScene(), { ...p, checks: p.checks.map((c) => ({ ...c, result: { degree: 'success', natural: 15, total: 15, dc: 13 } as CheckResult })) })
+    expect(settled.reads).toMatchObject([{ by: 'mara', target: 'tobin', hiding: true }])
+    const next = applyTurn(fixture, yardScene(), { id: 't1', input: ASK, plan: settled, beats: [{ kind: 'dialogue', speaker: 'tobin', text: 'Nobody.' }], tags: parseReply('', []).tags, dice: 1 })
+    expect(next.scene!.turns[0]!.exposed).toBeUndefined()
+    expect(buildMemoryPrompt(fixture, next, 'mara').user).toMatch(/Mara saw through to what Tobin really felt: .*, and saw that Tobin was hiding something, though not what\./)
+  })
+
+  it('takes the bookkeeper’s records in place of the plan’s, and the same records twice change nothing', () => {
+    const quiet = applyTurn(fixture, yardScene(), { id: 't1', input: ASK, plan: by('dodge'), beats: [{ kind: 'dialogue', speaker: 'tobin', text: 'I let her in, all right?' }], tags: parseReply('', []).tags, dice: 1 })
+    const records: Bookkeeping = {
+      ...BookkeepingSchema.parse({ source: 'bookkeeper' }),
+      out: [{ secret: 'tobin.after-closing', by: 'tobin', at: 1, words: 'I let her in', how: 'confirmed', to: ['mara'] }],
+      new: [{ text: 'three pennies', by: 'tobin' }]
+    }
+    const once = applyRecords(quiet, records)
+    expect(once.scene!.told).toEqual(['tobin.after-closing'])
+    expect(once.scene!.turns[0]).toMatchObject({ exposed: out.exposed, toldSecrets: ['tobin.after-closing'], records: { source: 'bookkeeper' } })
+    expect(once.scene!.newFacts).toEqual([{ id: 'said.1', text: 'three pennies', by: 'tobin', turn: 't1' }])
+    expect(applyRecords(once, records)).toEqual(once)
+    // Records that take it back (the bookkeeper read a leak, say) undo what the plan's had added.
+    const revealed = applyTurn(fixture, yardScene(), { id: 't1', input: ASK, plan: by('reveal'), beats: [{ kind: 'dialogue', speaker: 'tobin', text: 'x' }], tags: parseReply('', []).tags, dice: 1 })
+    const back = applyRecords(revealed, BookkeepingSchema.parse({ source: 'bookkeeper' }))
+    expect(back.scene!.told).toEqual([])
+    expect(back.scene!.turns[0]!.exposed).toBeUndefined()
   })
 })
 

@@ -19,7 +19,7 @@ export const noChange = (r: Ruleset): MeterDelta => Object.fromEntries(r.meters.
  * What a witness saw through to this scene (npc design §7, milestone 4b): the reading checks they won, latest per
  * person, so their memory can hold what someone really felt rather than what showed.
  */
-function reads(state: GameState, id: string): { target: string; feeling: NonNullable<GameState['scene']>['moods'][string] }[] {
+function reads(state: GameState, id: string): { target: string; feeling: NonNullable<GameState['scene']>['moods'][string]; hiding?: boolean }[] {
   const all = state.scene!.turns.flatMap((t) => t.reads ?? []).filter((x) => x.by === id)
   return [...new Map(all.map((x) => [x.target, x])).values()]
 }
@@ -241,7 +241,7 @@ export function about(content: Pack, state: GameState, c: Character, others: Cha
     })(),
     `- Mood at the end: ${feelingWords(r, scene.moods[c.id])}; comfort ${scene.comfort[c.id] ?? 3}/5.`,
     ...(memory ? judgedLines(content, state, c) : []),
-    ...reads(state, c.id).map((x) => `- ${me} saw through to what ${firstName(others.find((o) => o.id === x.target)?.name ?? x.target)} really felt: ${feelingWords(r, x.feeling)}.`),
+    ...reads(state, c.id).map((x) => `- ${me} saw through to what ${firstName(others.find((o) => o.id === x.target)?.name ?? x.target)} really felt: ${feelingWords(r, x.feeling)}${x.hiding ? `, and saw that ${firstName(others.find((o) => o.id === x.target)?.name ?? x.target)} was hiding something, though not what` : ''}.`),
     scene.departed.includes(c.id) && `- ${me} left before the scene was over${memory ? '; the memory ends with leaving' : ''}.`
   ]
     .filter(Boolean)

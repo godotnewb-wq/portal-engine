@@ -1,6 +1,6 @@
 # Scene test bench
 
-A pack's fixed scenarios played through the real turn pipeline (director → rolls → writer → code checks → rewrite → end-of-scene summaries), so a change to a prompt, the style guide, a character file or a model can be judged against the same scenes. Tuning character quality without this is guesswork.
+A pack's fixed scenarios played through the real turn pipeline (director → rolls → writer → code checks → rewrite → the bookkeeper, with the same timeout as play (milestone 4c) → end-of-scene summaries), so a change to a prompt, the style guide, a character file or a model can be judged against the same scenes. Tuning character quality without this is guesswork.
 
 ## Running it
 

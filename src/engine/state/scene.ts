@@ -82,13 +82,14 @@ export const TurnSchema = z.object({
   kept: z.array(z.string()).optional(),
   /**
    * Reading checks that succeeded this turn (npc design §7, milestone 4b): who saw through to what someone felt, for
-   * the reader's end-of-scene memory. Absent when none.
+   * the reader's end-of-scene memory. `hiding`: the one read was keeping a secret, so the reader saw that something
+   * was hidden, never what (milestone 4c: a read no longer gives the secret away). Absent when none.
    */
-  reads: z.array(z.object({ by: z.string(), target: z.string(), feeling: FeelingSchema })).optional(),
+  reads: z.array(z.object({ by: z.string(), target: z.string(), feeling: FeelingSchema, hiding: z.boolean().optional() })).optional(),
   /**
-   * Secrets that came out on screen this turn and who they came out in front of (milestone 4b): a move that used one,
-   * said in front of everyone present, or a reading check that saw through someone keeping one, for the reader. Only
-   * these can become someone's learned secret at the scene's end.
+   * Secrets that came out on screen this turn and who they came out in front of: everyone present but the holder
+   * (milestone 4b). Since milestone 4c they come from the turn's records (`records.out`), the bookkeeper's or, when it
+   * failed, the plan's. Only these can become someone's learned secret at the scene's end.
    */
   exposed: z.array(z.object({ secret: z.string(), to: z.array(z.string()) })).optional(),
   /** Codex entries the conversation brought up this turn and secrets that came out (milestone 4b): what memories can be tagged with. */
@@ -99,7 +100,14 @@ export const TurnSchema = z.object({
    * Optional brief detail this turn used or left open (director writer §7): carried into the next turn's brief on a
    * follow-up, dropped on a change of topic. Absent when none.
    */
-  details: z.array(z.string()).optional()
+  details: z.array(z.string()).optional(),
+  /**
+   * What the turn did on screen (milestone 4c): the bookkeeper's records, or the plan's until it answers and when it
+   * fails. `exposed`, `toldSecrets`, the secrets among `topics` and the turn's said facts all follow them.
+   */
+  records: BookkeepingSchema.optional(),
+  /** Secrets this turn's records added to the scene's `told`, so newer records can replace them (milestone 4c). */
+  toldSecrets: z.array(z.string()).optional()
 })
 export type Turn = z.infer<typeof TurnSchema>
 
@@ -182,8 +190,11 @@ export const SceneSchema = z.object({
   baseline: z.record(z.string(), MetersSchema).default({}),
   /** Facts said on screen this scene, by id (characters' knowledge and secrets, the place's news), so a fact is introduced the first time and anyone present can repeat it after. */
   told: z.array(z.string()).default([]),
-  /** Facts the plan brought in that no sheet holds (a price, a count), once said: anyone present can use them. */
-  newFacts: z.array(z.object({ id: z.string(), text: z.string(), by: z.string() })).default([]),
+  /**
+   * Details said on screen that no sheet holds (a price, a count): anyone present can use them. Since milestone 4c
+   * they come from each turn's records (`turn`: the one that said it, so newer records can replace them).
+   */
+  newFacts: z.array(z.object({ id: z.string(), text: z.string(), by: z.string(), turn: z.string().optional() })).default([]),
   /** How hard each character's aim presses now, as an index into the ruleset's pressure words; moves a step a turn. */
   pressures: z.record(z.string(), z.number().int().nonnegative()).default({}),
   /** Secrets (fact ids) whose tell the writer has already been given this scene: a tell shows once unless someone looks closely. */

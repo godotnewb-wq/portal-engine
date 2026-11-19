@@ -63,7 +63,9 @@ export function SceneView({ content, state, onState, onEnd, onSave, endError }: 
   useEffect(
     () =>
       window.api.onSceneEvent((event) => {
-        if (event.type === 'delta') setStreamed((s) => s + event.text)
+        if (event.type === 'catching-up') setStatus('Catching up…')
+        else if (event.type === 'caught-up') setStatus('')
+        else if (event.type === 'delta') setStreamed((s) => s + event.text)
         else if (event.type === 'planned') {
           setPlanned(event.checks)
           setStatus(event.fallback ? 'Director reply unreadable; the game planned this turn.' : '')

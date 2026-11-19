@@ -105,8 +105,8 @@ describe('a turn on the situation plan', () => {
     expect(trace.director.read).toBe('json')
     expect(state.scene!.told).toEqual(['mara.k1'])
     expect(state.scene!.newFacts).toEqual([
-      { id: 'said.1', text: 'he locked up at the usual hour', by: 'tobin' },
-      { id: 'said.2', text: 'two cinders to forget it', by: 'tobin' }
+      { id: 'said.1', text: 'he locked up at the usual hour', by: 'tobin', turn: 'scene-1200-1' },
+      { id: 'said.2', text: 'two cinders to forget it', by: 'tobin', turn: 'scene-1200-1' }
     ])
     const next = buildDirectorPrompt(fixture, state, 'Mara, what did you see?')
     expect(next.user).toMatch(/# Already said on screen \(anyone present can use these\)\n- \[mara\.k1\] Tobin was in the yard after closing\n- \[said\.1\] he locked up/)

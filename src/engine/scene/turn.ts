@@ -1,10 +1,10 @@
-import type { Beat, GameState, RolledCheck, Turn } from '@engine/state'
+import type { Beat, Bookkeeping, GameState, RolledCheck, Turn } from '@engine/state'
 import type { Tags } from './beats'
 import { characterById, type Pack } from '@engine/pack'
-import { entryById, mentions } from '@engine/codex'
 import { firstName } from '@engine/core'
 import { RECENT_TURNS, turnText } from './director'
-import { presentCast, type BeatPlan, type Move } from './planShape'
+import { planBookkeeping } from './bookkeeper'
+import { presentCast, type BeatPlan } from './planShape'
 
 /** In-game minutes a turn of talk takes (tune). */
 export const MINUTES_PER_TURN = 3
@@ -28,6 +28,8 @@ export interface TurnWritten {
   topics?: string[]
   /** Held secrets that were active this turn, for dormancy (milestone 4b): kept, shown in full, or brought up. */
   secrets?: { id: string; how: 'kept' | 'full' | 'keyword' | 'context' }[]
+  /** The turn's records, when they are already known (tests, tools); left out, the plan's stand in until the bookkeeper answers. */
+  records?: Bookkeeping
 }
 
 export function rolledChecks(plan: BeatPlan): RolledCheck[] {
@@ -97,83 +99,40 @@ export function showDepartures(content: Pack, plan: BeatPlan, beats: Beat[]): { 
   return { beats: [...beats, ...added.map((a) => a.beat)], added }
 }
 
-/** A character's secret by its fact id (`<holder>.<secret>`), with its holder and the words that name it. */
-function secretOf(content: Pack, id: string): { holder: string; keywords: string[] } | undefined {
-  const dot = id.indexOf('.')
-  const c = dot > 0 ? characterById(content, id.slice(0, dot)) : undefined
-  const s = c?.secrets.find((x) => `${c.id}.${x.id}` === id)
-  if (!c || !s) return undefined
-  const entry = s.codex ? entryById(content.codex, s.codex) : undefined
-  return { holder: c.id, keywords: entry ? entry.keywords : (s.keywords ?? []) }
-}
-
 /**
- * Whether a voiced move gives away a fact it drew on (decided 2026-11-16, user, after the end-of-Milestone-4 bench run
- * 2: a dodge that drew on a character's secret counted as telling it, forced them a Core memory and taught it to the
- * friend who heard the dodge). A move's
- * `uses` is a pool it may draw on, not what was said, so a secret needs more than being listed:
- * - the holder's own secret comes out on a **reveal** or **concede**, or on an **answer** whose spoken line names it by
- *   its keywords, and never while the holder keeps it that turn, whatever the approach (a partial truth hides the
- *   secret too; decided 2026-11-16, user);
- * - someone else's secret (a learner telling it) comes out on any move but a **dodge** or **refuse**.
- * Other facts are said whenever a voiced move draws on them, as before.
+ * Puts a turn's records into the state (milestone 4c): the bookkeeper's, or the plan's until it answers and when it
+ * fails. Always the scene's last turn, since the next turn waits for its bookkeeper. Replaces whatever records the turn
+ * had: the secrets it added to `told`, who they came out in front of (`exposed`), the secrets among its topics, and
+ * the details it said (`newFacts`), so applying the same records twice changes nothing. A secret comes out only
+ * through `records.out`; leaks, guesses and unresolved cases are kept on the turn and teach no one (decided
+ * 2026-11-18, user, J–L).
  */
-export function givesAway(content: Pack, written: Pick<TurnWritten, 'plan' | 'beats'>, m: Move, id: string): boolean {
-  const secret = secretOf(content, id)
-  if (!secret) return true
-  if (m.who !== secret.holder) return m.move !== 'dodge' && m.move !== 'refuse'
-  const hiding = written.plan.speakers.some((s) => s.id === m.who && (s.kept ?? []).includes(id))
-  if (hiding) return false
-  if (m.move === 'reveal' || m.move === 'concede') return true
-  if (m.move !== 'answer') return false
-  const spoken = written.beats.flatMap((b) => (b.kind === 'dialogue' && b.speaker === m.who ? [b.text] : [])).join(' ')
-  return secret.keywords.some((k) => mentions(spoken, k))
-}
-
-/**
- * Secrets that came out on screen this turn, and who they came out in front of (milestone 4b; decided 2026-11-13): a
- * move whose speaker had a line gave one away (`givesAway`), in front of everyone present but its holder; or a reading check saw through
- * someone keeping one, for the reader (the player keeps no memories, so a player's read records nothing). Given the
- * state and the player's words, also a secret the player knows (learned, or said on screen) that their words bring up
- * by its keywords, in front of everyone present but its holder (decided 2026-11-15, user: you can only spread what you
- * know). Whether a listener took it in is the summary's call, as for the others.
- */
-export function exposures(content: Pack, scene: NonNullable<GameState['scene']>, written: Pick<TurnWritten, 'plan' | 'beats'>, player?: { state: GameState; input: string }): NonNullable<Turn['exposed']> {
-  const present = presentCast(scene)
-  const voiced = new Set(written.beats.flatMap((b) => (b.kind === 'dialogue' ? [b.speaker] : [])))
-  const out = new Map<string, Set<string>>()
-  const add = (secret: string, to: string[]) => out.set(secret, new Set([...(out.get(secret) ?? []), ...to]))
-  for (const m of written.plan.moves ?? []) {
-    if (!voiced.has(m.who)) continue
-    for (const s of m.says) {
-      const holder = s.id ? secretOf(content, s.id)?.holder : undefined
-      if (holder && givesAway(content, written, m, s.id!)) add(s.id!, present.filter((x) => x !== holder))
-    }
-  }
-  for (const read of written.plan.reads ?? []) {
-    if (read.by === 'player') continue
-    for (const id of written.plan.speakers.find((x) => x.id === read.target)?.kept ?? []) add(id, [read.by])
-  }
-  if (player) {
-    for (const id of present) {
-      const c = characterById(content, id)
-      for (const s of c?.secrets ?? []) {
-        const secret = `${id}.${s.id}`
-        const entry = s.codex ? entryById(content.codex, s.codex) : undefined
-        const keywords = entry ? entry.keywords : (s.keywords ?? [])
-        if (!keywords.some((k) => mentions(player.input, k))) continue
-        const knows = (player.state.facts[id] ?? []).includes(s.text) || !!player.state.scene?.told.includes(secret)
-        if (knows) add(secret, present.filter((x) => x !== id))
-      }
-    }
-  }
-  return [...out].flatMap(([secret, to]) => (to.size > 0 ? [{ secret, to: [...to] }] : []))
+export function applyRecords(state: GameState, records: Bookkeeping): GameState {
+  const scene = state.scene
+  const turn = scene?.turns.at(-1)
+  if (!scene || !turn) throw new Error('No turn to record')
+  const unique = <T>(xs: T[]) => [...new Set(xs)]
+  const before = scene.told.filter((id) => !(turn.toldSecrets ?? []).includes(id))
+  const out = unique(records.out.map((o) => o.secret))
+  const toldSecrets = out.filter((id) => !before.includes(id))
+  const exposed = out.flatMap((secret) => {
+    const to = unique(records.out.filter((o) => o.secret === secret).flatMap((o) => o.to))
+    return to.length > 0 ? [{ secret, to }] : []
+  })
+  const wereOut = (turn.records?.out ?? []).map((o) => o.secret)
+  const topics = unique([...(turn.topics ?? []).filter((t) => !wereOut.includes(t)), ...out])
+  const kept = scene.newFacts.filter((f) => f.turn !== turn.id)
+  const newFacts = [...kept]
+  for (const n of records.new) if (!newFacts.some((f) => f.text === n.text)) newFacts.push({ id: `said.${newFacts.length + 1}`, text: n.text, by: n.by, turn: turn.id })
+  const { exposed: _e, topics: _t, toldSecrets: _s, ...rest } = turn
+  const recorded = { ...rest, records, ...(exposed.length > 0 && { exposed }), ...(topics.length > 0 && { topics }), ...(toldSecrets.length > 0 && { toldSecrets }) }
+  return { ...state, scene: { ...scene, turns: [...scene.turns.slice(0, -1), recorded], told: [...before, ...toldSecrets], newFacts } }
 }
 
 /**
  * Applies a finished turn to the state. Felt moods come from the plan's `feels`; tags only touch characters who are
- * present; departures and the scene's end
- * come from the plan alone (see `acceptTags` for which tags count).
+ * present; departures and the scene's end come from the plan alone (see `acceptTags` for which tags count). Secrets
+ * that came out and new details come from the turn's records (`applyRecords`), the plan's until the bookkeeper answers.
  */
 export function applyTurn(content: Pack, state: GameState, written: TurnWritten): GameState {
   const scene = state.scene
@@ -195,10 +154,7 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
   if (written.details && written.details.length > 0) turn.details = written.details
   if (written.plan.reads && written.plan.reads.length > 0) turn.reads = written.plan.reads
   if (written.memories && written.memories.length > 0) turn.memories = written.memories
-  const exposed = exposures(content, scene, written, { state, input: written.input })
-  if (exposed.length > 0) turn.exposed = exposed
-  const topics = [...new Set([...(written.topics ?? []), ...exposed.map((e) => e.secret)])]
-  if (topics.length > 0) turn.topics = topics
+  if (written.topics && written.topics.length > 0) turn.topics = [...new Set(written.topics)]
   // What the director says they feel becomes their mood (milestone 4b); anyone it says nothing about keeps theirs.
   const felt = Object.fromEntries([...written.plan.speakers, ...written.plan.reactions].flatMap((s) => (s.feels ? [[s.id, s.feels]] : [])))
   // The strongest each felt, for the memory over-grading guard at the scene's end.
@@ -212,17 +168,13 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
   const dropped = turns.length > RECENT_TURNS ? turns[turns.length - RECENT_TURNS - 1] : undefined
   const summary = dropped ? `${scene.summary}\n\n${turnText(content, state.player.name, dropped)}`.trim().slice(-SUMMARY_CHARS) : scene.summary
 
-  // What was said on screen joins the scene's common ground: a fact is introduced the first time, and anyone present
-  // can repeat it after. Only moves whose speaker actually had a line count, in case the writer or salvage dropped one,
-  // and a secret only when the move gave it away (`givesAway`): this list also forces the holder's Core memory and
-  // tells the game the player knows it.
+  // Facts said on screen join the scene's common ground: a fact is introduced the first time, and anyone present can
+  // repeat it after. Only moves whose speaker actually had a line count, in case the writer or salvage dropped one.
+  // Known facts stay plan-based (milestone 4c, until milestone 5); secrets and new details come from the records.
   const voiced = new Set(written.beats.flatMap((b) => (b.kind === 'dialogue' ? [b.speaker] : [])))
   const said = (written.plan.moves ?? []).filter((m) => voiced.has(m.who))
-  const told = [...new Set([...scene.told, ...said.flatMap((m) => m.says.flatMap((s) => (s.id && givesAway(content, written, m, s.id) ? [s.id] : [])))])]
-  const newFacts = [...scene.newFacts]
-  for (const m of said)
-    for (const s of m.says)
-      if (!s.id && !newFacts.some((f) => f.text === s.text)) newFacts.push({ id: `said.${newFacts.length + 1}`, text: s.text, by: m.who })
+  const isSecret = (id: string) => content.characters.some((c) => c.secrets.some((x) => `${c.id}.${x.id}` === id))
+  const told = [...new Set([...scene.told, ...said.flatMap((m) => m.says.flatMap((s) => (s.id && !isSecret(s.id) ? [s.id] : [])))])]
 
   // How hard each speaker's aim pressed this turn, so the next can move it only a step; and which secrets' tells have shown.
   const pressures = { ...scene.pressures }
@@ -237,7 +189,9 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
   const ORDER = ['kept', 'full', 'keyword', 'context'] as const
   for (const s of [...(written.secrets ?? []), ...kept.map((id) => ({ id, how: 'kept' as const }))].sort((a, b) => ORDER.indexOf(b.how) - ORDER.indexOf(a.how))) secretActivity[s.id] = { at: state.time, how: s.how }
 
-  return {
+  // Secrets and new details come from the turn's records: the plan's stand in until the bookkeeper answers (milestone 4c).
+  const records = written.records ?? planBookkeeping(content, state, written)
+  return applyRecords({
     ...state,
     secretActivity,
     time: state.time + MINUTES_PER_TURN,
@@ -253,9 +207,8 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
       departed: [...scene.departed, ...leaving],
       ended: scene.ended || written.plan.end_scene,
       told,
-      newFacts,
       pressures,
       tells
     }
-  }
+  }, records)
 }

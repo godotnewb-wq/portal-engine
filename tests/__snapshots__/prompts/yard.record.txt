@@ -349,7 +349,8 @@
       {
         "id": "said.1",
         "text": "The gate stood open until ten.",
-        "by": "tobin"
+        "by": "tobin",
+        "turn": "scene-1200-1"
       }
     ],
     "pressures": {
@@ -711,12 +712,14 @@
       {
         "id": "said.1",
         "text": "The gate stood open until ten.",
-        "by": "tobin"
+        "by": "tobin",
+        "turn": "scene-1200-1"
       },
       {
         "id": "said.2",
         "text": "Someone with a Guild seal knocked after closing.",
-        "by": "tobin"
+        "by": "tobin",
+        "turn": "scene-1200-2"
       }
     ],
     "pressures": {
@@ -995,17 +998,20 @@
       {
         "id": "said.1",
         "text": "The gate stood open until ten.",
-        "by": "tobin"
+        "by": "tobin",
+        "turn": "scene-1200-1"
       },
       {
         "id": "said.2",
         "text": "Someone with a Guild seal knocked after closing.",
-        "by": "tobin"
+        "by": "tobin",
+        "turn": "scene-1200-2"
       },
       {
         "id": "said.3",
         "text": "Only clerks carry Guild seals.",
-        "by": "mara"
+        "by": "mara",
+        "turn": "scene-1200-3"
       }
     ],
     "pressures": {
@@ -1289,17 +1295,20 @@
       {
         "id": "said.1",
         "text": "The gate stood open until ten.",
-        "by": "tobin"
+        "by": "tobin",
+        "turn": "scene-1200-1"
       },
       {
         "id": "said.2",
         "text": "Someone with a Guild seal knocked after closing.",
-        "by": "tobin"
+        "by": "tobin",
+        "turn": "scene-1200-2"
       },
       {
         "id": "said.3",
         "text": "Only clerks carry Guild seals.",
-        "by": "mara"
+        "by": "mara",
+        "turn": "scene-1200-3"
       }
     ],
     "pressures": {
@@ -1568,22 +1577,26 @@
       {
         "id": "said.1",
         "text": "The gate stood open until ten.",
-        "by": "tobin"
+        "by": "tobin",
+        "turn": "scene-1200-1"
       },
       {
         "id": "said.2",
         "text": "Someone with a Guild seal knocked after closing.",
-        "by": "tobin"
+        "by": "tobin",
+        "turn": "scene-1200-2"
       },
       {
         "id": "said.3",
         "text": "Only clerks carry Guild seals.",
-        "by": "mara"
+        "by": "mara",
+        "turn": "scene-1200-3"
       },
       {
         "id": "said.4",
         "text": "She will check the seal log at dawn.",
-        "by": "mara"
+        "by": "mara",
+        "turn": "scene-1200-5"
       }
     ],
     "pressures": {
