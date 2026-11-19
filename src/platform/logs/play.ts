@@ -210,18 +210,17 @@ export class PlayLogs {
     const log = readSession(dir)
     const turn = log.turns.find((t) => t.turnId === turnId)
     if (!turn) return null
+    const records = log.bookkeeping.find((b) => b.turnId === turnId)
+    // The bookkeeper's call is logged with its record, after the turn's own; the Calls tab lists them together.
     return {
       session,
       turn,
-      calls: turn.calls.flatMap((id) => {
+      calls: [...turn.calls, ...(records?.calls ?? [])].flatMap((id) => {
         const call = log.calls.get(id)
         return call ? [summarizeCall(call)] : []
       }),
       scores: log.scores.filter((s) => s.turnSession === session && s.turnId === turnId),
-      ...(() => {
-        const records = log.bookkeeping.find((b) => b.turnId === turnId)
-        return records ? { records } : {}
-      })()
+      ...(records && { records })
     }
   }
 

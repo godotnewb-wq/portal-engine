@@ -13,6 +13,11 @@ const signed = (n: number) => (n > 0 ? `+${n}` : `${n}`)
  */
 export function SceneEndDetails({ content, details, onClose }: { content: Pack; details: Details; onClose: () => void }) {
   const [tab, setTab] = useState('people')
+  return <DetailsOverlay title="The scene's end" tab={tab} onTab={setTab} onClose={onClose} tabs={sceneEndTabs(content, details)} />
+}
+
+/** The overlay's tabs for a scene's end; exported so each tab can be tested on its own (milestone 4d task 3). */
+export function sceneEndTabs(content: Pack, details: Details): DetailsTab[] {
   const name = (id: string) => (id === 'player' ? content.player.name : (content.characters.find((c) => c.id === id)?.name.split(' ')[0] ?? id))
   const meter = (id: string) => content.ruleset.meters.list.find((m) => m.id === id)?.name ?? id
   const ties = details.ties
@@ -233,5 +238,5 @@ export function SceneEndDetails({ content, details, onClose }: { content: Pack; 
       )
     }
   ]
-  return <DetailsOverlay title="The scene's end" tab={tab} onTab={setTab} onClose={onClose} tabs={tabs} />
+  return tabs
 }

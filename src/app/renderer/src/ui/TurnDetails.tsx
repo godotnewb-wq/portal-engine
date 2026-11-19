@@ -67,10 +67,11 @@ export function TurnDetails({ nameOf, details, loading, stateRecords, flags, fla
     return <DetailsOverlay title={title} actions={actions} tab="none" onTab={() => {}} onClose={onClose} tabs={[{ id: 'none', label: 'Turn', render: () => <p className="status">{status}</p> }]} />
   }
   const record: Pick<BookkeepingRecord, 'records' | 'late' | 'error'> | undefined = details.records ?? (stateRecords && { records: stateRecords })
-  return <DetailsOverlay title={title} actions={actions} tab={tab} onTab={setTab} onClose={onClose} tabs={tabsFor(details, record, nameOf, flags, (n) => (onClose(), onBeat(n)), onRefresh)} />
+  return <DetailsOverlay title={title} actions={actions} tab={tab} onTab={setTab} onClose={onClose} tabs={turnTabs(details, record, nameOf, flags, (n) => (onClose(), onBeat(n)), onRefresh)} />
 }
 
-function tabsFor(details: Details, record: Pick<BookkeepingRecord, 'records' | 'late' | 'error'> | undefined, nameOf: (id: string) => string, flags: FlagRecord[], onBeat: (n: number) => void, onRefresh?: () => void): DetailsTab[] {
+/** The overlay's tabs for one turn; exported so each tab can be tested on its own (milestone 4d task 3). */
+export function turnTabs(details: Details, record: Pick<BookkeepingRecord, 'records' | 'late' | 'error'> | undefined, nameOf: (id: string) => string, flags: FlagRecord[], onBeat: (n: number) => void, onRefresh?: () => void): DetailsTab[] {
   const t = details.turn
   const plan = t.director.plan
   const r = record?.records
