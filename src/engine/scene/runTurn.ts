@@ -168,10 +168,8 @@ export async function runTurn(
       checks: checkTraces(plan),
       lore: loreTrace(lore),
       brief: briefs.trace,
-      ...(() => {
-        const shown = shownTraces(content, state, plan)
-        return shown.length > 0 ? { shown } : {}
-      })(),
+      // Always set, even empty, so a log without it is known to be older than milestone 4d.
+      shown: shownTraces(content, state, plan),
       writer: { callId: `${turnId}:writer`, ...(parsed.reshaped.length > 0 && { reshaped: parsed.reshaped }) },
       findings: problems,
       ...(rewritten && {

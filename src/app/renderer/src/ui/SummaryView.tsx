@@ -2,7 +2,10 @@ import { characterById, type Pack } from '@engine/pack'
 import { firstName } from '@engine/core'
 import type { WitnessReport } from '@engine/relationships'
 import { bandWord, type Ruleset } from '@engine/rules'
+import { useState } from 'react'
+import type { SceneEndDetails } from '@platform/logs'
 import { Button } from './Button'
+import { SceneEndDetails as EndDetails } from './SceneEndDetails'
 
 /** Which way a meter moved, without the number (relationships §1: the player sees bands, not values). */
 function Delta({ before, after }: { before: number; after: number }) {
@@ -33,8 +36,9 @@ function Meter({ ruleset, id, label, before, after }: { ruleset: Ruleset; id: st
 }
 
 /** After a scene: what each witness remembers, and how their feelings moved (milestone-1 acceptance 7). */
-export function SummaryView({ content, reports, againLabel, onAgain, onNextDay, onTitle }: { content: Pack; reports: WitnessReport[]; againLabel: string; onAgain: () => void; onNextDay: () => void; onTitle: () => void }) {
+export function SummaryView({ content, reports, details, againLabel, onAgain, onNextDay, onTitle }: { content: Pack; reports: WitnessReport[]; details?: SceneEndDetails; againLabel: string; onAgain: () => void; onNextDay: () => void; onTitle: () => void }) {
   const name = (id: string) => firstName(characterById(content, id)?.name ?? id)
+  const [open, setOpen] = useState(false)
   // The pack's relationship meters, in its order.
   const meters = content.ruleset.meters.list
   return (
@@ -96,7 +100,12 @@ export function SummaryView({ content, reports, againLabel, onAgain, onNextDay, 
         <Button variant="ghost" onClick={onTitle}>
           Title
         </Button>
+        {/* The scene's end in detail (milestone 4d): the calls, the ties and why, for checking the game, not for play. */}
+        <Button variant="ghost" onClick={() => setOpen(true)} disabled={!details} title="The scene's end in detail: each witness's calls, the ties, memories, and the prompts">
+          Details
+        </Button>
       </div>
+      {open && details && <EndDetails content={content} details={details} onClose={() => setOpen(false)} />}
     </div>
   )
 }

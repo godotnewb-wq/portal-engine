@@ -42,7 +42,7 @@ export interface TurnTrace {
   /**
    * How much each feeling showed this turn and why (npc design §7; milestone 4d, for Turn details' People tab): each
    * character present with a feeling, its masking for that family, the audience and why, the visibility number and its
-   * band, as the writer was told. Older logs have none.
+   * band, as the writer was told. Always set since then, so an older log is the one without it.
    */
   shown?: ShownTrace[]
   /** `reshaped`: lines of the shown reply where code split speech from action (round 0 F1). */

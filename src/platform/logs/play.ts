@@ -5,8 +5,8 @@ import type { Pack } from '@engine/pack'
 import type { ConsolidationTrace, SceneEndTrace, RelationshipTrace } from '@engine/relationships'
 import { promptSources, type BookkeeperTrace, type TurnTrace } from '@engine/scene'
 import { currentFlags, FlagSchema, type Flag, type FlagRecord, type ScoreRecord } from '@engine/review'
-import { findSessions, readFlags, readSession } from './reader'
-import { promptVersion, type CallRecord, type SessionRecord, type TurnRecord } from './records'
+import { callTrace, findSessions, readFlags, readSession } from './reader'
+import { promptVersion, type BookkeepingRecord, type CallRecord, type SessionRecord, type TurnRecord } from './records'
 import { LogSession } from './writer'
 
 /** A call as the Turn details panel shows it: no prompt or reply, just what it cost and who answered. */
@@ -24,13 +24,41 @@ export interface CallSummary {
   error?: string
 }
 
-/** One logged turn for the Turn details panel: its readable trace, its calls, and any AI scores. */
+/**
+ * One logged turn for the Turn details panel: its readable trace, its calls, any AI scores, and the bookkeeper's
+ * record once it has answered (milestone 4d; absent for a turn just played, until it is read back, and in older logs).
+ */
 export interface TurnDetails {
   session: string
   turn: TurnRecord
   calls: CallSummary[]
   scores: ScoreRecord[]
+  records?: BookkeepingRecord
 }
+
+/** One call's prompt and reply, read back from its session for a Calls tab (milestone 4d). */
+export interface CallText {
+  id: string
+  role: CallRecord['role']
+  system: string
+  user: string
+  reply?: string
+  error?: string
+}
+
+/**
+ * The scene's end for its details view (milestone 4d): the relationship calls and the ties settled from them, then
+ * the memory calls and what each witness took, each with its calls summarized; `session` is where their prompts can
+ * be read back, absent with logging off. Either half is absent when it didn't run.
+ */
+export interface SceneEndDetails {
+  session?: string
+  ties?: Omit<RelationshipTrace, 'calls'> & { calls: CallSummary[] }
+  end?: Omit<SceneEndTrace, 'calls'> & { calls: CallSummary[] }
+}
+
+/** A trace with its calls summarized, for the screen. */
+export const summarized = <T extends { calls: CallTrace[] }>(trace: T): Omit<T, 'calls'> & { calls: CallSummary[] } => ({ ...trace, calls: trace.calls.map(summarizeCall) })
 
 /** What the flag panel sends: what is flagged, and the flag (null clears it). */
 export interface FlagInput {
@@ -189,8 +217,20 @@ export class PlayLogs {
         const call = log.calls.get(id)
         return call ? [summarizeCall(call)] : []
       }),
-      scores: log.scores.filter((s) => s.turnSession === session && s.turnId === turnId)
+      scores: log.scores.filter((s) => s.turnSession === session && s.turnId === turnId),
+      ...(() => {
+        const records = log.bookkeeping.find((b) => b.turnId === turnId)
+        return records ? { records } : {}
+      })()
     }
+  }
+
+  /** A logged call's prompt and reply (milestone 4d), or null when the session or call isn't there. */
+  call(session: string, callId: string): CallText | null {
+    const dir = join(this.root, session)
+    if (!/^[\w.-]+$/.test(session) || !existsSync(dir)) return null
+    const call = callTrace(readSession(dir), callId)
+    return call ? { id: call.id, role: call.role, system: call.prompt.system, user: call.prompt.user, ...(call.reply && { reply: call.reply }), ...(call.error && { error: call.error }) } : null
   }
 
   private sessionDirs(): string[] {

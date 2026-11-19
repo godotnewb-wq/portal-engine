@@ -30,6 +30,7 @@ const api: RendererApi = {
   flag: (input) => ipcRenderer.invoke(IPC.flag, input),
   flagsFor: (turns) => ipcRenderer.invoke(IPC.flagsFor, turns),
   turnDetails: (session, turnId) => ipcRenderer.invoke(IPC.turnDetails, session, turnId),
+  callText: (session, callId) => ipcRenderer.invoke(IPC.callText, session, callId),
   onSceneEvent: (listener) => {
     const heard = (_event: unknown, sceneEvent: SceneEvent) => listener(sceneEvent)
     ipcRenderer.on(IPC.sceneEvent, heard)

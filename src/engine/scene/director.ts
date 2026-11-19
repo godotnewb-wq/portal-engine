@@ -95,7 +95,8 @@ export function buildBriefs(content: Pack, state: GameState, input: string, lore
     const ids = recall(content.ruleset, state, c).map((m) => m.id)
     if (ids.length > 0) recalled[id] = ids
   }
-  return { sheets, details, trace: { ...trace, recurring, memories, ...(Object.keys(recalled).length > 0 && { recalled }) } }
+  // Always set, even empty, so a log without it is known to be older than milestone 4d.
+  return { sheets, details, trace: { ...trace, recurring, memories, recalled } }
 }
 
 export function buildDirectorPrompt(content: Pack, state: GameState, input: string, lore: TurnLore = turnLore(content, state, input), briefs: Briefs = buildBriefs(content, state, input, lore)): Prompt {

@@ -6,7 +6,7 @@ import { TracedError } from '@engine/core'
 import { consolidate, endScene, judgeScene } from '@engine/relationships'
 import { applyRecords, runTurn } from '@engine/scene'
 import { FlagSchema } from '@engine/review'
-import { detailsOf, PlayLogs, roleModels, type FlagInput } from '@platform/logs'
+import { detailsOf, PlayLogs, roleModels, summarized, type FlagInput } from '@platform/logs'
 import { GameStateSchema, SaveRequestSchema, SlotIdSchema, stateProblems, type GameState } from '@engine/state'
 import { chatCompletion, isConfigured, listModels, ListModelsRequestSchema, LLM_PROFILE_IDS, SettingsUpdateSchema, toView, type LlmProfileId } from '@llm'
 import { discoverPacks, type PackListing, type PackSource } from '@platform/packs'
@@ -221,8 +221,10 @@ app.whenReady().then(() => {
       try {
         const { state: next, reports, trace } = await endScene(pack, state, summaryLlm(settings.get()))
         logs.sceneEnd(trace)
+        const session = logs.current
+        const details = { ...(session && { session }), end: summarized(trace) }
         recording = null
-        return { ok: true, state: next, reports }
+        return { ok: true, state: next, reports, details }
       } catch (error) {
         logs.error('scene-end', (error as Error).message, { ...(state.scene && { sceneId: state.scene.id }), ...(error instanceof TracedError && { calls: error.calls }) })
         throw error
@@ -245,7 +247,8 @@ app.whenReady().then(() => {
       const state = await recorded(GameStateSchema.parse(raw), tell(event))
       const { state: next, trace } = await judgeScene(pack, state, summaryLlm(settings.get()))
       if (trace.calls.length > 0) logs.ties(trace)
-      return { ok: true, state: next }
+      const session = logs.current
+      return { ok: true, state: next, details: { ...(session && { session }), ties: summarized(trace) } }
     } catch (error) {
       return { ok: false, error: (error as Error).message }
     } finally {
@@ -334,6 +337,9 @@ app.whenReady().then(() => {
   )
   ipcMain.handle(IPC.turnDetails, (_event, session: unknown, turnId: unknown) =>
     typeof session === 'string' && typeof turnId === 'string' ? current().logs.details(session, turnId) : null
+  )
+  ipcMain.handle(IPC.callText, (_event, session: unknown, callId: unknown) =>
+    typeof session === 'string' && typeof callId === 'string' ? current().logs.call(session, callId) : null
   )
 
   closeLogs = () => playing?.logs.end()

@@ -140,9 +140,23 @@ export function SceneView({ content, state, onState, onEnd, onSave, endError }: 
     window.api.turnDetails(turn.log, turn.id).then((found) => setDetails((d) => new Map(d).set(turn.id, found)))
   }, [detailsOpen, shownTurn, details])
 
+  // A turn's details come back with it, before its bookkeeper has answered (milestone 4c); opening them reads the log
+  // again once, so the records are there if it has answered since. The Records tab can ask again.
+  const refreshDetails = () => {
+    const turn = shownTurn
+    if (!turn?.log) return
+    window.api.turnDetails(turn.log, turn.id).then((found) => found && setDetails((d) => new Map(d).set(turn.id, found)))
+  }
+  const shownId = shownTurn?.id
+  useEffect(() => {
+    if (detailsOpen && shownId && details.get(shownId) && !details.get(shownId)!.records) refreshDetails()
+    // Only when the overlay opens or the turn on screen changes, not on every read.
+  }, [detailsOpen, shownId])
+
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
-      if (flagging) return
+      // The details overlay covers the scene: reading keys wait until it closes (it handles Escape itself).
+      if (flagging || detailsOpen) return
       // F flags only while reading: never from a text field, so it can't add an "f" to the player's line.
       const inField = event.target instanceof HTMLInputElement || event.target instanceof HTMLTextAreaElement
       if (!inField && (event.key === 'f' || event.key === 'F') && !event.ctrlKey && !event.metaKey && !event.altKey && flaggable) {
@@ -238,10 +252,15 @@ export function SceneView({ content, state, onState, onEnd, onSave, endError }: 
             nameOf={(id) => nameplate(content, state, { kind: 'dialogue', speaker: id, text: '' }) ?? id}
             details={detailsOf ?? null}
             loading={!!shownTurn && detailsOf === undefined}
+            {...(shownTurn?.records && { stateRecords: shownTurn.records })}
             flags={shownTurn ? [...flags.values()].filter((f) => f.turnId === shownTurn.id && f.turnSession === shownTurn.log) : []}
             flaggable={flaggable}
-            onFlagTurn={() => openFlag(true)}
+            onFlagTurn={() => {
+              setDetailsOpen(false)
+              openFlag(true)
+            }}
             onBeat={(n) => shown && setIndex(beats.findIndex((b) => b.turn === shown.turn && b.n === n))}
+            onRefresh={refreshDetails}
             onClose={() => setDetailsOpen(false)}
           />
         )}

@@ -5,6 +5,7 @@ import { seedFrom } from '@engine/core'
 import { answerTie, createInitialState, startScene, tieQuestion } from '@engine/state'
 import { nextDay, type WitnessReport } from '@engine/relationships'
 import { AUTO_SLOT_ID, latestSave, type SaveSummary } from '@engine/state'
+import type { SceneEndDetails } from '@platform/logs'
 import { Button } from './ui/Button'
 import { PackPicker } from './ui/PackPicker'
 import { SavesView } from './ui/SavesView'
@@ -23,6 +24,8 @@ export function App() {
   const [content, setContent] = useState<Pack | null>(null)
   const [state, setState] = useState<GameState | null>(null)
   const [reports, setReports] = useState<WitnessReport[]>([])
+  // The scene's end in detail (milestone 4d): the relationship calls' half from the first request, the memory calls' from the second.
+  const [endDetails, setEndDetails] = useState<SceneEndDetails | undefined>(undefined)
   const [error, setError] = useState('')
   const [saves, setSaves] = useState<SaveSummary[]>([])
   // Where the save and settings screens go back to.
@@ -121,8 +124,10 @@ export function App() {
     }
     setScreen('ending')
     setError('')
+    setEndDetails(undefined)
     const checked = await window.api.sceneTies(state)
     if (!checked.ok) console.error('Relationship calls failed:', checked.error)
+    else if (checked.details) setEndDetails(checked.details)
     const next = checked.ok ? checked.state : state
     setState(next)
     if (next.scene && next.scene.pendingTies.length > 0) setScreen('ties')
@@ -145,6 +150,8 @@ export function App() {
     if (response.ok) {
       setState(response.state)
       setReports(response.reports)
+      const end = response.details
+      if (end) setEndDetails((had) => ({ ...had, ...end }))
       setScreen('summary')
     } else {
       setError(response.error)
@@ -189,7 +196,7 @@ export function App() {
   }
   if (screen === 'summary' && content && state) {
     const again = locationById(content, content.manifest.start.location)?.name ?? ''
-    return <SummaryView content={content} reports={reports} againLabel={`Back to ${again}`} onAgain={() => enterScene(state)} onNextDay={() => void sleepOn(nextDay(content, state))} onTitle={() => setScreen('title')} />
+    return <SummaryView content={content} reports={reports} {...(endDetails && { details: endDetails })} againLabel={`Back to ${again}`} onAgain={() => enterScene(state)} onNextDay={() => void sleepOn(nextDay(content, state))} onTitle={() => setScreen('title')} />
   }
   if (screen === 'scene' && content && state?.scene) {
     return <SceneView content={content} state={state} onState={setState} onEnd={endScene} onSave={() => openSaves('save')} endError={error} />

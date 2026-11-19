@@ -7,10 +7,11 @@ import type { PackListing } from '@platform/packs'
 import { mockLlm } from '../bench/mock'
 import type { GameState } from '@engine/state'
 import type { RendererApi, SceneEvent } from '@app/ipc'
-import { runTurn, type TurnLlm } from '@engine/scene'
+import { bookkeep, runTurn, type TurnLlm } from '@engine/scene'
+import type { CallTrace } from '@engine/core'
 import { endScene, judgeScene } from '@engine/relationships'
 import { currentFlags, type FlagRecord } from '@engine/review'
-import type { TurnDetails } from '@platform/logs'
+import type { CallSummary, SceneEndDetails, TurnDetails } from '@platform/logs'
 import { cleanLoreBudgets, type LoreBudgetOverrides } from '@engine/rules'
 // Every pack in packs/, as Vite bundles them: JSON parsed, Markdown as text.
 const json = import.meta.glob('../../packs/*/**/*.json', { eager: true, import: 'default' }) as Record<string, unknown>
@@ -99,6 +100,33 @@ const SESSION = 'preview'
 let logging = true
 let loreBudgets: LoreBudgetOverrides = {}
 const logged = new Map<string, TurnDetails>()
+// Every call made, whole, so a Calls tab can open its prompt and reply (milestone 4d).
+const made = new Map<string, CallTrace>()
+const summary = (c: CallTrace): CallSummary => ({ id: c.id, role: c.role, ms: c.ms, ...(c.firstTextMs !== undefined && { firstTextMs: c.firstTextMs }), model: 'mock' })
+const summarized = <T extends { calls: CallTrace[] }>(trace: T) => {
+  for (const c of trace.calls) made.set(c.id, c)
+  return { ...trace, calls: trace.calls.map(summary) }
+}
+
+/**
+ * A scripted bookkeeper for the preview (milestone 4c): a new detail, what changed, a mood for the first speaker and
+ * every check kept, so the Records, Secrets and Checks tabs have something to show. It answers after a moment, as the
+ * real one does while the player reads.
+ */
+const bookkeeper = async (prompt: { user: string }) => {
+  await wait(800)
+  const first = prompt.user.match(/^1\. ([^:]+):/m)?.[1]
+  const id = content.characters.find((c) => c.name.startsWith(first ?? '\u0000'))?.id
+  const shade = content.ruleset.people.emotions.shades[0]
+  const checks = [...prompt.user.matchAll(/^- \[([^\]]+)\]/gm)].map((m) => m[1]!).filter((x) => !x.includes('.'))
+  return JSON.stringify({
+    secrets: [],
+    new: [{ text: 'a private collector', at: 2 }],
+    changed: 'The table hears the lie called out.',
+    moods: id && shade ? [{ id, shade: shade.word, family: shade.families[0], intensity: 2 }] : [],
+    checks: checks.map((c) => ({ id: c, honored: true }))
+  })
+}
 const flagged: FlagRecord[] = []
 
 const saved = new Map<string, { pack: string; slotId: string; savedAt: string; name?: string; state: GameState }>()
@@ -114,7 +142,14 @@ function cannedSummarize() {
     Brask: { memory: 'Brask sat through a loud night at the Sump Lantern while Oria lied and Vex called it; nobody asked him anything.', level: 'fleeting', reason: 'Too loud, and nobody noticed he wanted to go.', approval: 'unchanged', trust: 'unchanged', interest: 'unchanged' },
     Oria: { memory: 'Oria was caught in her "darling" by a Courier and had to admit the client was corporate.', level: 'normal', reason: 'Rook pushed her in public.', approval: 'a little less', trust: 'unchanged', interest: 'a little more', others: [{ with: 'vex', approval: 'less', trust: 'unchanged', interest: 'unchanged', reason: 'She sees through me.' }] }
   }
-  return content.manifest.id === 'neonpunk-nights' ? async (prompt: { user: string }) => JSON.stringify(summaries[prompt.user.match(/^About (\w+)/)![1]!]) : mockLlm().summarize
+  // Anyone the script didn't plan for (a walk-on who joined the scene) gets a quiet, unchanged reply.
+  const quiet = (name: string) => ({ memory: `${name} spent the night at the edge of things.`, level: 'fleeting', reason: 'Nothing much happened between us.', approval: 'unchanged', trust: 'unchanged', interest: 'unchanged' })
+  return content.manifest.id === 'neonpunk-nights'
+    ? async (prompt: { user: string }) => {
+        const name = prompt.user.match(/^About (\w+)/)![1]!
+        return JSON.stringify(summaries[name] ?? quiet(name))
+      }
+    : mockLlm().summarize
 }
 
 const api: RendererApi = {
@@ -128,22 +163,37 @@ const api: RendererApi = {
     const llm = content.manifest.id === 'neonpunk-nights' ? scripted : mockLlm().turn
     const outcome = await runTurn(content, state, input, llm, emit, { loreBudgets, ...(logging && { log: SESSION }) })
     const { calls, ...trace } = outcome.trace
+    for (const c of calls) made.set(c.id, c)
     const details: TurnDetails = {
       session: logging ? SESSION : '',
       turn: { ...trace, calls: calls.map((c) => c.id) },
-      calls: calls.map((c) => ({ id: c.id, role: c.role, ms: c.ms, ...(c.firstTextMs !== undefined && { firstTextMs: c.firstTextMs }), model: 'mock' })),
+      calls: calls.map(summary),
       scores: []
     }
-    if (logging) logged.set(trace.turnId, details)
+    if (logging) {
+      logged.set(trace.turnId, details)
+      // The bookkeeper reads the turn while the player does; its record joins the logged details when it answers.
+      const last = outcome.state.scene!.turns.at(-1)!
+      void bookkeep(content, state, { id: last.id, input, beats: last.beats, plan: outcome.plan }, bookkeeper).then(({ trace: kept }) => {
+        for (const c of kept.calls) made.set(c.id, c)
+        const { calls: done, ...rest } = kept
+        logged.set(trace.turnId, { ...details, calls: [...details.calls, ...done.map(summary)], records: { ...rest, calls: done.map((c) => c.id) } })
+      })
+    }
     return { ok: true, state: outcome.state, beats: outcome.beats, checks: outcome.plan.checks.flatMap((c) => (c.line ? [c.line] : [])), calls: outcome.calls, corrections: outcome.corrections, rewrite: outcome.problems.map((p) => p.fix), details }
   },
   consolidate: async (state) => ({ ok: true, state, merged: 0 }),
-  sceneTies: async (state) => ({ ok: true, state: (await judgeScene(content, state, cannedSummarize())).state }),
+  sceneTies: async (state) => {
+    const { state: next, trace } = await judgeScene(content, state, cannedSummarize())
+    const details: SceneEndDetails = { ...(logging && { session: SESSION }), ties: summarized(trace) }
+    return { ok: true, state: next, details }
+  },
   sceneEnd: async (state) => {
     await wait(600)
     const summarize = cannedSummarize()
-    const { state: next, reports } = await endScene(content, state, summarize)
-    return { ok: true, state: next, reports }
+    const { state: next, reports, trace } = await endScene(content, state, summarize)
+    const details: SceneEndDetails = { ...(logging && { session: SESSION }), end: summarized(trace) }
+    return { ok: true, state: next, reports, details }
   },
   listPacks: async () => listings,
   choosePack: async (key) => {
@@ -181,6 +231,10 @@ const api: RendererApi = {
   },
   flagsFor: async (turns) => [...currentFlags(flagged).values()].filter((f) => turns.some((t) => t.session === f.turnSession && t.turnId === f.turnId)),
   turnDetails: async (_session, turnId) => logged.get(turnId) ?? null,
+  callText: async (_session, callId) => {
+    const c = made.get(callId)
+    return c ? { id: c.id, role: c.role, system: c.prompt.system, user: c.prompt.user, ...(c.reply && { reply: c.reply }), ...(c.error && { error: c.error }) } : null
+  },
   onSceneEvent: (listener) => {
     listeners.add(listener)
     return () => listeners.delete(listener)

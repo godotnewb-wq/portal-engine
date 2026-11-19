@@ -15,7 +15,7 @@ Play and bench logs (milestone 2, A2): a folder per session, a file per concern,
   bookkeeping.jsonl  each turn's bookkeeper (milestone 4c): the records the game kept, its call by id, why it fell back, `late` when the turn stopped waiting
 ```
 
-**Public API** (`@platform/logs`): `LogSession` (`open`, `resume`, `turn`, `sceneStart`, `sceneEnd`, `error`, `flag`, `score`, `close`), `readSession`, `readFlags`, `findSessions`, `PlayLogs` (the app's session lifecycle, flags and turn details), `promptOf`, `callTrace`, `promptVersion`, the record types, `sections` / `joinSections`.
+**Public API** (`@platform/logs`): `LogSession` (`open`, `resume`, `turn`, `sceneStart`, `sceneEnd`, `error`, `flag`, `score`, `close`), `readSession`, `readFlags`, `findSessions`, `PlayLogs` (the app's session lifecycle, flags and turn details: `details()` joins the turn's bookkeeping record as `records` once it is logged, `call()` gives one call's prompt and reply as `CallText`), `summarized` (a scene-end trace for `SceneEndDetails`), `TurnDetails`, `CallText`, `SceneEndDetails`, `promptOf`, `callTrace`, `promptVersion`, the record types, `sections` / `joinSections`.
 
 Rules: lines are appended as they happen (crash-safe); nothing is ever deleted; API keys, headers and endpoint addresses never reach a file (`RoleModel` holds a profile, model and temperature only). Logs never go inside a pack folder.
 
