@@ -5,7 +5,7 @@ import type { GameState } from '@engine/state'
 import { characterById, type Pack } from '@engine/pack'
 import { fixture, yardScene } from '@tests/fixture'
 import { parseReply } from './beats'
-import { audienceOf, readingDifficulty, shown } from './feelings'
+import { audienceOf, watchingWalkOns, readingDifficulty, shown } from './feelings'
 import { parsePlan, settlePlan, validatePlan } from './plan'
 import { applyTurn } from './turn'
 import { buildWriterPrompt, sceneSpeakers } from './writer'
@@ -38,11 +38,21 @@ describe('reading a feeling', () => {
 
 describe('who is watching', () => {
   it('is guarded with a stranger, a walk-on or someone they hold a guarded tag toward', () => {
-    expect(audienceOf(fixture, yardScene(), 'mara')).toEqual({ value: -1, why: 'walk-ons present; guarded toward Tobin' })
+    expect(audienceOf(fixture, yardScene(), 'mara', { walk_ons: [{ id: 'clerk', line: 'Names in the book.' }] })).toEqual({ value: -1, why: 'walk-ons present; guarded toward Tobin' })
     expect(audienceOf(fixture, quiet(), 'tobin')).toEqual({ value: -1, why: 'Mara is a stranger' })
     const tied = { ...quiet(), playerTies: { ...quiet().playerTies, tobin: { tags: [{ tag: 'foe' }] } } }
     const known = { ...tied, relations: [...tied.relations, { from: 'tobin', to: 'mara', tags: [], meters: { warmth: 0, bond: 0 } }] }
     expect(audienceOf(fixture, known, 'tobin')).toEqual({ value: -1, why: 'guarded toward the player' })
+  })
+
+  it('counts a walk-on as watching only once they are on screen: brought in this turn, or with a line before', () => {
+    const scene = yardScene().scene!
+    expect(watchingWalkOns(scene)).toEqual([])
+    expect(watchingWalkOns(scene, { walk_ons: [{ id: 'clerk', line: 'Names in the book.' }] })).toEqual(['clerk'])
+    const spoke = { ...scene, turns: [{ id: 't1', player: 'Hello.', beats: [{ kind: 'dialogue' as const, speaker: 'clerk', text: 'Name?' }], checks: [], speakers: [], texture: [] }] }
+    expect(watchingWalkOns(spoke)).toEqual(['clerk'])
+    // Only someone in the room counts, however the turn named them.
+    expect(watchingWalkOns(scene, { walk_ons: [{ id: 'stranger', line: '' }] })).toEqual([])
   })
 
   it('is guarded with a member of a faction whose stance toward theirs is among the coldest', () => {

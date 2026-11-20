@@ -156,7 +156,7 @@ export function buildWriterPrompt(content: Pack, state: GameState, plan: BeatPla
   const felt = feelingsNow(state, plan)
   const feltLine = (id: string) => {
     const f = felt[id]
-    const s = f && shown(content, state, id, f)
+    const s = f && shown(content, state, id, f, plan)
     if (!f || !s) return ''
     const reads = (plan.reads ?? []).filter((x) => x.target === id).map((x) => (x.by === 'player' ? ' You see through to it.' : ` ${nameOf(x.by)} sees through to it and may say so.`))
     return ` Feels ${feltWords(content.ruleset, f)}. ${shownWords(s)}.${[...new Set(reads)].join('')}`

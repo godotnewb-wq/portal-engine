@@ -166,7 +166,9 @@ describe('the 4b scenarios, as the game sets them up', () => {
     expect(feltLine(writerPrompt(run, 'grief-sunny-1'), 'Tam')).toMatch(/Feels mourning: Old Gil.*stops joking for days/)
     const after = run.state!.aftermath.find((a) => a.owner === 'tam-dace')!
     expect(after.intensity).toBe(5 - Math.floor(4 / content.ruleset.people.aftermath.fadeDays))
-    expect(feltLine(writerPrompt(run, 'grief-sunny-s2-1'), 'Tam')).toMatch(/small tells/)
+    // Faded to 4, it still shows: the walk-on at the location isn't written into the scene, so no one is watching
+    // (since the manual run of 2026-11-19, a walk-on watches only once on screen). The fade itself is the line above.
+    expect(feltLine(writerPrompt(run, 'grief-sunny-s2-1'), 'Tam')).toMatch(/Feels mourning: .*It shows clearly/)
   })
 
   it('forgotten anniversary: short with her spouse while the tie stays (acceptance 2b, the game’s half)', async () => {

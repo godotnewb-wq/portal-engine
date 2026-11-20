@@ -1,7 +1,7 @@
 import { firstName } from '@engine/core'
 import { shadeWords, type Character, type Feeling } from '@engine/characters'
 import type { Ruleset } from '@engine/rules'
-import type { GameState } from '@engine/state'
+import type { GameState, Scene } from '@engine/state'
 import { factionChain } from '@engine/world'
 import { characterById, type Pack } from '@engine/pack'
 import { feelingsToward } from './resolve'
@@ -44,7 +44,18 @@ export interface Audience {
  * included, is above the ruleset's trust; otherwise neither. The player is never a stranger: every character holds
  * meters toward the player from the start.
  */
-export function audienceOf(content: Pack, state: GameState, id: string): Audience {
+/**
+ * The walk-ons watching: those on screen, with a line in an earlier turn or brought in by this turn's plan. One who is
+ * only part of the location never shows up and watches no one (manual run of 2026-11-19, where a card player at the
+ * next table, never written in, kept every feeling in the room a step down for the whole scene).
+ */
+export function watchingWalkOns(scene: Scene, plan?: Pick<BeatPlan, 'walk_ons'>): string[] {
+  const seen = new Set(scene.turns.flatMap((t) => t.beats.flatMap((b) => (b.kind === 'dialogue' ? [b.speaker] : []))))
+  for (const w of plan?.walk_ons ?? []) seen.add(w.id)
+  return scene.walkOns.filter((id) => seen.has(id))
+}
+
+export function audienceOf(content: Pack, state: GameState, id: string, plan?: Pick<BeatPlan, 'walk_ons'>): Audience {
   const r = content.ruleset
   const v = r.people.visibility
   const scene = state.scene!
@@ -60,7 +71,7 @@ export function audienceOf(content: Pack, state: GameState, id: string): Audienc
     return content.setting.stances.some((s) => chain.includes(s.from) && mine.includes(s.toward) && words.indexOf(s.stance) >= words.length - v.hostileStances)
   }
   const reasons: string[] = []
-  if (scene.walkOns.length > 0) reasons.push('walk-ons present')
+  if (watchingWalkOns(scene, plan).length > 0) reasons.push('walk-ons present')
   for (const o of others) {
     const rel = state.relations.find((x) => x.from === id && x.to === o)
     const name = firstName(characterById(content, o)?.name ?? o)
@@ -89,12 +100,12 @@ export interface Shown {
 }
 
 /** visibility = intensity − masking + audience (npc design §7). Masking is the level's position in the ruleset's list. */
-export function shown(content: Pack, state: GameState, id: string, feeling: Feeling): Shown | undefined {
+export function shown(content: Pack, state: GameState, id: string, feeling: Feeling, plan?: Pick<BeatPlan, 'walk_ons'>): Shown | undefined {
   const r = content.ruleset
   const c = characterById(content, id)
   if (!c) return undefined
   const masking = maskingOf(r, c, feeling.family)
-  const audience = audienceOf(content, state, id)
+  const audience = audienceOf(content, state, id, plan)
   const visibility = feeling.intensity - Math.max(0, r.people.masking.levels.indexOf(masking)) + audience.value
   const bands = r.people.visibility.bands
   const band = bands.find((b) => b.max !== undefined && visibility <= b.max) ?? bands.at(-1)!

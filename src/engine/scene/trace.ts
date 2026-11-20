@@ -73,11 +73,11 @@ export type ShownTrace = Omit<Shown, 'shows'>
  * Everyone present with a feeling, as it showed once the turn's plan applied: the same numbers the writer's brief
  * gives in words (`writer.ts`).
  */
-export function shownTraces(content: Pack, state: GameState, plan: Pick<BeatPlan, 'speakers' | 'reactions'>): ShownTrace[] {
+export function shownTraces(content: Pack, state: GameState, plan: Pick<BeatPlan, 'speakers' | 'reactions' | 'walk_ons'>): ShownTrace[] {
   const felt = feelingsNow(state, plan)
   return presentCast(state.scene!).flatMap((id) => {
     const f = felt[id]
-    const s = f && shown(content, state, id, f)
+    const s = f && shown(content, state, id, f, plan)
     if (!s) return []
     const { shows: _shows, ...rest } = s
     return [rest]

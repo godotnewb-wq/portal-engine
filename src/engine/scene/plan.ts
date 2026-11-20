@@ -191,7 +191,7 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan, inpu
   const throughMask = (c: (typeof plan.checks)[number]) => {
     if (!c.target || !isReading(content.ruleset, c)) return false
     const f = felt[c.target]
-    const s = f && shown(content, state, c.target, f)
+    const s = f && shown(content, state, c.target, f, plan)
     return !!f && !!s && s.visibility < f.intensity
   }
   if (!raw.player_action.uncertain && plan.checks.some((c) => c.who === 'player' && !throughMask(c))) {
