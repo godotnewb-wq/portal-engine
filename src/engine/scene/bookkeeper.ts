@@ -17,7 +17,8 @@ import type { TurnWritten } from './turn'
  * - **A secret comes out** only when it is confirmed by someone who could say it (its holder, not keeping it that
  *   turn; someone who knew it; the player, who knew it) or when the prose shows the fact itself. Then everyone present
  *   learns it (the shared-scene rule since 4b).
- * - **A guess reveals nothing**, even a right one (J). **A leak**, said as known by someone who couldn't know it, is
+ * - **A guess reveals nothing**, even a right one (J), and is only someone putting forward what the hidden part
+ *   might be: a question, a dodge or a denial is no guess, and a guess by someone who knows the secret is turned down. **A leak**, said as known by someone who couldn't know it, is
  *   recorded as their claim and teaches no one (K). The player saying, as known, a secret they don't know is a guess:
  *   they are bluffing or guessing, and a leak is the writer's fault, not theirs. A holder saying a secret they were keeping that turn is left for
  *   review, not taken as a confirmation (the proposal's §5.2).
@@ -117,7 +118,8 @@ Reply with only a JSON object:
 
 - secrets: each secret from the list whose hidden part this turn's lines or narration touched, in the order it happened. Each is listed by what is hidden, then in full. Only the hidden part counts: the background around it (a job, a place, a price, who is involved, what people there already know) is not the secret, and talk about it is none of these. id: from the list. at: "player" for the player's words, or the number of the line. words: the words that did it, copied exactly from that line. how is one of:
   - "stated": the hidden part said as something known, outright or by confirming it ("Yes, that's what's in it", answering a question about it). Then answers: what it confirms, "player", an earlier line's number, or "earlier" for the turn before.
-  - "guess": asked about, guessed at, suspected, denied or hinted at; not said as known, even when the guess is right. Saying one doesn't know, or won't say, is never "stated".
+  - "guess": someone who doesn't know it puts forward what the hidden part might be ("I bet it's a weapon"), not as known, even when the guess is right.
+  Asking about it, dodging, refusing to say, denying it, hinting around it, or wondering whether something is hidden is none of these: leave it out. Saying one doesn't know, or won't say, is never "stated".
   - "evidence": the prose shows the hidden part itself, so anyone looking would know (a box opened and its contents seen, a letter read out).
   - "unclear": you can't tell which.
   Most turns touch none: [].
@@ -253,7 +255,10 @@ export function checkBookkeeping(content: Pack, before: GameState, written: Turn
     const secret = candidates.get(o.id)!
     const by = byOf(o.at)
     const note = { secret: o.id, by, at: o.at, words: o.words }
-    if (o.how === 'guess') records.guesses.push(note)
+    // Nobody guesses what they know: a holder's dodge or a knower's coyness read as a guess (manual runs of
+    // 2026-11-19, where a holder's own dodge was logged as a guess at her secret) is turned down, not counted.
+    if (o.how === 'guess' && (by === secret.holder || knows.get(o.id)!.has(by))) refused.push(`${o.id} at ${where(o.at)}: a guess by ${by}, who knows it`)
+    else if (o.how === 'guess') records.guesses.push(note)
     else if (o.how === 'unclear') records.unresolved.push({ ...note, why: 'the bookkeeper couldn\'t tell' })
     else if (done.has(o.id)) continue
     else if (o.how === 'stated' && by === secret.holder && kept.has(o.id)) records.unresolved.push({ ...note, why: `${by} said it while keeping it` })

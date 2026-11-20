@@ -69,6 +69,15 @@ describe('when a secret comes out (J, K)', () => {
     expect(r.guesses).toMatchObject([{ secret: TOBIN, by: 'mara', at: 1 }])
   })
 
+  it('nobody guesses what they know: a holder’s dodge or a knower’s guess is turned down, not counted', () => {
+    const dodge = check(yardScene(), [say('tobin', 'Who knows who comes by after closing?')], [{ how: 'guess', words: 'Who knows who comes by after closing' }])
+    expect(dodge.guesses).toEqual([])
+    expect(dodge.refused).toEqual([`${TOBIN} at line 1: a guess by tobin, who knows it`])
+    const coy = check(maraLearned(yardScene()), [say('mara', 'Maybe somebody let someone in.')], [{ how: 'guess', words: 'Maybe somebody let someone in' }])
+    expect(coy.guesses).toEqual([])
+    expect(coy.refused).toEqual([`${TOBIN} at line 1: a guess by mara, who knows it`])
+  })
+
   it('said as known by someone who couldn’t know it is a leak: their claim, teaching no one', () => {
     const r = check(yardScene(), [say('mara', 'Tobin let someone in after closing. Everyone knows it.')], [{ words: 'Tobin let someone in after closing' }])
     expect(r.out).toEqual([])
