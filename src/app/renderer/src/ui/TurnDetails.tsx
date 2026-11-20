@@ -247,7 +247,7 @@ function SecretsTab({ details, records, missing, nameOf }: { details: Details; r
         <h3>On screen <small>(the bookkeeper's reading)</small></h3>
         {!records ? (
           missing
-        ) : records.out.length + records.guesses.length + records.leaks.length + records.unresolved.length === 0 ? (
+        ) : records.out.length + records.guesses.length + (records.around ?? []).length + records.leaks.length + records.unresolved.length === 0 ? (
           <p className="muted">No secret came up.</p>
         ) : (
           <ul>
@@ -263,7 +263,13 @@ function SecretsTab({ details, records, missing, nameOf }: { details: Details; r
             ))}
             {records.guesses.map((g, i) => (
               <li key={`g${i}`}>
-                Guessed or asked: <code>{g.secret}</code> by {who(g.by)}, {at(g)}: “{g.words}”
+                Guessed: <code>{g.secret}</code> by {who(g.by)}, {at(g)}: “{g.words}”
+              </li>
+            ))}
+            {/* Records logged before "around" existed (2026-11-19) have none. */}
+            {(records.around ?? []).map((a, i) => (
+              <li key={`a${i}`} className="muted">
+                Talked around: <code>{a.secret}</code> by {who(a.by)}, {at(a)}: “{a.words}”
               </li>
             ))}
             {records.unresolved.map((u, i) => (

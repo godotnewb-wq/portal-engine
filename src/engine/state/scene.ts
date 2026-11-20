@@ -46,6 +46,8 @@ export const BookkeepingSchema = z.object({
   out: z.array(SecretOutSchema).default([]),
   leaks: z.array(SecretNoteSchema).default([]),
   guesses: z.array(SecretNoteSchema).default([]),
+  /** Talk that touched a secret without saying it was true: asking, dodging, denying, hinting. Teaches no one. */
+  around: z.array(SecretNoteSchema).default([]),
   /** Secrets the game couldn't settle: the bookkeeper couldn't tell, or a holder said one they were keeping. */
   unresolved: z.array(SecretNoteSchema).default([]),
   /** Concrete details the prose stated as settled that no fact holds; anyone present may repeat them. */

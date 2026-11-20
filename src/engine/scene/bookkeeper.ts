@@ -18,7 +18,8 @@ import type { TurnWritten } from './turn'
  *   turn; someone who knew it; the player, who knew it) or when the prose shows the fact itself. Then everyone present
  *   learns it (the shared-scene rule since 4b).
  * - **A guess reveals nothing**, even a right one (J), and is only someone putting forward what the hidden part
- *   might be: a question, a dodge or a denial is no guess, and a guess by someone who knows the secret is turned down. **A leak**, said as known by someone who couldn't know it, is
+ *   might be. A question, a dodge, a denial or a hint is talk **around** it, kept and teaching no one; a guess by
+ *   someone who knows the secret is turned down. **A leak**, said as known by someone who couldn't know it, is
  *   recorded as their claim and teaches no one (K). The player saying, as known, a secret they don't know is a guess:
  *   they are bluffing or guessing, and a leak is the writer's fault, not theirs. A holder saying a secret they were keeping that turn is left for
  *   review, not taken as a confirmation (the proposal's §5.2).
@@ -28,7 +29,7 @@ import type { TurnWritten } from './turn'
  */
 
 /** How a secret came up, in the bookkeeper's words. */
-export const SECRET_HOW = ['stated', 'guess', 'evidence', 'unclear'] as const
+export const SECRET_HOW = ['stated', 'guess', 'around', 'evidence', 'unclear'] as const
 export type SecretHow = (typeof SECRET_HOW)[number]
 
 /** A secret the bookkeeper is told to watch for: one held or learned by someone present, or one the player knows. */
@@ -117,9 +118,9 @@ Reply with only a JSON object:
 {"secrets": [{"id": "...", "at": 1, "how": "stated", "words": "...", "answers": "player"}], "new": [{"text": "...", "at": 1}], "changed": "...", "moods": [{"id": "...", "shade": "...", "family": "...", "intensity": 1}], "checks": [{"id": "...", "honored": true, "note": "..."}]}
 
 - secrets: each secret from the list whose hidden part this turn's lines or narration touched, in the order it happened. Each is listed by what is hidden, then in full. Only the hidden part counts: the background around it (a job, a place, a price, who is involved, what people there already know) is not the secret, and talk about it is none of these. id: from the list. at: "player" for the player's words, or the number of the line. words: the words that did it, copied exactly from that line. how is one of:
-  - "stated": the hidden part said as something known, outright or by confirming it ("Yes, that's what's in it", answering a question about it). Then answers: what it confirms, "player", an earlier line's number, or "earlier" for the turn before.
+  - "stated": the hidden part said as true and known, outright or by confirming it ("Yes, that's what's in it", answering a question about it). Then answers: what it confirms, "player", an earlier line's number, or "earlier" for the turn before. A denial, or a line that says or implies the opposite, is never "stated", and neither is saying one doesn't know or won't say.
   - "guess": someone who doesn't know it puts forward what the hidden part might be ("I bet it's a weapon"), not as known, even when the guess is right.
-  Asking about it, dodging, refusing to say, denying it, hinting around it, or wondering whether something is hidden is none of these: leave it out. Saying one doesn't know, or won't say, is never "stated".
+  - "around": talk that touches the hidden part without saying it is true: asking about it, dodging, refusing to say, denying it ("It wasn't the courier"), hinting, wondering whether something is hidden.
   - "evidence": the prose shows the hidden part itself, so anyone looking would know (a box opened and its contents seen, a letter read out).
   - "unclear": you can't tell which.
   Most turns touch none: [].
@@ -211,7 +212,7 @@ export function checkBookkeeping(content: Pack, before: GameState, written: Turn
   const scene = before.scene!
   const present = presentCast(scene)
   const refused: string[] = []
-  const records: Bookkeeping = { source: 'bookkeeper', out: [], leaks: [], guesses: [], unresolved: [], new: [], moods: [], checks: [], refused }
+  const records: Bookkeeping = { source: 'bookkeeper', out: [], leaks: [], guesses: [], around: [], unresolved: [], new: [], moods: [], checks: [], refused }
   const candidates = new Map(secretCandidates(content, before).map((c) => [c.id, c]))
   const knows = new Map([...candidates.values()].map((c) => [c.id, new Set([c.holder, ...knowersOf(before, c.id, c.text)])]))
   const kept = new Set(written.plan.speakers.flatMap((s) => s.kept ?? []))
@@ -257,7 +258,10 @@ export function checkBookkeeping(content: Pack, before: GameState, written: Turn
     const note = { secret: o.id, by, at: o.at, words: o.words }
     // Nobody guesses what they know: a holder's dodge or a knower's coyness read as a guess (manual runs of
     // 2026-11-19, where a holder's own dodge was logged as a guess at her secret) is turned down, not counted.
-    if (o.how === 'guess' && (by === secret.holder || knows.get(o.id)!.has(by))) refused.push(`${o.id} at ${where(o.at)}: a guess by ${by}, who knows it`)
+    // Talk around a secret teaches no one and is only kept (manual runs and bench run of 2026-11-19: with no kind for a
+    // denial, a holder's "it wasn't them" was read as stating that it was).
+    if (o.how === 'around') records.around.push(note)
+    else if (o.how === 'guess' && (by === secret.holder || knows.get(o.id)!.has(by))) refused.push(`${o.id} at ${where(o.at)}: a guess by ${by}, who knows it`)
     else if (o.how === 'guess') records.guesses.push(note)
     else if (o.how === 'unclear') records.unresolved.push({ ...note, why: 'the bookkeeper couldn\'t tell' })
     else if (done.has(o.id)) continue
@@ -271,7 +275,7 @@ export function checkBookkeeping(content: Pack, before: GameState, written: Turn
   }
 
   // A detail can't bring back as common ground what was only claimed or guessed about a secret.
-  const claims = [...records.leaks, ...records.guesses, ...records.unresolved].map((n) => n.words)
+  const claims = [...records.leaks, ...records.guesses, ...records.around, ...records.unresolved].map((n) => n.words)
   const limit = content.ruleset.bookkeeper.newDetails
   for (const n of raw.new) {
     const at = readAt(n.at, written.beats)
@@ -317,7 +321,7 @@ export function planBookkeeping(content: Pack, before: GameState, written: Turne
   const present = presentCast(before.scene!)
   const kept = new Set(written.plan.speakers.flatMap((s) => s.kept ?? []))
   const lineBy = (who: string) => written.beats.findIndex((b) => b.kind === 'dialogue' && b.speaker === who) + 1
-  const records: Bookkeeping = { source: 'plan', out: [], leaks: [], guesses: [], unresolved: [], new: [], moods: [], checks: [], refused: [], unaudited: true }
+  const records: Bookkeeping = { source: 'plan', out: [], leaks: [], guesses: [], around: [], unresolved: [], new: [], moods: [], checks: [], refused: [], unaudited: true }
   for (const m of written.plan.moves ?? []) {
     const at = lineBy(m.who)
     if (at === 0) continue

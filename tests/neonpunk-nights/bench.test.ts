@@ -272,7 +272,7 @@ describe('the bookkeeper in the report (milestone 4c task 4)', () => {
     records[1] = { ...records[1]!, turnId: second.turnId, late: true, error: 'no answer within 30 seconds', records: { ...records[1]!.records, source: 'plan', unaudited: true } }
     const report = renderReport(content, bench)
     expect(report).toContain('## Bookkeeper')
-    expect(report).toMatch(/\| deception-caught \| 3 \| 0 \| 1 \| 0 \| 1 \| 0 \| 0 \| \d \| 1 \| 1 \| 0 \|/)
+    expect(report).toMatch(/\| deception-caught \| 3 \| 0 \| 1 \| 0 \| 1 \| 0 \| 0 \| 0 \| \d \| 1 \| 1 \| 0 \|/)
     expect(report).toContain('⚠ Leak: `oria-senn.the-case`')
     expect(report).toContain('Mood: ')
     expect(report).toContain('Check not honored: c1 — played as a success')

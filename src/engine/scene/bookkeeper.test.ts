@@ -69,6 +69,24 @@ describe('when a secret comes out (J, K)', () => {
     expect(r.guesses).toMatchObject([{ secret: TOBIN, by: 'mara', at: 1 }])
   })
 
+  it('talk around a secret (a denial, a question, a dodge) is kept and teaches no one, whoever says it', () => {
+    // The bench run of 2026-11-19: with no kind for a denial, a holder's "it's not that" was read as stating it.
+    const denial = check(yardScene(), [say('tobin', 'Nobody came by after closing. Not a soul.')], [{ how: 'around', words: 'Nobody came by after closing' }])
+    expect(denial.out).toEqual([])
+    expect(denial.unresolved).toEqual([])
+    expect(denial.around).toEqual([{ secret: TOBIN, by: 'tobin', at: 1, words: 'Nobody came by after closing' }])
+    const asked = check(yardScene(), [say('mara', 'Did you let someone in, Tobin?')], [{ how: 'around', words: 'Did you let someone in' }])
+    expect(asked.leaks).toEqual([])
+    expect(asked.guesses).toEqual([])
+    expect(asked.around.map((a) => a.by)).toEqual(['mara'])
+  })
+
+  it('a denial can’t come back as a settled detail', () => {
+    const r = check(yardScene(), [say('tobin', 'Nobody came by after closing.')], [{ how: 'around', words: 'Nobody came by after closing' }], {}, { new: [{ text: 'nobody came by after closing', at: 1 }] })
+    expect(r.new).toEqual([])
+    expect(r.refused.join(' | ')).toMatch(/claim or a guess/)
+  })
+
   it('nobody guesses what they know: a holder’s dodge or a knower’s guess is turned down, not counted', () => {
     const dodge = check(yardScene(), [say('tobin', 'Who knows who comes by after closing?')], [{ how: 'guess', words: 'Who knows who comes by after closing' }])
     expect(dodge.guesses).toEqual([])

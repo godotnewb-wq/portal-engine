@@ -40,11 +40,12 @@ const tab = (tabs: DetailsTab[], id: string) => tabs.find((t) => t.id === id)!
 /** Each turn's bookkeeper reply, found by the words it quotes so the beat numbers come from the turn itself. */
 const BOOKKEEPER: ((beats: { text: string }[]) => object | null)[] = [
   // Turn 1: Mara says Tobin's secret as if she knew it (a leak), a secret nobody holds (refused), and the reading
-  // check the prose dropped.
+  // check the prose dropped, and Tobin's dodge, talk around his secret.
   (beats) => ({
     secrets: [
       { id: TOBIN, at: beats.findIndex((b) => b.text.includes('You were here after closing')) + 1, how: 'stated', words: 'You were here after closing' },
-      { id: 'pell.nothing', at: 1, how: 'stated', words: 'gate' }
+      { id: 'pell.nothing', at: 1, how: 'stated', words: 'gate' },
+      { id: TOBIN, at: beats.findIndex((b) => b.text.includes('I sang to them')) + 1, how: 'around', words: 'I sang to them' }
     ],
     new: [],
     changed: 'Mara has caught Tobin out.',
@@ -143,6 +144,8 @@ describe('Turn details on a recorded turn', () => {
     expect(first).toMatchObject({ count: 1, warn: true })
     expect(text(first)).toContain(`Leak, a claim that teaches no one: ${TOBIN} by Mara`)
     expect(text(first)).toContain('Secrets on the director')
+    // Talk around the secret is shown, and counts for nothing.
+    expect(text(first)).toContain(`Talked around: ${TOBIN} by Tobin, beat`)
     const second = text(tab(tabsOf(read[1]!), 'secrets'))
     expect(second).toContain(`Left for review: ${TOBIN} by Tobin`)
   })

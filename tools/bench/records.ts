@@ -47,6 +47,7 @@ export function recordStats(run: ScenarioRun) {
     out: sum(({ b }) => b.records.out.length),
     leaks: sum(({ b }) => b.records.leaks.length),
     guesses: sum(({ b }) => b.records.guesses.length),
+    around: sum(({ b }) => (b.records.around ?? []).length),
     unresolved: sum(({ b }) => b.records.unresolved.length),
     changed: turns.filter(({ t, b }) => !b.records.unaudited && oneSided(t, b.records)).length,
     moods: sum(({ t, b }) => moodMismatches(t, b.records).length),
@@ -55,11 +56,11 @@ export function recordStats(run: ScenarioRun) {
   }
 }
 
-export const RECORD_HEADS = ['Scenario', 'Turns recorded', 'Failed', 'Late', 'Came out', 'Leaks', 'Guesses', 'Unresolved', 'Changed vs change', 'Mood mismatches', 'Checks not honored', 'Refused']
+export const RECORD_HEADS = ['Scenario', 'Turns recorded', 'Failed', 'Late', 'Came out', 'Leaks', 'Guesses', 'Talked around', 'Unresolved', 'Changed vs change', 'Mood mismatches', 'Checks not honored', 'Refused']
 
 export const recordRow = (label: string, run: ScenarioRun): string => {
   const s = recordStats(run)
-  return `| ${label} | ${s.turns} | ${s.failed} | ${s.late} | ${s.out} | ${s.leaks} | ${s.guesses} | ${s.unresolved} | ${s.changed} | ${s.moods} | ${s.unhonored} | ${s.refused} |`
+  return `| ${label} | ${s.turns} | ${s.failed} | ${s.late} | ${s.out} | ${s.leaks} | ${s.guesses} | ${s.around} | ${s.unresolved} | ${s.changed} | ${s.moods} | ${s.unhonored} | ${s.refused} |`
 }
 
 const feeling = (f: Feeling) => `${f.shade} (${f.family}) ${f.intensity}`
@@ -75,6 +76,7 @@ export function recordLines(name: Name, t: TurnTrace, b: BookkeepingRun | undefi
     ...r.out.map((o) => `Came out (${o.how}): \`${o.secret}\` by ${who(o.by)}, ${at(o)}: “${o.words}” → ${o.to.map(name).join(', ') || 'no one else'}`),
     ...r.leaks.map((l) => `⚠ Leak: \`${l.secret}\` by ${who(l.by)}, ${at(l)}: “${l.words}”${l.why ? ` (${l.why})` : ''}`),
     ...r.guesses.map((g) => `Guess: \`${g.secret}\` by ${who(g.by)}, ${at(g)}: “${g.words}”`),
+    ...(r.around ?? []).map((a) => `Talked around: \`${a.secret}\` by ${who(a.by)}, ${at(a)}: “${a.words}”`),
     ...r.unresolved.map((u) => `Unresolved: \`${u.secret}\` by ${who(u.by)}, ${at(u)}: “${u.words}”${u.why ? ` (${u.why})` : ''}`),
     ...r.new.map((n) => `New detail (${who(n.by)}): ${n.text}`),
     `Changed: ${r.changed || '(nothing)'} · director's change: ${t.director.plan.change || '(none)'}`,
