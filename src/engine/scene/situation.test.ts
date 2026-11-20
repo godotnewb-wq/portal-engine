@@ -41,6 +41,15 @@ describe('facts and who may say them', () => {
 })
 
 describe('the situation plan', () => {
+  it('reads a secret kept as a bare string, as models often write it, as a list of one (bench runs of 2026-11-20)', () => {
+    const speakers = [{ id: 'tobin', goal: 'get the question dropped', keeps: 'tobin.after-closing', touched: 'who came by', approach: 'deflect' }]
+    const { plan: p } = validatePlan(fixture, yardScene(), parsePlan(plan({ speakers }))!, 'Tobin, who came by?')
+    expect(p.speakers[0]).toMatchObject({ kept: ['tobin.after-closing'], approach: 'deflect' })
+    expect(p.speakers[0]!.hiding).toBeTruthy()
+    // Nothing, null or an empty string is no list at all.
+    for (const keeps of [undefined, null, '']) expect(parsePlan(plan({ speakers: [{ ...speakers[0], keeps }] }))!.speakers[0]!.keeps).toEqual([])
+  })
+
   it('reads moves with their facts, and marks what the player has not heard', () => {
     const { plan: p, corrections } = validatePlan(fixture, yardScene(), parsePlan(plan())!, 'Tobin, who came by?')
     expect(corrections).toEqual([])

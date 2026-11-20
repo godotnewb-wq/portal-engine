@@ -10,10 +10,17 @@ import { characterById, type Pack } from '@engine/pack'
  * a field the model leaves out or gets the wrong shape of becomes empty rather than failing the turn.
  */
 export const text = z.string().catch('')
-export const list = <T extends z.ZodType>(item: T) => z.array(z.unknown()).catch([]).transform((xs) => xs.flatMap((x) => {
-  const parsed = item.safeParse(x)
-  return parsed.success ? [parsed.data as z.infer<T>] : []
-}))
+/**
+ * A list read leniently: items of the wrong shape are dropped, and a single item where a list belongs is a list of
+ * one. The director often writes one secret it keeps as a bare string (`"keeps": "ada.debt"`); read strictly, every
+ * such secret was silently dropped (bench runs of 2026-11-20: all of them after milestone 4d's prompt changes, about
+ * four in five before).
+ */
+export const list = <T extends z.ZodType>(item: T) =>
+  z.preprocess((x) => (x === undefined || x === null || x === '' || Array.isArray(x) ? x : [x]), z.array(z.unknown()).catch([])).transform((xs) => xs.flatMap((x) => {
+    const parsed = item.safeParse(x)
+    return parsed.success ? [parsed.data as z.infer<T>] : []
+  }))
 
 export const PlannedCheckSchema = z.object({
   id: z.string(),
