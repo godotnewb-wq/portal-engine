@@ -10,17 +10,23 @@ import { characterById, type Pack } from '@engine/pack'
  * a field the model leaves out or gets the wrong shape of becomes empty rather than failing the turn.
  */
 export const text = z.string().catch('')
+/** A list read leniently: items of the wrong shape are dropped, and anything but an array is an empty list. */
+export const list = <T extends z.ZodType>(item: T) => z.array(z.unknown()).catch([]).transform((xs) => xs.flatMap((x) => {
+  const parsed = item.safeParse(x)
+  return parsed.success ? [parsed.data as z.infer<T>] : []
+}))
+
 /**
- * A list read leniently: items of the wrong shape are dropped, and a single item where a list belongs is a list of
- * one. The director often writes one secret it keeps as a bare string (`"keeps": "ada.debt"`); read strictly, every
- * such secret was silently dropped (bench runs of 2026-11-20: all of them after milestone 4d's prompt changes, about
- * four in five before).
+ * A list that also takes a single item as a list of one (nothing, null or an empty string as an empty list), for the
+ * fields models write as a bare string: the secrets a speaker keeps (`"keeps": "ada.debt"`) and the one detail of
+ * texture. Read strictly, every such secret was silently dropped (bench runs of 2026-11-20).
+ *
+ * Not for a move's `new`: the director writes it as a sentence scripting the line, and once it reached the writer the
+ * writer copied it (copied from plan 5% to 19% in the bench run of 2026-11-20, 08-12-00). It stays dropped until
+ * Milestone 5 decides what the director hands the writer.
  */
-export const list = <T extends z.ZodType>(item: T) =>
-  z.preprocess((x) => (x === undefined || x === null || x === '' || Array.isArray(x) ? x : [x]), z.array(z.unknown()).catch([])).transform((xs) => xs.flatMap((x) => {
-    const parsed = item.safeParse(x)
-    return parsed.success ? [parsed.data as z.infer<T>] : []
-  }))
+export const oneOrList = <T extends z.ZodType>(item: T) =>
+  z.preprocess((x) => (x === undefined || x === null || x === '' || Array.isArray(x) ? x : [x]), list(item))
 
 export const PlannedCheckSchema = z.object({
   id: z.string(),

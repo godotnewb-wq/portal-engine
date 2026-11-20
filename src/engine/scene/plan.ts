@@ -19,6 +19,7 @@ import {
   QUOTED_WORDS,
   difficultyNamed,
   list,
+  oneOrList,
   presentCast,
   presentId,
   silence,
@@ -66,14 +67,14 @@ const RawMoveSchema = z.object({
 
 export const RawPlanSchema = z.object({
   player_action: z.object({ doing: text, uncertain: z.boolean().catch(false), reading: z.string().optional().catch(undefined) }).catch({ doing: '', uncertain: false }),
-  speakers: list(z.object({ id: z.string(), goal: text, feels: RawFeelsSchema.optional().catch(undefined), pressure: text, keeps: list(z.string()), touched: text, approach: text.optional(), framing: text.optional() })),
+  speakers: list(z.object({ id: z.string(), goal: text, feels: RawFeelsSchema.optional().catch(undefined), pressure: text, keeps: oneOrList(z.string()), touched: text, approach: text.optional(), framing: text.optional() })),
   moves: list(RawMoveSchema),
   lore: list(z.object({ entry: z.string(), who: z.string().optional().catch(undefined), line: text })),
   change: text,
   reactions: list(z.object({ id: z.string(), beat: z.string(), feels: RawFeelsSchema.optional().catch(undefined) })),
   checks: list(PlannedCheckSchema),
   walk_ons: list(z.object({ id: z.string(), line: z.string() })),
-  texture: list(z.string()),
+  texture: oneOrList(z.string()),
   avoid: list(z.string()),
   leaves: list(z.string()),
   end_scene: z.boolean().catch(false)

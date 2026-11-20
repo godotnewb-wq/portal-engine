@@ -50,6 +50,13 @@ describe('the situation plan', () => {
     for (const keeps of [undefined, null, '']) expect(parsePlan(plan({ speakers: [{ ...speakers[0], keeps }] }))!.speakers[0]!.keeps).toEqual([])
   })
 
+  it('reads a single texture detail as a list, but not a move’s new written as one sentence (bench run of 2026-11-20)', () => {
+    expect(parsePlan(plan({ texture: 'the gate creaks' }))!.texture).toEqual(['the gate creaks'])
+    // The director writes new as a sentence scripting the line; the writer copied it, so it stays dropped (Milestone 5).
+    const moves = [{ who: 'tobin', answers: 'player', move: 'dodge', new: 'says the horses were restless and he sang to them' }]
+    expect(parsePlan(plan({ moves }))!.moves![0]!.new).toEqual([])
+  })
+
   it('reads moves with their facts, and marks what the player has not heard', () => {
     const { plan: p, corrections } = validatePlan(fixture, yardScene(), parsePlan(plan())!, 'Tobin, who came by?')
     expect(corrections).toEqual([])
