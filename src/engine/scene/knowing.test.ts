@@ -72,7 +72,7 @@ describe('the director (task 3)', () => {
 
   it('needs no difficulty on a reading check: the game sets it, and corrects only a word that differs', () => {
     const checks = (difficulty?: string) => {
-      const raw = { player_action: { doing: 'studies Tobin', uncertain: true }, speakers: [{ id: 'tobin', goal: 'answer' }], moves: [{ who: 'tobin', answers: 'player', move: 'answer' }], checks: [{ id: 'read', who: 'player', skill: 'notice', target: 'tobin', stakes: 'sees what he feels', ...(difficulty && { difficulty }) }] }
+      const raw = { player_action: { doing: 'studies Tobin', uncertain: true, reading: 'tobin' }, speakers: [{ id: 'tobin', goal: 'answer' }], moves: [{ who: 'tobin', answers: 'player', move: 'answer' }], checks: [{ id: 'read', who: 'player', skill: 'notice', target: 'tobin', stakes: 'sees what he feels', ...(difficulty && { difficulty }) }] }
       return validatePlan(fixture, yardScene(), parsePlan(JSON.stringify(raw))!, 'I study Tobin.')
     }
     const left = checks()

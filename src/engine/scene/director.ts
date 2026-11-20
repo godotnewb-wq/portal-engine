@@ -39,7 +39,7 @@ export const directorRules = (r: Ruleset, loreLines = r.codex.loreLines): string
 
 Return only this JSON object:
 {
-  "player_action": {"doing", "uncertain"},
+  "player_action": {"doing", "uncertain", "reading"},
   "checks": [{"id","who","skill","difficulty","target","stakes","edge","edge_reason"}],
   "speakers": [{"id","goal","feels","pressure","keeps","touched","approach","framing"}],
   "moves": [{"who","answers","move","uses","new","needs"}],
@@ -50,13 +50,13 @@ ${loreLines > 0 ? '  "lore": [{"entry","who","line"}],\n' : ''}  "change": "..."
 }
 
 - The player leads, and people are in the moment. Move 1 answers what the player just said or did, in its own terms; what people say comes first from what was just said and done: they answer, notice, react. Their aims for the night and their secrets are background that shapes them, not the topic of every line: they come in after that, or in a later turn, unless something urgent cuts in.
-- player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking and asking are not uncertain.
+- player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking and asking are not uncertain. reading: the id of the person the player is trying to read (watching their face, studying them, looking for a lie); leave it out otherwise. Asking a question is not reading.
 - checks: only for an uncertain player action, or a character attempting something uncertain. The skill fits the action. At most ${MAX_CHECKS}. who is "player" or a character id. skill is one of: ${r.skills.map((x) => x.id).join(', ')}. difficulty is one of: ${r.difficulties.map((d) => d.word).join(', ')}; leave it out for a check that reads someone, since the game sets it. target: the character being read, for a check that reads someone. stakes says what success means. Companions in the player's party help on their own when they are willing and trained; the game works it out.
 - Feelings on the sheets are words for each meter, toward the player and toward others here. ${r.meters.list.map((m) => `${m.name} (${m.id}): ${m.description}.`).join(' ')} Each is a separate feeling; when they pull apart, play the tension.
 - speakers: at most ${MAX_SPEAKERS} characters with lines. goal: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone.
 - feels: what the character really feels now, whatever they show: {"shade","family","intensity","reason"}. shade is one of the shades below. family only when the shade is listed under more than one. intensity is 1 to 5. reason: what it's about, in a few words. Leave feels out to keep what they felt before. The game works out how much shows. A mask hides a feeling; it doesn't lessen it: never lower feels because they are hiding it or look composed. A feeling eases at most one step a turn.
 - Shades by family: ${shadeNames(r)}.
-- To see what someone really feels behind what they show, give the person looking a check with ${r.skills.find((s) => s.id === r.people.reading.skill)?.name ?? r.people.reading.skill} and the one being read as target. A companion can be the one looking; on success they may tell the player.
+- To see what someone really feels behind what they show, give the person looking a check with ${r.skills.find((s) => s.id === r.people.reading.skill)?.name ?? r.people.reading.skill} and the one being read as target. The player looks only at the person player_action.reading names. A companion can be the one looking; on success they may tell the player.
 - pressure: how hard their aim for tonight (on their sheet) presses on them right now, one of: ${r.pressures.join(', ')} (weakest first). Most of the time it is ${r.pressures[0]}. It rises when time runs short or events push.
 - keeps: ids of their own secrets, only when what was just said or done touches one; touched: the words that touched it, as said. Most turns nobody keeps anything. approach: lie, deflect or partial truth. A secret marked "in short" is shown as a brief cue; keep it by its id all the same, and the writer will get the whole secret.
 - A plan gives nobody knowledge. Someone may ask about another's secret, guess, suspect or deny it, and that needs nothing in uses; a secret is confirmed only by its holder, by someone who knows it, or by what is shown on screen.

@@ -122,23 +122,36 @@ describe('reading through the mask', () => {
   })
 
   // Found by the end-of-Milestone-4 bench: reading checks were dropped by the rule that the player rolls only on an attempt.
-  it('keeps the player’s reading check while the mask hides something, even when the player is only talking', () => {
-    const talking = { player_action: { doing: 'asks Tobin who came by', uncertain: false } }
+  it('keeps the player’s reading check while the mask hides something, when the player is trying to read them, even with no attempt in doubt', () => {
+    const watching = { player_action: { doing: 'watches Tobin while asking who came by', uncertain: false, reading: 'tobin' } }
     const look = { id: 'look', who: 'player', skill: 'notice', difficulty: 'routine', target: 'tobin', stakes: 'sees what he feels' }
     const sore = shown(fixture, yardScene(), 'tobin', felt('sore', 4, 'mad'))!
     expect(sore.visibility).toBeLessThan(4)
-    const kept = validatePlan(fixture, yardScene(), reading([look], talking), ASK)
+    const kept = validatePlan(fixture, yardScene(), reading([look], watching), ASK)
     expect(kept.plan.checks.map((c) => c.id)).toEqual(['look'])
+    expect(kept.plan.player_action?.reading).toBe('tobin')
     expect(kept.corrections).not.toContain('dropped the player check: the player action is not an uncertain attempt')
     // Not a reading check: dropped as before.
-    const notice = validatePlan(fixture, yardScene(), reading([{ ...look, target: undefined }], talking), ASK)
+    const notice = validatePlan(fixture, yardScene(), reading([{ ...look, target: undefined }], watching), ASK)
     expect(notice.plan.checks).toEqual([])
     expect(notice.corrections).toContain('dropped the player check: the player action is not an uncertain attempt')
   })
 
+  it('drops a read of someone the player isn’t trying to read: asking a question is not reading (manual run of 2026-11-19)', () => {
+    const look = { id: 'look', who: 'player', skill: 'notice', difficulty: 'routine', target: 'tobin', stakes: 'sees what he feels' }
+    for (const action of [{ doing: 'asks Tobin who came by', uncertain: false }, { doing: 'persuades Tobin', uncertain: true }, { doing: 'watches Mara', uncertain: false, reading: 'mara' }]) {
+      const r = validatePlan(fixture, yardScene(), reading([look], { player_action: action }), ASK)
+      expect(r.plan.checks).toEqual([])
+      expect(r.corrections).toContain("dropped look: the player isn't trying to read tobin")
+    }
+    // A companion noticing without trying still reads.
+    const mara = validatePlan(fixture, yardScene(), reading([{ ...look, who: 'mara' }], { player_action: { doing: 'asks Tobin who came by', uncertain: false } }), ASK)
+    expect(mara.plan.checks.map((c) => c.who)).toEqual(['mara'])
+  })
+
   const rolled = (degree: CheckResult['degree']) => ({ degree, natural: 10, total: 10, dc: 10 }) as CheckResult
   const settled = (who: string, degree: CheckResult['degree'], state = yardScene()) => {
-    const { plan } = validatePlan(fixture, state, reading([{ id: 'look', who, skill: 'notice', difficulty: 'routine', target: 'tobin', stakes: 'sees what he feels' }]), ASK)
+    const { plan } = validatePlan(fixture, state, reading([{ id: 'look', who, skill: 'notice', difficulty: 'routine', target: 'tobin', stakes: 'sees what he feels' }], { player_action: { doing: 'watches Tobin', uncertain: false, reading: 'tobin' } }), ASK)
     return settlePlan(fixture, state, { ...plan, checks: plan.checks.map((c) => ({ ...c, result: rolled(degree) })) })
   }
 

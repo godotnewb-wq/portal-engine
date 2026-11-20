@@ -65,7 +65,7 @@ const RawMoveSchema = z.object({
 })
 
 export const RawPlanSchema = z.object({
-  player_action: z.object({ doing: text, uncertain: z.boolean().catch(false) }).catch({ doing: '', uncertain: false }),
+  player_action: z.object({ doing: text, uncertain: z.boolean().catch(false), reading: z.string().optional().catch(undefined) }).catch({ doing: '', uncertain: false }),
   speakers: list(z.object({ id: z.string(), goal: text, feels: RawFeelsSchema.optional().catch(undefined), pressure: text, keeps: list(z.string()), touched: text, approach: text.optional(), framing: text.optional() })),
   moves: list(RawMoveSchema),
   lore: list(z.object({ entry: z.string(), who: z.string().optional().catch(undefined), line: text })),
@@ -188,6 +188,15 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan, inpu
   // (milestone 4b; found by the end-of-Milestone-4 bench, where 9 reading checks were dropped). Only while the mask
   // hides something: a feeling that shows less than it is felt.
   const felt = feelingsNow(state, plan)
+  // The player reads only the person they are trying to read (manual run of 2026-11-19: a plain question got a read
+  // of the one who answered it, at odds only a natural 20 could beat, and the dice line told the player she was hiding
+  // something). Noticing without trying is a companion's read.
+  const reading = raw.player_action.reading ? presentId(content, scene, raw.player_action.reading) : undefined
+  const unasked = plan.checks.filter((c) => c.who === 'player' && c.target && isReading(content.ruleset, c) && c.target !== reading)
+  if (unasked.length > 0) {
+    fix(`dropped ${unasked.map((c) => c.id).join(', ')}: the player isn't trying to read ${unasked.map((c) => c.target).join(', ')}`)
+    plan.checks = plan.checks.filter((c) => !unasked.includes(c))
+  }
   const throughMask = (c: (typeof plan.checks)[number]) => {
     if (!c.target || !isReading(content.ruleset, c)) return false
     const f = felt[c.target]
@@ -247,7 +256,7 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan, inpu
   const exchange: ExchangeLine[] = moves.map((m) => ({ who: m.who, answers: m.answers, point: moveText(m) }))
   const loreLines = validateLore(content, state, raw, lore, speakers, fix)
   return {
-    plan: { ...plan, exchange, moves, player_action: raw.player_action, change: raw.change, ...(loreLines.length > 0 && { lore: loreLines }) },
+    plan: { ...plan, exchange, moves, player_action: { doing: raw.player_action.doing, uncertain: raw.player_action.uncertain, ...(reading && { reading }) }, change: raw.change, ...(loreLines.length > 0 && { lore: loreLines }) },
     corrections
   }
 }

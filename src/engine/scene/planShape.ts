@@ -142,7 +142,8 @@ export interface BeatPlan {
   moves?: Move[]
   /** A pool of lore lines, apart from the moves. */
   lore?: LoreLine[]
-  player_action?: { doing: string; uncertain: boolean }
+  /** reading: who the player is trying to read, when they are (milestone 4d); only then can the player roll to read someone. */
+  player_action?: { doing: string; uncertain: boolean; reading?: string }
   change?: string
   /** Older logs only: the line-plan director's note on how the speakers' voices differ. */
   contrast?: string
