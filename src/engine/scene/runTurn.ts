@@ -16,6 +16,11 @@ import { recentlyUsed, repeatProblems, usageOf } from './repeats'
 import { loreTrace, turnLore } from './lore'
 import type { LoreBudgetOverrides } from '@engine/rules'
 import { DEFAULT_PIPELINE, isPipeline, type Pipeline } from './pipeline'
+import { gatherScene } from './gather'
+import { buildSceneDirectorPrompt } from './sceneDirector'
+import { liveRecords, parseScenePlan, sceneFallback, sceneView, validateScenePlan } from './scenePlan'
+import { buildSceneWriterPrompt, ownedProblems } from './sceneWriter'
+import { presentCast } from './planShape'
 
 /**
  * The LLM calls a turn may make. `write` streams; it is used for the scene writer and its one rewrite. Either may
@@ -52,6 +57,9 @@ export interface TurnOutcome {
   /** Everything the turn did, for the logs. */
   trace: TurnTrace
 }
+
+/** The scene writer's repeats of recently used slang and gestures are sent back from this many (Q10; *tune*). */
+export const SCENE_REPEAT_REWRITE = 3
 
 export interface TurnOptions extends ResolveOptions {
   /** The turn's id; by default the scene's id and the turn's number. The app passes one unique across sessions. */
@@ -96,18 +104,34 @@ export async function runTurn(
     // Call 1: the director.
     const lore = turnLore(content, state, input, options.loreBudgets)
     const briefs = buildBriefs(content, state, input, lore)
-    const directorPrompt = buildDirectorPrompt(content, state, input, lore, briefs)
-    const directorReply = await call('director', directorPrompt, () => llm.direct(directorPrompt))
-    const directed = parsePlan(directorReply)
-    const validated: { plan: BeatPlan; corrections: string[] } = directed ? validatePlan(content, state, directed, input, lore) : { plan: fallbackPlan(content, state, input), corrections: [] }
+    // The two pipelines differ in the director and the writer; everything between and after reads the same plan shape
+    // (the scene plan through its view, Milestone 5 task 3).
+    const scenePipeline = pipeline === 'scene'
+    let directed: boolean
+    let validated: { plan: BeatPlan; corrections: string[] }
+    if (scenePipeline) {
+      const gathered = gatherScene(content, state, input, lore, briefs)
+      const directorPrompt = buildSceneDirectorPrompt(content, state, input, lore, briefs, gathered)
+      const raw = parseScenePlan(await call('director', directorPrompt, () => llm.direct(directorPrompt)))
+      const checked = raw ? validateScenePlan(content, state, raw, gathered, input) : { plan: sceneFallback(state, gathered), corrections: [] }
+      directed = !!raw
+      validated = { plan: sceneView(checked.plan), corrections: checked.corrections }
+    } else {
+      const directorPrompt = buildDirectorPrompt(content, state, input, lore, briefs)
+      const raw = parsePlan(await call('director', directorPrompt, () => llm.direct(directorPrompt)))
+      directed = !!raw
+      validated = raw ? validatePlan(content, state, raw, input, lore) : { plan: fallbackPlan(content, state, input), corrections: [] }
+    }
     const resolved = resolvePlan(content, state, validated.plan, options)
     const dice = resolved.dice
-    const plan = settlePlan(content, state, resolved.plan)
+    const settled = settlePlan(content, state, resolved.plan)
+    // The scene plan rides along; it takes the rolled checks and the reads the view settled.
+    const plan: BeatPlan = settled.scene ? { ...settled, scene: { ...settled.scene, checks: settled.checks, ...(settled.reads && { reads: settled.reads }) } } : settled
     emit({ type: 'planned', speakers: plan.speakers.map((s) => s.id), checks: plan.checks.flatMap((c) => (c.line ? [c.line] : [])), corrections: validated.corrections, fallback: !directed })
 
     // Call 2: the writer, streamed.
     const speakers = sceneSpeakers(content, state)
-    const writerPrompt = buildWriterPrompt(content, state, plan, input)
+    const writerPrompt = scenePipeline ? buildSceneWriterPrompt(content, state, plan, input) : buildWriterPrompt(content, state, plan, input)
     const stream = (role: 'writer' | 'rewrite', prompt: Prompt) =>
       call(role, prompt, (hooks) =>
         llm.write(
@@ -125,7 +149,12 @@ export async function runTurn(
     const draft = await stream('writer', writerPrompt)
     let parsed: ParsedReply = parseReply(draft, speakers)
     const recent = recentlyUsed(content, scene)
-    const check = (reply: ParsedReply) => [...checkReply(reply, plan, speakers, input, content.phrases), ...repeatProblems(content, reply, recent), ...loreProblems(content, state, reply)]
+    // The scene writer: anyone present may speak, repeats are sent back from the third (Q10), and someone saying what only
+    // another knows is a problem (redesign §6.4).
+    const check = (reply: ParsedReply) =>
+      scenePipeline
+        ? [...checkReply(reply, plan, speakers, input, content.phrases, presentCast(scene)), ...repeatProblems(content, reply, recent, SCENE_REPEAT_REWRITE), ...loreProblems(content, state, reply), ...ownedProblems(content, state, reply)]
+        : [...checkReply(reply, plan, speakers, input, content.phrases), ...repeatProblems(content, reply, recent), ...loreProblems(content, state, reply)]
     const problems = check(parsed)
     let remaining: Problem[] = []
     let kept = parsed.beats.map((_, i) => i)
@@ -147,7 +176,7 @@ export async function runTurn(
     const departures = showDepartures(content, plan, kept.map((i) => parsed.beats[i]!))
     const beats = departures.beats
 
-    const next = applyTurn(content, state, { id: turnId, ...(options.log && { log: options.log }), input, plan, beats, tags: accepted.tags, dice, details: carryDetails(briefs.details, plan), memories: briefs.details.filter((d) => d.kind === 'memory').map((d) => d.id), secrets: activeSecrets(lore.secrets), topics: lore.layers.triggered.entries.map((e) => e.id) })
+    const next = applyTurn(content, state, { id: turnId, ...(options.log && { log: options.log }), input, plan, beats, tags: accepted.tags, dice, details: carryDetails(briefs.details, plan), memories: briefs.details.filter((d) => d.kind === 'memory').map((d) => d.id), secrets: activeSecrets(lore.secrets), topics: lore.layers.triggered.entries.map((e) => e.id), ...(plan.scene && { live: liveRecords(plan.scene) }) })
     const rewritten = problems.length > 0
     const salvage = rewritten && remaining.length > 0
     const dropped = salvage ? droppedBeats(remaining).filter((n) => n <= parsed.beats.length) : []

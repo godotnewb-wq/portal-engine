@@ -183,7 +183,7 @@ app.whenReady().then(() => {
       // Scene ids are random and unique; the number makes the turn id read in order.
       const turnId = scene ? `${scene.id}-${scene.turns.length + 1}` : undefined
       try {
-        const outcome = await runTurn(pack, state, input.trim(), turnLlm(settings.get()), send, { ...(turnId && { turnId }), ...(session && { log: session }), loreBudgets: settings.getLoreBudgets() })
+        const outcome = await runTurn(pack, state, input.trim(), turnLlm(settings.get()), send, { ...(turnId && { turnId }), ...(session && { log: session }), loreBudgets: settings.getLoreBudgets(), pipeline: settings.getPipeline() })
         const details = logs.turn(outcome.trace, { location: scene!.locationId, cast: scene!.cast }) ?? detailsOf('', outcome.trace)
         // The turn is shown now; its bookkeeper reads it while the player does, and is logged when it is done.
         const last = outcome.state.scene!.turns.at(-1)!
@@ -306,6 +306,8 @@ app.whenReady().then(() => {
   ipcMain.handle(IPC.beginLog, (_event, from: unknown) => current().logs.begin(typeof from === 'string' ? from.slice(0, 80) : 'unknown'))
   ipcMain.handle(IPC.endLog, () => playing?.logs.end())
   ipcMain.handle(IPC.getLogging, () => settings.getLogging())
+  ipcMain.handle(IPC.getPipeline, () => settings.getPipeline())
+  ipcMain.handle(IPC.setPipeline, (_event, pipeline: unknown) => settings.setPipeline(pipeline))
   ipcMain.handle(IPC.setLogging, (_event, on: unknown) => {
     const enabled = settings.setLogging(on === true)
     if (!enabled) playing?.logs.end()

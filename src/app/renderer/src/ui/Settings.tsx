@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { LLM_PROFILE_IDS, REASONING_LEVELS, type LlmProfileId, type LlmProfileView, type SettingsUpdate, type SettingsView } from '@llm'
 import { LORE_BUDGET_BOUNDS, LORE_BUDGET_FIELDS, RulesetSchema, type LoreBudgetField, type LoreBudgetOverrides } from '@engine/rules'
 import type { Pack } from '@engine/pack'
+import { PIPELINES, type Pipeline } from '@engine/scene'
 import { Button } from './Button'
 
 const LABEL: Record<LlmProfileId, { name: string; hint: string }> = {
@@ -186,6 +187,33 @@ function LoreBudgets({ pack, draft, onChange, onReset }: { pack: Pack | null; dr
   )
 }
 
+/**
+ * Which pipeline makes the turns (Milestone 5 plan, task 3): the current one, or the redesigned scene turn while it is
+ * built and compared. Saved at once, and used from the next turn.
+ */
+function TurnPipeline() {
+  const [pipeline, setPipeline] = useState<Pipeline | null>(null)
+  useEffect(() => {
+    window.api.getPipeline().then(setPipeline)
+  }, [])
+  if (pipeline === null) return null
+  const label: Record<Pipeline, string> = { situation: 'Situation (the current turn)', scene: 'Scene (the redesigned turn, in testing)' }
+  return (
+    <fieldset className="profile pipeline">
+      <legend title="How each turn is planned and written. Scene is Milestone 5's redesign: a game-master director and a writer that writes the turn as one scene.">Turn pipeline</legend>
+      <label>
+        <select value={pipeline} onChange={async (e) => setPipeline(await window.api.setPipeline(e.target.value as Pipeline))}>
+          {PIPELINES.map((p) => (
+            <option key={p} value={p}>
+              {label[p]}
+            </option>
+          ))}
+        </select>
+      </label>
+    </fieldset>
+  )
+}
+
 /** Play logs (milestone 2): on or off, and where they are. Nothing deletes them but the player. */
 function Logging() {
   const [on, setOn] = useState<boolean | null>(null)
@@ -254,6 +282,7 @@ export function Settings({ onClose, pack = null }: { onClose: () => void; pack?:
         onChange={(next) => (setSaved(''), setBudgets(next))}
         onReset={async () => (setBudgets(draftOf(await window.api.setLoreBudgets({}))), setSaved('Lore budgets reset'))}
       />
+      <TurnPipeline />
       <Logging />
       <div className="row">
         <Button variant="primary" onClick={save} disabled={!budgetsValid}>

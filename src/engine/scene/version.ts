@@ -3,6 +3,8 @@ import { directorRules } from './director'
 import { DEFAULT_PIPELINE, type Pipeline } from './pipeline'
 import { BEATS, OVERUSED_PHRASES } from './style'
 import { WRITER_FORMAT, WRITER_STYLE } from './writer'
+import { sceneDirectorRules } from './sceneDirector'
+import { SCENE_FORMAT, SCENE_STYLE } from './sceneWriter'
 
 /**
  * The fixed text a pipeline's turn prompts are built from: the director's rules, the writer's style and format, the
@@ -17,5 +19,7 @@ export function promptSources(content: Pack, pipeline: Pipeline = DEFAULT_PIPELI
   switch (pipeline) {
     case 'situation':
       return [directorRules(content.ruleset), WRITER_STYLE, WRITER_FORMAT, JSON.stringify(BEATS), OVERUSED_PHRASES.join('\n'), content.phrases.join('\n'), content.tone]
+    case 'scene':
+      return [sceneDirectorRules(content.ruleset), SCENE_STYLE, SCENE_FORMAT, JSON.stringify(BEATS), OVERUSED_PHRASES.join('\n'), content.phrases.join('\n'), content.tone]
   }
 }

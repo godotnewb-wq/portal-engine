@@ -5,7 +5,7 @@ import { characterById, type Pack } from '@engine/pack'
 import type { GameState } from '@engine/state'
 import { justSaid, type Gathered, type LiveRecord, type PoolFact, type SecretOption, type TieOption } from './gather'
 import { feltNow, playerChecks, RawFeelsSchema, validateChecks, validateLeaves, validateWalkOns } from './plan'
-import { list, MAX_SPEAKERS, oneOrList, PlannedCheckSchema, presentId, QUOTED_WORDS, text, type PlannedCheck, type Read } from './planShape'
+import { list, MAX_SPEAKERS, oneOrList, PlannedCheckSchema, presentId, QUOTED_WORDS, text, type BeatPlan, type PlannedCheck, type Read } from './planShape'
 
 /**
  * The `scene` pipeline's plan (scene system redesign §4 "The director: a game master, not a playwright"; Milestone 5
@@ -284,3 +284,66 @@ export function validateScenePlan(content: Pack, state: GameState, raw: RawScene
 
 /** The pressures played live, as the turn keeps them (`Turn.live`), so the next turns' gathering sees them. */
 export const liveRecords = (plan: Pick<ScenePlan, 'pressures'>): LiveRecord[] => plan.pressures.map((p) => ({ who: p.who, kind: p.kind, ref: p.ref }))
+
+/**
+ * The scene plan seen as a situation plan (Milestone 5 plan, task 3), so everything after the writer reads it as before:
+ * applying the turn (feelings, aim strengths, kept secrets, reads, departures), settling the checks (tells, reads), the
+ * bookkeeper, the trace and the metrics. The people in focus are its speakers: what they want is their intent, a live
+ * secret is what they keep. No moves, no exchange, no reactions and no texture: the writer writes the scene. The plan
+ * itself rides along as `scene`.
+ */
+export function sceneView(plan: ScenePlan): BeatPlan {
+  const moments = new Map(plan.moments.map((m) => [m.who, m]))
+  return {
+    speakers: plan.focus.map((id) => {
+      const m = moments.get(id)
+      const secret = plan.pressures.find((p) => p.who === id && p.kind === 'secret')
+      return {
+        id,
+        intent: m?.wants ?? '',
+        ...(m?.feels && { feels: m.feels }),
+        ...(plan.strengths[id] && { pressure: plan.strengths[id] }),
+        ...(secret && { hiding: secret.text, approach: secret.approach ?? 'deflect', kept: [secret.ref] })
+      }
+    }),
+    exchange: [],
+    reactions: [],
+    checks: plan.checks,
+    ...(plan.reads && { reads: plan.reads }),
+    walk_ons: plan.walk_ons,
+    texture: [],
+    avoid: plan.avoid,
+    leaves: plan.leaves,
+    end_scene: plan.end_scene,
+    moves: [],
+    player_action: plan.player_action,
+    scene: plan
+  }
+}
+
+/**
+ * The plan when the director's reply can't be read: the game's own, at no extra call, as the situation pipeline's
+ * `fallbackPlan`. Whoever spoke last turn, else everyone present up to the cap, is in focus, wanting to answer what
+ * was asked; nothing is live and nothing is drawn on.
+ */
+export function sceneFallback(state: GameState, gathered: Gathered): ScenePlan {
+  const scene = state.scene!
+  const last = scene.turns.at(-1)?.speakers ?? []
+  const present = Object.keys(gathered.options)
+  const focus = (last.filter((id) => present.includes(id)).length > 0 ? last.filter((id) => present.includes(id)) : present).slice(0, MAX_SPEAKERS)
+  return {
+    pipeline: 'scene',
+    player_action: { doing: '', uncertain: false },
+    checks: [],
+    focus,
+    moments: focus.map((who) => ({ who, lands: '', wants: 'to answer what was asked' })),
+    strengths: Object.fromEntries(Object.entries(gathered.options).map(([id, o]) => [id, o.goal.strength])),
+    pressures: [],
+    pools: {},
+    stakes: '',
+    walk_ons: [],
+    leaves: [],
+    end_scene: false,
+    avoid: []
+  }
+}

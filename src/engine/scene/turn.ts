@@ -30,6 +30,8 @@ export interface TurnWritten {
   secrets?: { id: string; how: 'kept' | 'full' | 'keyword' | 'context' }[]
   /** The turn's records, when they are already known (tests, tools); left out, the plan's stand in until the bookkeeper answers. */
   records?: Bookkeeping
+  /** The pressures the `scene` pipeline played live (Milestone 5, task 1), kept on the turn as `live`. */
+  live?: { who: string; kind: 'goal' | 'secret' | 'tie'; ref: string }[]
 }
 
 export function rolledChecks(plan: BeatPlan): RolledCheck[] {
@@ -151,6 +153,7 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
   }
   const kept = written.plan.speakers.flatMap((s) => s.kept ?? [])
   if (kept.length > 0) turn.kept = kept
+  if (written.live && written.live.length > 0) turn.live = written.live
   if (written.details && written.details.length > 0) turn.details = written.details
   if (written.plan.reads && written.plan.reads.length > 0) turn.reads = written.plan.reads
   if (written.memories && written.memories.length > 0) turn.memories = written.memories

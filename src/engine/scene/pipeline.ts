@@ -3,7 +3,7 @@
  * in code since Milestone 2 and the only one since 3.6 removed `lines`. Milestone 5 builds `scene` beside it, so the
  * two can be played on the same scenarios and compared, and then removes `situation`.
  */
-export const PIPELINES = ['situation'] as const
+export const PIPELINES = ['situation', 'scene'] as const
 
 export type Pipeline = (typeof PIPELINES)[number]
 

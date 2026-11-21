@@ -70,7 +70,7 @@ export const gestureKey = (g: string) => {
  * Recently used slang and gestures that come back in a draft. One repeat is let through (a word can come back for a
  * reason); from `REPEAT_REWRITE` on, the draft is sent back.
  */
-export function repeatProblems(content: Pack, parsed: ParsedReply, recent: Record<string, RecentUse>): Problem[] {
+export function repeatProblems(content: Pack, parsed: ParsedReply, recent: Record<string, RecentUse>, rewriteAt = REPEAT_REWRITE): Problem[] {
   const hits: { beat: number; text: string }[] = []
   parsed.beats.forEach((b, i) => {
     for (const [id, used] of Object.entries(recent)) {
@@ -82,7 +82,7 @@ export function repeatProblems(content: Pack, parsed: ParsedReply, recent: Recor
       }
     }
   })
-  if (hits.length < REPEAT_REWRITE) return []
+  if (hits.length < rewriteAt) return []
   return hits.map((h) => ({ kind: 'repeated' as const, beat: h.beat, text: h.text, fix: `Beat ${h.beat} repeats "${h.text}", used in the last turns. Say or show it another way, or leave it out.` }))
 }
 

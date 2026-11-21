@@ -14,7 +14,7 @@ npm run bench -- --repeat 10                    play each scenario 10 times, see
 npm run bench -- --score                        run the AI scorer on the run when it finishes (see tools/logs)
 npm run bench -- --scenario turn.json           a scenario file from elsewhere, e.g. made by npm run logs -- to-scenario
 npm run bench -- --mock                         no LLM: checks the harness, not the prose
-npm run bench -- --pipeline situation           which pipeline makes the turns (default situation; Milestone 5 adds scene)
+npm run bench -- --pipeline situation           which pipeline makes the turns (situation, the default, or scene: Milestone 5's game-master director and scene writer)
 npm run bench -- --compare bench-output/<run A> bench-output/<run B>
 npm run bench -- --fill bench-output/<run>      re-play the run's stopped plays into it, up to two tries each
 ```

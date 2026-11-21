@@ -3,6 +3,7 @@ import type { CheckResult, Difficulty, Ruleset, Skill } from '@engine/rules'
 import { feelingLabel, type Feeling } from '@engine/characters'
 import type { Scene } from '@engine/state'
 import { characterById, type Pack } from '@engine/pack'
+import type { ScenePlan } from './scenePlan'
 
 /**
  * What the director's plan is once checked (director writer §4): its types, its limits, and the helpers that read
@@ -160,6 +161,11 @@ export interface BeatPlan {
   change?: string
   /** Older logs only: the line-plan director's note on how the speakers' voices differ. */
   contrast?: string
+  /**
+   * A turn the `scene` pipeline made (Milestone 5): its own plan. The rest of this plan is a view of it (`sceneView`),
+   * so applying the turn, the bookkeeper, the trace and the metrics read it as they read the situation plan.
+   */
+  scene?: ScenePlan
 }
 
 /**

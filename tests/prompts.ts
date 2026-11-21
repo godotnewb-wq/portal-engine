@@ -1,7 +1,7 @@
 import type { Prompt } from '@engine/core'
 import type { Pack } from '@engine/pack'
 import type { GameState } from '@engine/state'
-import { runTurn, type TurnLlm, buildBriefs, buildSceneDirectorPrompt, gatherScene, parseScenePlan, turnLore, validateScenePlan } from '@engine/scene'
+import { runTurn, type Pipeline, type TurnLlm, buildBriefs, buildSceneDirectorPrompt, gatherScene, parseScenePlan, turnLore, validateScenePlan } from '@engine/scene'
 import { endScene, judgeScene, witnesses } from '@engine/relationships'
 import { answerTie } from '@engine/state'
 
@@ -36,7 +36,7 @@ const promptText = (heading: string, p: Prompt) => `===== ${heading} =====\n----
  * call's meters, feelings and ties, and the memory call's memories), and each call reads its own fields from it.
  * `answer`: how the player answers any relationship change that waits on them (milestone 4b); yes by default.
  */
-export async function playScene(content: Pack, start: GameState, turns: ScriptedTurn[], replies: Record<string, object | string> = {}, answer = true): Promise<PlayedScene> {
+export async function playScene(content: Pack, start: GameState, turns: ScriptedTurn[], replies: Record<string, object | string> = {}, answer = true, pipeline: Pipeline = 'situation'): Promise<PlayedScene> {
   const prompts: string[] = []
   const record: string[] = []
   let state = start
@@ -56,7 +56,7 @@ export async function playScene(content: Pack, start: GameState, turns: Scripted
         return reply
       }
     }
-    const outcome = await runTurn(content, state, t.input, llm, () => {}, { now: () => 0 })
+    const outcome = await runTurn(content, state, t.input, llm, () => {}, { now: () => 0, pipeline })
     state = outcome.state
     const { turns: _turns, ...scene } = state.scene!
     record.push(

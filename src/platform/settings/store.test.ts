@@ -52,6 +52,19 @@ describe('logging', () => {
   })
 })
 
+// Milestone 5 plan, task 3: the app can play the redesigned turn while it is built and compared.
+describe('the turn pipeline', () => {
+  it('is situation by default, remembers scene, and ignores anything it doesn’t know', () => {
+    const path = pathIn()
+    const store = new SettingsStore(path, cipher)
+    expect(store.getPipeline()).toBe('situation')
+    expect(store.setPipeline('scene')).toBe('scene')
+    expect(new SettingsStore(path, cipher).getPipeline()).toBe('scene')
+    expect(store.setPipeline('lines')).toBe('scene')
+    expect(store.setPipeline(7)).toBe('scene')
+  })
+})
+
 describe('lore budgets', () => {
   it('start empty (the packs’ own apply), keep what was set across restarts, and clean it', () => {
     const path = pathIn()

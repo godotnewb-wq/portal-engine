@@ -7,7 +7,7 @@ import type { PackListing } from '@platform/packs'
 import { mockLlm } from '../bench/mock'
 import type { GameState } from '@engine/state'
 import type { RendererApi, SceneEvent } from '@app/ipc'
-import { bookkeep, runTurn, type TurnLlm } from '@engine/scene'
+import { bookkeep, DEFAULT_PIPELINE, runTurn, type Pipeline, type TurnLlm } from '@engine/scene'
 import type { CallTrace } from '@engine/core'
 import { endScene, judgeScene } from '@engine/relationships'
 import { currentFlags, type FlagRecord } from '@engine/review'
@@ -98,6 +98,7 @@ const scripted: TurnLlm = {
 // Logs live in memory for the preview: one session, its turns' details and its flags.
 const SESSION = 'preview'
 let logging = true
+let pipeline: Pipeline = DEFAULT_PIPELINE
 let loreBudgets: LoreBudgetOverrides = {}
 const logged = new Map<string, TurnDetails>()
 // Every call made, whole, so a Calls tab can open its prompt and reply (milestone 4d).
@@ -161,7 +162,7 @@ const api: RendererApi = {
   testConnection: async () => ({ ok: true, detail: 'mock' }),
   sceneTurn: async ({ state, input }) => {
     const llm = content.manifest.id === 'neonpunk-nights' ? scripted : mockLlm().turn
-    const outcome = await runTurn(content, state, input, llm, emit, { loreBudgets, ...(logging && { log: SESSION }) })
+    const outcome = await runTurn(content, state, input, llm, emit, { loreBudgets, pipeline, ...(logging && { log: SESSION }) })
     const { calls, ...trace } = outcome.trace
     for (const c of calls) made.set(c.id, c)
     const details: TurnDetails = {
@@ -223,6 +224,8 @@ const api: RendererApi = {
   endLog: async () => {},
   getLogging: async () => logging,
   setLogging: async (on) => (logging = on),
+  getPipeline: async () => pipeline,
+  setPipeline: async (next) => (pipeline = next),
   openLogsFolder: async () => '(preview: logs are in memory)',
   flag: async (input) => {
     const record: FlagRecord = { session: SESSION, ...input, at: new Date().toISOString() }

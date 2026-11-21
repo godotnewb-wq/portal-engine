@@ -1,0 +1,985 @@
+===== turn 1 =====
+{
+  "input": "Evening, both. Busy night?",
+  "fallback": false,
+  "corrections": [],
+  "plan": {
+    "speakers": [
+      {
+        "id": "mara",
+        "intent": "to finish the tally",
+        "pressure": "idle"
+      },
+      {
+        "id": "tobin",
+        "intent": "to be friendly",
+        "pressure": "idle"
+      }
+    ],
+    "exchange": [],
+    "reactions": [],
+    "checks": [],
+    "walk_ons": [],
+    "texture": [],
+    "avoid": [],
+    "leaves": [],
+    "end_scene": false,
+    "moves": [],
+    "player_action": {
+      "doing": "greets them",
+      "uncertain": false
+    },
+    "scene": {
+      "pipeline": "scene",
+      "player_action": {
+        "doing": "greets them",
+        "uncertain": false
+      },
+      "checks": [],
+      "focus": [
+        "mara",
+        "tobin"
+      ],
+      "moments": [
+        {
+          "who": "mara",
+          "lands": "a greeting at the end of a long count",
+          "wants": "to finish the tally"
+        },
+        {
+          "who": "tobin",
+          "lands": "someone to talk to who isn’t Mara",
+          "wants": "to be friendly"
+        }
+      ],
+      "strengths": {
+        "mara": "idle",
+        "tobin": "idle"
+      },
+      "pressures": [],
+      "pools": {},
+      "stakes": "whether anyone talks about the night",
+      "walk_ons": [],
+      "leaves": [],
+      "end_scene": false,
+      "avoid": []
+    }
+  },
+  "checks": [],
+  "lore": {
+    "stage": [
+      "location.upper",
+      "location.lower",
+      "faction.guild",
+      "faction.watch",
+      "concept.pennies"
+    ],
+    "scene": [
+      {
+        "id": "location.lower.east-gate.the-yard",
+        "title": "The Guild Yard",
+        "form": "full"
+      },
+      {
+        "id": "location.lower.east-gate",
+        "title": "East Gate",
+        "form": "full"
+      },
+      {
+        "id": "location.lower",
+        "title": "The Lower Ward",
+        "form": "full"
+      },
+      {
+        "id": "faction.guild",
+        "title": "The Guild",
+        "form": "full"
+      },
+      {
+        "id": "faction.guild.tallies",
+        "title": "How the tallies work",
+        "form": "full"
+      },
+      {
+        "id": "species.automaton",
+        "title": "Automaton culture",
+        "form": "full"
+      }
+    ],
+    "triggered": [],
+    "stances": [],
+    "tokens": {
+      "stage": 91,
+      "writerStage": 60,
+      "scene": 223,
+      "triggered": 0
+    },
+    "budgets": {
+      "sceneTokens": 1200,
+      "triggeredTokens": 800,
+      "loreLines": 3,
+      "set": []
+    },
+    "budgetCuts": {
+      "scene": {
+        "shortened": [],
+        "dropped": []
+      },
+      "triggered": {
+        "shortened": [],
+        "dropped": []
+      }
+    },
+    "secrets": [
+      {
+        "holder": "mara",
+        "id": "mara.two-books",
+        "kind": "linked",
+        "form": "cue",
+        "cueTokens": 29,
+        "expansionTokens": 0
+      },
+      {
+        "holder": "tobin",
+        "id": "tobin.after-closing",
+        "kind": "personal",
+        "form": "cue",
+        "cueTokens": 22,
+        "expansionTokens": 0
+      }
+    ]
+  },
+  "brief": {
+    "budget": 500,
+    "used": 0,
+    "selected": [],
+    "cut": [],
+    "dropped": [],
+    "recurring": {
+      "mara": 173,
+      "tobin": 136
+    },
+    "memories": {},
+    "recalled": {}
+  },
+  "findings": [],
+  "remaining": [],
+  "beats": [
+    {
+      "kind": "narration",
+      "text": "Tobin straightens up from the crates."
+    },
+    {
+      "kind": "dialogue",
+      "speaker": "tobin",
+      "text": "Busy enough. Carts till dark."
+    },
+    {
+      "kind": "dialogue",
+      "speaker": "mara",
+      "text": "Some of us are still counting them."
+    },
+    {
+      "kind": "narration",
+      "text": "Mara doesn't look up."
+    }
+  ],
+  "tags": {
+    "parsed": {
+      "expressions": {
+        "tobin": "friendly",
+        "mara": "tired"
+      },
+      "comfort": {},
+      "leaves": [],
+      "ended": false
+    },
+    "dropped": []
+  },
+  "scene": {
+    "id": "scene-1200",
+    "locationId": "the-yard",
+    "cast": [
+      "mara",
+      "tobin"
+    ],
+    "walkOns": [
+      "clerk"
+    ],
+    "summary": "",
+    "moods": {
+      "mara": {
+        "shade": "glum",
+        "family": "sad",
+        "intensity": 1,
+        "text": "busy, curious"
+      },
+      "tobin": {
+        "shade": "sore",
+        "family": "sad",
+        "intensity": 2,
+        "text": "uneasy"
+      }
+    },
+    "comfort": {
+      "mara": 3,
+      "tobin": 3
+    },
+    "expressions": {
+      "mara": "tired",
+      "tobin": "friendly"
+    },
+    "departed": [],
+    "ended": false,
+    "baseline": {
+      "mara": {
+        "warmth": 2,
+        "bond": 3
+      },
+      "tobin": {
+        "warmth": -2,
+        "bond": -2
+      }
+    },
+    "told": [],
+    "newFacts": [],
+    "pressures": {
+      "mara": 0,
+      "tobin": 0
+    },
+    "tells": [],
+    "pendingTies": [],
+    "answered": [],
+    "peaks": {
+      "mara": 1,
+      "tobin": 2
+    },
+    "tieEvents": []
+  }
+}
+
+===== turn 2 =====
+{
+  "input": "Is there a second ledger, Mara?",
+  "fallback": false,
+  "corrections": [
+    "mara can't draw on \"lore.faction.guild.second-ledger\": not in their pool"
+  ],
+  "plan": {
+    "speakers": [
+      {
+        "id": "mara",
+        "intent": "to close it down",
+        "feels": {
+          "shade": "glum",
+          "family": "sad",
+          "intensity": 3,
+          "reason": "the question she dreads"
+        },
+        "pressure": "keen",
+        "hiding": "Mara's part: she keeps the second ledger. A second ledger records what the yard really takes in. It is kept in the tally office, under the floor. How Mara feels about it: would rather lose her post than see it found.",
+        "approach": "lie",
+        "kept": [
+          "mara.two-books"
+        ],
+        "tell": "Gives exact numbers"
+      }
+    ],
+    "exchange": [],
+    "reactions": [],
+    "checks": [],
+    "walk_ons": [],
+    "texture": [],
+    "avoid": [],
+    "leaves": [],
+    "end_scene": false,
+    "moves": [],
+    "player_action": {
+      "doing": "asks Mara straight out",
+      "uncertain": false
+    },
+    "scene": {
+      "pipeline": "scene",
+      "player_action": {
+        "doing": "asks Mara straight out",
+        "uncertain": false
+      },
+      "checks": [],
+      "focus": [
+        "mara"
+      ],
+      "moments": [
+        {
+          "who": "mara",
+          "feels": {
+            "shade": "glum",
+            "family": "sad",
+            "intensity": 3,
+            "reason": "the question she dreads"
+          },
+          "lands": "the one question she has no good answer to",
+          "wants": "to close it down"
+        }
+      ],
+      "strengths": {
+        "mara": "keen",
+        "tobin": "idle"
+      },
+      "pressures": [
+        {
+          "who": "mara",
+          "kind": "secret",
+          "ref": "mara.two-books",
+          "text": "Mara's part: she keeps the second ledger. A second ledger records what the yard really takes in. It is kept in the tally office, under the floor. How Mara feels about it: would rather lose her post than see it found.",
+          "how": "keyword",
+          "touched": "second ledger",
+          "approach": "lie"
+        }
+      ],
+      "pools": {},
+      "stakes": "whether Kit believes there is one book",
+      "walk_ons": [],
+      "leaves": [],
+      "end_scene": false,
+      "avoid": []
+    }
+  },
+  "checks": [],
+  "lore": {
+    "stage": [
+      "location.upper",
+      "location.lower",
+      "faction.guild",
+      "faction.watch",
+      "concept.pennies"
+    ],
+    "scene": [
+      {
+        "id": "location.lower.east-gate.the-yard",
+        "title": "The Guild Yard",
+        "form": "full"
+      },
+      {
+        "id": "location.lower.east-gate",
+        "title": "East Gate",
+        "form": "full"
+      },
+      {
+        "id": "location.lower",
+        "title": "The Lower Ward",
+        "form": "full"
+      },
+      {
+        "id": "faction.guild",
+        "title": "The Guild",
+        "form": "full"
+      },
+      {
+        "id": "faction.guild.tallies",
+        "title": "How the tallies work",
+        "form": "full"
+      },
+      {
+        "id": "species.automaton",
+        "title": "Automaton culture",
+        "form": "full"
+      }
+    ],
+    "triggered": [],
+    "stances": [],
+    "tokens": {
+      "stage": 91,
+      "writerStage": 60,
+      "scene": 223,
+      "triggered": 0
+    },
+    "budgets": {
+      "sceneTokens": 1200,
+      "triggeredTokens": 800,
+      "loreLines": 3,
+      "set": []
+    },
+    "budgetCuts": {
+      "scene": {
+        "shortened": [],
+        "dropped": []
+      },
+      "triggered": {
+        "shortened": [],
+        "dropped": []
+      }
+    },
+    "secrets": [
+      {
+        "holder": "mara",
+        "id": "mara.two-books",
+        "kind": "linked",
+        "form": "full",
+        "priority": "keyword",
+        "cueTokens": 29,
+        "expansionTokens": 38
+      },
+      {
+        "holder": "tobin",
+        "id": "tobin.after-closing",
+        "kind": "personal",
+        "form": "cue",
+        "cueTokens": 22,
+        "expansionTokens": 0
+      }
+    ]
+  },
+  "brief": {
+    "budget": 500,
+    "used": 32,
+    "selected": [
+      {
+        "id": "mara.motive1",
+        "owner": "mara",
+        "kind": "motive",
+        "rank": "choice",
+        "trigger": "addressed",
+        "tokens": 18
+      },
+      {
+        "id": "note.mara.tobin",
+        "owner": "mara",
+        "kind": "note",
+        "rank": "choice",
+        "trigger": "the pair spoke last turn",
+        "tokens": 14
+      }
+    ],
+    "cut": [],
+    "dropped": [],
+    "recurring": {
+      "mara": 211,
+      "tobin": 136
+    },
+    "memories": {},
+    "recalled": {}
+  },
+  "findings": [
+    {
+      "kind": "player-action",
+      "beat": 2,
+      "text": "You nod",
+      "fix": "Beat 2 has the player nod (\"You nod\"), which their input did not say. Remove it."
+    }
+  ],
+  "remaining": [],
+  "beats": [
+    {
+      "kind": "dialogue",
+      "speaker": "mara",
+      "text": "One book, Kit."
+    },
+    {
+      "kind": "narration",
+      "text": "Mara closes it with both hands."
+    },
+    {
+      "kind": "narration",
+      "text": "Tobin finds something to do with a strap."
+    }
+  ],
+  "tags": {
+    "parsed": {
+      "expressions": {
+        "mara": "guarded"
+      },
+      "comfort": {},
+      "leaves": [],
+      "ended": false
+    },
+    "dropped": []
+  },
+  "scene": {
+    "id": "scene-1200",
+    "locationId": "the-yard",
+    "cast": [
+      "mara",
+      "tobin"
+    ],
+    "walkOns": [
+      "clerk"
+    ],
+    "summary": "",
+    "moods": {
+      "mara": {
+        "shade": "glum",
+        "family": "sad",
+        "intensity": 3,
+        "reason": "the question she dreads"
+      },
+      "tobin": {
+        "shade": "sore",
+        "family": "sad",
+        "intensity": 2,
+        "text": "uneasy"
+      }
+    },
+    "comfort": {
+      "mara": 3,
+      "tobin": 3
+    },
+    "expressions": {
+      "mara": "guarded",
+      "tobin": "friendly"
+    },
+    "departed": [],
+    "ended": false,
+    "baseline": {
+      "mara": {
+        "warmth": 2,
+        "bond": 3
+      },
+      "tobin": {
+        "warmth": -2,
+        "bond": -2
+      }
+    },
+    "told": [],
+    "newFacts": [],
+    "pressures": {
+      "mara": 1,
+      "tobin": 0
+    },
+    "tells": [
+      "mara.two-books"
+    ],
+    "pendingTies": [],
+    "answered": [],
+    "peaks": {
+      "mara": 3,
+      "tobin": 2
+    },
+    "tieEvents": []
+  }
+}
+
+===== turn 3 =====
+{
+  "input": "Then I’ll leave you to it. Goodnight.",
+  "fallback": false,
+  "corrections": [],
+  "plan": {
+    "speakers": [
+      {
+        "id": "mara",
+        "intent": "the yard shut and empty",
+        "pressure": "keen"
+      },
+      {
+        "id": "tobin",
+        "intent": "to get home",
+        "pressure": "idle"
+      }
+    ],
+    "exchange": [],
+    "reactions": [],
+    "checks": [],
+    "walk_ons": [],
+    "texture": [],
+    "avoid": [],
+    "leaves": [
+      "tobin"
+    ],
+    "end_scene": true,
+    "moves": [],
+    "player_action": {
+      "doing": "says goodnight",
+      "uncertain": false
+    },
+    "scene": {
+      "pipeline": "scene",
+      "player_action": {
+        "doing": "says goodnight",
+        "uncertain": false
+      },
+      "checks": [],
+      "focus": [
+        "mara",
+        "tobin"
+      ],
+      "moments": [
+        {
+          "who": "mara",
+          "lands": "relief she hides",
+          "wants": "the yard shut and empty"
+        },
+        {
+          "who": "tobin",
+          "lands": "his cue to go",
+          "wants": "to get home"
+        }
+      ],
+      "strengths": {
+        "mara": "keen",
+        "tobin": "idle"
+      },
+      "pressures": [],
+      "pools": {},
+      "stakes": "the night ends",
+      "walk_ons": [],
+      "leaves": [
+        "tobin"
+      ],
+      "end_scene": true,
+      "avoid": []
+    }
+  },
+  "checks": [],
+  "lore": {
+    "stage": [
+      "location.upper",
+      "location.lower",
+      "faction.guild",
+      "faction.watch",
+      "concept.pennies"
+    ],
+    "scene": [
+      {
+        "id": "location.lower.east-gate.the-yard",
+        "title": "The Guild Yard",
+        "form": "full"
+      },
+      {
+        "id": "location.lower.east-gate",
+        "title": "East Gate",
+        "form": "full"
+      },
+      {
+        "id": "location.lower",
+        "title": "The Lower Ward",
+        "form": "full"
+      },
+      {
+        "id": "faction.guild",
+        "title": "The Guild",
+        "form": "full"
+      },
+      {
+        "id": "faction.guild.tallies",
+        "title": "How the tallies work",
+        "form": "full"
+      },
+      {
+        "id": "species.automaton",
+        "title": "Automaton culture",
+        "form": "full"
+      }
+    ],
+    "triggered": [],
+    "stances": [],
+    "tokens": {
+      "stage": 91,
+      "writerStage": 60,
+      "scene": 223,
+      "triggered": 0
+    },
+    "budgets": {
+      "sceneTokens": 1200,
+      "triggeredTokens": 800,
+      "loreLines": 3,
+      "set": []
+    },
+    "budgetCuts": {
+      "scene": {
+        "shortened": [],
+        "dropped": []
+      },
+      "triggered": {
+        "shortened": [],
+        "dropped": []
+      }
+    },
+    "secrets": [
+      {
+        "holder": "mara",
+        "id": "mara.two-books",
+        "kind": "linked",
+        "form": "full",
+        "priority": "kept",
+        "cueTokens": 29,
+        "expansionTokens": 38
+      },
+      {
+        "holder": "tobin",
+        "id": "tobin.after-closing",
+        "kind": "personal",
+        "form": "cue",
+        "cueTokens": 22,
+        "expansionTokens": 0
+      }
+    ]
+  },
+  "brief": {
+    "budget": 500,
+    "used": 0,
+    "selected": [],
+    "cut": [],
+    "dropped": [],
+    "recurring": {
+      "mara": 211,
+      "tobin": 136
+    },
+    "memories": {},
+    "recalled": {}
+  },
+  "findings": [],
+  "remaining": [],
+  "beats": [
+    {
+      "kind": "dialogue",
+      "speaker": "tobin",
+      "text": "Night, then."
+    },
+    {
+      "kind": "narration",
+      "text": "Tobin shoulders his bag and heads for the gate."
+    },
+    {
+      "kind": "dialogue",
+      "speaker": "mara",
+      "text": "Lock it behind you."
+    },
+    {
+      "kind": "narration",
+      "text": "Mara is already turning the lamp down."
+    }
+  ],
+  "tags": {
+    "parsed": {
+      "expressions": {},
+      "comfort": {},
+      "leaves": [
+        "tobin"
+      ],
+      "ended": true
+    },
+    "dropped": []
+  },
+  "scene": {
+    "id": "scene-1200",
+    "locationId": "the-yard",
+    "cast": [
+      "mara",
+      "tobin"
+    ],
+    "walkOns": [
+      "clerk"
+    ],
+    "summary": "",
+    "moods": {
+      "mara": {
+        "shade": "glum",
+        "family": "sad",
+        "intensity": 3,
+        "reason": "the question she dreads"
+      },
+      "tobin": {
+        "shade": "sore",
+        "family": "sad",
+        "intensity": 2,
+        "text": "uneasy"
+      }
+    },
+    "comfort": {
+      "mara": 3,
+      "tobin": 3
+    },
+    "expressions": {
+      "mara": "guarded",
+      "tobin": "friendly"
+    },
+    "departed": [
+      "tobin"
+    ],
+    "ended": true,
+    "baseline": {
+      "mara": {
+        "warmth": 2,
+        "bond": 3
+      },
+      "tobin": {
+        "warmth": -2,
+        "bond": -2
+      }
+    },
+    "told": [],
+    "newFacts": [],
+    "pressures": {
+      "mara": 1,
+      "tobin": 0
+    },
+    "tells": [
+      "mara.two-books"
+    ],
+    "pendingTies": [],
+    "answered": [],
+    "peaks": {
+      "mara": 3,
+      "tobin": 2
+    },
+    "tieEvents": []
+  }
+}
+
+===== relationship calls =====
+{
+  "witnesses": [
+    {
+      "id": "mara",
+      "relationship": {
+        "reason": "Kit let it go",
+        "delta": {
+          "warmth": 0,
+          "bond": 0
+        },
+        "others": [],
+        "toward": [],
+        "resolved": [],
+        "ties": []
+      }
+    },
+    {
+      "id": "tobin",
+      "relationship": {
+        "reason": "a quiet night",
+        "delta": {
+          "warmth": 0,
+          "bond": 0
+        },
+        "others": [],
+        "toward": [],
+        "resolved": [],
+        "ties": []
+      }
+    }
+  ],
+  "sceneId": "scene-1200",
+  "at": "1970-01-01T00:00:00.000Z",
+  "stated": [],
+  "applied": [],
+  "pending": [],
+  "refused": [],
+  "alone": [],
+  "answered": []
+}
+
+===== end of scene =====
+{
+  "witnesses": [
+    {
+      "id": "mara",
+      "summary": {
+        "memories": [
+          {
+            "text": "Kit asked about the second ledger, and I told them there was one book.",
+            "level": "normal",
+            "why": "",
+            "about": [
+              "player"
+            ]
+          }
+        ],
+        "revisited": [],
+        "reason": "Kit let it go",
+        "delta": {
+          "warmth": 0,
+          "bond": 0
+        },
+        "others": [],
+        "toward": [],
+        "resolved": []
+      },
+      "report": {
+        "id": "mara",
+        "memory": "Kit asked about the second ledger, and I told them there was one book.",
+        "level": "normal",
+        "memories": [
+          {
+            "id": "mara.m1",
+            "text": "Kit asked about the second ledger, and I told them there was one book.",
+            "level": "normal"
+          }
+        ],
+        "revisited": [],
+        "memoryNotes": [],
+        "heard": [],
+        "reason": "Kit let it go",
+        "before": {
+          "warmth": 2,
+          "bond": 3
+        },
+        "after": {
+          "warmth": 2,
+          "bond": 3
+        },
+        "learned": [],
+        "others": [],
+        "carried": {
+          "toward": [],
+          "resolved": [],
+          "dropped": []
+        }
+      }
+    },
+    {
+      "id": "tobin",
+      "summary": {
+        "memories": [
+          {
+            "text": "Kit asked Mara about a second ledger.",
+            "level": "normal",
+            "why": "",
+            "about": [
+              "mara"
+            ]
+          }
+        ],
+        "revisited": [],
+        "reason": "a quiet night",
+        "delta": {
+          "warmth": 0,
+          "bond": 0
+        },
+        "others": [],
+        "toward": [],
+        "resolved": []
+      },
+      "report": {
+        "id": "tobin",
+        "memory": "Kit asked Mara about a second ledger.",
+        "level": "normal",
+        "memories": [
+          {
+            "id": "tobin.m1",
+            "text": "Kit asked Mara about a second ledger.",
+            "level": "normal"
+          }
+        ],
+        "revisited": [],
+        "memoryNotes": [],
+        "heard": [],
+        "reason": "a quiet night",
+        "before": {
+          "warmth": -2,
+          "bond": -2
+        },
+        "after": {
+          "warmth": -2,
+          "bond": -2
+        },
+        "learned": [],
+        "others": [],
+        "carried": {
+          "toward": [],
+          "resolved": [],
+          "dropped": []
+        }
+      }
+    }
+  ]
+}

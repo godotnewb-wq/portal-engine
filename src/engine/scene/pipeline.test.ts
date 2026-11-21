@@ -14,8 +14,9 @@ const llm: TurnLlm = {
 }
 
 describe('pipelines', () => {
-  it('are situation for now, which is the default', () => {
-    expect(PIPELINES).toEqual(['situation'])
+  it('are situation and scene, with situation the default', () => {
+    expect(PIPELINES).toEqual(['situation', 'scene'])
+    expect(isPipeline('scene')).toBe(true)
     expect(DEFAULT_PIPELINE).toBe('situation')
     expect(isPipeline('situation')).toBe(true)
     expect(isPipeline('lines')).toBe(false)
@@ -33,7 +34,8 @@ describe('pipelines', () => {
     expect(calls).toBe(0)
   })
 
-  it('give situation the prompt sources it had before the choice existed', () => {
+  it('give situation the prompt sources it had before the choice existed, and scene its own', () => {
     expect(promptSources(fixture, 'situation')).toEqual(promptSources(fixture))
+    expect(promptSources(fixture, 'scene')).not.toEqual(promptSources(fixture, 'situation'))
   })
 })

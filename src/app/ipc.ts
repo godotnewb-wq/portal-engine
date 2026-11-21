@@ -1,5 +1,5 @@
 import type { Pack } from '@engine/pack'
-import type { TurnEvent } from '@engine/scene'
+import type { Pipeline, TurnEvent } from '@engine/scene'
 import type { PackListing } from '@platform/packs'
 import type { WitnessReport } from '@engine/relationships'
 import type { SaveRequest, SaveSummary, SlotId } from '@engine/state'
@@ -36,6 +36,8 @@ export const IPC = {
   endLog: 'logs:end',
   getLogging: 'logs:get-enabled',
   setLogging: 'logs:set-enabled',
+  getPipeline: 'settings:get-pipeline',
+  setPipeline: 'settings:set-pipeline',
   openLogsFolder: 'logs:open-folder',
   flag: 'logs:flag',
   flagsFor: 'logs:flags-for',
@@ -134,6 +136,9 @@ export interface RendererApi {
   endLog(): Promise<void>
   getLogging(): Promise<boolean>
   setLogging(on: boolean): Promise<boolean>
+  /** Which pipeline makes the turns (Milestone 5): `situation`, or `scene` while it is being built and compared. */
+  getPipeline(): Promise<Pipeline>
+  setPipeline(pipeline: Pipeline): Promise<Pipeline>
   /** Opens this pack's logs folder (or all logs, before a pack is chosen); returns its path. */
   openLogsFolder(): Promise<string>
   /** Saves (or, with `flag: null`, clears) a flag on a beat or turn. */

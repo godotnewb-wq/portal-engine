@@ -17,6 +17,8 @@ export type ProblemKind =
   | 'beat-length'
   | 'wrong-name'
   | 'invented-name'
+  /** A speaker saying what only someone else knows (`scene` pipeline, Milestone 5 task 3). */
+  | 'unowned-fact'
 
 export interface Problem {
   kind: ProblemKind
@@ -75,9 +77,10 @@ export function withoutSpeech(text: string): string {
  * Everything wrong with a reply that one rewrite should fix (director writer §3, code checks). `phrases` are the
  * pack's own over-used phrases, checked with the engine's.
  */
-export function checkReply(parsed: ParsedReply, plan: BeatPlan, speakers: Speaker[], input: string, phrases: string[] = []): Problem[] {
+export function checkReply(parsed: ParsedReply, plan: BeatPlan, speakers: Speaker[], input: string, phrases: string[] = [], alsoSpeaking: string[] = []): Problem[] {
   const problems: Problem[] = []
-  const planned = new Set([...plan.speakers.map((s) => s.id), ...plan.walk_ons.map((w) => w.id)])
+  // `alsoSpeaking`: who else may speak this turn; in the `scene` pipeline anyone present may (redesign §4).
+  const planned = new Set([...plan.speakers.map((s) => s.id), ...plan.walk_ons.map((w) => w.id), ...alsoSpeaking])
   const byId = new Map(speakers.map((s) => [s.id, s]))
   const nameOf = (id: string) => byId.get(id)?.names[2] ?? byId.get(id)?.names[1] ?? id
 

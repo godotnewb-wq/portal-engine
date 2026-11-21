@@ -4,6 +4,7 @@ import { mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import { dirname } from 'node:path'
 import { LLM_PROFILE_IDS, SettingsSchema, type LlmProfile, type Settings, type SettingsUpdate } from '@llm'
 import { cleanLoreBudgets, type LoreBudgetOverrides } from '@engine/rules'
+import { DEFAULT_PIPELINE, isPipeline, type Pipeline } from '@engine/scene'
 
 /** Encrypts API keys at rest. Backed by Electron's safeStorage in the app. */
 export interface KeyCipher {
@@ -14,8 +15,8 @@ export interface KeyCipher {
 type StoredProfile = Omit<LlmProfile, 'apiKey'> & { apiKey: string; apiKeyEncrypted: boolean }
 
 /**
- * Persists settings as JSON: the LLM profiles, the extra folders to look for packs in, and the lore budgets the player
- * set over the packs' own. Without a cipher, API keys are written in plain text.
+ * Persists settings as JSON: the LLM profiles, the extra folders to look for packs in, the lore budgets the player
+ * set over the packs' own, and which pipeline makes the turns. Without a cipher, API keys are written in plain text.
  */
 export class SettingsStore {
   private settings: Settings
@@ -24,6 +25,8 @@ export class SettingsStore {
   private logging = true
   /** Lore budgets over every pack's defaults (milestone 3, task 10); a field left out uses the pack's. */
   private loreBudgets: LoreBudgetOverrides = {}
+  /** Which pipeline makes the turns (Milestone 5 plan, task 3): `situation` until `scene` replaces it. */
+  private pipeline: Pipeline = DEFAULT_PIPELINE
 
   constructor(
     private readonly path: string,
@@ -49,6 +52,17 @@ export class SettingsStore {
     this.logging = on
     this.write()
     return this.logging
+  }
+
+  getPipeline(): Pipeline {
+    return this.pipeline
+  }
+
+  /** Saves the pipeline the turns are made by; anything but a known pipeline leaves it as it was. Returns what was kept. */
+  setPipeline(raw: unknown): Pipeline {
+    if (typeof raw === 'string' && isPipeline(raw)) this.pipeline = raw
+    this.write()
+    return this.pipeline
   }
 
   getLoreBudgets(): LoreBudgetOverrides {
@@ -89,6 +103,8 @@ export class SettingsStore {
       if (typeof logging === 'boolean') this.logging = logging
       // A hand-edited value out of bounds is brought back in rather than refused.
       this.loreBudgets = cleanLoreBudgets((raw as { loreBudgets?: unknown }).loreBudgets).overrides
+      const pipeline = (raw as { pipeline?: unknown }).pipeline
+      if (typeof pipeline === 'string' && isPipeline(pipeline)) this.pipeline = pipeline
     } catch {
       // Missing or unreadable file: start from defaults.
       return SettingsSchema.parse({})
@@ -121,6 +137,6 @@ export class SettingsStore {
       stored[id] = { ...profile, apiKey: encrypt ? this.cipher!.encrypt(profile.apiKey) : profile.apiKey, apiKeyEncrypted: encrypt }
     }
     mkdirSync(dirname(this.path), { recursive: true })
-    writeFileSync(this.path, JSON.stringify({ ...stored, packFolders: this.packFolders, logging: this.logging, loreBudgets: this.loreBudgets }, null, 2))
+    writeFileSync(this.path, JSON.stringify({ ...stored, packFolders: this.packFolders, logging: this.logging, loreBudgets: this.loreBudgets, pipeline: this.pipeline }, null, 2))
   }
 }
