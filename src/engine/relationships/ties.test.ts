@@ -271,3 +271,26 @@ describe('work that lasts', () => {
     expect(ended.refused).toEqual([])
   })
 })
+
+// Milestone 5 plan, task 5's scored run (decided 2026-11-21, user): a witness made the player a friend on the
+// player's own "I'm witnessing". A tie that begins toward the player without their yes needs the scene to show it.
+describe('ties toward the player, shown by the scene', () => {
+  const OWN = 'Tobin, will you work for Mara?'
+
+  it('refuse a new tie that rests only on the player’s words', () => {
+    const r = settleTies(fixture, played(), [said('tobin', 'player', { now: 'foe', line: OWN })])
+    expect(r.applied).toEqual([])
+    expect(r.refused).toEqual([`Tobin, about Kit: a new foe tie toward the player needs the scene to show it, not the player's own words ("${OWN}")`])
+  })
+
+  it('begin one shown by a line in the scene', () => {
+    expect(settleTies(fixture, played(), [said('tobin', 'player', { now: 'foe', line: YES })]).applied.map((e) => e.added)).toEqual([['foe']])
+  })
+
+  it('still end on the player’s words, and still let an arrangement wait for the player’s yes', () => {
+    const state = played()
+    state.playerTies['mara'] = { tags: [{ tag: 'foe' }] }
+    expect(settleTies(fixture, state, [said('mara', 'player', { no_longer: 'foe', line: "Mara, I'm finished here. Find another hand." })]).applied.map((e) => e.ended)).toEqual([['foe']])
+    expect(settleTies(fixture, played(), [said('mara', 'player', { now: 'hand', line: OWN })]).pending.map((p) => p.add)).toEqual(['hand'])
+  })
+})

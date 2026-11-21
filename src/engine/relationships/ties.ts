@@ -16,7 +16,11 @@ import { witnesses } from './summary'
  * - a tie with the player needs the character's call alone (the player has none), and an arrangement waits for the
  *   player's answer as before;
  * - a new tag the ruleset's `ties.lasting` names begins only when the call says the work goes on (Milestone 5 plan,
- *   task 5): a hire for one job is not a client.
+ *   task 5): a hire for one job is not a client;
+ * - a tag that begins toward the player without waiting for their yes (a friend, a rival) needs a line from the scene
+ *   itself, a character's or the narration's, not the player's own words (Milestone 5 plan, task 5's scored run: a
+ *   witness made the player a friend on the player's "I'm witnessing"). Endings, and arrangements the player answers,
+ *   may still rest on the player's words.
  * The design leans toward missing a real change over recording a false one.
  */
 
@@ -64,14 +68,14 @@ const LINE_LOOSE_SHARE = 0.8
 /**
  * The turn a quoted line is in, by index, or undefined when it isn't in the scene. Forgiving about punctuation, case
  * and a speaker's name in front; a line with a few words off still counts when most of its words are in one turn.
- * Reads the player's words too: a breakup the player said is the player's line.
+ * Reads the player's words too, unless `playerWords` is false: a breakup the player said is the player's line.
  */
-export function findLine(state: GameState, line: string): number | undefined {
+export function findLine(state: GameState, line: string, { playerWords = true }: { playerWords?: boolean } = {}): number | undefined {
   const scene = state.scene!
   const asked = plain(line.replace(/^\s*[\p{L}' -]{1,30}:\s*(?=\S)/u, ''))
   const words = asked.split(' ').filter(Boolean)
   if (words.length < LINE_MIN_WORDS) return undefined
-  const texts = scene.turns.map((t) => [t.player, ...t.beats.map((b) => b.text)].map(plain))
+  const texts = scene.turns.map((t) => [...(playerWords ? [t.player] : []), ...t.beats.map((b) => b.text)].map(plain))
   const exact = texts.findIndex((parts) => parts.some((p) => ` ${p} `.includes(` ${asked} `)))
   if (exact >= 0) return exact
   if (words.length < LINE_LOOSE_WORDS) return undefined
@@ -154,9 +158,11 @@ export function settleTies(content: Pack, state: GameState, stated: StatedTie[])
         continue
       }
     }
-    const at = findLine(state, t.line)
+    const unasked = to === 'player' && !!add && !needsAgreement(content, add)
+    const at = findLine(state, t.line, { playerWords: !unasked })
     if (at === undefined) {
-      refused.push(`${about}: the line isn't in the scene (${t.line.trim() ? `"${t.line.trim()}"` : 'none given'})`)
+      const theirs = unasked && findLine(state, t.line) !== undefined
+      refused.push(theirs ? `${about}: a new ${words(add)} tie toward the player needs the scene to show it, not the player's own words ("${t.line.trim()}")` : `${about}: the line isn't in the scene (${t.line.trim() ? `"${t.line.trim()}"` : 'none given'})`)
       continue
     }
     const word = add && t.now ? wordOf(add, t.now) : undefined
