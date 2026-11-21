@@ -41,5 +41,9 @@
         "\"Kesh, how does it feel, being someone's wife?\""
       ]
     }
+  ],
+  "expectedTies": [
+    { "from": "kesh", "to": "teo-varrin", "has": ["spouse"], "lacks": ["fiance"] },
+    { "from": "teo-varrin", "to": "kesh", "has": ["spouse"], "lacks": ["fiance"] }
   ]
 }

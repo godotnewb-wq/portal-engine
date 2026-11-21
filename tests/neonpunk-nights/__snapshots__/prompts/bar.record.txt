@@ -1766,29 +1766,12 @@
     }
   ],
   "applied": [],
-  "pending": [
-    {
-      "from": "oria-senn",
-      "to": "player",
-      "add": "contractor",
-      "word": "contractor",
-      "reason": "",
-      "line": "Before midnight. The lower level floods at high tide. Triple the usual rate."
-    }
+  "pending": [],
+  "refused": [
+    "Oria, about Rook: a new contractor tie needs work that goes on, and it says nothing about that"
   ],
-  "refused": [],
   "alone": [],
-  "answered": [
-    {
-      "from": "oria-senn",
-      "to": "player",
-      "add": "contractor",
-      "word": "contractor",
-      "reason": "",
-      "line": "Before midnight. The lower level floods at high tide. Triple the usual rate.",
-      "accepted": true
-    }
-  ]
+  "answered": []
 }
 
 ===== end of scene =====
@@ -2011,12 +1994,12 @@
       "report": {
         "id": "oria-senn",
         "memory": "Rook is asking about the client; I need to close this before Vex pushes harder.",
-        "level": "core",
+        "level": "normal",
         "memories": [
           {
             "id": "oria-senn.m1",
             "text": "Rook is asking about the client; I need to close this before Vex pushes harder.",
-            "level": "core"
+            "level": "normal"
           }
         ],
         "revisited": [],
@@ -2040,13 +2023,7 @@
           "resolved": [],
           "dropped": [
             "toward player: \"resentment\" at 2 is below 3"
-          ],
-          "aftermath": {
-            "shade": "relief",
-            "family": "joy",
-            "intensity": 3,
-            "reason": "the deal is close"
-          }
+          ]
         }
       }
     },

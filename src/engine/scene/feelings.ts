@@ -124,7 +124,8 @@ export function feelingsNow(state: GameState, plan: Pick<BeatPlan, 'speakers' | 
 /**
  * A reading check's difficulty (npc design §7; decided 2026-11-13): the ruleset's word for the target's masking of
  * what they feel, one step harder for the masking-axis stages it names (Composure *masked*), and never past the
- * hardest. The director's own word doesn't count.
+ * hardest, or past `harderUpTo` when the ruleset caps the step (Milestone 5 plan, task 5). The director's own word
+ * doesn't count.
  */
 export function readingDifficulty(r: Ruleset, target: Character, feeling: Feeling | undefined): string {
   const masking = feeling ? maskingOf(r, target, feeling.family) : maskingOf(r, target, '')
@@ -132,7 +133,9 @@ export function readingDifficulty(r: Ruleset, target: Character, feeling: Feelin
   const stage = maskingStage(r, target)
   if (!stage || !r.people.reading.harder.includes(stage)) return base
   const i = r.difficulties.findIndex((d) => d.word === base)
-  return r.difficulties[Math.min(i + 1, r.difficulties.length - 1)]!.word
+  const cap = r.people.reading.harderUpTo ? r.difficulties.findIndex((d) => d.word === r.people.reading.harderUpTo) : r.difficulties.length - 1
+  // A read already at the cap stays as it is; the step never lowers one past it.
+  return r.difficulties[Math.max(i, Math.min(i + 1, cap))]!.word
 }
 
 /** Whether a check reads someone: the ruleset's reading skill, with a target. */

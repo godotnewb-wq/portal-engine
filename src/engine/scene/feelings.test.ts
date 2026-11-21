@@ -91,6 +91,11 @@ describe('reading through the mask', () => {
     // Mara is closed: thin anger reads as tough, one step harder: grim. Thick grief is grim already, and stays there.
     expect(readingDifficulty(R, mara, felt('livid', 4))).toBe('grim')
     expect(readingDifficulty(R, mara, felt('glum', 2))).toBe('grim')
+    // Capped (Milestone 5 plan, task 5): the step stops at the cap, and a read already there isn't made harder.
+    const capped = { ...R, people: { ...R.people, reading: { ...R.people.reading, harderUpTo: 'tough' } } }
+    expect(readingDifficulty(capped, mara, felt('livid', 4))).toBe('tough')
+    expect(readingDifficulty(capped, mara, felt('glum', 2))).toBe('grim')
+    expect(readingDifficulty(capped, tobin, felt('glum', 2))).toBe('tough')
   })
 
   const ASK = 'Tobin, who came by?'

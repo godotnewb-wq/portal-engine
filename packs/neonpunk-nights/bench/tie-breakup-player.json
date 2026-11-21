@@ -33,5 +33,8 @@
       "cast": ["vex", "brask"],
       "turns": ["\"Evening, Vex. Brask.\"", "\"Brask, did she tell you?\""]
     }
+  ],
+  "expectedTies": [
+    { "from": "vex", "to": "player", "has": ["ex"], "lacks": ["partner"] }
   ]
 }

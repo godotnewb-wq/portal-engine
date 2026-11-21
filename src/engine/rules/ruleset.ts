@@ -232,6 +232,8 @@ export function rulesetProblems(r: Ruleset): string[] {
   problems.push(...peopleProblems(r.people, r.ties, meters))
   if (!r.skills.some((s) => s.id === r.people.reading.skill)) problems.push(`people.reading.skill names unknown skill "${r.people.reading.skill}"`)
   for (const [level, w] of Object.entries(r.people.reading.difficulty)) if (!r.difficulties.some((d) => d.word === w)) problems.push(`people.reading.difficulty gives "${level}" the unknown difficulty "${w}"`)
+  const upTo = r.people.reading.harderUpTo
+  if (upTo && !r.difficulties.some((d) => d.word === upTo)) problems.push(`people.reading.harderUpTo is the unknown difficulty "${upTo}"`)
   for (const [tier, f] of Object.entries(r.people.forms)) {
     if (!['recurring', 'major'].includes(tier)) problems.push(`people.forms names unknown tier "${tier}"`)
     for (const [k, [lo, hi]] of Object.entries({ haunts: f.haunts, axes: f.axes, values: f.values, tells: f.tells })) if (lo > hi) problems.push(`people.forms.${tier}.${k} must be low first`)

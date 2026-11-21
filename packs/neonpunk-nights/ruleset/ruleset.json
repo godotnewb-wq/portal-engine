@@ -286,7 +286,8 @@
     "reading": {
       "skill": "empathy",
       "difficulty": { "none": "easy", "light": "easy", "moderate": "moderate", "heavy": "hard" },
-      "harder": ["masked"]
+      "harder": ["masked"],
+      "harderUpTo": "hard"
     },
     "aftermath": {
       "minIntensity": 4,
@@ -415,14 +416,16 @@
         "group": "family",
         "counterpart": "ward",
         "words": ["guardian", "foster mother", "foster father"],
-        "family": true
+        "family": true,
+        "means": "who looks after {me}"
       },
       {
         "id": "ward",
         "group": "family",
         "counterpart": "guardian",
         "words": ["ward", "foster daughter", "foster son"],
-        "family": true
+        "family": true,
+        "means": "who {me} looks after"
       },
       {
         "id": "relative",
@@ -447,8 +450,8 @@
         "counterpart": "ex",
         "words": ["ex-girlfriend", "ex-boyfriend", "ex-wife", "ex-husband", "ex"]
       },
-      { "id": "boss", "group": "work", "counterpart": "employee", "words": ["boss", "captain", "foreman"] },
-      { "id": "employee", "group": "work", "counterpart": "boss", "words": ["worker", "employee", "lieutenant"] },
+      { "id": "boss", "group": "work", "counterpart": "employee", "words": ["boss", "captain", "foreman"], "means": "who {me} works for" },
+      { "id": "employee", "group": "work", "counterpart": "boss", "words": ["worker", "employee", "lieutenant"], "means": "who works for {me}" },
       { "id": "colleague", "group": "work", "counterpart": "colleague", "words": ["coworker", "colleague"] },
       {
         "id": "business-partner",
@@ -456,26 +459,26 @@
         "counterpart": "business-partner",
         "words": ["business partner", "co-owner"]
       },
-      { "id": "client", "group": "work", "counterpart": "contractor", "words": ["client", "regular"] },
-      { "id": "contractor", "group": "work", "counterpart": "client", "words": ["fixer", "fence", "contractor"] },
-      { "id": "handler", "group": "work", "counterpart": "informant", "words": ["handler"] },
-      { "id": "informant", "group": "work", "counterpart": "handler", "words": ["informant", "asset"] },
-      { "id": "creditor", "group": "work", "counterpart": "debtor", "words": ["creditor", "loan shark"] },
-      { "id": "debtor", "group": "work", "counterpart": "creditor", "words": ["debtor"] },
+      { "id": "client", "group": "work", "counterpart": "contractor", "words": ["client"], "means": "who hires {me}" },
+      { "id": "contractor", "group": "work", "counterpart": "client", "words": ["contractor"], "means": "who {me} hires" },
+      { "id": "handler", "group": "work", "counterpart": "informant", "words": ["handler"], "means": "who {me} passes secrets to" },
+      { "id": "informant", "group": "work", "counterpart": "handler", "words": ["informant", "asset"], "means": "who passes secrets to {me}" },
+      { "id": "creditor", "group": "work", "counterpart": "debtor", "words": ["creditor"], "means": "who {me} owes" },
+      { "id": "debtor", "group": "work", "counterpart": "creditor", "words": ["debtor"], "means": "who owes {me}" },
       {
         "id": "comrade",
         "group": "work",
         "counterpart": "comrade",
         "words": ["crewmate", "comrade", "sister-in-arms", "brother-in-arms"]
       },
-      { "id": "landlord", "group": "home", "counterpart": "tenant", "words": ["landlord", "landlady"] },
-      { "id": "tenant", "group": "home", "counterpart": "landlord", "words": ["tenant", "lodger"] },
+      { "id": "landlord", "group": "home", "counterpart": "tenant", "words": ["landlord", "landlady"], "means": "who {me} rents from" },
+      { "id": "tenant", "group": "home", "counterpart": "landlord", "words": ["tenant", "lodger"], "means": "who rents from {me}" },
       { "id": "roommate", "group": "home", "counterpart": "roommate", "words": ["roommate", "flatmate"] },
       { "id": "neighbor", "group": "home", "counterpart": "neighbor", "words": ["neighbor"] },
-      { "id": "mentor", "group": "teaching", "counterpart": "protege", "words": ["mentor", "master"] },
-      { "id": "protege", "group": "teaching", "counterpart": "mentor", "words": ["protégé", "apprentice"] },
-      { "id": "teacher", "group": "teaching", "counterpart": "student", "words": ["teacher"] },
-      { "id": "student", "group": "teaching", "counterpart": "teacher", "words": ["student", "pupil"] },
+      { "id": "mentor", "group": "teaching", "counterpart": "protege", "words": ["mentor", "master"], "means": "who guides {me}" },
+      { "id": "protege", "group": "teaching", "counterpart": "mentor", "words": ["protégé", "apprentice"], "means": "who {me} guides" },
+      { "id": "teacher", "group": "teaching", "counterpart": "student", "words": ["teacher"], "means": "who teaches {me}" },
+      { "id": "student", "group": "teaching", "counterpart": "teacher", "words": ["student", "pupil"], "means": "who {me} teaches" },
       {
         "id": "friend",
         "group": "social",
@@ -485,7 +488,14 @@
       { "id": "old-friend", "group": "social", "counterpart": "old-friend", "words": ["old friend"] },
       { "id": "rival", "group": "social", "counterpart": "rival", "words": ["rival"], "oneSided": true },
       { "id": "enemy", "group": "social", "counterpart": "enemy", "words": ["enemy", "sworn enemy"], "oneSided": true }
-    ]
+    ],
+    "lasting": {
+      "tags": ["boss", "employee", "colleague", "business-partner", "client", "contractor", "handler", "informant"],
+      "words": [
+        { "word": "one job", "lasting": false },
+        { "word": "steady", "lasting": true }
+      ]
+    }
   },
   "party": { "max": 3 },
   "memory": {

@@ -34,6 +34,7 @@ describe('the shipped scenarios', () => {
       'lore-secret-fishing',
       'lore-species-stereotype',
       'mask-strangers-then-trusted',
+      'one-job-hire',
       'repair-with-brask',
       'secret-dormancy',
       'secret-dormant',
@@ -385,5 +386,35 @@ describe('pipelines, stopped plays and --fill', () => {
     expect(fillProblems(bench, other)).toEqual([])
     const { inputs: _gone, ...old } = bench
     expect(fillProblems(old, same)).toEqual(["the run recorded no inputs (it predates Milestone 3.6), so it can't be checked"])
+  })
+})
+
+// Milestone 5 plan, task 7 (decided 2026-11-20, user): a scenario says which ties it should end with, and the report
+// marks each play met or missed.
+describe('expected ties', () => {
+  const byId = (id: string) => scenarios.find((s) => s.id === id)!
+
+  it('are read against the state the play ended on, after the player’s answers', async () => {
+    // The mock states no tie changes, so the wedding doesn't happen and the hire makes no tie.
+    const [wedding, hire] = await Promise.all([runScenario(content, byId('tie-wedding'), mockLlm()), runScenario(content, byId('one-job-hire'), mockLlm())])
+    expect(wedding.tieResults!.map((t) => [t.expected.from, t.met, t.held])).toEqual([['kesh', false, ['fiance']], ['teo-varrin', false, ['fiance']]])
+    expect(hire.tieResults!.every((t) => t.met)).toBe(true)
+    const bench = await runBench(content, [byId('tie-wedding'), byId('one-job-hire')], mockLlm(), 'ties', { all: 'mock' })
+    const report = renderReport(content, bench)
+    expect(report).toMatch(/\| tie-wedding ⚠ Expected tie missed \|/)
+    expect(report).toContain("**Expected tie missed: kesh toward teo-varrin should have spouse and shouldn't have fiance; it holds fiance.**")
+    expect(report).toContain('Expected ties met (3).')
+  })
+
+  it('survive being written and read back', async () => {
+    const out = mkdtempSync(join(tmpdir(), 'ties-'))
+    const bench = await runBench(content, [byId('one-job-hire')], mockLlm(), 'ties', { all: 'mock' }, { out })
+    writeRun(out, bench)
+    expect(readRun(out).scenarios[0]!.tieResults).toEqual(bench.scenarios[0]!.tieResults)
+  })
+
+  it('name only known people and tags, and expect something', () => {
+    const bad = ScenarioSchema.parse({ ...byId('one-job-hire'), expectedTies: [{ from: 'ghost', to: 'player', lacks: ['patron'] }, { from: 'vex', to: 'oria-senn' }] })
+    expect(scenarioProblems(content, bad)).toEqual(['an expected tie names unknown character "ghost"', 'an expected tie uses unknown tag "patron"', 'an expected tie from vex to oria-senn expects nothing'])
   })
 })

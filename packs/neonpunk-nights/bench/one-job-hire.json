@@ -1,0 +1,18 @@
+{
+  "id": "one-job-hire",
+  "title": "Hired for one job",
+  "watchFor": "Oria hires Rook for one job, the pump-station case, and Rook takes it. The scene should play the deal in Oria's unhurried way, with Vex backing Rook. When it ends, nobody becomes anyone's client, contractor, boss or worker: one job agreed is not lasting work (Milestone 5, task 5). The relationship calls should say \"one job\" if they mention the work at all, and the report should show the expected ties met.",
+  "location": "sump-lantern",
+  "cast": ["oria-senn", "vex"],
+  "seed": 31,
+  "turns": [
+    "I slide into Oria's booth. \"Vex says you have a job. Just the one, tonight?\"",
+    "\"Half up front, the rest when the case is in your hands. That works.\"",
+    "\"Alright. We'll take the job. After tonight we're square.\""
+  ],
+  "expectedTies": [
+    { "from": "oria-senn", "to": "player", "lacks": ["client", "contractor", "boss", "employee"] },
+    { "from": "vex", "to": "oria-senn", "has": ["client"] },
+    { "from": "oria-senn", "to": "vex", "has": ["contractor"] }
+  ]
+}

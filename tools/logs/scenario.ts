@@ -47,6 +47,7 @@ export function toScenario(log: SessionLog, n: number, flags = log.flags): Scena
     summaries: false,
     start: StartSchema.parse({}),
     later: [],
+    expectedTies: [],
     answerTies: 'yes'
   }
 }

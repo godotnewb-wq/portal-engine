@@ -7,11 +7,33 @@ import { entryById } from '@engine/codex'
 import { memoryId } from '@engine/memory'
 import type { GameState, Memory, Relation } from '@engine/state'
 import { characterById, type Pack } from '@engine/pack'
-import { createInitialState, dayOf, MemoryLevelSchema, MINUTES_PER_DAY, startScene, stateProblems, TurnSchema } from '@engine/state'
+import { createInitialState, dayOf, MemoryLevelSchema, MINUTES_PER_DAY, startScene, stateProblems, tagsToward, TurnSchema } from '@engine/state'
 import { MINUTES_PER_TURN, RECENT_TURNS, SUMMARY_CHARS, turnText } from '@engine/scene'
 
 export const ExpectedCheckSchema = z.object({ turn: z.number().int().positive(), who: IdSchema, skill: IdSchema })
 export type ExpectedCheck = z.infer<typeof ExpectedCheckSchema>
+
+/**
+ * What one person should hold toward another when the play ends (Milestone 5 plan, task 7; decided 2026-11-20, user):
+ * tags it must have and tags it must not. A hire for one job lacks every work tag; a wedding has spouse and lacks
+ * fiancé. Read against the state the play ended on, after the player's answers.
+ */
+export const ExpectedTieSchema = z.object({ from: IdSchema, to: IdSchema, has: z.array(IdSchema).default([]), lacks: z.array(IdSchema).default([]) })
+export type ExpectedTie = z.infer<typeof ExpectedTieSchema>
+
+/** An expected tie as the play left it: the tags held, and whether the expectation was met. */
+export interface TieResult {
+  expected: ExpectedTie
+  held: string[]
+  met: boolean
+}
+
+/** Each expected tie read against the state a play ended on. */
+export const checkTies = (state: GameState, expected: ExpectedTie[]): TieResult[] =>
+  expected.map((e) => {
+    const held = tagsToward(state, e.from, e.to).map((t) => t.tag)
+    return { expected: e, held, met: e.has.every((t) => held.includes(t)) && !e.lacks.some((t) => held.includes(t)) }
+  })
 
 /** Starting moods, overriding the character files: a feeling in the ruleset's words, with words for it or a reason (milestone 4b). */
 const MoodsSchema = z.record(IdSchema, FeelingWordsSchema.extend({ text: z.string().min(1).optional(), reason: z.string().min(1).optional() })).default({})
@@ -83,6 +105,8 @@ export const ScenarioSchema = z.object({
   turns: z.array(z.string().min(1)).min(1),
   /** A roll the scenario is designed to exercise. Turns are 1-based. */
   expectedCheck: ExpectedCheckSchema.optional(),
+  /** Ties the play should end with, and ties it shouldn't; checked against the last scene's end. */
+  expectedTies: z.array(ExpectedTieSchema).default([]),
   /** Run the end-of-scene summaries too. */
   summaries: z.boolean().default(true),
   /** Run-only starting state (milestone 4b). */
@@ -141,6 +165,12 @@ export function scenarioProblems(content: Pack, scenario: Scenario): string[] {
     if (expected.turn > scenario.turns.length) problems.push(`expected check is outside the scripted turns (${expected.turn})`)
     if (expected.who !== 'player' && !scenario.cast.includes(expected.who)) problems.push(`expected check roller "${expected.who}" is not in the cast`)
     if (!content.ruleset.skills.some((skill) => skill.id === expected.skill)) problems.push(`unknown expected check skill "${expected.skill}"`)
+  }
+  for (const t of scenario.expectedTies) {
+    if (!content.characters.some((c) => c.id === t.from)) problems.push(`an expected tie names unknown character "${t.from}"`)
+    if (t.to !== 'player' && !content.characters.some((c) => c.id === t.to)) problems.push(`an expected tie names unknown character "${t.to}"`)
+    for (const tag of [...t.has, ...t.lacks]) if (!content.ruleset.ties.tags.some((x) => x.id === tag)) problems.push(`an expected tie uses unknown tag "${tag}"`)
+    if (t.has.length + t.lacks.length === 0) problems.push(`an expected tie from ${t.from} to ${t.to} expects nothing`)
   }
   return [...new Set(problems)]
 }

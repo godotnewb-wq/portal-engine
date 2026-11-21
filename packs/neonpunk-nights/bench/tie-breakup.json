@@ -63,5 +63,9 @@
         "\"Dunmar, one for him. On my slate.\""
       ]
     }
+  ],
+  "expectedTies": [
+    { "from": "brask", "to": "dunmar", "has": ["ex", "client"], "lacks": ["partner"] },
+    { "from": "dunmar", "to": "brask", "has": ["ex", "contractor"], "lacks": ["partner"] }
   ]
 }

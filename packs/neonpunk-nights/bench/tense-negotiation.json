@@ -9,5 +9,8 @@
     "Triple the fee, or find someone else to swim into a flooded pump station.",
     "Then tell me who wants the case so badly. That's worth something to me.",
     "Half up front, in cinders, tonight. Or Vex and I walk out that door."
+  ],
+  "expectedTies": [
+    { "from": "oria-senn", "to": "player", "lacks": ["client", "contractor", "boss", "employee"] }
   ]
 }

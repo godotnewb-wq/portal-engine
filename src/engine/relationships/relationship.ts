@@ -10,7 +10,7 @@ import { settleTies, type StatedTie, type WrittenTie } from './ties'
 /**
  * The relationship call (milestone 4c; decided 2026-11-16, user): the first of a witness's two end-of-scene calls. It
  * judges how the scene moved their meters and what feelings it left, and says, in the first person, what someone here
- * became to them or stopped being ("Ada is now my client"). The game settles those statements across all the witnesses
+ * became to them or stopped being ("Ada is now my wife"). The game settles those statements across all the witnesses
  * (`settleTies`), the player answers any arrangement offered to them, and only then does each witness's memory call
  * run, told what changed. The meters move when the scene closes, with the memories.
  */
@@ -53,11 +53,16 @@ function task(content: Pack, state: GameState, c: Character, others: Character[]
   const me = firstName(c.name)
   const m = meterTask(r)
   const people = [...others.map((o) => `"${o.id}"`), `or "player" for ${player}`].join(', ')
-  const groups = r.ties.groups.map((g) => `${g.name}: ${r.ties.tags.filter((t) => t.group === g.id).map((t) => t.words.join('/')).join(', ')}`).join('. ')
+  // Each tag's words, and what the other person is to the holder when the pack says it, so work ties run the right way.
+  const tagText = (t: (typeof r.ties.tags)[number]) => `${t.words.join('/')}${t.means ? ` (${t.means.replaceAll('{me}', me)})` : ''}`
+  const groups = r.ties.groups.map((g) => `${g.name}: ${r.ties.tags.filter((t) => t.group === g.id).map(tagText).join(', ')}`).join('. ')
+  const lasting = r.ties.lasting
+  // One word for each tag keeps the line short; the full words are in the list below.
+  const lastingWords = lasting ? r.ties.tags.filter((t) => lasting.tags.includes(t.id)).map((t) => t.words[0]!) : []
   return `You judge how one scene in a visual-novel RPG changed what one character feels about the people in it, and what those people are to them. Answer for ${me}, as ${me} would. ${player} is the player (${state.player.pronouns}).
 
 Reply with only a JSON object:
-{"reason": "...", ${m.fields}, "others": [{"with": "id", ${m.fields}, "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": [], "ties": [{"with": "id", "now": "...", "no_longer": "...", "line": "..."}]}
+{"reason": "...", ${m.fields}, "others": [{"with": "id", ${m.fields}, "reason": "..."}], "feels": {"shade": "...", "family": "...", "intensity": 1, "reason": "..."}, "toward": [{"who": "id", "shade": "...", "family": "...", "intensity": 1, "reason": "..."}], "resolved": [], "ties": [{"with": "id", "now": "...", "no_longer": "...",${lasting ? ' "lasting": "...",' : ''} "line": "..."}]}
 
 - ${m.names}: how each CHANGED toward ${player} because of this scene, each one of: ${m.words}. Meters move slowly; nothing is owed for turning up. Toward someone, ${m.meaning}.
 - Judge as ${me}: by ${me}'s values, agenda and how things stood before. Values ${me} likes, shown by ${player}, raise regard; values ${me} dislikes lower it.
@@ -65,7 +70,7 @@ Reply with only a JSON object:
 - feels: how ${me} feels as the scene ends, when it isn't about one person: a shade from the list below, family only when the shade is listed under more than one, intensity 1 to 5, and why in a few words. Leave it out if nothing much.
 - toward: feelings this scene left ${me} with toward one person (who: ${people}): what happened between them, not how ${me} feels about them overall, which the meters hold. Only for something between them that will still be felt tomorrow, at intensity ${r.people.aftermath.towardMin} or more; a pleasant chat or a small slight is none. A shade, intensity and why ("forgot our anniversary"). They pass in days. Most scenes leave none: [].
 - resolved: the people (as ids) toward whom a feeling ${me} already carries was settled in this scene (an apology accepted, a fear put to rest); [] if none.
-- ties: what someone here became to ${me} in this scene, or stopped being, as ${me} would say it. "Ada is now my client" is {"with": "ada", "now": "client", "line": "..."}; "Ben is no longer my partner" is {"with": "ben", "no_longer": "partner", "line": "..."}. with: ${people}. now, no_longer: one of the words under "What someone can be to ${me}" below, the one ${me} would use for them. line: the words from the scene that show it, copied exactly.
+- ties: what someone here became to ${me} in this scene, or stopped being, as ${me} would say it. "Ada is now my wife" is {"with": "ada", "now": "wife", "line": "..."}; "Ben is no longer my partner" is {"with": "ben", "no_longer": "partner", "line": "..."}. with: ${people}. now, no_longer: one of the words under "What someone can be to ${me}" below, the one ${me} would use for them. line: the words from the scene that show it, copied exactly.${lasting ? `\n- lasting: only for a new ${lastingWords.join('/')} tie, one of: ${lasting.words.map((w) => w.word).join(', ')}. Whether the work goes on past this scene; line then shows it going on, not one job agreed.` : ''}
 - A tie is only what happened on screen and was carried through: vows made, a breakup said and meant, steady work taken on or quit, a debt paid off. Not what was only talked about, joked about, offered and left open, or felt: feelings are not ties. It is what ${me} would still call them next week: one job hired for or offered, an order given once, one favor or help with one task is not a tie.
 - Go through what each person here already is to ${me} (listed with them below): did this scene make, end or change it? Vows exchanged turn a fiancé into a spouse; a breakup said and meant ends a partner or lover and makes them an ex. Give each such change, even when nothing else between them changed. Most scenes change none: [].
 - Shades by family (usual intensity): ${shadeList(r)}.
@@ -108,8 +113,8 @@ export function parseRelationship(content: Pack, reply: string): Relationship | 
     resolved: strings(raw['resolved']),
     ties: Array.isArray(raw['ties'])
       ? raw['ties'].filter(isObject).flatMap((t): WrittenTie[] => {
-          const [who, now, gone] = [str(t['with']), str(t['now']), str(t['no_longer'])]
-          return who && (now || gone) ? [{ with: who, ...(now && { now }), ...(gone && { no_longer: gone }), line: str(t['line']) }] : []
+          const [who, now, gone, lasting] = [str(t['with']), str(t['now']), str(t['no_longer']), str(t['lasting'])]
+          return who && (now || gone) ? [{ with: who, ...(now && { now }), ...(gone && { no_longer: gone }), ...(lasting && { lasting }), line: str(t['line']) }] : []
         })
       : []
   }

@@ -60,9 +60,17 @@ function missedCheck(run: ScenarioRun): string {
   return `Expected check not exercised on turn ${expected.turn}: ${expected.who} (${expected.skill}).`
 }
 
+/** The expected ties a play missed (Milestone 5 plan, task 7), in words; none when it met them all or expected none. */
+function missedTies(run: ScenarioRun): string[] {
+  const tags = (ids: string[]) => (ids.length > 0 ? ids.join(', ') : 'no tag')
+  return (run.tieResults ?? [])
+    .filter((t) => !t.met)
+    .map((t) => `Expected tie missed: ${t.expected.from} toward ${t.expected.to}${t.expected.has.length > 0 ? ` should have ${t.expected.has.join(', ')}` : ''}${t.expected.has.length > 0 && t.expected.lacks.length > 0 ? ' and' : ''}${t.expected.lacks.length > 0 ? ` shouldn't have ${t.expected.lacks.join(', ')}` : ''}; it holds ${tags(t.held)}.`)
+}
+
 function statRow(run: ScenarioRun, repeats = false): string {
   const s = stats(run)
-  return `| ${runName(run, repeats)}${run.error ? ' ⚠' : ''}${missedCheck(run) ? ' ⚠ Expected check not exercised' : ''} | ${s.turns} | ${s.calls} | ${s.rewrites} | ${s.salvaged} | ${s.fallbacks} | ${s.corrections} | ${s.beats} | ${s.turnMs} | ${s.firstTextMs} | ${s.directorMs} |`
+  return `| ${runName(run, repeats)}${run.error ? ' ⚠' : ''}${missedCheck(run) ? ' ⚠ Expected check not exercised' : ''}${missedTies(run).length > 0 ? ' ⚠ Expected tie missed' : ''} | ${s.turns} | ${s.calls} | ${s.rewrites} | ${s.salvaged} | ${s.fallbacks} | ${s.corrections} | ${s.beats} | ${s.turnMs} | ${s.firstTextMs} | ${s.directorMs} |`
 }
 
 function loreLines(turn: TurnTrace, budgets?: BenchRun['loreBudgets']): string[] {
@@ -112,6 +120,8 @@ function scenarioSection(names: Names, run: ScenarioRun, repeats: boolean, budge
   if (run.forceNatural !== undefined) lines.push(`Checks forced to a natural ${run.forceNatural}.`, '')
   const missed = missedCheck(run)
   if (missed) lines.push(`**${missed}**`, '')
+  for (const tie of missedTies(run)) lines.push(`**${tie}**`, '')
+  if (run.tieResults?.length && missedTies(run).length === 0) lines.push(`Expected ties met (${run.tieResults.length}).`, '')
   if (run.error) lines.push(`**Stopped:** ${run.error}`, '')
   if (run.stopped) lines.push(`**Re-played** with \`--fill\` after ${run.stopped.length === 1 ? 'a play that' : `${run.stopped.length} plays that`} stopped: ${run.stopped.map((x) => `\`${x.session}\` (${x.error})`).join('; ')}.`, '')
   if (!run.scenes) {

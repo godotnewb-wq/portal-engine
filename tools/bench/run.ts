@@ -9,7 +9,7 @@ import { applyRecords, DEFAULT_PIPELINE, promptSources, runTurn, type Bookkeeper
 import { callTrace, LogSession, promptVersion, readSession, type SessionRecord } from '@platform/logs'
 import type { FlagRecord, ScoreRecord } from '@engine/review'
 import { loreBudgets, type LoreBudgetOverrides, type LoreBudgets } from '@engine/rules'
-import { openScene, sceneIdOf, scenarioContent, scenarioProblems, scenarioState, scenesOf, type ExpectedCheck, type Scenario } from './scenario'
+import { checkTies, openScene, sceneIdOf, scenarioContent, scenarioProblems, scenarioState, scenesOf, type ExpectedCheck, type Scenario, type TieResult } from './scenario'
 import { runInputs, type RunInputs } from './inputs'
 
 export { mockLlm } from './mock'
@@ -44,6 +44,8 @@ export interface ScenarioRun {
   watchFor: string
   forceNatural?: number
   expectedCheck?: ExpectedCheck
+  /** The scenario's expected ties, as the play left them (Milestone 5 plan, task 7); absent when it expects none or stopped. */
+  tieResults?: TieResult[]
   /** 1-based; `--repeat N` plays each scenario N times with different seeds. */
   repeat: number
   seed: number
@@ -232,6 +234,7 @@ export async function runScenario(content: Pack, scenario: Scenario, llm: BenchL
     session?.error({ where, message: run.error, sceneId, ...(where === 'turn' && { turnId: `${sceneId}-${turnInScene + 1}` }), ...(run.errorCalls && { calls: run.errorCalls }) })
   }
   if (state) run.state = state
+  if (state && !run.error && scenario.expectedTies.length > 0) run.tieResults = checkTies(state, scenario.expectedTies)
   return run
 }
 
@@ -375,13 +378,13 @@ export function callsOf(run: ScenarioRun): CallTrace[] {
 /** `run.json`: the run's settings and where its sessions are; the traces live in the session folders. */
 interface RunFile extends Omit<BenchRun, 'scenarios'> {
   /** `days`: a scenario with several scenes, the days before each (milestone 4b). */
-  scenarios: { id: string; repeat: number; session: string; error?: string; expectedCheck?: ExpectedCheck; days?: number[]; stopped?: ScenarioRun['stopped'] }[]
+  scenarios: { id: string; repeat: number; session: string; error?: string; expectedCheck?: ExpectedCheck; days?: number[]; stopped?: ScenarioRun['stopped']; tieResults?: TieResult[] }[]
 }
 
 export function writeRun(out: string, bench: BenchRun): void {
   mkdirSync(out, { recursive: true })
   const { scenarios, ...rest } = bench
-  const file: RunFile = { ...rest, scenarios: scenarios.map((s) => ({ id: s.id, repeat: s.repeat, session: s.session, ...(s.expectedCheck && { expectedCheck: s.expectedCheck }), ...(s.scenes && { days: s.scenes.map((x) => x.days) }), ...(s.error && { error: s.error }), ...(s.stopped && { stopped: s.stopped }) })) }
+  const file: RunFile = { ...rest, scenarios: scenarios.map((s) => ({ id: s.id, repeat: s.repeat, session: s.session, ...(s.expectedCheck && { expectedCheck: s.expectedCheck }), ...(s.scenes && { days: s.scenes.map((x) => x.days) }), ...(s.error && { error: s.error }), ...(s.stopped && { stopped: s.stopped }), ...(s.tieResults && { tieResults: s.tieResults }) })) }
   writeFileSync(join(out, 'run.json'), JSON.stringify(file, null, 2))
 }
 
@@ -437,6 +440,7 @@ export function readRun(dir: string): BenchRun {
       ...(scenes ? { scenes } : { ...(ties && { ties: { ...ties, calls: calls(ties.calls) } }), ...(end && { sceneEnd: { ...end, calls: calls(end.calls) } }) }),
       ...(entry.error && { error: entry.error }),
       ...(entry.stopped && { stopped: entry.stopped }),
+      ...(entry.tieResults && { tieResults: entry.tieResults }),
       ...(failed?.calls && { errorCalls: calls(failed.calls) }),
       flags: log.flags,
       scores: log.scores

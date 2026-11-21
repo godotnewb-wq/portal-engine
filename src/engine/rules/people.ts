@@ -93,9 +93,11 @@ export const PeopleRulesSchema = z.object({
   }),
   /**
    * Reading through the mask (§7, milestone 4b): the skill for reading people, the difficulty word for each masking
-   * level, and the stages of the masking axis that make it one difficulty step harder.
+   * level, and the stages of the masking axis that make it one difficulty step harder. `harderUpTo` caps that step
+   * (Milestone 5 plan, task 5; decided 2026-11-19, user): it never takes a read past this difficulty, and a read
+   * already there isn't made harder, so a heavy mask and a masked Composure don't count twice.
    */
-  reading: z.object({ skill: id, difficulty: z.record(word, word), harder: z.array(word).default([]) }),
+  reading: z.object({ skill: id, difficulty: z.record(word, word), harder: z.array(word).default([]), harderUpTo: word.optional() }),
   /**
    * Aftermath (§7, milestone 4b; all *tune*): a feeling at scene end of at least `minIntensity`, or one with a Core
    * memory, lingers; it loses 1 intensity every `fadeDays` in-game days and ends at 0. A character carries at most `max`
@@ -183,10 +185,23 @@ export const TiesRulesSchema = z.object({
          * after the end-of-Milestone-4 bench run 2: breakups left nothing behind). Partner, lover, fiancé and spouse
          * end as ex. Not when the pair still holds another tag of the same group (a fiancé who becomes a spouse).
          */
-        endsAs: id.optional()
+        endsAs: id.optional(),
+        /**
+         * What the other person is to the holder, in a few words, with `{me}` for the holder ("who hires {me}"):
+         * the relationship call reads it beside the words, so a work tie isn't written the wrong way round
+         * (Milestone 5 plan, task 5: "client" didn't say which way the work runs).
+         */
+        means: z.string().min(1).optional()
       })
     )
-    .min(1)
+    .min(1),
+  /**
+   * Ties that begin only when the arrangement goes on past the scene (Milestone 5 plan, task 5; decided 2026-11-19,
+   * user, after hires made lasting work ties three milestones running). For a new tag in `tags`, the relationship call
+   * says, in one of `words`, whether it is one job or steady; a word that isn't `lasting` refuses the tie. A pack
+   * without this block checks nothing.
+   */
+  lasting: z.object({ tags: z.array(id).min(1), words: z.array(z.object({ word, lasting: z.boolean() })).min(2) }).optional()
 })
 export type TiesRules = z.infer<typeof TiesRulesSchema>
 
@@ -292,6 +307,11 @@ export function peopleProblems(p: PeopleRules, t: TiesRules, meters: string[], c
     else if (c!.oneSided !== x.oneSided || c!.family !== x.family) problems.push(`tag "${x.id}" and its counterpart "${x.counterpart}" disagree on oneSided or family`)
     if (x.endsAs && !tags.includes(x.endsAs)) problems.push(`tag "${x.id}" ends as unknown tag "${x.endsAs}"`)
     else if (x.endsAs === x.id) problems.push(`tag "${x.id}" ends as itself`)
+  }
+  if (t.lasting) {
+    for (const x of t.lasting.tags) if (!tags.includes(x)) problems.push(`ties.lasting names unknown tag "${x}"`)
+    unique('ties.lasting word', t.lasting.words.map((w) => w.word))
+    if (!t.lasting.words.some((w) => w.lasting) || t.lasting.words.every((w) => w.lasting)) problems.push('ties.lasting needs a word that lets a tie begin and one that refuses it')
   }
   return problems
 }

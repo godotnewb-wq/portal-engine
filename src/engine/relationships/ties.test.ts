@@ -26,7 +26,10 @@ describe('the relationship call', () => {
     expect(p.system).toMatch(/^You judge how one scene/)
     expect(p.system).toMatch(/Kit is the player \(they\/them\)/)
     expect(p.system).toContain('"ties": [{"with": "id", "now": "...", "no_longer": "...", "line": "..."}]')
-    expect(p.system).toContain('"Ada is now my client" is {"with": "ada", "now": "client", "line": "..."}')
+    // The example is no work tie, which bench runs copied word for word (Milestone 5 plan, task 5).
+    expect(p.system).toContain('"Ada is now my wife" is {"with": "ada", "now": "wife", "line": "..."}')
+    // The fixture asks nothing about work that lasts, so the call has no such field.
+    expect(p.system).not.toContain('lasting')
     expect(p.system).toContain('an order given once, one favor or help with one task is not a tie')
     expect(p.system).toContain('- What someone can be to Mara: Blood: older sister/older brother, younger sister/younger brother. Trade: master, hand/apprentice, foe.')
     expect(p.user).toContain('- What each person here is to Mara now: Tobin [tobin]: rival; Kit [player]: no tie.')
@@ -219,5 +222,52 @@ describe('settling what the witnesses said', () => {
     const no = answerTie(fixture, next, 0, false)
     expect(no.playerTies['mara']).toBeUndefined()
     expect(no.scene!.answered).toEqual([{ ...pending[0]!, accepted: false }])
+  })
+})
+
+// Milestone 5 plan, task 5 (decided 2026-11-19, user): a hire for one job makes no work tie. The fixture asks nothing
+// about that, so these run on a copy whose trade tags need lasting work and say which way they run.
+describe('work that lasts', () => {
+  const lasting: Pack = {
+    ...fixture,
+    ruleset: {
+      ...fixture.ruleset,
+      ties: {
+        ...fixture.ruleset.ties,
+        tags: fixture.ruleset.ties.tags.map((t) => (t.id === 'master' ? { ...t, means: 'who {me} works for' } : t.id === 'hand' ? { ...t, means: 'who works for {me}' } : t)),
+        lasting: { tags: ['master', 'hand'], words: [{ word: 'one job', lasting: false }, { word: 'for good', lasting: true }] }
+      }
+    }
+  }
+  const hire = (word?: string) => settleTies(lasting, played(), [said('mara', 'tobin', { now: 'hand', ...(word && { lasting: word }) }), said('tobin', 'mara', { now: 'master', line: YES, ...(word && { lasting: word }) })])
+
+  it('asks whether the work goes on, and says which way each work tie runs', () => {
+    const p = buildRelationshipPrompt(lasting, played(), 'mara')
+    expect(p.system).toContain('"no_longer": "...", "lasting": "...", "line": "..."')
+    expect(p.system).toContain('- lasting: only for a new master/hand tie, one of: one job, for good.')
+    expect(p.system).toContain('Trade: master (who Mara works for), hand/apprentice (who works for Mara), foe.')
+    expect(parseRelationship(lasting, JSON.stringify({ ties: [{ with: 'tobin', now: 'hand', lasting: 'for good', line: HIRE }] }))!.ties).toEqual([{ with: 'tobin', now: 'hand', lasting: 'for good', line: HIRE }])
+  })
+
+  it('begins a work tie only when both sides say it goes on', () => {
+    const steady = hire('for good')
+    expect(steady.refused).toEqual([])
+    expect(steady.applied.map((e) => e.added)).toEqual([['hand']])
+  })
+
+  it('refuses a work tie for one job, or with nothing said about it, on each side', () => {
+    expect(hire('one job')).toMatchObject({
+      applied: [],
+      refused: ['Mara, about Tobin: a new hand tie needs work that goes on, and it says "one job"', 'Tobin, about Mara: a new master tie needs work that goes on, and it says "one job"']
+    })
+    expect(hire().refused[0]).toBe('Mara, about Tobin: a new hand tie needs work that goes on, and it says nothing about that')
+    expect(hire('maybe').applied).toEqual([])
+  })
+
+  it('asks nothing of a tie outside the list, or of one that ends', () => {
+    const foe = settleTies(lasting, played(), [said('tobin', 'mara', { now: 'foe' })])
+    expect(foe.applied.map((e) => e.added)).toEqual([['foe']])
+    const ended = settleTies(lasting, played(), [said('mara', 'tobin', { no_longer: 'foe' })])
+    expect(ended.refused).toEqual([])
   })
 })

@@ -15,12 +15,13 @@ describe('createInitialState', () => {
 
   // Milestone 4a task 6, decided in the cast review (2026-11-13): Rook knows Vex and Brask from a dozen jobs and drinks
   // at Dunmar's; everyone else meets Rook fresh. Tags only: the meters still start where the cards put them.
-  it('starts with the cast’s ties toward Rook: Vex and Brask friends, Dunmar’s regular, no one else', () => {
+  it('starts with the cast’s ties toward Rook: Vex and Brask friends, Dunmar’s regular as a note with no tag, no one else', () => {
     const state = createInitialState(content, 1)
     expect(Object.keys(state.playerTies).sort()).toEqual(['brask', 'dunmar', 'vex'])
     expect(state.playerTies['vex']!.tags).toEqual([{ tag: 'friend' }])
     expect(state.playerTies['brask']!.tags).toEqual([{ tag: 'friend' }])
-    expect(state.playerTies['dunmar']!.tags).toEqual([{ tag: 'client', word: 'regular' }])
+    // A bar's regular is particular to the setting, so it is a note, not a tag (Milestone 5 plan, Q17; relationships §3).
+    expect(state.playerTies['dunmar']).toEqual({ tags: [], note: expect.stringMatching(/drinks here when there's money/) })
   })
 })
 

@@ -14,7 +14,9 @@ import { witnesses } from './summary'
  * - a tag **ends** on one call: a breakup takes one person;
  * - the quoted line must be in the scene (`findLine`), or the statement is refused;
  * - a tie with the player needs the character's call alone (the player has none), and an arrangement waits for the
- *   player's answer as before.
+ *   player's answer as before;
+ * - a new tag the ruleset's `ties.lasting` names begins only when the call says the work goes on (Milestone 5 plan,
+ *   task 5): a hire for one job is not a client.
  * The design leans toward missing a real change over recording a false one.
  */
 
@@ -23,6 +25,8 @@ export interface WrittenTie {
   with: string
   now?: string
   no_longer?: string
+  /** For a new work tie in the ruleset's `ties.lasting`: one of its words, saying whether the work goes on past the scene. */
+  lasting?: string
   line: string
 }
 
@@ -141,6 +145,14 @@ export function settleTies(content: Pack, state: GameState, stated: StatedTie[])
     if (!add && !end) {
       refused.push(`${about}: it says nothing began or ended`)
       continue
+    }
+    // A work tie from one job is refused here, before its line is looked for: the reason reads plainer.
+    if (add && r.ties.lasting?.tags.includes(add)) {
+      const said = r.ties.lasting.words.find((w) => norm(w.word) === norm(t.lasting ?? ''))
+      if (!said?.lasting) {
+        refused.push(`${about}: a new ${words(add)} tie needs work that goes on, and it says ${t.lasting ? `"${t.lasting}"` : 'nothing about that'}`)
+        continue
+      }
     }
     const at = findLine(state, t.line)
     if (at === undefined) {

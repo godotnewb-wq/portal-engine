@@ -30,6 +30,13 @@ describe('peopleProblems', () => {
     expect(peopleProblems(P, { ...T, agreement: ['hand', 'spouse'] }, meters)).toEqual(['ties.agreement names unknown tag "spouse"'])
   })
 
+  it('names only known tags for work that must last, and needs a word that lets a tie begin and one that refuses it (Milestone 5)', () => {
+    const words = [{ word: 'one job', lasting: false }, { word: 'for good', lasting: true }]
+    expect(peopleProblems(P, { ...T, lasting: { tags: ['hand'], words } }, meters)).toEqual([])
+    expect(peopleProblems(P, { ...T, lasting: { tags: ['hand', 'boss'], words: [...words, { word: 'one job', lasting: true }] } }, meters)).toEqual(['ties.lasting names unknown tag "boss"', 'ties.lasting word "one job" is defined twice'])
+    expect(peopleProblems(P, { ...T, lasting: { tags: ['hand'], words: words.map((w) => ({ ...w, lasting: true })) } }, meters)).toEqual(['ties.lasting needs a word that lets a tie begin and one that refuses it'])
+  })
+
   it('names only a known, different tag for a tag to end as (decided 2026-11-16)', () => {
     const tags = T.tags.map((t, i) => (i === 0 ? { ...t, endsAs: 'ex' } : i === 1 ? { ...t, endsAs: t.id } : t))
     expect(peopleProblems(P, { ...T, tags }, meters)).toEqual([`tag "${T.tags[0]!.id}" ends as unknown tag "ex"`, `tag "${T.tags[1]!.id}" ends as itself`])

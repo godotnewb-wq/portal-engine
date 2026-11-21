@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest'
 import type { StatBlock } from '@engine/rules'
-import { assistBonus, combineEdges, degreeOf, describeCheck, modifier, rankCap, rollCheck } from '@engine/rules'
+import { assistBonus, combineEdges, degreeOf, describeCheck, difficultyDc, modifier, rankCap, rollCheck } from '@engine/rules'
+import { readingDifficulty } from '@engine/scene'
+import type { Feeling } from '@engine/characters'
 import { content } from './support'
 
 /** The Neonpunk Nights ruleset, as the pack ships it (core rules.md). */
@@ -94,5 +96,18 @@ describe('dice', () => {
       expect(n).toBeGreaterThanOrEqual(1)
       expect(n).toBeLessThanOrEqual(20)
     }
+  })
+})
+
+// Milestone 5 plan, task 5 (decided 2026-11-19, user: no double step). Oria's heavy mask makes her hard to read and
+// her masked Composure no longer adds a step on top, so Rook's deliberate read needs 18 or more, not a natural 20. A
+// lighter mask still takes the step.
+describe('reading a heavy masker', () => {
+  it('stops the masked Composure step at hard', () => {
+    const r = content.ruleset
+    const oria = content.characters.find((c) => c.id === 'oria-senn')!
+    expect(readingDifficulty(r, oria, { shade: 'dread', family: 'fear', intensity: 4 } as Feeling)).toBe('hard')
+    expect(difficultyDc(r, 'hard')).toBe(20)
+    expect(readingDifficulty(r, oria, { shade: 'delight', family: 'joy', intensity: 2 } as Feeling)).toBe('moderate')
   })
 })
