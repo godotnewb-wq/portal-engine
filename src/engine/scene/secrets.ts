@@ -65,18 +65,26 @@ export function cueSecretLine(content: Pack, c: Character, s: Secret, id = `${c.
 /** Every codex entry whose label or alias the text names. */
 const namedIn = (codex: CodexEntry[], text: string) => codex.filter((e) => [...(e.label ? [e.label] : []), ...e.aliases].some((n) => mentions(text, n)))
 
-function priorityOf(content: Pack, s: Secret, id: string, keptLast: Set<string>, scan: SecretScan): SecretShown['priority'] {
-  if (keptLast.has(id)) return 'kept'
+/**
+ * What in the scan touches a secret, and how: one of its own keywords said, or its subject brought up (a linked
+ * secret's faction and the entries it links to; the canon things a personal secret's text names). `words`: the keyword,
+ * or the subject's title, for the trace. Undefined when nothing does. The `scene` pipeline reads this on what was just
+ * said (Milestone 5 plan, Q5); the sheet's display reads it on the turn's wider scan.
+ */
+export function touchOf(content: Pack, s: Secret, scan: SecretScan): { how: 'keyword' | 'context'; words: string } | undefined {
   const entry = s.codex ? entryById(content.codex, s.codex) : undefined
   const keywords = entry ? entry.keywords : (s.keywords ?? [])
-  if (keywords.some((k) => scan.texts.some((t) => mentions(t, k)))) return 'keyword'
-  if (entry) {
-    // A linked secret's subject: its faction and what its entry links to, brought up in the conversation.
-    const subjects = [...(entry.faction ? [codexFactionId(content.setting, entry.faction)] : []), ...entry.related]
-    return subjects.some((x) => scan.mentioned.has(x)) ? 'context' : undefined
-  }
-  // A personal secret's subject: the canon things its text names, brought up in the conversation.
-  return namedIn(content.codex, s.text).some((e) => scan.mentioned.has(e.id)) ? 'context' : undefined
+  const keyword = keywords.find((k) => scan.texts.some((t) => mentions(t, k)))
+  if (keyword) return { how: 'keyword', words: keyword }
+  // A linked secret's subject: its faction and what its entry links to. A personal one's: the canon things its text names.
+  const subjects = entry ? [...(entry.faction ? [codexFactionId(content.setting, entry.faction)] : []), ...entry.related] : namedIn(content.codex, s.text).map((e) => e.id)
+  const hit = subjects.find((x) => scan.mentioned.has(x))
+  return hit ? { how: 'context', words: entryById(content.codex, hit)?.title ?? hit } : undefined
+}
+
+function priorityOf(content: Pack, s: Secret, id: string, keptLast: Set<string>, scan: SecretScan): SecretShown['priority'] {
+  if (keptLast.has(id)) return 'kept'
+  return touchOf(content, s, scan)?.how
 }
 
 const RANK = { kept: 0, keyword: 1, context: 2 } as const

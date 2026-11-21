@@ -174,7 +174,11 @@ export const CharacterSchema = z
      * (scene system redesign.md §7; the short form of milestone 4's portrait).
      */
     portrait: z.string(),
-    agenda: z.object({ longTerm: z.array(z.string()).min(1), current: z.string() }),
+    /**
+     * `pressure`: how hard tonight's aim presses when a scene opens, as one of the ruleset's pressure words (Milestone 5
+     * plan, Q5); the weakest when left out. The `scene` pipeline starts from it; the director moves it a step a turn.
+     */
+    agenda: z.object({ longTerm: z.array(z.string()).min(1), current: z.string(), pressure: z.string().min(1).optional() }),
     /** At least one internal tension. */
     contradictions: z.array(z.string()).min(1),
     voice: VoiceCardSchema,

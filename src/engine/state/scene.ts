@@ -83,6 +83,12 @@ export const TurnSchema = z.object({
    */
   kept: z.array(z.string()).optional(),
   /**
+   * The pressures the `scene` pipeline played live this turn (Milestone 5 plan, task 1): who, what kind, and what it
+   * was (a goal by its holder's id, a secret by its fact id, a tie by the other person). The next turns' gathering reads
+   * them as recently live. Absent when none, and in turns made by `situation`, which keeps secrets in `kept`.
+   */
+  live: z.array(z.object({ who: z.string(), kind: z.enum(['goal', 'secret', 'tie']), ref: z.string() })).optional(),
+  /**
    * Reading checks that succeeded this turn (npc design §7, milestone 4b): who saw through to what someone felt, for
    * the reader's end-of-scene memory. `hiding`: the one read was keeping a secret, so the reader saw that something
    * was hidden, never what (milestone 4c: a read no longer gives the secret away). Absent when none.

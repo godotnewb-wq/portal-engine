@@ -23,6 +23,7 @@ export function cardProblems(r: Ruleset, codex: CodexEntry[], c: Character): str
   }
 
   if (c.age !== undefined) bad('age', c.age, p.ages.stages)
+  if (c.agenda.pressure !== undefined) bad("tonight's pressure", c.agenda.pressure, r.pressures)
   const mood = feelingProblem(r, c.mood)
   if (mood) problems.push(`${c.id}: default mood: ${mood}`)
 

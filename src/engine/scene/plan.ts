@@ -49,7 +49,7 @@ export const NEW_FACT_WORDS = 25
 export { LORE_LINE_WORDS }
 
 /** A feeling as the director writes it (npc design §7): a shade, its family when the shade has several, an intensity, and why. */
-const RawFeelsSchema = z.object({
+export const RawFeelsSchema = z.object({
   shade: text,
   family: text.optional(),
   intensity: z.union([z.number(), z.string()]).catch(0),
@@ -130,21 +130,7 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan, inpu
   const words = content.ruleset.pressures
   const ground = justSaid(state, input)
   const early: string[] = []
-  const feels = (who: string, f: RawPlan['speakers'][number]['feels']) => {
-    const read = readFeels(content.ruleset, who, f)
-    if (read.problem) early.push(read.problem)
-    if (!read.feels) return {}
-    // A feeling eases at most one step a turn (decided 2026-11-16, user, after the end-of-Milestone-4 bench run 2: the
-    // director took a heavy masker's composure for calm and dropped her panic from 5 to 3 in one turn, so her mask could
-    // never break). Within the same family only: a feeling of another family is something new.
-    const before = scene.moods[who]
-    const floor = before && before.family === read.feels.family ? before.intensity - EASE_PER_TURN : 0
-    if (read.feels.intensity < floor) {
-      early.push(`${who}'s ${read.feels.family} eases at most ${EASE_PER_TURN} a turn: ${floor}, not ${read.feels.intensity}`)
-      return { feels: { ...read.feels, intensity: floor } }
-    }
-    return { feels: read.feels }
-  }
+  const feels = (who: string, f: RawPlan['speakers'][number]['feels']) => feltNow(content, state, who, f, (why) => early.push(why))
   const shared: SharedPlan = {
     speakers: raw.speakers.map((s) => {
       const who = presentId(content, scene, s.id) ?? s.id
@@ -184,30 +170,8 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan, inpu
   corrections.unshift(...early)
   const fix = (why: string) => corrections.push(why)
 
-  // Talking and asking aren't in doubt; a roll for the player belongs to an attempt (round 0, F4). Reading someone
-  // through their mask is the exception: whatever the player is doing, whether they see what the mask hides is in doubt
-  // (milestone 4b; found by the end-of-Milestone-4 bench, where 9 reading checks were dropped). Only while the mask
-  // hides something: a feeling that shows less than it is felt.
-  const felt = feelingsNow(state, plan)
-  // The player reads only the person they are trying to read (manual run of 2026-11-19: a plain question got a read
-  // of the one who answered it, at odds only a natural 20 could beat, and the dice line told the player she was hiding
-  // something). Noticing without trying is a companion's read.
   const reading = raw.player_action.reading ? presentId(content, scene, raw.player_action.reading) : undefined
-  const unasked = plan.checks.filter((c) => c.who === 'player' && c.target && isReading(content.ruleset, c) && c.target !== reading)
-  if (unasked.length > 0) {
-    fix(`dropped ${unasked.map((c) => c.id).join(', ')}: the player isn't trying to read ${unasked.map((c) => c.target).join(', ')}`)
-    plan.checks = plan.checks.filter((c) => !unasked.includes(c))
-  }
-  const throughMask = (c: (typeof plan.checks)[number]) => {
-    if (!c.target || !isReading(content.ruleset, c)) return false
-    const f = felt[c.target]
-    const s = f && shown(content, state, c.target, f, plan)
-    return !!f && !!s && s.visibility < f.intensity
-  }
-  if (!raw.player_action.uncertain && plan.checks.some((c) => c.who === 'player' && !throughMask(c))) {
-    fix('dropped the player check: the player action is not an uncertain attempt')
-    plan.checks = plan.checks.filter((c) => c.who !== 'player' || throughMask(c))
-  }
+  plan.checks = playerChecks(content, state, plan.checks, { uncertain: raw.player_action.uncertain, ...(reading && { reading }) }, feelingsNow(state, plan), plan, fix)
   if (plan.texture.length > MAX_TEXTURE) plan.texture = plan.texture.slice(0, MAX_TEXTURE)
 
   const speakers = new Set(plan.speakers.map((s) => s.id))
@@ -266,10 +230,29 @@ export function validatePlan(content: Pack, state: GameState, raw: RawPlan, inpu
 const EASE_PER_TURN = 1
 
 /**
+ * A feeling the director gave someone, checked (`readFeels`) and eased: it eases at most one step a turn (decided
+ * 2026-11-16, user, after the end-of-Milestone-4 bench run 2: the director took a heavy masker's composure for calm
+ * and dropped her panic from 5 to 3 in one turn, so her mask could never break). Within the same family only: a
+ * feeling of another family is something new. Shared by both pipelines' plans.
+ */
+export function feltNow(content: Pack, state: GameState, who: string, raw: z.infer<typeof RawFeelsSchema> | undefined, fix: (why: string) => void): { feels?: Feeling } {
+  const read = readFeels(content.ruleset, who, raw)
+  if (read.problem) fix(read.problem)
+  if (!read.feels) return {}
+  const before = state.scene!.moods[who]
+  const floor = before && before.family === read.feels.family ? before.intensity - EASE_PER_TURN : 0
+  if (read.feels.intensity < floor) {
+    fix(`${who}'s ${read.feels.family} eases at most ${EASE_PER_TURN} a turn: ${floor}, not ${read.feels.intensity}`)
+    return { feels: { ...read.feels, intensity: floor } }
+  }
+  return { feels: read.feels }
+}
+
+/**
  * A feeling from the plan, checked against the ruleset (npc design §7): an unknown shade, a family the shade isn't
  * listed under, or no intensity is refused with a correction, and the character's feeling from before carries.
  */
-function readFeels(r: Ruleset, who: string, raw: RawPlan['speakers'][number]['feels']): { feels?: Feeling; problem?: string } {
+function readFeels(r: Ruleset, who: string, raw: z.infer<typeof RawFeelsSchema> | undefined): { feels?: Feeling; problem?: string } {
   if (!raw || (!raw.shade.trim() && !raw.intensity)) return {}
   const read = readFeeling(r, raw)
   return 'feeling' in read ? { feels: read.feeling } : { problem: `${who}'s feeling: ${read.problem}; their feeling from before carries` }
@@ -336,10 +319,66 @@ function validateShared(content: Pack, state: GameState, raw: SharedPlan): { pla
     else if (!reactions.some((x) => x.id === id)) reactions.push({ ...r, id })
   }
 
+  const checks = validateChecks(content, state, raw.checks, feelingsNow(state, { speakers, reactions }), fix)
+
+  const walk_ons = validateWalkOns(content, state, raw.walk_ons, fix)
+
+  let texture = raw.texture.filter((t) => t.trim().length > 0)
+  if (texture.length > NOTED_TEXTURE) {
+    fix(`kept ${NOTED_TEXTURE} of ${texture.length} texture details`)
+    texture = texture.slice(0, NOTED_TEXTURE)
+  }
+  if (texture.length === 0) texture = freshTexture(content, scene, 2)
+
+  const leaves = validateLeaves(content, state, raw.leaves, fix)
+
+  return { plan: { ...raw, speakers, reactions, checks, walk_ons, texture, leaves }, corrections }
+}
+
+
+/**
+ * The player's checks, shared by both pipelines: the player reads only the person they are trying to read
+ * (`action.reading`), and otherwise rolls only for an uncertain attempt. `felt` and `plan` (its walk-ons) say how much
+ * each feeling shows, since reading through a mask is in doubt whatever the player is doing.
+ */
+export function playerChecks(content: Pack, state: GameState, given: PlannedCheck[], action: { uncertain: boolean; reading?: string }, felt: Record<string, Feeling>, plan: Pick<BeatPlan, 'walk_ons'>, fix: (why: string) => void): PlannedCheck[] {
+  let checks = given
+  const reading = action.reading
+  // The player reads only the person they are trying to read (manual run of 2026-11-19: a plain question got a read
+  // of the one who answered it, at odds only a natural 20 could beat, and the dice line told the player she was hiding
+  // something). Noticing without trying is a companion's read.
+  const unasked = checks.filter((c) => c.who === 'player' && c.target && isReading(content.ruleset, c) && c.target !== reading)
+  if (unasked.length > 0) {
+    fix(`dropped ${unasked.map((c) => c.id).join(', ')}: the player isn't trying to read ${unasked.map((c) => c.target).join(', ')}`)
+    checks = checks.filter((c) => !unasked.includes(c))
+  }
+  // Talking and asking aren't in doubt; a roll for the player belongs to an attempt (round 0, F4). Reading someone
+  // through their mask is the exception: whatever the player is doing, whether they see what the mask hides is in doubt
+  // (milestone 4b; found by the end-of-Milestone-4 bench, where 9 reading checks were dropped). Only while the mask
+  // hides something: a feeling that shows less than it is felt.
+  const throughMask = (c: PlannedCheck) => {
+    if (!c.target || !isReading(content.ruleset, c)) return false
+    const f = felt[c.target]
+    const s = f && shown(content, state, c.target, f, plan)
+    return !!f && !!s && s.visibility < f.intensity
+  }
+  if (!action.uncertain && checks.some((c) => c.who === 'player' && !throughMask(c))) {
+    fix('dropped the player check: the player action is not an uncertain attempt')
+    checks = checks.filter((c) => c.who !== 'player' || throughMask(c))
+  }
+  return checks
+}
+
+/**
+ * The plan's checks against the scene and the ruleset, shared by both pipelines: who rolls (the player or someone
+ * present), a skill and a difficulty that exist, at most `MAX_CHECKS`, and a reading check's difficulty set by the
+ * target's masking (npc design §7). `felt`: what each person feels this turn, for that difficulty.
+ */
+export function validateChecks(content: Pack, state: GameState, raw: RawPlan['checks'], felt: Record<string, Feeling>, fix: (why: string) => void): PlannedCheck[] {
+  const scene = state.scene!
   const checks: PlannedCheck[] = []
   const r = content.ruleset
-  const felt = feelingsNow(state, { speakers, reactions })
-  for (const c of raw.checks) {
+  for (const c of raw) {
     const who = normalize(c.who) === 'player' || normalize(c.who) === normalize(state.player.name) ? 'player' : presentId(content, scene, c.who)
     const skill = skillNamed(r, c.skill)
     let difficulty = difficultyNamed(r, c.difficulty)
@@ -374,9 +413,14 @@ function validateShared(content: Pack, state: GameState, raw: SharedPlan): { pla
       })
     }
   }
+  return checks
+}
 
+/** The plan's walk-ons: only those at the place now. */
+export function validateWalkOns(content: Pack, state: GameState, raw: RawPlan['walk_ons'], fix: (why: string) => void): BeatPlan['walk_ons'] {
+  const scene = state.scene!
   const location = locationById(content, scene.locationId)!
-  const walk_ons = raw.walk_ons.flatMap((w) => {
+  return raw.flatMap((w) => {
     const card = location.walkOns.find((x) => scene.walkOns.includes(x.id) && [x.id, x.label, x.name ?? ''].some((n) => normalize(n) === normalize(w.id)))
     if (!card) {
       fix(`dropped walk-on "${w.id}": not here`)
@@ -384,21 +428,16 @@ function validateShared(content: Pack, state: GameState, raw: SharedPlan): { pla
     }
     return [{ id: card.id, line: w.line }]
   })
+}
 
-  let texture = raw.texture.filter((t) => t.trim().length > 0)
-  if (texture.length > NOTED_TEXTURE) {
-    fix(`kept ${NOTED_TEXTURE} of ${texture.length} texture details`)
-    texture = texture.slice(0, NOTED_TEXTURE)
-  }
-  if (texture.length === 0) texture = freshTexture(content, scene, 2)
-
-  const leaves = raw.leaves.flatMap((l) => {
+/** The plan's departures: only people present. */
+export function validateLeaves(content: Pack, state: GameState, raw: string[], fix: (why: string) => void): string[] {
+  const scene = state.scene!
+  return raw.flatMap((l) => {
     const id = presentId(content, scene, l)
     if (!id) fix(`ignored departure of "${l}": not present`)
     return id ? [id] : []
   })
-
-  return { plan: { ...raw, speakers, reactions, checks, walk_ons, texture, leaves }, corrections }
 }
 
 /**

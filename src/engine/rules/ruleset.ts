@@ -194,7 +194,12 @@ export const RulesetSchema = z.object({
    * The bookkeeper's records after each turn (milestone 4c; *tune*): the most new details (a price, a time, a place, a
    * name, a promise) it may record from one turn's prose.
    */
-  bookkeeper: z.object({ newDetails: z.number().int().min(0).default(3) }).default({ newDetails: 3 })
+  bookkeeper: z.object({ newDetails: z.number().int().min(0).default(3) }).default({ newDetails: 3 }),
+  /**
+   * The `scene` pipeline's gathering (Milestone 5 plan, task 1; *tune*): how many facts one character's pool offers
+   * the director in a turn, and how many turns back a pressure still counts as recently live.
+   */
+  scene: z.object({ factPool: z.number().int().min(1).default(6), recentTurns: z.number().int().min(1).default(2) }).default({ factPool: 6, recentTurns: 2 })
 })
 export type Ruleset = z.infer<typeof RulesetSchema>
 
