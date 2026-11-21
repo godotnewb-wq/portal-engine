@@ -54,7 +54,7 @@ function clean(text: string): string {
   return t
 }
 
-function parseTag(body: string, speakers: Speaker[], tags: Tags, dropped: string[]): void {
+function parseTag(body: string, speakers: Speaker[], tags: Tags, dropped: string[], script = false): void {
   const raw = `[${body}]`
   if (/^\s*END[\s_-]*SCENE\s*$/i.test(body)) {
     tags.ended = true
@@ -67,7 +67,9 @@ function parseTag(body: string, speakers: Speaker[], tags: Tags, dropped: string
     else dropped.push(raw)
     return
   }
-  const named = body.match(/^\s*([^:]+?)\s*:\s*(EXPRESSION|COMFORT)\s*:?\s*(.*?)\s*$/i)
+  // The scene writer often leaves the word EXPRESSION out ("[Ada: WARY]"); one plain word after a name is what the face shows.
+  const bare = script ? body.match(/^\s*([^:]+?)\s*:\s*(?!EXPRESSION\b|COMFORT\b)(\p{L}[\p{L}-]*)\s*$/iu) : null
+  const named = bare ? [bare[0], bare[1], 'EXPRESSION', bare[2]] : body.match(/^\s*([^:]+?)\s*:\s*(EXPRESSION|COMFORT)\s*:?\s*(.*?)\s*$/i)
   const s = named ? who(named[1]!, speakers) : undefined
   if (!named || s?.kind !== 'cast') {
     dropped.push(raw)
@@ -145,15 +147,33 @@ function dialogueBeats(raw: string, s: Speaker): Beat[] {
   return parts.map((p): Beat => (p.said ? { kind: 'dialogue', speaker: s.id, text: p.text } : { kind: 'narration', text: p.text }))
 }
 
+export interface ParseOptions {
+  /**
+   * The scene writer's script form (Milestone 5 task 3): a paragraph may run into the next speaker's label after a
+   * sentence ends ("Ada looks away. Ben: \"Well?\""), and an expression tag may leave out the word EXPRESSION.
+   */
+  script?: boolean
+}
+
+/** A sentence end followed by a short, capitalized label and a colon: maybe the next speaker, mid-paragraph. */
+const MID_LABEL = /(?<=[.!?…"”*)]\s+)([\p{Lu}][\p{L}'-]*(?:\s[\p{Lu}][\p{L}'-]*){0,2})\s*:\s/gu
+
+/** A line split where someone here starts speaking partway through it; a label that names no one here stays put. */
+function speakerTurns(line: string, speakers: Speaker[]): string[] {
+  const cuts = [...line.matchAll(MID_LABEL)].filter((m) => who(m[1]!, speakers) || NARRATOR_NAMES.includes(plainName(m[1]!))).map((m) => m.index!)
+  if (cuts.length === 0) return [line]
+  return [0, ...cuts].map((at, k) => line.slice(at, cuts[k] ?? line.length).trim()).filter(Boolean)
+}
+
 /** Reads the writer's reply into beats and tags. Lenient: an unlabelled line is narration. */
-export function parseReply(reply: string, speakers: Speaker[]): ParsedReply {
+export function parseReply(reply: string, speakers: Speaker[], options: ParseOptions = {}): ParsedReply {
   const tags: Tags = { expressions: {}, comfort: {}, leaves: [], ended: false }
   const droppedTags: string[] = []
   const unknownSpeakers: string[] = []
   const reshaped: number[] = []
   // Thinking is blanked rather than cut, keeping its newlines, so line numbers still match the raw reply.
   const withoutThinking = reply.replace(/<think(?:ing)?>[\s\S]*?<\/think(?:ing)?>/gi, (m) => m.replace(/[^\n]/g, ''))
-  for (const m of withoutThinking.matchAll(TAG)) parseTag(m[1]!, speakers, tags, droppedTags)
+  for (const m of withoutThinking.matchAll(TAG)) parseTag(m[1]!, speakers, tags, droppedTags, options.script)
 
   const beats: Beat[] = []
   const lines: number[] = []
@@ -161,7 +181,8 @@ export function parseReply(reply: string, speakers: Speaker[]): ParsedReply {
     beats.push(beat)
     lines.push(n)
   }
-  for (const [i, line] of withoutThinking.replace(TAG, '').split(/\r?\n/).entries()) {
+  const rows = withoutThinking.replace(TAG, '').split(/\r?\n/).flatMap((line, i) => (options.script ? speakerTurns(line, speakers) : [line]).map((part) => [i, part] as const))
+  for (const [i, line] of rows) {
     const n = i + 1
     if (line.trim().length === 0 || /^\s*(?:```|---+)\s*$/.test(line)) continue
     const m = line.match(LINE)

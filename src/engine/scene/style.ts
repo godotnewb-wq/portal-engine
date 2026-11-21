@@ -39,3 +39,10 @@ export const OVERUSED_PHRASES = [
  * round 0 F1), so a turn needs more of them than when one beat could hold both.
  */
 export const BEATS = { min: 2, max: 12, target: '4–8', maxWords: 60, targetWords: 40 } as const
+
+/**
+ * How long a scene-pipeline turn runs (Milestone 5 plan, Q8): a guide in the units the writer controls, paragraphs and
+ * words, and a hard limit at about 1.5 times the guide. Over it, the turn's one rewrite asks for a shorter scene; a
+ * rewrite still over is shown whole, since cutting a scene loses its ending (*tune*).
+ */
+export const SCENE_LENGTH = { paragraphs: '4–6', words: '80–140', maxWords: 200 } as const

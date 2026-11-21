@@ -3,7 +3,12 @@ import type { Prompt } from '@engine/core'
 import type { GameState } from '@engine/state'
 import { fixture, yardScene } from '@tests/fixture'
 import { runTurn, type TurnLlm } from './runTurn'
-import { checkEvent } from './sceneWriter'
+import { checkEvent, ownedProblems } from './sceneWriter'
+import { parseReply } from './beats'
+import { checkReply, salvaged } from './checks'
+import { sceneSpeakers } from './writer'
+import { sceneView, sceneFallback } from './scenePlan'
+import { gatherScene } from './gather'
 
 // A turn made by the `scene` pipeline (Milestone 5 plan, task 3): the game-master director, the scene writer, and
 // everything after them reading the scene plan through its view.
@@ -118,3 +123,50 @@ describe('the scene writer’s brief', () => {
   })
 })
 
+
+describe('the scene writer’s checks (fixes from the first scored run)', () => {
+  const state = yard()
+  const speakers = sceneSpeakers(fixture, state)
+
+  it('reads a speaker who starts partway through a line, in the script form only', () => {
+    const line = 'Tobin looks at his boots. Mara: "One book, Kit." She closes it.'
+    expect(parseReply(line, speakers, { script: true }).beats).toEqual([
+      { kind: 'narration', text: 'Tobin looks at his boots.' },
+      { kind: 'dialogue', speaker: 'mara', text: 'One book, Kit.' },
+      { kind: 'narration', text: 'Mara closes it.' }
+    ])
+    expect(parseReply(line, speakers).beats).toHaveLength(1)
+    // A label that names no one here is ordinary prose.
+    expect(parseReply('NARRATION: The sign is clear. Rule: no carts after dark.', speakers, { script: true }).beats).toHaveLength(1)
+  })
+
+  it('takes "[Name: WORD]" as what the face shows, in the script form only', () => {
+    expect(parseReply('Mara: "Fine."\n[Mara: WARY]', speakers, { script: true }).tags.expressions).toEqual({ mara: 'wary' })
+    expect(parseReply('Mara: "Fine."\n[Mara: WARY]', speakers).droppedTags).toEqual(['[Mara: WARY]'])
+  })
+
+  it('measures a scene in words, not in the beats the cutter makes, and never cuts it', () => {
+    const plan = sceneView(sceneFallback(state, gatherScene(fixture, state, 'Evening.')))
+    const short = Array.from({ length: 8 }, (_, i) => `Mara: "Count ${i}." She ticks it.`).join('\n')
+    const parsedShort = parseReply(short, speakers, { script: true })
+    expect(parsedShort.beats).toHaveLength(16)
+    expect(checkReply(parsedShort, plan, speakers, 'Evening.', [], { alsoSpeaking: ['mara', 'tobin'] }).map((p) => p.kind)).not.toContain('beat-count')
+    const long = Array.from({ length: 8 }, () => `Mara: "${'count it again and again '.repeat(6).trim()}."`).join('\n')
+    const kinds = checkReply(parseReply(long, speakers, { script: true }), plan, speakers, 'Evening.', [], { alsoSpeaking: ['mara', 'tobin'] }).map((p) => p.kind)
+    expect(kinds).toContain('scene-length')
+    expect(salvaged(16, [], false)).toHaveLength(16)
+    expect(salvaged(16, [])).toHaveLength(12)
+  })
+
+  it('lets someone say what they know from lore, and passes over runs of everyday words', () => {
+    const extra = (knowledge: string[]) => ({ ...fixture, characters: fixture.characters.map((c) => (c.id === 'mara' ? { ...c, knowledge: [...c.knowledge, ...knowledge] } : c)) })
+    const said = (content: typeof fixture, line: string) => ownedProblems(content, state, parseReply(line, sceneSpeakers(content, state), { script: true })).map((p) => p.kind)
+    // Tobin is a porter, and porters know how the tallies are rounded.
+    const tallies = extra(['Every tally is rounded up a crate or two at the gate'])
+    expect(said(tallies, 'Tobin: "Every tally is rounded up a crate or two."')).toEqual([])
+    // Only Mara knows this one, and nothing open to Tobin says it.
+    const gin = extra(['The night foreman drinks cheap gin behind the stables'])
+    expect(said(gin, 'Tobin: "The night foreman drinks cheap gin, you know."')).toEqual(['unowned-fact'])
+    expect(said(gin, 'Tobin: "It was in the yard after all, Kit."')).toEqual([])
+  })
+})

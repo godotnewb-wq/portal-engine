@@ -1,6 +1,6 @@
-import { writerStage } from '@engine/codex'
+import { knows, writerStage } from '@engine/codex'
 import { firstName, type Prompt } from '@engine/core'
-import { characterById, locationById, type Pack } from '@engine/pack'
+import { characterById, knowerOf, locationById, type Pack } from '@engine/pack'
 import type { Degree } from '@engine/rules'
 import type { GameState } from '@engine/state'
 import type { ParsedReply } from './beats'
@@ -13,7 +13,7 @@ import { knowersOf } from '@engine/memory'
 import { presentCast, type BeatPlan, type PlannedCheck } from './planShape'
 import { recentlyUsed } from './repeats'
 import type { LivePressure } from './scenePlan'
-import { BEATS } from './style'
+import { SCENE_LENGTH } from './style'
 import { claimLines, knowledgeLines, speakerTies, voiceCard } from './writer'
 
 /**
@@ -47,11 +47,18 @@ Played honestly: NARRATION: Ben watches Ada a moment too long, then looks back a
 
 /** The script form (redesign §6.1) and the tag footer (Q7). */
 export const SCENE_FORMAT = `Output format, nothing else:
-- A short scene, one paragraph per line. NARRATION: … for what happens. Name: … for a character (first name): what they say in double quotes and what they do, in the order it happens, as in written fiction.
-- About ${BEATS.target} beats in all, where each quoted speech and each action counts as one; each under ${BEATS.targetWords} words.
+- A short scene, one paragraph per line. Start every paragraph with NARRATION: for what happens, or with a character's first name and a colon for what they say and do: what they say in double quotes and what they do, in the order it happens, as in written fiction. Someone who speaks gets their own paragraph.
+- ${SCENE_LENGTH.paragraphs} paragraphs, ${SCENE_LENGTH.words} words in all; never more than ${SCENE_LENGTH.maxWords}.
 - The people in the moment carry the scene. Anyone else present may react or say a little. Walk-ons speak only when listed. Nobody else speaks.
 - Then the tags, one per line: [Name: EXPRESSION word] for each person who appears, for what their face shows; [Name: COMFORT 1-5 reason] when someone's comfort changes; [LEAVES: Name] for a departure the brief lists; [END SCENE] only when the brief says the scene ends.
-- Never write the player's words, choices, thoughts or actions beyond what their input stated.`
+- Never write the player's words, choices, thoughts or actions beyond what their input stated.
+
+For example:
+NARRATION: The kettle starts to tick on the stove.
+Ada: She doesn't look up from the ledger. "You're late. Sit, the tea's nearly done."
+Ben: "Traffic." He takes the chair nearest the door.
+[Ada: EXPRESSION tired]
+[Ben: EXPRESSION sheepish]`
 
 /** A check's result as what happens (Q9: results as events, not an attempt with a label). */
 const EVENT: Record<Degree, (who: string, succeeds: string, fails: string, stakes: string) => string> = {
@@ -167,20 +174,39 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
 export const OWNED_PHRASE_WORDS = 5
 
 const plainWords = (t: string) => t.toLowerCase().replace(/[^\p{L}\p{N}' ]+/gu, ' ').split(/\s+/).filter(Boolean)
+
+/**
+ * Words that carry no fact: a run made mostly of these ("in the right order and") is how anyone talks, not something
+ * learned. A run counts only with `OWNED_CONTENT_WORDS` words outside this list.
+ */
+const FUNCTION_WORDS = new Set('a an the and or but if then than so of in on at to for from by with without into onto off out up down over under about after before this that these those it its is are was were be been has have had do does did not no every each all some any one two his her their our your my he she they we you i me him them us who what when where which there here as just only very around near'.split(' '))
+export const OWNED_CONTENT_WORDS = 3
+
 const runs = (t: string, n: number) => {
   const w = plainWords(t)
-  return w.length < n ? [] : w.slice(0, w.length - n + 1).map((_, i) => w.slice(i, i + n).join(' '))
+  return w.length < n ? [] : w.slice(0, w.length - n + 1).map((_, i) => w.slice(i, i + n)).filter((r) => r.filter((x) => !FUNCTION_WORDS.has(x)).length >= OWNED_CONTENT_WORDS).map((r) => r.join(' '))
 }
 
 /**
  * Someone saying what only another knows (redesign §6.4, new): a dialogue beat that carries a run of
- * `OWNED_PHRASE_WORDS` words from a fact or secret its speaker can't say (another's knowledge they haven't heard, a
- * secret they don't hold or know). Matched on whole runs of words, not keywords: a secret's keywords are what touch
- * it, and saying "the client" gives nothing away.
+ * `OWNED_PHRASE_WORDS` words, at least `OWNED_CONTENT_WORDS` of them content words, from a fact or secret its speaker
+ * can't say (another's knowledge they haven't heard, a secret they don't hold or know). Matched on whole runs of words,
+ * not keywords: a secret's keywords are what touch it, and saying "the client" gives nothing away. A run that is also in
+ * what the speaker knows (lore open to them, their own facts) is theirs to say: a place's news is often in a card too.
  */
 export function ownedProblems(content: Pack, state: GameState, parsed: ParsedReply): Problem[] {
   const scene = state.scene!
   const facts = sceneFacts(content, state).filter((f) => f.kind === 'knows' || f.kind === 'secret')
+  const theirs = new Map<string, string>()
+  const ownWords = (speaker: string): string => {
+    if (!theirs.has(speaker)) {
+      const c = characterById(content, speaker)
+      const lore = c ? content.codex.filter((e) => knows(content.setting, e, knowerOf(c))).flatMap((e) => [e.summary, e.full, e.stage ?? '']) : []
+      const said = facts.filter((f) => canSay(scene, f, speaker)).map((f) => f.text)
+      theirs.set(speaker, ` ${plainWords([...lore, ...said].join(' . ')).join(' ')} `)
+    }
+    return theirs.get(speaker)!
+  }
   const problems: Problem[] = []
   parsed.beats.forEach((b, i) => {
     if (b.kind !== 'dialogue') return
@@ -188,7 +214,7 @@ export function ownedProblems(content: Pack, state: GameState, parsed: ParsedRep
     for (const f of facts) {
       const knows = canSay(scene, f, b.speaker) || (f.kind === 'secret' && knowersOf(state, f.id, f.text).includes(b.speaker))
       if (knows) continue
-      const hit = runs(f.text, OWNED_PHRASE_WORDS).find((r) => said.includes(` ${r} `))
+      const hit = runs(f.text, OWNED_PHRASE_WORDS).find((r) => said.includes(` ${r} `) && !ownWords(b.speaker).includes(` ${r} `))
       if (!hit) continue
       const holder = firstName(characterById(content, f.owner)?.name ?? f.owner)
       const speaker = firstName(characterById(content, b.speaker)?.name ?? b.speaker)

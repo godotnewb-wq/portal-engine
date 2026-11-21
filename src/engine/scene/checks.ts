@@ -3,7 +3,7 @@ import { checkNames, nameIndex, withProseNames, type NameIndex } from '@engine/c
 import type { Pack } from '@engine/pack'
 import type { ParsedReply, Speaker } from './beats'
 import type { BeatPlan } from './planShape'
-import { BEATS, OVERUSED_PHRASES } from './style'
+import { BEATS, OVERUSED_PHRASES, SCENE_LENGTH } from './style'
 
 export type ProblemKind =
   | 'player-voice'
@@ -14,6 +14,7 @@ export type ProblemKind =
   | 'overused-phrase'
   | 'repeated'
   | 'beat-count'
+  | 'scene-length'
   | 'beat-length'
   | 'wrong-name'
   | 'invented-name'
@@ -73,13 +74,19 @@ export function withoutSpeech(text: string): string {
     .trim()
 }
 
+/** What the `scene` pipeline checks differently: anyone present may speak, and length is in words (Milestone 5 plan, Q8). */
+export interface SceneChecks {
+  alsoSpeaking: string[]
+}
+
 /**
  * Everything wrong with a reply that one rewrite should fix (director writer §3, code checks). `phrases` are the
  * pack's own over-used phrases, checked with the engine's.
  */
-export function checkReply(parsed: ParsedReply, plan: BeatPlan, speakers: Speaker[], input: string, phrases: string[] = [], alsoSpeaking: string[] = []): Problem[] {
+export function checkReply(parsed: ParsedReply, plan: BeatPlan, speakers: Speaker[], input: string, phrases: string[] = [], scene?: SceneChecks): Problem[] {
   const problems: Problem[] = []
-  // `alsoSpeaking`: who else may speak this turn; in the `scene` pipeline anyone present may (redesign §4).
+  // Who else may speak this turn; in the `scene` pipeline anyone present may (redesign §4).
+  const alsoSpeaking = scene?.alsoSpeaking ?? []
   const planned = new Set([...plan.speakers.map((s) => s.id), ...plan.walk_ons.map((w) => w.id), ...alsoSpeaking])
   const byId = new Map(speakers.map((s) => [s.id, s]))
   const nameOf = (id: string) => byId.get(id)?.names[2] ?? byId.get(id)?.names[1] ?? id
@@ -118,7 +125,12 @@ export function checkReply(parsed: ParsedReply, plan: BeatPlan, speakers: Speake
   })
 
   const count = parsed.beats.length
-  if (count < BEATS.min || count > BEATS.max) problems.push({ kind: 'beat-count', fix: `Write ${BEATS.target} beats; there are ${count}.` })
+  if (scene) {
+    // A scene is measured in words: the cutter makes two or three beats of one paragraph, so its beats aren't the writer's.
+    const total = parsed.beats.reduce((n, b) => n + words(b.text), 0)
+    if (count < BEATS.min) problems.push({ kind: 'beat-count', fix: `Write ${SCENE_LENGTH.paragraphs} paragraphs; there are ${count} beats.` })
+    else if (total > SCENE_LENGTH.maxWords) problems.push({ kind: 'scene-length', text: `${total} words`, fix: `The scene is ${total} words. Write it in ${SCENE_LENGTH.paragraphs} paragraphs, ${SCENE_LENGTH.words} words in all: keep what the moment needs and cut the rest.` })
+  } else if (count < BEATS.min || count > BEATS.max) problems.push({ kind: 'beat-count', fix: `Write ${BEATS.target} beats; there are ${count}.` })
   return problems
 }
 
@@ -133,9 +145,11 @@ export function salvage(beats: Beat[], problems: Problem[]): Beat[] {
 }
 
 /** Which beats salvage keeps, by index into the rewrite's beats, so the logs can say what was dropped and cut. */
-export function salvaged(count: number, problems: Problem[]): number[] {
+export function salvaged(count: number, problems: Problem[], cut = true): number[] {
   const drop = new Set(droppedBeats(problems).map((n) => n - 1))
-  return [...Array(count).keys()].filter((i) => !drop.has(i)).slice(0, BEATS.max)
+  // A scene-pipeline turn is shown whole (`cut` false): cutting it to a beat budget loses its ending (Q8).
+  const kept = [...Array(count).keys()].filter((i) => !drop.has(i))
+  return cut ? kept.slice(0, BEATS.max) : kept
 }
 
 const SALVAGE_DROPS: ProblemKind[] = ['player-voice', 'player-action', 'unplanned-speaker', 'unknown-speaker']

@@ -144,11 +144,18 @@ Plain and brisk.
 Names in this world (for groups and places, use only these or a plain description): Pennies; The Guild; the hall; The Night Shift; The Ward Watch; the watch; East Gate; The Guild Yard; The Lower Ward; The Upper Ward.
 
 Output format, nothing else:
-- A short scene, one paragraph per line. NARRATION: … for what happens. Name: … for a character (first name): what they say in double quotes and what they do, in the order it happens, as in written fiction.
-- About 4–8 beats in all, where each quoted speech and each action counts as one; each under 40 words.
+- A short scene, one paragraph per line. Start every paragraph with NARRATION: for what happens, or with a character's first name and a colon for what they say and do: what they say in double quotes and what they do, in the order it happens, as in written fiction. Someone who speaks gets their own paragraph.
+- 4–6 paragraphs, 80–140 words in all; never more than 200.
 - The people in the moment carry the scene. Anyone else present may react or say a little. Walk-ons speak only when listed. Nobody else speaks.
 - Then the tags, one per line: [Name: EXPRESSION word] for each person who appears, for what their face shows; [Name: COMFORT 1-5 reason] when someone's comfort changes; [LEAVES: Name] for a departure the brief lists; [END SCENE] only when the brief says the scene ends.
 - Never write the player's words, choices, thoughts or actions beyond what their input stated.
+
+For example:
+NARRATION: The kettle starts to tick on the stove.
+Ada: She doesn't look up from the ledger. "You're late. Sit, the tea's nearly done."
+Ben: "Traffic." He takes the chair nearest the door.
+[Ada: EXPRESSION tired]
+[Ben: EXPRESSION sheepish]
 
 The player is Kit (they/them), addressed as "you".
 
@@ -347,11 +354,18 @@ Plain and brisk.
 Names in this world (for groups and places, use only these or a plain description): Pennies; The Guild; the hall; The Night Shift; The Ward Watch; the watch; East Gate; The Guild Yard; The Lower Ward; The Upper Ward.
 
 Output format, nothing else:
-- A short scene, one paragraph per line. NARRATION: … for what happens. Name: … for a character (first name): what they say in double quotes and what they do, in the order it happens, as in written fiction.
-- About 4–8 beats in all, where each quoted speech and each action counts as one; each under 40 words.
+- A short scene, one paragraph per line. Start every paragraph with NARRATION: for what happens, or with a character's first name and a colon for what they say and do: what they say in double quotes and what they do, in the order it happens, as in written fiction. Someone who speaks gets their own paragraph.
+- 4–6 paragraphs, 80–140 words in all; never more than 200.
 - The people in the moment carry the scene. Anyone else present may react or say a little. Walk-ons speak only when listed. Nobody else speaks.
 - Then the tags, one per line: [Name: EXPRESSION word] for each person who appears, for what their face shows; [Name: COMFORT 1-5 reason] when someone's comfort changes; [LEAVES: Name] for a departure the brief lists; [END SCENE] only when the brief says the scene ends.
 - Never write the player's words, choices, thoughts or actions beyond what their input stated.
+
+For example:
+NARRATION: The kettle starts to tick on the stove.
+Ada: She doesn't look up from the ledger. "You're late. Sit, the tea's nearly done."
+Ben: "Traffic." He takes the chair nearest the door.
+[Ada: EXPRESSION tired]
+[Ben: EXPRESSION sheepish]
 
 The player is Kit (they/them), addressed as "you".
 
@@ -435,11 +449,18 @@ Plain and brisk.
 Names in this world (for groups and places, use only these or a plain description): Pennies; The Guild; the hall; The Night Shift; The Ward Watch; the watch; East Gate; The Guild Yard; The Lower Ward; The Upper Ward.
 
 Output format, nothing else:
-- A short scene, one paragraph per line. NARRATION: … for what happens. Name: … for a character (first name): what they say in double quotes and what they do, in the order it happens, as in written fiction.
-- About 4–8 beats in all, where each quoted speech and each action counts as one; each under 40 words.
+- A short scene, one paragraph per line. Start every paragraph with NARRATION: for what happens, or with a character's first name and a colon for what they say and do: what they say in double quotes and what they do, in the order it happens, as in written fiction. Someone who speaks gets their own paragraph.
+- 4–6 paragraphs, 80–140 words in all; never more than 200.
 - The people in the moment carry the scene. Anyone else present may react or say a little. Walk-ons speak only when listed. Nobody else speaks.
 - Then the tags, one per line: [Name: EXPRESSION word] for each person who appears, for what their face shows; [Name: COMFORT 1-5 reason] when someone's comfort changes; [LEAVES: Name] for a departure the brief lists; [END SCENE] only when the brief says the scene ends.
 - Never write the player's words, choices, thoughts or actions beyond what their input stated.
+
+For example:
+NARRATION: The kettle starts to tick on the stove.
+Ada: She doesn't look up from the ledger. "You're late. Sit, the tea's nearly done."
+Ben: "Traffic." He takes the chair nearest the door.
+[Ada: EXPRESSION tired]
+[Ben: EXPRESSION sheepish]
 
 The player is Kit (they/them), addressed as "you".
 
@@ -657,11 +678,18 @@ Plain and brisk.
 Names in this world (for groups and places, use only these or a plain description): Pennies; The Guild; the hall; The Night Shift; The Ward Watch; the watch; East Gate; The Guild Yard; The Lower Ward; The Upper Ward.
 
 Output format, nothing else:
-- A short scene, one paragraph per line. NARRATION: … for what happens. Name: … for a character (first name): what they say in double quotes and what they do, in the order it happens, as in written fiction.
-- About 4–8 beats in all, where each quoted speech and each action counts as one; each under 40 words.
+- A short scene, one paragraph per line. Start every paragraph with NARRATION: for what happens, or with a character's first name and a colon for what they say and do: what they say in double quotes and what they do, in the order it happens, as in written fiction. Someone who speaks gets their own paragraph.
+- 4–6 paragraphs, 80–140 words in all; never more than 200.
 - The people in the moment carry the scene. Anyone else present may react or say a little. Walk-ons speak only when listed. Nobody else speaks.
 - Then the tags, one per line: [Name: EXPRESSION word] for each person who appears, for what their face shows; [Name: COMFORT 1-5 reason] when someone's comfort changes; [LEAVES: Name] for a departure the brief lists; [END SCENE] only when the brief says the scene ends.
 - Never write the player's words, choices, thoughts or actions beyond what their input stated.
+
+For example:
+NARRATION: The kettle starts to tick on the stove.
+Ada: She doesn't look up from the ledger. "You're late. Sit, the tea's nearly done."
+Ben: "Traffic." He takes the chair nearest the door.
+[Ada: EXPRESSION tired]
+[Ben: EXPRESSION sheepish]
 
 The player is Kit (they/them), addressed as "you".
 

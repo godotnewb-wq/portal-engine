@@ -147,13 +147,13 @@ export async function runTurn(
         )
       )
     const draft = await stream('writer', writerPrompt)
-    let parsed: ParsedReply = parseReply(draft, speakers)
+    let parsed: ParsedReply = parseReply(draft, speakers, { script: scenePipeline })
     const recent = recentlyUsed(content, scene)
-    // The scene writer: anyone present may speak, repeats are sent back from the third (Q10), and someone saying what only
+    // The scene writer: anyone present may speak, length is in words, repeats are sent back from the third (Q10), and someone saying what only
     // another knows is a problem (redesign §6.4).
     const check = (reply: ParsedReply) =>
       scenePipeline
-        ? [...checkReply(reply, plan, speakers, input, content.phrases, presentCast(scene)), ...repeatProblems(content, reply, recent, SCENE_REPEAT_REWRITE), ...loreProblems(content, state, reply), ...ownedProblems(content, state, reply)]
+        ? [...checkReply(reply, plan, speakers, input, content.phrases, { alsoSpeaking: presentCast(scene) }), ...repeatProblems(content, reply, recent, SCENE_REPEAT_REWRITE), ...loreProblems(content, state, reply), ...ownedProblems(content, state, reply)]
         : [...checkReply(reply, plan, speakers, input, content.phrases), ...repeatProblems(content, reply, recent), ...loreProblems(content, state, reply)]
     const problems = check(parsed)
     let remaining: Problem[] = []
@@ -163,9 +163,9 @@ export async function runTurn(
     if (problems.length > 0) {
       emit({ type: 'restart', reason: 'rewrite', problems: problems.map((p) => p.fix) })
       const rewrite = await stream('rewrite', buildRewritePrompt(writerPrompt, draft, problems.map((p) => p.fix)))
-      parsed = parseReply(rewrite, speakers)
+      parsed = parseReply(rewrite, speakers, { script: scenePipeline })
       remaining = check(parsed)
-      kept = remaining.length > 0 ? salvaged(parsed.beats.length, remaining) : parsed.beats.map((_, i) => i)
+      kept = remaining.length > 0 ? salvaged(parsed.beats.length, remaining, !scenePipeline) : parsed.beats.map((_, i) => i)
       const spoken = new Set(remaining.filter((p) => p.kind === 'speech-in-narration').map((p) => p.beat! - 1))
       if (spoken.size > 0) {
         parsed = { ...parsed, beats: parsed.beats.map((b, i) => (spoken.has(i) ? { ...b, text: withoutSpeech(b.text) } : b)) }
