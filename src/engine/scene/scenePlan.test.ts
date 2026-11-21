@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import type { GameState } from '@engine/state'
 import { fixture, yardScene } from '@tests/fixture'
-import { gatherScene } from './gather'
+import { gatherScene, readersOf } from './gather'
 import { liveRecords, parseScenePlan, RawScenePlanSchema, validateScenePlan, type RawScenePlan } from './scenePlan'
 
 // The `scene` pipeline's plan (Milestone 5 plan, task 1): the director sets the situation and what's at stake and
@@ -51,7 +51,7 @@ describe('aim strength', () => {
 describe('pressures', () => {
   it('take a secret only when something just said touches it, with the game’s trigger', () => {
     const touched = check('Is there a second ledger?', { pressures: [{ who: 'mara', kind: 'secret', secret: 'mara.two-books', touched: 'ledger' }] })
-    expect(touched.plan.pressures).toEqual([{ who: 'mara', kind: 'secret', ref: 'mara.two-books', text: expect.any(String), how: 'keyword', touched: 'second ledger' }])
+    expect(touched.plan.pressures).toEqual([{ who: 'mara', kind: 'secret', ref: 'mara.two-books', text: expect.any(String), how: 'keyword', touched: 'second ledger', approach: 'deflect' }])
     expect(touched.corrections).toEqual([])
     expect(check('Cold tonight.', { pressures: [{ who: 'mara', kind: 'secret', secret: 'mara.two-books' }] })).toMatchObject({ plan: { pressures: [] }, corrections: ['dropped mara\'s secret "mara.two-books": nothing just said touches it'] })
     // A quote the director made up doesn't stand in for what touched it.
@@ -100,5 +100,35 @@ describe('checks, walk-ons and departures', () => {
     expect(trying.plan.checks.map((c) => c.id)).toEqual(['c1'])
     expect(trying.plan.leaves).toEqual(['tobin'])
     expect(trying.corrections).toEqual(['ignored departure of "ghost": not present'])
+  })
+})
+
+// Milestone 5 plan, task 2: seeing through someone takes a roll, and the game says who could.
+describe('reading a live secret', () => {
+  // Tobin has known Mara for years in this copy of the yard, so he could see through her.
+  const knowing = (): GameState => {
+    const state = yardScene()
+    state.relations = [...state.relations, { from: 'tobin', to: 'mara', tags: [], note: 'has worked under her a year', meters: { warmth: 0, bond: 0 } }]
+    return state
+  }
+  const ledger = (over: Record<string, unknown> = {}) => {
+    const state = knowing()
+    return validateScenePlan(fixture, state, raw({ pressures: [{ who: 'mara', kind: 'secret', secret: 'mara.two-books', approach: 'lie' }], ...over }), gatherScene(fixture, state, 'Is there a second ledger?'), 'Is there a second ledger?')
+  }
+
+  it('names who knows the holder, with their reading bonus', () => {
+    expect(readersOf(fixture, knowing(), 'mara')).toEqual([{ who: 'tobin', bonus: expect.any(Number), knows: 'has worked under her a year' }])
+    expect(readersOf(fixture, yardScene(), 'mara')).toEqual([])
+  })
+
+  it('notes a live secret with someone to see through it and no read', () => {
+    expect(ledger()).toMatchObject({ plan: { pressures: [{ approach: 'lie' }] }, corrections: ['mara plays mara.two-books live with tobin here to see through it, and no one reads them'] })
+  })
+
+  it('is satisfied by a read on the holder, and reads an unknown approach as deflect', () => {
+    const read = ledger({ checks: [{ id: 'read-mara', who: 'tobin', skill: 'notice', target: 'mara', stakes: 'he sees the lie' }] })
+    expect(read.plan.checks.map((c) => c.who)).toEqual(['tobin'])
+    expect(read.corrections).toEqual([])
+    expect(ledger({ pressures: [{ who: 'mara', kind: 'secret', secret: 'mara.two-books', approach: 'stonewall' }] }).corrections[0]).toBe('mara\'s secret: no approach "stonewall"; deflect')
   })
 })

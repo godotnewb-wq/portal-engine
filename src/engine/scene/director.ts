@@ -20,7 +20,7 @@ import { claimLines } from './writer'
  * The shades by family for the director, words only (milestone 4c trim): the usual intensities are left to the game,
  * which marks one outside them, so the list costs less on every turn.
  */
-const shadeNames = (r: Ruleset): string =>
+export const shadeNames = (r: Ruleset): string =>
   r.people.emotions.families.map((f) => `${f.name.toLowerCase()}${f.moodOnly ? ' (in the moment only)' : ''}: ${r.people.emotions.shades.filter((x) => x.families.includes(f.id)).map((x) => x.word).join(', ')}`).join('; ')
 
 /** How many past turns go into prompts verbatim; older ones live in the running summary. */
@@ -99,18 +99,15 @@ export function buildBriefs(content: Pack, state: GameState, input: string, lore
   return { sheets, details, trace: { ...trace, recurring, memories, recalled } }
 }
 
-export function buildDirectorPrompt(content: Pack, state: GameState, input: string, lore: TurnLore = turnLore(content, state, input), briefs: Briefs = buildBriefs(content, state, input, lore)): Prompt {
-  const scene = state.scene
-  if (!scene) throw new Error('No scene in progress')
+/** What both directors are shown about the world, the place and the people, after their rules (director writer §7). */
+export function directorContext(content: Pack, state: GameState, lore: TurnLore, briefs: Briefs): string[] {
+  const scene = state.scene!
   const location = locationById(content, scene.locationId)!
-  const present = presentCast(scene)
-  const cast = present.map((id) => characterById(content, id)!)
+  const cast = presentCast(scene).map((id) => characterById(content, id)!)
   const walkOns = location.walkOns.filter((w) => scene.walkOns.includes(w.id))
   const player = state.player
   const facts = sceneFacts(content, state)
-
-  const system = [
-    directorRules(content.ruleset, lore.budgets.loreLines),
+  return [
     `# World: ${content.setting.name}\n${lore.stage.text}`,
     content.tone && `# Tone\n${content.tone}`,
     [
@@ -124,15 +121,20 @@ export function buildDirectorPrompt(content: Pack, state: GameState, input: stri
     `# The player: ${player.name} (${player.species}, ${player.pronouns})\n${player.appearance}. ${player.background}`,
     `# Characters present\n${cast.map((c) => briefs.sheets[c.id]).join('\n\n')}`,
     childGuard(content, state)
-  ]
-    .filter(Boolean)
-    .join('\n\n')
+  ].filter((x): x is string => !!x)
+}
 
+/**
+ * What both directors are told about where the scene stands, before their own sections and the player's words: earlier
+ * in the scene, the last turns, what has been said and claimed, who has spoken, the player's backing, lore come up.
+ */
+export function sceneSoFar(content: Pack, state: GameState, lore: TurnLore): { before: string[]; after: string[] } {
+  const scene = state.scene!
+  const present = presentCast(scene)
+  const player = state.player
+  const facts = sceneFacts(content, state)
   const quiet = silence(scene)
   const recent = scene.turns.slice(-RECENT_TURNS)
-  const quietOnes = cast
-    .filter((c) => quiet[c.id]! >= QUIET_TURNS)
-    .map((c) => `- ${c.name} [id: ${c.id}], silent ${quiet[c.id]} turns. Trade: ${c.role}. Tonight: ${c.agenda.current}. Wants: ${c.agenda.longTerm.join('; ')}.`)
   const said = facts.filter((f) => f.kind === 'said' || scene.told.includes(f.id))
   const claims = claimLines(content, state)
   // The assist gate in words (core rules §1): which companions present would back the player up, never the numbers.
@@ -140,17 +142,38 @@ export function buildDirectorPrompt(content: Pack, state: GameState, input: stri
   const backing = state.party
     .filter((id) => present.includes(id))
     .map((id) => `${speakerName(content, id)} ${willing.includes(id) ? 'would back the player up.' : "won't lift a finger."}`)
-  const user = [
+  const before = [
     scene.summary && `# Earlier in the scene\n${scene.summary}`,
     recent.length > 0 ? `# Last turns\n${recent.map((t) => turnText(content, player.name, t)).join('\n\n')}` : '# The scene opens now.',
     said.length > 0 ? `# Already said on screen (anyone present can use these)\n${said.map((f) => `- [${f.id}] ${f.text}`).join('\n')}` : '# Nothing has been said on screen yet.',
     claims.length > 0 && `# Claimed but never confirmed (claims, not facts: anyone may doubt or deny them)\n${claims.join('\n')}`,
     `# Turns since each last spoke\n${present.map((id) => `${id}: ${quiet[id]}`).join(', ')}`,
-    backing.length > 0 && `# Help with the player's checks\n${backing.join(' ')}`,
+    backing.length > 0 && `# Help with the player's checks\n${backing.join(' ')}`
+  ].filter((x): x is string => !!x)
+  const after = [
+    lore.layers.triggered.text && `# Lore that has come up (background, not things to recite)\n${lore.layers.triggered.text}`,
+    lore.layers.stances.length > 0 && `# Official stances between the factions here (individuals feel as their sheets say)\n${lore.layers.stances.join('\n')}`
+  ].filter((x): x is string => !!x)
+  return { before, after }
+}
+
+export function buildDirectorPrompt(content: Pack, state: GameState, input: string, lore: TurnLore = turnLore(content, state, input), briefs: Briefs = buildBriefs(content, state, input, lore)): Prompt {
+  const scene = state.scene
+  if (!scene) throw new Error('No scene in progress')
+  const present = presentCast(scene)
+  const cast = present.map((id) => characterById(content, id)!)
+  const system = [directorRules(content.ruleset, lore.budgets.loreLines), ...directorContext(content, state, lore, briefs)].join('\n\n')
+
+  const quiet = silence(scene)
+  const quietOnes = cast
+    .filter((c) => quiet[c.id]! >= QUIET_TURNS)
+    .map((c) => `- ${c.name} [id: ${c.id}], silent ${quiet[c.id]} turns. Trade: ${c.role}. Tonight: ${c.agenda.current}. Wants: ${c.agenda.longTerm.join('; ')}.`)
+  const so = sceneSoFar(content, state, lore)
+  const user = [
+    ...so.before,
     Object.keys(scene.pressures).length > 0 && `# Pressure now\n${present.filter((id) => scene.pressures[id] !== undefined).map((id) => `${id}: ${content.ruleset.pressures[scene.pressures[id]!]}`).join(', ')}`,
     quietOnes.length > 0 && `# Quiet for a while\n${quietOnes.join('\n')}`,
-    lore.layers.triggered.text && `# Lore that has come up (background, not things to recite)\n${lore.layers.triggered.text}`,
-    lore.layers.stances.length > 0 && `# Official stances between the factions here (individuals feel as their sheets say)\n${lore.layers.stances.join('\n')}`,
+    ...so.after,
     `# The player says or does\n${input}`,
     'Return the JSON plan.'
   ]

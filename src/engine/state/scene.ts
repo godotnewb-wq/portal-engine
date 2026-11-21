@@ -52,7 +52,10 @@ export const BookkeepingSchema = z.object({
   unresolved: z.array(SecretNoteSchema).default([]),
   /** Concrete details the prose stated as settled that no fact holds; anyone present may repeat them. */
   new: z.array(z.object({ text: z.string(), by: z.string() })).default([]),
-  /** What is actually different after the turn; compared with the director's `change` in the logs, read by no prompt. */
+  /**
+   * What is actually different after the turn; compared with the director's `change` in the logs. The `scene` pipeline's
+   * next director reads it, for that turn only (Milestone 5 plan, Q4); `situation`'s doesn't.
+   */
   changed: z.string().optional(),
   /** Where each feeling the prose showed seemed to land; logged against the director's `feels`, never applied. */
   moods: z.array(z.object({ id: z.string(), feeling: FeelingSchema })).default([]),

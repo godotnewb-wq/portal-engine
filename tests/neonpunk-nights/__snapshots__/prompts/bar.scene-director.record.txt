@@ -1,0 +1,314 @@
+===== who is the client =====
+{
+  "gathered": {
+    "options": {
+      "vex": {
+        "goal": {
+          "text": "Keep the player from walking into a bad deal tonight without making it look like she cares; and if Oria is the one offering, find out whether Oria's network had anything to do with Sef",
+          "strength": "background",
+          "level": 0
+        },
+        "secrets": [],
+        "ties": [
+          {
+            "with": "player",
+            "words": "friend",
+            "note": "a dozen jobs together; covers for Rook more than she'd admit, and keeps a tally of who owes whom",
+            "how": "present"
+          },
+          {
+            "with": "brask",
+            "words": "best friend",
+            "note": "met hauling his tool cart up the lower stairs six years ago; she's dragged him to every bar since and he's fixed everything she owns",
+            "how": "present"
+          },
+          {
+            "with": "oria-senn",
+            "words": "client",
+            "note": "ran sealed packets for her twice; both paid on time, and one went bad in a way Oria smoothed over too easily",
+            "how": "present"
+          },
+          {
+            "with": "dunmar",
+            "words": "",
+            "note": "drinks at his bar most nights and owes him a small, permanent slate",
+            "how": "present"
+          }
+        ]
+      },
+      "brask": {
+        "goal": {
+          "text": "Get out of this noisy room as soon as he decently can; but if the job on the table is down at Pump Station Nine, find out who's paying before Vex or the player goes near that water",
+          "strength": "background",
+          "level": 0
+        },
+        "secrets": [],
+        "ties": [
+          {
+            "with": "player",
+            "words": "friend",
+            "note": "Rook has run errands for half his tenants; he's patched Rook's coat zip twice and never charged",
+            "how": "present"
+          },
+          {
+            "with": "vex",
+            "words": "best friend",
+            "note": "she dragged him to his first bar six years ago and has dragged him to every one since; he's fixed everything she owns",
+            "how": "present"
+          },
+          {
+            "with": "dunmar",
+            "words": "client",
+            "note": "keeps the bar's ice chiller and pumps running; paid in Tuesdays and the odd favor",
+            "how": "present"
+          },
+          {
+            "with": "oria-senn",
+            "words": "",
+            "note": "has heard of her for years and never met her; knows she always pays and that nobody says what for",
+            "how": "present"
+          }
+        ]
+      },
+      "oria-senn": {
+        "goal": {
+          "text": "Get the player to take the retrieval job at Pump Station Nine tonight without learning who the client is; she'd take Brask too, if he knows the station",
+          "strength": "background",
+          "level": 0
+        },
+        "secrets": [
+          {
+            "id": "oria-senn.client-is-grid-corporation",
+            "text": "The 'private client' is the Aether Grid Corporation, and she owes them; this job pays down her debt.",
+            "how": "keyword",
+            "by": "client"
+          }
+        ],
+        "ties": [
+          {
+            "with": "vex",
+            "words": "runner",
+            "note": "hired her for sealed runs twice; one went wrong, and Oria paid in full and didn't ask the questions she should have",
+            "how": "present"
+          },
+          {
+            "with": "brask",
+            "words": "",
+            "note": "knows him by reputation only: the mechanic everyone on the lower stairs calls first",
+            "how": "present"
+          },
+          {
+            "with": "dunmar",
+            "words": "",
+            "note": "keeps her standing booth and her tab; she pays it on the first of every month",
+            "how": "present"
+          }
+        ]
+      },
+      "dunmar": {
+        "goal": {
+          "text": "Keep tonight quiet, keep the slate honest, and keep anyone he likes from going down to Pump Station Nine at high tide",
+          "strength": "background",
+          "level": 0
+        },
+        "secrets": [],
+        "ties": [
+          {
+            "with": "player",
+            "words": "",
+            "note": "drinks here when there's money, and when there isn't; a small slate",
+            "how": "present"
+          },
+          {
+            "with": "brask",
+            "words": "mechanic",
+            "note": "the mechanic who keeps his chiller and pumps alive; paid in Tuesdays",
+            "how": "present"
+          },
+          {
+            "with": "vex",
+            "words": "",
+            "note": "a regular for years; he's slipped her out the back door twice and never asked why",
+            "how": "present"
+          },
+          {
+            "with": "oria-senn",
+            "words": "",
+            "note": "her booth, her tab, paid on the first of every month without fail",
+            "how": "present"
+          }
+        ]
+      }
+    },
+    "recent": {},
+    "pools": {
+      "vex": [
+        {
+          "id": "vex.k1",
+          "text": "Oria Senn has lied to her before, smoothly, about a run that went bad; Vex didn't catch it until afterward",
+          "source": "card",
+          "unheard": true
+        },
+        {
+          "id": "place.1",
+          "text": "Grid Corporation surveyors were seen on the lower stairs this week",
+          "source": "place",
+          "unheard": true
+        },
+        {
+          "id": "place.2",
+          "text": "Someone chalked an Animist spiral on the back door",
+          "source": "place",
+          "unheard": true
+        }
+      ],
+      "brask": [
+        {
+          "id": "brask.k5",
+          "text": "He has never met Oria Senn but has heard that she always gets paid, and that nobody says what the jobs were",
+          "source": "card",
+          "unheard": true
+        },
+        {
+          "id": "place.1",
+          "text": "Grid Corporation surveyors were seen on the lower stairs this week",
+          "source": "place",
+          "unheard": true
+        },
+        {
+          "id": "place.2",
+          "text": "Someone chalked an Animist spiral on the back door",
+          "source": "place",
+          "unheard": true
+        }
+      ],
+      "oria-senn": [
+        {
+          "id": "oria-senn.k3",
+          "text": "The client will pay triple the usual rate, and has told her nothing about why",
+          "source": "card",
+          "unheard": true
+        },
+        {
+          "id": "place.1",
+          "text": "Grid Corporation surveyors were seen on the lower stairs this week",
+          "source": "place",
+          "unheard": true
+        },
+        {
+          "id": "place.2",
+          "text": "Someone chalked an Animist spiral on the back door",
+          "source": "place",
+          "unheard": true
+        }
+      ],
+      "dunmar": [
+        {
+          "id": "dunmar.k4",
+          "text": "Oria Senn pays her booth's tab on the first of every month, never late",
+          "source": "card",
+          "unheard": true
+        },
+        {
+          "id": "place.1",
+          "text": "Grid Corporation surveyors were seen on the lower stairs this week",
+          "source": "place",
+          "unheard": true
+        },
+        {
+          "id": "place.2",
+          "text": "Someone chalked an Animist spiral on the back door",
+          "source": "place",
+          "unheard": true
+        }
+      ]
+    },
+    "readers": {
+      "oria-senn": [
+        {
+          "who": "vex",
+          "bonus": 4,
+          "knows": "client"
+        },
+        {
+          "who": "brask",
+          "bonus": 1,
+          "knows": "has heard of her for years and never met her; knows she always pays and that nobody says what for"
+        }
+      ]
+    }
+  },
+  "plan": {
+    "pipeline": "scene",
+    "player_action": {
+      "doing": "asks Oria who the client really is",
+      "uncertain": false
+    },
+    "checks": [
+      {
+        "id": "read-oria",
+        "who": "vex",
+        "skill": "empathy",
+        "difficulty": "hard",
+        "target": "oria-senn",
+        "stakes": "Vex catches the dodge for what it is"
+      }
+    ],
+    "focus": [
+      "oria-senn",
+      "vex"
+    ],
+    "moments": [
+      {
+        "who": "oria-senn",
+        "feels": {
+          "shade": "irritation",
+          "family": "anger",
+          "intensity": 3,
+          "reason": "pressed on the client in front of everyone",
+          "atypical": true
+        },
+        "lands": "the question she came prepared to turn aside, asked plainly",
+        "wants": "to answer warmly enough that it stops being asked"
+      },
+      {
+        "who": "vex",
+        "lands": "she has run for Oria before and knows the over-formal voice",
+        "wants": "a straight answer before Rook takes the job"
+      }
+    ],
+    "strengths": {
+      "vex": "background",
+      "brask": "background",
+      "oria-senn": "pressing",
+      "dunmar": "background"
+    },
+    "pressures": [
+      {
+        "who": "oria-senn",
+        "kind": "secret",
+        "ref": "oria-senn.client-is-grid-corporation",
+        "text": "The 'private client' is the Aether Grid Corporation, and she owes them; this job pays down her debt.",
+        "how": "keyword",
+        "touched": "client",
+        "approach": "deflect"
+      }
+    ],
+    "pools": {
+      "oria-senn": [
+        {
+          "id": "oria-senn.k3",
+          "text": "The client will pay triple the usual rate, and has told her nothing about why",
+          "source": "card",
+          "unheard": true
+        }
+      ]
+    },
+    "stakes": "whether the player takes Oria at her word, and whether Vex sees the dodge",
+    "walk_ons": [],
+    "leaves": [],
+    "end_scene": false,
+    "avoid": []
+  },
+  "corrections": []
+}

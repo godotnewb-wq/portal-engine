@@ -40,7 +40,13 @@ export interface LivePressure {
   how?: SecretOption['how'] | TieOption['how']
   /** A secret: the words that touched it. */
   touched?: string
+  /** A secret: how they handle it this turn (redesign §5.2). */
+  approach?: Approach
 }
+
+/** How someone handles a live secret (redesign §5.2): engine words the writer reads, as the situation plan's were. */
+export const APPROACHES = ['deflect', 'partial truth', 'lie'] as const
+export type Approach = (typeof APPROACHES)[number]
 
 export interface ScenePlan {
   pipeline: 'scene'
@@ -70,7 +76,7 @@ export const RawScenePlanSchema = z.object({
   checks: list(PlannedCheckSchema),
   focus: oneOrList(z.string()),
   moments: list(z.object({ who: z.string(), feels: RawFeelsSchema.optional().catch(undefined), lands: text, wants: text, pressure: text })),
-  pressures: list(z.object({ who: z.string(), kind: text, secret: text, with: text, touched: text })),
+  pressures: list(z.object({ who: z.string(), kind: text, secret: text, with: text, touched: text, approach: text })),
   draws_on: list(z.object({ who: z.string(), facts: oneOrList(z.string()) })),
   stakes: text,
   walk_ons: list(z.object({ id: z.string(), line: z.string() })),
@@ -214,7 +220,9 @@ export function validateScenePlan(content: Pack, state: GameState, raw: RawScene
       }
       // The game found what touched it; a quote the director invented doesn't replace that.
       if (p.touched.trim() && !said.includes(p.touched.trim().toLowerCase())) fix(`${id}'s secret: "${p.touched.trim()}" isn't in what was just said; "${option.by}" touched it`)
-      pressures.push({ who: id, kind, ref: option.id, text: option.text, how: option.how, touched: option.by })
+      const approach = APPROACHES.find((a) => a === p.approach.trim().toLowerCase()) ?? 'deflect'
+      if (p.approach.trim() && approach !== p.approach.trim().toLowerCase()) fix(`${id}'s secret: no approach "${p.approach.trim()}"; deflect`)
+      pressures.push({ who: id, kind, ref: option.id, text: option.text, how: option.how, touched: option.by, approach })
     } else {
       const tie = tieFor(content, state, options.ties, p.with)
       if (!tie) {
@@ -244,6 +252,15 @@ export function validateScenePlan(content: Pack, state: GameState, raw: RawScene
   const walk_ons = validateWalkOns(content, state, raw.walk_ons, fix)
   const reading = raw.player_action.reading ? who(raw.player_action.reading) : undefined
   const checks = playerChecks(content, state, validateChecks(content, state, raw.checks, felt, fix), { uncertain: raw.player_action.uncertain, ...(reading && { reading }) }, felt, { walk_ons }, fix)
+
+  // Seeing through someone takes a roll (redesign §5.2; criterion 5). A live secret is always dodged or lied about, never
+  // simply told, so when someone here could see through the holder and no one is reading them, the plan missed the read
+  // (Milestone 5 plan, task 2: no companion read in any run before this milestone). Noted, counted, not added: whether
+  // the moment calls for a read stays the director's call.
+  for (const p of pressures.filter((x) => x.kind === 'secret')) {
+    const readers = gathered.readers[p.who] ?? []
+    if (readers.length > 0 && !checks.some((c) => c.target === p.who && c.skill === r.people.reading.skill)) fix(`${p.who} plays ${p.ref} live with ${readers.map((x) => x.who).join(' or ')} here to see through it, and no one reads them`)
+  }
 
   return {
     plan: {

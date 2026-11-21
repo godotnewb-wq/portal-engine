@@ -2,6 +2,7 @@ import { knows, mentions, triggeredEntries, type CodexEntry } from '@engine/code
 import { firstName } from '@engine/core'
 import { tagWord, type Character } from '@engine/characters'
 import { recall } from '@engine/memory'
+import { modifier, rankOf } from '@engine/rules'
 import { characterById, locationById, type Pack } from '@engine/pack'
 import type { GameState } from '@engine/state'
 import type { Briefs } from './brief'
@@ -9,6 +10,7 @@ import { buildBriefs } from './director'
 import { canSay, sceneFacts, toldPlayer } from './facts'
 import { knowerIn, turnLore, type TurnLore } from './lore'
 import { presentCast } from './planShape'
+import { statsOf } from './resolve'
 import { secretDisplay, touchOf, type SecretScan } from './secrets'
 
 /**
@@ -69,6 +71,23 @@ export interface LiveRecord {
   ref: string
 }
 
+/**
+ * Someone present who could see through a holder's dodge or lie (Milestone 5 plan, task 2; criterion 8): they know the
+ * holder (a tie or a history between them) and can roll the ruleset's reading skill. No run before Milestone 5 had a
+ * companion read: the director was told to give the read to "someone present who could see through it" and never
+ * told who that was, so it gave it to the player or to no one.
+ */
+export interface Reader {
+  who: string
+  /** Their reading bonus: the skill's attribute modifier plus their rank, as a roll would count it. */
+  bonus: number
+  /** What they are to the holder, in words: the tags, or the history note. */
+  knows: string
+}
+
+/** Readers listed per holder, at most this many, best first. */
+export const MAX_READERS = 2
+
 export interface Gathered {
   /** What could be live for each character present, by id. */
   options: Record<string, PressureOptions>
@@ -76,6 +95,8 @@ export interface Gathered {
   recent: Record<string, LiveRecord[]>
   /** The facts each character present may draw on, best first, at most the ruleset's `scene.factPool`. */
   pools: Record<string, PoolFact[]>
+  /** For each holder of a secret something just touched: who present could see through them, best first. */
+  readers: Record<string, Reader[]>
 }
 
 /** The player's words and the last turn: where something must be said to touch a secret or name a person (Q5). */
@@ -138,6 +159,30 @@ function tieOptions(content: Pack, state: GameState, c: Character, input: string
     if (how) out.push({ with: o.id, words: words(x.tags), ...(x.note && { note: x.note }), how })
   }
   return out
+}
+
+/**
+ * Who present could see through `holder`: anyone but the holder who knows them (a tie or a history note toward them),
+ * best reader first, then the order they're present in. The player isn't listed: the player reads only when trying to
+ * (milestone 4d), and the plan says so in `player_action.reading`.
+ */
+export function readersOf(content: Pack, state: GameState, holder: string): Reader[] {
+  const r = content.ruleset
+  const skill = r.skills.find((x) => x.id === r.people.reading.skill)
+  if (!skill) return []
+  const present = presentCast(state.scene!)
+  return present
+    .filter((id) => id !== holder)
+    .flatMap((id): Reader[] => {
+      const c = characterById(content, id)
+      const tie = state.relations.find((x) => x.from === id && x.to === holder)
+      if (!c || !tie || (tie.tags.length === 0 && !tie.note)) return []
+      const stats = statsOf(r, c)
+      const knows = tie.tags.filter((t) => !t.private).map((t) => tagWord(r, t)).join(', ') || tie.note!
+      return [{ who: id, bonus: modifier(r, stats.attributes[skill.attribute] ?? r.attributes.average) + rankOf(stats, skill.id), knows }]
+    })
+    .sort((a, b) => b.bonus - a.bonus || present.indexOf(a.who) - present.indexOf(b.who))
+    .slice(0, MAX_READERS)
 }
 
 /** Tonight's aim at its current strength: where the director left it this scene, else the card's word, else the weakest. */
@@ -210,5 +255,6 @@ export function gatherScene(content: Pack, state: GameState, input: string, lore
     options[id] = { goal: goalOption(content, state, c), secrets: secrets[id] ?? [], ties: tieOptions(content, state, c, input) }
     pools[id] = poolOf(content, state, c, briefs, brought)
   }
-  return { options, recent: recentlyLive(content, state), pools }
+  const readers = Object.fromEntries(Object.keys(secrets).map((holder) => [holder, readersOf(content, state, holder)]).filter(([, r]) => r!.length > 0))
+  return { options, recent: recentlyLive(content, state), pools, readers }
 }

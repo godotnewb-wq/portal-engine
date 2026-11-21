@@ -1,7 +1,7 @@
 import type { Prompt } from '@engine/core'
 import type { Pack } from '@engine/pack'
 import type { GameState } from '@engine/state'
-import { runTurn, type TurnLlm } from '@engine/scene'
+import { runTurn, type TurnLlm, buildBriefs, buildSceneDirectorPrompt, gatherScene, parseScenePlan, turnLore, validateScenePlan } from '@engine/scene'
 import { endScene, judgeScene, witnesses } from '@engine/relationships'
 import { answerTie } from '@engine/state'
 
@@ -112,4 +112,31 @@ export async function playScene(content: Pack, start: GameState, turns: Scripted
   )
   record.push(`===== end of scene =====\n${json({ witnesses: ended.trace.witnesses.map(({ callId: _c, ...w }) => w) })}\n`)
   return { prompts: prompts.join('\n'), record: record.join('\n'), state: ended.state }
+}
+
+/** One scripted moment for the scene director: a state, what the player says, and the director's scripted reply. */
+export interface SceneMoment {
+  heading: string
+  state: GameState
+  input: string
+  reply: object
+}
+
+/**
+ * The `scene` pipeline's director on scripted moments (Milestone 5 plan, task 2), before it can play a turn: each
+ * moment's prompt, and what the game gathered and validated from the scripted reply. A refactor must leave both
+ * unchanged, as with the situation pipeline's snapshots.
+ */
+export function sceneDirector(content: Pack, moments: SceneMoment[]): Omit<PlayedScene, 'state'> {
+  const prompts: string[] = []
+  const record: string[] = []
+  for (const m of moments) {
+    const lore = turnLore(content, m.state, m.input)
+    const briefs = buildBriefs(content, m.state, m.input, lore)
+    const gathered = gatherScene(content, m.state, m.input, lore, briefs)
+    prompts.push(promptText(`${m.heading}: scene director`, buildSceneDirectorPrompt(content, m.state, m.input, lore, briefs, gathered)))
+    const raw = parseScenePlan(JSON.stringify(m.reply))
+    record.push(`===== ${m.heading} =====\n${json({ gathered, ...(raw ? validateScenePlan(content, m.state, raw, gathered, m.input) : { unreadable: true }) })}\n`)
+  }
+  return { prompts: prompts.join('\n'), record: record.join('\n') }
 }

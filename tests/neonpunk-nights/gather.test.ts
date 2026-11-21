@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { gatherScene } from '@engine/scene'
+import { createInitialState, startScene } from '@engine/state'
 import { barScene, content } from './support'
 
 // The `scene` pipeline's gathering on the real bar scene (Milestone 5 plan, task 1): the pools follow what was just
@@ -23,5 +24,21 @@ describe('gathering in the Sump Lantern', () => {
 
   it('never offers more than the ruleset’s pool size', () => {
     for (const pool of Object.values(gatherScene(content, barScene(), 'Is the Grid shedding load down here again?').pools)) expect(pool.length).toBeLessThanOrEqual(content.ruleset.scene.factPool)
+  })
+})
+
+// Milestone 5 plan, task 2 (criterion 8): no run before this milestone had a companion read. The game now names who
+// could see through a holder; in the deception scenes that is Vex, as the scenarios expect.
+describe('who could see through Oria', () => {
+  it('is Vex first, then Brask, when the client comes up', () => {
+    const state = startScene(content, createInitialState(content, 1), 'sump-lantern', ['vex', 'brask', 'oria-senn', 'dunmar'])
+    const g = gatherScene(content, state, "So, Oria, who's the client, really?")
+    expect(g.options['oria-senn']!.secrets.map((s) => s.id)).toEqual(['oria-senn.client-is-grid-corporation'])
+    expect(g.readers['oria-senn']!.map((r) => r.who)).toEqual(['vex', 'brask'])
+    expect(g.readers['oria-senn']![0]).toMatchObject({ knows: 'client' })
+  })
+
+  it('is no one while nothing touches her secrets', () => {
+    expect(gatherScene(content, barScene(), 'Evening, all.').readers).toEqual({})
   })
 })
