@@ -30,7 +30,7 @@ import { join, resolve } from 'node:path'
 import { isConfigured } from '@llm'
 import { existsSync } from 'node:fs'
 import { loadPack } from '@platform/packs'
-import { benchLoreBudgets, benchSettings, modelsOf } from './config'
+import { benchLoreBudgets, benchSettings, modelsOf, npmSwallowed } from './config'
 import { compareRuns, renderReport } from './report'
 import { fillProblems, fillRun, mockLlm, readRun, runBench, writeRun, type BenchLlm } from './run'
 import { roleSettings, runInputs, sourceRevision, type RunInputs } from './inputs'
@@ -133,6 +133,8 @@ async function fill(out: string): Promise<void> {
 }
 
 async function main(): Promise<void> {
+  const swallowed = npmSwallowed(process.env)
+  if (swallowed.length > 0) throw new Error(`npm took ${swallowed.join(', ')} for itself, so the bench never saw ${swallowed.length > 1 ? 'them' : 'it'}. Put -- before the bench's options: npm run bench -- ${swallowed.join(' ')} …`)
   const compare = args.indexOf('--compare')
   if (compare >= 0) {
     const [a, b] = args.slice(compare + 1, compare + 3)

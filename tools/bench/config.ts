@@ -40,3 +40,15 @@ export function modelsOf(settings: Settings): Record<string, string> {
   if (isConfigured(settings.nsfw)) models['nsfw fallback'] = settings.nsfw.model
   return models
 }
+
+/** The bench's own options, as npm would name them. */
+const BENCH_OPTIONS = ['mock', 'no-summaries', 'score', 'compare', 'config', 'fill', 'label', 'pack', 'pipeline', 'repeat']
+
+/**
+ * The bench options npm kept for itself: `npm run bench --score` without the `--` before the options hands them to npm,
+ * which sets `npm_config_score` and passes the bench only their values. The bench then plays the defaults and the run
+ * looks like the one asked for; better to stop and say so.
+ */
+export function npmSwallowed(env: Record<string, string | undefined>): string[] {
+  return BENCH_OPTIONS.filter((name) => env[`npm_config_${name.replace(/-/g, '_')}`] !== undefined).map((name) => `--${name}`)
+}
