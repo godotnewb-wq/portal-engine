@@ -7,7 +7,7 @@ import { content, PACK_DIR } from './support'
 import { SettingsSchema } from '@llm'
 import { benchSettings, modelsOf } from '../../tools/bench/config'
 import { compareRuns, renderReport, stats } from '../../tools/bench/report'
-import { comparability, fingerprint, roleSettings } from '../../tools/bench/inputs'
+import { comparability, fingerprint, roleSettings, scenarioFingerprint } from '../../tools/bench/inputs'
 import { callsOf, fillProblems, fillRun, mockLlm, readRun, runBench, runScenario, writeRun, type BenchLlm } from '../../tools/bench/run'
 import { loreBudgets } from '@engine/rules'
 import { loadScenarios, scenarioProblems, scenarioState, ScenarioSchema } from '../../tools/bench/scenario'
@@ -411,6 +411,15 @@ describe('expected ties', () => {
     const bench = await runBench(content, [byId('one-job-hire')], mockLlm(), 'ties', { all: 'mock' }, { out })
     writeRun(out, bench)
     expect(readRun(out).scenarios[0]!.tieResults).toEqual(bench.scenarios[0]!.tieResults)
+  })
+
+  it('leave the scenario’s fingerprint as it was: they check the result, they aren’t played', () => {
+    const hire = byId('one-job-hire')
+    const { expectedTies: _checked, ...played } = hire
+    // A scenario from before the field fingerprints the same, so runs on either side of it still compare.
+    expect(scenarioFingerprint(hire)).toBe(fingerprint(played))
+    expect(scenarioFingerprint({ ...hire, expectedTies: [] })).toBe(scenarioFingerprint(hire))
+    expect(scenarioFingerprint({ ...hire, turns: ['Something else.'] })).not.toBe(scenarioFingerprint(hire))
   })
 
   it('name only known people and tags, and expect something', () => {

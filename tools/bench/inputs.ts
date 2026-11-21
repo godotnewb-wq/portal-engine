@@ -28,6 +28,16 @@ export type RoleSettings = Omit<LlmProfile, 'apiKey' | 'baseUrl'> & { profile: L
 /** A short, stable fingerprint of anything JSON can hold. Line ends are evened out, so a pack read on Windows matches. */
 export const fingerprint = (value: unknown): string => promptVersion([JSON.stringify(value).replaceAll('\\r\\n', '\\n')])
 
+/**
+ * A scenario's fingerprint covers what is played, not what the result is checked against: `expectedTies` is left out
+ * (Milestone 5, task 5's bench run: the field's default made every scenario look changed, and nothing compared). A
+ * scenario without it fingerprints as it did before the field existed.
+ */
+export const scenarioFingerprint = (scenario: Scenario): string => {
+  const { expectedTies: _checked, ...played } = scenario
+  return fingerprint(played)
+}
+
 /** The commit checked out at `root`, and whether tracked or untracked files differ from it; undefined without git. */
 export function sourceRevision(root: string): RunInputs['source'] {
   try {
@@ -66,7 +76,7 @@ export function runInputs(content: Pack, scenarios: Scenario[], extra: Pick<RunI
   return {
     ...(extra.source && { source: extra.source }),
     pack: fingerprint(content),
-    scenarios: Object.fromEntries(scenarios.map((s) => [s.id, fingerprint(s)])),
+    scenarios: Object.fromEntries(scenarios.map((s) => [s.id, scenarioFingerprint(s)])),
     roles: extra.roles,
     names
   }
