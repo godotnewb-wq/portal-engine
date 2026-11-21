@@ -3,7 +3,7 @@ import type { Prompt } from '@engine/core'
 import type { GameState } from '@engine/state'
 import { fixture, yardScene } from '@tests/fixture'
 import { runTurn, type TurnLlm } from './runTurn'
-import { checkEvent, ownedProblems } from './sceneWriter'
+import { checkEvent, ownedProblems, placeDetails } from './sceneWriter'
 import { parseReply } from './beats'
 import { checkReply, salvaged } from './checks'
 import { sceneSpeakers } from './writer'
@@ -168,5 +168,17 @@ describe('the scene writer’s checks (fixes from the first scored run)', () => 
     const gin = extra(['The night foreman drinks cheap gin behind the stables'])
     expect(said(gin, 'Tobin: "The night foreman drinks cheap gin, you know."')).toEqual(['unowned-fact'])
     expect(said(gin, 'Tobin: "It was in the yard after all, Kit."')).toEqual([])
+  })
+})
+
+describe('the place’s details for the scene writer', () => {
+  it('offers the place’s details, less any the last turns used', async () => {
+    const state = yard()
+    const llm = scripted(LEDGER, [SCENE])
+    await runTurn(fixture, state, 'Is there a second ledger, Mara?', llm, () => {}, { pipeline: 'scene' })
+    expect(llm.prompts[1]!.user).toMatch(/# The place's details \(one, if a line needs it\)\n- /)
+    const texture = { sights: ['a lamp swinging over the scales', 'crates stacked to the rafters'], sounds: ['gulls over the water'], smells: ['tar'] }
+    const scene = { ...state.scene!, turns: [{ ...state.scene!.turns[0]!, beats: [{ kind: 'narration' as const, text: 'The lamp over the scales swings once.' }] }] }
+    expect(placeDetails(texture, scene)).toEqual(['crates stacked to the rafters', 'gulls over the water', 'tar'])
   })
 })

@@ -127,7 +127,7 @@ How it should read:
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite. A fact marked new hasn't been said to the player yet: if it's used, say what it is.
 - Each character sounds like their voice card. The card wins over everything else.
-- Narration only for what happens: an action that matters, a reaction, at most one detail of the place. Never write the brief's notes out as prose.
+- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and at most one detail of the place, from its own details. Never write the brief's notes out as prose.
 - No sayings, maxims or riddles in place of an answer.
 - The player is "you", in the present tense.
 - A check result is what happens. A failure means it does not come off: show the attempt falling short, never a success.
@@ -180,6 +180,12 @@ When angry: Goes silent. Warm: Polishes his plates. Lying: Hums. Afraid: Repeats
 ----- user -----
 # Where you are
 The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
+
+# The place's details (one, if a line needs it)
+- stacked crates
+- a cart with a broken wheel
+- a gate creaking
+- wet straw
 
 # What the player has been told this scene
 Nothing yet beyond what they can see.
@@ -337,7 +343,7 @@ How it should read:
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite. A fact marked new hasn't been said to the player yet: if it's used, say what it is.
 - Each character sounds like their voice card. The card wins over everything else.
-- Narration only for what happens: an action that matters, a reaction, at most one detail of the place. Never write the brief's notes out as prose.
+- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and at most one detail of the place, from its own details. Never write the brief's notes out as prose.
 - No sayings, maxims or riddles in place of an answer.
 - The player is "you", in the present tense.
 - A check result is what happens. A failure means it does not come off: show the attempt falling short, never a success.
@@ -385,6 +391,12 @@ With strangers Tobin is shy; with friends he talks about the yard horses.
 # Where you are
 The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
 
+# The place's details (one, if a line needs it)
+- stacked crates
+- a cart with a broken wheel
+- a gate creaking
+- wet straw
+
 # What the player has been told this scene
 Nothing yet beyond what they can see.
 
@@ -414,7 +426,7 @@ Is there a second ledger, Mara?
 # What's at stake
 whether Kit believes there is one book
 
-# Used in the last turns (don't repeat)
+# Used in the last turns (don't repeat these, or bring back the things in them)
 - Tobin: straightens up from the crates
 
 Write the scene.
@@ -432,7 +444,7 @@ How it should read:
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite. A fact marked new hasn't been said to the player yet: if it's used, say what it is.
 - Each character sounds like their voice card. The card wins over everything else.
-- Narration only for what happens: an action that matters, a reaction, at most one detail of the place. Never write the brief's notes out as prose.
+- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and at most one detail of the place, from its own details. Never write the brief's notes out as prose.
 - No sayings, maxims or riddles in place of an answer.
 - The player is "you", in the present tense.
 - A check result is what happens. A failure means it does not come off: show the attempt falling short, never a success.
@@ -480,6 +492,12 @@ With strangers Tobin is shy; with friends he talks about the yard horses.
 # Where you are
 The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
 
+# The place's details (one, if a line needs it)
+- stacked crates
+- a cart with a broken wheel
+- a gate creaking
+- wet straw
+
 # What the player has been told this scene
 Nothing yet beyond what they can see.
 
@@ -509,7 +527,7 @@ Is there a second ledger, Mara?
 # What's at stake
 whether Kit believes there is one book
 
-# Used in the last turns (don't repeat)
+# Used in the last turns (don't repeat these, or bring back the things in them)
 - Tobin: straightens up from the crates
 
 Write the scene.
@@ -661,7 +679,7 @@ How it should read:
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite. A fact marked new hasn't been said to the player yet: if it's used, say what it is.
 - Each character sounds like their voice card. The card wins over everything else.
-- Narration only for what happens: an action that matters, a reaction, at most one detail of the place. Never write the brief's notes out as prose.
+- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and at most one detail of the place, from its own details. Never write the brief's notes out as prose.
 - No sayings, maxims or riddles in place of an answer.
 - The player is "you", in the present tense.
 - A check result is what happens. A failure means it does not come off: show the attempt falling short, never a success.
@@ -715,6 +733,12 @@ When angry: Goes silent. Warm: Polishes his plates. Lying: Hums. Afraid: Repeats
 # Where you are
 The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
 
+# The place's details (one, if a line needs it)
+- stacked crates
+- a cart with a broken wheel
+- a gate creaking
+- wet straw
+
 # What the player has been told this scene
 Nothing yet beyond what they can see.
 
@@ -750,7 +774,7 @@ Tobin leaves. Show them going.
 # The scene ends this turn
 Bring it to a close, and add [END SCENE].
 
-# Used in the last turns (don't repeat)
+# Used in the last turns (don't repeat these, or bring back the things in them)
 - Mara: closes it with both hands
 - Tobin: straightens up from the crates; finds something to do with a strap
 
