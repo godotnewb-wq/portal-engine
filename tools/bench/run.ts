@@ -5,7 +5,7 @@ import { TracedError, type CallTrace, type LlmReply, type Prompt } from '@engine
 import { bookkeepWithin } from '@platform/roles'
 import { consolidate, endScene, judgeScene, nextDay, type ConsolidationTrace, type RelationshipTrace, type SceneEndTrace, type Summarize } from '@engine/relationships'
 import { answerTie, GameStateSchema, type GameState } from '@engine/state'
-import { applyRecords, promptSources, runTurn, type BookkeeperTrace, type TurnLlm, type TurnTrace } from '@engine/scene'
+import { applyRecords, DEFAULT_PIPELINE, promptSources, runTurn, type BookkeeperTrace, type Pipeline, type TurnLlm, type TurnTrace } from '@engine/scene'
 import { callTrace, LogSession, promptVersion, readSession, type SessionRecord } from '@platform/logs'
 import type { FlagRecord, ScoreRecord } from '@engine/review'
 import { loreBudgets, type LoreBudgetOverrides, type LoreBudgets } from '@engine/rules'
@@ -62,6 +62,11 @@ export interface ScenarioRun {
   state?: GameState
   /** Set if the run stopped early. */
   error?: string
+  /**
+   * Earlier plays of this scenario and repeat that stopped, which `--fill` replaced with this one (Milestone 5 plan,
+   * task 0b): their session folders stay in the run folder for the record.
+   */
+  stopped?: { session: string; error: string }[]
   /** Calls made in the turn or scene end that failed, before the failure. */
   errorCalls?: CallTrace[]
   /** Read back from the session folder: flags made on it and AI scores. */
@@ -83,7 +88,8 @@ export interface BenchRun {
   startedAt: string
   /** Which models played each role, for reading results later. */
   models: Record<string, string>
-  options: { repeat: number; summaries: boolean; score?: boolean }
+  /** `pipeline`: which pipeline made the turns (Milestone 5); absent in runs from before the choice, which are all `situation` since Milestone 3.6. */
+  options: { repeat: number; summaries: boolean; score?: boolean; pipeline?: Pipeline }
   /** The lore budgets every turn ran with, and which came from the config; absent in runs from before they could be set. */
   loreBudgets?: LoreBudgets
   /** What the run was given, so comparisons can match inputs (milestone 3.6); absent in older runs. */
@@ -116,6 +122,8 @@ export interface BenchOptions {
   source?: RunInputs['source']
   /** Each role's model settings without keys (`roleSettings`), for the run's inputs. */
   roles?: RunInputs['roles']
+  /** Which pipeline makes the turns (`--pipeline`); `situation` when unset. */
+  pipeline?: Pipeline
 }
 
 /** The seed of a repeat: the scenario's own for the first, then the next ones, so repeats roll differently. */
@@ -136,7 +144,7 @@ const reload = (state: GameState): GameState => GameStateSchema.parse(JSON.parse
  * scenes goes on as play would (milestone 4b): a save and reload, each Next day's upkeep and consolidation, then the
  * next scene opens on what the last one left.
  */
-export async function runScenario(content: Pack, scenario: Scenario, llm: BenchLlm, repeat = 1, session?: LogSession, loreBudgets?: LoreBudgetOverrides): Promise<ScenarioRun> {
+export async function runScenario(content: Pack, scenario: Scenario, llm: BenchLlm, repeat = 1, session?: LogSession, loreBudgets?: LoreBudgetOverrides, pipeline?: Pipeline): Promise<ScenarioRun> {
   const seed = repeatSeed(scenario, repeat)
   const run: ScenarioRun = {
     id: scenario.id,
@@ -156,7 +164,7 @@ export async function runScenario(content: Pack, scenario: Scenario, llm: BenchL
   const played = scenarioContent(content, scenario)
   const scenes = scenesOf(scenario)
   if (scenes.length > 1) run.scenes = []
-  const options = { ...(scenario.forceNatural !== undefined && { forceNatural: scenario.forceNatural }), ...(loreBudgets && { loreBudgets }) }
+  const options = { ...(scenario.forceNatural !== undefined && { forceNatural: scenario.forceNatural }), ...(loreBudgets && { loreBudgets }), ...(pipeline && { pipeline }) }
   let state: GameState | undefined
   let where: 'turn' | 'scene-end' = 'turn'
   let sceneId = scenario.id
@@ -227,17 +235,45 @@ export async function runScenario(content: Pack, scenario: Scenario, llm: BenchL
   return run
 }
 
+/**
+ * One play of a scenario as part of a run: its session folder (when the run writes one) under `sessionId`, with the
+ * run's pack, prompts, models, lore budgets and pipeline. `runBench` and `fillRun` both play through here, so a play
+ * that fills a stopped one is made exactly as the run's others were.
+ */
+async function playOne(content: Pack, bench: BenchRun, scenario: Scenario, llm: BenchLlm, n: number, sessionId: string, options: Pick<BenchOptions, 'out' | 'roleModels' | 'loreBudgets'>): Promise<ScenarioRun> {
+  const session = options.out
+    ? LogSession.open(
+        options.out,
+        {
+          kind: 'bench',
+          pack: { id: bench.pack, version: bench.packVersion },
+          engine: bench.engine,
+          prompts: bench.prompts,
+          models: options.roleModels ?? {},
+          from: scenario.id,
+          bench: { run: bench.label, scenario: scenario.id, repeat: n, seed: repeatSeed(scenario, n), watchFor: scenario.watchFor, title: scenario.title, location: scenario.location, ...(scenario.forceNatural !== undefined && { forceNatural: scenario.forceNatural }) }
+        },
+        new Date(),
+        sessionId
+      )
+    : undefined
+  const run = await runScenario(content, scenario, llm, n, session, options.loreBudgets, bench.options.pipeline)
+  session?.close()
+  return run
+}
+
 export async function runBench(content: Pack, scenarios: Scenario[], llm: BenchLlm, label: string, models: Record<string, string>, options: BenchOptions = {}): Promise<BenchRun> {
   const repeat = Math.max(1, options.repeat ?? 1)
+  const pipeline = options.pipeline ?? DEFAULT_PIPELINE
   const bench: BenchRun = {
     label,
     pack: content.manifest.id,
     packVersion: content.manifest.version,
-    prompts: promptVersion(promptSources(content)),
+    prompts: promptVersion(promptSources(content, pipeline)),
     engine: options.engine ?? '',
     startedAt: new Date().toISOString(),
     models,
-    options: { repeat, summaries: scenarios.some((s) => s.summaries) },
+    options: { repeat, summaries: scenarios.some((s) => s.summaries), pipeline },
     loreBudgets: loreBudgets(content.ruleset, options.loreBudgets),
     inputs: runInputs(content, scenarios, { ...(options.source && { source: options.source }), roles: options.roles ?? {} }),
     scenarios: []
@@ -247,30 +283,74 @@ export async function runBench(content: Pack, scenarios: Scenario[], llm: BenchL
   for (const scenario of scenarios) {
     for (let n = 1; n <= repeat; n++) {
       log(`▸ ${scenario.id}${repeat > 1 ? ` #${n}` : ''}`)
-      const session = options.out
-        ? LogSession.open(
-            options.out,
-            {
-              kind: 'bench',
-              pack: { id: bench.pack, version: bench.packVersion },
-              engine: bench.engine,
-              prompts: bench.prompts,
-              models: options.roleModels ?? {},
-              from: scenario.id,
-              bench: { run: label, scenario: scenario.id, repeat: n, seed: repeatSeed(scenario, n), watchFor: scenario.watchFor, title: scenario.title, location: scenario.location, ...(scenario.forceNatural !== undefined && { forceNatural: scenario.forceNatural }) }
-            },
-            new Date(),
-            `${scenario.id}-${n}`
-          )
-        : undefined
-      const run = await runScenario(content, scenario, llm, n, session, options.loreBudgets)
-      session?.close()
-      const calls = callsOf(run).length
-      log(run.error ? `  stopped: ${run.error}` : `  ${run.turns.length} turns, ${calls} calls, ${run.turns.filter((t) => t.rewrite).length} rewrites`)
+      const run = await playOne(content, bench, scenario, llm, n, `${scenario.id}-${n}`, options)
+      log(run.error ? `  stopped: ${run.error}` : `  ${run.turns.length} turns, ${callsOf(run).length} calls, ${run.turns.filter((t) => t.rewrite).length} rewrites`)
       bench.scenarios.push(run)
     }
   }
   return bench
+}
+
+/** What `fillRun` did: the plays it replaced, and those still stopped after every try. */
+export interface FillResult {
+  bench: BenchRun
+  /** "id #repeat", each a play that now runs to the end. */
+  filled: string[]
+  /** "id #repeat: error", each a play that stopped on every try; comparisons leave it out of both sides. */
+  still: string[]
+}
+
+/**
+ * Re-plays a run's stopped plays into the same run (Milestone 5 plan, task 0b: no comparison on uneven plays). A
+ * provider error or timeout can stop a play partway; comparing a run with stopped plays against one without would
+ * compare different scenarios. Each stopped play is played again with its own repeat and seed, up to `tries` times,
+ * into a new session folder (`<id>-<repeat>-fill<k>`); the first that runs to the end takes its place, and the stopped
+ * ones stay in the run folder, listed under `stopped`. The caller checks first that the run's inputs still hold
+ * (`fillProblems`).
+ */
+export async function fillRun(content: Pack, bench: BenchRun, scenarios: Scenario[], llm: BenchLlm, options: Pick<BenchOptions, 'out' | 'roleModels' | 'loreBudgets' | 'log'> & { tries?: number } = {}): Promise<FillResult> {
+  const tries = Math.max(1, options.tries ?? 2)
+  const log = options.log ?? (() => {})
+  const filled: string[] = []
+  const still: string[] = []
+  const plays = [...bench.scenarios]
+  for (const [i, old] of plays.entries()) {
+    if (!old.error) continue
+    const name = `${old.id} #${old.repeat}`
+    const scenario = scenarios.find((s) => s.id === old.id)
+    if (!scenario) {
+      still.push(`${name}: the scenario isn't in the pack any more`)
+      continue
+    }
+    let current = old
+    const stopped = [...(old.stopped ?? [])]
+    for (let k = 1; k <= tries && current.error; k++) {
+      stopped.push({ session: current.session, error: current.error })
+      log(`▸ ${name}, try ${k} of ${tries}`)
+      current = await playOne(content, bench, scenario, llm, old.repeat, `${old.id}-${old.repeat}-fill${stopped.length}`, options)
+      log(current.error ? `  stopped: ${current.error}` : `  ${current.turns.length} turns, ${callsOf(current).length} calls`)
+    }
+    // The last try is the play, whether or not it ran to the end; every earlier one that stopped is the record.
+    plays[i] = { ...current, ...(stopped.length > 0 && { stopped }) }
+    if (current.error) still.push(`${name}: ${current.error}`)
+    else filled.push(name)
+  }
+  return { bench: { ...bench, scenarios: plays }, filled, still }
+}
+
+/** The run's recorded inputs that no longer hold, in words: a run is filled only on the inputs it was made with. */
+export function fillProblems(bench: BenchRun, now: { prompts: string; inputs: RunInputs; loreBudgets: LoreBudgets }): string[] {
+  const problems: string[] = []
+  if (!bench.inputs) return ['the run recorded no inputs (it predates Milestone 3.6), so it can\'t be checked']
+  const was = bench.inputs
+  if (bench.prompts !== now.prompts) problems.push(`the prompt version is \`${now.prompts}\`, not the run's \`${bench.prompts}\``)
+  if (was.pack !== now.inputs.pack) problems.push("the pack's content changed")
+  if (was.source && now.inputs.source && was.source.commit !== now.inputs.source.commit) problems.push(`the code is at \`${now.inputs.source.commit.slice(0, 7)}\`, not the run's \`${was.source.commit.slice(0, 7)}\``)
+  if (now.inputs.source?.dirty && !was.source?.dirty) problems.push('the checkout has uncommitted changes the run didn\'t have')
+  for (const s of bench.scenarios.filter((x) => x.error)) if (was.scenarios[s.id] && now.inputs.scenarios[s.id] && was.scenarios[s.id] !== now.inputs.scenarios[s.id]) problems.push(`scenario ${s.id} changed`)
+  for (const role of new Set([...Object.keys(was.roles), ...Object.keys(now.inputs.roles)])) if (JSON.stringify(was.roles[role]) !== JSON.stringify(now.inputs.roles[role])) problems.push(`the ${role}'s model settings changed`)
+  if (bench.loreBudgets && JSON.stringify(bench.loreBudgets) !== JSON.stringify(now.loreBudgets)) problems.push('the lore budgets changed')
+  return problems
 }
 
 /** A scenario run as the metrics read it (milestone 2, B2). */
@@ -295,13 +375,13 @@ export function callsOf(run: ScenarioRun): CallTrace[] {
 /** `run.json`: the run's settings and where its sessions are; the traces live in the session folders. */
 interface RunFile extends Omit<BenchRun, 'scenarios'> {
   /** `days`: a scenario with several scenes, the days before each (milestone 4b). */
-  scenarios: { id: string; repeat: number; session: string; error?: string; expectedCheck?: ExpectedCheck; days?: number[] }[]
+  scenarios: { id: string; repeat: number; session: string; error?: string; expectedCheck?: ExpectedCheck; days?: number[]; stopped?: ScenarioRun['stopped'] }[]
 }
 
 export function writeRun(out: string, bench: BenchRun): void {
   mkdirSync(out, { recursive: true })
   const { scenarios, ...rest } = bench
-  const file: RunFile = { ...rest, scenarios: scenarios.map((s) => ({ id: s.id, repeat: s.repeat, session: s.session, ...(s.expectedCheck && { expectedCheck: s.expectedCheck }), ...(s.scenes && { days: s.scenes.map((x) => x.days) }), ...(s.error && { error: s.error }) })) }
+  const file: RunFile = { ...rest, scenarios: scenarios.map((s) => ({ id: s.id, repeat: s.repeat, session: s.session, ...(s.expectedCheck && { expectedCheck: s.expectedCheck }), ...(s.scenes && { days: s.scenes.map((x) => x.days) }), ...(s.error && { error: s.error }), ...(s.stopped && { stopped: s.stopped }) })) }
   writeFileSync(join(out, 'run.json'), JSON.stringify(file, null, 2))
 }
 
@@ -356,6 +436,7 @@ export function readRun(dir: string): BenchRun {
       ...(log.bookkeeping.length > 0 && { bookkeeping: log.bookkeeping.map(({ calls: ids, ...rest }) => ({ ...rest, calls: calls(ids) })) }),
       ...(scenes ? { scenes } : { ...(ties && { ties: { ...ties, calls: calls(ties.calls) } }), ...(end && { sceneEnd: { ...end, calls: calls(end.calls) } }) }),
       ...(entry.error && { error: entry.error }),
+      ...(entry.stopped && { stopped: entry.stopped }),
       ...(failed?.calls && { errorCalls: calls(failed.calls) }),
       flags: log.flags,
       scores: log.scores

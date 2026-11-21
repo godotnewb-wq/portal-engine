@@ -76,7 +76,11 @@ export function runInputs(content: Pack, scenarios: Scenario[], extra: Pick<RunI
 export interface Comparability {
   /** Inputs that differ between the runs, in words. */
   differences: string[]
-  /** Pairs of plays with the same scenario, repeat and seed, and, when both runs recorded them, the same scenario content. */
+  /**
+   * Pairs of plays with the same scenario, repeat and seed, and, when both runs recorded them, the same scenario content.
+   * A play that stopped on either side is left out (Milestone 5 plan, task 0b): its partial turns would weigh against a
+   * whole play. `--fill` re-plays stopped plays first.
+   */
   matched: [ScenarioRun, ScenarioRun][]
   /** Plays left out of the shared numbers, and why. */
   left: string[]
@@ -90,7 +94,7 @@ interface Side {
   prompts: string
   engine: string
   models: Record<string, string>
-  options: { repeat: number; summaries: boolean }
+  options: { repeat: number; summaries: boolean; pipeline?: string }
   loreBudgets?: { sceneTokens: number; triggeredTokens: number; loreLines: number }
   inputs?: RunInputs
   scenarios: ScenarioRun[]
@@ -102,6 +106,8 @@ export function comparability(a: Side, b: Side): Comparability {
     if (JSON.stringify(x) !== JSON.stringify(y)) differences.push(`${what}: A ${show(x)}, B ${show(y)}`)
   }
   differ('pack', `${a.pack} ${a.packVersion}`, `${b.pack} ${b.packVersion}`)
+  // A run from before the choice was made with `situation` (the only pipeline since Milestone 3.6).
+  differ('pipeline', a.options.pipeline ?? 'situation', b.options.pipeline ?? 'situation')
   differ('prompt version', a.prompts, b.prompts)
   differ('engine', a.engine, b.engine)
   differ('models', a.models, b.models)
@@ -129,6 +135,7 @@ export function comparability(a: Side, b: Side): Comparability {
     const fa = a.inputs?.scenarios[ra.id]
     const fb = b.inputs?.scenarios[rb.id]
     if (fa && fb && fa !== fb) left.push(`${play(ra)}: the scenario changed between the runs`)
+    else if (ra.error || rb.error) left.push(`${play(ra)}: stopped in ${ra.error && rb.error ? 'both runs' : ra.error ? 'A' : 'B'} (${ra.error ?? rb.error})`)
     else matched.push([ra, rb])
   }
   for (const rb of b.scenarios) if (!a.scenarios.some((r) => r.id === rb.id && r.repeat === rb.repeat && r.seed === rb.seed)) left.push(`${play(rb)}: only in B`)

@@ -14,7 +14,9 @@ npm run bench -- --repeat 10                    play each scenario 10 times, see
 npm run bench -- --score                        run the AI scorer on the run when it finishes (see tools/logs)
 npm run bench -- --scenario turn.json           a scenario file from elsewhere, e.g. made by npm run logs -- to-scenario
 npm run bench -- --mock                         no LLM: checks the harness, not the prose
+npm run bench -- --pipeline situation           which pipeline makes the turns (default situation; Milestone 5 adds scene)
 npm run bench -- --compare bench-output/<run A> bench-output/<run B>
+npm run bench -- --fill bench-output/<run>      re-play the run's stopped plays into it, up to two tries each
 ```
 
 Each run writes `bench-output/<time>-<label>/`:
@@ -23,6 +25,8 @@ Each run writes `bench-output/<time>-<label>/`:
 - one session folder per scenario run (`<scenario>-<repeat>/`) in the play-log layout (`@platform/logs`): `session.json`, `turns.jsonl` (the turn traces), `calls.jsonl` and `prompts.jsonl` (every prompt in full and every raw reply), `scenes.jsonl`, `errors.jsonl`, `bookkeeping.jsonl` (each turn's bookkeeper, milestone 4c). `npm run logs` reads these the same way it reads play sessions.
 
 Runs record the pack's id and version, the prompt version and their inputs. `--compare` writes `bench-output/compare-<time>.md`: what differs between the two runs' inputs, both runs' numbers, each metric's change over the scenario plays whose inputs match (same scenario, repeat and seed, and the same scenario content when both runs recorded it; ✓ better, ✗ worse), the plays left out and why, then each shared scenario turn by turn with the beats in two columns. Each run is named as it recorded, not from the pack loaded now. A run from before milestone 3.6 has no inputs: the comparison says so and matches it on scenario, repeat and seed alone. The prompt version hashes only fixed prompt text, so a change to how prompts are assembled per turn doesn't move it; compare the source commits too.
+
+**Pipelines and stopped plays** (Milestone 5 plan, task 0b). Each run records its pipeline (`run.json`'s `options.pipeline`, each turn's `director.pipeline`, the report's first line); a run from before the choice counts as `situation`. A different pipeline is listed under what differs, and the plays are still compared, since comparing pipelines is the point. A play that stopped partway (a provider error or timeout) is left out of the shared numbers on both sides, and the comparison lists it. Before comparing, re-play stopped plays with `--fill <run>`: each is played again with its own repeat and seed, up to two tries, into a new session folder (`<id>-<repeat>-fill<k>`) that takes its place in the run; the stopped folders stay, listed under `stopped` in `run.json` and in the report. `--fill` uses the mock for a mock run and the config's models otherwise, and refuses if the code, the pack's content, a stopped play's scenario, the prompt version, a role's model settings or the lore budgets changed since the run. A run scored with `--score` gets its re-played plays scored. A play still stopped after two tries stays out of comparisons on both sides.
 
 Bench runs are logs like any other: `npm run logs -- transcript bench-output/<run>/<scenario>-1`, `npm run logs -- stats bench-output/<run>`, and `npm run logs -- flag …` to flag them.
 

@@ -1,4 +1,4 @@
-import { mkdtempSync, readdirSync } from 'node:fs'
+import { existsSync, mkdtempSync, readdirSync } from 'node:fs'
 import { tmpdir } from 'node:os'
 import { join } from 'node:path'
 import { readSession } from '@platform/logs'
@@ -8,7 +8,8 @@ import { SettingsSchema } from '@llm'
 import { benchSettings, modelsOf } from '../../tools/bench/config'
 import { compareRuns, renderReport, stats } from '../../tools/bench/report'
 import { comparability, fingerprint, roleSettings } from '../../tools/bench/inputs'
-import { callsOf, mockLlm, readRun, runBench, runScenario, writeRun, type BenchLlm } from '../../tools/bench/run'
+import { callsOf, fillProblems, fillRun, mockLlm, readRun, runBench, runScenario, writeRun, type BenchLlm } from '../../tools/bench/run'
+import { loreBudgets } from '@engine/rules'
 import { loadScenarios, scenarioProblems, scenarioState, ScenarioSchema } from '../../tools/bench/scenario'
 
 const scenarios = loadScenarios(join(PACK_DIR, 'bench'))
@@ -280,5 +281,109 @@ describe('the bookkeeper in the report (milestone 4c task 4)', () => {
     expect(report).toContain('## Tokens by role')
     expect(report).toMatch(/\| bookkeeper \| 3 \|/)
     expect(compareRuns(content, bench, bench)).toContain('## Tokens by role (matching scenario plays)')
+  })
+})
+
+// Milestone 5 plan, task 0b: runs say which pipeline made them, comparisons leave out plays that stopped, and
+// --fill re-plays a run's stopped plays into it on the inputs it recorded.
+describe('pipelines, stopped plays and --fill', () => {
+  const two = scenarios.slice(0, 2)
+  /** A director that fails once, on the second call of the run: the first scenario stops at turn 2, the rest play on. */
+  const failingOnce = (message = 'connection timed out'): BenchLlm => {
+    let n = 0
+    return { ...mockLlm(), turn: { ...mockLlm().turn, direct: async () => (++n === 2 ? Promise.reject(new Error(message)) : '{}') } }
+  }
+  const alwaysFailing: BenchLlm = { ...mockLlm(), turn: { ...mockLlm().turn, direct: async () => Promise.reject(new Error('provider down')) } }
+
+  it('records the pipeline on the run, its report and every turn', async () => {
+    const bench = await runBench(content, two, mockLlm(), 'A', { all: 'mock' })
+    expect(bench.options.pipeline).toBe('situation')
+    expect(bench.scenarios.flatMap((r) => r.turns).every((t) => t.director.pipeline === 'situation')).toBe(true)
+    expect(renderReport(content, bench)).toMatch(/prompts `\w+`, pipeline `situation`/)
+  })
+
+  it('compares runs on different pipelines, saying so, and counts a run from before the choice as situation', async () => {
+    const a = await runBench(content, two, mockLlm(), 'A', { all: 'mock' })
+    const b = await runBench(content, two, mockLlm(), 'B', { all: 'mock' })
+    const { pipeline: _gone, ...older } = a.options
+    expect(comparability({ ...a, options: older }, b).differences).toEqual([])
+    const other = { ...b, options: { ...b.options, pipeline: 'scene' as never } }
+    const c = comparability(a, other)
+    expect(c.differences).toContain('pipeline: A `situation`, B `scene`')
+    expect(c.matched).toHaveLength(2)
+  })
+
+  it('leaves a play that stopped on either side out of the shared numbers', async () => {
+    const a = await runBench(content, two, failingOnce(), 'A', { all: 'mock' })
+    const b = await runBench(content, two, mockLlm(), 'B', { all: 'mock' })
+    expect(a.scenarios[0]!.error).toBe('connection timed out')
+    const c = comparability(a, b)
+    expect(c.matched.map(([x]) => x.id)).toEqual(['deception-uncaught'])
+    expect(c.left).toEqual(['deception-caught #1 (seed 11): stopped in A (connection timed out)'])
+  })
+
+  it('fills a stopped play into the same run, keeping the stopped one for the record', async () => {
+    const out = mkdtempSync(join(tmpdir(), 'fill-'))
+    const stopped = await runBench(content, two, failingOnce(), 'A', { all: 'mock' }, { out })
+    writeRun(out, stopped)
+    const result = await fillRun(content, readRun(out), two, mockLlm(), { out })
+    expect(result.filled).toEqual(['deception-caught #1'])
+    expect(result.still).toEqual([])
+    const play = result.bench.scenarios[0]!
+    expect(play).toMatchObject({ session: 'deception-caught-1-fill1', seed: 11, stopped: [{ session: 'deception-caught-1', error: 'connection timed out' }] })
+    expect(play.error).toBeUndefined()
+    expect(play.turns).toHaveLength(3)
+    // The other play is untouched, and the stopped one's folder stays.
+    expect(result.bench.scenarios[1]!.session).toBe('deception-uncaught-1')
+    expect(existsSync(join(out, 'deception-caught-1'))).toBe(true)
+    writeRun(out, result.bench)
+    const back = readRun(out)
+    expect(back.scenarios[0]!.stopped).toEqual(play.stopped)
+    expect(renderReport(content, back)).toContain('**Re-played** with `--fill` after a play that stopped: `deception-caught-1` (connection timed out).')
+    // Filled, it compares whole against a run that never stopped.
+    const c = comparability(back, await runBench(content, two, mockLlm(), 'B', { all: 'mock' }))
+    expect(c).toMatchObject({ left: [], differences: [] })
+    expect(c.matched).toHaveLength(2)
+  })
+
+  it('gives up on a play after two tries and leaves it stopped', async () => {
+    const out = mkdtempSync(join(tmpdir(), 'fill-'))
+    const stopped = await runBench(content, [two[0]!], alwaysFailing, 'A', { all: 'mock' }, { out })
+    const result = await fillRun(content, stopped, [two[0]!], alwaysFailing, { out })
+    expect(result.filled).toEqual([])
+    expect(result.still).toEqual(['deception-caught #1: provider down'])
+    const play = result.bench.scenarios[0]!
+    expect(play.session).toBe('deception-caught-1-fill2')
+    expect(play.error).toBe('provider down')
+    expect(play.stopped!.map((x) => x.session)).toEqual(['deception-caught-1', 'deception-caught-1-fill1'])
+    expect(readdirSync(out).sort()).toEqual(['deception-caught-1', 'deception-caught-1-fill1', 'deception-caught-1-fill2'])
+  })
+
+  it('fills only on the inputs the run recorded', async () => {
+    const bench = await runBench(content, two, failingOnce(), 'A', { all: 'mock' }, { source: { commit: 'abc1234def', dirty: false } })
+    const same = { prompts: bench.prompts, inputs: structuredClone(bench.inputs!), loreBudgets: loreBudgets(content.ruleset) }
+    expect(fillProblems(bench, same)).toEqual([])
+    const changed = structuredClone(same)
+    changed.prompts = 'other'
+    changed.inputs.pack = 'other'
+    changed.inputs.source = { commit: 'fff9999aaa', dirty: true }
+    changed.inputs.scenarios['deception-caught'] = 'other'
+    changed.inputs.roles = { writer: { profile: 'writer', host: 'x', model: 'm' } as never }
+    changed.loreBudgets = { ...changed.loreBudgets, loreLines: 1 }
+    expect(fillProblems(bench, changed)).toEqual([
+      `the prompt version is \`other\`, not the run's \`${bench.prompts}\``,
+      "the pack's content changed",
+      "the code is at `fff9999`, not the run's `abc1234`",
+      "the checkout has uncommitted changes the run didn't have",
+      'scenario deception-caught changed',
+      "the writer's model settings changed",
+      'the lore budgets changed'
+    ])
+    // A scenario that didn't stop may change: it isn't re-played.
+    const other = structuredClone(same)
+    other.inputs.scenarios['deception-uncaught'] = 'other'
+    expect(fillProblems(bench, other)).toEqual([])
+    const { inputs: _gone, ...old } = bench
+    expect(fillProblems(old, same)).toEqual(["the run recorded no inputs (it predates Milestone 3.6), so it can't be checked"])
   })
 })

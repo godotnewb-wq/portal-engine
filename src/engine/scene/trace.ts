@@ -10,6 +10,7 @@ import type { Problem } from './checks'
 import { presentCast, type BeatPlan } from './planShape'
 import { feelingsNow, shown, type Shown } from './feelings'
 import type { LoreTrace } from './lore'
+import type { Pipeline } from './pipeline'
 import type { BriefTrace } from './brief'
 
 /**
@@ -32,6 +33,8 @@ export interface TurnTrace {
     /** The plan after validation, with its checks rolled. */
     plan: BeatPlan
     corrections: string[]
+    /** Which pipeline made the turn (Milestone 5 plan, task 0b); absent in logs from before the choice, which are all `situation` since Milestone 3.6. */
+    pipeline?: Pipeline
   }
   dice: { before: number; after: number }
   checks: CheckTrace[]

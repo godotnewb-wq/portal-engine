@@ -113,6 +113,7 @@ function scenarioSection(names: Names, run: ScenarioRun, repeats: boolean, budge
   const missed = missedCheck(run)
   if (missed) lines.push(`**${missed}**`, '')
   if (run.error) lines.push(`**Stopped:** ${run.error}`, '')
+  if (run.stopped) lines.push(`**Re-played** with \`--fill\` after ${run.stopped.length === 1 ? 'a play that' : `${run.stopped.length} plays that`} stopped: ${run.stopped.map((x) => `\`${x.session}\` (${x.error})`).join('; ')}.`, '')
   if (!run.scenes) {
     lines.push(...turnLines(names, run.location, run.turns, '###', budgets), ...tieLines(names, run.location, run.ties, run.sceneEnd, '###'), ...afterLines(names, run.location, run.sceneEnd, '###'))
     return lines.join('\n')
@@ -233,6 +234,9 @@ const budgetsLine = (bench: BenchRun): string => {
 }
 
 /** Where a run's code and content came from, as far as it recorded. */
+/** The pipeline as a run recorded it; a run from before the choice says nothing (Milestone 5 plan, task 0b). */
+const pipelineOf = (bench: BenchRun): string => (bench.options.pipeline ? `, pipeline \`${bench.options.pipeline}\`` : '')
+
 const inputsLine = (bench: BenchRun): string => {
   const i = bench.inputs
   if (!i) return 'Inputs: not recorded (a run from before milestone 3.6), so comparisons can match it on scenario, repeat and seed only.'
@@ -247,7 +251,7 @@ export function renderReport(content: Pack, bench: BenchRun): string {
   return [
     `# Scene test bench — ${bench.label}`,
     '',
-    `Run ${bench.startedAt}, pack \`${bench.pack}\` ${bench.packVersion}, prompts \`${bench.prompts}\`${repeats ? `, ${bench.options.repeat} repeats` : ''}. Models: ${Object.entries(bench.models).map(([role, model]) => `${role} \`${model}\``).join(', ')}.${budgetsLine(bench)}`,
+    `Run ${bench.startedAt}, pack \`${bench.pack}\` ${bench.packVersion}, prompts \`${bench.prompts}\`${pipelineOf(bench)}${repeats ? `, ${bench.options.repeat} repeats` : ''}. Models: ${Object.entries(bench.models).map(([role, model]) => `${role} \`${model}\``).join(', ')}.${budgetsLine(bench)}`,
     '',
     inputsLine(bench),
     '',
@@ -285,8 +289,8 @@ export function compareRuns(content: Pack, a: BenchRun, b: BenchRun): string {
   const lines = [
     `# Bench comparison: ${a.label} vs ${b.label}`,
     '',
-    `- **A** — ${a.label} (${a.startedAt}): ${Object.entries(a.models).map(([r, m]) => `${r} \`${m}\``).join(', ')}.${budgetsLine(a)} ${inputsLine(a)}`,
-    `- **B** — ${b.label} (${b.startedAt}): ${Object.entries(b.models).map(([r, m]) => `${r} \`${m}\``).join(', ')}.${budgetsLine(b)} ${inputsLine(b)}`,
+    `- **A** — ${a.label} (${a.startedAt})${pipelineOf(a)}: ${Object.entries(a.models).map(([r, m]) => `${r} \`${m}\``).join(', ')}.${budgetsLine(a)} ${inputsLine(a)}`,
+    `- **B** — ${b.label} (${b.startedAt})${pipelineOf(b)}: ${Object.entries(b.models).map(([r, m]) => `${r} \`${m}\``).join(', ')}.${budgetsLine(b)} ${inputsLine(b)}`,
     '',
     '## What differs between the runs',
     '',

@@ -15,6 +15,7 @@ import { buildRewritePrompt, buildWriterPrompt, sceneSpeakers } from './writer'
 import { recentlyUsed, repeatProblems, usageOf } from './repeats'
 import { loreTrace, turnLore } from './lore'
 import type { LoreBudgetOverrides } from '@engine/rules'
+import { DEFAULT_PIPELINE, isPipeline, type Pipeline } from './pipeline'
 
 /**
  * The LLM calls a turn may make. `write` streams; it is used for the scene writer and its one rewrite. Either may
@@ -61,6 +62,8 @@ export interface TurnOptions extends ResolveOptions {
   now?: () => number
   /** Lore budgets the player set in Settings, over the pack's; left out, the pack's apply (milestone 3, task 10). */
   loreBudgets?: LoreBudgetOverrides
+  /** Which pipeline makes the turn (Milestone 5 plan, task 0b); `situation` when unset. */
+  pipeline?: Pipeline
 }
 
 /**
@@ -82,6 +85,9 @@ export async function runTurn(
   const now = options.now ?? Date.now
   const started = now()
   const turnId = options.turnId ?? `${scene.id}-${scene.turns.length + 1}`
+  // Checked here too, since the choice can come from outside the type system (a flag, a settings file).
+  const pipeline = options.pipeline ?? DEFAULT_PIPELINE
+  if (!isPipeline(pipeline)) throw new Error(`Unknown pipeline "${pipeline as string}"`)
   const calls: CallTrace[] = []
   const call = (role: CallTrace['role'], prompt: Prompt, run: Parameters<typeof traced>[4]) =>
     traced(calls, { id: `${turnId}:${role}`, role, turnId, sceneId: scene.id }, prompt, now, run)
@@ -163,7 +169,7 @@ export async function runTurn(
       at: new Date(started).toISOString(),
       input,
       cast: { before: castSnapshot(state), after: castSnapshot(next) },
-      director: { callId: directorCall.id, read: !directed ? 'unreadable' : directorCall.meta?.jsonRetried ? 'json-retried' : 'json', plan, corrections: validated.corrections },
+      director: { callId: directorCall.id, read: !directed ? 'unreadable' : directorCall.meta?.jsonRetried ? 'json-retried' : 'json', plan, corrections: validated.corrections, pipeline },
       dice: { before: state.dice, after: dice },
       checks: checkTraces(plan),
       lore: loreTrace(lore),
