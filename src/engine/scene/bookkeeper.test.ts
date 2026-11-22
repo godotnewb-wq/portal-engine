@@ -14,6 +14,7 @@ const narrate = (text: string): Beat => ({ kind: 'narration', text })
 const turn = (beats: Beat[], over: { input?: string; plan?: BeatPlan } = {}) => ({ id: 't1', input: over.input ?? 'What happened last night?', beats, plan: over.plan ?? plan() })
 const reply = (secrets: Partial<WrittenSecret>[], more: Partial<WrittenBookkeeping> = {}): WrittenBookkeeping => ({
   secrets: secrets.map((s) => ({ id: TOBIN, at: 1, how: 'stated', words: '', ...s })),
+  facts: [],
   new: [],
   changed: '',
   moods: [],
@@ -202,15 +203,15 @@ describe('the other records', () => {
   })
 
   it('keeps moods in the ruleset’s shades for people present, and checks for this turn’s checks, for the logs only', () => {
-    const rolled = { id: 'c1', who: 'player', stakes: 'spot the lie', line: 'Ada — Insight 9 vs 12: failure' } as unknown as PlannedCheck
+    const rolled = { id: 'c1', who: 'player', skill: 'insight', stakes: 'spot the lie', line: 'Ada — Insight 9 vs 12: failure', result: { degree: 'failure' } } as unknown as PlannedCheck
     const r = check(yardScene(), beats, [], { plan: plan({ checks: [rolled] }) }, {
       changed: 'Mara suspects Tobin.',
       moods: [{ id: 'mara', shade: 'sore', family: 'mad', intensity: 3 }, { id: 'mara', shade: 'sore', intensity: 3 }, { id: 'ghost', shade: 'glum', intensity: 1 }],
-      checks: [{ id: 'c1', honored: false, note: 'played as a success' }, { id: 'c9', honored: true }, { id: 'c1', honored: 'yes' }]
+      checks: [{ id: 'c1', shown: 'comes off', at: 1, words: 'at the east gate' }, { id: 'c9', shown: 'comes off' }, { id: 'c1', shown: 'maybe' }]
     })
     expect(r.changed).toBe('Mara suspects Tobin.')
     expect(r.moods).toEqual([{ id: 'mara', feeling: { shade: 'sore', family: 'mad', intensity: 3 } }])
-    expect(r.checks).toEqual([{ id: 'c1', honored: false, note: 'played as a success' }])
+    expect(r.checks).toEqual([{ id: 'c1', honored: false, shown: 'comes off', at: 1, words: 'at the east gate', note: 'rolled failure; the prose shows it working' }])
     expect(r.refused).toHaveLength(4)
   })
 })
@@ -246,5 +247,80 @@ describe('when the call fails (decision L, change 1)', () => {
     expect(good.records).toMatchObject({ source: 'bookkeeper', out: [{ secret: TOBIN }] })
     expect(good.trace.error).toBeUndefined()
     expect(good.trace.calls[0]).toMatchObject({ id: 't1:bookkeeper', role: 'bookkeeper', turnId: 't1' })
+  })
+})
+
+describe('facts the scene writer was offered (Milestone 5 task 4, Q12)', () => {
+  const TALLY = { id: 'lore.guild.tallies', text: 'Every tally at the gate is rounded up a crate or two', source: 'lore' as const, unheard: true }
+  const scenePlan = (pools: Record<string, (typeof TALLY)[]>) => plan({ scene: { pools } as never })
+  const offeredTo = (who: string) => ({ plan: scenePlan({ [who]: [TALLY] }) })
+
+  it('lists them for the bookkeeper on the scene pipeline only', () => {
+    const p = buildBookkeeperPrompt(fixture, yardScene(), turn([say('mara', 'Every tally is rounded.')], offeredTo('mara')))
+    expect(p.user).toContain('Facts the writer could use:\n- [lore.guild.tallies] Every tally at the gate is rounded up a crate or two')
+    expect(p.system).toContain('- facts: each fact from the list below that a line said as true')
+    const situation = buildBookkeeperPrompt(fixture, yardScene(), turn([say('mara', 'Every tally is rounded.')]))
+    expect(situation.user).not.toContain('Facts the writer could use')
+    expect(situation.system).not.toContain('"facts"')
+  })
+
+  it('records a fact a line stated, by someone it was offered to, and turns down what it can’t check', () => {
+    const beats = [say('mara', 'Every tally at the gate gets rounded up.'), narrate('Tobin shrugs.'), say('tobin', 'Not by me.')]
+    const facts = [
+      { id: TALLY.id, at: 1, words: 'Every tally at the gate' },
+      { id: 'lore.nothing', at: 1, words: 'Every tally' },
+      { id: TALLY.id, at: 3, words: 'rounded up' }
+    ]
+    const records = check(yardScene(), beats, [], offeredTo('mara'), { facts })
+    expect(records.said).toEqual([{ fact: TALLY.id, text: TALLY.text, by: 'mara', words: 'Every tally at the gate' }])
+    expect(records.refused).toEqual(['fact lore.nothing: not on the list', 'fact lore.guild.tallies: "rounded up" isn\'t in line 3'])
+    // Someone it wasn't offered to, who doesn't know it, can't make it heard.
+    const tobin = check(yardScene(), [say('tobin', 'Every tally at the gate gets rounded up.')], [], offeredTo('mara'), { facts: [{ id: TALLY.id, at: 1, words: 'Every tally' }] })
+    expect(tobin.said).toEqual([])
+    expect(tobin.refused).toEqual(['fact lore.guild.tallies: tobin couldn\'t say it'])
+  })
+
+  it('when the call fails, takes a fact a line by someone it was offered to repeats in its own words', () => {
+    const said = planBookkeeping(fixture, yardScene(), turn([say('mara', 'Every tally at the gate is rounded up, Kit.')], offeredTo('mara')))
+    expect(said.said).toEqual([{ fact: TALLY.id, text: TALLY.text, by: 'mara', words: '' }])
+    expect(planBookkeeping(fixture, yardScene(), turn([say('mara', 'The tallies are fine.')], offeredTo('mara'))).said).toEqual([])
+  })
+})
+
+describe('checks: what the prose shows, against the roll (task 4)', () => {
+  const beats = [say('mara', 'You were here after closing, Tobin.'), narrate('Mara watches him and learns nothing.')]
+  const rolledAs = (degree: string) => ({ id: 'c1', who: 'mara', skill: 'insight', target: 'tobin', stakes: 'Mara sees he is lying', line: `Mara — Insight: ${degree}`, result: { degree } }) as unknown as PlannedCheck
+  const checked = (degree: string, c: Record<string, unknown>) => check(yardScene(), beats, [], { plan: plan({ checks: [rolledAs(degree)] }) }, { checks: [{ id: 'c1', ...c }] })
+
+  it('asks what the attempt shows, without its result', () => {
+    const p = buildBookkeeperPrompt(fixture, yardScene(), turn(beats, { plan: plan({ checks: [rolledAs('failure')] }) }))
+    expect(p.user).toContain('- [c1] Mara tries insight on Tobin. If it works: Mara sees he is lying')
+    expect(p.user).not.toContain('failure')
+  })
+
+  it('a failure the prose shows falling short is kept; shown working, it isn’t', () => {
+    expect(checked('failure', { shown: 'falls short', at: 2, words: 'learns nothing' }).checks).toEqual([{ id: 'c1', honored: true, shown: 'falls short', at: 2, words: 'learns nothing' }])
+    expect(checked('failure', { shown: 'comes off', at: 2, words: 'Mara watches him' }).checks[0]).toMatchObject({ honored: false, note: 'rolled failure; the prose shows it working' })
+    expect(checked('cost', { shown: 'at a cost', at: 2, words: 'Mara watches him' }).checks[0]).toMatchObject({ honored: true })
+  })
+
+  it('unclear records no verdict; a quote that isn’t in the line records nothing', () => {
+    expect(checked('success', { shown: 'unclear' }).checks).toEqual([{ id: 'c1', shown: 'unclear' }])
+    const r = checked('success', { shown: 'comes off', at: 1, words: 'she sees it' })
+    expect(r.checks).toEqual([])
+    expect(r.refused).toEqual(['check c1: "she sees it" isn\'t in line 1'])
+  })
+})
+
+describe('part of a secret (Q11)', () => {
+  it('is kept and shown, teaches no one, and can’t come back as a settled detail', () => {
+    const beats = [say('mara', 'Someone was let in after closing, that much I know.')]
+    const r = check(yardScene(), beats, [{ at: 1, how: 'partial', words: 'Someone was let in after closing' }], {}, { new: [{ text: 'Someone was let in after closing', at: 1 }] })
+    expect(r.partial).toEqual([{ secret: TOBIN, by: 'mara', at: 1, words: 'Someone was let in after closing' }])
+    expect(r.out).toEqual([])
+    expect(r.leaks).toEqual([])
+    expect(r.new).toEqual([])
+    const p = buildBookkeeperPrompt(fixture, yardScene(), turn(beats))
+    expect(p.system).toContain('- "partial": part of the hidden part said as true and known, but not all of it')
   })
 })

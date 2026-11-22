@@ -22,10 +22,11 @@ import { secretDisplay, touchOf, type SecretScan } from './secrets'
 
 /** A fact a character may draw on this turn, marked by where it came from (decided 2026-11-20, user: one pool, marked). */
 export interface PoolFact {
-  /** Its id: a card fact `<character>.k<n>`, a memory's id, `lore.<entry>`, or `place.<n>`. */
+  /** Its id: a card fact `<character>.k<n>`, a memory's id, `lore.<entry>`, `place.<n>`, or a director's detail `detail.<turn>.<n>`. */
   id: string
   text: string
-  source: 'card' | 'memory' | 'lore' | 'place'
+  /** `plan`: a concrete detail the director added this turn (task 4). */
+  source: 'card' | 'memory' | 'lore' | 'place' | 'plan'
   /** The player hasn't been told it on screen this scene. */
   unheard: boolean
 }
@@ -215,7 +216,8 @@ export function recentlyLive(content: Pack, state: GameState): Record<string, Li
  * 3. their memories recalled for the scene;
  * 4. the place's current news.
  * A fact the player has already been told comes back only when the player's words or the last turn ask about it
- * (the brief's "answer" rank). Never a secret: a secret is a pressure, and the bookkeeper and the who-knows-what notes
+ * (the brief's "answer" rank); lore and memories, which have no rank, don't come back. What was said is the bookkeeper's
+ * record (`said`, task 4). Never a secret: a secret is a pressure, and the bookkeeper and the who-knows-what notes
  * guard it.
  */
 function poolOf(content: Pack, state: GameState, c: Character, briefs: Briefs, brought: CodexEntry[]): PoolFact[] {
@@ -232,12 +234,12 @@ function poolOf(content: Pack, state: GameState, c: Character, briefs: Briefs, b
       if (f && f.kind === 'knows' && canSay(scene, f, c.id) && (!told(f.id) || d.rank === 'answer')) add({ id: f.id, text: f.text, source: 'card', unheard: !toldPlayer(scene, f) })
     } else if (d.kind === 'memory') {
       const m = state.memories.find((x) => x.id === d.id)
-      if (m) add({ id: m.id, text: m.text, source: 'memory', unheard: true })
+      if (m && !told(m.id)) add({ id: m.id, text: m.text, source: 'memory', unheard: true })
     }
   }
   const knower = knowerIn(state, c)
-  for (const entry of brought) if (entry.knowledge !== 'secret' && knows(content.setting, entry, knower)) add({ id: `lore.${entry.id}`, text: entry.summary, source: 'lore', unheard: true })
-  for (const m of recall(content.ruleset, state, c)) add({ id: m.id, text: m.text, source: 'memory', unheard: true })
+  for (const entry of brought) if (entry.knowledge !== 'secret' && knows(content.setting, entry, knower) && !told(`lore.${entry.id}`)) add({ id: `lore.${entry.id}`, text: entry.summary, source: 'lore', unheard: true })
+  for (const m of recall(content.ruleset, state, c)) if (!told(m.id)) add({ id: m.id, text: m.text, source: 'memory', unheard: true })
   for (const f of facts.values()) if (f.kind === 'place' && !told(f.id)) add({ id: f.id, text: f.text, source: 'place', unheard: !toldPlayer(scene, f) })
   return pool.slice(0, content.ruleset.scene.factPool)
 }

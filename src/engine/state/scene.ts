@@ -48,8 +48,16 @@ export const BookkeepingSchema = z.object({
   guesses: z.array(SecretNoteSchema).default([]),
   /** Talk that touched a secret without saying it was true: asking, dodging, denying, hinting. Teaches no one. */
   around: z.array(SecretNoteSchema).default([]),
+  /** Part of a secret said as true, not all of it (Milestone 5 plan, Q11): kept and shown, teaching no one. */
+  partial: z.array(SecretNoteSchema).default([]),
   /** Secrets the game couldn't settle: the bookkeeper couldn't tell, or a holder said one they were keeping. */
   unresolved: z.array(SecretNoteSchema).default([]),
+  /**
+   * Facts from the writer's pool that the prose stated (Milestone 5 plan, Q12: the `scene` pipeline has no moves to read
+   * them from): they join the scene's `told`, so the player has heard them and they leave the pool. `text` keeps a lore
+   * or memory fact's words, which no sheet in the scene holds.
+   */
+  said: z.array(z.object({ fact: z.string(), text: z.string(), by: z.string(), words: z.string().default('') })).default([]),
   /** Concrete details the prose stated as settled that no fact holds; anyone present may repeat them. */
   new: z.array(z.object({ text: z.string(), by: z.string() })).default([]),
   /**
@@ -59,8 +67,11 @@ export const BookkeepingSchema = z.object({
   changed: z.string().optional(),
   /** Where each feeling the prose showed seemed to land; logged against the director's `feels`, never applied. */
   moods: z.array(z.object({ id: z.string(), feeling: FeelingSchema })).default([]),
-  /** Whether the prose kept each check's result; logged only. */
-  checks: z.array(z.object({ id: z.string(), honored: z.boolean(), note: z.string().optional() })).default([]),
+  /**
+   * What the prose showed of each check, and whether that kept the roll's result; logged only. Since Milestone 5 task 4
+   * the bookkeeper says what a line shows and the game compares it with the roll; `honored` is absent when it was unclear.
+   */
+  checks: z.array(z.object({ id: z.string(), honored: z.boolean().optional(), shown: z.string().optional(), at: z.number().int().optional(), words: z.string().optional(), note: z.string().optional() })).default([]),
   /** What the bookkeeper said that the game turned down, with why. */
   refused: z.array(z.string()).default([]),
   /** A plan-based record: the bookkeeper failed, timed out or couldn't be read, so its secrets weren't audited. */
@@ -118,7 +129,9 @@ export const TurnSchema = z.object({
    */
   records: BookkeepingSchema.optional(),
   /** Secrets this turn's records added to the scene's `told`, so newer records can replace them (milestone 4c). */
-  toldSecrets: z.array(z.string()).optional()
+  toldSecrets: z.array(z.string()).optional(),
+  /** Facts this turn's records added to the scene's `told` (the `scene` pipeline's said facts), likewise. */
+  toldFacts: z.array(z.string()).optional()
 })
 export type Turn = z.infer<typeof TurnSchema>
 

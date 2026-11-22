@@ -7,7 +7,7 @@ import { callsOf, type BookkeepingRun, type ScenarioRun } from './run'
 /**
  * The bookkeeper's part of a bench report (milestone 4c task 4; milestone-4 plan Part 4c, Acceptance): what each turn
  * recorded, what fell back, the leaks, and the mismatches logged and never applied (what changed against the
- * director's `change`, moods against its `feels`, checks the prose didn't honor). Also tokens by role, against which
+ * director's `change` (the scene plan's stakes), moods against its `feels`, checks the prose didn't honor). Also tokens by role, against which
  * 4c's cost is reported with no pass mark.
  */
 
@@ -30,8 +30,17 @@ export function moodMismatches(t: TurnTrace, records: Bookkeeping): { id: string
   })
 }
 
-/** Whether one of the director's `change` and the bookkeeper's `changed` says something changed and the other doesn't. */
-const oneSided = (t: TurnTrace, records: Bookkeeping) => !!t.director.plan.change?.trim() !== !!records.changed?.trim()
+/**
+ * What the director meant the turn to change: `situation`'s `change`, or the scene plan's stakes, which replace it
+ * (Milestone 5 plan, Q4). The report is "changed vs stakes" on a scene turn.
+ */
+export const intended = (t: TurnTrace): string => (t.director.plan.scene ? t.director.plan.scene.stakes : t.director.plan.change ?? '').trim()
+
+/**
+ * Whether one of the director's intent and the bookkeeper's `changed` says something changed and the other doesn't.
+ * Code can't tell whether the stakes named what changed; that is for reading the turn, shown side by side.
+ */
+const oneSided = (t: TurnTrace, records: Bookkeeping) => !!intended(t) !== !!records.changed?.trim()
 
 /** A scenario's records in numbers. */
 export function recordStats(run: ScenarioRun) {
@@ -48,19 +57,20 @@ export function recordStats(run: ScenarioRun) {
     leaks: sum(({ b }) => b.records.leaks.length),
     guesses: sum(({ b }) => b.records.guesses.length),
     around: sum(({ b }) => (b.records.around ?? []).length),
+    partial: sum(({ b }) => (b.records.partial ?? []).length),
     unresolved: sum(({ b }) => b.records.unresolved.length),
     changed: turns.filter(({ t, b }) => !b.records.unaudited && oneSided(t, b.records)).length,
     moods: sum(({ t, b }) => moodMismatches(t, b.records).length),
-    unhonored: sum(({ b }) => b.records.checks.filter((c) => !c.honored).length),
+    unhonored: sum(({ b }) => b.records.checks.filter((c) => c.honored === false).length),
     refused: sum(({ b }) => b.records.refused.length)
   }
 }
 
-export const RECORD_HEADS = ['Scenario', 'Turns recorded', 'Failed', 'Late', 'Came out', 'Leaks', 'Guesses', 'Talked around', 'Unresolved', 'Changed vs change', 'Mood mismatches', 'Checks not honored', 'Refused']
+export const RECORD_HEADS = ['Scenario', 'Turns recorded', 'Failed', 'Late', 'Came out', 'Leaks', 'Guesses', 'Talked around', 'Partly out', 'Unresolved', 'Changed vs plan', 'Mood mismatches', 'Checks not honored', 'Refused']
 
 export const recordRow = (label: string, run: ScenarioRun): string => {
   const s = recordStats(run)
-  return `| ${label} | ${s.turns} | ${s.failed} | ${s.late} | ${s.out} | ${s.leaks} | ${s.guesses} | ${s.around} | ${s.unresolved} | ${s.changed} | ${s.moods} | ${s.unhonored} | ${s.refused} |`
+  return `| ${label} | ${s.turns} | ${s.failed} | ${s.late} | ${s.out} | ${s.leaks} | ${s.guesses} | ${s.around} | ${s.partial} | ${s.unresolved} | ${s.changed} | ${s.moods} | ${s.unhonored} | ${s.refused} |`
 }
 
 const feeling = (f: Feeling) => `${f.shade} (${f.family}) ${f.intensity}`
@@ -76,12 +86,14 @@ export function recordLines(name: Name, t: TurnTrace, b: BookkeepingRun | undefi
     ...r.out.map((o) => `Came out (${o.how}): \`${o.secret}\` by ${who(o.by)}, ${at(o)}: “${o.words}” → ${o.to.map(name).join(', ') || 'no one else'}`),
     ...r.leaks.map((l) => `⚠ Leak: \`${l.secret}\` by ${who(l.by)}, ${at(l)}: “${l.words}”${l.why ? ` (${l.why})` : ''}`),
     ...r.guesses.map((g) => `Guess: \`${g.secret}\` by ${who(g.by)}, ${at(g)}: “${g.words}”`),
+    ...(r.partial ?? []).map((p) => `Partly out: \`${p.secret}\` by ${who(p.by)}, ${at(p)}: “${p.words}”`),
     ...(r.around ?? []).map((a) => `Talked around: \`${a.secret}\` by ${who(a.by)}, ${at(a)}: “${a.words}”`),
     ...r.unresolved.map((u) => `Unresolved: \`${u.secret}\` by ${who(u.by)}, ${at(u)}: “${u.words}”${u.why ? ` (${u.why})` : ''}`),
+    ...(r.said ?? []).map((f) => `Heard: \`${f.fact}\` by ${who(f.by)}${f.words ? `: “${f.words}”` : ''}`),
     ...r.new.map((n) => `New detail (${who(n.by)}): ${n.text}`),
-    `Changed: ${r.changed || '(nothing)'} · director's change: ${t.director.plan.change || '(none)'}`,
+    `Changed: ${r.changed || '(nothing)'} · director's ${t.director.plan.scene ? 'stakes' : 'change'}: ${intended(t) || '(none)'}`,
     ...moodMismatches(t, r).map((m) => `Mood: ${name(m.id)} felt ${feeling(m.felt)}, read as ${feeling(m.read)}`),
-    ...r.checks.filter((c) => !c.honored).map((c) => `Check not honored: ${c.id}${c.note ? ` — ${c.note}` : ''}`),
+    ...r.checks.filter((c) => c.honored === false).map((c) => `Check not honored: ${c.id}${c.note ? ` — ${c.note}` : ''}${c.words ? `: “${c.words}”` : ''}`),
     ...r.refused.map((x) => `Refused: ${x}`)
   ]
 }

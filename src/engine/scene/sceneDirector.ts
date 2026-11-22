@@ -25,6 +25,7 @@ Return only this JSON object:
   "moments": [{"who","feels","lands","wants","pressure"}],
   "pressures": [{"who","kind","secret","with","touched","approach"}],
   "draws_on": [{"who","facts"}],
+  "details": [{"who","text"}],
   "stakes": "...",
   "walk_ons": [{"id","line"}],
   "avoid": [], "leaves": [], "end_scene": false
@@ -38,6 +39,7 @@ Return only this JSON object:
 - moments: one for each person in focus. feels: what they really feel now, whatever they show: {"shade","family","intensity","reason"}; shade from the list below, family only when the shade is under more than one, intensity 1 to 5, reason in a few words. Leave it out to keep what they felt before. A mask hides a feeling and never lessens it; a feeling eases at most one step a turn. lands: how what just happened lands on them, in plain situational words. wants: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone. Each at most ${MOMENT_WORDS} words, never dialogue. pressure: how hard their aim for tonight presses now, one of: ${r.pressures.join(', ')} (weakest first); most of the time ${r.pressures[0]}; it moves at most one step a turn.
 - pressures: at most one per person in focus, and usually none. Only from "What could press" below. kind is "secret" (secret: its id; approach: ${APPROACHES.join(', ')}; touched: the words that touched it), "tie" (with: the other person's id, or "player"), or "goal" (their aim for tonight, only above ${r.pressures[0]}). A pressure is an undercurrent: it shapes what they choose, avoid or notice, and is rarely what they talk about.
 - draws_on: for a person in focus who needs a fact: ids from their list under "Facts they could draw on". A pool to choose from, not a list to recite; most turns need few.
+- details: a concrete detail a person in focus will need that no listed fact holds (a price, a time, a place, a name), in a few plain words, never a line to say and never a secret. At most ${r.scene.details}; most turns need none.
 - stakes: what this turn could settle or change, and what a check result would change. Not what will happen: the writer finds that in the moment.
 - A plan gives nobody knowledge. Someone may ask about another's secret, guess, suspect or deny it; a secret is confirmed only by its holder, by someone who knows it, or by what is shown on screen.
 - walk_ons: only when the player speaks to them, or they have news that changes things. leaves: characters who walk out. end_scene: true only at a natural close. avoid: phrases the writer should keep off, if any.

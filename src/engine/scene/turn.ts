@@ -104,7 +104,7 @@ export function showDepartures(content: Pack, plan: BeatPlan, beats: Beat[]): { 
 /**
  * Puts a turn's records into the state (milestone 4c): the bookkeeper's, or the plan's until it answers and when it
  * fails. Always the scene's last turn, since the next turn waits for its bookkeeper. Replaces whatever records the turn
- * had: the secrets it added to `told`, who they came out in front of (`exposed`), the secrets among its topics, and
+ * had: the secrets and said facts it added to `told`, who they came out in front of (`exposed`), the secrets among its topics, and
  * the details it said (`newFacts`), so applying the same records twice changes nothing. A secret comes out only
  * through `records.out`; leaks, guesses and unresolved cases are kept on the turn and teach no one (decided
  * 2026-11-18, user, J–L).
@@ -114,9 +114,10 @@ export function applyRecords(state: GameState, records: Bookkeeping): GameState 
   const turn = scene?.turns.at(-1)
   if (!scene || !turn) throw new Error('No turn to record')
   const unique = <T>(xs: T[]) => [...new Set(xs)]
-  const before = scene.told.filter((id) => !(turn.toldSecrets ?? []).includes(id))
+  const before = scene.told.filter((id) => !(turn.toldSecrets ?? []).includes(id) && !(turn.toldFacts ?? []).includes(id))
   const out = unique(records.out.map((o) => o.secret))
   const toldSecrets = out.filter((id) => !before.includes(id))
+  const toldFacts = unique(records.said.map((f) => f.fact)).filter((id) => !before.includes(id) && !toldSecrets.includes(id))
   const exposed = out.flatMap((secret) => {
     const to = unique(records.out.filter((o) => o.secret === secret).flatMap((o) => o.to))
     return to.length > 0 ? [{ secret, to }] : []
@@ -126,9 +127,9 @@ export function applyRecords(state: GameState, records: Bookkeeping): GameState 
   const kept = scene.newFacts.filter((f) => f.turn !== turn.id)
   const newFacts = [...kept]
   for (const n of records.new) if (!newFacts.some((f) => f.text === n.text)) newFacts.push({ id: `said.${newFacts.length + 1}`, text: n.text, by: n.by, turn: turn.id })
-  const { exposed: _e, topics: _t, toldSecrets: _s, ...rest } = turn
-  const recorded = { ...rest, records, ...(exposed.length > 0 && { exposed }), ...(topics.length > 0 && { topics }), ...(toldSecrets.length > 0 && { toldSecrets }) }
-  return { ...state, scene: { ...scene, turns: [...scene.turns.slice(0, -1), recorded], told: [...before, ...toldSecrets], newFacts } }
+  const { exposed: _e, topics: _t, toldSecrets: _s, toldFacts: _f, ...rest } = turn
+  const recorded = { ...rest, records, ...(exposed.length > 0 && { exposed }), ...(topics.length > 0 && { topics }), ...(toldSecrets.length > 0 && { toldSecrets }), ...(toldFacts.length > 0 && { toldFacts }) }
+  return { ...state, scene: { ...scene, turns: [...scene.turns.slice(0, -1), recorded], told: [...before, ...toldSecrets, ...toldFacts], newFacts } }
 }
 
 /**

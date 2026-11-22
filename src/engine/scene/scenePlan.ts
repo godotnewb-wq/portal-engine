@@ -4,7 +4,9 @@ import { firstName } from '@engine/core'
 import { characterById, type Pack } from '@engine/pack'
 import type { GameState } from '@engine/state'
 import { justSaid, type Gathered, type LiveRecord, type PoolFact, type SecretOption, type TieOption } from './gather'
-import { feltNow, playerChecks, RawFeelsSchema, validateChecks, validateLeaves, validateWalkOns } from './plan'
+import { feltNow, NEW_FACT_WORDS, playerChecks, RawFeelsSchema, validateChecks, validateLeaves, validateWalkOns } from './plan'
+import { sceneFacts } from './facts'
+import { sharedWords } from './phrases'
 import { list, MAX_SPEAKERS, oneOrList, PlannedCheckSchema, presentId, QUOTED_WORDS, text, type BeatPlan, type PlannedCheck, type Read } from './planShape'
 
 /**
@@ -78,6 +80,7 @@ export const RawScenePlanSchema = z.object({
   moments: list(z.object({ who: z.string(), feels: RawFeelsSchema.optional().catch(undefined), lands: text, wants: text, pressure: text })),
   pressures: list(z.object({ who: z.string(), kind: text, secret: text, with: text, touched: text, approach: text })),
   draws_on: list(z.object({ who: z.string(), facts: oneOrList(z.string()) })),
+  details: list(z.object({ who: z.string(), text })),
   stakes: text,
   walk_ons: list(z.object({ id: z.string(), line: z.string() })),
   leaves: oneOrList(z.string()),
@@ -85,6 +88,9 @@ export const RawScenePlanSchema = z.object({
   avoid: oneOrList(z.string())
 })
 export type RawScenePlan = z.infer<typeof RawScenePlanSchema>
+
+/** A director's detail sharing this many content words with a secret is about the secret, and dropped (*tune*). */
+export const DETAIL_SECRET_WORDS = 3
 
 /** Words for a moment's line or the stakes before the rest is cut (*tune*): a situation, not a script. */
 export const MOMENT_WORDS = 30
@@ -234,6 +240,20 @@ export function validateScenePlan(content: Pack, state: GameState, raw: RawScene
   }
 
   const pools: Record<string, PoolFact[]> = {}
+  // Concrete details the director wants on hand (task 4; a move's `new` before): short facts in one person's pool,
+  // never wording for a line. Not a secret, and within the ruleset's count. Said on screen, they become common ground.
+  const secretTexts = sceneFacts(content, state).filter((f) => f.kind === 'secret').map((f) => f.text)
+  for (const d of raw.details) {
+    const id = who(d.who)
+    const text = d.text.trim()
+    const n = Object.values(pools).flat().filter((f) => f.source === 'plan').length
+    if (!text) continue
+    if (!id || !focus.includes(id)) fix(`dropped the detail for "${d.who}": not in focus`)
+    else if (text.split(/\s+/).length > NEW_FACT_WORDS) fix(`dropped ${id}'s detail "${text}": over ${NEW_FACT_WORDS} words`)
+    else if (secretTexts.some((t) => sharedWords(text, t) >= DETAIL_SECRET_WORDS)) fix(`dropped ${id}'s detail "${text}": it says a secret`)
+    else if (n >= r.scene.details) fix(`dropped ${id}'s detail "${text}": over the limit of ${r.scene.details}`)
+    else (pools[id] ??= []).push({ id: `detail.${scene.turns.length + 1}.${n + 1}`, text, source: 'plan', unheard: true })
+  }
   for (const d of raw.draws_on) {
     const id = who(d.who)
     if (!id || !focus.includes(id)) {
@@ -346,4 +366,22 @@ export function sceneFallback(state: GameState, gathered: Gathered): ScenePlan {
     end_scene: false,
     avoid: []
   }
+}
+
+/**
+ * A scene plan in read-out lines, for the logs, the bench report and Turn details (task 4): the moment for each person
+ * in focus, what pressed live, the facts and details they could draw on, the stakes, and who leaves.
+ */
+export function scenePlanLines(plan: ScenePlan, nameOf: (id: string) => string): string[] {
+  const named = (id: string) => (id === 'player' ? 'the player' : nameOf(id))
+  const pressure = (p: LivePressure) =>
+    p.kind === 'secret' ? `secret \`${p.ref}\`${p.approach ? ` (${p.approach})` : ''}${p.touched ? `, touched by “${p.touched}”` : ''}` : p.kind === 'tie' ? `tie with ${named(p.ref)}` : `aim${p.strength ? ` (${p.strength})` : ''}: ${p.text}`
+  return [
+    ...plan.moments.map((m) => `${nameOf(m.who)}: ${m.lands}; wants ${m.wants}${m.feels ? ` (feels ${m.feels.shade} ${m.feels.intensity})` : ''}${plan.strengths[m.who] ? `; aim ${plan.strengths[m.who]}` : ''}`),
+    ...plan.pressures.map((p) => `Underneath, ${nameOf(p.who)}: ${pressure(p)}`),
+    ...Object.entries(plan.pools).map(([who, pool]) => `${nameOf(who)} may draw on: ${pool.map((f) => (f.source === 'plan' ? `“${f.text}” (detail)` : `\`${f.id}\``)).join(', ')}`),
+    plan.stakes && `Stakes: ${plan.stakes}`,
+    plan.leaves.length > 0 && `Leaving: ${plan.leaves.map(nameOf).join(', ')}`,
+    plan.end_scene && 'Ends the scene'
+  ].filter((x): x is string => !!x)
 }

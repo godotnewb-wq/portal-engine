@@ -9,6 +9,7 @@ import { checkReply, salvaged } from './checks'
 import { sceneSpeakers } from './writer'
 import { sceneView, sceneFallback } from './scenePlan'
 import { gatherScene } from './gather'
+import { applyRecords } from './turn'
 
 // A turn made by the `scene` pipeline (Milestone 5 plan, task 3): the game-master director, the scene writer, and
 // everything after them reading the scene plan through its view.
@@ -180,5 +181,48 @@ describe('the place’s details for the scene writer', () => {
     const texture = { sights: ['a lamp swinging over the scales', 'crates stacked to the rafters'], sounds: ['gulls over the water'], smells: ['tar'] }
     const scene = { ...state.scene!, turns: [{ ...state.scene!.turns[0]!, beats: [{ kind: 'narration' as const, text: 'The lamp over the scales swings once.' }] }] }
     expect(placeDetails(texture, scene)).toEqual(['crates stacked to the rafters', 'gulls over the water', 'tar'])
+  })
+})
+
+describe('what the player has heard, on the scene pipeline (task 4, Q12)', () => {
+  const TALLIES = {
+    player_action: { doing: 'asks how the tallies work', uncertain: false },
+    focus: ['tobin'],
+    moments: [{ who: 'tobin', lands: 'a question he can answer', wants: 'to explain', pressure: 'idle' }],
+    draws_on: [{ who: 'tobin', facts: ['lore.faction.guild.tallies'] }],
+    stakes: 'whether Kit learns how the tallies work'
+  }
+  const SAID = 'Tobin: "The tallies are rounded in the Guild\'s favor. Always have been."\n[Tobin: EXPRESSION frank]'
+
+  it('a pool fact a line said is heard: it joins told, leaves the pool, and the writer lists it as told', async () => {
+    const out = await runTurn(fixture, yardScene(13), 'How do the tallies work?', scripted(TALLIES, [SAID]), () => {}, { pipeline: 'scene' })
+    const scene = out.state.scene!
+    expect(scene.told).toContain('lore.faction.guild.tallies')
+    expect(scene.turns.at(-1)!.toldFacts).toEqual(['lore.faction.guild.tallies'])
+    expect((gatherScene(fixture, out.state, 'How do the tallies work?').pools['tobin'] ?? []).map((f) => f.id)).not.toContain('lore.faction.guild.tallies')
+    const next = scripted({ ...TALLIES, draws_on: [] }, ['Tobin: "Same as ever."'])
+    await runTurn(fixture, out.state, 'And the watch?', next, () => {}, { pipeline: 'scene' })
+    expect(next.prompts[1]!.user).toContain("# What the player has been told this scene\n- The tallies are rounded in the Guild's favor.")
+    // Applying the same records again changes nothing.
+    expect(applyRecords(out.state, scene.turns.at(-1)!.records!)).toEqual(out.state)
+  })
+})
+
+describe('the director’s concrete details (task 4: a move’s `new`)', () => {
+  const PRICE = {
+    player_action: { doing: 'asks what the crates cost', uncertain: false },
+    focus: ['mara'],
+    moments: [{ who: 'mara', lands: 'a price question', wants: 'to quote it', pressure: 'idle' }],
+    details: [{ who: 'mara', text: 'two pennies a crate' }, { who: 'tobin', text: 'the gate shuts at nine' }, { who: 'mara', text: 'Tobin let someone in after closing' }],
+    stakes: 'whether Kit pays'
+  }
+
+  it('joins the person’s pool as a short fact, never a secret, and once said is common ground', async () => {
+    const llm = scripted(PRICE, ['Mara: "Two pennies a crate, Kit. Take it or leave it."'])
+    const out = await runTurn(fixture, yardScene(13), 'What do the crates cost?', llm, () => {}, { pipeline: 'scene' })
+    expect(out.plan.scene!.pools['mara']).toEqual([{ id: 'detail.1.1', text: 'two pennies a crate', source: 'plan', unheard: true }])
+    expect(out.trace.director.corrections).toEqual(expect.arrayContaining(['dropped the detail for "tobin": not in focus', 'dropped mara\'s detail "Tobin let someone in after closing": it says a secret']))
+    expect(llm.prompts[1]!.user).toContain('May draw on, if a line needs it: two pennies a crate [new to the player]')
+    expect(out.state.scene!.newFacts).toEqual([expect.objectContaining({ text: 'two pennies a crate', by: 'mara' })])
   })
 })

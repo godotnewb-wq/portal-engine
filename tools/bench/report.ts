@@ -2,7 +2,7 @@ import type { Beat } from '@engine/state'
 import { parseConsolidation, type RelationshipTrace, type SceneEndTrace, type WitnessReport } from '@engine/relationships'
 import { feelingLabel, type Meters } from '@engine/characters'
 import type { Pack } from '@engine/pack'
-import { lineText, moodOf, planLines, type TurnTrace } from '@engine/scene'
+import { lineText, moodOf, planLines, scenePlanLines, type TurnTrace } from '@engine/scene'
 import { callsOf, metricInputOf, nameIn, turnsOf, type BenchRun, type SceneRun, type ScenarioRun } from './run'
 import { comparability } from './inputs'
 import { bookkeepingOf, RECORD_HEADS, recordLines, recordRow, renderTokens } from './records'
@@ -178,9 +178,14 @@ function turnSection(names: Names, location: string, turns: TurnTrace[], heading
     const p = t.director.plan
     const exchange = planLines(p)
     const plan = [
-      ...exchange.map((_, i) => `- line ${lineText(exchange, i, name)}`),
-      ...p.speakers.map((s) => `- **${name(s.id)}** speaks: ${s.intent}${moodOf(s) ? ` *(feels: ${moodOf(s)})*` : ''}${s.hiding ? ` — hiding: ${s.hiding} (${s.approach ?? '?'})` : ''}`),
-      ...p.reactions.map((r) => `- ${name(r.id)} reacts: ${r.beat}`),
+      // A scene plan reads as itself, not through the view the rest of the pipeline uses (Milestone 5 task 4).
+      ...(p.scene
+        ? scenePlanLines(p.scene, name).map((l) => `- ${l}`)
+        : [
+            ...exchange.map((_, i) => `- line ${lineText(exchange, i, name)}`),
+            ...p.speakers.map((s) => `- **${name(s.id)}** speaks: ${s.intent}${moodOf(s) ? ` *(feels: ${moodOf(s)})*` : ''}${s.hiding ? ` — hiding: ${s.hiding} (${s.approach ?? '?'})` : ''}`),
+            ...p.reactions.map((r) => `- ${name(r.id)} reacts: ${r.beat}`)
+          ]),
       ...checkLines(t).map((c) => `- 🎲 ${c}`),
       p.texture.length > 0 ? `- Texture: ${p.texture.join('; ')}` : '',
       ...t.director.corrections.map((c) => `- ⚙ corrected: ${c}`),

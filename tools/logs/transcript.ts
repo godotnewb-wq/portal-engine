@@ -24,6 +24,16 @@ export function latestScores(scores: ScoreRecord[]): Map<string, ScoreRecord> {
 export function planSummary(turn: TurnRecord, nameOf: (id: string) => string): string {
   const p = turn.director.plan
   const lines = planLines(p)
+  // A scene plan: who the moment is about and what they want, what pressed live, and the stakes (Milestone 5 task 4).
+  if (p.scene)
+    return [
+      ...p.scene.moments.map((m) => `${nameOf(m.who)}: ${m.wants}`),
+      ...p.scene.pressures.map((x) => `${nameOf(x.who)} [${x.kind}${x.approach ? `: ${x.approach}` : ''}]`),
+      p.scene.stakes && `stakes: ${p.scene.stakes}`,
+      turn.director.read === 'unreadable' ? 'game-planned (director unreadable)' : ''
+    ]
+      .filter(Boolean)
+      .join(' · ')
   return [
     ...lines.map((_, i) => lineText(lines, i, nameOf)),
     ...p.speakers.map((s) => `${nameOf(s.id)}: ${s.intent}${s.hiding ? ` [hiding: ${s.approach ?? 'deflect'}]` : ''}`),

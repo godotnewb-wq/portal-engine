@@ -50,7 +50,7 @@ const BOOKKEEPER: ((beats: { text: string }[]) => object | null)[] = [
     new: [],
     changed: 'Mara has caught Tobin out.',
     moods: [{ id: 'tobin', shade: 'sore', family: 'mad', intensity: 3 }],
-    checks: [{ id: 'read-tobin', honored: false, note: 'the prose never shows her seeing it' }]
+    checks: [{ id: 'read-tobin', shown: 'falls short', at: beats.findIndex((b) => b.text.includes('You were here after closing')) + 1, words: 'You were here after closing' }]
   }),
   // Turn 2: Tobin says the secret he is keeping, which is left for review.
   (beats) => ({
@@ -58,7 +58,7 @@ const BOOKKEEPER: ((beats: { text: string }[]) => object | null)[] = [
     new: [],
     changed: 'Tobin admits it.',
     moods: [],
-    checks: [{ id: 'persuade-tobin', honored: true }]
+    checks: [{ id: 'persuade-tobin', shown: 'comes off', at: beats.findIndex((b) => b.text.includes('Guild seal knocked')) + 1, words: 'Someone with a Guild seal knocked' }]
   }),
   // Turn 3: the call fails, so the plan's records stand in.
   () => null
@@ -161,8 +161,8 @@ describe('Turn details on a recorded turn', () => {
     expect(checks).toMatchObject({ count: 1, warn: true })
     const s = text(checks)
     expect(s).toMatch(/d20 \d+.* = -?\d+ vs DC \d+ \(tough\)/)
-    expect(s).toContain("The prose didn't keep the result: the prose never shows her seeing it")
-    expect(text(tab(tabsOf(read[1]!), 'checks'))).toContain('The prose kept the result.')
+    expect(s).toContain("The prose didn't keep the result: rolled success; the prose shows it falling short (“You were here after closing”)")
+    expect(text(tab(tabsOf(read[1]!), 'checks'))).toContain('The prose kept the result: “Someone with a Guild seal knocked”')
   })
 
   it('Fixes: the corrections the plan needed and the rewrite', () => {
@@ -268,5 +268,57 @@ describe("The scene's end on a recorded scene", () => {
     expect(text(tab(empty, 'people'))).toContain("The relationship calls didn't run")
     expect(text(tab(empty, 'memory'))).toBe("The memory calls haven't run yet.")
     expect(text(tab(empty, 'calls'))).toBe('Calls (click a call for its prompt and reply) No calls.')
+  })
+})
+
+describe('Turn details on a scene-pipeline turn (Milestone 5 task 4)', () => {
+  let scene: TurnDetails
+  beforeAll(async () => {
+    const dir = mkdtempSync(join(tmpdir(), 'details-scene-'))
+    const logs = new PlayLogs(dir, fixture, () => ({ engine: 'test', models: {} }), () => true)
+    const session = logs.begin('test')!
+    const plan = {
+      player_action: { doing: 'asks Mara about a second ledger', uncertain: false },
+      focus: ['mara'],
+      moments: [{ who: 'mara', lands: 'the one question she dreads', wants: 'to close it down', pressure: 'keen' }],
+      pressures: [{ who: 'mara', kind: 'secret', secret: 'mara.two-books', touched: 'second ledger', approach: 'lie' }],
+      details: [{ who: 'mara', text: 'one book, closed at six' }],
+      stakes: 'whether Kit believes there is one book'
+    }
+    const llm: TurnLlm = {
+      direct: async () => JSON.stringify(plan),
+      async write(_p, onDelta) {
+        const reply = 'Mara: She shuts the book. "One book, Kit. Closed at six."\n[Mara: EXPRESSION guarded]'
+        onDelta(reply)
+        return reply
+      }
+    }
+    const before = yardScene(13)
+    const outcome = await runTurn(fixture, before, 'Is there a second ledger, Mara?', llm, () => {}, { turnId: 'scene-1', log: session, now: () => 0, pipeline: 'scene' })
+    logs.turn(outcome.trace, { location: before.scene!.locationId, cast: before.scene!.cast })
+    scene = logs.details(session, 'scene-1')!
+    logs.end()
+    rmSync(dir, { recursive: true, force: true })
+  })
+
+  it('Turn: the stakes and the moment, with what pressed live, in place of moves', () => {
+    const s = text(tab(tabsOf(scene), 'turn'))
+    expect(s).toContain("What's at stake whether Kit believes there is one book")
+    expect(s).toContain('The moment Mara : the one question she dreads · wants to close it down')
+    expect(s).toContain('Pressing live Mara: mara.two-books (lie) · touched by “second ledger”')
+    expect(s).not.toContain('The change the director meant')
+  })
+
+  it('People: the moment, what presses underneath, the pool, and the director’s brief', () => {
+    const s = text(tab(tabsOf(scene), 'people'))
+    expect(s).toContain('In the moment: the one question she dreads · wants to close it down')
+    expect(s).toContain('Underneath: secret mara.two-books (lie)')
+    expect(s).toContain('May draw on: “one book, closed at six”')
+    expect(s).toMatch(/Brief: ≈\d+ tokens always/)
+    expect(s).toContain('Here, not in focus: may react or say a little.')
+  })
+
+  it('Secrets: the facts the writer was offered', () => {
+    expect(text(tab(tabsOf(scene), 'secrets'))).toContain('Mara: new — one book, closed at six (new to the player)')
   })
 })

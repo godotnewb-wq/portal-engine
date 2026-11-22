@@ -2,7 +2,7 @@ import { useState, type ReactNode } from 'react'
 import type { FlagRecord } from '@engine/review'
 import { RUBRIC } from '@engine/review'
 import { feelingLabel, type Feeling } from '@engine/characters'
-import { lineText, moodOf, planLines, type CheckTrace } from '@engine/scene'
+import { lineText, moodOf, planLines, type BriefTrace, type CheckTrace } from '@engine/scene'
 import type { Bookkeeping } from '@engine/state'
 import type { BookkeepingRecord, TurnDetails as Details } from '@platform/logs'
 import { Button } from './Button'
@@ -92,7 +92,7 @@ export function turnTabs(details: Details, record: Pick<BookkeepingRecord, 'reco
     { id: 'people', label: 'People', count: people.length, render: () => <PeopleTab details={details} people={people} nameOf={nameOf} /> },
     { id: 'secrets', label: 'Secrets and knowledge', count: r ? r.out.length + r.leaks.length : 0, warn: !!r && r.leaks.length > 0, render: () => <SecretsTab details={details} records={r} missing={missing} nameOf={nameOf} /> },
     { id: 'lore', label: 'Lore', count: t.lore?.triggered.length ?? 0, render: () => (t.lore ? <Lore lore={t.lore} plan={plan} nameOf={nameOf} /> : <NotRecorded what="This log is from before the codex (milestone 3)." />) },
-    { id: 'checks', label: 'Checks', count: t.checks.length, warn: !!r && r.checks.some((c) => !c.honored), render: () => <ChecksTab checks={t.checks} records={r} nameOf={nameOf} /> },
+    { id: 'checks', label: 'Checks', count: t.checks.length, warn: !!r && r.checks.some((c) => c.honored === false), render: () => <ChecksTab checks={t.checks} records={r} nameOf={nameOf} /> },
     { id: 'fixes', label: 'Fixes', count: fixes, warn: fixes > 0, render: () => <FixesTab details={details} /> },
     { id: 'calls', label: 'Calls', count: details.calls.length, render: () => <CallsTab details={details} /> },
     { id: 'records', label: 'Records', count: r ? r.refused.length : 0, warn: !!r && (r.refused.length > 0 || !!r.unaudited), render: () => (record ? <RecordsTab record={record} plan={plan} nameOf={nameOf} /> : missing) }
@@ -112,11 +112,46 @@ function TurnTab({ details, nameOf, flags, onBeat }: { details: Details; nameOf:
         <p>{t.input}</p>
         {plan.player_action?.doing && <p className="muted">Read as: {plan.player_action.doing}{plan.player_action.uncertain ? ' (uncertain, so it needed a check)' : ''}</p>}
       </section>
-      <section>
-        <h3>The change the director meant</h3>
-        <p>{plan.change || <span className="muted">None given.</span>}</p>
-      </section>
-      <section>
+      {plan.scene ? (
+        <section>
+          <h3>What's at stake</h3>
+          <p>{plan.scene.stakes || <span className="muted">None given.</span>}</p>
+        </section>
+      ) : (
+        <section>
+          <h3>The change the director meant</h3>
+          <p>{plan.change || <span className="muted">None given.</span>}</p>
+        </section>
+      )}
+      {plan.scene && (
+        // The scene plan (Milestone 5 task 4): the moment for each person in focus and what pressed live, in place of moves.
+        <section>
+          <h3>The moment {t.director.read !== 'json' && <small>({t.director.read === 'unreadable' ? 'reply unreadable; the game planned it' : 'retried without JSON mode'})</small>}</h3>
+          <ul>
+            {plan.scene.moments.map((m) => (
+              <li key={m.who}>
+                <b>{nameOf(m.who)}</b>: {m.lands} <span className="muted">· wants {m.wants}</span>
+              </li>
+            ))}
+          </ul>
+          {plan.scene.pressures.length > 0 && (
+            <>
+              <h4>Pressing live</h4>
+              <ul>
+                {plan.scene.pressures.map((x, i) => (
+                  <li key={i}>
+                    {nameOf(x.who)}: {x.kind === 'secret' ? <><code>{x.ref}</code>{x.approach && ` (${x.approach})`}{x.touched && <span className="muted"> · touched by “{x.touched}”</span>}</> : x.kind === 'tie' ? `the tie with ${x.ref === 'player' ? 'the player' : nameOf(x.ref)}` : `the aim${x.strength ? ` (${x.strength})` : ''}: ${x.text}`}
+                  </li>
+                ))}
+              </ul>
+            </>
+          )}
+          {plan.walk_ons.length > 0 && <p className="muted">Walk-ons: {plan.walk_ons.map((w) => `${nameOf(w.id)}: ${w.line}`).join('; ')}</p>}
+          {plan.leaves.length > 0 && <p className="muted">Leaves: {plan.leaves.map(nameOf).join(', ')}</p>}
+          {plan.scene.end_scene && <p className="muted">Ends the scene.</p>}
+        </section>
+      )}
+      {!plan.scene && <section>
         <h3>Outline {t.director.read !== 'json' && <small>({t.director.read === 'unreadable' ? 'reply unreadable; the game planned it' : 'retried without JSON mode'})</small>}</h3>
         {plan.moves && plan.moves.length > 0 ? (
           <ol>
@@ -139,7 +174,7 @@ function TurnTab({ details, nameOf, flags, onBeat }: { details: Details; nameOf:
         )}
         {plan.walk_ons.length > 0 && <p className="muted">Walk-ons: {plan.walk_ons.map((w) => `${nameOf(w.id)}: ${w.line}`).join('; ')}</p>}
         {plan.leaves.length > 0 && <p className="muted">Leaves: {plan.leaves.map(nameOf).join(', ')}</p>}
-      </section>
+      </section>}
       <section>
         <h3>Beats <small>(click one to read from it)</small></h3>
         <ol className="detail-beats">
@@ -160,6 +195,24 @@ function TurnTab({ details, nameOf, flags, onBeat }: { details: Details; nameOf:
   )
 }
 
+/**
+ * A person's director brief (decided 2026-11-20, Milestone 5 task 4): what it always costs, the optional detail chosen
+ * and why, what didn't fit, and what a change of topic let go, from the trace's `brief`.
+ */
+function BriefLine({ brief, id }: { brief: BriefTrace; id: string }) {
+  const chosen = brief.selected.filter((d) => d.owner === id)
+  const cut = brief.cut.filter((d) => d.owner === id)
+  const dropped = brief.dropped.filter((d) => d.startsWith(`${id}.`) || d.startsWith(`${id}:`))
+  return (
+    <li>
+      Brief: ≈{brief.recurring[id] ?? 0} tokens always{brief.memories?.[id] ? `, ≈${brief.memories[id]} of memories` : ''}
+      {chosen.length > 0 && <div className="muted">Detail chosen: {chosen.map((d) => `${d.id} (${d.rank}: ${d.trigger}, ≈${d.tokens})`).join('; ')}</div>}
+      {cut.length > 0 && <div className="warn">Cut: {cut.map((d) => `${d.id} (${d.why === 'budget' ? 'over the budget' : 'over the cap for people not here'})`).join('; ')}</div>}
+      {dropped.length > 0 && <div className="muted">Let go on a change of topic: {dropped.join(', ')}</div>}
+    </li>
+  )
+}
+
 /** One card per person: what they felt and how much showed, what they kept, who read them, what they remembered. */
 function PeopleTab({ details, people, nameOf }: { details: Details; people: string[]; nameOf: (id: string) => string }) {
   const t = details.turn
@@ -175,15 +228,30 @@ function PeopleTab({ details, people, nameOf }: { details: Details; people: stri
         const reads = (plan.reads ?? []).filter((x) => x.target === id)
         const recalled = t.brief?.recalled?.[id] ?? []
         const brought = (t.brief?.selected ?? []).filter((d) => d.owner === id && d.kind === 'memory')
+        const moment = plan.scene?.moments.find((m) => m.who === id)
+        const pressing = plan.scene?.pressures.find((x) => x.who === id)
+        const pool = plan.scene?.pools[id] ?? []
         return (
           <section key={id} className="person-card">
             <h3>
               {nameOf(id)} {after?.departed && <small>(left)</small>}
             </h3>
             <ul>
-              {speaker && <li>Speaks: {speaker.intent || <span className="muted">no aim given</span>}{speaker.pressure && <span className="muted"> · pressure {speaker.pressure}</span>}</li>}
-              {reaction && <li>Reacts: {reaction.beat}</li>}
-              {!speaker && !reaction && <li className="muted">Silent this turn.</li>}
+              {moment ? (
+                <li>
+                  In the moment: {moment.lands} <span className="muted">· wants {moment.wants}{plan.scene!.strengths[id] && ` · aim ${plan.scene!.strengths[id]}`}</span>
+                </li>
+              ) : plan.scene ? (
+                <li className="muted">Here, not in focus: may react or say a little.</li>
+              ) : (
+                <>
+                  {speaker && <li>Speaks: {speaker.intent || <span className="muted">no aim given</span>}{speaker.pressure && <span className="muted"> · pressure {speaker.pressure}</span>}</li>}
+                  {reaction && <li>Reacts: {reaction.beat}</li>}
+                  {!speaker && !reaction && <li className="muted">Silent this turn.</li>}
+                </>
+              )}
+              {pressing && <li>Underneath: {pressing.kind === 'secret' ? `secret ${pressing.ref}` : pressing.kind === 'tie' ? `the tie with ${pressing.ref === 'player' ? 'the player' : nameOf(pressing.ref)}` : 'the aim'}{pressing.approach && ` (${pressing.approach})`}</li>}
+              {pool.length > 0 && <li>May draw on: {pool.map((f) => (f.source === 'plan' ? `“${f.text}”` : f.id)).join(', ')}</li>}
               <li>
                 Felt: {feeling(speaker?.feels ?? reaction?.feels ?? after?.feeling)}
                 {speaker && !speaker.feels && moodOf(speaker) && <span className="muted"> · mood words: {moodOf(speaker)}</span>}
@@ -221,6 +289,7 @@ function PeopleTab({ details, people, nameOf }: { details: Details; people: stri
                   </li>
                 )
               )}
+              {t.brief && <BriefLine brief={t.brief} id={id} />}
               {before && after && (
                 <li className="muted">
                   Comfort {before.comfort === after.comfort ? after.comfort : `${before.comfort} → ${after.comfort}`} · expression {after.expression}
@@ -240,14 +309,18 @@ function SecretsTab({ details, records, missing, nameOf }: { details: Details; r
   const t = details.turn
   const who = (id: string) => (id === 'player' ? 'the player' : id === 'narration' ? 'the narration' : nameOf(id))
   const at = (x: { at: 'player' | number }) => (x.at === 'player' ? "the player's words" : `beat ${x.at}`)
-  const facts = (t.director.plan.moves ?? []).flatMap((m) => m.says.map((s) => ({ who: m.who, ...s })))
+  // The situation plan's facts are its moves' `says`; the scene plan's, the pools the writer was offered (task 4).
+  const scenePools = t.director.plan.scene?.pools
+  const facts = scenePools
+    ? Object.entries(scenePools).flatMap(([who, pool]) => pool.map((f) => ({ who, id: f.source === 'plan' ? undefined : f.id, text: f.text, unheard: f.unheard })))
+    : (t.director.plan.moves ?? []).flatMap((m) => m.says.map((s) => ({ who: m.who, ...s })))
   return (
     <>
       <section>
         <h3>On screen <small>(the bookkeeper's reading)</small></h3>
         {!records ? (
           missing
-        ) : records.out.length + records.guesses.length + (records.around ?? []).length + records.leaks.length + records.unresolved.length === 0 ? (
+        ) : records.out.length + records.guesses.length + (records.around ?? []).length + (records.partial ?? []).length + records.leaks.length + records.unresolved.length === 0 ? (
           <p className="muted">No secret came up.</p>
         ) : (
           <ul>
@@ -259,6 +332,11 @@ function SecretsTab({ details, records, missing, nameOf }: { details: Details; r
             {records.leaks.map((l, i) => (
               <li key={`l${i}`} className="warn">
                 Leak, a claim that teaches no one: <code>{l.secret}</code> by {who(l.by)}, {at(l)}: “{l.words}”{l.why && <span className="muted"> ({l.why})</span>}
+              </li>
+            ))}
+            {(records.partial ?? []).map((p, i) => (
+              <li key={`p${i}`}>
+                Partly out, teaching no one: <code>{p.secret}</code> by {who(p.by)}, {at(p)}: “{p.words}”
               </li>
             ))}
             {records.guesses.map((g, i) => (
@@ -279,6 +357,7 @@ function SecretsTab({ details, records, missing, nameOf }: { details: Details; r
             ))}
           </ul>
         )}
+        {records && (records.said ?? []).length > 0 && <p>Facts the player heard: {records.said.map((f) => `${f.text} (${who(f.by)})`).join('; ')}</p>}
         {records && records.new.length > 0 && <p>New details said: {records.new.map((n) => `${n.text} (${who(n.by)})`).join('; ')}</p>}
       </section>
       <section>
@@ -400,8 +479,10 @@ function ChecksTab({ checks, records, nameOf }: { checks: CheckTrace[]; records?
             <b>{c.line}</b>
             <div className="muted mono">{checkSum(c, nameOf)}</div>
             <div className="muted">Stakes: {c.stakes}</div>
-            <div className={honored && !honored.honored ? 'warn' : 'muted'}>
-              {honored ? (honored.honored ? 'The prose kept the result.' : `The prose didn't keep the result${honored.note ? `: ${honored.note}` : '.'}`) : 'Whether the prose kept it: not recorded.'}
+            <div className={honored?.honored === false ? 'warn' : 'muted'}>
+              {!honored || honored.honored === undefined
+                ? honored ? 'The prose doesn\'t show whether it worked.' : 'Whether the prose kept it: not recorded.'
+                : honored.honored ? `The prose kept the result${honored.words ? `: “${honored.words}”` : '.'}` : `The prose didn't keep the result${honored.note ? `: ${honored.note}` : ''}${honored.words ? ` (“${honored.words}”)` : '.'}`}
             </div>
           </li>
         )
@@ -516,7 +597,7 @@ function RecordsTab({ record, plan, nameOf }: { record: Pick<BookkeepingRecord, 
       <section>
         <h3>What changed</h3>
         <p>{r.changed || <span className="muted">Nothing, it says.</span>}</p>
-        <p className="muted">The director meant: {plan.change || 'none given'}</p>
+        <p className="muted">{plan.scene ? `The stakes: ${plan.scene.stakes || 'none given'}` : `The director meant: ${plan.change || 'none given'}`}</p>
       </section>
       <section>
         <h3>Moods read <small>(logged against the director's feels, never applied)</small></h3>

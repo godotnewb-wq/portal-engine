@@ -13,6 +13,7 @@ import { knowersOf } from '@engine/memory'
 import { presentCast, type BeatPlan, type PlannedCheck } from './planShape'
 import { RECENT_USE_TURNS, recentlyUsed } from './repeats'
 import type { LivePressure } from './scenePlan'
+import { FUNCTION_WORDS, OWNED_PHRASE_WORDS, plainWords, runs } from './phrases'
 import { SCENE_LENGTH } from './style'
 import { claimLines, knowledgeLines, speakerTies, voiceCard } from './writer'
 
@@ -127,7 +128,10 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
     .join('\n\n')
 
   const facts = sceneFacts(content, state)
-  const told = facts.filter((f) => f.kind === 'said' || scene.told.includes(f.id))
+  // What the player has heard: sheet facts by id, and lore or memories said on screen, which no sheet holds (task 4).
+  const sheets = new Set(facts.map((f) => f.id))
+  const heard = scene.turns.flatMap((t) => (t.records?.said ?? []).filter((f) => !sheets.has(f.fact) && scene.told.includes(f.fact)))
+  const told = [...facts.filter((f) => f.kind === 'said' || scene.told.includes(f.id)), ...heard.filter((f, i) => heard.findIndex((x) => x.fact === f.fact) === i).map((f) => ({ text: f.text }))]
   const felt = feelingsNow(state, view)
   const feltLine = (id: string) => {
     const f = felt[id]
@@ -181,23 +185,6 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
     .join('\n\n')
 
   return { system, user }
-}
-
-/** Words in a row that make a phrase another speaker could only have from the fact itself (*tune*). */
-export const OWNED_PHRASE_WORDS = 5
-
-const plainWords = (t: string) => t.toLowerCase().replace(/[^\p{L}\p{N}' ]+/gu, ' ').split(/\s+/).filter(Boolean)
-
-/**
- * Words that carry no fact: a run made mostly of these ("in the right order and") is how anyone talks, not something
- * learned. A run counts only with `OWNED_CONTENT_WORDS` words outside this list.
- */
-const FUNCTION_WORDS = new Set('a an the and or but if then than so of in on at to for from by with without into onto off out up down over under about after before this that these those it its is are was were be been has have had do does did not no every each all some any one two his her their our your my he she they we you i me him them us who what when where which there here as just only very around near'.split(' '))
-export const OWNED_CONTENT_WORDS = 3
-
-const runs = (t: string, n: number) => {
-  const w = plainWords(t)
-  return w.length < n ? [] : w.slice(0, w.length - n + 1).map((_, i) => w.slice(i, i + n)).filter((r) => r.filter((x) => !FUNCTION_WORDS.has(x)).length >= OWNED_CONTENT_WORDS).map((r) => r.join(' '))
 }
 
 /**
