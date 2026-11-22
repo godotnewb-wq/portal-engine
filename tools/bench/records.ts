@@ -89,7 +89,7 @@ export function recordLines(name: Name, t: TurnTrace, b: BookkeepingRun | undefi
     ...(r.partial ?? []).map((p) => `Partly out: \`${p.secret}\` by ${who(p.by)}, ${at(p)}: “${p.words}”`),
     ...(r.around ?? []).map((a) => `Talked around: \`${a.secret}\` by ${who(a.by)}, ${at(a)}: “${a.words}”`),
     ...r.unresolved.map((u) => `Unresolved: \`${u.secret}\` by ${who(u.by)}, ${at(u)}: “${u.words}”${u.why ? ` (${u.why})` : ''}`),
-    ...(r.said ?? []).map((f) => `Heard: \`${f.fact}\` by ${who(f.by)}${f.words ? `: “${f.words}”` : ''}`),
+    ...(r.said ?? []).map((f) => `Heard: \`${f.fact}\` by ${who(f.by)}${f.unowned ? ' (not theirs to know)' : ''}${f.words ? `: “${f.words}”` : ''}`),
     ...r.new.map((n) => `New detail (${who(n.by)}): ${n.text}`),
     `Changed: ${r.changed || '(nothing)'} · director's ${t.director.plan.scene ? 'stakes' : 'change'}: ${intended(t) || '(none)'}`,
     ...moodMismatches(t, r).map((m) => `Mood: ${name(m.id)} felt ${feeling(m.felt)}, read as ${feeling(m.read)}`),

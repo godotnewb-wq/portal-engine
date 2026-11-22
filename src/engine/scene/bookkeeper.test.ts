@@ -207,11 +207,11 @@ describe('the other records', () => {
     const r = check(yardScene(), beats, [], { plan: plan({ checks: [rolled] }) }, {
       changed: 'Mara suspects Tobin.',
       moods: [{ id: 'mara', shade: 'sore', family: 'mad', intensity: 3 }, { id: 'mara', shade: 'sore', intensity: 3 }, { id: 'ghost', shade: 'glum', intensity: 1 }],
-      checks: [{ id: 'c1', shown: 'comes off', at: 1, words: 'at the east gate' }, { id: 'c9', shown: 'comes off' }, { id: 'c1', shown: 'maybe' }]
+      checks: [{ id: 'c1', shown: 'happens', at: 1, words: 'at the east gate' }, { id: 'c9', shown: 'happens' }, { id: 'c1', shown: 'maybe' }]
     })
     expect(r.changed).toBe('Mara suspects Tobin.')
     expect(r.moods).toEqual([{ id: 'mara', feeling: { shade: 'sore', family: 'mad', intensity: 3 } }])
-    expect(r.checks).toEqual([{ id: 'c1', honored: false, shown: 'comes off', at: 1, words: 'at the east gate', note: 'rolled failure; the prose shows it working' }])
+    expect(r.checks).toEqual([{ id: 'c1', honored: false, shown: 'happens', at: 1, words: 'at the east gate', note: 'rolled failure; in the prose it happens' }])
     expect(r.refused).toHaveLength(4)
   })
 })
@@ -274,10 +274,10 @@ describe('facts the scene writer was offered (Milestone 5 task 4, Q12)', () => {
     const records = check(yardScene(), beats, [], offeredTo('mara'), { facts })
     expect(records.said).toEqual([{ fact: TALLY.id, text: TALLY.text, by: 'mara', words: 'Every tally at the gate' }])
     expect(records.refused).toEqual(['fact lore.nothing: not on the list', 'fact lore.guild.tallies: "rounded up" isn\'t in line 3'])
-    // Someone it wasn't offered to, who doesn't know it, can't make it heard.
+    // Said aloud by someone it wasn't offered to, who doesn't know it: still heard, marked as not theirs to know.
     const tobin = check(yardScene(), [say('tobin', 'Every tally at the gate gets rounded up.')], [], offeredTo('mara'), { facts: [{ id: TALLY.id, at: 1, words: 'Every tally' }] })
-    expect(tobin.said).toEqual([])
-    expect(tobin.refused).toEqual(['fact lore.guild.tallies: tobin couldn\'t say it'])
+    expect(tobin.said).toEqual([{ fact: TALLY.id, text: TALLY.text, by: 'tobin', words: 'Every tally', unowned: true }])
+    expect(tobin.refused).toEqual([])
   })
 
   it('when the call fails, takes a fact a line by someone it was offered to repeats in its own words', () => {
@@ -295,18 +295,19 @@ describe('checks: what the prose shows, against the roll (task 4)', () => {
   it('asks what the attempt shows, without its result', () => {
     const p = buildBookkeeperPrompt(fixture, yardScene(), turn(beats, { plan: plan({ checks: [rolledAs('failure')] }) }))
     expect(p.user).toContain('- [c1] Mara tries insight on Tobin. If it works: Mara sees he is lying')
+    expect(p.system).toContain('Judge that person\'s attempt only: someone else\'s dodge landing is the attempt failing.')
     expect(p.user).not.toContain('failure')
   })
 
-  it('a failure the prose shows falling short is kept; shown working, it isn’t', () => {
-    expect(checked('failure', { shown: 'falls short', at: 2, words: 'learns nothing' }).checks).toEqual([{ id: 'c1', honored: true, shown: 'falls short', at: 2, words: 'learns nothing' }])
-    expect(checked('failure', { shown: 'comes off', at: 2, words: 'Mara watches him' }).checks[0]).toMatchObject({ honored: false, note: 'rolled failure; the prose shows it working' })
+  it('a failure that doesn’t happen in the prose is kept; one that happens isn’t', () => {
+    expect(checked('failure', { shown: "doesn't happen", at: 2, words: 'learns nothing' }).checks).toEqual([{ id: 'c1', honored: true, shown: "doesn't happen", at: 2, words: 'learns nothing' }])
+    expect(checked('failure', { shown: 'happens', at: 2, words: 'Mara watches him' }).checks[0]).toMatchObject({ honored: false, note: 'rolled failure; in the prose it happens' })
     expect(checked('cost', { shown: 'at a cost', at: 2, words: 'Mara watches him' }).checks[0]).toMatchObject({ honored: true })
   })
 
   it('unclear records no verdict; a quote that isn’t in the line records nothing', () => {
     expect(checked('success', { shown: 'unclear' }).checks).toEqual([{ id: 'c1', shown: 'unclear' }])
-    const r = checked('success', { shown: 'comes off', at: 1, words: 'she sees it' })
+    const r = checked('success', { shown: 'happens', at: 1, words: 'she sees it' })
     expect(r.checks).toEqual([])
     expect(r.refused).toEqual(['check c1: "she sees it" isn\'t in line 1'])
   })

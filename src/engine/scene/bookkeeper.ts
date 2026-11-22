@@ -32,8 +32,8 @@ import type { TurnWritten } from './turn'
  *   is marked unaudited for anything else.
  */
 
-/** What the prose shows of a check's attempt, in the bookkeeper's words; the game compares it with the roll. */
-export const CHECK_SHOWN = ['comes off', 'at a cost', 'falls short', 'unclear'] as const
+/** Whether what a check would bring about happens in the prose, in the bookkeeper's words; the game compares it with the roll. */
+export const CHECK_SHOWN = ['happens', 'at a cost', "doesn't happen", 'unclear'] as const
 
 /** How a secret came up, in the bookkeeper's words. */
 export const SECRET_HOW = ['stated', 'partial', 'guess', 'around', 'evidence', 'unclear'] as const
@@ -93,13 +93,13 @@ function offered(written: Turned): Map<string, { text: string; to: string[] }> {
 }
 
 /**
- * A pool fact the prose said: the player has heard it. A director's detail (`detail.*`) has no sheet behind it, so it
+ * A pool fact the prose said: the player has heard it, and `unowned` marks a speaker who couldn't have known it. A director's detail (`detail.*`) has no sheet behind it, so it
  * becomes a new detail anyone present may repeat, as a move's `new` did before (task 4).
  */
-function heard(records: Bookkeeping, newFacts: { text: string }[], id: string, text: string, by: string, words: string): void {
+function heard(records: Bookkeeping, newFacts: { text: string }[], id: string, text: string, by: string, words: string, unowned = false): void {
   if (id.startsWith('detail.')) {
     if (![...newFacts, ...records.new].some((n) => n.text === text)) records.new.push({ text, by })
-  } else if (!records.said.some((x) => x.fact === id)) records.said.push({ fact: id, text, by, words })
+  } else if (!records.said.some((x) => x.fact === id)) records.said.push({ fact: id, text, by, words, ...(unowned && { unowned }) })
 }
 
 /** A character's secret by its fact id (`<holder>.<secret>`). */
@@ -142,7 +142,7 @@ function task(content: Pack, limit: number, facts: boolean): string {
   return `You keep the records for one turn of a visual-novel RPG scene. You read what was written and report what it did on screen. You don't judge whether anything was allowed; the game does that.
 
 Reply with only a JSON object:
-{"secrets": [{"id": "...", "at": 1, "how": "stated", "words": "...", "answers": "player"}], ${facts ? '"facts": [{"id": "...", "at": 1, "words": "..."}], ' : ''}"new": [{"text": "...", "at": 1}], "changed": "...", "moods": [{"id": "...", "shade": "...", "family": "...", "intensity": 1}], "checks": [{"id": "...", "shown": "falls short", "at": 1, "words": "..."}]}
+{"secrets": [{"id": "...", "at": 1, "how": "stated", "words": "...", "answers": "player"}], ${facts ? '"facts": [{"id": "...", "at": 1, "words": "..."}], ' : ''}"new": [{"text": "...", "at": 1}], "changed": "...", "moods": [{"id": "...", "shade": "...", "family": "...", "intensity": 1}], "checks": [{"id": "...", "shown": "doesn't happen", "at": 1, "words": "..."}]}
 
 - secrets: each secret from the list whose hidden part this turn's lines or narration touched, in the order it happened. Each is listed by what is hidden, then in full. Only the hidden part counts: the background around it (a job, a place, a price, who is involved, what people there already know) is not the secret, and talk about it is none of these. id: from the list. at: "player" for the player's words, or the number of the line. words: the words that did it, copied exactly from that line. how is one of:
   - "stated": the whole hidden part said as true and known, outright or by confirming it ("Yes, that's what's in it", answering a question about it). Then answers: what it confirms, "player", an earlier line's number, or "earlier" for the turn before. A denial, or a line that says or implies the opposite, is never "stated", and neither is saying one doesn't know or won't say.
@@ -156,7 +156,7 @@ Reply with only a JSON object:
 - new: concrete details a line states as settled that no secret and no earlier turn holds: a price, a time, a place, a name, a promise. At most ${limit}, each in a few plain words, with the line it is from. A guess, or anything about a secret, is not a detail. Most turns have none: [].
 - changed: one sentence on what is actually different after this turn; "" if nothing is.
 - moods: each character present whose feeling the prose shows: where it seemed to land, as a shade from the list below (family only when the shade is listed under more than one) and intensity 1 to 5. Leave out anyone it doesn't show.
-- checks: for each check below, what the prose shows of the attempt, judged from the lines alone: shown is "comes off" (it works), "at a cost" (it works, at a price the lines show), "falls short" (it doesn't work: the person misses it, fails, or is turned down) or "unclear" (the lines don't show either way). at and words: the line that shows it, copied exactly; for "unclear", none.
+- checks: for each check below, whether what "If it works" describes happens in the lines: shown is "happens", "at a cost" (it happens, at a price the lines show), "doesn't happen" (the person misses it, fails, or is turned down) or "unclear" (the lines don't show either way). Judge that person's attempt only: someone else's dodge landing is the attempt failing. at and words: the line that shows it, copied exactly; for "unclear", none.
 - Shades by family (usual intensity): ${shadeList(r)}.`
 }
 
@@ -323,11 +323,12 @@ export function checkBookkeeping(content: Pack, before: GameState, written: Turn
     else if (at === 'player') refused.push(`${what}: the player's words`)
     else if (!quoted(f.words, lineOf(at))) refused.push(`${what}: "${f.words}" isn't in line ${at}`)
     else {
+      // Said aloud, it was heard, whoever said it: refused, it stayed "new to the player" and came back (m5-task4, 32
+      // refusals). Whether the speaker could know it is the writer's check; the record only marks that they couldn't.
       const by = byOf(at)
       const sheet = facts.get(f.id)
       const could = by === 'narration' || fact.to.includes(by) || (sheet !== undefined && canSay(scene, sheet, by))
-      if (!could) refused.push(`${what}: ${by} couldn't say it`)
-      else heard(records, scene.newFacts, f.id, fact.text, by, f.words)
+      heard(records, scene.newFacts, f.id, fact.text, by, f.words, !could)
     }
   }
 
@@ -374,8 +375,8 @@ export function checkBookkeeping(content: Pack, before: GameState, written: Turn
         refused.push(`check ${id}: "${words}" isn't in ${at === undefined ? 'any line given' : where(at)}`)
         continue
       }
-      const honored = shown === 'falls short' ? !isSuccess(degree) : isSuccess(degree)
-      records.checks.push({ id, honored, shown, at, words, ...(!honored && { note: `rolled ${degree}; the prose shows it ${shown === 'falls short' ? 'falling short' : shown === 'at a cost' ? 'working at a cost' : 'working'}` }) })
+      const honored = shown === "doesn't happen" ? !isSuccess(degree) : isSuccess(degree)
+      records.checks.push({ id, honored, shown, at, words, ...(!honored && { note: `rolled ${degree}; in the prose it ${shown === "doesn't happen" ? "doesn't happen" : shown === 'at a cost' ? 'happens at a cost' : 'happens'}` }) })
     }
   }
   return records

@@ -50,7 +50,7 @@ const BOOKKEEPER: ((beats: { text: string }[]) => object | null)[] = [
     new: [],
     changed: 'Mara has caught Tobin out.',
     moods: [{ id: 'tobin', shade: 'sore', family: 'mad', intensity: 3 }],
-    checks: [{ id: 'read-tobin', shown: 'falls short', at: beats.findIndex((b) => b.text.includes('You were here after closing')) + 1, words: 'You were here after closing' }]
+    checks: [{ id: 'read-tobin', shown: "doesn't happen", at: beats.findIndex((b) => b.text.includes('You were here after closing')) + 1, words: 'You were here after closing' }]
   }),
   // Turn 2: Tobin says the secret he is keeping, which is left for review.
   (beats) => ({
@@ -58,7 +58,7 @@ const BOOKKEEPER: ((beats: { text: string }[]) => object | null)[] = [
     new: [],
     changed: 'Tobin admits it.',
     moods: [],
-    checks: [{ id: 'persuade-tobin', shown: 'comes off', at: beats.findIndex((b) => b.text.includes('Guild seal knocked')) + 1, words: 'Someone with a Guild seal knocked' }]
+    checks: [{ id: 'persuade-tobin', shown: 'happens', at: beats.findIndex((b) => b.text.includes('Guild seal knocked')) + 1, words: 'Someone with a Guild seal knocked' }]
   }),
   // Turn 3: the call fails, so the plan's records stand in.
   () => null
@@ -161,7 +161,7 @@ describe('Turn details on a recorded turn', () => {
     expect(checks).toMatchObject({ count: 1, warn: true })
     const s = text(checks)
     expect(s).toMatch(/d20 \d+.* = -?\d+ vs DC \d+ \(tough\)/)
-    expect(s).toContain("The prose didn't keep the result: rolled success; the prose shows it falling short (“You were here after closing”)")
+    expect(s).toContain("The prose didn't keep the result: rolled success; in the prose it doesn't happen (“You were here after closing”)")
     expect(text(tab(tabsOf(read[1]!), 'checks'))).toContain('The prose kept the result: “Someone with a Guild seal knocked”')
   })
 

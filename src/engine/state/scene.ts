@@ -57,7 +57,7 @@ export const BookkeepingSchema = z.object({
    * them from): they join the scene's `told`, so the player has heard them and they leave the pool. `text` keeps a lore
    * or memory fact's words, which no sheet in the scene holds.
    */
-  said: z.array(z.object({ fact: z.string(), text: z.string(), by: z.string(), words: z.string().default('') })).default([]),
+  said: z.array(z.object({ fact: z.string(), text: z.string(), by: z.string(), words: z.string().default(''), unowned: z.boolean().optional() })).default([]),
   /** Concrete details the prose stated as settled that no fact holds; anyone present may repeat them. */
   new: z.array(z.object({ text: z.string(), by: z.string() })).default([]),
   /**
