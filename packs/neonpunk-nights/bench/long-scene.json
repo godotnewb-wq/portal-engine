@@ -1,0 +1,27 @@
+{
+  "id": "long-scene",
+  "title": "A long, easy scene",
+  "watchFor": "Ten turns of easy talk in one scene, saved and reloaded after turn 5: the scene has to come back whole, with its turns, moods and what the player was told. Over ten turns, no gesture, tell, phrase or detail of the place twice unless it means something (gesture repeats and fact repeats per scene, repeated phrases); voices stay distinct; nobody fades out; the closing goodnight ends the scene.",
+  "location": "sump-lantern",
+  "cast": [
+    "vex",
+    "brask",
+    "dunmar"
+  ],
+  "seed": 73,
+  "reloadAfter": [
+    5
+  ],
+  "turns": [
+    "Quiet night, Dunmar?",
+    "Vex, any work this week?",
+    "Brask, how's the workshop?",
+    "What's good to eat in here tonight?",
+    "Anyone heard anything about the Grid lately?",
+    "Dunmar, who's the worst customer you've ever had in here?",
+    "Vex, what's the strangest job you've ever taken?",
+    "Brask, you ever think about leaving the city?",
+    "You're all quiet. Long day?",
+    "I should head out. Night, all."
+  ]
+}

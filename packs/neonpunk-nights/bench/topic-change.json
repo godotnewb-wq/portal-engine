@@ -1,0 +1,18 @@
+{
+  "id": "topic-change",
+  "title": "A change of topic, and back",
+  "watchFor": "Turns 1 and 2 are about the pumps; turn 3 changes the subject to Dunmar's bar. The brief should let the pump details go (Turn details, People: let go on a change of topic), and the pools and pressures should follow the new topic: Dunmar answers about the bar in his own terms, without the job pulling the scene back. Turn 4 returns to the job: what was said about the pumps may come back, but not word for word.",
+  "location": "sump-lantern",
+  "cast": [
+    "vex",
+    "brask",
+    "dunmar"
+  ],
+  "seed": 71,
+  "turns": [
+    "Brask, what do you know about the pumps down below?",
+    "So the seals are the weak point?",
+    "Forget the pumps for a second. Dunmar, how long have you had this bar?",
+    "Back to the job, then. Vex, are you in?"
+  ]
+}

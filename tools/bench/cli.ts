@@ -6,11 +6,12 @@
 //   npm run bench -- --pack test-fixture           another pack: a pack id in packs/, or a path to a pack folder
 //   npm run bench -- deception-caught tense-negotiation   only these
 //   npm run bench -- --label new-style-guide       name the run (its folder and report title)
+//   npm run bench -- --set core                    the scenarios tagged with that set (Milestone 5: the core set)
 //   npm run bench -- --mock                        no LLM: checks the harness, not the prose
 //   npm run bench -- --no-summaries                skip the end-of-scene summaries
 //   npm run bench -- --repeat 10                   play each scenario 10 times with different seeds
 //   npm run bench -- --score                       run the AI scorer on the run as it finishes
-//   npm run bench -- --pipeline situation          which pipeline makes the turns (default: situation; Milestone 5 adds scene)
+//   npm run bench -- --pipeline situation          which pipeline makes the turns (situation, the default, or scene)
 //   npm run bench -- --scenario turn.json          also a scenario file from elsewhere (e.g. made by `npm run logs -- to-scenario`)
 //   npm run bench -- --compare bench-output/A bench-output/B   side by side, into bench-output/compare-….md; it lists
 //                                                  what differs between the runs' inputs, and computes shared metrics
@@ -35,7 +36,7 @@ import { compareRuns, renderReport } from './report'
 import { fillProblems, fillRun, mockLlm, readRun, runBench, writeRun, type BenchLlm } from './run'
 import { roleSettings, runInputs, sourceRevision, type RunInputs } from './inputs'
 import { scoreSession, type Scorer } from '../logs/score'
-import { loadScenarios, scenarioFile } from './scenario'
+import { loadScenarios, pickScenarios, scenarioFile } from './scenario'
 import { bookkeeperLlm, bookkeeperWaitMs, scorerLlm, summaryLlm, turnLlm } from '@platform/roles'
 import { isPipeline, PIPELINES, promptSources, type Pipeline } from '@engine/scene'
 import { loreBudgets } from '@engine/rules'
@@ -151,14 +152,12 @@ async function main(): Promise<void> {
 
   const dir = packDir(option('--pack') ?? 'neonpunk-nights')
   const content = loadPack(dir)
-  const valued = new Set(['--label', '--config', '--pack', '--repeat', '--scenario', '--pipeline'])
+  const valued = new Set(['--label', '--config', '--pack', '--repeat', '--scenario', '--pipeline', '--set'])
   const wanted = args.filter((arg, i) => !arg.startsWith('--') && !valued.has(args[i - 1] ?? ''))
   const extra = args.flatMap((arg, i) => (args[i - 1] === '--scenario' ? [scenarioFile(resolve(arg))] : []))
   const all = scenariosIn(dir)
   // Scenario files given by path run on their own unless pack scenarios are named too.
-  const scenarios = wanted.length > 0 ? [...all.filter((s) => wanted.includes(s.id)), ...extra.filter((s) => !wanted.includes(s.id))] : extra.length > 0 ? extra : all
-  const missing = wanted.filter((id) => !all.some((s) => s.id === id))
-  if (missing.length > 0) throw new Error(`No such scenario: ${missing.join(', ')}. Known: ${all.map((s) => s.id).join(', ')}`)
+  const scenarios = pickScenarios(all, wanted, option('--set'), extra)
   if (flag('--no-summaries')) for (const s of scenarios) s.summaries = false
 
   const repeat = Number(option('--repeat') ?? 1)

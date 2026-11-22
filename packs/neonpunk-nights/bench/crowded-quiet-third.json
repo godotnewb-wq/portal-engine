@@ -1,0 +1,25 @@
+{
+  "id": "crowded-quiet-third",
+  "title": "A crowded table and a quiet third",
+  "watchFor": "Four people at the bar, and the player never names Brask. Oria and Vex carry the haggling over the job, but Brask, quiet and uneasy, should still get in over the four turns: a short line, a look that means something, or a moment of focus, not furniture. Dunmar the same from behind the bar. Not everyone every turn: focus rotates, and speakers per turn and the longest silence show it.",
+  "location": "sump-lantern",
+  "cast": [
+    "vex",
+    "brask",
+    "oria-senn",
+    "dunmar"
+  ],
+  "seed": 67,
+  "comfort": {
+    "brask": 2
+  },
+  "sets": [
+    "core"
+  ],
+  "turns": [
+    "Oria, what's the job, and what does it pay?",
+    "Vex, is three hundred worth it to you?",
+    "Fine. Oria, when do we leave?",
+    "Anything else we should know before we go down there?"
+  ]
+}

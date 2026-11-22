@@ -46,6 +46,8 @@ export interface ScenarioRun {
   expectedCheck?: ExpectedCheck
   /** The scenario's expected ties, as the play left them (Milestone 5 plan, task 7); absent when it expects none or stopped. */
   tieResults?: TieResult[]
+  /** Turns after which the scene was saved and reloaded mid-scene (task 7). */
+  reloads?: string[]
   /** 1-based; `--repeat N` plays each scenario N times with different seeds. */
   repeat: number
   seed: number
@@ -210,6 +212,11 @@ export async function runScenario(content: Pack, scenario: Scenario, llm: BenchL
           state = applyRecords(outcome.state, kept.records)
         } else state = outcome.state
         if (state.scene?.ended) break
+        // A save and reload mid-scene (task 7): the scene in progress has to come back whole.
+        if (scene.reloadAfter.includes(turnInScene)) {
+          state = reload(state)
+          ;(run.reloads ??= []).push(`${sceneId}-${turnInScene}`)
+        }
       }
       if (scenario.summaries) {
         // As the app does: the relationship calls and the ties settled from them, the player's answers, then the memory calls.

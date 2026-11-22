@@ -72,7 +72,9 @@ export const LaterSceneSchema = z.object({
   walkOns: z.array(IdSchema).optional(),
   moods: MoodsSchema,
   comfort: z.record(IdSchema, z.number().int().min(1).max(5)).default({}),
-  turns: z.array(z.string().min(1)).min(1)
+  turns: z.array(z.string().min(1)).min(1),
+  /** Turns of this scene (1-based) after which the game is saved and reloaded, as when a player quits mid-scene (task 7). */
+  reloadAfter: z.array(z.number().int().positive()).default([])
 })
 export type LaterScene = z.infer<typeof LaterSceneSchema>
 
@@ -103,6 +105,10 @@ export const ScenarioSchema = z.object({
    */
   history: z.array(TurnSchema).default([]),
   turns: z.array(z.string().min(1)).min(1),
+  /** Turns of the first scene (1-based) after which the game is saved and reloaded mid-scene (Milestone 5 task 7). */
+  reloadAfter: z.array(z.number().int().positive()).default([]),
+  /** Named groups to run together, e.g. `core` (Milestone 5 plan, Q15): `npm run bench -- --set core`. */
+  sets: z.array(IdSchema).default([]),
   /** A roll the scenario is designed to exercise. Turns are 1-based. */
   expectedCheck: ExpectedCheckSchema.optional(),
   /** Ties the play should end with, and ties it shouldn't; checked against the last scene's end. */
@@ -126,6 +132,19 @@ export function loadScenarios(dir: string): Scenario[] {
     .map((name) => scenarioFile(join(dir, name)))
 }
 
+/**
+ * The scenarios a run plays: those named, and those in the named set (task 7, Q15: the core set), in the pack's
+ * order; scenario files given by path run on their own unless pack scenarios are named too. Everything with none.
+ */
+export function pickScenarios(all: Scenario[], named: string[], set?: string, extra: Scenario[] = []): Scenario[] {
+  const missing = named.filter((id) => !all.some((s) => s.id === id))
+  if (missing.length > 0) throw new Error(`No such scenario: ${missing.join(', ')}. Known: ${all.map((s) => s.id).join(', ')}`)
+  const inSet = set ? all.filter((s) => s.sets.includes(set)).map((s) => s.id) : []
+  if (set && inSet.length === 0) throw new Error(`No scenario is in the set "${set}". Sets: ${[...new Set(all.flatMap((s) => s.sets))].join(', ') || 'none'}`)
+  const ids = [...new Set([...inSet, ...named])]
+  return ids.length > 0 ? [...all.filter((s) => ids.includes(s.id)), ...extra.filter((s) => !ids.includes(s.id))] : extra.length > 0 ? extra : all
+}
+
 /** One scenario file, checked. */
 export function scenarioFile(path: string): Scenario {
   const parsed = ScenarioSchema.safeParse(JSON.parse(readFileSync(path, 'utf8')))
@@ -135,8 +154,8 @@ export function scenarioFile(path: string): Scenario {
 
 /** Every scene a scenario plays, the first included, in order. */
 export function scenesOf(scenario: Scenario): (LaterScene & { n: number })[] {
-  const { location, cast, walkOns, moods, comfort, turns } = scenario
-  return [{ n: 1, days: 0, location, cast, ...(walkOns && { walkOns }), moods, comfort, turns }, ...scenario.later.map((s, i) => ({ ...s, n: i + 2 }))]
+  const { location, cast, walkOns, moods, comfort, turns, reloadAfter } = scenario
+  return [{ n: 1, days: 0, location, cast, ...(walkOns && { walkOns }), moods, comfort, turns, reloadAfter }, ...scenario.later.map((s, i) => ({ ...s, n: i + 2 }))]
 }
 
 /** A scene's id: the scenario's for the first, so single-scene runs read as before ("deception-caught-2"); "<id>-s2" and on after. */

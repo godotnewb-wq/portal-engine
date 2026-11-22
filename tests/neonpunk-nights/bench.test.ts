@@ -10,18 +10,23 @@ import { compareRuns, renderReport, stats } from '../../tools/bench/report'
 import { comparability, fingerprint, roleSettings, scenarioFingerprint } from '../../tools/bench/inputs'
 import { callsOf, fillProblems, fillRun, mockLlm, readRun, runBench, runScenario, writeRun, type BenchLlm } from '../../tools/bench/run'
 import { loreBudgets } from '@engine/rules'
-import { loadScenarios, scenarioProblems, scenarioState, ScenarioSchema } from '../../tools/bench/scenario'
+import { loadScenarios, pickScenarios, scenarioProblems, scenarioState, ScenarioSchema } from '../../tools/bench/scenario'
 
 const scenarios = loadScenarios(join(PACK_DIR, 'bench'))
+/** Scenarios by id, so a new scenario that sorts first doesn't change what a test plays. */
+const byId = (...ids: string[]) => ids.map((id) => scenarios.find((s) => s.id === id)!)
 
 describe('the shipped scenarios', () => {
   it('cover the plan’s cases and all fit the content', () => {
     expect(scenarios.map((s) => s.id)).toEqual([
+      'check-fails-honored',
+      'crowded-quiet-third',
       'deception-caught',
       'deception-uncaught',
       'forgotten-anniversary',
       'grief-sunny',
       'long-run-memories',
+      'long-scene',
       'lore-budget-pressure',
       'lore-departure',
       'lore-invented-gang',
@@ -46,6 +51,7 @@ describe('the shipped scenarios', () => {
       'tie-breakup-player',
       'tie-breakup',
       'tie-wedding',
+      'topic-change',
       'tram-attempt',
       'tram-small-talk',
       'tram-stay-or-go',
@@ -68,9 +74,9 @@ describe('runBench (acceptance 9: the bench runs its scenarios)', () => {
     const bench = await runBench(content, scenarios, mockLlm(), 'test', { all: 'mock' })
     expect(bench.scenarios.map((s) => s.error)).toEqual(scenarios.map(() => undefined))
     for (const run of bench.scenarios.filter((r) => !r.scenes)) {
-      expect(run.turns).toHaveLength(3)
+      expect(run.turns).toHaveLength(byId(run.id)[0]!.turns.length)
       expect(run.sceneEnd!.witnesses.length).toBeGreaterThan(0)
-      expect(stats(run).calls).toBe(6)
+      expect(stats(run).calls).toBe(run.turns.length * 2)
     }
     // Several scenes (milestone 4b, task 6): every scene played and summed up, two turn calls a turn.
     for (const run of bench.scenarios.filter((r) => r.scenes)) {
@@ -89,7 +95,7 @@ describe('runBench (acceptance 9: the bench runs its scenarios)', () => {
 
   it('writes the play-log layout, one session folder per scenario and repeat, and reads back to the same report', async () => {
     const out = mkdtempSync(join(tmpdir(), 'bench-'))
-    const bench = await runBench(content, scenarios.slice(0, 2), mockLlm(), 'test', { all: 'mock' }, { out, repeat: 2 })
+    const bench = await runBench(content, byId('deception-caught', 'deception-uncaught'), mockLlm(), 'test', { all: 'mock' }, { out, repeat: 2 })
     writeRun(out, bench)
     expect(readdirSync(out).sort()).toEqual(['deception-caught-1', 'deception-caught-2', 'deception-uncaught-1', 'deception-uncaught-2', 'run.json'])
     expect(bench.scenarios.map((s) => [s.id, s.repeat, s.seed])).toEqual([['deception-caught', 1, 11], ['deception-caught', 2, 12], ['deception-uncaught', 1, 11], ['deception-uncaught', 2, 12]])
@@ -169,8 +175,8 @@ describe('runScenario', () => {
 
 describe('compareRuns', () => {
   it('puts two runs’ numbers and beats side by side, and notes scenarios only one ran', async () => {
-    const a = await runBench(content, scenarios.slice(0, 2), mockLlm(), 'A', { all: 'mock' })
-    const b = await runBench(content, scenarios.slice(0, 1), mockLlm(), 'B', { all: 'mock' })
+    const a = await runBench(content, byId('deception-caught', 'deception-uncaught'), mockLlm(), 'A', { all: 'mock' })
+    const b = await runBench(content, byId('deception-caught'), mockLlm(), 'B', { all: 'mock' })
     const md = compareRuns(content, a, b)
     expect(md).toMatch(/^# Bench comparison: A vs B/)
     expect(md).toMatch(/\| A \| deception-caught ⚠ Expected check not exercised \|/)
@@ -192,7 +198,7 @@ describe('benchSettings', () => {
 
 // Milestone 3.6, task 7 (code review P2): a run records what it was given, and a comparison matches inputs.
 describe('run inputs and comparability', () => {
-  const two = scenarios.slice(0, 2)
+  const two = byId('deception-caught', 'deception-uncaught')
   const run = (label: string, over: Parameters<typeof runBench>[5] = {}, list = two) => runBench(content, list, mockLlm(), label, { all: 'mock' }, over)
 
   it('records the pack and scenario fingerprints, the names as the pack had them, and the source when given', async () => {
@@ -288,7 +294,7 @@ describe('the bookkeeper in the report (milestone 4c task 4)', () => {
 // Milestone 5 plan, task 0b: runs say which pipeline made them, comparisons leave out plays that stopped, and
 // --fill re-plays a run's stopped plays into it on the inputs it recorded.
 describe('pipelines, stopped plays and --fill', () => {
-  const two = scenarios.slice(0, 2)
+  const two = byId('deception-caught', 'deception-uncaught')
   /** A director that fails once, on the second call of the run: the first scenario stops at turn 2, the rest play on. */
   const failingOnce = (message = 'connection timed out'): BenchLlm => {
     let n = 0
@@ -415,9 +421,12 @@ describe('expected ties', () => {
 
   it('leave the scenario’s fingerprint as it was: they check the result, they aren’t played', () => {
     const hire = byId('one-job-hire')
-    const { expectedTies: _checked, ...played } = hire
-    // A scenario from before the field fingerprints the same, so runs on either side of it still compare.
+    const { expectedTies: _checked, sets: _sets, reloadAfter: _reload, ...played } = hire
+    // A scenario from before the field fingerprints the same, so runs on either side of it still compare; the same
+    // for `sets` and an empty `reloadAfter` (task 7).
     expect(scenarioFingerprint(hire)).toBe(fingerprint(played))
+    expect(scenarioFingerprint({ ...hire, sets: [] })).toBe(scenarioFingerprint(hire))
+    expect(scenarioFingerprint({ ...hire, reloadAfter: [2] })).not.toBe(scenarioFingerprint(hire))
     expect(scenarioFingerprint({ ...hire, expectedTies: [] })).toBe(scenarioFingerprint(hire))
     expect(scenarioFingerprint({ ...hire, turns: ['Something else.'] })).not.toBe(scenarioFingerprint(hire))
   })
@@ -425,5 +434,41 @@ describe('expected ties', () => {
   it('name only known people and tags, and expect something', () => {
     const bad = ScenarioSchema.parse({ ...byId('one-job-hire'), expectedTies: [{ from: 'ghost', to: 'player', lacks: ['patron'] }, { from: 'vex', to: 'oria-senn' }] })
     expect(scenarioProblems(content, bad)).toEqual(['an expected tie names unknown character "ghost"', 'an expected tie uses unknown tag "patron"', 'an expected tie from vex to oria-senn expects nothing'])
+  })
+})
+
+describe('the scenarios of Milestone 5 task 7', () => {
+  it('the core set: ten scenarios, chosen with --set core and any named beside it', () => {
+    expect(pickScenarios(scenarios, [], 'core').map((s) => s.id)).toEqual([
+      'check-fails-honored',
+      'crowded-quiet-third',
+      'deception-caught',
+      'deception-uncaught',
+      'mask-strangers-then-trusted',
+      'one-job-hire',
+      'tense-negotiation',
+      'tie-breakup',
+      'tie-wedding',
+      'tram-small-talk'
+    ])
+    expect(pickScenarios(scenarios, ['long-scene'], 'core')).toHaveLength(11)
+    expect(() => pickScenarios(scenarios, [], 'nightly')).toThrow('No scenario is in the set "nightly". Sets: core')
+    expect(pickScenarios(scenarios, [])).toHaveLength(scenarios.length)
+  })
+
+  it('saves and reloads a scene in progress where a scenario asks, and plays on from it', async () => {
+    const [long] = byId('long-scene')
+    const bench = await runBench(content, [long!], mockLlm(), 'reload', { all: 'mock' })
+    const run = bench.scenarios[0]!
+    expect(run.error).toBeUndefined()
+    expect(run.reloads).toEqual(['long-scene-5'])
+    expect(run.turns.map((t) => t.turn)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
+    // The turn after the reload saw the scene as it stood: five turns of history.
+    expect(run.turns[5]!.calls[0]!.prompt.user).toContain('Anyone heard anything about the Grid lately?')
+  })
+
+  it('a failed check, forced, for the player to fail', () => {
+    const [failed] = byId('check-fails-honored')
+    expect(failed).toMatchObject({ forceNatural: 2, expectedCheck: { turn: 2, who: 'player', skill: 'persuasion' } })
   })
 })

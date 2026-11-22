@@ -5,6 +5,7 @@
   "location": "sump-lantern",
   "cast": ["oria-senn", "vex", "dunmar"],
   "seed": 23,
+  "sets": ["core"],
   "turns": [
     "Triple the fee, or find someone else to swim into a flooded pump station.",
     "Then tell me who wants the case so badly. That's worth something to me.",

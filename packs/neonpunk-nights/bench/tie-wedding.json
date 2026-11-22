@@ -5,6 +5,7 @@
   "location": "coil-line-car-14",
   "cast": ["kesh", "teo-varrin", "tam-dace"],
   "seed": 73,
+  "sets": ["core"],
   "start": {
     "ties": [
       {

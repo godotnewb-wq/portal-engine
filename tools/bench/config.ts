@@ -42,7 +42,7 @@ export function modelsOf(settings: Settings): Record<string, string> {
 }
 
 /** The bench's own options, as npm would name them. */
-const BENCH_OPTIONS = ['mock', 'no-summaries', 'score', 'compare', 'config', 'fill', 'label', 'pack', 'pipeline', 'repeat']
+const BENCH_OPTIONS = ['mock', 'no-summaries', 'score', 'compare', 'config', 'fill', 'label', 'pack', 'pipeline', 'repeat', 'set']
 
 /**
  * The bench options npm kept for itself: `npm run bench --score` without the `--` before the options hands them to npm,

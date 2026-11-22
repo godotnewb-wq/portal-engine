@@ -5,6 +5,7 @@
   "location": "sump-lantern",
   "cast": ["brask", "dunmar", "vex"],
   "seed": 79,
+  "sets": ["core"],
   "start": {
     "ties": [
       {

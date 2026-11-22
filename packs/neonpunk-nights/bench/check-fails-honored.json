@@ -1,0 +1,26 @@
+{
+  "id": "check-fails-honored",
+  "title": "A failed check, played as a failure",
+  "watchFor": "The player tries to talk Kesh into opening the doors of the stalled car. The Persuasion check is forced to fail: Kesh doesn't open the doors and isn't talked round, and the prose shows the attempt falling short, not a half-success or a softened yes. \"Open the doors\" touches her secret: she won't volunteer why, and she won't lie about it either. On turn 3, asked why, she may say part of it or refuse plainly. Jun and Teo react in their own voices.",
+  "location": "coil-line-car-14",
+  "cast": [
+    "kesh",
+    "jun-halloway",
+    "teo-varrin"
+  ],
+  "seed": 61,
+  "forceNatural": 2,
+  "expectedCheck": {
+    "turn": 2,
+    "who": "player",
+    "skill": "persuasion"
+  },
+  "sets": [
+    "core"
+  ],
+  "turns": [
+    "How long are we going to be stuck here?",
+    "Kesh, open the doors. We can walk the rail to the next platform. It's not far, and nobody's coming for us.",
+    "Fine. Then at least tell me why you won't."
+  ]
+}

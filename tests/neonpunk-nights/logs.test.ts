@@ -17,6 +17,8 @@ import { renderTurn } from '../../tools/logs/show'
 import { renderTranscript } from '../../tools/logs/transcript'
 
 const scenarios = loadScenarios(join(PACK_DIR, 'bench'))
+/** Scenarios by id, so a new scenario that sorts first doesn't change what a test plays. */
+const byId = (...ids: string[]) => ids.map((id) => scenarios.find((s) => s.id === id)!)
 let out: string
 let bench: BenchRun
 let caught: SessionLog
@@ -29,7 +31,7 @@ const scorer: Scorer = async (prompt) => ({
 
 beforeAll(async () => {
   out = mkdtempSync(join(tmpdir(), 'logs-'))
-  bench = await runBench(content, scenarios.slice(0, 1), mockLlm(), 'logs', { all: 'mock' }, { out })
+  bench = await runBench(content, byId('deception-caught'), mockLlm(), 'logs', { all: 'mock' }, { out })
   writeRun(out, bench)
   const dir = join(out, 'deception-caught-1')
   const log = LogSession.resume(dir)
@@ -56,7 +58,7 @@ describe('AI scoring of logs (milestone 2, A5)', () => {
   it('logs an unreadable reply as an error and scores nothing', async () => {
     const dir = join(out, 'deception-caught-1')
     const fresh = mkdtempSync(join(tmpdir(), 'logs-'))
-    const run = await runBench(content, scenarios.slice(1, 2), mockLlm(), 'x', {}, { out: fresh })
+    const run = await runBench(content, byId('deception-uncaught'), mockLlm(), 'x', {}, { out: fresh })
     const r = await scoreSession(content, join(fresh, run.scenarios[0]!.session), async () => 'I would rather not.')
     expect(r).toEqual({ scored: 0, skipped: 0, failed: 3 })
     expect(readSession(join(fresh, run.scenarios[0]!.session)).errors[0]).toMatchObject({ where: 'scorer', message: 'The scorer reply could not be read.' })
@@ -206,7 +208,7 @@ describe('bench metrics (milestone 2, B4)', () => {
   it('are in the report, and --compare shows each one’s change', async () => {
     const back = readRun(out)
     expect(back.scenarios[0]!.flags).toHaveLength(3)
-    const other = await runBench(content, scenarios.slice(0, 1), mockLlm(), 'B', { all: 'mock' })
+    const other = await runBench(content, byId('deception-caught'), mockLlm(), 'B', { all: 'mock' })
     const md = compareRuns(content, back, other)
     expect(md).toMatch(/## Metrics \(matching scenario plays\)\n\n\| Metric \| A \| B \| Change \|/)
     expect(md).toMatch(/\| beats flagged bad \| 17% \| 0% \| -17 pts ✓ \|/)

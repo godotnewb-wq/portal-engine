@@ -11,6 +11,7 @@ npm run bench -- deception-caught three-way-argument   only these
 npm run bench -- --label tighter-style-guide    name the run
 npm run bench -- --no-summaries                 skip end-of-scene summaries (cheaper)
 npm run bench -- --repeat 10                    play each scenario 10 times, seeds counting up from its own
+npm run bench -- --set core                     the scenarios tagged with a set (Milestone 5: the core set of ten), and any named beside it
 npm run bench -- --score                        run the AI scorer on the run when it finishes (see tools/logs)
 npm run bench -- --scenario turn.json           a scenario file from elsewhere, e.g. made by npm run logs -- to-scenario
 npm run bench -- --mock                         no LLM: checks the harness, not the prose
@@ -29,6 +30,8 @@ Runs record the pack's id and version, the prompt version and their inputs. `--c
 The Bookkeeper table and each turn's records read both plan shapes (Milestone 5 task 4): *Changed vs plan* sets the bookkeeper's `changed` against `situation`'s `change` or the scene plan's stakes; *Partly out* counts partial reveals; a scene turn lists the facts the player heard. A scene turn's plan reads as itself (`scenePlanLines`): moments, what pressed live, the pools, the stakes.
 
 Options go after `--` (`npm run bench -- --score`). Without it npm keeps them for itself and the bench would play the defaults, so it stops and says which options npm took.
+
+**Scenario fields from Milestone 5 task 7:** `sets` tags a scenario into named groups (`core`: the ten Q15 names for the pipeline comparison, chosen with `--set core`); `reloadAfter` lists turns of a scene after which the game is saved and reloaded mid-scene (on the first scene or any `later` one), recorded in the play's `reloads`. Neither changes a scenario's fingerprint unless `reloadAfter` is set, so older runs still compare. Tests pick scenarios by id, since a new one can sort first.
 
 **Pipelines and stopped plays** (Milestone 5 plan, task 0b). Each run records its pipeline (`run.json`'s `options.pipeline`, each turn's `director.pipeline`, the report's first line); a run from before the choice counts as `situation`. A different pipeline is listed under what differs, and the plays are still compared, since comparing pipelines is the point. A play that stopped partway (a provider error or timeout) is left out of the shared numbers on both sides, and the comparison lists it. Before comparing, re-play stopped plays with `--fill <run>`: each is played again with its own repeat and seed, up to two tries, into a new session folder (`<id>-<repeat>-fill<k>`) that takes its place in the run; the stopped folders stay, listed under `stopped` in `run.json` and in the report. `--fill` uses the mock for a mock run and the config's models otherwise, and refuses if the code, the pack's content, a stopped play's scenario, the prompt version, a role's model settings or the lore budgets changed since the run. A run scored with `--score` gets its re-played plays scored. A play still stopped after two tries stays out of comparisons on both sides.
 

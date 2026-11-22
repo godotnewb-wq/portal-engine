@@ -31,10 +31,13 @@ export const fingerprint = (value: unknown): string => promptVersion([JSON.strin
 /**
  * A scenario's fingerprint covers what is played, not what the result is checked against: `expectedTies` is left out
  * (Milestone 5, task 5's bench run: the field's default made every scenario look changed, and nothing compared). A
- * scenario without it fingerprints as it did before the field existed.
+ * scenario without it fingerprints as it did before the field existed; so do `sets` and an empty `reloadAfter` (task 7).
  */
 export const scenarioFingerprint = (scenario: Scenario): string => {
-  const { expectedTies: _checked, ...played } = scenario
+  // `sets` only groups scenarios for choosing them (task 7); an empty `reloadAfter` plays as it did before the field.
+  // Keys keep their order, which the fingerprint depends on.
+  const keep = ([key, value]: [string, unknown]) => key !== 'expectedTies' && key !== 'sets' && !(key === 'reloadAfter' && (value as number[]).length === 0)
+  const played = Object.fromEntries(Object.entries(scenario).filter(keep).map(([key, value]) => [key, key === 'later' ? (value as object[]).map((s) => Object.fromEntries(Object.entries(s).filter(keep))) : value]))
   return fingerprint(played)
 }
 

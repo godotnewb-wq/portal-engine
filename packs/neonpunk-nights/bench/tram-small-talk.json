@@ -9,6 +9,7 @@
     "teo-varrin"
   ],
   "seed": 43,
+  "sets": ["core"],
   "turns": [
     "I look at Jun. \"So what brings you out here?\"",
     "\"What about you?\" I ask Kesh. \"What do you do?\"",

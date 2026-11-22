@@ -5,6 +5,7 @@
   "location": "sump-lantern",
   "cast": ["oria-senn", "dunmar", "corvin-hale"],
   "seed": 67,
+  "sets": ["core"],
   "meters": {
     "oria-senn": { "approval": 20, "trust": 30, "interest": 10 }
   },
