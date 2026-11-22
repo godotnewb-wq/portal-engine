@@ -2,12 +2,16 @@ import { z } from 'zod'
 import type { Prompt } from '@engine/core'
 import { firstName } from '@engine/core'
 import { characterById, locationById, type Pack } from '@engine/pack'
-import { moodOf } from '@engine/scene'
+import { lineText, moodOf, planLines as exchangeOf, scenePlanLines } from '@engine/scene'
 import { FLAG_REASONS, RATINGS, type FlagReason, type Rating } from './flags'
-import { itemsFor, type ScorableTurn } from './rubric'
+import { itemsFor, itemText, type ScorableTurn } from './rubric'
 
-/** Bumped when the scorer's prompt or reading changes, so scores from different scorers aren't mixed up. */
-export const SCORER_VERSION = 1
+/**
+ * Bumped when the scorer's prompt or reading changes, so scores from different scorers aren't mixed up. Version 2
+ * (Milestone 5 task 6): three new items (16–18), the plan items worded for the scene plan, the scene plan shown as
+ * itself and the situation plan with its exchange, and a scene turn's beats marked by paragraph.
+ */
+export const SCORER_VERSION = 2
 
 /** One rubric score, with the reason in a line. */
 export interface ItemScore {
@@ -37,10 +41,10 @@ export interface ScoreRecord {
   callId?: string
 }
 
-const SYSTEM = (items: ReturnType<typeof itemsFor>) => `You review one turn of a visual-novel RPG scene for writing quality. A director planned the turn as JSON; the game rolled the checks; a writer wrote the beats the player read. You did not write any of it. Judge it strictly: a 5 is rare and earned, a 3 is serviceable, a 1 is a clear failure.
+const SYSTEM = (items: ReturnType<typeof itemsFor>, turn: ScorableTurn) => `You review one turn of a visual-novel RPG scene for writing quality. A director planned the turn as JSON; the game rolled the checks; a writer wrote the beats the player read. You did not write any of it. Judge it strictly: a 5 is rare and earned, a 3 is serviceable, a 1 is a clear failure.
 
 Score each item 1–5 with a one-line reason that points at the beat or plan field it is about:
-${items.map((i) => `${i.id}. [${i.part}] ${i.text}`).join('\n')}
+${items.map((i) => `${i.id}. [${i.part}] ${itemText(i, turn)}`).join('\n')}
 
 Then mark only the beats that clearly stand out, good or bad, with reasons from this list: ${FLAG_REASONS.join(', ')}.
 
@@ -78,7 +82,7 @@ export function buildScorerPrompt(content: Pack, turn: ScorableTurn, locationId:
     ]
   })
   const system = [
-    SYSTEM(itemsFor(turn)),
+    SYSTEM(itemsFor(turn), turn),
     content.tone && `# The pack's tone\n${content.tone}`,
     location && `# Location: ${location.name}, ${location.district}\nSights: ${location.texture.sights.join('; ')}\nSounds: ${location.texture.sounds.join('; ')}\nSmells: ${location.texture.smells.join('; ')}`,
     `# Characters\n${cards.join('\n\n')}`
@@ -86,20 +90,41 @@ export function buildScorerPrompt(content: Pack, turn: ScorableTurn, locationId:
     .filter(Boolean)
     .join('\n\n')
 
-  const planLines = [
-    ...plan.speakers.map((s) => `- ${nameOf(s.id)} speaks. Intent: ${s.intent}${moodOf(s) ? `; feels: ${moodOf(s)}` : ''}${s.hiding ? `; hiding: ${s.hiding} (${s.approach ?? 'deflect'})` : ''}${s.depends_on_check ? `; depends on check ${s.depends_on_check}` : ''}`),
-    ...plan.reactions.map((r) => `- ${nameOf(r.id)} reacts (no dialogue): ${r.beat}${r.feels ? `; feels: ${moodOf(r)}` : ''}`),
-    ...plan.walk_ons.map((w) => `- Walk-on ${nameOf(w.id)}: ${w.line}`),
-    plan.texture.length > 0 && `- Texture: ${plan.texture.join('; ')}`,
-    plan.contrast && `- Contrast: ${plan.contrast}`,
-    plan.avoid.length > 0 && `- Avoid: ${plan.avoid.join('; ')}`
-  ].filter(Boolean)
+  // The plan as its own shape: a scene plan's moments, pressures and stakes; the situation plan's exchange, which it
+  // didn't list before version 2, as well as its speakers and reactions.
+  const scene = plan.scene
+  const exchange = exchangeOf(plan)
+  const secretText = (ref: string) => turn.cast.before.flatMap(({ id }) => characterById(content, id)?.secrets.filter((x) => `${id}.${x.id}` === ref || x.id === ref).map((x) => x.text) ?? [])[0]
+  const planLines = scene
+    ? [
+        ...scenePlanLines(scene, nameOf).filter((l) => !l.startsWith('Underneath') && !l.includes(' may draw on: ')).map((l) => `- ${l}`),
+        ...scene.pressures.map((x) => `- Underneath, ${nameOf(x.who)}: ${x.kind === 'secret' ? `keeping ${secretText(x.ref) ?? x.text} (${x.approach ?? 'deflect'})` : x.kind === 'tie' ? `the tie with ${x.ref === 'player' ? 'the player' : nameOf(x.ref)}: ${x.text}` : `the aim${x.strength ? ` (${x.strength})` : ''}: ${x.text}`}`),
+        ...Object.entries(scene.pools).map(([who, pool]) => `- ${nameOf(who)} may draw on: ${pool.map((f) => f.text).join('; ')}`),
+        ...plan.walk_ons.map((w) => `- Walk-on ${nameOf(w.id)}: ${w.line}`)
+      ]
+    : [
+        ...exchange.map((_, i) => `- Line ${lineText(exchange, i, nameOf)}`),
+        ...plan.speakers.map((s) => `- ${nameOf(s.id)} speaks. Intent: ${s.intent}${moodOf(s) ? `; feels: ${moodOf(s)}` : ''}${s.hiding ? `; hiding: ${s.hiding} (${s.approach ?? 'deflect'})` : ''}${s.depends_on_check ? `; depends on check ${s.depends_on_check}` : ''}`),
+        ...plan.reactions.map((r) => `- ${nameOf(r.id)} reacts (no dialogue): ${r.beat}${r.feels ? `; feels: ${moodOf(r)}` : ''}`),
+        ...plan.walk_ons.map((w) => `- Walk-on ${nameOf(w.id)}: ${w.line}`),
+        plan.texture.length > 0 && `- Texture: ${plan.texture.join('; ')}`,
+        plan.contrast && `- Contrast: ${plan.contrast}`,
+        plan.avoid.length > 0 && `- Avoid: ${plan.avoid.join('; ')}`
+      ].filter(Boolean)
+  // A scene turn is written in paragraphs the game cuts into beats; ¶ marks where the writer's paragraphs begin, so
+  // pacing is judged on what was written (m5-scene-3: the scorer counted the cut beats, "sixteen beats for one exchange").
+  const paragraph = new Map<number, number>()
+  turn.beats.forEach((b, i) => {
+    const prev = turn.beats[i - 1]
+    paragraph.set(b.index, !prev || prev.source !== b.source || prev.line !== b.line ? (paragraph.get(prev?.index ?? -1) ?? 0) + 1 : paragraph.get(prev.index)!)
+  })
+  const mark = (b: ScorableTurn['beats'][number], i: number) => (scene && (i === 0 || paragraph.get(b.index) !== paragraph.get(turn.beats[i - 1]!.index)) ? `¶${paragraph.get(b.index)} ` : '')
   const user = [
     earlier.length > 0 && `# Earlier turns\n${earlier.join('\n\n')}`,
     `# The player says or does\n${turn.input}`,
     `# The director's plan\n${planLines.join('\n')}`,
     turn.checks.length > 0 && `# Check results\n${turn.checks.map((c) => `- [${c.id}] ${c.line}. Stakes: ${c.stakes}`).join('\n')}`,
-    `# The beats as shown\n${turn.beats.map((b) => `${b.index}. ${b.beat.kind === 'narration' ? `NARRATION: ${b.beat.text}` : `${nameOf(b.beat.speaker)}: ${b.beat.text}`}`).join('\n')}`,
+    `# The beats as shown\n${turn.beats.map((b, i) => `${mark(b, i)}${b.index}. ${b.beat.kind === 'narration' ? `NARRATION: ${b.beat.text}` : `${nameOf(b.beat.speaker)}: ${b.beat.text}`}`).join('\n')}`,
     'Return the JSON review.'
   ]
     .filter(Boolean)

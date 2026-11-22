@@ -1,7 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { fixture, yardScene } from '@tests/fixture'
 import { runTurn, type TurnLlm } from '@engine/scene'
-import { buildScorerPrompt, currentFlags, FLAG_REASONS, itemsFor, parseScore, RUBRIC, type FlagRecord } from '.'
+import { buildScorerPrompt, currentFlags, FLAG_REASONS, itemsFor, parseScore, RUBRIC, SCORER_VERSION, type FlagRecord } from '.'
 
 const PLAN = JSON.stringify({
   speakers: [{ id: 'tobin', goal: 'Dodge.', mood: 'uneasy', keeps: ['tobin.after-closing'], touched: 'who came by', approach: 'deflect' }],
@@ -59,5 +59,44 @@ describe('the AI scorer', () => {
       beats: [{ beat: 2, rating: 'bad', reasons: ['voice'], note: 'flat' }]
     })
     expect(parseScore('no json here', trace)).toBeNull()
+  })
+})
+
+describe('the AI scorer, version 2 (Milestone 5 task 6)', () => {
+  const SCENE = JSON.stringify({
+    player_action: { doing: 'asks Mara straight out', uncertain: false },
+    focus: ['mara'],
+    moments: [{ who: 'mara', lands: 'the question she dreads', wants: 'to close it down', pressure: 'keen' }],
+    pressures: [{ who: 'mara', kind: 'secret', secret: 'mara.two-books', touched: 'second ledger', approach: 'lie' }],
+    stakes: 'whether Kit believes there is one book'
+  })
+  const write = async () => 'NARRATION: The lamp ticks.\nMara: "One book, Kit." She closes it with both hands.\nTobin: "Long night."'
+
+  it('is version 2, with the three new items on every turn', () => {
+    expect(SCORER_VERSION).toBe(2)
+    expect(RUBRIC.slice(-3).map((i) => `${i.id}. ${i.name}`)).toEqual(['16. in the moment', '17. responds to meaning', '18. undercurrent'])
+  })
+
+  it('on a scene turn: the plan items in its own words, the plan as itself, and the paragraphs marked', async () => {
+    const { trace } = await runTurn(fixture, yardScene(13), 'Is there a second ledger, Mara?', { direct: async () => SCENE, write }, () => {}, { pipeline: 'scene' })
+    const { system, user } = buildScorerPrompt(fixture, trace, 'the-yard')
+    expect(system).toMatch(/^1\. \[director\] Focus follows the priority rules/m)
+    expect(system).toMatch(/^6\. \[director\] Each moment says plainly/m)
+    expect(system).toMatch(/^8\. \[writer\] The people in focus carry the scene/m)
+    expect(system).toMatch(/^14\. \[writer\] Length within the guide \(about 4 to 6 paragraphs, marked ¶\)/m)
+    expect(system).toMatch(/^18\. \[writer\] Goals and secrets shape/m)
+    expect(user).toContain('- Mara: the question she dreads; wants to close it down')
+    expect(user).toMatch(/- Underneath, Mara: keeping .+ \(lie\)/)
+    expect(user).toContain('- Stakes: whether Kit believes there is one book')
+    expect(user).not.toContain('Texture:')
+    expect(user).toMatch(/¶1 1\. NARRATION: The lamp ticks\.\n¶2 2\. Mara: One book, Kit\.\n3\. NARRATION: Mara closes it with both hands\.\n¶3 4\. Tobin: Long night\./)
+  })
+
+  it('on a situation turn: the old wording, and the exchange, which it didn’t see before', async () => {
+    const { trace } = await runTurn(fixture, yardScene(), 'Tobin, who came by?', llm, () => {}, { forceNatural: 15 })
+    const { system, user } = buildScorerPrompt(fixture, trace, 'the-yard')
+    expect(system).toMatch(/^6\. \[director\] Texture, contrast and avoid fields/m)
+    expect(user).toMatch(/- Line 1\. Tobin → the player: /)
+    expect(user).not.toContain('¶')
   })
 })

@@ -1,5 +1,5 @@
 import type { CallTrace } from '@engine/core'
-import { gestureKey, planLines, type TurnTrace } from '@engine/scene'
+import { FUNCTION_WORDS, gestureKey, plainWords, planLines, statesFact, type TurnTrace } from '@engine/scene'
 import { currentFlags, RUBRIC, type FlagRecord, type ScoreRecord } from '@engine/review'
 import type { ErrorRecord } from '@platform/logs'
 
@@ -40,7 +40,6 @@ export function repeatedPhrases(turns: Omit<TurnTrace, 'calls'>[], n = 4): Map<s
   return repeated
 }
 
-/** The longest run of turns each character spent present without a speaking slot, per scene, worst case. */
 /** How the lines of each turn follow one another (round 0, session 2026-11-06_2313_c313). */
 const trigrams = (text: string) => {
   const w = text.toLowerCase().match(/[\p{L}\p{N}']+/gu) ?? []
@@ -50,15 +49,24 @@ const trigrams = (text: string) => {
 /**
  * How much of each line's wording comes straight from its planned point (session 2026-11-07_0013_714e: half).
  * A line is matched to its exchange line through the trace (`line:<n>`), or, in older logs, to its speaker's points.
+ * On a `scene` turn (Milestone 5 task 6), a line is matched to its speaker's moment, the pressure on them and the
+ * facts they were offered: everything the plan gave the writer about them in words.
  */
 export function copiedFromPlan(turns: Omit<TurnTrace, 'calls'>[]): number {
   const shares = turns.flatMap((t) => {
+    const scene = t.director.plan.scene
     const lines = planLines(t.director.plan)
+    const plannedFor = (speaker: string, b: TurnTrace['beats'][number]): string => {
+      if (scene) {
+        const m = scene.moments.find((x) => x.who === speaker)
+        return [m?.lands, m?.wants, ...scene.pressures.filter((x) => x.who === speaker).map((x) => x.text), ...(scene.pools[speaker] ?? []).map((f) => f.text)].filter(Boolean).join(' ')
+      }
+      const n = b.plan.find((p) => p.startsWith('line:'))
+      return n ? lines[Number(n.slice(5)) - 1]?.point ?? '' : lines.filter((l) => l.who === speaker).map((l) => l.point).join(' ')
+    }
     return t.beats.flatMap((b) => {
       if (b.beat.kind !== 'dialogue') return []
-      const speaker = b.beat.speaker
-      const n = b.plan.find((p) => p.startsWith('line:'))
-      const point = n ? lines[Number(n.slice(5)) - 1]?.point ?? '' : lines.filter((l) => l.who === speaker).map((l) => l.point).join(' ')
+      const point = plannedFor(b.beat.speaker, b)
       const said = trigrams(b.beat.text)
       if (!point || said.length === 0) return []
       const planned = new Set(trigrams(point))
@@ -68,6 +76,85 @@ export function copiedFromPlan(turns: Omit<TurnTrace, 'calls'>[]): number {
   return shares.length === 0 ? Number.NaN : avg(shares)
 }
 
+/**
+ * A turn's paragraphs as the writer wrote them: beats cut from the same line of the same reply. A paragraph belongs to
+ * the first character who speaks in it, or to the narration. The `situation` writer writes a beat a line, so there a
+ * paragraph is a beat.
+ */
+export function paragraphs(t: Omit<TurnTrace, 'calls'>): { who: string; text: string }[] {
+  const out: { who: string; text: string; key: string }[] = []
+  for (const b of t.beats) {
+    const key = `${b.source}:${b.line}`
+    const last = out.at(-1)
+    if (last && last.key === key && b.line > 0) {
+      last.text += ` ${b.beat.text}`
+      if (last.who === 'narration' && b.beat.kind === 'dialogue') last.who = b.beat.speaker
+    } else out.push({ key, who: b.beat.kind === 'dialogue' ? b.beat.speaker : 'narration', text: b.beat.text })
+  }
+  return out.map(({ who, text }) => ({ who, text }))
+}
+
+/**
+ * How characters talk to each other (Milestone 5 task 6; redesign §11), from the paragraphs, so both pipelines count
+ * alike: replies between characters (a character's lines right after another character's, not the player's), how
+ * many of those open by picking up what they answer (naming its speaker, or a word of it in the first sentence), and
+ * the longest run of paragraphs in a row by one speaker.
+ */
+export function conversation(turns: Omit<TurnTrace, 'calls'>[], nameOf: (id: string) => string = (id) => id): { repliesPerTurn: number; replyOpenerRate: number; longestRunPerTurn: number } {
+  const content = (text: string) => new Set(plainWords(text).filter((w) => w.length > 3 && !FUNCTION_WORDS.has(w)))
+  let replies = 0
+  let openers = 0
+  const shaped = turns.map((t) => {
+    const spoken = paragraphs(t).filter((p) => p.who !== 'narration')
+    let longest = 0
+    let run = 0
+    let n = 0
+    spoken.forEach((p, i) => {
+      const prev = spoken[i - 1]
+      run = prev && prev.who === p.who ? run + 1 : 1
+      longest = Math.max(longest, run)
+      if (!prev || prev.who === p.who) return
+      n++
+      const first = p.text.split(/(?<=[.!?])\s/)[0] ?? p.text
+      const theirs = content(prev.text)
+      const picksUp = plainWords(first).includes(plainWords(nameOf(prev.who))[0] ?? '\u0000') || [...content(first)].some((w) => theirs.has(w))
+      if (picksUp) openers++
+    })
+    replies += n
+    return { n, longest }
+  })
+  return { repliesPerTurn: avg(shaped.map((s) => s.n)), replyOpenerRate: replies === 0 ? Number.NaN : share(openers, replies), longestRunPerTurn: avg(shaped.map((s) => s.longest)) }
+}
+
+/**
+ * Facts said again within a scene (redesign §11; Milestone 5 task 6): a fact the plan offered in any turn of the scene
+ * (a scene plan's pools, a situation move's `says`) that a line states in a turn after one where a line already stated
+ * it, counted once per turn it comes back in. The same word-run test as the bookkeeper's stand-in (`statesFact`).
+ */
+export function factRepeats(turns: Omit<TurnTrace, 'calls'>[]): number {
+  const byScene = new Map<string, Omit<TurnTrace, 'calls'>[]>()
+  for (const t of turns) byScene.set(t.sceneId, [...(byScene.get(t.sceneId) ?? []), t])
+  let repeats = 0
+  for (const scene of byScene.values()) {
+    const facts = new Map<string, string>()
+    for (const t of scene) {
+      const p = t.director.plan
+      for (const pool of Object.values(p.scene?.pools ?? {})) for (const f of pool) facts.set(f.id, f.text)
+      for (const m of p.moves ?? []) for (const x of m.says) facts.set(x.id ?? x.text, x.text)
+    }
+    const said = new Set<string>()
+    for (const t of scene) {
+      const lines = t.beats.flatMap((b) => (b.beat.kind === 'dialogue' ? [b.beat.text] : []))
+      for (const [id, text] of facts) {
+        if (!lines.some((l) => statesFact(text, l))) continue
+        if (said.has(id)) repeats++
+        said.add(id)
+      }
+    }
+  }
+  return repeats
+}
+
 export function exchangeShape(turns: Omit<TurnTrace, 'calls'>[]): { answeredBackPerTurn: number; sameSpeakerPerTurn: number } {
   const shapes = turns.map((t) => {
     const who = t.beats.flatMap((b) => (b.beat.kind === 'dialogue' ? [b.beat.speaker] : []))
@@ -75,13 +162,16 @@ export function exchangeShape(turns: Omit<TurnTrace, 'calls'>[]): { answeredBack
     // One planned line written as two beats, or line, action, line, is how a character talks, not a speech
     // (session 2026-11-07_0039_e46a). So with an exchange, a speech is the plan giving one speaker two lines in a row;
     // older plans, without one, are read from the beats.
-    const exchange = t.director?.plan?.exchange
-    const same = exchange ? exchange.filter((l, i) => i > 0 && exchange[i - 1]!.who === l.who).length : who.length - runs.length
+    // A scene turn has no exchange; its own paragraphs say who spoke twice in a row (Milestone 5 task 6).
+    const exchange = t.director?.plan?.scene ? undefined : t.director?.plan?.exchange
+    const spoken = paragraphs(t).filter((p) => p.who !== 'narration').map((p) => p.who)
+    const same = exchange ? exchange.filter((l, i) => i > 0 && exchange[i - 1]!.who === l.who).length : t.director?.plan?.scene ? spoken.filter((w, i) => i > 0 && spoken[i - 1] === w).length : who.length - runs.length
     return { back: runs.filter((w, i) => i >= 2 && runs[i - 2] === w).length, same }
   })
   return { answeredBackPerTurn: avg(shapes.map((s) => s.back)), sameSpeakerPerTurn: avg(shapes.map((s) => s.same)) }
 }
 
+/** The longest run of turns each character spent present without speaking, per scene, worst case. */
 function longestSilence(turns: Omit<TurnTrace, 'calls'>[]): Record<string, number> {
   const worst: Record<string, number> = {}
   const run: Record<string, number> = {}
@@ -91,7 +181,8 @@ function longestSilence(turns: Omit<TurnTrace, 'calls'>[]): Record<string, numbe
       scene = t.sceneId
       for (const k of Object.keys(run)) run[k] = 0
     }
-    const speaking = new Set(t.director.plan.speakers.map((s) => s.id))
+    // Who spoke, not who was planned to (Milestone 5 task 6): the same count on both pipelines.
+    const speaking = new Set(t.beats.flatMap((b) => (b.beat.kind === 'dialogue' ? [b.beat.speaker] : [])))
     for (const c of t.cast.before.filter((c) => !c.departed)) {
       run[c.id] = speaking.has(c.id) ? 0 : (run[c.id] ?? 0) + 1
       worst[c.id] = Math.max(worst[c.id] ?? 0, run[c.id]!)
@@ -117,12 +208,23 @@ export interface Metrics {
    * `answeredBackPerTurn`: a speaker answered by someone who then gets answered in turn (A, B, A), the sign of a
    * conversation rather than speeches; `sameSpeakerPerTurn`: a line followed by another from the same speaker.
    */
-  cast: { speakingShare: Record<string, number>; longestSilence: Record<string, number>; dialogueWords: Record<string, number>; answeredBackPerTurn: number; sameSpeakerPerTurn: number }
+  cast: {
+    speakingShare: Record<string, number>
+    longestSilence: Record<string, number>
+    dialogueWords: Record<string, number>
+    answeredBackPerTurn: number
+    sameSpeakerPerTurn: number
+    /** Milestone 5: replies between characters a turn, the share that pick up what they answer, the longest run by one speaker. */
+    repliesPerTurn: number
+    replyOpenerRate: number
+    longestRunPerTurn: number
+  }
   checks: { total: number; skills: Record<string, number>; difficulties: Record<string, number>; successRate: number }
   pacing: { beatsPerTurn: number; wordsPerBeat: number }
   /** Share of a line's three-word runs found in its planned point: the writer copying the director's notes. */
   copiedFromPlan: number
-  repetition: { repeatedPerTurn: number; top: [string, number][] }
+  /** `factRepeatsPerScene` (Milestone 5): facts the plan offered said again in a later turn of the scene. */
+  repetition: { repeatedPerTurn: number; top: [string, number][]; factRepeatsPerScene: number }
   speed: { firstTextMs: number; turnMs: number; tokensPerTurn: number }
   flags: {
     beatsFlagged: number
@@ -152,6 +254,8 @@ export interface Metrics {
     slangRate: number
     aimRate: number
     gestureRepeatsPerTurn: number
+    /** Milestone 5: the same, per scene (the redesign's target is none twice). */
+    gestureRepeatsPerScene: number
     speakersPerTurn: number
     slangBySpeaker: Record<string, number>
     aimBySpeaker: Record<string, number>
@@ -257,6 +361,7 @@ export function metrics(inputs: MetricInput[]): Metrics {
       speakingShare: Object.fromEntries(Object.entries(count(dialogue.map((b) => (b.beat as { speaker: string }).speaker))).map(([k, v]) => [k, share(v, dialogue.length)])),
       longestSilence: longestSilence(turns),
       ...exchangeShape(turns),
+      ...conversation(turns),
       dialogueWords: dialogue.reduce<Record<string, number>>((m, b) => {
         const who = (b.beat as { speaker: string }).speaker
         m[who] = (m[who] ?? 0) + words(b.beat.text)
@@ -274,7 +379,8 @@ export function metrics(inputs: MetricInput[]): Metrics {
     copiedFromPlan: copiedFromPlan(turns),
     repetition: {
       repeatedPerTurn: share([...repeated.values()].reduce((a, b) => a + b, 0), turns.length),
-      top: [...repeated.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 10)
+      top: [...repeated.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).slice(0, 10),
+      factRepeatsPerScene: share(factRepeats(turns), new Set(turns.map((t) => t.sceneId)).size)
     },
     speed: {
       firstTextMs: avg(calls.filter((c) => c.role === 'writer' && c.firstTextMs !== undefined).map((c) => c.firstTextMs!)),
@@ -335,6 +441,7 @@ export function relevanceOf(turns: Omit<TurnTrace, 'calls'>[]): Metrics['relevan
     slangRate: rate(slang.length),
     aimRate: rate(aim.length),
     gestureRepeatsPerTurn: counted.length === 0 ? Number.NaN : share(gestureRepeats(counted), counted.length),
+    gestureRepeatsPerScene: counted.length === 0 ? Number.NaN : share(gestureRepeats(counted), new Set(counted.map((t) => t.sceneId)).size),
     speakersPerTurn: avg(turns.map((t) => new Set(t.beats.flatMap((b) => (b.beat.kind === 'dialogue' ? [b.beat.speaker] : []))).size)),
     slangBySpeaker: per(slang),
     aimBySpeaker: per(aim)
@@ -374,15 +481,20 @@ export function headline(m: Metrics): [string, number, 'lower' | 'higher' | 'inf
     ['distinct skills', Object.keys(m.checks.skills).length, 'higher'],
     ['answered back / turn', m.cast.answeredBackPerTurn, 'higher'],
     ['same speaker twice / turn', m.cast.sameSpeakerPerTurn, 'lower'],
+    ['replies between characters / turn', m.cast.repliesPerTurn, 'higher'],
+    ['reply opener rate', m.cast.replyOpenerRate, 'higher'],
+    ['longest run by one speaker / turn', m.cast.longestRunPerTurn, 'info'],
     ['copied from plan rate', m.copiedFromPlan, 'lower'],
     ['speakers / turn', m.relevance.speakersPerTurn, 'info'],
     ['live secret rate', m.relevance.liveSecretRate, 'lower'],
     ['slang line rate', m.relevance.slangRate, 'lower'],
     ['aim line rate', m.relevance.aimRate, 'lower'],
     ['gesture repeats / turn', m.relevance.gestureRepeatsPerTurn, 'lower'],
+    ['gesture repeats / scene', m.relevance.gestureRepeatsPerScene, 'lower'],
     ['beats / turn', m.pacing.beatsPerTurn, 'info'],
     ['words / beat', m.pacing.wordsPerBeat, 'info'],
     ['repeated phrases / turn', m.repetition.repeatedPerTurn, 'lower'],
+    ['fact repeats / scene', m.repetition.factRepeatsPerScene, 'lower'],
     ['first text ms', m.speed.firstTextMs, 'lower'],
     ['turn ms', m.speed.turnMs, 'lower'],
     ['tokens / turn', m.speed.tokensPerTurn, 'lower'],

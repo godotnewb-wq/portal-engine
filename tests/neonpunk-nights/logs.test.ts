@@ -9,7 +9,7 @@ import { compareRuns } from '../../tools/bench/report'
 import { mockLlm, readRun, runBench, writeRun, type BenchRun } from '../../tools/bench/run'
 import { loadScenarios, scenarioState, ScenarioSchema } from '../../tools/bench/scenario'
 import { flagsFor, metricInput } from '../../tools/logs/load'
-import { compareMetrics, copiedFromPlan, exchangeShape, gestureRepeats, metrics, relevanceOf, renderMetrics, repeatedPhrases } from '../../tools/logs/metrics'
+import { compareMetrics, conversation, copiedFromPlan, exchangeShape, factRepeats, gestureRepeats, metrics, paragraphs, relevanceOf, renderMetrics, repeatedPhrases } from '../../tools/logs/metrics'
 import { blindTest, renderFlags } from '../../tools/logs/review'
 import { toScenario } from '../../tools/logs/scenario'
 import { scoreSession, type Scorer } from '../../tools/logs/score'
@@ -120,6 +120,33 @@ describe('npm run logs (milestone 2, A4)', () => {
     expect(copiedFromPlan([turn('Down the maintenance stair behind the bar, a skiff through the flooded level.', ['speaker:oria-senn', 'line:1'])])).toBe(1)
     expect(copiedFromPlan([turn('We take the back way down, darling, and a boat does the rest.', ['speaker:oria-senn', 'line:1'])])).toBe(0)
     expect(copiedFromPlan([])).toBeNaN()
+  })
+
+  // Milestone 5 task 6: a scene turn, written in paragraphs the game cuts into beats.
+  const sceneTurn = (sceneId: string, scene: object, ...lines: [string, string][][]) => ({
+    sceneId,
+    director: { plan: { speakers: [], scene: { moments: [], pressures: [], pools: {}, ...scene } } },
+    beats: lines.flatMap((para, l) => para.map(([who, text]) => ({ source: 'draft', line: l + 1, plan: [], beat: who === 'N' ? { kind: 'narration', text } : { kind: 'dialogue', speaker: who, text } })))
+  }) as never
+
+  it('reads a scene turn by its paragraphs: who spoke twice in a row, replies between characters and their openers', () => {
+    const t = sceneTurn('s', {}, [['oria-senn', 'Darling, the price is three hundred.'], ['N', 'Oria smiles.']], [['vex', 'Three hundred is a joke.']], [['N', 'The pump wheel turns.']], [['vex', 'Find someone else.']], [['oria-senn', 'Fine.']])
+    expect(paragraphs(t).map((p) => p.who)).toEqual(['oria-senn', 'vex', 'narration', 'vex', 'oria-senn'])
+    expect(exchangeShape([t])).toEqual({ answeredBackPerTurn: 1, sameSpeakerPerTurn: 1 })
+    // Vex picks up "three hundred"; Oria's "Fine." picks up nothing.
+    expect(conversation([t])).toEqual({ repliesPerTurn: 2, replyOpenerRate: 0.5, longestRunPerTurn: 2 })
+  })
+
+  it('on a scene turn, compares lines with the speaker’s moment, pressure and pool', () => {
+    const scene = { moments: [{ who: 'vex', lands: 'a lowball offer', wants: 'to walk away from the table' }], pools: { vex: [{ id: 'vex.k1', text: 'Brask owes her two favors', source: 'card', unheard: true }] } }
+    expect(copiedFromPlan([sceneTurn('s', scene, [['vex', 'To walk away from the table.']])])).toBe(1)
+    expect(copiedFromPlan([sceneTurn('s', scene, [['vex', 'No. We are done here.']])])).toBe(0)
+  })
+
+  it('counts a fact the plan offered said again in a later turn of the scene', () => {
+    const pools = { vex: [{ id: 'place.1', text: 'The lower level floods with the tide around midnight', source: 'place', unheard: true }] }
+    const floods: [string, string][] = [['vex', 'The lower level floods around midnight, so move.']]
+    expect(factRepeats([sceneTurn('a', { pools }, floods), sceneTurn('a', {}, floods), sceneTurn('a', {}, floods), sceneTurn('b', { pools }, floods)])).toBe(2)
   })
 
   // Redesign step 2: is the patch back every turn, and how many lines are slang or about the speaker's aim.
