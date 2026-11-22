@@ -12,7 +12,7 @@ import { castSnapshot, checkTraces, planItems, shownTraces, type BeatTrace, type
 import { activeSecrets } from './secrets'
 import { acceptTags, applyTurn, showDepartures } from './turn'
 import { buildRewritePrompt, buildWriterPrompt, sceneSpeakers } from './writer'
-import { recentlyUsed, repeatProblems, usageOf } from './repeats'
+import { RECENT_USE_TURNS, recentlyUsed, repeatProblems, usageOf } from './repeats'
 import { loreTrace, turnLore } from './lore'
 import type { LoreBudgetOverrides } from '@engine/rules'
 import { DEFAULT_PIPELINE, isPipeline, type Pipeline } from './pipeline'
@@ -148,7 +148,7 @@ export async function runTurn(
       )
     const draft = await stream('writer', writerPrompt)
     let parsed: ParsedReply = parseReply(draft, speakers, { script: scenePipeline })
-    const recent = recentlyUsed(content, scene)
+    const recent = scenePipeline ? recentlyUsed(content, scene, RECENT_USE_TURNS, scene.turns.length) : recentlyUsed(content, scene)
     // The scene writer: anyone present may speak, length is in words, repeats are sent back from the third (Q10), and someone saying what only
     // another knows is a problem (redesign §6.4).
     const check = (reply: ParsedReply) =>

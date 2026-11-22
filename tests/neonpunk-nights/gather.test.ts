@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { gatherScene } from '@engine/scene'
-import { createInitialState, startScene } from '@engine/state'
+import { createInitialState, startScene, TurnSchema } from '@engine/state'
 import { barScene, content } from './support'
 
 // The `scene` pipeline's gathering on the real bar scene (Milestone 5 plan, task 1): the pools follow what was just
@@ -40,5 +40,24 @@ describe('who could see through Oria', () => {
 
   it('is no one while nothing touches her secrets', () => {
     expect(gatherScene(content, barScene(), 'Evening, all.').readers).toEqual({})
+  })
+})
+
+// Milestone 5 task 8: Oria's own "my client" kept her secret live the turn after, every turn (51% of her turns in
+// m5-full-scene). A holder's own lines don't touch their secret; someone else's, or the narration, do.
+describe('a secret and its holder’s own words', () => {
+  const after = (beats: { kind: 'dialogue' | 'narration'; speaker?: string; text: string }[]) => {
+    const state = barScene()
+    const turn = TurnSchema.parse({ id: 't1', player: 'Evening.', beats: beats.map((b) => (b.kind === 'dialogue' ? { kind: 'dialogue', speaker: b.speaker, text: b.text } : { kind: 'narration', text: b.text })) })
+    return { ...state, scene: { ...state.scene!, turns: [turn] } }
+  }
+  const live = (state: ReturnType<typeof barScene>) => gatherScene(content, state, 'Go on.').options['oria-senn']!.secrets.map((s) => s.id)
+
+  it('Oria saying "my client" doesn’t make it live next turn', () => {
+    expect(live(after([{ kind: 'dialogue', speaker: 'oria-senn', text: 'My client wants the case by morning.' }]))).toEqual([])
+  })
+
+  it('Vex asking about the client does', () => {
+    expect(live(after([{ kind: 'dialogue', speaker: 'vex', text: 'And who is this client of yours?' }]))).toEqual(['oria-senn.client-is-grid-corporation'])
   })
 })

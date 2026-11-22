@@ -35,7 +35,7 @@ export const SCENE_STYLE = `How it should read:
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite. A fact marked new hasn't been said to the player yet: if it's used, say what it is.
 - Each character sounds like their voice card. The card wins over everything else.
-- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and at most one detail of the place, from its own details. Never write the brief's notes out as prose.
+- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two details of the place, from its own details, never generic ones. Never write the brief's notes out as prose.
 - No sayings, maxims or riddles in place of an answer.
 - The player is "you", in the present tense.
 - A check result is what happens. A failure means it does not come off: show the attempt falling short, never a success.
@@ -155,13 +155,13 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
   const ties = speakerTies(content, state, { ...view, speakers: present.map((id) => ({ id, intent: '' })) })
   const knowledge = knowledgeLines(content, state, view)
   const claims = claimLines(content, state)
-  const recent = Object.entries(recentlyUsed(content, scene)).map(([id, u]) => `- ${nameOf(id)}: ${[...u.slang.map((t) => `"${t}"`), ...u.gestures].join('; ')}`)
+  const recent = Object.entries(recentlyUsed(content, scene, RECENT_USE_TURNS, scene.turns.length)).map(([id, u]) => `- ${nameOf(id)}: ${[...u.slang.map((t) => `"${t}"`), ...u.gestures].join('; ')}`)
   const details = placeDetails(location.texture, scene)
   const listed = (names: string[]) => (names.length <= 1 ? (names[0] ?? '') : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`)
 
   const user = [
     `# Where you are\n${location.name}. ${location.description}`,
-    details.length > 0 && `# The place's details (one, if a line needs it)\n${details.map((d) => `- ${d}`).join('\n')}`,
+    details.length > 0 && `# The place's details (use one or two in the narration)\n${details.map((d) => `- ${d}`).join('\n')}`,
     told.length > 0 ? `# What the player has been told this scene\n${told.map((f) => `- ${f.text}`).join('\n')}` : '# What the player has been told this scene\nNothing yet beyond what they can see.',
     claims.length > 0 && `# Claimed but never confirmed (claims, not facts: anyone may doubt or deny them)\n${claims.join('\n')}`,
     scene.summary && `# Earlier in the scene\n${scene.summary}`,
@@ -177,7 +177,7 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
     plan.walk_ons.length > 0 && `# Walk-ons\n${plan.walk_ons.map((w) => `- ${nameOf(w.id)}: ${w.line}`).join('\n')}`,
     // The writer is told when the plan ends the scene (a gap found in Milestone 3.6: it was asked to tag it "only then").
     plan.end_scene && '# The scene ends this turn\nBring it to a close, and add [END SCENE].',
-    recent.length > 0 && `# Used in the last turns (don't repeat these, or bring back the things in them)\n${recent.join('\n')}`,
+    recent.length > 0 && `# Used already: slang in the last turns, gestures this scene (don't repeat these, or bring back the things in them)\n${recent.join('\n')}`,
     plan.avoid.length > 0 && `# Avoid\n${plan.avoid.join('; ')}`,
     'Write the scene.'
   ]

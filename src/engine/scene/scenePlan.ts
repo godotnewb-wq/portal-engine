@@ -139,7 +139,7 @@ function tieFor(content: Pack, state: GameState, options: TieOption[], written: 
  * correction, counted as the situation plan's are.
  * - **Focus:** people present, at most `MAX_SPEAKERS`; when the director gives none, the moments' people.
  * - **Moments:** for people in focus; a feeling checked and eased as in the situation plan; the lines in plain words.
- *   Someone in focus without one is noted.
+ *   Someone in focus without one is moved out of focus (still present), unless no one has one.
  * - **Aim strength:** a ruleset pressure word, moving at most one step a turn from the gathered strength.
  * - **Pressures:** at most one each, for people in focus, and only from the gathered options: a secret something just
  *   said touched, a tie in play, or an aim stronger than the weakest word (a background aim shapes choices silently
@@ -190,7 +190,15 @@ export function validateScenePlan(content: Pack, state: GameState, raw: RawScene
       strengths[id] = r.pressures[level]!
     }
   }
-  for (const id of focus) if (!moments.some((m) => m.who === id)) fix(`${id} is in focus with no moment`)
+  // Someone in focus with no moment would be written as wanting "to answer what was asked", pulling in a speaker
+  // with nothing to say (34 times in m5-core-scene): they stay present, out of focus. With no moments at all, focus
+  // stands and the writer answers what was asked.
+  if (moments.length > 0)
+    for (const id of [...focus])
+      if (!moments.some((m) => m.who === id)) {
+        focus.splice(focus.indexOf(id), 1)
+        fix(`${id} is in focus with no moment: here, out of focus`)
+      }
 
   const pressures: LivePressure[] = []
   const { texts, written } = justSaid(state, input)

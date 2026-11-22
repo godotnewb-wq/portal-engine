@@ -1,17 +1,22 @@
-import { knows, mentions, triggeredEntries, type CodexEntry } from '@engine/codex'
-import { firstName } from '@engine/core'
-import { tagWord, type Character } from '@engine/characters'
-import { recall } from '@engine/memory'
-import { modifier, rankOf } from '@engine/rules'
-import { characterById, locationById, type Pack } from '@engine/pack'
-import type { GameState } from '@engine/state'
-import type { Briefs } from './brief'
-import { buildBriefs } from './director'
-import { canSay, sceneFacts, toldPlayer } from './facts'
-import { knowerIn, turnLore, type TurnLore } from './lore'
-import { presentCast } from './planShape'
-import { statsOf } from './resolve'
-import { secretDisplay, touchOf, type SecretScan } from './secrets'
+import {
+  knows,
+  mentions,
+  triggeredEntries,
+  type CodexEntry,
+} from "@engine/codex";
+import { firstName } from "@engine/core";
+import { tagWord, type Character } from "@engine/characters";
+import { recall } from "@engine/memory";
+import { modifier, rankOf } from "@engine/rules";
+import { characterById, locationById, type Pack } from "@engine/pack";
+import type { GameState } from "@engine/state";
+import type { Briefs } from "./brief";
+import { buildBriefs } from "./director";
+import { canSay, sceneFacts, toldPlayer } from "./facts";
+import { knowerIn, turnLore, type TurnLore } from "./lore";
+import { presentCast } from "./planShape";
+import { statsOf } from "./resolve";
+import { secretDisplay, touchOf, type SecretScan } from "./secrets";
 
 /**
  * What the `scene` pipeline's game gathers before the director plans (scene system redesign §4 "The game", §5;
@@ -23,53 +28,53 @@ import { secretDisplay, touchOf, type SecretScan } from './secrets'
 /** A fact a character may draw on this turn, marked by where it came from (decided 2026-11-20, user: one pool, marked). */
 export interface PoolFact {
   /** Its id: a card fact `<character>.k<n>`, a memory's id, `lore.<entry>`, `place.<n>`, or a director's detail `detail.<turn>.<n>`. */
-  id: string
-  text: string
+  id: string;
+  text: string;
   /** `plan`: a concrete detail the director added this turn (task 4). */
-  source: 'card' | 'memory' | 'lore' | 'place' | 'plan'
+  source: "card" | "memory" | "lore" | "place" | "plan";
   /** The player hasn't been told it on screen this scene. */
-  unheard: boolean
+  unheard: boolean;
 }
 
 /** A secret that something just said touches, so its holder may play it live (Q5). */
 export interface SecretOption {
-  id: string
-  text: string
+  id: string;
+  text: string;
   /** What touched it: one of its keywords, its subject, or someone it names who isn't here. */
-  how: 'keyword' | 'subject' | 'person'
+  how: "keyword" | "subject" | "person";
   /** The keyword, the subject's title or the person's name, as the game found it. */
-  by: string
+  by: string;
 }
 
 /** A relationship in play this turn: the other person is here, or was just named (Q5 default, confirmed 2026-11-20). */
 export interface TieOption {
   /** A character id, or `player`. */
-  with: string
+  with: string;
   /** The tags in words ("sister, business partner"); empty for a tie that is only a note. */
-  words: string
-  note?: string
-  how: 'present' | 'named'
+  words: string;
+  note?: string;
+  how: "present" | "named";
 }
 
 /** Tonight's aim and how hard it presses now: the card's starting word until the director has moved it. */
 export interface GoalOption {
-  text: string
-  strength: string
+  text: string;
+  strength: string;
   /** The strength as an index into the ruleset's pressure words, weakest first. */
-  level: number
+  level: number;
 }
 
 export interface PressureOptions {
-  goal: GoalOption
-  secrets: SecretOption[]
-  ties: TieOption[]
+  goal: GoalOption;
+  secrets: SecretOption[];
+  ties: TieOption[];
 }
 
 /** A pressure played live on a turn, as the state keeps it (`Turn.live`). */
 export interface LiveRecord {
-  who: string
-  kind: 'goal' | 'secret' | 'tie'
-  ref: string
+  who: string;
+  kind: "goal" | "secret" | "tie";
+  ref: string;
 }
 
 /**
@@ -79,41 +84,52 @@ export interface LiveRecord {
  * told who that was, so it gave it to the player or to no one.
  */
 export interface Reader {
-  who: string
+  who: string;
   /** Their reading bonus: the skill's attribute modifier plus their rank, as a roll would count it. */
-  bonus: number
+  bonus: number;
   /** What they are to the holder, in words: the tags, or the history note. */
-  knows: string
+  knows: string;
 }
 
 /** Readers listed per holder, at most this many, best first. */
-export const MAX_READERS = 2
+export const MAX_READERS = 2;
 
 export interface Gathered {
   /** What could be live for each character present, by id. */
-  options: Record<string, PressureOptions>
+  options: Record<string, PressureOptions>;
   /** What was live for them in the ruleset's `scene.recentTurns` last turns, newest first. */
-  recent: Record<string, LiveRecord[]>
+  recent: Record<string, LiveRecord[]>;
   /** The facts each character present may draw on, best first, at most the ruleset's `scene.factPool`. */
-  pools: Record<string, PoolFact[]>
+  pools: Record<string, PoolFact[]>;
   /** For each holder of a secret something just touched: who present could see through them, best first. */
-  readers: Record<string, Reader[]>
+  readers: Record<string, Reader[]>;
 }
 
 /** The player's words and the last turn: where something must be said to touch a secret or name a person (Q5). */
-export function justSaid(state: GameState, input: string): { texts: string[]; written: string[] } {
-  const last = state.scene!.turns.at(-1)
-  return { texts: [input, last?.player ?? ''].filter(Boolean), written: last?.beats.map((b) => b.text) ?? [] }
+export function justSaid(
+  state: GameState,
+  input: string,
+): { texts: string[]; written: string[] } {
+  const last = state.scene!.turns.at(-1);
+  return {
+    texts: [input, last?.player ?? ""].filter(Boolean),
+    written: last?.beats.map((b) => b.text) ?? [],
+  };
 }
 
 /** Everyone's names, which the codex scan leaves out (a person is not a topic), as the lore layers do. */
 function peopleNames(content: Pack, state: GameState): string[] {
-  const location = locationById(content, state.scene!.locationId)
-  const people = [...content.characters.map((c) => c.name), state.player.name, ...(location?.walkOns.flatMap((w) => (w.name ? [w.name] : [])) ?? [])]
-  return [...new Set([...people, ...people.map(firstName)])]
+  const location = locationById(content, state.scene!.locationId);
+  const people = [
+    ...content.characters.map((c) => c.name),
+    state.player.name,
+    ...(location?.walkOns.flatMap((w) => (w.name ? [w.name] : [])) ?? []),
+  ];
+  return [...new Set([...people, ...people.map(firstName)])];
 }
 
-const named = (texts: string[], c: Character) => [c.name, firstName(c.name)].find((n) => texts.some((t) => mentions(t, n)))
+const named = (texts: string[], c: Character) =>
+  [c.name, firstName(c.name)].find((n) => texts.some((t) => mentions(t, n)));
 
 /**
  * The secrets something just said touches, for each holder present. Only what is held from someone present counts
@@ -121,45 +137,117 @@ const named = (texts: string[], c: Character) => [c.name, firstName(c.name)].fin
  * A person a secret names counts only when they aren't here: someone present is named all the time, which would keep
  * their secret in play every turn (decided in code, task 1).
  */
-function secretOptions(content: Pack, state: GameState, input: string): Record<string, SecretOption[]> {
-  const { texts, written } = justSaid(state, input)
-  const all = [...texts, ...written]
-  const ignore = peopleNames(content, state)
-  const scan: SecretScan = { texts: all, mentioned: new Set(triggeredEntries(content.codex, texts, ignore, written).map((e) => e.id)) }
-  const present = new Set(presentCast(state.scene!))
-  const out: Record<string, SecretOption[]> = {}
-  for (const shown of secretDisplay(content, state, scan)) {
-    if (shown.form === 'off') continue
-    const c = characterById(content, shown.holder)!
-    const s = c.secrets.find((x) => `${c.id}.${x.id}` === shown.id)!
-    const touch = touchOf(content, s, scan)
-    const person = touch ? undefined : content.characters.filter((o) => o.id !== c.id && !present.has(o.id) && mentions(s.text, firstName(o.name))).map((o) => named(all, o)).find(Boolean)
-    const option: SecretOption | undefined = touch ? { id: shown.id, text: s.text, how: touch.how === 'keyword' ? 'keyword' : 'subject', by: touch.words } : person ? { id: shown.id, text: s.text, how: 'person', by: person } : undefined
-    if (option) (out[c.id] ??= []).push(option)
+function secretOptions(
+  content: Pack,
+  state: GameState,
+  input: string,
+): Record<string, SecretOption[]> {
+  const { texts } = justSaid(state, input);
+  const last = state.scene!.turns.at(-1)?.beats ?? [];
+  const ignore = peopleNames(content, state);
+  // Each holder's own lines don't touch their secret: a fixer saying "my client" kept her secret, keyed on "client",
+  // live the turn after, every turn (half her turns in m5-full-scene). Someone else has to bring it up (task 8).
+  const scanFor = (holder: string): { scan: SecretScan; all: string[] } => {
+    const written = last
+      .filter((b) => !(b.kind === "dialogue" && b.speaker === holder))
+      .map((b) => b.text);
+    const all = [...texts, ...written];
+    return {
+      all,
+      scan: {
+        texts: all,
+        mentioned: new Set(
+          triggeredEntries(content.codex, texts, ignore, written).map(
+            (e) => e.id,
+          ),
+        ),
+      },
+    };
+  };
+  const present = new Set(presentCast(state.scene!));
+  const out: Record<string, SecretOption[]> = {};
+  const holders = [
+    ...new Set(
+      content.characters
+        .filter((c) => present.has(c.id) && c.secrets.length > 0)
+        .map((c) => c.id),
+    ),
+  ];
+  for (const holder of holders) {
+    const { scan, all } = scanFor(holder);
+    for (const shown of secretDisplay(content, state, scan)) {
+      if (shown.holder !== holder || shown.form === "off") continue;
+      const c = characterById(content, shown.holder)!;
+      const s = c.secrets.find((x) => `${c.id}.${x.id}` === shown.id)!;
+      const touch = touchOf(content, s, scan);
+      const person = touch
+        ? undefined
+        : content.characters
+            .filter(
+              (o) =>
+                o.id !== c.id &&
+                !present.has(o.id) &&
+                mentions(s.text, firstName(o.name)),
+            )
+            .map((o) => named(all, o))
+            .find(Boolean);
+      const option: SecretOption | undefined = touch
+        ? {
+            id: shown.id,
+            text: s.text,
+            how: touch.how === "keyword" ? "keyword" : "subject",
+            by: touch.words,
+          }
+        : person
+          ? { id: shown.id, text: s.text, how: "person", by: person }
+          : undefined;
+      if (option) (out[c.id] ??= []).push(option);
+    }
   }
-  return out
+  return out;
 }
 
 /** Each relationship of `c` in play: toward the player, toward someone here, or toward someone just named. */
-function tieOptions(content: Pack, state: GameState, c: Character, input: string): TieOption[] {
-  const r = content.ruleset
-  const { texts, written } = justSaid(state, input)
-  const present = new Set(presentCast(state.scene!))
+function tieOptions(
+  content: Pack,
+  state: GameState,
+  c: Character,
+  input: string,
+): TieOption[] {
+  const r = content.ruleset;
+  const { texts, written } = justSaid(state, input);
+  const present = new Set(presentCast(state.scene!));
   const words = (tags: Parameters<typeof tagWord>[1][]) =>
     tags
       .filter((t) => !t.private)
       .map((t) => tagWord(r, t))
-      .join(', ')
-  const out: TieOption[] = []
-  const toPlayer = state.playerTies[c.id]
-  if (toPlayer && (toPlayer.tags.length > 0 || toPlayer.note)) out.push({ with: 'player', words: words(toPlayer.tags), ...(toPlayer.note && { note: toPlayer.note }), how: 'present' })
+      .join(", ");
+  const out: TieOption[] = [];
+  const toPlayer = state.playerTies[c.id];
+  if (toPlayer && (toPlayer.tags.length > 0 || toPlayer.note))
+    out.push({
+      with: "player",
+      words: words(toPlayer.tags),
+      ...(toPlayer.note && { note: toPlayer.note }),
+      how: "present",
+    });
   for (const x of state.relations.filter((x) => x.from === c.id)) {
-    const o = characterById(content, x.to)
-    if (!o || (x.tags.length === 0 && !x.note)) continue
-    const how = present.has(o.id) ? 'present' : named([...texts, ...written], o) ? 'named' : undefined
-    if (how) out.push({ with: o.id, words: words(x.tags), ...(x.note && { note: x.note }), how })
+    const o = characterById(content, x.to);
+    if (!o || (x.tags.length === 0 && !x.note)) continue;
+    const how = present.has(o.id)
+      ? "present"
+      : named([...texts, ...written], o)
+        ? "named"
+        : undefined;
+    if (how)
+      out.push({
+        with: o.id,
+        words: words(x.tags),
+        ...(x.note && { note: x.note }),
+        how,
+      });
   }
-  return out
+  return out;
 }
 
 /**
@@ -167,42 +255,81 @@ function tieOptions(content: Pack, state: GameState, c: Character, input: string
  * best reader first, then the order they're present in. The player isn't listed: the player reads only when trying to
  * (milestone 4d), and the plan says so in `player_action.reading`.
  */
-export function readersOf(content: Pack, state: GameState, holder: string): Reader[] {
-  const r = content.ruleset
-  const skill = r.skills.find((x) => x.id === r.people.reading.skill)
-  if (!skill) return []
-  const present = presentCast(state.scene!)
+export function readersOf(
+  content: Pack,
+  state: GameState,
+  holder: string,
+): Reader[] {
+  const r = content.ruleset;
+  const skill = r.skills.find((x) => x.id === r.people.reading.skill);
+  if (!skill) return [];
+  const present = presentCast(state.scene!);
   return present
     .filter((id) => id !== holder)
     .flatMap((id): Reader[] => {
-      const c = characterById(content, id)
-      const tie = state.relations.find((x) => x.from === id && x.to === holder)
-      if (!c || !tie || (tie.tags.length === 0 && !tie.note)) return []
-      const stats = statsOf(r, c)
-      const knows = tie.tags.filter((t) => !t.private).map((t) => tagWord(r, t)).join(', ') || tie.note!
-      return [{ who: id, bonus: modifier(r, stats.attributes[skill.attribute] ?? r.attributes.average) + rankOf(stats, skill.id), knows }]
+      const c = characterById(content, id);
+      const tie = state.relations.find((x) => x.from === id && x.to === holder);
+      if (!c || !tie || (tie.tags.length === 0 && !tie.note)) return [];
+      const stats = statsOf(r, c);
+      const knows =
+        tie.tags
+          .filter((t) => !t.private)
+          .map((t) => tagWord(r, t))
+          .join(", ") || tie.note!;
+      return [
+        {
+          who: id,
+          bonus:
+            modifier(
+              r,
+              stats.attributes[skill.attribute] ?? r.attributes.average,
+            ) + rankOf(stats, skill.id),
+          knows,
+        },
+      ];
     })
-    .sort((a, b) => b.bonus - a.bonus || present.indexOf(a.who) - present.indexOf(b.who))
-    .slice(0, MAX_READERS)
+    .sort(
+      (a, b) =>
+        b.bonus - a.bonus || present.indexOf(a.who) - present.indexOf(b.who),
+    )
+    .slice(0, MAX_READERS);
 }
 
 /** Tonight's aim at its current strength: where the director left it this scene, else the card's word, else the weakest. */
-export function goalOption(content: Pack, state: GameState, c: Character): GoalOption {
-  const words = content.ruleset.pressures
-  const start = c.agenda.pressure ? Math.max(0, words.indexOf(c.agenda.pressure)) : 0
-  const level = state.scene!.pressures[c.id] ?? start
-  return { text: c.agenda.current, strength: words[level]!, level }
+export function goalOption(
+  content: Pack,
+  state: GameState,
+  c: Character,
+): GoalOption {
+  const words = content.ruleset.pressures;
+  const start = c.agenda.pressure
+    ? Math.max(0, words.indexOf(c.agenda.pressure))
+    : 0;
+  const level = state.scene!.pressures[c.id] ?? start;
+  return { text: c.agenda.current, strength: words[level]!, level };
 }
 
 /** What was live for each character present in the last turns, from `Turn.live`, and from `kept` in turns `situation` made. */
-export function recentlyLive(content: Pack, state: GameState): Record<string, LiveRecord[]> {
-  const turns = state.scene!.turns.slice(-content.ruleset.scene.recentTurns).reverse()
-  const out: Record<string, LiveRecord[]> = {}
+export function recentlyLive(
+  content: Pack,
+  state: GameState,
+): Record<string, LiveRecord[]> {
+  const turns = state
+    .scene!.turns.slice(-content.ruleset.scene.recentTurns)
+    .reverse();
+  const out: Record<string, LiveRecord[]> = {};
   for (const who of presentCast(state.scene!)) {
-    const records = turns.flatMap((t): LiveRecord[] => [...(t.live ?? []).filter((x) => x.who === who), ...(t.live ? [] : (t.kept ?? []).filter((id) => id.startsWith(`${who}.`)).map((ref) => ({ who, kind: 'secret' as const, ref })))])
-    if (records.length > 0) out[who] = records
+    const records = turns.flatMap((t): LiveRecord[] => [
+      ...(t.live ?? []).filter((x) => x.who === who),
+      ...(t.live
+        ? []
+        : (t.kept ?? [])
+            .filter((id) => id.startsWith(`${who}.`))
+            .map((ref) => ({ who, kind: "secret" as const, ref }))),
+    ]);
+    if (records.length > 0) out[who] = records;
   }
-  return out
+  return out;
 }
 
 /**
@@ -220,43 +347,100 @@ export function recentlyLive(content: Pack, state: GameState): Record<string, Li
  * record (`said`, task 4). Never a secret: a secret is a pressure, and the bookkeeper and the who-knows-what notes
  * guard it.
  */
-function poolOf(content: Pack, state: GameState, c: Character, briefs: Briefs, brought: CodexEntry[]): PoolFact[] {
-  const scene = state.scene!
-  const facts = new Map(sceneFacts(content, state).map((f) => [f.id, f]))
-  const pool: PoolFact[] = []
+function poolOf(
+  content: Pack,
+  state: GameState,
+  c: Character,
+  briefs: Briefs,
+  brought: CodexEntry[],
+): PoolFact[] {
+  const scene = state.scene!;
+  const facts = new Map(sceneFacts(content, state).map((f) => [f.id, f]));
+  const pool: PoolFact[] = [];
   const add = (f: PoolFact) => {
-    if (!pool.some((x) => x.id === f.id)) pool.push(f)
-  }
-  const told = (id: string) => scene.told.includes(id)
+    if (!pool.some((x) => x.id === f.id)) pool.push(f);
+  };
+  const told = (id: string) => scene.told.includes(id);
   for (const d of briefs.details.filter((x) => x.owner === c.id)) {
-    if (d.kind === 'knows') {
-      const f = facts.get(d.id)
-      if (f && f.kind === 'knows' && canSay(scene, f, c.id) && (!told(f.id) || d.rank === 'answer')) add({ id: f.id, text: f.text, source: 'card', unheard: !toldPlayer(scene, f) })
-    } else if (d.kind === 'memory') {
-      const m = state.memories.find((x) => x.id === d.id)
-      if (m && !told(m.id)) add({ id: m.id, text: m.text, source: 'memory', unheard: true })
+    if (d.kind === "knows") {
+      const f = facts.get(d.id);
+      if (
+        f &&
+        f.kind === "knows" &&
+        canSay(scene, f, c.id) &&
+        (!told(f.id) || d.rank === "answer")
+      )
+        add({
+          id: f.id,
+          text: f.text,
+          source: "card",
+          unheard: !toldPlayer(scene, f),
+        });
+    } else if (d.kind === "memory") {
+      const m = state.memories.find((x) => x.id === d.id);
+      if (m && !told(m.id))
+        add({ id: m.id, text: m.text, source: "memory", unheard: true });
     }
   }
-  const knower = knowerIn(state, c)
-  for (const entry of brought) if (entry.knowledge !== 'secret' && knows(content.setting, entry, knower) && !told(`lore.${entry.id}`)) add({ id: `lore.${entry.id}`, text: entry.summary, source: 'lore', unheard: true })
-  for (const m of recall(content.ruleset, state, c)) if (!told(m.id)) add({ id: m.id, text: m.text, source: 'memory', unheard: true })
-  for (const f of facts.values()) if (f.kind === 'place' && !told(f.id)) add({ id: f.id, text: f.text, source: 'place', unheard: !toldPlayer(scene, f) })
-  return pool.slice(0, content.ruleset.scene.factPool)
+  const knower = knowerIn(state, c);
+  for (const entry of brought)
+    if (
+      entry.knowledge !== "secret" &&
+      knows(content.setting, entry, knower) &&
+      !told(`lore.${entry.id}`)
+    )
+      add({
+        id: `lore.${entry.id}`,
+        text: entry.summary,
+        source: "lore",
+        unheard: true,
+      });
+  for (const m of recall(content.ruleset, state, c))
+    if (!told(m.id))
+      add({ id: m.id, text: m.text, source: "memory", unheard: true });
+  for (const f of facts.values())
+    if (f.kind === "place" && !told(f.id))
+      add({
+        id: f.id,
+        text: f.text,
+        source: "place",
+        unheard: !toldPlayer(scene, f),
+      });
+  return pool.slice(0, content.ruleset.scene.factPool);
 }
 
 /** Everything the `scene` pipeline's director chooses from this turn, for everyone present. */
-export function gatherScene(content: Pack, state: GameState, input: string, lore: TurnLore = turnLore(content, state, input), briefs: Briefs = buildBriefs(content, state, input, lore)): Gathered {
-  const secrets = secretOptions(content, state, input)
-  const { texts, written } = justSaid(state, input)
-  const brought = triggeredEntries(content.codex, texts, peopleNames(content, state), written)
-  const options: Gathered['options'] = {}
-  const pools: Gathered['pools'] = {}
+export function gatherScene(
+  content: Pack,
+  state: GameState,
+  input: string,
+  lore: TurnLore = turnLore(content, state, input),
+  briefs: Briefs = buildBriefs(content, state, input, lore),
+): Gathered {
+  const secrets = secretOptions(content, state, input);
+  const { texts, written } = justSaid(state, input);
+  const brought = triggeredEntries(
+    content.codex,
+    texts,
+    peopleNames(content, state),
+    written,
+  );
+  const options: Gathered["options"] = {};
+  const pools: Gathered["pools"] = {};
   for (const id of presentCast(state.scene!)) {
-    const c = characterById(content, id)
-    if (!c) continue
-    options[id] = { goal: goalOption(content, state, c), secrets: secrets[id] ?? [], ties: tieOptions(content, state, c, input) }
-    pools[id] = poolOf(content, state, c, briefs, brought)
+    const c = characterById(content, id);
+    if (!c) continue;
+    options[id] = {
+      goal: goalOption(content, state, c),
+      secrets: secrets[id] ?? [],
+      ties: tieOptions(content, state, c, input),
+    };
+    pools[id] = poolOf(content, state, c, briefs, brought);
   }
-  const readers = Object.fromEntries(Object.keys(secrets).map((holder) => [holder, readersOf(content, state, holder)]).filter(([, r]) => r!.length > 0))
-  return { options, recent: recentlyLive(content, state), pools, readers }
+  const readers = Object.fromEntries(
+    Object.keys(secrets)
+      .map((holder) => [holder, readersOf(content, state, holder)])
+      .filter(([, r]) => r!.length > 0),
+  );
+  return { options, recent: recentlyLive(content, state), pools, readers };
 }

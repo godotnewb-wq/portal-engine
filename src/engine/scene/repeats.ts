@@ -46,15 +46,21 @@ export function gesturesIn(c: Character, text: string): string[] {
   return out
 }
 
-/** What each character present used in the last few turns: slang in their own lines, gestures in narration. */
-export function recentlyUsed(content: Pack, scene: Scene, turns = RECENT_USE_TURNS): Record<string, RecentUse> {
+/**
+ * What each character present used in the last few turns: slang in their own lines, gestures in narration. The
+ * `scene` pipeline looks for gestures over the whole scene (`gestureTurns`): a habit from the card came back every
+ * third turn, just outside the window (a glass turned by the stem five times in one scene of m5-core-scene; redesign §11: none twice
+ * a scene unless it means something).
+ */
+export function recentlyUsed(content: Pack, scene: Scene, turns = RECENT_USE_TURNS, gestureTurns = turns): Record<string, RecentUse> {
   const beats = scene.turns.slice(-turns).flatMap((t) => t.beats)
+  const gestureBeats = scene.turns.slice(-gestureTurns).flatMap((t) => t.beats)
   const out: Record<string, RecentUse> = {}
   for (const id of presentCast(scene)) {
     const c = characterById(content, id)
     if (!c) continue
     const slang = [...new Set(beats.flatMap((b) => (b.kind === 'dialogue' && b.speaker === id ? slangIn(c, b.text) : [])))]
-    const gestures = [...new Set(beats.flatMap((b) => (b.kind === 'narration' ? gesturesIn(c, b.text) : [])))]
+    const gestures = [...new Set(gestureBeats.flatMap((b) => (b.kind === 'narration' ? gesturesIn(c, b.text) : [])))]
     if (slang.length > 0 || gestures.length > 0) out[id] = { slang, gestures }
   }
   return out

@@ -27,10 +27,11 @@ describe('focus and moments', () => {
     expect(check('Evening.', { focus: [], moments: [{ who: 'tobin', lands: 'a', wants: 'b' }] }).plan.focus).toEqual(['tobin'])
   })
 
-  it('needs a moment for everyone in focus, and none for anyone else', () => {
+  it('needs a moment for everyone in focus, and none for anyone else; without one, a person is here but out of focus', () => {
     const { plan, corrections } = check('Evening.', { focus: ['mara', 'tobin'], moments: [{ who: 'mara', lands: 'a', wants: 'b' }, { who: 'kit', lands: 'c', wants: 'd' }] })
     expect(plan.moments.map((m) => m.who)).toEqual(['mara'])
-    expect(corrections).toEqual(['dropped the moment for "kit": not in focus', 'tobin is in focus with no moment'])
+    expect(plan.focus).toEqual(['mara'])
+    expect(corrections).toEqual(['dropped the moment for "kit": not in focus', 'tobin is in focus with no moment: here, out of focus'])
   })
 
   it('checks and eases a feeling as the situation plan does, and keeps the lines to a situation in words', () => {

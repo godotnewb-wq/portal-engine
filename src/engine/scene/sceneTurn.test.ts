@@ -10,6 +10,7 @@ import { sceneSpeakers } from './writer'
 import { sceneView, sceneFallback } from './scenePlan'
 import { gatherScene } from './gather'
 import { applyRecords } from './turn'
+import { RECENT_USE_TURNS, recentlyUsed } from './repeats'
 
 // A turn made by the `scene` pipeline (Milestone 5 plan, task 3): the game-master director, the scene writer, and
 // everything after them reading the scene plan through its view.
@@ -177,7 +178,7 @@ describe('the place’s details for the scene writer', () => {
     const state = yard()
     const llm = scripted(LEDGER, [SCENE])
     await runTurn(fixture, state, 'Is there a second ledger, Mara?', llm, () => {}, { pipeline: 'scene' })
-    expect(llm.prompts[1]!.user).toMatch(/# The place's details \(one, if a line needs it\)\n- /)
+    expect(llm.prompts[1]!.user).toMatch(/# The place's details \(use one or two in the narration\)\n- /)
     const texture = { sights: ['a lamp swinging over the scales', 'crates stacked to the rafters'], sounds: ['gulls over the water'], smells: ['tar'] }
     const scene = { ...state.scene!, turns: [{ ...state.scene!.turns[0]!, beats: [{ kind: 'narration' as const, text: 'The lamp over the scales swings once.' }] }] }
     expect(placeDetails(texture, scene)).toEqual(['crates stacked to the rafters', 'gulls over the water', 'tar'])
@@ -224,5 +225,17 @@ describe('the director’s concrete details (task 4: a move’s `new`)', () => {
     expect(out.trace.director.corrections).toEqual(expect.arrayContaining(['dropped the detail for "tobin": not in focus', 'dropped mara\'s detail "Tobin let someone in after closing": it says a secret']))
     expect(llm.prompts[1]!.user).toContain('May draw on, if a line needs it: two pennies a crate [new to the player]')
     expect(out.state.scene!.newFacts).toEqual([expect.objectContaining({ text: 'two pennies a crate', by: 'mara' })])
+  })
+})
+
+describe('gestures over the whole scene, on the scene pipeline (task 8)', () => {
+  it('lists a gesture from three turns back, which the two-turn window lost', () => {
+    const state = yardScene(13)
+    const scene = state.scene!
+    const old = (beats: { kind: 'narration'; text: string }[], n: number) => ({ ...scene.turns[0]!, id: `old-${n}`, beats })
+    const turns = [old([{ kind: 'narration', text: 'Mara straightens her ledger.' }], 1), old([{ kind: 'narration', text: 'Tobin shrugs.' }], 2), old([{ kind: 'narration', text: 'The lamp hisses.' }], 3)]
+    const later = { ...scene, turns }
+    expect(recentlyUsed(fixture, later)['mara']).toBeUndefined()
+    expect(recentlyUsed(fixture, later, RECENT_USE_TURNS, later.turns.length)['mara']).toEqual({ slang: [], gestures: ['straightens her ledger'] })
   })
 })

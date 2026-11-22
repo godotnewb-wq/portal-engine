@@ -62,7 +62,7 @@ describe('the AI scorer', () => {
   })
 })
 
-describe('the AI scorer, version 2 (Milestone 5 task 6)', () => {
+describe('the AI scorer, versions 2 and 3 (Milestone 5 tasks 6 and 8)', () => {
   const SCENE = JSON.stringify({
     player_action: { doing: 'asks Mara straight out', uncertain: false },
     focus: ['mara'],
@@ -72,8 +72,8 @@ describe('the AI scorer, version 2 (Milestone 5 task 6)', () => {
   })
   const write = async () => 'NARRATION: The lamp ticks.\nMara: "One book, Kit." She closes it with both hands.\nTobin: "Long night."'
 
-  it('is version 2, with the three new items on every turn', () => {
-    expect(SCORER_VERSION).toBe(2)
+  it('is version 3, with the three new items on every turn', () => {
+    expect(SCORER_VERSION).toBe(3)
     expect(RUBRIC.slice(-3).map((i) => `${i.id}. ${i.name}`)).toEqual(['16. in the moment', '17. responds to meaning', '18. undercurrent'])
   })
 
@@ -81,8 +81,8 @@ describe('the AI scorer, version 2 (Milestone 5 task 6)', () => {
     const { trace } = await runTurn(fixture, yardScene(13), 'Is there a second ledger, Mara?', { direct: async () => SCENE, write }, () => {}, { pipeline: 'scene' })
     const { system, user } = buildScorerPrompt(fixture, trace, 'the-yard')
     expect(system).toMatch(/^1\. \[director\] Focus follows the priority rules/m)
-    expect(system).toMatch(/^6\. \[director\] Each moment says plainly/m)
-    expect(system).toMatch(/^8\. \[writer\] The people in focus carry the scene/m)
+    expect(system).toMatch(/^6\. \[director\] The plan itself, not the prose: each moment says plainly/m)
+    expect(system).toMatch(/^8\. \[writer\] The people in focus carry the scene\. Anyone else present may react or say a little/m)
     expect(system).toMatch(/^14\. \[writer\] Length within the guide \(about 4 to 6 paragraphs, marked ¶\)/m)
     expect(system).toMatch(/^18\. \[writer\] Goals and secrets shape/m)
     expect(user).toContain('- Mara: the question she dreads; wants to close it down')
@@ -95,7 +95,7 @@ describe('the AI scorer, version 2 (Milestone 5 task 6)', () => {
   it('on a situation turn: the old wording, and the exchange, which it didn’t see before', async () => {
     const { trace } = await runTurn(fixture, yardScene(), 'Tobin, who came by?', llm, () => {}, { forceNatural: 15 })
     const { system, user } = buildScorerPrompt(fixture, trace, 'the-yard')
-    expect(system).toMatch(/^6\. \[director\] Texture, contrast and avoid fields/m)
+    expect(system).toMatch(/^6\. \[director\] The plan itself, not the prose: texture, contrast and avoid fields/m)
     expect(user).toMatch(/- Line 1\. Tobin → the player: /)
     expect(user).not.toContain('¶')
   })

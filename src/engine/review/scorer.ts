@@ -9,9 +9,11 @@ import { itemsFor, itemText, type ScorableTurn } from './rubric'
 /**
  * Bumped when the scorer's prompt or reading changes, so scores from different scorers aren't mixed up. Version 2
  * (Milestone 5 task 6): three new items (16–18), the plan items worded for the scene plan, the scene plan shown as
- * itself and the situation plan with its exchange, and a scene turn's beats marked by paragraph.
+ * itself and the situation plan with its exchange, and a scene turn's beats marked by paragraph. Version 3 (task 8):
+ * item 6 judges the plan, not the prose (it was grading whether the beats paid off the stakes), and item 8 on a scene
+ * turn no longer counts anyone present who isn't in focus as unlisted (the scene plan lets them say a little).
  */
-export const SCORER_VERSION = 2
+export const SCORER_VERSION = 3
 
 /** One rubric score, with the reason in a line. */
 export interface ItemScore {

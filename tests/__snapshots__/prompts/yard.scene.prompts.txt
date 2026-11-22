@@ -17,7 +17,7 @@ Return only this JSON object:
 }
 
 - People are in the moment. What someone says and does comes first from what just happened: what was said to them, who is there, how they feel right now. Their aims, secrets and ties are part of them and press only when the moment touches them.
-- player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking and asking are not uncertain. reading: the id of the person the player is trying to read (watching their face, studying them, looking for a lie); leave it out otherwise. Asking a question is not reading.
+- player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking someone into what they don't want to do is an attempt (persuading, bargaining, bluffing, threatening); plain talk and questions are not. reading: the id of the person the player is trying to read (watching their face, studying them, looking for a lie); leave it out otherwise. Asking a question is not reading.
 - checks: only for an uncertain attempt by the player or a character, or someone reading another. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim; leave it out for a reading check, since the game sets it. target: the one being read. stakes: what success means.
 - Seeing through someone: when a person in focus dodges or lies about a live secret, and "could see through" names someone below, give the first of them a Notice check with the holder as target, unless the moment gives them no reason to look. Success means they notice the dodge, never what is hidden. The player reads only the person player_action.reading names.
 - focus: who the moment is about, at most 3; usually whoever was spoken to and whoever would answer. Anyone else present may still react or say a little.
@@ -129,7 +129,7 @@ How it should read:
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite. A fact marked new hasn't been said to the player yet: if it's used, say what it is.
 - Each character sounds like their voice card. The card wins over everything else.
-- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and at most one detail of the place, from its own details. Never write the brief's notes out as prose.
+- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two details of the place, from its own details, never generic ones. Never write the brief's notes out as prose.
 - No sayings, maxims or riddles in place of an answer.
 - The player is "you", in the present tense.
 - A check result is what happens. A failure means it does not come off: show the attempt falling short, never a success.
@@ -183,7 +183,7 @@ When angry: Goes silent. Warm: Polishes his plates. Lying: Hums. Afraid: Repeats
 # Where you are
 The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
 
-# The place's details (one, if a line needs it)
+# The place's details (use one or two in the narration)
 - stacked crates
 - a cart with a broken wheel
 - a gate creaking
@@ -227,7 +227,7 @@ Return only this JSON object:
 }
 
 - People are in the moment. What someone says and does comes first from what just happened: what was said to them, who is there, how they feel right now. Their aims, secrets and ties are part of them and press only when the moment touches them.
-- player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking and asking are not uncertain. reading: the id of the person the player is trying to read (watching their face, studying them, looking for a lie); leave it out otherwise. Asking a question is not reading.
+- player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking someone into what they don't want to do is an attempt (persuading, bargaining, bluffing, threatening); plain talk and questions are not. reading: the id of the person the player is trying to read (watching their face, studying them, looking for a lie); leave it out otherwise. Asking a question is not reading.
 - checks: only for an uncertain attempt by the player or a character, or someone reading another. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim; leave it out for a reading check, since the game sets it. target: the one being read. stakes: what success means.
 - Seeing through someone: when a person in focus dodges or lies about a live secret, and "could see through" names someone below, give the first of them a Notice check with the holder as target, unless the moment gives them no reason to look. Success means they notice the dodge, never what is hidden. The player reads only the person player_action.reading names.
 - focus: who the moment is about, at most 3; usually whoever was spoken to and whoever would answer. Anyone else present may still react or say a little.
@@ -347,7 +347,7 @@ How it should read:
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite. A fact marked new hasn't been said to the player yet: if it's used, say what it is.
 - Each character sounds like their voice card. The card wins over everything else.
-- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and at most one detail of the place, from its own details. Never write the brief's notes out as prose.
+- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two details of the place, from its own details, never generic ones. Never write the brief's notes out as prose.
 - No sayings, maxims or riddles in place of an answer.
 - The player is "you", in the present tense.
 - A check result is what happens. A failure means it does not come off: show the attempt falling short, never a success.
@@ -395,7 +395,7 @@ With strangers Tobin is shy; with friends he talks about the yard horses.
 # Where you are
 The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
 
-# The place's details (one, if a line needs it)
+# The place's details (use one or two in the narration)
 - stacked crates
 - a cart with a broken wheel
 - a gate creaking
@@ -430,7 +430,7 @@ Is there a second ledger, Mara?
 # What's at stake
 whether Kit believes there is one book
 
-# Used in the last turns (don't repeat these, or bring back the things in them)
+# Used already: slang in the last turns, gestures this scene (don't repeat these, or bring back the things in them)
 - Tobin: straightens up from the crates
 
 Write the scene.
@@ -448,7 +448,7 @@ How it should read:
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite. A fact marked new hasn't been said to the player yet: if it's used, say what it is.
 - Each character sounds like their voice card. The card wins over everything else.
-- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and at most one detail of the place, from its own details. Never write the brief's notes out as prose.
+- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two details of the place, from its own details, never generic ones. Never write the brief's notes out as prose.
 - No sayings, maxims or riddles in place of an answer.
 - The player is "you", in the present tense.
 - A check result is what happens. A failure means it does not come off: show the attempt falling short, never a success.
@@ -496,7 +496,7 @@ With strangers Tobin is shy; with friends he talks about the yard horses.
 # Where you are
 The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
 
-# The place's details (one, if a line needs it)
+# The place's details (use one or two in the narration)
 - stacked crates
 - a cart with a broken wheel
 - a gate creaking
@@ -531,7 +531,7 @@ Is there a second ledger, Mara?
 # What's at stake
 whether Kit believes there is one book
 
-# Used in the last turns (don't repeat these, or bring back the things in them)
+# Used already: slang in the last turns, gestures this scene (don't repeat these, or bring back the things in them)
 - Tobin: straightens up from the crates
 
 Write the scene.
@@ -563,7 +563,7 @@ Return only this JSON object:
 }
 
 - People are in the moment. What someone says and does comes first from what just happened: what was said to them, who is there, how they feel right now. Their aims, secrets and ties are part of them and press only when the moment touches them.
-- player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking and asking are not uncertain. reading: the id of the person the player is trying to read (watching their face, studying them, looking for a lie); leave it out otherwise. Asking a question is not reading.
+- player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking someone into what they don't want to do is an attempt (persuading, bargaining, bluffing, threatening); plain talk and questions are not. reading: the id of the person the player is trying to read (watching their face, studying them, looking for a lie); leave it out otherwise. Asking a question is not reading.
 - checks: only for an uncertain attempt by the player or a character, or someone reading another. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim; leave it out for a reading check, since the game sets it. target: the one being read. stakes: what success means.
 - Seeing through someone: when a person in focus dodges or lies about a live secret, and "could see through" names someone below, give the first of them a Notice check with the holder as target, unless the moment gives them no reason to look. Success means they notice the dodge, never what is hidden. The player reads only the person player_action.reading names.
 - focus: who the moment is about, at most 3; usually whoever was spoken to and whoever would answer. Anyone else present may still react or say a little.
@@ -685,7 +685,7 @@ How it should read:
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite. A fact marked new hasn't been said to the player yet: if it's used, say what it is.
 - Each character sounds like their voice card. The card wins over everything else.
-- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and at most one detail of the place, from its own details. Never write the brief's notes out as prose.
+- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two details of the place, from its own details, never generic ones. Never write the brief's notes out as prose.
 - No sayings, maxims or riddles in place of an answer.
 - The player is "you", in the present tense.
 - A check result is what happens. A failure means it does not come off: show the attempt falling short, never a success.
@@ -739,7 +739,7 @@ When angry: Goes silent. Warm: Polishes his plates. Lying: Hums. Afraid: Repeats
 # Where you are
 The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
 
-# The place's details (one, if a line needs it)
+# The place's details (use one or two in the narration)
 - stacked crates
 - a cart with a broken wheel
 - a gate creaking
@@ -780,7 +780,7 @@ Tobin leaves. Show them going.
 # The scene ends this turn
 Bring it to a close, and add [END SCENE].
 
-# Used in the last turns (don't repeat these, or bring back the things in them)
+# Used already: slang in the last turns, gestures this scene (don't repeat these, or bring back the things in them)
 - Mara: closes it with both hands
 - Tobin: straightens up from the crates; finds something to do with a strap
 
