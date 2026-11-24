@@ -218,6 +218,13 @@ describe('bench metrics (milestone 2, B4)', () => {
 
 // Milestone 4c: the rubric is an acceptance check, so a comparison shows the AI scores, with the mean over every score.
 describe('AI scores in a comparison', () => {
+  it('counts repeats within one play: two plays of a scenario share a scene id but aren’t one scene (task 8)', () => {
+    const one = metrics([metricInput(caught)])
+    const twice = metrics([metricInput(caught), { ...metricInput(caught), session: 'another-play' }])
+    expect(twice.repetition.repeatedPerTurn).toBe(one.repetition.repeatedPerTurn)
+    expect(twice.relevance.gestureRepeatsPerTurn).toBe(one.relevance.gestureRepeatsPerTurn)
+  })
+
   it('gives the mean over every score and each item, for both runs', () => {
     const scored = (scores: number[]) =>
       metrics([{ session: 's', turns: [], calls: [], flags: [], errors: [], scores: [{ turnSession: 's', turnId: 't1', scorer: { version: SCORER_VERSION, profile: 'p', model: 'm' }, at: '2026-11-19T00:00:00Z', items: scores.map((score, i) => ({ id: i + 1, score, reason: '' })), beats: [] }] }])

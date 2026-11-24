@@ -247,6 +247,8 @@ describe('a portrait without the habits already shown this scene (task 8)', () =
   it('drops the sentence with a used habit, keeps the rest, and keeps the whole portrait when nothing was used', () => {
     expect(portraitNow(PORTRAIT, ['turns her glass by the stem'])).toBe('A broker in a pressed coat. Her laugh comes a beat late.')
     expect(portraitNow(PORTRAIT, ['taps the table'])).toBe(PORTRAIT)
+    // Another verb for the same glass still counts: the writer varies it.
+    expect(portraitNow(PORTRAIT, ['sets her glass down'])).toBe('A broker in a pressed coat. Her laugh comes a beat late.')
     expect(portraitNow(PORTRAIT, [])).toBe(PORTRAIT)
   })
 

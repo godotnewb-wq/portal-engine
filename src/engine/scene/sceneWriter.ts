@@ -64,16 +64,18 @@ Ben: "Traffic." He takes the chair nearest the door.
 /**
  * A portrait without the habits already shown this scene (task 8). Listed as used, a habit the portrait describes still
  * came back: the portrait offers it again every turn, and it won (a glass turned by the stem three times in a scene of
- * m5-core-scene-2). A sentence goes when it has a used gesture's verb and object; a secret's tell is not in the
- * portrait and stays, since it shows only under pressure.
+ * m5-core-scene-2). A sentence goes when it names the thing a used gesture handled; a secret's tell and a feeling's
+ * display line are not in the portrait and stay, since they show something.
  */
 export function portraitNow(portrait: string, gestures: string[]): string {
   if (gestures.length === 0) return portrait
-  const keys = gestures.map((g) => gestureKey(g).split(' ')).filter((k) => k.length === 2)
+  // Matched on the thing handled, not the verb: the writer varies the verb ("sets her glass down" for a portrait's
+  // "turns her glass by the stem"), and the habit came back (round 3: a coin, a washer, a towel in nearly every scene).
+  const objects = gestures.map((g) => gestureKey(g).split(' ')[1]).filter((o): o is string => !!o && o.length > 3 && !FUNCTION_WORDS.has(o))
   const sentences = portrait.match(/[^.!?]+[.!?]+["”]?\s*/g) ?? [portrait]
   const kept = sentences.filter((x) => {
     const words = new Set(plainWords(x))
-    return !keys.some(([verb, object]) => words.has(verb!) && words.has(object!))
+    return !objects.some((o) => words.has(o))
   })
   return kept.join('').trim() || portrait
 }

@@ -281,7 +281,10 @@ export function gestureRepeats(turns: Omit<TurnTrace, 'calls'>[]): number {
 const isSpeakerReaction = (c: string) => /^dropped reaction for .*: they speak this beat$/.test(c)
 
 export function metrics(inputs: MetricInput[]): Metrics {
-  const turns = inputs.flatMap((i) => i.turns.map((t) => ({ ...t, session: i.session })))
+  // A scene is one session's: the bench's repeat plays of a scenario share its scene id, so keyed on the id alone the
+  // repeat metrics (phrases, gestures, facts, silences) counted play 2 echoing play 1 (Milestone 5 task 8, round 3:
+  // the core set's three plays showed two to three times the full set's repeats, on both pipelines).
+  const turns = inputs.flatMap((i) => i.turns.map((t) => ({ ...t, session: i.session, sceneId: `${i.session}\u0001${t.sceneId}` })))
   const briefed = turns.flatMap((t) => (t.brief ? [t.brief] : []))
   const calls = inputs.flatMap((i) => i.calls)
   const beats = turns.flatMap((t) => t.beats.map((b) => ({ ...b, turn: t })))
