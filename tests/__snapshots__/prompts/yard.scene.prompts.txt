@@ -662,7 +662,7 @@ mara: 0, tobin: 1
 Mara would back the player up.
 
 # What could press on each person this turn (at most one each; usually none)
-- Mara Quill [mara]. Aim for tonight (keen): Find out who keeps skimming the tallies. Secret [mara.two-books], touched by "second ledger". Ties in play: Tobin [tobin] (rival). Live lately: secret [mara.two-books].
+- Mara Quill [mara]. Aim for tonight (keen): Find out who keeps skimming the tallies. Ties in play: Tobin [tobin] (rival). Live lately: secret [mara.two-books].
 - Tobin [tobin]. Aim for tonight (idle): Keep anyone from asking about last night. Ties in play: Kit [player] (employer).
 
 # Facts they could draw on: none this turn.

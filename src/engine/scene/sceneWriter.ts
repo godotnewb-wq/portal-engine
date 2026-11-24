@@ -11,7 +11,7 @@ import { feelingsNow, feltWords, shown, shownWords } from './feelings'
 import { childGuard } from './guard'
 import { knowersOf } from '@engine/memory'
 import { presentCast, type BeatPlan, type PlannedCheck } from './planShape'
-import { RECENT_USE_TURNS, recentlyUsed } from './repeats'
+import { gestureKey, RECENT_USE_TURNS, recentlyUsed } from './repeats'
 import type { LivePressure } from './scenePlan'
 import { FUNCTION_WORDS, OWNED_PHRASE_WORDS, plainWords, runs } from './phrases'
 import { SCENE_LENGTH } from './style'
@@ -60,6 +60,23 @@ Ada: She doesn't look up from the ledger. "You're late. Sit, the tea's nearly do
 Ben: "Traffic." He takes the chair nearest the door.
 [Ada: EXPRESSION tired]
 [Ben: EXPRESSION sheepish]`
+
+/**
+ * A portrait without the habits already shown this scene (task 8). Listed as used, a habit the portrait describes still
+ * came back: the portrait offers it again every turn, and it won (a glass turned by the stem three times in a scene of
+ * m5-core-scene-2). A sentence goes when it has a used gesture's verb and object; a secret's tell is not in the
+ * portrait and stays, since it shows only under pressure.
+ */
+export function portraitNow(portrait: string, gestures: string[]): string {
+  if (gestures.length === 0) return portrait
+  const keys = gestures.map((g) => gestureKey(g).split(' ')).filter((k) => k.length === 2)
+  const sentences = portrait.match(/[^.!?]+[.!?]+["”]?\s*/g) ?? [portrait]
+  const kept = sentences.filter((x) => {
+    const words = new Set(plainWords(x))
+    return !keys.some(([verb, object]) => words.has(verb!) && words.has(object!))
+  })
+  return kept.join('').trim() || portrait
+}
 
 /**
  * The place's sights, sounds and smells for the writer to draw on (redesign §9: texture is no longer the director's
@@ -113,7 +130,9 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
   }
   const people = present.map((id) => characterById(content, id)!)
   // Portraits of everyone present; voice cards for the people in the moment (redesign §4, "The writer").
-  const cards = people.map((c) => (plan.focus.includes(c.id) ? voiceCard(firstName(c.name), c.voice, c.portrait) : `## ${firstName(c.name)}\n${c.portrait}`))
+  const used = recentlyUsed(content, scene, RECENT_USE_TURNS, scene.turns.length)
+  const portrait = (c: (typeof people)[number]) => portraitNow(c.portrait, used[c.id]?.gestures ?? [])
+  const cards = people.map((c) => (plan.focus.includes(c.id) ? voiceCard(firstName(c.name), c.voice, portrait(c)) : `## ${firstName(c.name)}\n${portrait(c)}`))
 
   const system = [
     'You write one turn of a visual-novel RPG scene as a short scene: the conversation and what happens, in one continuous piece.',
@@ -155,7 +174,7 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
   const ties = speakerTies(content, state, { ...view, speakers: present.map((id) => ({ id, intent: '' })) })
   const knowledge = knowledgeLines(content, state, view)
   const claims = claimLines(content, state)
-  const recent = Object.entries(recentlyUsed(content, scene, RECENT_USE_TURNS, scene.turns.length)).map(([id, u]) => `- ${nameOf(id)}: ${[...u.slang.map((t) => `"${t}"`), ...u.gestures].join('; ')}`)
+  const recent = Object.entries(used).map(([id, u]) => `- ${nameOf(id)}: ${[...u.slang.map((t) => `"${t}"`), ...u.gestures].join('; ')}`)
   const details = placeDetails(location.texture, scene)
   const listed = (names: string[]) => (names.length <= 1 ? (names[0] ?? '') : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`)
 

@@ -46,12 +46,12 @@ describe('who could see through Oria', () => {
 // Milestone 5 task 8: Oria's own "my client" kept her secret live the turn after, every turn (51% of her turns in
 // m5-full-scene). A holder's own lines don't touch their secret; someone else's, or the narration, do.
 describe('a secret and its holder’s own words', () => {
-  const after = (beats: { kind: 'dialogue' | 'narration'; speaker?: string; text: string }[]) => {
+  const after = (beats: { kind: 'dialogue' | 'narration'; speaker?: string; text: string }[], live: { who: string; kind: 'secret'; ref: string }[] = []) => {
     const state = barScene()
-    const turn = TurnSchema.parse({ id: 't1', player: 'Evening.', beats: beats.map((b) => (b.kind === 'dialogue' ? { kind: 'dialogue', speaker: b.speaker, text: b.text } : { kind: 'narration', text: b.text })) })
+    const turn = TurnSchema.parse({ id: 't1', player: 'Evening.', live, beats: beats.map((b) => (b.kind === 'dialogue' ? { kind: 'dialogue', speaker: b.speaker, text: b.text } : { kind: 'narration', text: b.text })) })
     return { ...state, scene: { ...state.scene!, turns: [turn] } }
   }
-  const live = (state: ReturnType<typeof barScene>) => gatherScene(content, state, 'Go on.').options['oria-senn']!.secrets.map((s) => s.id)
+  const live = (state: ReturnType<typeof barScene>, input = 'Go on.') => gatherScene(content, state, input).options['oria-senn']!.secrets.map((s) => s.id)
 
   it('Oria saying "my client" doesn’t make it live next turn', () => {
     expect(live(after([{ kind: 'dialogue', speaker: 'oria-senn', text: 'My client wants the case by morning.' }]))).toEqual([])
@@ -60,4 +60,15 @@ describe('a secret and its holder’s own words', () => {
   it('Vex asking about the client does', () => {
     expect(live(after([{ kind: 'dialogue', speaker: 'vex', text: 'And who is this client of yours?' }]))).toEqual(['oria-senn.client-is-grid-corporation'])
   })
+
+  // A secret live last turn comes back only when the player's own words touch it (24 of 57 in m5-full-scene-2 were
+  // the same secret pressing again while the subject was in the air).
+  const CLIENT = 'oria-senn.client-is-grid-corporation'
+  const wasLive = [{ who: 'oria-senn', kind: 'secret' as const, ref: CLIENT }]
+  it('live last turn: Vex still on about the client doesn’t keep it live; the player asking does', () => {
+    const vexAgain = after([{ kind: 'dialogue', speaker: 'vex', text: 'Still waiting to hear who this client is.' }], wasLive)
+    expect(live(vexAgain)).toEqual([])
+    expect(live(vexAgain, 'So who is the client, Oria?')).toEqual([CLIENT])
+  })
 })
+

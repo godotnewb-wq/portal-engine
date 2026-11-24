@@ -3,13 +3,14 @@ import type { Prompt } from '@engine/core'
 import type { GameState } from '@engine/state'
 import { fixture, yardScene } from '@tests/fixture'
 import { runTurn, type TurnLlm } from './runTurn'
-import { checkEvent, ownedProblems, placeDetails } from './sceneWriter'
+import { checkEvent, ownedProblems, placeDetails, portraitNow } from './sceneWriter'
 import { parseReply } from './beats'
 import { checkReply, salvaged } from './checks'
 import { sceneSpeakers } from './writer'
 import { sceneView, sceneFallback } from './scenePlan'
 import { gatherScene } from './gather'
 import { applyRecords } from './turn'
+import { TurnSchema } from '@engine/state'
 import { RECENT_USE_TURNS, recentlyUsed } from './repeats'
 
 // A turn made by the `scene` pipeline (Milestone 5 plan, task 3): the game-master director, the scene writer, and
@@ -237,5 +238,31 @@ describe('gestures over the whole scene, on the scene pipeline (task 8)', () => 
     const later = { ...scene, turns }
     expect(recentlyUsed(fixture, later)['mara']).toBeUndefined()
     expect(recentlyUsed(fixture, later, RECENT_USE_TURNS, later.turns.length)['mara']).toEqual({ slang: [], gestures: ['straightens her ledger'] })
+  })
+})
+
+describe('a portrait without the habits already shown this scene (task 8)', () => {
+  const PORTRAIT = 'A broker in a pressed coat. She turns her glass by the stem while she listens. Her laugh comes a beat late.'
+
+  it('drops the sentence with a used habit, keeps the rest, and keeps the whole portrait when nothing was used', () => {
+    expect(portraitNow(PORTRAIT, ['turns her glass by the stem'])).toBe('A broker in a pressed coat. Her laugh comes a beat late.')
+    expect(portraitNow(PORTRAIT, ['taps the table'])).toBe(PORTRAIT)
+    expect(portraitNow(PORTRAIT, [])).toBe(PORTRAIT)
+  })
+
+  it('in the writer’s brief, once the habit is in the scene', async () => {
+    const content = { ...fixture, characters: fixture.characters.map((c) => (c.id === 'mara' ? { ...c, portrait: `${c.portrait} She straightens her ledger when she is nervous.` } : c)) }
+    const state = yardScene(13)
+    const earlier = TurnSchema.parse({ id: 'earlier', player: 'Busy?', beats: [{ kind: 'narration', text: 'Mara straightens her ledger.' }] })
+    const turned = { ...state, scene: { ...state.scene!, turns: [earlier] } }
+    const plan = { player_action: { doing: 'greets her', uncertain: false }, focus: ['mara'], moments: [{ who: 'mara', lands: 'a greeting', wants: 'to finish', pressure: 'idle' }], stakes: 'none' }
+    const first = scripted(plan, ['Mara: "Evening."'])
+    await runTurn(content, state, 'Evening.', first, () => {}, { pipeline: 'scene' })
+    expect(first.prompts[1]!.system).toContain('She straightens her ledger when she is nervous.')
+    const later = scripted(plan, ['Mara: "Evening."'])
+    await runTurn(content, turned, 'Evening.', later, () => {}, { pipeline: 'scene' })
+    expect(later.prompts[1]!.system).not.toContain('She straightens her ledger when she is nervous.')
+    expect(later.prompts[1]!.system).toContain('She notices numbers that are off.')
+    expect(later.prompts[1]!.user).toContain('- Mara: straightens her ledger')
   })
 })
