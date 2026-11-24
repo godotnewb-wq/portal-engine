@@ -49,8 +49,9 @@ const trigrams = (text: string) => {
 /**
  * How much of each line's wording comes straight from its planned point (session 2026-11-07_0013_714e: half).
  * A line is matched to its exchange line through the trace (`line:<n>`), or, in older logs, to its speaker's points.
- * On a `scene` turn (Milestone 5 task 6), a line is matched to its speaker's moment, the pressure on them and the
- * facts they were offered: everything the plan gave the writer about them in words.
+ * On a `scene` turn (Milestone 5 task 6), a line is matched to its speaker's moment and the pressure on them: the
+ * director's own wording. Not the facts they were offered, which a line is meant to state (decided in task 8, user:
+ * with them the rate was 6%, without 0.6%).
  */
 export function copiedFromPlan(turns: Omit<TurnTrace, 'calls'>[]): number {
   const shares = turns.flatMap((t) => {
@@ -59,7 +60,7 @@ export function copiedFromPlan(turns: Omit<TurnTrace, 'calls'>[]): number {
     const plannedFor = (speaker: string, b: TurnTrace['beats'][number]): string => {
       if (scene) {
         const m = scene.moments.find((x) => x.who === speaker)
-        return [m?.lands, m?.wants, ...scene.pressures.filter((x) => x.who === speaker).map((x) => x.text), ...(scene.pools[speaker] ?? []).map((f) => f.text)].filter(Boolean).join(' ')
+        return [m?.lands, m?.wants, ...scene.pressures.filter((x) => x.who === speaker).map((x) => x.text)].filter(Boolean).join(' ')
       }
       const n = b.plan.find((p) => p.startsWith('line:'))
       return n ? lines[Number(n.slice(5)) - 1]?.point ?? '' : lines.filter((l) => l.who === speaker).map((l) => l.point).join(' ')

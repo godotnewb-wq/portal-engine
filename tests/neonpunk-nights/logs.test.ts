@@ -139,10 +139,12 @@ describe('npm run logs (milestone 2, A4)', () => {
     expect(conversation([t])).toEqual({ repliesPerTurn: 2, replyOpenerRate: 0.5, longestRunPerTurn: 2 })
   })
 
-  it('on a scene turn, compares lines with the speaker’s moment, pressure and pool', () => {
+  it('on a scene turn, compares lines with the director’s wording (the moment, the pressure), not the facts offered', () => {
     const scene = { moments: [{ who: 'vex', lands: 'a lowball offer', wants: 'to walk away from the table' }], pools: { vex: [{ id: 'vex.k1', text: 'Brask owes her two favors', source: 'card', unheard: true }] } }
     expect(copiedFromPlan([sceneTurn('s', scene, [['vex', 'To walk away from the table.']])])).toBe(1)
     expect(copiedFromPlan([sceneTurn('s', scene, [['vex', 'No. We are done here.']])])).toBe(0)
+    // Stating a fact she was offered is what the pool is for.
+    expect(copiedFromPlan([sceneTurn('s', scene, [['vex', 'Brask owes her two favors.']])])).toBe(0)
   })
 
   it('counts a fact the plan offered said again in a later turn of the scene', () => {
