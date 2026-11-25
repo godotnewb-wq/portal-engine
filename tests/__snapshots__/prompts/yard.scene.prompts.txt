@@ -20,7 +20,7 @@ Return only this JSON object:
 - player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking someone into what they don't want to do is an attempt (persuading, bargaining, bluffing, threatening); plain talk and questions are not. reading: the id of the person the player is trying to read (watching their face, studying them, looking for a lie); leave it out otherwise. Asking a question is not reading.
 - checks: only for an uncertain attempt by the player or a character, or someone reading another. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim; leave it out for a reading check, since the game sets it. target: the one being read. stakes: what success means.
 - Seeing through someone: when a person in focus dodges or lies about a live secret, and "could see through" names someone below, give the first of them a Notice check with the holder as target, unless the moment gives them no reason to look. Success means they notice the dodge, never what is hidden. The player reads only the person player_action.reading names.
-- focus: who the moment is about, at most 3; usually whoever was spoken to and whoever would answer. Anyone else present may still react or say a little.
+- focus: who the moment is about, at most 3; usually whoever was spoken to and whoever would answer. Anyone else present may still react or say a little. Someone out of the player's earshot can be in focus: the writer shows them from where the player is, by what they do, not what they say.
 - moments: one for each person in focus. feels: what they really feel now, whatever they show: {"shade","family","intensity","reason"}; shade from the list below, family only when the shade is under more than one, intensity 1 to 5, reason in a few words. Leave it out to keep what they felt before. A mask hides a feeling and never lessens it; a feeling eases at most one step a turn. lands: how what just happened lands on them, in plain situational words. wants: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone. Each at most 30 words, never dialogue. pressure: how hard their aim for tonight presses now, one of: idle, keen, driven (weakest first); most of the time idle; it moves at most one step a turn.
 - pressures: at most one per person in focus, and usually none. Only from "What could press" below. kind is "secret" (secret: its id; approach: deflect, partial truth, lie; touched: the words that touched it), "tie" (with: the other person's id, or "player"), or "goal" (their aim for tonight, only above idle). A pressure is an undercurrent: it shapes what they choose, avoid or notice, and is rarely what they talk about.
 - draws_on: for a person in focus who needs a fact: ids from their list under "Facts they could draw on". A pool to choose from, not a list to recite; most turns need few.
@@ -121,14 +121,15 @@ Return the JSON plan.
 You write one turn of a visual-novel RPG scene as a short scene: the conversation and what happens, in one continuous piece.
 
 How it should read:
-- One continuous scene, written by one hand: each line comes out of the one before it, in what it means, not only its words. A question gets an answer, or a dodge the reader can see.
+- One continuous scene, written by one hand: each line, narration included, comes out of the one before it, in what it means, not only its words. A question gets an answer, or a dodge the reader can see.
 - People talk like people: complete, plain sentences that someone hearing them for the first time can follow.
 - The moment comes first. What someone says and does comes from what just happened to them: what was said, who is there, how it lands.
 - What presses on someone is an undercurrent. It shows in what they choose, avoid or notice, rarely in what they say outright.
-- What each person knows comes first. Someone who doesn't know a secret may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it.
+- What each person knows comes first. Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it.
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite: a fact a line uses comes out the way this person would say it here, to these people, never in the brief's words. What people are to each other is background, never said as written.
 - People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. When someone moves, show who goes with them. People mind who can hear them.
+- The scene is what you see and hear from where you are. People out of earshot show only in what you can see them do; their words reach you only when said loudly or to you. Someone in the moment who is out of earshot is still shown, from where you are.
 - Each character sounds like their voice card. The card wins over everything else.
 - An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two details of the place, from its own details, never generic ones. Never write the brief's notes out as prose.
 - No sayings, maxims or riddles in place of an answer.
@@ -208,7 +209,7 @@ Nothing yet beyond what they can see.
 - Mara: a greeting at the end of a long count. Right now Mara wants to finish the tally. Feels glum. Nothing shows.
 - Tobin: someone to talk to who isn’t Mara. Right now Tobin wants to be friendly. Feels sore (sad). Nothing shows.
 
-# How people here stand with each other (background: never said as written)
+# How people here stand with each other (background, never said as written; each line is what the first person knows of the second, and theirs alone)
 - Mara → Tobin: rival; has known him since the guild took him on
 - Tobin → you: employer; took him on for the night shift last month
 
@@ -242,7 +243,7 @@ Return only this JSON object:
 - player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking someone into what they don't want to do is an attempt (persuading, bargaining, bluffing, threatening); plain talk and questions are not. reading: the id of the person the player is trying to read (watching their face, studying them, looking for a lie); leave it out otherwise. Asking a question is not reading.
 - checks: only for an uncertain attempt by the player or a character, or someone reading another. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim; leave it out for a reading check, since the game sets it. target: the one being read. stakes: what success means.
 - Seeing through someone: when a person in focus dodges or lies about a live secret, and "could see through" names someone below, give the first of them a Notice check with the holder as target, unless the moment gives them no reason to look. Success means they notice the dodge, never what is hidden. The player reads only the person player_action.reading names.
-- focus: who the moment is about, at most 3; usually whoever was spoken to and whoever would answer. Anyone else present may still react or say a little.
+- focus: who the moment is about, at most 3; usually whoever was spoken to and whoever would answer. Anyone else present may still react or say a little. Someone out of the player's earshot can be in focus: the writer shows them from where the player is, by what they do, not what they say.
 - moments: one for each person in focus. feels: what they really feel now, whatever they show: {"shade","family","intensity","reason"}; shade from the list below, family only when the shade is under more than one, intensity 1 to 5, reason in a few words. Leave it out to keep what they felt before. A mask hides a feeling and never lessens it; a feeling eases at most one step a turn. lands: how what just happened lands on them, in plain situational words. wants: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone. Each at most 30 words, never dialogue. pressure: how hard their aim for tonight presses now, one of: idle, keen, driven (weakest first); most of the time idle; it moves at most one step a turn.
 - pressures: at most one per person in focus, and usually none. Only from "What could press" below. kind is "secret" (secret: its id; approach: deflect, partial truth, lie; touched: the words that touched it), "tie" (with: the other person's id, or "player"), or "goal" (their aim for tonight, only above idle). A pressure is an undercurrent: it shapes what they choose, avoid or notice, and is rarely what they talk about.
 - draws_on: for a person in focus who needs a fact: ids from their list under "Facts they could draw on". A pool to choose from, not a list to recite; most turns need few.
@@ -351,14 +352,15 @@ Return the JSON plan.
 You write one turn of a visual-novel RPG scene as a short scene: the conversation and what happens, in one continuous piece.
 
 How it should read:
-- One continuous scene, written by one hand: each line comes out of the one before it, in what it means, not only its words. A question gets an answer, or a dodge the reader can see.
+- One continuous scene, written by one hand: each line, narration included, comes out of the one before it, in what it means, not only its words. A question gets an answer, or a dodge the reader can see.
 - People talk like people: complete, plain sentences that someone hearing them for the first time can follow.
 - The moment comes first. What someone says and does comes from what just happened to them: what was said, who is there, how it lands.
 - What presses on someone is an undercurrent. It shows in what they choose, avoid or notice, rarely in what they say outright.
-- What each person knows comes first. Someone who doesn't know a secret may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it.
+- What each person knows comes first. Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it.
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite: a fact a line uses comes out the way this person would say it here, to these people, never in the brief's words. What people are to each other is background, never said as written.
 - People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. When someone moves, show who goes with them. People mind who can hear them.
+- The scene is what you see and hear from where you are. People out of earshot show only in what you can see them do; their words reach you only when said loudly or to you. Someone in the moment who is out of earshot is still shown, from where you are.
 - Each character sounds like their voice card. The card wins over everything else.
 - An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two details of the place, from its own details, never generic ones. Never write the brief's notes out as prose.
 - No sayings, maxims or riddles in place of an answer.
@@ -434,7 +436,7 @@ Nothing yet beyond what they can see.
 # Also here (they may react to what was just said, briefly, but start no topic; a feeling that shows is in how they react, not something they bring up)
 - Tobin. Feels sore (sad). Nothing shows.
 
-# How people here stand with each other (background: never said as written)
+# How people here stand with each other (background, never said as written; each line is what the first person knows of the second, and theirs alone)
 - Mara → Tobin: rival; has known him since the guild took him on
 - Tobin → you: employer; took him on for the night shift last month
 
@@ -464,14 +466,15 @@ Write the scene: the first line answers what the player just said or did, and ev
 You write one turn of a visual-novel RPG scene as a short scene: the conversation and what happens, in one continuous piece.
 
 How it should read:
-- One continuous scene, written by one hand: each line comes out of the one before it, in what it means, not only its words. A question gets an answer, or a dodge the reader can see.
+- One continuous scene, written by one hand: each line, narration included, comes out of the one before it, in what it means, not only its words. A question gets an answer, or a dodge the reader can see.
 - People talk like people: complete, plain sentences that someone hearing them for the first time can follow.
 - The moment comes first. What someone says and does comes from what just happened to them: what was said, who is there, how it lands.
 - What presses on someone is an undercurrent. It shows in what they choose, avoid or notice, rarely in what they say outright.
-- What each person knows comes first. Someone who doesn't know a secret may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it.
+- What each person knows comes first. Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it.
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite: a fact a line uses comes out the way this person would say it here, to these people, never in the brief's words. What people are to each other is background, never said as written.
 - People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. When someone moves, show who goes with them. People mind who can hear them.
+- The scene is what you see and hear from where you are. People out of earshot show only in what you can see them do; their words reach you only when said loudly or to you. Someone in the moment who is out of earshot is still shown, from where you are.
 - Each character sounds like their voice card. The card wins over everything else.
 - An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two details of the place, from its own details, never generic ones. Never write the brief's notes out as prose.
 - No sayings, maxims or riddles in place of an answer.
@@ -547,7 +550,7 @@ Nothing yet beyond what they can see.
 # Also here (they may react to what was just said, briefly, but start no topic; a feeling that shows is in how they react, not something they bring up)
 - Tobin. Feels sore (sad). Nothing shows.
 
-# How people here stand with each other (background: never said as written)
+# How people here stand with each other (background, never said as written; each line is what the first person knows of the second, and theirs alone)
 - Mara → Tobin: rival; has known him since the guild took him on
 - Tobin → you: employer; took him on for the night shift last month
 
@@ -602,7 +605,7 @@ Return only this JSON object:
 - player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking someone into what they don't want to do is an attempt (persuading, bargaining, bluffing, threatening); plain talk and questions are not. reading: the id of the person the player is trying to read (watching their face, studying them, looking for a lie); leave it out otherwise. Asking a question is not reading.
 - checks: only for an uncertain attempt by the player or a character, or someone reading another. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim; leave it out for a reading check, since the game sets it. target: the one being read. stakes: what success means.
 - Seeing through someone: when a person in focus dodges or lies about a live secret, and "could see through" names someone below, give the first of them a Notice check with the holder as target, unless the moment gives them no reason to look. Success means they notice the dodge, never what is hidden. The player reads only the person player_action.reading names.
-- focus: who the moment is about, at most 3; usually whoever was spoken to and whoever would answer. Anyone else present may still react or say a little.
+- focus: who the moment is about, at most 3; usually whoever was spoken to and whoever would answer. Anyone else present may still react or say a little. Someone out of the player's earshot can be in focus: the writer shows them from where the player is, by what they do, not what they say.
 - moments: one for each person in focus. feels: what they really feel now, whatever they show: {"shade","family","intensity","reason"}; shade from the list below, family only when the shade is under more than one, intensity 1 to 5, reason in a few words. Leave it out to keep what they felt before. A mask hides a feeling and never lessens it; a feeling eases at most one step a turn. lands: how what just happened lands on them, in plain situational words. wants: what they want right now, in this exchange; often simply to answer, help, get it right, or be left alone. Each at most 30 words, never dialogue. pressure: how hard their aim for tonight presses now, one of: idle, keen, driven (weakest first); most of the time idle; it moves at most one step a turn.
 - pressures: at most one per person in focus, and usually none. Only from "What could press" below. kind is "secret" (secret: its id; approach: deflect, partial truth, lie; touched: the words that touched it), "tie" (with: the other person's id, or "player"), or "goal" (their aim for tonight, only above idle). A pressure is an undercurrent: it shapes what they choose, avoid or notice, and is rarely what they talk about.
 - draws_on: for a person in focus who needs a fact: ids from their list under "Facts they could draw on". A pool to choose from, not a list to recite; most turns need few.
@@ -713,14 +716,15 @@ Return the JSON plan.
 You write one turn of a visual-novel RPG scene as a short scene: the conversation and what happens, in one continuous piece.
 
 How it should read:
-- One continuous scene, written by one hand: each line comes out of the one before it, in what it means, not only its words. A question gets an answer, or a dodge the reader can see.
+- One continuous scene, written by one hand: each line, narration included, comes out of the one before it, in what it means, not only its words. A question gets an answer, or a dodge the reader can see.
 - People talk like people: complete, plain sentences that someone hearing them for the first time can follow.
 - The moment comes first. What someone says and does comes from what just happened to them: what was said, who is there, how it lands.
 - What presses on someone is an undercurrent. It shows in what they choose, avoid or notice, rarely in what they say outright.
-- What each person knows comes first. Someone who doesn't know a secret may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it.
+- What each person knows comes first. Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it.
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite: a fact a line uses comes out the way this person would say it here, to these people, never in the brief's words. What people are to each other is background, never said as written.
 - People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. When someone moves, show who goes with them. People mind who can hear them.
+- The scene is what you see and hear from where you are. People out of earshot show only in what you can see them do; their words reach you only when said loudly or to you. Someone in the moment who is out of earshot is still shown, from where you are.
 - Each character sounds like their voice card. The card wins over everything else.
 - An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two details of the place, from its own details, never generic ones. Never write the brief's notes out as prose.
 - No sayings, maxims or riddles in place of an answer.
@@ -800,7 +804,7 @@ Nothing yet beyond what they can see.
 - Mara: relief she hides. Right now Mara wants the yard shut and empty. Feels glum: the question she dreads. Nothing shows.
 - Tobin: his cue to go. Right now Tobin wants to get home. Feels sore (sad). Nothing shows.
 
-# How people here stand with each other (background: never said as written)
+# How people here stand with each other (background, never said as written; each line is what the first person knows of the second, and theirs alone)
 - Mara → Tobin: rival; has known him since the guild took him on
 - Tobin → you: employer; took him on for the night shift last month
 

@@ -75,7 +75,8 @@ export function buildOpeningPrompt(content: Pack, state: GameState): Prompt {
     `# Where you are\n${location.name}. ${location.description}`,
     details.length > 0 && `# The place's details (use one or two)\n${details.map((d) => `- ${d}`).join('\n')}`,
     `# Who is here\n${presentCast(scene).map(person).join('\n')}`,
-    walkOns.length > 0 && `# Also around (no names unless given)\n${walkOns.map((w) => `- ${w.label}`).join('\n')}`,
+    // The walk-on as anyone would see them, not only their label (2026-11-24 play: a card player given the wrong sex).
+    walkOns.length > 0 && `# Also around (not by name)\n${walkOns.map((w) => `- ${w.label}: ${w.look}`).join('\n')}`,
     'Write the opening.'
   ]
     .filter(Boolean)

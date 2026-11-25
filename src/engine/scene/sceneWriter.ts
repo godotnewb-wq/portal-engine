@@ -28,14 +28,15 @@ import { claimLines, knowledgeLines, speakerTies, voiceCard } from './writer'
 
 /** How the scene should read (redesign §6.3): a few principles and short examples with made-up people, as engine text must. */
 export const SCENE_STYLE = `How it should read:
-- One continuous scene, written by one hand: each line comes out of the one before it, in what it means, not only its words. A question gets an answer, or a dodge the reader can see.
+- One continuous scene, written by one hand: each line, narration included, comes out of the one before it, in what it means, not only its words. A question gets an answer, or a dodge the reader can see.
 - People talk like people: complete, plain sentences that someone hearing them for the first time can follow.
 - The moment comes first. What someone says and does comes from what just happened to them: what was said, who is there, how it lands.
 - What presses on someone is an undercurrent. It shows in what they choose, avoid or notice, rarely in what they say outright.
-- What each person knows comes first. Someone who doesn't know a secret may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it.
+- What each person knows comes first. Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it.
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite: a fact a line uses comes out the way this person would say it here, to these people, never in the brief's words. What people are to each other is background, never said as written.
 - People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. When someone moves, show who goes with them. People mind who can hear them.
+- The scene is what you see and hear from where you are. People out of earshot show only in what you can see them do; their words reach you only when said loudly or to you. Someone in the moment who is out of earshot is still shown, from where you are.
 - Each character sounds like their voice card. The card wins over everything else.
 - An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two details of the place, from its own details, never generic ones. Never write the brief's notes out as prose.
 - No sayings, maxims or riddles in place of an answer.
@@ -115,7 +116,10 @@ function undercurrent(content: Pack, who: string, p: LivePressure, tell?: string
   if (p.kind === 'tie') return ` Underneath, what ${name(p.ref)} ${p.ref === 'player' ? 'are' : 'is'} to ${self} matters here: ${clip(p.text)}.`
   const words = content.ruleset.pressures
   const level = words.indexOf(p.strength ?? '')
-  return level >= words.length - 1 ? ` Underneath, tonight's aim drives what ${self} does: ${clip(p.text)}.` : ` Underneath, tonight's aim is on ${self}'s mind and may come up if it fits: ${clip(p.text)}.`
+  // An aim is its holder's alone: given in the brief beside everyone else's, it turned up as another's knowledge
+  // (2026-11-24 play: a mechanic naming the place a fixer's job was in before she'd said it).
+  const own = ` It is ${self}'s own: nobody else here knows it.`
+  return level >= words.length - 1 ? ` Underneath, tonight's aim drives what ${self} does: ${clip(p.text)}.${own}` : ` Underneath, tonight's aim is on ${self}'s mind and may come up if it fits: ${clip(p.text)}.${own}`
 }
 
 /** The writer's brief from the scene plan and its view (redesign §6.2). */
@@ -197,7 +201,7 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
     // each one's part rather than one exchange (2026-11-24 play: a fact and a want joined into a line that answered nothing).
     plan.focus.length > 0 && `# What each person brings (draw on it when the conversation reaches it)\n${plan.focus.map(momentLine).join('\n')}`,
     around.length > 0 && `# Also here (they may react to what was just said, briefly, but start no topic; a feeling that shows is in how they react, not something they bring up)\n${around.map((id) => `- ${nameOf(id)}.${feltLine(id, false)}`).join('\n')}`,
-    ties.length > 0 && `# How people here stand with each other (background: never said as written)\n${ties.join('\n')}`,
+    ties.length > 0 && `# How people here stand with each other (background, never said as written; each line is what the first person knows of the second, and theirs alone)\n${ties.join('\n')}`,
     knowledge.length > 0 && `# Who knows what\n${knowledge.join('\n')}`,
     plan.stakes && `# What's at stake\n${plan.stakes}`,
     plan.leaves.length > 0 && `# Leaving this turn\n${listed(plan.leaves.map(nameOf))} ${plan.leaves.length === 1 ? 'leaves' : 'leave'}. Show them going.`,
@@ -240,6 +244,15 @@ export function ownedProblems(content: Pack, state: GameState, parsed: ParsedRep
     }
     return theirs.get(speaker)!
   }
+  const present = presentCast(scene)
+  const privateMaterial = [
+    ...present.flatMap((id) => {
+      const c = characterById(content, id)
+      return c ? [{ owner: id, about: [id], text: c.agenda.current }] : []
+    }),
+    ...state.relations.filter((r) => present.includes(r.from) && r.note).map((r) => ({ owner: r.from, about: [r.from, r.to], text: r.note! })),
+    ...Object.entries(state.playerTies).flatMap(([id, t]) => (present.includes(id) && t.note ? [{ owner: id, about: [id], text: t.note }] : []))
+  ]
   const problems: Problem[] = []
   parsed.beats.forEach((b, i) => {
     if (b.kind !== 'dialogue') return
@@ -252,7 +265,19 @@ export function ownedProblems(content: Pack, state: GameState, parsed: ParsedRep
       const holder = firstName(characterById(content, f.owner)?.name ?? f.owner)
       const speaker = firstName(characterById(content, b.speaker)?.name ?? b.speaker)
       problems.push({ kind: 'unowned-fact', beat: i + 1, text: hit, fix: `Beat ${i + 1}: ${speaker} says what only ${holder} knows ("${hit}"). Have ${speaker} ask, guess or say nothing about it.` })
-      break
+      return
+    }
+    // Another person's aim for tonight, or their note about someone, in the words the brief gives it (2026-11-24 play:
+    // what the writer sees for everyone came out of someone it doesn't belong to). Word for word only: a rewording
+    // isn't caught here, and the style guide's rule on what each person knows does the rest.
+    for (const m of privateMaterial) {
+      if (m.about.includes(b.speaker)) continue
+      const hit = runs(m.text, OWNED_PHRASE_WORDS).find((r) => said.includes(` ${r} `) && !ownWords(b.speaker).includes(` ${r} `))
+      if (!hit) continue
+      const holder = firstName(characterById(content, m.owner)?.name ?? m.owner)
+      const speaker = firstName(characterById(content, b.speaker)?.name ?? b.speaker)
+      problems.push({ kind: 'unowned-fact', beat: i + 1, text: hit, fix: `Beat ${i + 1}: ${speaker} says what is ${holder}'s own ("${hit}"). Have ${speaker} ask, guess or say nothing about it.` })
+      return
     }
   })
   return problems
