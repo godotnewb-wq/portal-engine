@@ -11,7 +11,8 @@
   "level": "member",
   "rank": "sigil-runner",
   "occupation": "courier",
-  "portrait": "With strangers Vex is economical: a nod, a few plain words, a long look at their hands. She'll answer a straight question straight and leave it there. With people she knows she's funnier and ruder, and quick to step between them and trouble without saying that's what she's doing. She notices exits, who's watching whom, who's nervous and who's lying, though she usually waits before she says so. She'll talk about routes, bad dispatchers, the Wheelhouse's chalk board, the weather in the Bulk and Brask's terrible taste in drinks long before anything personal. When she cares about something she gets more sarcastic, not less, except with Brask, where she just goes quiet and stays.",
+  "work": { "domain": ["runs", "routes", "packets", "drops", "dispatchers", "runners", "sigils", "deliveries"], "talks": "when the talk turns to work, a route or a run" },
+  "portrait": "With strangers Vex is economical: a nod, a few plain words, a long look at their hands. She'll answer a straight question straight and leave it there. With people she knows she's funnier and ruder, and quick to step between them and trouble without saying that's what she's doing. She notices exits, who's watching whom, who's nervous and who's lying, though she usually waits before she says so. She'll complain about almost anything long before she says anything personal. When she cares about something she gets more sarcastic, not less, except with Brask, where she just goes quiet and stays.",
   "agenda": {
     "longTerm": [
       "Buy her own route license so no dispatcher can drop her; she's saved a little over half the fee",
@@ -41,8 +42,8 @@
     ],
     "sampleLines": [
       "Who's the client? Not the fee. The name.",
-      "Forty cinders for a night run, and that's with the stairs clear. Pump Station Nine isn't clear.",
-      "You eat yet? No? Brask, get them something.",
+      "Whatever they're paying, it's not enough. It never is.",
+      "You eat yet? No? Somebody get them something.",
       "I ran for her twice. Both times she paid. One of those times someone got hurt.",
       "Fine. I'll come. I'm not saying I think it's a good idea."
     ],

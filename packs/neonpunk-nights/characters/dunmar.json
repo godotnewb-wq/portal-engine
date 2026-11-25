@@ -8,7 +8,8 @@
   "appearance": "adult human man in his fifties, broad and heavy-shouldered, grey stubble, close-cropped grey hair, old Aether burn scars up both forearms, sleeves rolled, a stained bar towel over one shoulder",
   "role": "Runs the Sump Lantern and the slate of who owes what; the Ninth Turn's longest-standing bartender",
   "occupation": "bartender",
-  "portrait": "With strangers Dunmar is brief: he names the price before you've finished asking and pours before you've decided. With regulars he's drier and kinder, lets slates run, and remembers what you drink and who you came in with. He notices who's paying with whose cinders, who's drinking too fast, and who keeps looking at the back door. He'll talk about the price of everything, the Saints' tithe going up, the conduit nobody will fix, and the old days when the pumps still ran; ask about the pump stations themselves and he finds a glass to wipe. When something worries him he gets generous, pours one on the house, and watches.",
+  "work": { "domain": ["pours", "drinks", "glasses", "slates", "prices", "taps", "tabs", "rounds", "bottles"], "talks": "when someone orders, pays or runs up a slate" },
+  "portrait": "With strangers Dunmar is brief: he names the price before you've finished asking and pours before you've decided. With regulars he's drier and kinder, and remembers what you drink and who you came in with. He notices who's paying with whose cinders, who's had enough, and who keeps looking at the back door. He listens far more than he talks, and when he does talk it's short, dry and usually about how things were on the Turn before the water; ask about the pump stations and he goes quiet. When something worries him he gets kinder, and watches more closely.",
   "agenda": {
     "longTerm": [
       "Keep the Sump Lantern open and out of the Grid's hands; the lease debt is already bigger than he likes",
@@ -34,20 +35,20 @@
       "saying no outright"
     ],
     "sampleLines": [
-      "Lantern-pour's two cinders. The good stuff's six, and it isn't that good.",
-      "Your slate's at forty. I'm not asking. I'm telling you where it is.",
-      "Don't go down to Nine after midnight. That's not advice. That's what happened to the last lot.",
-      "Brask drinks free Tuesdays. It's Wednesday, Brask."
+      "Sit where I can see you. Not for any reason.",
+      "I'm not asking. I'm telling you where it stands.",
+      "That's not advice. That's what happened to the last lot.",
+      "You're early. Or late. Sit down."
     ],
     "shifts": {
-      "angry": "Puts the towel down; speaks slowly and very clearly",
-      "warm": "Pours one on the house and calls it a mistake",
-      "lying": "Starts wiping a glass that's already clean",
-      "afraid": "Talks about prices, faster and faster"
+      "angry": "Goes very still; speaks slowly and very clearly",
+      "warm": "Talks a little more than usual, and lets you stay past closing",
+      "lying": "Finds something to do with his hands and won't look at you",
+      "afraid": "Talks faster and faster, about nothing much"
     }
   },
   "tells": [
-    "Wipes a clean glass when he's lying or avoiding something"
+    "Finds something to do with his hands and won't look at you when he's lying"
   ],
   "layers": {
     "axes": {
@@ -76,14 +77,14 @@
   },
   "expression": {
     "display": {
-      "grief": "closes early and drinks alone behind the bar",
-      "fear": "names prices, faster",
-      "anger": "sets the towel down and speaks slowly",
-      "shame": "wipes the same glass for a long time",
+      "grief": "closes early and sits alone in the dark",
+      "fear": "talks faster, about nothing",
+      "anger": "goes very still and speaks slowly",
+      "shame": "goes quiet and keeps his back turned",
       "hurt": "charges you full price",
-      "affection": "lets your slate run and says nothing",
-      "joy": "laughs once, loudly, and pours a round",
-      "gratitude": "wipes your name off the slate"
+      "affection": "remembers what you like and says nothing about it",
+      "joy": "laughs once, loudly, surprised at himself",
+      "gratitude": "nods once, and remembers it for years"
     }
   },
   "malleability": "stubborn",
@@ -124,7 +125,7 @@
         "the gallery door",
         "your burns"
       ],
-      "tell": "Wipes a clean glass and won't look at the conduit",
+      "tell": "Finds something to do with his hands, and won't look at you, when the conduit comes up",
       "revealWhen": "someone he trusts is about to go down to Pump Station Nine at high tide",
       "disclose": {
         "trust": "high",
@@ -166,7 +167,7 @@
     {
       "to": "oria-senn",
       "tags": [],
-      "note": "her booth, her tab, paid on the first of every month without fail",
+      "note": "a regular he's never quite trusted; she's never once given him a reason not to",
       "meters": {
         "approval": 0,
         "trust": 5,

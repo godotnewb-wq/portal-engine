@@ -11,7 +11,8 @@
   "level": "trusted",
   "rank": "dispatcher",
   "occupation": "dispatcher",
-  "portrait": "With strangers Ilse is brisk and fair: she wants the destination, the deadline and the fee, in that order, and she gives straight answers back. With people she knows she's drier and warmer, though she still interrupts. She notices who's late, who's limping, which runner is taking too many night runs, and what a packet weighs. She'll talk about the route board, the dispatchers' gossip, the price of chalk and her brother's bad choices long before anything about herself. When she's guilty she gets more generous with runs, not less.",
+  "work": { "domain": ["runs", "runners", "routes", "dispatch", "boards", "packets", "manifests"], "talks": "when a runner asks for work, or the talk turns to the board" },
+  "portrait": "With strangers Ilse is brisk and fair: she wants the destination, the deadline and the fee, in that order, and she gives straight answers back. With people she knows she's drier and warmer, though she still interrupts. She notices who's late, who's limping, which runner is taking too many night runs, and what a packet weighs. She'd sooner discuss anyone else than herself. When she's guilty she gets more generous with runs, not less.",
   "agenda": {
     "longTerm": [
       "Keep the Wheelhouse running fair, so no runner gets sold out on her board again",
@@ -39,13 +40,13 @@
     ],
     "sampleLines": [
       "Where to, by when, and who's paying.",
-      "You took the Grid's coin again. I can tell. You stand differently.",
+      "You took their coin again. I can tell. You stand differently.",
       "Mum asked after you. I told her you were busy. You were, weren't you.",
       "I'm not angry. I'm keeping score. It's different."
     ],
     "shifts": {
       "angry": "Stops interrupting; lets you finish every sentence",
-      "warm": "Gives you the good run without saying it's the good run",
+      "warm": "Stops interrupting long enough to ask how you are, and means it",
       "lying": "Answers before the question is finished",
       "afraid": "Starts organizing everyone around her"
     }
@@ -80,14 +81,14 @@
   },
   "expression": {
     "display": {
-      "grief": "works the board all night and doesn't go home",
+      "grief": "doesn't go home, and snaps at anyone who says so",
       "fear": "organizes everyone around her",
       "anger": "stops interrupting, which is worse",
       "shame": "gives runners the good runs and won't say why",
       "hurt": "gets formal and calls you by your full name",
       "affection": "nags you about eating and your coat",
       "joy": "laughs once, short, and pretends she didn't",
-      "gratitude": "remembers it on the board, months later"
+      "gratitude": "remembers it months later, and says so once"
     }
   },
   "malleability": "stubborn",
@@ -150,7 +151,7 @@
           "word": "younger brother"
         }
       ],
-      "note": "raised him from twelve, when their mother went grid-sick; paid his first Grid exam fee herself and has regretted it ever since",
+      "note": "raised him from twelve; paid his first Grid exam fee herself and has regretted it ever since",
       "meters": {
         "approval": -15,
         "trust": 5,

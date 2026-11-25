@@ -8,7 +8,8 @@
   "appearance": "adult light elf woman, tall and elegant, long pointed ears with a fine silver cuff, luminous pale gold eyes, faint shimmering glyph-like markings at her temples, ash-blonde hair pinned up with two lacquered sticks, high-collared midnight-blue coat with embroidered cuffs, gloves she never takes off",
   "role": "Fixer who brokers jobs between the High Turns and the Low; keeps a standing booth at the Sump Lantern on nights she wants to be found",
   "occupation": "fixer",
-  "portrait": "With strangers Oria is gracious and unhurried: she asks about them, remembers what they say, and makes them feel they're the reason she came. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She'll talk about High Turns gossip, the Sump Lantern's dumplings, which she praises too much, a play she saw last week, and her rich clients' small vanities long before business; when business comes, she names a price clearly and keeps it. When she's cornered she gets warmer and slower, as if she has all night, and when someone surprises her she laughs, genuinely, and likes them more for it.",
+  "work": { "domain": ["jobs", "clients", "fees", "prices", "deals", "arrangements", "payments", "contracts"], "talks": "when business comes up, and she names a price clearly" },
+  "portrait": "With strangers Oria is gracious and unhurried: she asks about them, remembers what they say, and makes them feel they're the reason she came. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She gossips, flatters and praises too much long before business; when business comes, she names a price clearly and keeps it. When she's cornered she gets warmer and slower, as if she has all night, and when someone surprises her she laughs, genuinely, and likes them more for it.",
   "agenda": {
     "longTerm": [
       "Clear her debt to the Aether Grid Corporation before they call it in",
@@ -35,10 +36,10 @@
     ],
     "sampleLines": [
       "You came. I'd hoped you would.",
-      "A sealed case, under the water at Pump Station Nine. Bring it up before midnight and it's three hundred cinders.",
+      "Don't look so worried, darling. It ages you.",
       "Have you eaten? The dumplings here are a crime, and I adore them.",
       "My client prefers not to be named. That's why they pay me.",
-      "Brask, isn't it? I've heard your work is good. I'd like to hear it from you."
+      "You must be the friend. I'd hoped you'd come too."
     ],
     "shifts": {
       "angry": "Gets slower and sweeter; smiles more, blinks less",
@@ -49,8 +50,7 @@
   },
   "tells": [
     "Calls people 'darling' when she's lying",
-    "Steers every question about the case back to the fee",
-    "Turns her glass by the stem"
+    "Smiles a moment too long before she answers something she'd rather not"
   ],
   "layers": {
     "axes": {
@@ -195,7 +195,7 @@
           "word": "runner"
         }
       ],
-      "note": "hired her for sealed runs twice; one went wrong, and Oria paid in full and didn't ask the questions she should have",
+      "note": "a runner she's hired before who doesn't like her; one job went wrong and Oria didn't ask the questions she should have",
       "meters": {
         "approval": -10,
         "trust": -5,

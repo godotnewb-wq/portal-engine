@@ -351,7 +351,7 @@
   },
   "brief": {
     "budget": 500,
-    "used": 212,
+    "used": 206,
     "selected": [
       {
         "id": "oria-senn.k3",
@@ -375,7 +375,7 @@
         "kind": "note",
         "rank": "answer",
         "trigger": "named: Oria",
-        "tokens": 27
+        "tokens": 21
       },
       {
         "id": "note.vex.oria-senn",
@@ -422,7 +422,7 @@
     "dropped": [],
     "recurring": {
       "vex": 377,
-      "brask": 404,
+      "brask": 393,
       "oria-senn": 434,
       "kesh": 251
     },
@@ -829,7 +829,7 @@
   },
   "brief": {
     "budget": 500,
-    "used": 418,
+    "used": 412,
     "selected": [
       {
         "id": "oria-senn.k1",
@@ -864,14 +864,6 @@
         "tokens": 23
       },
       {
-        "id": "note.oria-senn.vex",
-        "owner": "oria-senn",
-        "kind": "note",
-        "rank": "answer",
-        "trigger": "player's words: seal",
-        "tokens": 32
-      },
-      {
         "id": "note.vex.oria-senn",
         "owner": "vex",
         "kind": "note",
@@ -893,7 +885,7 @@
         "kind": "note",
         "rank": "choice",
         "trigger": "the pair spoke last turn",
-        "tokens": 27
+        "tokens": 21
       },
       {
         "id": "note.brask.vex",
@@ -910,6 +902,14 @@
         "rank": "choice",
         "trigger": "the pair spoke last turn",
         "tokens": 24
+      },
+      {
+        "id": "note.oria-senn.vex",
+        "owner": "oria-senn",
+        "kind": "note",
+        "rank": "choice",
+        "trigger": "the pair spoke last turn",
+        "tokens": 32
       },
       {
         "id": "note.vex.brask",
@@ -956,7 +956,7 @@
     "dropped": [],
     "recurring": {
       "vex": 368,
-      "brask": 398,
+      "brask": 387,
       "oria-senn": 424,
       "kesh": 244
     },
@@ -1453,20 +1453,20 @@
         "tokens": 41
       },
       {
-        "id": "note.oria-senn.vex",
-        "owner": "oria-senn",
-        "kind": "note",
-        "rank": "choice",
-        "trigger": "the pair spoke last turn",
-        "tokens": 32
-      },
-      {
         "id": "note.vex.oria-senn",
         "owner": "vex",
         "kind": "note",
         "rank": "choice",
         "trigger": "the pair spoke last turn",
         "tokens": 30
+      },
+      {
+        "id": "note.oria-senn.vex",
+        "owner": "oria-senn",
+        "kind": "note",
+        "rank": "choice",
+        "trigger": "the pair spoke last turn",
+        "tokens": 32
       },
       {
         "id": "brask.k2",
@@ -1529,7 +1529,7 @@
     "dropped": [],
     "recurring": {
       "vex": 368,
-      "brask": 398,
+      "brask": 387,
       "oria-senn": 571,
       "kesh": 244
     },

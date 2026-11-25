@@ -11,7 +11,8 @@
   "level": "trusted",
   "rank": "shift boss",
   "occupation": "shift boss",
-  "portrait": "With strangers Harl is gruff and short: company business, company answers. With people he knows he's fair, blunt and quietly protective, and he'll cover for a tech who made an honest mistake. He notices the substation's hum, who's tired, who's careless and who's been near a panel they shouldn't. He'll talk about the substation, the old line accidents, the foundries' complaints and his crews before he talks about the board. When something touches the old overload he goes quiet and finds a reason to leave.",
+  "work": { "domain": ["crews", "shifts", "meters", "quotas", "schedules", "substations", "rosters"], "talks": "when the talk turns to the substation, his crews or the schedule" },
+  "portrait": "With strangers Harl is gruff and short: company business, company answers. With people he knows he's fair, blunt and quietly protective, and he'll cover for a tech who made an honest mistake. He notices the substation's hum, who's tired, who's careless and who's been near a panel they shouldn't. He speaks up for his crews before himself, and for himself before the board. When something touches the old overload he goes quiet and finds a reason to leave.",
   "agenda": {
     "longTerm": [
       "Get his crews through to retirement in one piece",
@@ -38,14 +39,14 @@
     "sampleLines": [
       "That's company business. Ask the company.",
       "My crews don't touch transit panels. Not on my shift.",
-      "Somebody's telling the Wheel which nights go dark. When I find out who, I'd rather it was someone I like.",
+      "Somebody's talking out of turn. When I find out who, I'd rather it wasn't one of mine.",
       "Go home, Varrin. You're no good to me asleep."
     ],
     "shifts": {
       "angry": "Goes quiet and very procedural",
-      "warm": "Covers your shift and doesn't mention it",
+      "warm": "Gets gruffly kind: asks after your family and acts like he didn't",
       "lying": "Quotes the company handbook",
-      "afraid": "Clicks his pen and talks about the hum"
+      "afraid": "Clicks his pen and talks about anything but what's wrong"
     }
   },
   "tells": [
@@ -78,14 +79,14 @@
   },
   "expression": {
     "display": {
-      "grief": "walks the substation alone at night",
-      "fear": "clicks his pen and talks about the hum",
+      "grief": "walks alone at night and won't say where",
+      "fear": "clicks his pen and talks about anything else",
       "anger": "goes procedural and quiet",
       "shame": "finds a reason to leave",
       "hurt": "becomes very formal",
       "affection": "covers your shift and says nothing",
       "joy": "laughs, short and rough",
-      "gratitude": "puts you on the good shift"
+      "gratitude": "remembers it, and stands up for you when it counts"
     }
   },
   "malleability": "stubborn",
@@ -138,7 +139,7 @@
           "word": "meter-man"
         }
       ],
-      "note": "his best meter-man, too soft on the poor meters; Harl covers for it",
+      "note": "the best of his crew and too soft by half; Harl covers for him",
       "meters": {
         "approval": 20,
         "trust": 15,
@@ -153,7 +154,7 @@
           "word": "line tech"
         }
       ],
-      "note": "the line tech on a final warning; Harl wrote it up as lightly as he could and expects him to stay clear of panels",
+      "note": "the line tech he's protecting as far as he can; expects him to stay clear of panels",
       "meters": {
         "approval": 10,
         "trust": 0,

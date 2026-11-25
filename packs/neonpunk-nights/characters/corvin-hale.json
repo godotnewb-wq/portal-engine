@@ -11,7 +11,8 @@
   "level": "trusted",
   "rank": "surveyor",
   "occupation": "surveyor",
-  "portrait": "With strangers Corvin is polite and precise: he explains what he's measuring, and why, at length. With people he knows he's warmer, and he asks real questions and listens to the answers. He notices stone, water levels, old Council stencils, cracked seals, and whether a stair will hold another winter. He'll talk about the pre-Burn engineers who built the stations, the Phoenix Academy's lectures and the light in the Crown before he'll talk about who he works for. When he's uncomfortable he offers people money, kindly, and is hurt when they take it badly.",
+  "work": { "domain": ["surveys", "maps", "measurements", "readings", "charts", "gauges", "depths"], "talks": "when someone asks what he's mapping, or the talk turns to the stations" },
+  "portrait": "With strangers Corvin is polite and precise: he explains what he's measuring, and why, at length. With people he knows he's warmer, and he asks real questions and listens to the answers. He notices stone, water levels, old Council stencils, cracked seals, and whether a stair will hold another winter. He'll talk about almost anything before he'll say who he works for. When he's uncomfortable he offers people money, kindly, and is hurt when they take it badly.",
   "agenda": {
     "longTerm": [
       "Finish the Ninth Turn survey and earn a district post",
@@ -43,12 +44,12 @@
     "shifts": {
       "angry": "Goes very quiet and very formal",
       "warm": "Tells you something true about the stations that he shouldn't",
-      "lying": "Explains the measurement in more detail than anyone asked",
+      "lying": "Over-explains, in long careful sentences, and keeps apologizing",
       "afraid": "Offers money, quickly, to make it stop"
     }
   },
   "tells": [
-    "Explains measurements in great detail when he's avoiding something",
+    "Over-explains, in long careful sentences, when he's avoiding something",
     "Offers money when he's uncomfortable"
   ],
   "layers": {
@@ -78,8 +79,8 @@
   },
   "expression": {
     "display": {
-      "grief": "works later and later on the maps",
-      "fear": "explains the measurements faster",
+      "grief": "stops sleeping, and apologizes for it",
+      "fear": "talks faster and apologizes more",
       "anger": "goes very quiet and formal",
       "shame": "offers to pay for something",
       "hurt": "is very polite and leaves",
@@ -141,7 +142,7 @@
     {
       "to": "brask",
       "tags": [],
-      "note": "made him the Grid's offer for his filter design; still hopes to talk him round",
+      "note": "the mechanic he's trying to win over; he likes him, which makes it harder",
       "meters": {
         "approval": 25,
         "trust": 10,

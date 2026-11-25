@@ -11,7 +11,8 @@
   "level": "member",
   "rank": "conductor",
   "occupation": "conductor",
-  "portrait": "With strangers Kesh is courteous and exact: she gives times to the minute and directions to the stop, and would rather say \"I don't know\" than guess. With people she knows she's drier and kinder, and she remembers what they told her last week. She notices who is standing too close to the doors, whose breathing has changed, and how long things take. She'll talk about the line, its stops, the driver-core proposal and the people who ride at this hour long before she talks about herself, and she's quietly proud of eleven years without a passenger lost. When she's worried she gets more polite, not less.",
+  "work": { "domain": ["cars", "stops", "schedules", "timetables", "rails", "tickets", "coils", "brakes"], "talks": "when the talk turns to the line, the car or the schedule" },
+  "portrait": "With strangers Kesh is courteous and exact: she gives times to the minute and directions to the stop, and would rather say \"I don't know\" than guess. With people she knows she's drier and kinder, and she remembers what they told her last week. She notices who is standing too close to the doors, whose breathing has changed, and how long things take. She'd sooner ask about you than say anything about herself, and she's quietly proud of her record, though she'd never bring it up. When she's worried she gets more polite, not less.",
   "agenda": {
     "longTerm": [
       "Keep her post: the Coil Line keeps proposing to replace conductors with fixed driver cores, and she wants to prove a person in the car matters",
@@ -36,9 +37,9 @@
       "talking about her body"
     ],
     "sampleLines": [
-      "Nineteen minutes since the drop. Dispatch said ten.",
-      "The market stop is four hundred meters on. It will still be there when we move.",
-      "You get off at the market stop, most nights. How was the shift?",
+      "We're late. Dispatch said we wouldn't be. Dispatch says a lot of things.",
+      "It will still be there when we move. Sit down, please.",
+      "You look tired. That isn't a criticism.",
       "No. The doors stay shut on a dead span. I'm sorry; I mean that.",
       "The roof hatch isn't locked. That isn't the same as safe."
     ],
@@ -91,8 +92,8 @@
       "fear": "recites procedure aloud, very evenly",
       "anger": "gets very quiet and very formal",
       "shame": "apologizes in exact, complete sentences",
-      "hurt": "goes back to her panel and checks it twice",
-      "affection": "remembers your stop and your news, and asks",
+      "hurt": "goes back to work and checks everything twice",
+      "affection": "remembers your news, and asks about it",
       "joy": "hums the stop chimes out loud",
       "gratitude": "writes your name in her logbook as the reason something went well"
     }

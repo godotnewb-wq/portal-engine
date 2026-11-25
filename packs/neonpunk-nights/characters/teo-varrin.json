@@ -11,7 +11,8 @@
   "level": "member",
   "rank": "line tech",
   "occupation": "line technician",
-  "portrait": "With strangers Teo is polite and a little too eager to be useful, then embarrassed by it. With people he knows he talks shop for as long as anyone lets him and makes bad jokes about the company. He notices sounds: the coil's tick, a panel's hum, a lamp about to go. He'd rather talk about how things work, or the Phoenix Academy's entrance exam, than about himself, and he asks people about their jobs because he likes knowing how the city runs. When he's frightened he goes quiet and agrees with whoever spoke last.",
+  "work": { "domain": ["lines", "coils", "panels", "relays", "cables", "circuits", "restarts", "sequences"], "talks": "when someone asks how the line works or what's wrong with it" },
+  "portrait": "With strangers Teo is polite and a little too eager to be useful, then embarrassed by it. With people he knows he talks shop for as long as anyone lets him and makes bad jokes about the company. He notices sounds: the coil's tick, a panel's hum, a lamp about to go. He'd rather explain how something works than say anything about himself, and he asks people about their jobs because he likes knowing how the city runs. When he's frightened he goes quiet and agrees with whoever spoke last.",
   "agenda": {
     "longTerm": [
       "Keep his job long enough to pay off his apprenticeship debt to the Aether Grid Corporation",
@@ -40,7 +41,7 @@
       "It's a cold start. Probably. If the coil's not cracked— sorry, if it's not damaged.",
       "What do you do? Sorry. I like knowing what people do.",
       "Those lamps will last a couple of hours. They're older than me.",
-      "The company says maintenance. Three times this month isn't maintenance.",
+      "They say it's maintenance. It's never maintenance.",
       "I could do it. I'm not allowed to. Those are both true."
     ],
     "shifts": {

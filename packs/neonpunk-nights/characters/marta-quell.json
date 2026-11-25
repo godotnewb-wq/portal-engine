@@ -11,7 +11,8 @@
   "level": "member",
   "rank": "warden sergeant",
   "occupation": "warden",
-  "portrait": "With strangers Marta is polite and direct: she asks your name and business and writes both down. With people she knows she's wry, and she'll tell you which patrols to avoid if she likes you. She notices lies, nerves, new faces, forged papers and who's wearing someone else's coat. She'll talk about the Wheel's market, the Ward Office's staffing, the Council's priorities and her own beat, never about the Ninth Turn's Wardens. When she's sure of something she stops writing it down.",
+  "work": { "domain": ["patrols", "arrests", "reports", "orders", "beats", "cells", "warrants"], "talks": "when there's trouble, or someone asks about the law" },
+  "portrait": "With strangers Marta is polite and direct: she asks your name and business and writes both down. With people she knows she's wry, and she'll tell you which patrols to avoid if she likes you. She notices lies, nerves, new faces, forged papers and who's wearing someone else's coat. She's plain-spoken about her own work and goes quiet about the people above her. When she's sure of something she stops writing it down.",
   "agenda": {
     "longTerm": [
       "Keep the Wheel safe with the Wardens she's given, which isn't enough",
@@ -37,19 +38,19 @@
     ],
     "sampleLines": [
       "Name and business. I'm writing it down, so make it the real one.",
-      "I'm looking for a family. Four of them. You haven't seen them.",
-      "The Ninth Turn's Wardens are not my business. Not yet.",
-      "The Council wants the Wheel quiet. So do I. Different reasons."
+      "I'm looking for some people. You haven't seen them. Of course you haven't.",
+      "That's not my business. Not yet.",
+      "They want it quiet. So do I. Different reasons."
     ],
     "shifts": {
-      "angry": "Stops writing and speaks very quietly",
-      "warm": "Tells you which patrols to avoid tonight",
-      "lying": "Writes something down she doesn't need to",
+      "angry": "Speaks very quietly, every word separate",
+      "warm": "Drops the official voice and talks to you like a neighbor",
+      "lying": "Repeats your question back to you, word for word",
       "afraid": "Goes formal and by the book"
     }
   },
   "tells": [
-    "Writes things down she doesn't need to when she's lying"
+    "Repeats your question back to you, word for word when she's lying"
   ],
   "layers": {
     "axes": {
@@ -78,14 +79,14 @@
   },
   "expression": {
     "display": {
-      "grief": "walks her beat twice",
+      "grief": "says nothing for a whole evening",
       "fear": "goes formal and by the book",
-      "anger": "stops writing and speaks very quietly",
+      "anger": "speaks very quietly, every word separate",
       "shame": "writes it all down, exactly",
       "hurt": "says nothing and walks on",
       "affection": "warns you off a patrol",
       "joy": "laughs, once, surprised",
-      "gratitude": "remembers it on her beat"
+      "gratitude": "remembers it, and tells you so, once"
     }
   },
   "malleability": "average",
@@ -125,7 +126,7 @@
         "the evidence",
         "the magistrate"
       ],
-      "tell": "Writes things down she doesn't need to",
+      "tell": "Repeats your question back to you, word for word",
       "revealWhen": "someone shows her the family is in real danger",
       "disclose": {
         "trust": "high",

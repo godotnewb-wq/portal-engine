@@ -54,7 +54,7 @@ const found = [
 ]
 const listings: PackListing[] = found.map(({ key, built, cover }) => {
   const manifest = built.ok ? built.pack.manifest : built.manifest
-  return { key, source: 'bundled', ...(manifest && { manifest }), ok: built.ok, problems: built.ok ? [] : built.problems, duplicate: false, ...(cover && { cover }) }
+  return { key, source: 'bundled', ...(manifest && { manifest }), ok: built.ok, problems: built.ok ? [] : built.problems, warnings: built.ok ? built.warnings : [], duplicate: false, ...(cover && { cover }) }
 })
 let content: Pack
 

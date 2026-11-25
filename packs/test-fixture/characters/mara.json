@@ -10,6 +10,7 @@
   "level": "trusted",
   "rank": "tally-keeper",
   "occupation": "clerk",
+  "work": { "domain": ["ledgers", "tallies", "books", "crates", "accounts", "invoices"], "talks": "when someone asks about the yard's books or its stock" },
   "portrait": "With strangers Mara is brisk; with friends she teases. She notices numbers that are off.",
   "agenda": { "longTerm": ["Become the Guild's chief clerk"], "current": "Find out who keeps skimming the tallies" },
   "contradictions": ["Values honesty, and keeps two sets of books"],

@@ -1,7 +1,7 @@
 import { z } from 'zod'
-import { CharacterSchema, PlayerSchema, type Character, type CharacterFile, type Meters, type Player } from '@engine/characters'
+import { cardShapeProblems, CharacterSchema, PlayerSchema, type Character, type CharacterFile, type Meters, type Player } from '@engine/characters'
 import { rankCap, RulesetSchema, rulesetProblems, type Ruleset, type StatBlock } from '@engine/rules'
-import { buildCodex, codexProblems, codexWarnings, entryById, mayHold, type CodexEntry, type CodexFile, type Knower } from '@engine/codex'
+import { buildCodex, canonNames, codexProblems, codexWarnings, entryById, mayHold, type CodexEntry, type CodexFile, type Knower } from '@engine/codex'
 import { LocationSchema, SettingSchema, settingProblems, speciesById, factionById, tierById, STANCE_LEVEL_COUNT, type Location, type Setting } from '@engine/world'
 import { firstName } from '@engine/core'
 import { ENGINE_VERSION, PackManifestSchema, satisfies, type PackManifest } from './manifest'
@@ -60,7 +60,8 @@ export interface PackFiles {
 }
 
 export type BuiltPack =
-  | { ok: true; pack: Pack }
+  /** `warnings`: what doesn't stop the pack but should be fixed, e.g. a card whose trade fills it (`cardShapeProblems`). */
+  | { ok: true; pack: Pack; warnings: string[] }
   /** The manifest is kept when it reads, so a pack picker can still show which pack is broken. */
   | { ok: false; problems: string[]; manifest?: PackManifest }
 
@@ -95,7 +96,7 @@ export function buildPack(files: PackFiles): BuiltPack {
   const { overused, ...vocabulary } = words
   const pack: Pack = { manifest, ruleset, setting, primer: files.primer.trim(), tone: files.tone.trim(), phrases: overused, vocabulary, codex: codex.entries, characters: characters.map((c) => withSecretTexts(c, codex.entries)), locations, player }
   const cross = packProblems(pack)
-  return cross.length > 0 ? { ok: false, problems: cross, manifest } : { ok: true, pack }
+  return cross.length > 0 ? { ok: false, problems: cross, manifest } : { ok: true, pack, warnings: pack.characters.flatMap((c) => cardShapeProblems(c, worldNames(pack)).map((p) => `characters: ${p}`)) }
 }
 
 /**
@@ -249,3 +250,12 @@ export function packProblems(pack: Pack): string[] {
 
 export const characterById = (pack: Pack, id: string): Character | undefined => pack.characters.find((c) => c.id === id)
 export const locationById = (pack: Pack, id: string): Location | undefined => pack.locations.find((l) => l.id === id)
+
+/**
+ * The world's names, as a card or a line might use them: the codex's names and aliases, places, factions, the cast and the
+ * player, each full name and first name. A name in a line is a fact of this world (writing issue 2, 2026-11-25).
+ */
+export function worldNames(pack: Pick<Pack, 'codex' | 'locations' | 'characters' | 'player' | 'setting'>): string[] {
+  const people = [...pack.characters.map((c) => c.name), pack.player.name]
+  return [...new Set([...canonNames(pack.codex), ...pack.locations.map((l) => l.name), ...pack.setting.factions.map((f) => f.name), ...people, ...people.map(firstName)])]
+}

@@ -8,7 +8,8 @@
   "appearance": "adult golem, tall and heavy, scuffed dark-blue panels, rune-circuitry glowing a tired amber at the throat, a doctor's long coat patched at the elbows, a stethoscope he doesn't need, hands steady as stone",
   "role": "The Wheel clinic's only doctor, on shift around the clock; Jun Halloway's boss",
   "occupation": "doctor",
-  "portrait": "With strangers Abenez is calm and plain: he asks what hurts, listens all the way through, and tells the truth gently. With people he knows he's dry and funny, and he lets Jun boss him around. He notices breathing, color, grid-sickness, who's been waiting longest, and when his own core is running hot. He'll talk about the clinic, the queue, the price of burn gel and the Academy's medical lectures he reads at four in the morning. When he's worried he gets slower and more careful.",
+  "work": { "domain": ["patients", "clinic", "wounds", "medicine", "doses", "stitches", "fevers", "wards", "bandages"], "talks": "when someone is hurt or ill, or asks about the clinic" },
+  "portrait": "With strangers Abenez is calm and plain: he asks what hurts, listens all the way through, and tells the truth gently. With people he knows he's dry and funny, and he lets Jun boss him around. He notices breathing, color, grid-sickness, who's been waiting longest, and when his own core is running hot. He's easier to talk to about anyone's troubles than his own. When he's worried he gets slower and more careful.",
   "agenda": {
     "longTerm": [
       "Keep the clinic open on donations",
@@ -32,8 +33,8 @@
     ],
     "sampleLines": [
       "What hurts? Show me. Then tell me the rest.",
-      "Jun runs this clinic. I just work in it.",
-      "Burn gel's out until Thursday. Until then, cool water and patience.",
+      "Don't thank me. Thank whoever's still awake.",
+      "Sit. Don't touch it. Whatever you were about to do, don't.",
       "I don't sleep. That's not the same as not being tired."
     ],
     "shifts": {
@@ -131,7 +132,7 @@
           "word": "nurse"
         }
       ],
-      "note": "his night nurse for six years; she runs the clinic and he lets her",
+      "note": "his night nurse, and the one who really keeps the place going; he lets her",
       "meters": {
         "approval": 35,
         "trust": 40,

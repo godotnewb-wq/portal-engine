@@ -65,7 +65,7 @@
           {
             "with": "oria-senn",
             "words": "",
-            "note": "has heard of her for years and never met her; knows she always pays and that nobody says what for",
+            "note": "a name he's heard for years and never met; wary of her on Vex's account",
             "how": "present"
           }
         ]
@@ -88,7 +88,7 @@
           {
             "with": "vex",
             "words": "runner",
-            "note": "hired her for sealed runs twice; one went wrong, and Oria paid in full and didn't ask the questions she should have",
+            "note": "a runner she's hired before who doesn't like her; one job went wrong and Oria didn't ask the questions she should have",
             "how": "present"
           },
           {
@@ -134,7 +134,7 @@
           {
             "with": "oria-senn",
             "words": "",
-            "note": "her booth, her tab, paid on the first of every month without fail",
+            "note": "a regular he's never quite trusted; she's never once given him a reason not to",
             "how": "present"
           }
         ]
@@ -233,7 +233,7 @@
         {
           "who": "brask",
           "bonus": 1,
-          "knows": "has heard of her for years and never met her; knows she always pays and that nobody says what for"
+          "knows": "a name he's heard for years and never met; wary of her on Vex's account"
         }
       ]
     }

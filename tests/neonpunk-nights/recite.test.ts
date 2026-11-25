@@ -17,8 +17,13 @@ describe('a fact or note in the brief’s own words (2026-11-25 play)', () => {
       expect.stringMatching(/^Beat 1: Dunmar says it in the brief's words \(".+"\)\. Say it the way Dunmar would here, to these people, or leave it out\.$/)
     ])
     expect(recited('Vex: "I ran sealed packets for her twice. Both paid."')).toHaveLength(1)
-    // Four words in a row aren't enough since the replays of 2026-11-25: a term from someone's world was sent back.
-    expect(recited('Vex: "She\'s a client. Hired me twice, sealed packets, both paid on time."')).toEqual([])
+    // A note or fact reworded into "I" and "you", with its key words in the same order, is the same line (writing issue 2):
+    // both were flagged in play (2026-11-25 1242 and 2112).
+    expect(recited('Vex: "She\'s a client. Hired me twice, sealed packets, both paid on time."')).toHaveLength(1)
+    expect(recited('Oria: "You\'d be Brask. I\'ve heard your work is good."').map((p) => p.text)).toEqual(['heard … work … good'])
+    // A term from someone's world, or a place's name, isn't a fact said: "sealed packets" alone, "Pump Station Nine".
+    expect(recited('Vex: "She\'s a client. Sealed packets, mostly. She pays."')).toEqual([])
+    expect(recited('Vex: "Pump Station Nine. Of course it is."')).toEqual([])
     expect(recited('Dunmar: "Oria. Never once late with her slate, which is more than I can say for some."')).toEqual([])
     expect(recited('NARRATION: Oria pays her tab on the first of every month.')).toEqual([])
   })

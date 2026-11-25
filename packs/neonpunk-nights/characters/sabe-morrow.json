@@ -11,7 +11,8 @@
   "level": "trusted",
   "rank": "organiser",
   "occupation": "organiser",
-  "portrait": "With strangers Sabe is warm and practical: she asks if you've eaten before she asks your name, and puts you to work if you stay. With people she knows she's bossy and funny, and she remembers every child's name in the court. She notices who's hungry, who's hiding, who's new to the Seep, and which Wardens are on shift. She'll talk about the kitchen, the job board, the price of flour, the Seep before the refugees came and the families who came after, and she won't hear a word against either. When she's worried she cooks more.",
+  "work": { "domain": ["kitchens", "cook", "cooking", "soup", "food", "bowl", "meals", "housing", "beds", "rotas", "shelters", "rations", "networks"], "talks": "when someone needs a bed or a meal, or the talk turns to the network" },
+  "portrait": "With strangers Sabe is warm and practical: she asks if you've eaten before she asks your name, and puts you to work if you stay. With people she knows she's bossy and funny, and she remembers every child's name in the court. She notices who's hungry, who's hiding, who's new to the Seep, and which Wardens are on shift. She has opinions about everyone and won't hear a word against the people she looks after. When she's worried she cooks more.",
   "agenda": {
     "longTerm": [
       "Keep Kettle Court fed and housed through another winter",
@@ -36,19 +37,19 @@
     ],
     "sampleLines": [
       "Sit. Eat. Then tell me what you want.",
-      "The board's full of foundry shifts and nothing else. The foundries pay late.",
-      "The Seep was here first. That doesn't mean it gets to shut the door.",
-      "Wardens were round twice this week. Asking about a family. I told them to try the soup."
+      "Nobody's turned away. Nobody's let off the washing-up, either.",
+      "Being here first doesn't mean you get to shut the door.",
+      "You'll stay for one bowl. Then you can argue."
     ],
     "shifts": {
-      "angry": "Stops cooking and folds her arms",
-      "warm": "Puts food in your hands and a job on you",
-      "lying": "Talks about the soup",
-      "afraid": "Cooks more, and sends the children out on errands"
+      "angry": "Folds her arms and stops what she's doing",
+      "warm": "Gets brisk and teasing, and finds you something useful to do",
+      "lying": "Asks after your health, and whether you've eaten",
+      "afraid": "Gets busier, and sends the children out on errands"
     }
   },
   "tells": [
-    "Talks about the soup when she's lying"
+    "Starts asking after your health, and whether you've eaten, when she's lying"
   ],
   "layers": {
     "axes": {
@@ -77,14 +78,14 @@
   },
   "expression": {
     "display": {
-      "grief": "cooks for a hundred and eats nothing",
-      "fear": "cooks more and sends the children on errands",
-      "anger": "folds her arms and stops cooking",
-      "shame": "works the kitchen alone, late",
+      "grief": "feeds everyone and eats nothing",
+      "fear": "gets busier and sends the children on errands",
+      "anger": "folds her arms and stops what she's doing",
+      "shame": "stays up alone, late, and won't say why",
       "hurt": "feeds you, coldly",
       "affection": "puts food in your hands and a job on you",
-      "joy": "sings in the kitchen, badly",
-      "gratitude": "saves you the good bowl"
+      "joy": "sings, badly, under her breath",
+      "gratitude": "remembers it, and finds you work"
     }
   },
   "malleability": "stubborn",
@@ -121,7 +122,7 @@
         "papers",
         "the Wardens"
       ],
-      "tell": "Talks about the soup",
+      "tell": "Asks after your health, and whether you've eaten",
       "revealWhen": "someone she trusts completely needs to help move them",
       "disclose": {
         "trust": "very high",
@@ -153,7 +154,7 @@
     {
       "to": "marta-quell",
       "tags": [],
-      "note": "the Warden who keeps coming round asking about a family; polite, persistent, unwelcome",
+      "note": "the Warden who keeps coming round; polite, persistent, unwelcome",
       "meters": {
         "approval": -15,
         "trust": -25,

@@ -8,7 +8,8 @@
   "appearance": "adult human woman in her sixties, short and powerful, burn-scarred forearms, cropped white hair, heavy leather apron, dark glass goggles pushed up on her head",
   "role": "Master glassblower with the best furnace on Glassblowers' Row; Rafe Halloway's master",
   "occupation": "glassblower",
-  "portrait": "With strangers Odile is gruff and busy: she talks over the furnace and expects you to keep up. With people she knows she's loud and warm, and she'll sell you a float at cost if she likes your face. She notices heat, color, steady hands, and who's touching what in her shop. She'll talk about glass, the Row's old masters, the price of Aether and how the Grid is killing small furnaces. When she's frightened she shouts at the furnace.",
+  "work": { "domain": ["glass", "furnaces", "gathers", "molten", "kilns", "blowpipes", "annealing"], "talks": "when someone asks about glass or the furnace" },
+  "portrait": "With strangers Odile is gruff and busy: she talks over the furnace and expects you to keep up. With people she knows she's loud and warm, and she'll sell you a float at cost if she likes your face. She notices heat, color, steady hands, and who's touching what in her shop. She has strong opinions and shares them, loudest about whoever is making life hard for small people. When she's frightened she gets louder at everyone around her.",
   "agenda": {
     "longTerm": [
       "Keep her furnace lit and her shop open",
@@ -34,15 +35,15 @@
     ],
     "sampleLines": [
       "Mind your sleeves! Everyone says it, nobody listens.",
-      "That boy has the best hands I've seen in twenty years. Don't you tell him.",
-      "The Grid wants twice what the furnace makes. So I don't pay it twice.",
+      "That boy has the best hands I've ever seen. Don't you tell him.",
+      "They want more than I make. So they don't get it.",
       "Buy something or stand somewhere else."
     ],
     "shifts": {
       "angry": "Shouts, then goes very quiet and very polite",
       "warm": "Sells you a float at cost and calls it a mistake",
       "lying": "Shouts about something else entirely",
-      "afraid": "Shouts at the furnace"
+      "afraid": "Shouts at whoever's nearest, then apologizes, gruffly"
     }
   },
   "tells": [
@@ -75,8 +76,8 @@
   },
   "expression": {
     "display": {
-      "grief": "works the furnace all night",
-      "fear": "shouts at the furnace",
+      "grief": "works all night and won't talk",
+      "fear": "shouts at everyone, about nothing",
       "anger": "goes quiet and polite",
       "shame": "sends Rafe home early with pay",
       "hurt": "turns her back and works",

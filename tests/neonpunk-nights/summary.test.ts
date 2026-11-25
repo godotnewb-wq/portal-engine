@@ -43,7 +43,7 @@ describe('summary prompt', () => {
     expect(system).toMatch(/Vex \[vex\]/)
     expect(user).toMatch(/Secret \[client-is-grid-corporation\]/)
     expect(user).toMatch(/toward Rook: approval: no settled opinion; trust: wary, distrustful; interest: intrigued/)
-    expect(user).toMatch(/Toward Vex: approval: no settled opinion; trust: undecided; interest: intrigued \(hired her for sealed runs twice;/)
+    expect(user).toMatch(/Toward Vex: approval: no settled opinion; trust: undecided; interest: intrigued \(a runner she's hired before who doesn't like her;/)
     expect(user).not.toMatch(/-?\d+–-?\d+|approval -?\d/)
     expect(buildMemoryPrompt(content, playedScene(), 'brask').user).toMatch(/left before the scene was over/)
   })
@@ -102,7 +102,7 @@ describe('applySummaries', () => {
     // Oria → Vex moves; the authored note stays (relationship notes change only through story developments, 4b).
     const toVex = next.relations.find((r) => r.from === 'oria-senn' && r.to === 'vex')!
     expect(toVex.meters).toEqual({ approval: -18, trust: -9, interest: 20 })
-    expect(toVex.note).toMatch(/^hired her for sealed runs twice/)
+    expect(toVex.note).toMatch(/^a runner she's hired before/)
     expect(reports.find((r) => r.id === 'brask')).toMatchObject({ error: 'timeout', level: 'fleeting' })
     expect(GameStateSchema.parse(next)).toEqual(next)
   })

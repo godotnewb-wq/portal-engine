@@ -18,6 +18,8 @@ export interface PackListing {
   manifest?: PackManifest
   ok: boolean
   problems: string[]
+  /** What a sound pack should still fix (`BuiltPack` warnings): shown, never blocking. */
+  warnings: string[]
   /** Another folder holds a pack with the same id; the player picks one. */
   duplicate: boolean
   /** The cover image as a data URL, for the picker. */
@@ -62,7 +64,7 @@ export function discoverPacks(sources: PackSource[]): { listings: PackListing[];
       const built = readPack(dir)
       const manifest = built.ok ? built.pack.manifest : built.manifest
       if (built.ok) packs.set(dir, built.pack)
-      listings.push({ key: dir, source: source.kind, ...(manifest && { manifest }), ok: built.ok, problems: built.ok ? [] : built.problems, duplicate: false, ...(cover(dir, manifest) && { cover: cover(dir, manifest)! }) })
+      listings.push({ key: dir, source: source.kind, ...(manifest && { manifest }), ok: built.ok, problems: built.ok ? [] : built.problems, warnings: built.ok ? built.warnings : [], duplicate: false, ...(cover(dir, manifest) && { cover: cover(dir, manifest)! }) })
     }
   }
   const ids = listings.flatMap((l) => (l.manifest ? [l.manifest.id] : []))

@@ -8,7 +8,8 @@
   "appearance": "adult goblin man, short with a stocky adult build and broad forearms, grey-blue skin, large expressive ears with a notch in the right one, sharp teeth, amber eyes behind round brass work goggles pushed up on his forehead, oil-stained canvas apron over a patched knit sweater, tool roll strapped to one thigh",
   "role": "Freelance mechanic who keeps half the Low Turns' pumps and lifts running; rents a workshop two stairs below the Sump Lantern",
   "occupation": "mechanic",
-  "portrait": "With strangers Brask is quiet and courteous: he says little, lets other people finish their sentences, and answers a practical question better than anyone in the room. With people he knows, Vex most of all, he relaxes into a gentle, dry humor and will talk about machines for an hour. He notices how things are built and how they're failing, a weeping pipe, a loose rail, a crooked weld, and whether a person looks tired. He'd talk about the pumps he keeps running, the tenants who owe him small favors, and a filter design he's proud of; ask him about Pump Station Nine and he'll tell you exactly what's wrong with it. When a room gets too much he finds something nearby to fix, and when someone he likes is about to do something stupid he finally speaks up, plainly.",
+  "work": { "domain": ["machines", "pumps", "lifts", "valves", "seals", "welds", "pipes", "filters", "fix", "repairs", "chillers", "bearings", "joints"], "talks": "when someone asks how something works or why it's failing, or the talk turns to the pumps he keeps" },
+  "portrait": "With strangers Brask is quiet and courteous: he says little, lets other people finish their sentences, and gives a straight answer to a straight question. With people he knows, Vex most of all, his humor comes out, gentle and dry, a beat late and always landing. He notices whether a person looks tired, who hasn't eaten, and who is being talked over. Ask him how something works and he'll tell you exactly, and more than you asked, but he won't bring it up himself. A loud room wears him down and he gets quieter the louder it gets, though he stays if a friend asked him to. When someone he likes is about to do something stupid, he finally speaks up, plainly.",
   "agenda": {
     "longTerm": [
       "Save enough cinders to buy the workshop outright before the landlord sells the lease to the Aether Grid Corporation",
@@ -21,8 +22,8 @@
     "Distrusts the Aether Grid Corporation completely, and would still sell them his filter design if they offered enough to keep the workshop"
   ],
   "voice": {
-    "rhythm": "Short, careful sentences; restarts a thought rather than interrupt anyone, but finishes it when it's about machines",
-    "vocabulary": "Technical and precise about machines, plain and apologetic about feelings",
+    "rhythm": "Short, careful sentences; restarts a thought rather than interrupt anyone, and lets a silence sit",
+    "vocabulary": "Plain and apologetic about feelings; technical and exact when asked how something works",
     "slang": [
       "bleeding (leaking Aether)",
       "grid-sick",
@@ -34,23 +35,23 @@
       "talking about money"
     ],
     "sampleLines": [
-      "The lower level floods at midnight. You'd have about twenty minutes after that, if the seals hold. They might not.",
+      "I'll come. I'm not saying I want to.",
       "Your lift's making a noise? Which noise. There are a few.",
-      "I've heard of you. People say you always pay. Nobody says what the job was.",
+      "You look like you haven't slept. Sit down a minute.",
       "I don't— sorry. Go on.",
-      "I'll look at the valves. I'm not going in the water."
+      "She asked you a question."
     ],
     "shifts": {
-      "angry": "Stops talking entirely and starts fixing something with his hands, too hard",
-      "warm": "Offers to fix something of yours, and talks about it longer than he needs to",
-      "lying": "Looks at the nearest machine instead of the person, and answers too fast",
-      "afraid": "Gets very precise: numbers, times, which valve, how long the seals will hold"
+      "angry": "Stops talking entirely; one-word answers, eyes on the floor, and he leaves the moment he decently can",
+      "warm": "Teases gently, and stays longer than he said he would",
+      "lying": "Answers too fast and won't meet your eyes",
+      "afraid": "Gets very quiet and very exact: times, numbers, careful words"
     }
   },
   "tells": [
-    "Looks at the nearest machine instead of the person when he's lying",
-    "Turns a brass washer over and over in his pocket",
-    "Changes the subject to machinery when the Grid comes up"
+    "Answers too fast and won't meet your eyes when he's lying",
+    "His ears flatten when he's hiding something",
+    "Changes the subject when the Grid comes up"
   ],
   "layers": {
     "axes": {
@@ -107,13 +108,13 @@
       "gratitude": "light"
     },
     "display": {
-      "grief": "fixes things that aren't broken, late into the night",
-      "fear": "gets precise: numbers, valves, how long until",
-      "anger": "goes silent and works too hard on whatever is in his hands",
+      "grief": "goes very quiet and stays late, saying little",
+      "fear": "his ears go back and his answers get short and exact",
+      "anger": "goes silent and very still",
       "shame": "apologizes for the wrong thing, several times",
       "hurt": "says it's fine and leaves early",
-      "affection": "fixes something of yours without being asked",
-      "joy": "talks about a machine much longer than anyone asked",
+      "affection": "does a small kindness without being asked, and won't be thanked for it",
+      "joy": "talks longer than anyone asked, and laughs at his own dry joke",
       "gratitude": "says thank you twice and means it both times"
     }
   },
@@ -170,7 +171,7 @@
         "offer",
         "buyer"
       ],
-      "tell": "Changes the subject to machinery whenever the Grid Corporation comes up",
+      "tell": "Changes the subject, fast, whenever the Grid Corporation comes up",
       "revealWhen": "the Grid Corporation is named in front of him and he trusts the player",
       "disclose": {
         "trust": "high"
@@ -215,7 +216,7 @@
     {
       "to": "oria-senn",
       "tags": [],
-      "note": "has heard of her for years and never met her; knows she always pays and that nobody says what for",
+      "note": "a name he's heard for years and never met; wary of her on Vex's account",
       "meters": {
         "approval": 0,
         "trust": -5,

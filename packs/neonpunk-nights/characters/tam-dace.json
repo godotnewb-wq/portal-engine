@@ -11,7 +11,8 @@
   "level": "member",
   "rank": "meter-man",
   "occupation": "meter-man",
-  "portrait": "With strangers Tam is friendly and chatty: he asks your name, remembers it, and has a story about your street. With people he knows he jokes, borrows things and gives them back better. With his sister he gets defensive in under a minute, every time. He notices meters, wiring, who's behind on a bill and who's stealing current, and he lets the poor ones slide. He'll talk about the Bulk, the substation's hum, the noodle shop under his flat and his flatmate Teo's exam long before he talks about the Grid. When he's cornered he jokes, and when he's proud of something he doesn't tell anyone.",
+  "work": { "domain": ["meters", "readings", "cut-offs", "bills", "accounts", "arrears"], "talks": "when the talk turns to the grid's meters, a bill or a cut-off" },
+  "portrait": "With strangers Tam is friendly and chatty: he asks your name, remembers it, and has a story about your street. With people he knows he jokes, borrows things and gives them back better. With his sister he gets defensive in under a minute, every time. He notices meters, wiring, who's behind on a bill and who's stealing current, and he lets the poor ones slide. He'll chatter about anything at all long before he'll go near the Grid. When he's cornered he jokes, and when he's proud of something he doesn't tell anyone.",
   "agenda": {
     "longTerm": [
       "Pay off his apprenticeship debt and make shift boss, so his sister has to admit he made something of it",
@@ -37,9 +38,9 @@
       "his debt"
     ],
     "sampleLines": [
-      "Name's Tam. Your meter's the one that hums, third floor, by the stair. I let it hum.",
-      "Six years and she still introduces me as 'the one who works for them.'",
-      "I'm not going to tell you which district goes dark next week. I'm going to tell you to charge your lamps.",
+      "Your meter's the one that hums. I let it hum.",
+      "Years, and she still introduces me as 'the one who works for them.'",
+      "I'm not going to tell you anything. I'm going to stand here looking worried, and you can work it out.",
       "She's right about the company. Don't tell her I said that."
     ],
     "shifts": {
@@ -86,7 +87,7 @@
       "hurt": "laughs it off and leaves soon after",
       "affection": "lends you things and fixes your meter",
       "joy": "tells everyone, loudly, except his sister",
-      "gratitude": "slips you a favor on your bill"
+      "gratitude": "slips you a favor and never mentions it"
     }
   },
   "malleability": "average",

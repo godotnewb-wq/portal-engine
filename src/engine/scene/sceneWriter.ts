@@ -1,6 +1,6 @@
 import { knows, writerStage } from '@engine/codex'
-import { firstName, type Prompt } from '@engine/core'
-import { characterById, knowerOf, locationById, type Pack } from '@engine/pack'
+import { firstName, keyWords, nameWords, sharedRun, type Prompt } from '@engine/core'
+import { characterById, knowerOf, locationById, worldNames, type Pack } from '@engine/pack'
 import type { Degree } from '@engine/rules'
 import type { GameState, Scene } from '@engine/state'
 import type { ParsedReply } from './beats'
@@ -35,7 +35,7 @@ export const SCENE_STYLE = `How it should read:
 - People talk like people: complete, plain sentences that someone hearing them for the first time can follow. No sayings, maxims, riddles or figures of speech a stranger couldn't follow.
 - The player knows only what they have seen and heard, and what "What the player has been told this scene" lists. Someone bringing up something new to them says what it is first, before what it pays, where it is or what comes of it; nobody talks as if the player already knew. When the player looks, listens or searches, a line of narration shows what they find, as something you see or hear, not only as something that happens.
 - Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it. What someone only heard said, they pass on as heard, not as something they saw.
-- A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
+- A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface. When a tell or the way a feeling shows needs something that isn't in this scene, show the same feeling another way; never bring in an object or place for it.
 - The brief is material, not lines. A fact a line uses comes out the way this person would say it here, to these people, never in the brief's words; what people are to each other is background; what a portrait says someone would talk about is small talk for when the moment has room, never a topic to raise. Never write the brief's notes out as prose.
 - The scene is what you see and hear from where you are. Someone out of earshot hears only what is said loudly or to them, and shows only in what you can see them do; someone in the moment who is out of earshot is still shown, from where you are. To bring someone in, someone goes over or calls across; when someone moves, show who goes with them. People mind who can hear them.
 - A voice card sets how someone sounds: their rhythm, their words, what they avoid. It never adds to what they know or say.
@@ -177,12 +177,21 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
   const felt = feelingsNow(state, view)
   // Someone outside the moment gets how much their feeling shows, not its display line: given "gets precise: numbers,
   // valves, how long until", the writer had them volunteer a reading in every sample of the 2026-11-24 replays.
+  // A feeling's display line ("gets precise: numbers, valves…") only the first time someone is on screen, or when the
+  // feeling is new this turn or has risen: a mood held all evening, given its display line every turn, was a standing
+  // order to play the same business (2026-11-25: a worried mechanic talked machines in every turn he was in focus).
+  // Held, it says so and shows nothing more.
   const feltLine = (id: string, display = true) => {
     const f = felt[id]
     const s = f && shown(content, state, id, f, view)
     if (!f || !s) return ''
+    const before = scene.moods[id]
+    const same = !!before && before.shade === f.shade
+    const seen = scene.turns.some((t) => t.speakers.includes(id))
+    const held = seen && same && f.intensity <= before!.intensity
+    const how = held ? ', as before' : seen && same ? ', more than before' : ''
     const reads = (view.reads ?? []).filter((x) => x.target === id).map((x) => (x.by === 'player' ? ' You see through to it.' : ` ${nameOf(x.by)} sees through to it and may say so.`))
-    return ` Feels ${feltWords(content.ruleset, f)}. ${shownWords(display ? s : { ...s, display: undefined })}.${[...new Set(reads)].join('')}`
+    return ` Feels ${feltWords(content.ruleset, f)}${how}. ${shownWords(display && !held ? s : { ...s, display: undefined })}.${[...new Set(reads)].join('')}`
   }
   const tells = new Map(view.speakers.flatMap((s) => (s.tell ? [[s.id, s.tell]] : [])))
   const momentLine = (who: string) => {
@@ -249,12 +258,19 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
 export const RECITED_WORDS = 5
 /** Content words such a run needs, so "on the first of" alone isn't recitation. */
 export const RECITED_CONTENT_WORDS = 2
+/**
+ * Key words in a row (`keyWords`: no pronouns, small words or names) a spoken line may share with one fact or note
+ * (writing issue 2, 2026-11-25): "she has heard his work is good" said as "I've heard your work is good" kept its
+ * key words and their order, and five words in a row missed it. *tune*: on the 2026-11-24 full bench, 3 flagged 7.6%
+ * of dialogue lines against 5.2% for the runs alone, nearly all of them facts said as written.
+ */
+export const RECITED_KEY_WORDS = 3
 
 /**
  * A fact or a note said in the brief's own words (2026-11-25 play: asked who a fixer was, a bartender gave his card's line
  * about her tab word for word and a runner her note about the work she'd done for her). The style guide asks for a fact
  * the way this person would say it here; this sends back a line that carries `RECITED_WORDS` of the brief's words in a
- * row instead: the facts and details on hand (not secrets, nor what was already said on screen) and every note about
+ * row, or `RECITED_KEY_WORDS` of a fact's key words in order, instead: the facts and details on hand (not secrets, nor what was already said on screen) and every note about
  * people present. A beat already sent back for saying someone else's is left to that.
  */
 export function recitedProblems(content: Pack, state: GameState, plan: Pick<BeatPlan, 'scene'>, parsed: ParsedReply, skip: Set<number> = new Set()): Problem[] {
@@ -267,11 +283,14 @@ export function recitedProblems(content: Pack, state: GameState, plan: Pick<Beat
     ...Object.entries(state.playerTies).flatMap(([id, t]) => (present.includes(id) && t.note ? [t.note] : []))
   ]
   const phrases = [...new Set(material.flatMap((t) => runs(t, RECITED_WORDS, RECITED_CONTENT_WORDS)))]
+  const names = nameWords(worldNames(content))
+  const keyed = material.map((t) => keyWords(t, names))
   const problems: Problem[] = []
   parsed.beats.forEach((b, i) => {
     if (b.kind !== 'dialogue' || skip.has(i + 1)) return
     const said = ` ${plainWords(b.text).join(' ')} `
-    const hit = phrases.find((r) => said.includes(` ${r} `))
+    const line = keyWords(b.text, names)
+    const hit = phrases.find((r) => said.includes(` ${r} `)) ?? keyed.map((k) => sharedRun(line, k, RECITED_KEY_WORDS)).find(Boolean)?.split(' ').join(' … ')
     if (!hit) return
     const speaker = firstName(characterById(content, b.speaker)?.name ?? b.speaker)
     problems.push({ kind: 'recited', beat: i + 1, text: hit, fix: `Beat ${i + 1}: ${speaker} says it in the brief's words ("${hit}"). Say it the way ${speaker} would here, to these people, or leave it out.` })

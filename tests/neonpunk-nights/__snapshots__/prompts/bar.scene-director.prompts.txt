@@ -126,7 +126,7 @@ Relevant now:
 
 ## Brask [id: brask] — major character, in the player's party, goblin, he/him
 Who: Freelance mechanic who keeps half the Low Turns' pumps and lifts running; rents a workshop two stairs below the Sump Lantern
-Cue: With strangers Brask is quiet and courteous: he says little, lets other people finish their sentences, and answers a practical question better than anyone in the room.
+Cue: With strangers Brask is quiet and courteous: he says little, lets other people finish their sentences, and gives a straight answer to a straight question.
 Nature: honest, kind, patient, gloomy, anxious, deferential, diligent, reserved, warm
 Cares about: the workshop, and a lease nobody can take (strong); work done properly: a seal that holds, a filter that works (strong); the tenants on the lower stairs, and Vex (strong) · against: power
 Tonight: Get out of this noisy room as soon as he decently can; but if the job on the table is down at Pump Station Nine, find out who's paying before Vex or the player goes near that water
@@ -135,10 +135,10 @@ Toward the player: approval: no settled opinion; trust: trusts; interest: indiff
 Toward others here: Vex: best friend · approval: approves; trust: trusts implicitly; interest: indifferent; Dunmar: client · approval: approves; trust: trusts; interest: indifferent; Oria: approval: no settled opinion; trust: undecided; interest: indifferent
 Close ties, not here: landlady: Pim · client: Ysolde
 Secret [brask.landlord-offer] (in short): A Grid agent wants to buy his filter design. Won't tell the player yet.
-Lying tell: Looks at the nearest machine instead of the person, and answers too fast
+Lying tell: Answers too fast and won't meet your eyes
 Relevant now:
 - [brask.k5] He has never met Oria Senn but has heard that she always gets paid, and that nobody says what the jobs were
-- With Oria: has heard of her for years and never met her; knows she always pays and that nobody says what for
+- With Oria: a name he's heard for years and never met; wary of her on Vex's account
 
 ## Oria Senn [id: oria-senn] — major character, light-elf, she/her
 Who: Fixer who brokers jobs between the High Turns and the Low; keeps a standing booth at the Sump Lantern on nights she wants to be found
@@ -165,10 +165,10 @@ Mood now: watchful, pretending not to listen; felt as worry, 1 of 5; it shows as
 Toward the player: approval: no settled opinion; trust: undecided; interest: indifferent · drinks here when there's money, and when there isn't; a small slate
 Toward others here: Brask: mechanic · approval: approves; trust: trusts; interest: indifferent; Vex: approval: no settled opinion; trust: undecided; interest: indifferent; Oria: approval: no settled opinion; trust: undecided; interest: indifferent
 Secret [dunmar.saw-the-flood] (in short): Sealed the gallery door at Pump Station Nine with two men still below. Won't tell the player yet.
-Lying tell: Starts wiping a glass that's already clean
+Lying tell: Finds something to do with his hands and won't look at you
 Relevant now:
 - [dunmar.k4] Oria Senn pays her booth's tab on the first of every month, never late
-- With Oria: her booth, her tab, paid on the first of every month without fail
+- With Oria: a regular he's never quite trusted; she's never once given him a reason not to
 ----- user -----
 # The scene opens now.
 
@@ -183,7 +183,7 @@ Vex would back the player up. Brask would back the player up.
 # What could press on each person this turn (at most one each; usually none)
 - Vex [vex]. Aim for tonight (background): Keep the player from walking into a bad deal tonight without making it look like she cares; and if Oria is the one offering, find out whether Oria's network had anything to do with Sef. Ties in play: Rook [player] (friend); Brask [brask] (best friend); Oria [oria-senn] (client); Dunmar [dunmar].
 - Brask [brask]. Aim for tonight (background): Get out of this noisy room as soon as he decently can; but if the job on the table is down at Pump Station Nine, find out who's paying before Vex or the player goes near that water. Ties in play: Rook [player] (friend); Vex [vex] (best friend); Dunmar [dunmar] (client); Oria [oria-senn].
-- Oria Senn [oria-senn]. Aim for tonight (background): Get the player to take the retrieval job at Pump Station Nine tonight without learning who the client is; she'd take Brask too, if he knows the station. Secret [oria-senn.client-is-grid-corporation], touched by "client". Could see through Oria: Vex [vex], who knows Oria (client); then Brask [brask], who knows Oria (has heard of her for years and never met her; knows she always pays and that nobody says what for). Ties in play: Vex [vex] (runner); Brask [brask]; Dunmar [dunmar].
+- Oria Senn [oria-senn]. Aim for tonight (background): Get the player to take the retrieval job at Pump Station Nine tonight without learning who the client is; she'd take Brask too, if he knows the station. Secret [oria-senn.client-is-grid-corporation], touched by "client". Could see through Oria: Vex [vex], who knows Oria (client); then Brask [brask], who knows Oria (a name he's heard for years and never met; wary of her on Vex's account). Ties in play: Vex [vex] (runner); Brask [brask]; Dunmar [dunmar].
 - Dunmar [dunmar]. Aim for tonight (background): Keep tonight quiet, keep the slate honest, and keep anyone he likes from going down to Pump Station Nine at high tide. Ties in play: Rook [player]; Brask [brask] (mechanic); Vex [vex]; Oria [oria-senn].
 
 # Facts they could draw on (ids for draws_on)

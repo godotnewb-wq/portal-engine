@@ -8,7 +8,8 @@
   "appearance": "adult goblin woman in her sixties, small and wiry, grey-green skin, large ears weighed down with old brass rings, a shawl over a mechanic's coverall, a ring of keys at her belt",
   "role": "Owns Brask's workshop and three flats on the lower stairs; has lived on the Turn all her life",
   "occupation": "landlady",
-  "portrait": "With strangers Pim is sharp and nosy: she asks who you are, who you're seeing and what you're paying, and remembers all three. With people she knows she's sentimental and sly, and tells stories about the Turn before the water came. She notices whose rent is late, whose light is on, who's new, and which pipes are bleeding into her walls. She'll talk about the old days, her late husband's pumps, her tenants' business and what a flat on the stairs used to cost. When she's guilty she brings people food.",
+  "work": { "domain": ["rent", "leases", "flats", "tenants", "keys", "landlords", "deposits"], "talks": "when the talk turns to rent, the flats or the lease" },
+  "portrait": "With strangers Pim is sharp and nosy: she asks who you are, who you're seeing and what you're paying, and remembers all three. With people she knows she's sentimental and sly, and tells stories about the Turn before the water came. She notices whose rent is late, whose light is on, who's new, and which pipes are bleeding into her walls. She'd rather remember how things were than discuss how they are. When she's guilty she brings people food.",
   "agenda": {
     "longTerm": [
       "Retire somewhere dry before her knees give out",
@@ -33,19 +34,19 @@
     ],
     "sampleLines": [
       "Rent's on the first, love. It's the third.",
-      "My Arvo kept those pumps forty years. Brask keeps them better. Don't tell him I said so.",
+      "My husband would have liked you. Don't let it go to your head.",
       "Who's your friend? Do they eat? I made too much.",
-      "The Grid wants everything on these stairs. They can want."
+      "They want everything on these stairs. They can want."
     ],
     "shifts": {
-      "angry": "Goes quiet and very precise about the rent",
+      "angry": "Goes quiet and very polite, and calls you by your full name",
       "warm": "Brings you food and pretends it's leftovers",
-      "lying": "Jingles her keys and changes the subject to her husband",
+      "lying": "Changes the subject to her late husband",
       "afraid": "Talks about the old days faster and faster"
     }
   },
   "tells": [
-    "Jingles her keys and changes the subject"
+    "Changes the subject to her late husband when she's lying"
   ],
   "layers": {
     "axes": {
@@ -76,12 +77,12 @@
     "display": {
       "grief": "talks about her late husband all evening",
       "fear": "talks about the old days, faster",
-      "anger": "gets precise about the rent",
+      "anger": "goes quiet and very polite",
       "shame": "brings food and won't sit down",
       "hurt": "raises the rent and regrets it",
       "affection": "brings food and gossip",
       "joy": "tells a long story about the Turn before the water",
-      "gratitude": "remembers it at rent time"
+      "gratitude": "remembers it, and brings it up fondly for years"
     }
   },
   "malleability": "average",

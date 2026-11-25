@@ -15,8 +15,8 @@ describe('what each person knows (2026-11-24 play)', () => {
     expect(problems('Brask: "She wants us to take the retrieval job at Pump Station Nine tonight."').map((p) => p.fix)).toEqual([
       expect.stringMatching(/^Beat 1: Brask says what is Oria's own \(".+"\)\. Have Brask ask, guess or say nothing about it\.$/)
     ])
-    expect(problems('Brask: "Her booth, her tab, paid on the first of every month without fail."')).toHaveLength(1)
-    expect(problems('Dunmar: "Her booth, her tab, paid on the first of every month without fail."')).toEqual([])
+    expect(problems('Brask: "Oria Senn pays her booth\'s tab on the first of every month, never late."')).toHaveLength(1)
+    expect(problems('Dunmar: "Oria Senn pays her booth\'s tab on the first of every month, never late."')).toEqual([])
     expect(problems('Brask: "She always pays. Nobody says what for."')).toEqual([])
   })
 

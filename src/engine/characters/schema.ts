@@ -169,11 +169,22 @@ export const CharacterSchema = z
     /** Their trade, lower case ("courier", "nurse"); entries can open to people by occupation. */
     occupation: z.string().min(1).optional(),
     /**
-     * How they are with others, in prose: with strangers and with people they know, what they notice, what they'd talk
-     * about anyway. The writer's main picture of the person, so goals and secrets don't stand in for one (scene system
-     * redesign.md §7; the short form of milestone 4's portrait). No habits or fidget props: the writer played one in
-     * nearly every turn whatever was happening (decided 2026-11-24, user). A gesture belongs to a moment: a tell or a
-     * feeling's display line, which show only when what they show is there.
+     * Their work as one strand of who they are (2026-11-25, user): `domain`, the words of the trade ("pumps",
+     * "valves"), and `talks`, when it comes up in talk ("when someone asks how something works"). The trade belongs in
+     * the role, the knowledge, this block and at most a sentence or two of the portrait; vocabulary may carry it. How
+     * they change and how each feeling shows are the person's (voice, body, silence, how they treat people), never
+     * their trade or a prop: a card that routed every feeling through a mechanic's machines had him talk machines in
+     * every turn. `cardShapeProblems` checks it, for authored and generated cards alike. Needed with `occupation`.
+     */
+    work: z.object({ domain: z.array(z.string().min(1)).min(1), talks: z.string().min(1) }).optional(),
+    /**
+     * How they are with others, in prose: with strangers and with people they know, what they notice, how they handle
+     * a room. The writer's main picture of the person, so goals and secrets don't stand in for one (scene system
+     * redesign.md §7; the short form of milestone 4's portrait). Dispositions, not material: no habits or fidget props
+     * (the writer played one in nearly every turn; decided 2026-11-24, user), no lists of concrete examples ("a weeping
+     * pipe, a loose rail"), which came back almost word for word, no "would talk about X for an hour" and no fallback
+     * activity, which read as things to do in a scene (2026-11-25). Their work in at most two sentences. A gesture
+     * belongs to a moment: a tell or a feeling's display line, which show only when what they show is there.
      */
     portrait: z.string(),
     /**
@@ -190,7 +201,9 @@ export const CharacterSchema = z
     age: z.string().optional(),
     /** Where they can be found, and when (npc design §2). */
     haunts: z.array(HauntSchema).default([]),
-    /** How they behave when lying or hiding something (npc design §3). */
+    /** How they behave when lying or hiding something (npc design §3). A tell, like a voice shift or a display line, travels
+     *  with the person: their body, voice, way of talking, or something they always have on them (a scarf, a pen). Never
+     *  something the place supplies (a glass, a towel, a wall, a window, chalk), since the scene may be anywhere (2026-11-25). */
     tells: z.array(z.string().min(1)).default([]),
     layers: LayersSchema.optional(),
     expression: ExpressionSchema.optional(),

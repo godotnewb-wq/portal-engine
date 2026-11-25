@@ -11,7 +11,8 @@
   "level": "member",
   "rank": "keeper",
   "occupation": "keeper",
-  "portrait": "With strangers Ansel is gentle and slow: they ask what brought you to the wall, and wait for the real answer. With people they know they're dry and funny, and they talk about the Aether as if it were a difficult neighbor. They notice how the Aether runs down the wall, who's grid-sick, whose core is running hot, and which doors have spirals on them. They'll talk about the wall, the offerings, the golems who come to be blessed, and the Academy's lectures they read and disagree with. When they're angry they go very still, like stone.",
+  "work": { "domain": ["blessings", "rune-cores", "rites", "shrines", "prayers", "offerings"], "talks": "when someone asks about the Aether, the Wall or a blessing" },
+  "portrait": "With strangers Ansel is gentle and slow: they ask what brought you to the wall, and wait for the real answer. With people they know they're dry and funny, and they argue fondly with whatever they love. They notice how the Aether runs down the wall, who's grid-sick, whose core is running hot, and which doors have spirals on them. They listen more than they talk, and remember what they hear. When they're angry they go very still, like stone.",
   "agenda": {
     "longTerm": [
       "Keep the Spiral Wall open and the Seep's source unmetered",
@@ -38,18 +39,18 @@
     "sampleLines": [
       "What brought you to the wall? The true reason. I'll wait.",
       "Your core is running warm. Sit by the stone a while.",
-      "The Grid calls the source a supply. The source has opinions.",
+      "They call it a supply. It has opinions.",
       "I don't know who cut the line. I know who didn't sleep that night."
     ],
     "shifts": {
       "angry": "Goes very still, like stone",
-      "warm": "Blesses your core, or your hands, without being asked",
-      "lying": "Traces a chalk spiral and answers a different question",
-      "afraid": "Puts both hands flat on the wall and goes quiet"
+      "warm": "Softens, asks after you properly, and listens to the whole answer",
+      "lying": "Answers a different question, very calmly, as if it were the one you asked",
+      "afraid": "Goes quiet, and his rune-light dims"
     }
   },
   "tells": [
-    "Traces a chalk spiral and answers a different question"
+    "Answers a different question, very calmly, as if it were the one you asked"
   ],
   "layers": {
     "axes": {
@@ -78,13 +79,13 @@
   },
   "expression": {
     "display": {
-      "grief": "sits by the wall all night",
-      "fear": "puts both hands on the stone and goes quiet",
+      "grief": "sits alone all night, saying nothing",
+      "fear": "goes quiet, and his rune-light dims",
       "anger": "goes very still",
-      "shame": "chalks spirals until the wall is covered",
+      "shame": "blesses everyone but himself",
       "hurt": "speaks more slowly, and less",
       "affection": "blesses you without asking",
-      "joy": "hums with the wall",
+      "joy": "hums, low, without noticing",
       "gratitude": "remembers you in the blessing"
     }
   },
@@ -125,7 +126,7 @@
         "who cut",
         "the substation"
       ],
-      "tell": "Starts tracing a chalk spiral",
+      "tell": "His rune-light flickers, and he answers a different question",
       "revealWhen": "the Grid comes for the wall, or someone innocent is blamed for the cut",
       "disclose": {
         "trust": "very high"

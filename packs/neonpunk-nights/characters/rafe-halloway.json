@@ -8,7 +8,8 @@
   "appearance": "teenage human boy of fifteen, gangly and still growing, untidy dark hair, his sister's tired brown eyes, burn-scarred apprentice's gloves tucked in his belt, a soot-streaked smock several sizes too big",
   "role": "Glassblower's apprentice on Glassblowers' Row; Jun Halloway's younger brother",
   "occupation": "apprentice",
-  "portrait": "With strangers Rafe is shy for a minute and then can't stop talking, mostly about glass and the Coil Line. With people he knows he's cheeky and loud, and protective of his sister in a way he'd never admit. He notices color, heat, how things are made, and who's looking down on him for his age. He'll talk about the furnaces, the floats in the windows, his master's temper, the Couriers he'd like to run with and Jun's clinic, which he's proud of. When he's caught out he gets loud.",
+  "work": { "domain": ["glass", "furnaces", "gathers", "molten", "blowpipes", "masters", "pieces"], "talks": "when someone asks about glass or his apprenticeship" },
+  "portrait": "With strangers Rafe is shy for a minute and then can't stop talking, mostly about glass and the Coil Line. With people he knows he's cheeky and loud, and protective of his sister in a way he'd never admit. He notices color, heat, how things are made, and who's looking down on him for his age. He's proud of a great deal and says so, and prouder of his sister than he lets her hear. When he's caught out he gets loud.",
   "agenda": {
     "longTerm": [
       "Make journeyman before he's eighteen",
@@ -34,13 +35,13 @@
     ],
     "sampleLines": [
       "You want to see the furnace? Mind your sleeves. Everyone says that, but mind your sleeves.",
-      "Jun doesn't need looking after. She just needs burn gel.",
-      "I'm fifteen, not five.",
+      "She doesn't need looking after. She just needs sleep.",
+      "I'm not a kid.",
       "The gaffer says I've got good hands and a bad mouth. Both true."
     ],
     "shifts": {
       "angry": "Gets loud, then storms off",
-      "warm": "Shows you the best float in the window",
+      "warm": "Talks fast and shows you whatever he's proud of",
       "lying": "Talks very fast and too much",
       "afraid": "Goes quiet and stands closer to whoever's oldest"
     }
@@ -75,7 +76,7 @@
   },
   "expression": {
     "display": {
-      "grief": "works at the furnace until it's dark",
+      "grief": "works until dark and won't talk",
       "fear": "goes quiet and stays near the oldest person",
       "anger": "gets loud, then storms off",
       "shame": "gets loud, then apologizes badly",
