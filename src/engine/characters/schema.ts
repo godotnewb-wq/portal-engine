@@ -170,8 +170,10 @@ export const CharacterSchema = z
     occupation: z.string().min(1).optional(),
     /**
      * How they are with others, in prose: with strangers and with people they know, what they notice, what they'd talk
-     * about anyway, small habits. The writer's main picture of the person, so goals and secrets don't stand in for one
-     * (scene system redesign.md §7; the short form of milestone 4's portrait).
+     * about anyway. The writer's main picture of the person, so goals and secrets don't stand in for one (scene system
+     * redesign.md §7; the short form of milestone 4's portrait). No habits or fidget props: the writer played one in
+     * nearly every turn whatever was happening (decided 2026-11-24, user). A gesture belongs to a moment: a tell or a
+     * feeling's display line, which show only when what they show is there.
      */
     portrait: z.string(),
     /**

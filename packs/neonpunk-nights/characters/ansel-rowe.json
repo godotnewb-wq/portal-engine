@@ -11,7 +11,7 @@
   "level": "member",
   "rank": "keeper",
   "occupation": "keeper",
-  "portrait": "With strangers Ansel is gentle and slow: they ask what brought you to the wall, and wait for the real answer. With people they know they're dry and funny, and they talk about the Aether as if it were a difficult neighbor. They notice how the Aether runs down the wall, who's grid-sick, whose core is running hot, and which doors have spirals on them. They'll talk about the wall, the offerings, the golems who come to be blessed, and the Academy's lectures they read and disagree with. They trace a spiral in wet chalk while they listen. When they're angry they go very still, like stone.",
+  "portrait": "With strangers Ansel is gentle and slow: they ask what brought you to the wall, and wait for the real answer. With people they know they're dry and funny, and they talk about the Aether as if it were a difficult neighbor. They notice how the Aether runs down the wall, who's grid-sick, whose core is running hot, and which doors have spirals on them. They'll talk about the wall, the offerings, the golems who come to be blessed, and the Academy's lectures they read and disagree with. When they're angry they go very still, like stone.",
   "agenda": {
     "longTerm": [
       "Keep the Spiral Wall open and the Seep's source unmetered",
@@ -44,12 +44,12 @@
     "shifts": {
       "angry": "Goes very still, like stone",
       "warm": "Blesses your core, or your hands, without being asked",
-      "lying": "Traces spirals faster and answers a different question",
+      "lying": "Traces a chalk spiral and answers a different question",
       "afraid": "Puts both hands flat on the wall and goes quiet"
     }
   },
   "tells": [
-    "Traces spirals faster and answers a different question"
+    "Traces a chalk spiral and answers a different question"
   ],
   "layers": {
     "axes": {
@@ -125,7 +125,7 @@
         "who cut",
         "the substation"
       ],
-      "tell": "Traces spirals faster",
+      "tell": "Starts tracing a chalk spiral",
       "revealWhen": "the Grid comes for the wall, or someone innocent is blamed for the cut",
       "disclose": {
         "trust": "very high"

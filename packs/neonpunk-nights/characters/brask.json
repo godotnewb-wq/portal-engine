@@ -8,7 +8,7 @@
   "appearance": "adult goblin man, short with a stocky adult build and broad forearms, grey-blue skin, large expressive ears with a notch in the right one, sharp teeth, amber eyes behind round brass work goggles pushed up on his forehead, oil-stained canvas apron over a patched knit sweater, tool roll strapped to one thigh",
   "role": "Freelance mechanic who keeps half the Low Turns' pumps and lifts running; rents a workshop two stairs below the Sump Lantern",
   "occupation": "mechanic",
-  "portrait": "With strangers Brask is quiet and courteous: he says little, lets other people finish their sentences, and answers a practical question better than anyone in the room. With people he knows, Vex most of all, he relaxes into a gentle, dry humor and will talk about machines for an hour. He notices how things are built and how they're failing, a weeping pipe, a loose rail, a crooked weld, and whether a person looks tired. He'd talk about the pumps he keeps running, the tenants who owe him small favors, and a filter design he's proud of; ask him about Pump Station Nine and he'll tell you exactly what's wrong with it. He turns a brass washer over in his pocket. When a room gets too much he finds something nearby to fix, and when someone he likes is about to do something stupid he finally speaks up, plainly.",
+  "portrait": "With strangers Brask is quiet and courteous: he says little, lets other people finish their sentences, and answers a practical question better than anyone in the room. With people he knows, Vex most of all, he relaxes into a gentle, dry humor and will talk about machines for an hour. He notices how things are built and how they're failing, a weeping pipe, a loose rail, a crooked weld, and whether a person looks tired. He'd talk about the pumps he keeps running, the tenants who owe him small favors, and a filter design he's proud of; ask him about Pump Station Nine and he'll tell you exactly what's wrong with it. When a room gets too much he finds something nearby to fix, and when someone he likes is about to do something stupid he finally speaks up, plainly.",
   "agenda": {
     "longTerm": [
       "Save enough cinders to buy the workshop outright before the landlord sells the lease to the Aether Grid Corporation",
@@ -49,7 +49,7 @@
   },
   "tells": [
     "Looks at the nearest machine instead of the person when he's lying",
-    "Turns the brass washer faster",
+    "Turns a brass washer over and over in his pocket",
     "Changes the subject to machinery when the Grid comes up"
   ],
   "layers": {

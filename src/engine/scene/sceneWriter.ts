@@ -11,7 +11,7 @@ import { feelingsNow, feltWords, shown, shownWords } from './feelings'
 import { childGuard } from './guard'
 import { knowersOf } from '@engine/memory'
 import { presentCast, type BeatPlan, type PlannedCheck } from './planShape'
-import { gestureKey, RECENT_USE_TURNS, recentlyUsed } from './repeats'
+import { RECENT_USE_TURNS, recentlyUsed } from './repeats'
 import type { LivePressure } from './scenePlan'
 import { FUNCTION_WORDS, OWNED_PHRASE_WORDS, plainWords, runs } from './phrases'
 import { SCENE_LENGTH } from './style'
@@ -60,25 +60,6 @@ Ada: She doesn't look up from the ledger. "You're late. Sit, the tea's nearly do
 Ben: "Traffic." He takes the chair nearest the door.
 [Ada: EXPRESSION tired]
 [Ben: EXPRESSION sheepish]`
-
-/**
- * A portrait without the habits already shown this scene (task 8). Listed as used, a habit the portrait describes still
- * came back: the portrait offers it again every turn, and it won (a glass turned by the stem three times in a scene of
- * m5-core-scene-2). A sentence goes when it names the thing a used gesture handled; a secret's tell and a feeling's
- * display line are not in the portrait and stay, since they show something.
- */
-export function portraitNow(portrait: string, gestures: string[]): string {
-  if (gestures.length === 0) return portrait
-  // Matched on the thing handled, not the verb: the writer varies the verb ("sets her glass down" for a portrait's
-  // "turns her glass by the stem"), and the habit came back (round 3: a coin, a washer, a towel in nearly every scene).
-  const objects = gestures.map((g) => gestureKey(g).split(' ')[1]).filter((o): o is string => !!o && o.length > 3 && !FUNCTION_WORDS.has(o))
-  const sentences = portrait.match(/[^.!?]+[.!?]+["”]?\s*/g) ?? [portrait]
-  const kept = sentences.filter((x) => {
-    const words = new Set(plainWords(x))
-    return !objects.some((o) => words.has(o))
-  })
-  return kept.join('').trim() || portrait
-}
 
 /**
  * The place's sights, sounds and smells for the writer to draw on (redesign §9: texture is no longer the director's
@@ -131,10 +112,10 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
     return w?.name ?? w?.label ?? id
   }
   const people = present.map((id) => characterById(content, id)!)
-  // Portraits of everyone present; voice cards for the people in the moment (redesign §4, "The writer").
+  // Portraits of everyone present; voice cards for the people in the moment (redesign §4, "The writer"). A portrait
+  // holds no habits (decided 2026-11-24, user): a habit on the card came back in nearly every turn as filler.
   const used = recentlyUsed(content, scene, RECENT_USE_TURNS, scene.turns.length)
-  const portrait = (c: (typeof people)[number]) => portraitNow(c.portrait, used[c.id]?.gestures ?? [])
-  const cards = people.map((c) => (plan.focus.includes(c.id) ? voiceCard(firstName(c.name), c.voice, portrait(c)) : `## ${firstName(c.name)}\n${portrait(c)}`))
+  const cards = people.map((c) => (plan.focus.includes(c.id) ? voiceCard(firstName(c.name), c.voice, c.portrait) : `## ${firstName(c.name)}\n${c.portrait}`))
 
   const system = [
     'You write one turn of a visual-novel RPG scene as a short scene: the conversation and what happens, in one continuous piece.',

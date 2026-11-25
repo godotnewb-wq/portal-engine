@@ -7,30 +7,35 @@
 //   npm run logs -- blind <session> [--count 10] [--seed 1] [--key key.md]
 //   npm run logs -- to-scenario <session> --turn N [--out file.json]
 //   npm run logs -- show <session> --turn N                     one turn in full, prompts and raw replies
+//   npm run logs -- rewrite <paths…> [--turn N] [--samples 3] [--as-logged] [--label x] [--out file.md] [--config …]
+//                                                               a logged scene turn's writer again, on the current
+//                                                               prompts and the logged plan; without --turn, every
+//                                                               flagged scene turn under the paths
 //   npm run logs -- score <paths…> [--config bench.config.json] AI-score turns not yet scored by this scorer version
 //   npm run logs -- flag <session> --turn N [--beat n] --rating bad [--reason voice,generic] [--note "…"]
 //                                                               flag a beat or turn of a bench run (play is flagged in the app)
 //
 // Output goes to stdout unless --out names a file. --pack <id or folder> when a session's pack isn't in packs/.
 
-import { writeFileSync } from 'node:fs'
+import { mkdirSync, writeFileSync } from 'node:fs'
 import { join, resolve } from 'node:path'
 import { isConfigured } from '@llm'
 import { FlagSchema, RATINGS, type Rating } from '@engine/review'
 import { LogSession } from '@platform/logs'
-import { scorerLlm } from '@platform/roles'
-import { benchSettings } from '../bench/config'
+import { scorerLlm, turnLlm } from '@platform/roles'
+import { benchSettings, modelsOf } from '../bench/config'
 import { flagsFor, metricInput, namer, packFor, sessionsAt } from './load'
 import { metrics, renderMetrics } from './metrics'
 import { blindTest, renderFlags } from './review'
 import { toScenario } from './scenario'
 import { scoreSession } from './score'
+import { flaggedTurns, renderReplays, replayTurn, type Replay } from './rewrite'
 import { renderTurn } from './show'
 import { renderTranscript } from './transcript'
 
 const ROOT = resolve(__dirname, '../..')
 const [command, ...args] = process.argv.slice(2)
-const VALUED = new Set(['--out', '--rating', '--reason', '--speaker', '--count', '--seed', '--key', '--turn', '--pack', '--config', '--beat', '--note'])
+const VALUED = new Set(['--out', '--rating', '--reason', '--speaker', '--count', '--seed', '--key', '--turn', '--pack', '--config', '--beat', '--note', '--samples', '--label'])
 const option = (name: string) => {
   const at = args.indexOf(name)
   return at >= 0 ? args[at + 1] : undefined
@@ -103,6 +108,39 @@ async function main(): Promise<void> {
       emit(renderTurn(packFor(log, option('--pack')), log, turnNumber()))
       return
     }
+    case 'rewrite': {
+      const logs = sessionsAt(paths)
+      if (option('--turn') && logs.length !== 1) throw new Error(`--turn needs one session folder; ${paths.join(', ')} holds ${logs.length}.`)
+      const samples = Number(option('--samples') ?? 3)
+      if (!Number.isInteger(samples) || samples < 1 || samples > 10) throw new Error('--samples is a number from 1 to 10')
+      const settings = benchSettings(option('--config') ?? join(ROOT, 'bench.config.json'), process.env)
+      if (!isConfigured(settings.writer)) throw new Error('No writer model. Set "writer" in bench.config.json, or BENCH_WRITER_MODEL with BENCH_BASE_URL.')
+      const write = turnLlm(settings).write
+      const content = packFor(logs[0]!, option('--pack'))
+      const replays: Replay[] = []
+      for (const log of logs) {
+        const flags = flagsFor(log)
+        const turns = option('--turn') ? [turnNumber()] : flaggedTurns(log, flags)
+        for (const n of turns) {
+          console.error(`▸ ${log.session.id} turn ${n}: ${samples} sample${samples === 1 ? '' : 's'}`)
+          replays.push(await replayTurn(content, log, n, write, samples, flags, flag('--as-logged')))
+        }
+      }
+      if (replays.length === 0) throw new Error('No flagged turns to replay. Name one with --turn N.')
+      const label = option('--label')
+      const text = renderReplays(content, replays, { ...(label && { label }), model: modelsOf(settings).writer ?? settings.writer.model })
+      if (option('--out')) emit(text)
+      else {
+        // Written beside the bench's runs by default, since a replay is read later and compared with the next.
+        const dir = join(ROOT, 'bench-output')
+        mkdirSync(dir, { recursive: true })
+        const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(0, 19)
+        const file = join(dir, `rewrite-${stamp}${label ? `-${label.replace(/[^\w-]+/g, '-')}` : ''}.md`)
+        writeFileSync(file, text)
+        console.log(`Written to ${file}`)
+      }
+      return
+    }
     case 'score': {
       const logs = sessionsAt(paths)
       const settings = benchSettings(option('--config') ?? join(ROOT, 'bench.config.json'), process.env)
@@ -137,7 +175,7 @@ async function main(): Promise<void> {
       return
     }
     default:
-      throw new Error(`Unknown command "${command ?? ''}". Commands: transcript, flags, stats, blind, to-scenario, show, score, flag. See tools/logs/README.md.`)
+      throw new Error(`Unknown command "${command ?? ''}". Commands: transcript, flags, stats, blind, to-scenario, show, rewrite, score, flag. See tools/logs/README.md.`)
   }
 }
 

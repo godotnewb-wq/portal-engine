@@ -74,7 +74,7 @@ Adult, gritty but not bleak, punk: anti-authority energy, style, people living o
 
 # Location: The Sump Lantern (The Low Turns, Ninth Turn, under the old pumphouse)
 A low-ceilinged bar built into a decommissioned pump hall. Aether-cooled pipes run overhead and sweat onto the tables; the light is a green-gold glow from a cracked conduit nobody has the money to fix. Couriers, mechanics and people waiting for work drink here, and fixers keep booths in the back.
-Details: condensation dripping from an Aether-cooled pipe overhead; a cracked conduit throwing green-gold light that flickers when the grid surges; chalked tallies of who owes the bar what, on a slate by the taps; a card game at the next table going sour; a dead pump wheel bolted to the wall as decoration, still faintly humming; the conduit's low buzz rising and falling with the grid; a goblin band two stairs down, bass coming up through the floor; glass on glass as the bartender stacks cups without looking; fried river-eel and burnt chili oil; the ozone tang of raw Aether bleeding from the pipes; spilled fermented root beer and wet wool
+Details: condensation dripping from an Aether-cooled pipe overhead; a cracked conduit throwing green-gold light that flickers when the grid surges; chalked tallies of who owes the bar what, on a slate by the taps; a card game at the next table going sour; a dead pump wheel bolted to the wall as decoration, still faintly humming; the conduit's low buzz rising and falling with the grid; a goblin band two stairs down, bass coming up through the floor; fried river-eel and burnt chili oil; the ozone tang of raw Aether bleeding from the pipes; spilled fermented root beer and wet wool
 - [place.1] Grid Corporation surveyors were seen on the lower stairs this week
 - [place.2] Someone chalked an Animist spiral on the back door
 
@@ -160,7 +160,7 @@ Cue: With strangers Dunmar is brief: he names the price before you've finished a
 Nature: honest, kind, reserved
 Cares about: the bar, and the slate kept straight (strong); his regulars (mild)
 Tonight: Keep tonight quiet, keep the slate honest, and keep anyone he likes from going down to Pump Station Nine at high tide
-Mood now: watchful, wiping glasses, pretending not to listen; felt as worry, 1 of 5; it shows as: hidden. Comfort 3/5.
+Mood now: watchful, pretending not to listen; felt as worry, 1 of 5; it shows as: hidden. Comfort 3/5.
 Toward the player: approval: no settled opinion; trust: undecided; interest: indifferent · drinks here when there's money, and when there isn't; a small slate
 Toward others here: Brask: mechanic · approval: approves; trust: trusts; interest: indifferent; Vex: approval: no settled opinion; trust: undecided; interest: indifferent; Oria: approval: no settled opinion; trust: undecided; interest: indifferent
 Secret [dunmar.saw-the-flood] (in short): Sealed the gallery door at Pump Station Nine with two men still below. Won't tell the player yet.

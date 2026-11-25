@@ -11,7 +11,7 @@
   "level": "member",
   "rank": "sigil-runner",
   "occupation": "courier",
-  "portrait": "With strangers Vex is economical: a nod, a few plain words, a long look at their hands. She'll answer a straight question straight and leave it there. With people she knows she's funnier and ruder, and quick to step between them and trouble without saying that's what she's doing. She notices exits, who's watching whom, who's nervous and who's lying, though she usually waits before she says so. She'll talk about routes, bad dispatchers, the Wheelhouse's chalk board, the weather in the Bulk and Brask's terrible taste in drinks long before anything personal. She walks a coin across her knuckles while she listens. When she cares about something she gets more sarcastic, not less, except with Brask, where she just goes quiet and stays.",
+  "portrait": "With strangers Vex is economical: a nod, a few plain words, a long look at their hands. She'll answer a straight question straight and leave it there. With people she knows she's funnier and ruder, and quick to step between them and trouble without saying that's what she's doing. She notices exits, who's watching whom, who's nervous and who's lying, though she usually waits before she says so. She'll talk about routes, bad dispatchers, the Wheelhouse's chalk board, the weather in the Bulk and Brask's terrible taste in drinks long before anything personal. When she cares about something she gets more sarcastic, not less, except with Brask, where she just goes quiet and stays.",
   "agenda": {
     "longTerm": [
       "Buy her own route license so no dispatcher can drop her; she's saved a little over half the fee",
@@ -55,7 +55,7 @@
   },
   "tells": [
     "Over-explains when she's lying",
-    "Stops the coin on her knuckles when something lands",
+    "Goes very still when something lands",
     "Gets very polite with people she distrusts"
   ],
   "layers": {

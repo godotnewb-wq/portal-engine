@@ -75,6 +75,24 @@ export interface TurnOptions extends ResolveOptions {
 }
 
 /**
+ * The code checks on the writer's reply, as a turn runs them before deciding on a rewrite. Shared with the log tools'
+ * writer replay (Milestone 5 task 8), so a replayed draft is judged exactly as a played one.
+ */
+export function writerChecks(content: Pack, state: GameState, plan: BeatPlan, input: string, pipeline: Pipeline): (reply: ParsedReply) => Problem[] {
+  const scene = state.scene
+  if (!scene) throw new Error('No scene in progress')
+  const speakers = sceneSpeakers(content, state)
+  if (pipeline === 'scene') {
+    const recent = recentlyUsed(content, scene, RECENT_USE_TURNS, scene.turns.length)
+    // The scene writer: anyone present may speak, length is in words, repeats are sent back from the third (Q10), and someone saying what only
+    // another knows is a problem (redesign §6.4).
+    return (reply) => [...checkReply(reply, plan, speakers, input, content.phrases, { alsoSpeaking: presentCast(scene) }), ...repeatProblems(content, reply, recent, SCENE_REPEAT_REWRITE), ...loreProblems(content, state, reply), ...ownedProblems(content, state, reply)]
+  }
+  const recent = recentlyUsed(content, scene)
+  return (reply) => [...checkReply(reply, plan, speakers, input, content.phrases), ...repeatProblems(content, reply, recent), ...loreProblems(content, state, reply)]
+}
+
+/**
  * One player turn (director writer §3): director → game resolves mechanics → streamed writer → code checks →
  * one targeted rewrite if a check fails. At most three calls; anything still wrong after the rewrite is salvaged by
  * code rather than costing a fourth. A failed call throws a `TracedError` carrying the calls made so far.
@@ -148,13 +166,7 @@ export async function runTurn(
       )
     const draft = await stream('writer', writerPrompt)
     let parsed: ParsedReply = parseReply(draft, speakers, { script: scenePipeline })
-    const recent = scenePipeline ? recentlyUsed(content, scene, RECENT_USE_TURNS, scene.turns.length) : recentlyUsed(content, scene)
-    // The scene writer: anyone present may speak, length is in words, repeats are sent back from the third (Q10), and someone saying what only
-    // another knows is a problem (redesign §6.4).
-    const check = (reply: ParsedReply) =>
-      scenePipeline
-        ? [...checkReply(reply, plan, speakers, input, content.phrases, { alsoSpeaking: presentCast(scene) }), ...repeatProblems(content, reply, recent, SCENE_REPEAT_REWRITE), ...loreProblems(content, state, reply), ...ownedProblems(content, state, reply)]
-        : [...checkReply(reply, plan, speakers, input, content.phrases), ...repeatProblems(content, reply, recent), ...loreProblems(content, state, reply)]
+    const check = writerChecks(content, state, plan, input, pipeline)
     const problems = check(parsed)
     let remaining: Problem[] = []
     let kept = parsed.beats.map((_, i) => i)

@@ -8,7 +8,7 @@
   "appearance": "adult human man in his fifties, broad and heavy-shouldered, grey stubble, close-cropped grey hair, old Aether burn scars up both forearms, sleeves rolled, a stained bar towel over one shoulder",
   "role": "Runs the Sump Lantern and the slate of who owes what; the Ninth Turn's longest-standing bartender",
   "occupation": "bartender",
-  "portrait": "With strangers Dunmar is brief: he names the price before you've finished asking and pours before you've decided. With regulars he's drier and kinder, lets slates run, and remembers what you drink and who you came in with. He notices who's paying with whose cinders, who's drinking too fast, and who keeps looking at the back door. He'll talk about the price of everything, the Saints' tithe going up, the conduit nobody will fix, and the old days when the pumps still ran; ask about the pump stations themselves and he finds a glass to wipe. He stacks cups without looking. When something worries him he gets generous, pours one on the house, and watches.",
+  "portrait": "With strangers Dunmar is brief: he names the price before you've finished asking and pours before you've decided. With regulars he's drier and kinder, lets slates run, and remembers what you drink and who you came in with. He notices who's paying with whose cinders, who's drinking too fast, and who keeps looking at the back door. He'll talk about the price of everything, the Saints' tithe going up, the conduit nobody will fix, and the old days when the pumps still ran; ask about the pump stations themselves and he finds a glass to wipe. When something worries him he gets generous, pours one on the house, and watches.",
   "agenda": {
     "longTerm": [
       "Keep the Sump Lantern open and out of the Grid's hands; the lease debt is already bigger than he likes",
@@ -103,7 +103,7 @@
       ]
     }
   ],
-  "mood": { "text": "watchful, wiping glasses, pretending not to listen", "shade": "worry", "intensity": 1 },
+  "mood": { "text": "watchful, pretending not to listen", "shade": "worry", "intensity": 1 },
   "knowledge": [
     "He worked Pump Station Nine for the Spire Council as a young man, before the lower levels flooded; that's where the burns came from",
     "The Drowned Saints raised the tithe on the lower stairs this month",
