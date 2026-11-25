@@ -126,10 +126,10 @@ export function checkReply(parsed: ParsedReply, plan: BeatPlan, speakers: Speake
 
   const count = parsed.beats.length
   if (scene) {
-    // A scene is measured in words: the cutter makes two or three beats of one paragraph, so its beats aren't the writer's.
+    // A scene is measured in words: a line that still mixes speech and action is cut into beats, so beats aren't the writer's count.
     const total = parsed.beats.reduce((n, b) => n + words(b.text), 0)
-    if (count < BEATS.min) problems.push({ kind: 'beat-count', fix: `Write ${SCENE_LENGTH.paragraphs} paragraphs; there are ${count} beats.` })
-    else if (total > SCENE_LENGTH.maxWords) problems.push({ kind: 'scene-length', text: `${total} words`, fix: `The scene is ${total} words. Write it in ${SCENE_LENGTH.paragraphs} paragraphs, ${SCENE_LENGTH.words} words in all: keep what the moment needs and cut the rest.` })
+    if (count < BEATS.min) problems.push({ kind: 'beat-count', fix: `Write ${SCENE_LENGTH.lines} lines; there are ${count} beats.` })
+    else if (total > SCENE_LENGTH.maxWords) problems.push({ kind: 'scene-length', text: `${total} words`, fix: `The scene is ${total} words. Write it in ${SCENE_LENGTH.lines} lines, ${SCENE_LENGTH.words} words in all: keep what the moment needs and cut the rest.` })
   } else if (count < BEATS.min || count > BEATS.max) problems.push({ kind: 'beat-count', fix: `Write ${BEATS.target} beats; there are ${count}.` })
   return problems
 }

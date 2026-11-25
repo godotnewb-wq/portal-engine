@@ -22,7 +22,8 @@ import { claimLines, knowledgeLines, speakerTies, voiceCard } from './writer'
  * the turn as one continuous short scene in a light script form, from the people present, each one's moment, what
  * presses on them as undercurrent, the facts they may draw on and what is at stake. It is free in order, length within
  * the budget, interruptions and silences; it is bound by who knows what, the check results, and never acting for the
- * player. The game cuts its paragraphs into beats (`parseReply`), as it does the situation writer's lines.
+ * player. It writes one beat per line (since 2026-11-24: a paragraph form, cut into beats by code, guessed at subjects
+ * and grammar); `parseReply` still cuts a line that mixes speech and action.
  */
 
 /** How the scene should read (redesign §6.3): a few principles and short examples with made-up people, as engine text must. */
@@ -48,16 +49,18 @@ Played honestly: NARRATION: Ben watches Ada a moment too long, then looks back a
 
 /** The script form (redesign §6.1) and the tag footer (Q7). */
 export const SCENE_FORMAT = `Output format, nothing else:
-- A short scene, one paragraph per line. Start every paragraph with NARRATION: for what happens, or with a character's first name and a colon for what they say and do: what they say in double quotes and what they do, in the order it happens, as in written fiction. Someone who speaks gets their own paragraph.
-- ${SCENE_LENGTH.paragraphs} paragraphs, ${SCENE_LENGTH.words} words in all; never more than ${SCENE_LENGTH.maxWords}.
-- The people in the moment carry the scene. Anyone else present may react or say a little. Walk-ons speak only when listed. Nobody else speaks.
+- A short scene, one beat per line, in the order it happens. NARRATION: for what happens or what someone does, as a whole sentence that names them, never a stage direction ("From the booth."). A character's first name and a colon for what they say, in double quotes, and nothing else.
+- ${SCENE_LENGTH.lines} lines, ${SCENE_LENGTH.words} words in all; never more than ${SCENE_LENGTH.maxWords}.
+- The people in the moment carry the scene. Anyone else present may react to what was just said, briefly; they don't bring up a topic of their own. Walk-ons speak only when listed. Nobody else speaks.
+- Most lines of speech need no action beside them.
 - Then the tags, one per line: [Name: EXPRESSION word] for each person who appears, for what their face shows; [Name: COMFORT 1-5 reason] when someone's comfort changes; [LEAVES: Name] for a departure the brief lists; [END SCENE] only when the brief says the scene ends.
 - Never write the player's words, choices, thoughts or actions beyond what their input stated.
 
 For example:
 NARRATION: The kettle starts to tick on the stove.
-Ada: She doesn't look up from the ledger. "You're late. Sit, the tea's nearly done."
-Ben: "Traffic." He takes the chair nearest the door.
+NARRATION: Ada doesn't look up from the ledger.
+Ada: "You're late. Sit, the tea's nearly done."
+Ben: "Traffic."
 [Ada: EXPRESSION tired]
 [Ben: EXPRESSION sheepish]`
 
@@ -70,6 +73,16 @@ export function placeDetails(texture: { sights: string[]; sounds: string[]; smel
   const recent = new Set(plainWords(scene.turns.slice(-RECENT_USE_TURNS).flatMap((t) => t.beats.filter((b) => b.kind === 'narration').map((b) => b.text)).join(' ')))
   const used = (d: string) => plainWords(d).filter((w) => w.length > 3 && !FUNCTION_WORDS.has(w) && recent.has(w)).length >= 2
   return [...texture.sights, ...texture.sounds, ...texture.smells].filter((d) => !used(d))
+}
+
+/**
+ * The voice card as the scene writer reads it (2026-11-24 writer replay): sample lines and the shifts are how someone
+ * sounds, not lines to say. Read as material, a sample line came back word for word ("Six for the good stuff, and it
+ * isn't that good") and a lying shift played when no one was lying (a clean glass wiped). The situation writer's card
+ * is unchanged.
+ */
+export function sceneVoiceCard(card: string): string {
+  return card.replace(/^Sample lines: /m, 'How they sound (never use these lines): ').replace(/^When angry: /m, 'How they change, only when they feel it now. Angry: ')
 }
 
 /** A check's result as what happens (Q9: results as events, not an attempt with a label). */
@@ -115,7 +128,7 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
   // Portraits of everyone present; voice cards for the people in the moment (redesign §4, "The writer"). A portrait
   // holds no habits (decided 2026-11-24, user): a habit on the card came back in nearly every turn as filler.
   const used = recentlyUsed(content, scene, RECENT_USE_TURNS, scene.turns.length)
-  const cards = people.map((c) => (plan.focus.includes(c.id) ? voiceCard(firstName(c.name), c.voice, c.portrait) : `## ${firstName(c.name)}\n${c.portrait}`))
+  const cards = people.map((c) => (plan.focus.includes(c.id) ? sceneVoiceCard(voiceCard(firstName(c.name), c.voice, c.portrait)) : `## ${firstName(c.name)}\n${c.portrait}`))
 
   const system = [
     'You write one turn of a visual-novel RPG scene as a short scene: the conversation and what happens, in one continuous piece.',
@@ -135,12 +148,14 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
   const heard = scene.turns.flatMap((t) => (t.records?.said ?? []).filter((f) => !sheets.has(f.fact) && scene.told.includes(f.fact)))
   const told = [...facts.filter((f) => f.kind === 'said' || scene.told.includes(f.id)), ...heard.filter((f, i) => heard.findIndex((x) => x.fact === f.fact) === i).map((f) => ({ text: f.text }))]
   const felt = feelingsNow(state, view)
-  const feltLine = (id: string) => {
+  // Someone outside the moment gets how much their feeling shows, not its display line: given "gets precise: numbers,
+  // valves, how long until", the writer had them volunteer a reading in every sample of the 2026-11-24 replays.
+  const feltLine = (id: string, display = true) => {
     const f = felt[id]
     const s = f && shown(content, state, id, f, view)
     if (!f || !s) return ''
     const reads = (view.reads ?? []).filter((x) => x.target === id).map((x) => (x.by === 'player' ? ' You see through to it.' : ` ${nameOf(x.by)} sees through to it and may say so.`))
-    return ` Feels ${feltWords(content.ruleset, f)}. ${shownWords(s)}.${[...new Set(reads)].join('')}`
+    return ` Feels ${feltWords(content.ruleset, f)}. ${shownWords(display ? s : { ...s, display: undefined })}.${[...new Set(reads)].join('')}`
   }
   const tells = new Map(view.speakers.flatMap((s) => (s.tell ? [[s.id, s.tell]] : [])))
   const momentLine = (who: string) => {
@@ -171,7 +186,7 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
     `# The player says or does\n${input}`,
     view.checks.some((c) => c.result) && `# What the rolls decided (this happens; honor it)\n${view.checks.filter((c) => c.result).map((c) => checkEvent(content, c)).join('\n')}`,
     plan.focus.length > 0 && `# This moment\n${plan.focus.map(momentLine).join('\n')}`,
-    around.length > 0 && `# Also here (they may react or say a little)\n${around.map((id) => `- ${nameOf(id)}.${feltLine(id)}`).join('\n')}`,
+    around.length > 0 && `# Also here (they may react to what was just said, briefly, but start no topic; a feeling that shows is in how they react, not something they bring up)\n${around.map((id) => `- ${nameOf(id)}.${feltLine(id, false)}`).join('\n')}`,
     ties.length > 0 && `# How people here stand with each other (facts about them, not how to play them)\n${ties.join('\n')}`,
     knowledge.length > 0 && `# Who knows what\n${knowledge.join('\n')}`,
     plan.stakes && `# What's at stake\n${plan.stakes}`,

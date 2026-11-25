@@ -31,7 +31,11 @@ export const OVERUSED_PHRASES = [
   'little did you know',
   'in the dim light',
   'a mix of',
-  'maybe, just maybe'
+  'maybe, just maybe',
+  // The writer model's own fidget (2026-11-24 writer replays: a glass or cup turned "a quarter turn" in 3 to 4 of 5
+  // samples, from no card).
+  'quarter turn',
+  'quarter-turn'
 ]
 
 /**
@@ -41,8 +45,8 @@ export const OVERUSED_PHRASES = [
 export const BEATS = { min: 2, max: 12, target: '4–8', maxWords: 60, targetWords: 40 } as const
 
 /**
- * How long a scene-pipeline turn runs (Milestone 5 plan, Q8): a guide in the units the writer controls, paragraphs and
- * words, and a hard limit at about 1.5 times the guide. Over it, the turn's one rewrite asks for a shorter scene; a
+ * How long a scene-pipeline turn runs (Milestone 5 plan, Q8): a guide in the units the writer controls, lines (one beat
+ * each since 2026-11-24, was paragraphs) and words, and a hard limit at about 1.5 times the guide. Over it, the turn's one rewrite asks for a shorter scene; a
  * rewrite still over is shown whole, since cutting a scene loses its ending (*tune*).
  */
-export const SCENE_LENGTH = { paragraphs: '4–6', words: '80–140', maxWords: 200 } as const
+export const SCENE_LENGTH = { lines: '6–10', words: '80–140', maxWords: 200 } as const

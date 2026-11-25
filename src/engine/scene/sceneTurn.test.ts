@@ -105,7 +105,11 @@ describe('the scene writer’s brief', () => {
     expect(writer.system).toMatch(/## Tobin\n(?![\s\S]*### Tobin's voice)/)
     expect(writer.user).toMatch(/# This moment\n- Mara: the question she has no good answer to\. Right now Mara wants to close it down\./)
     expect(writer.user).toMatch(/Underneath, Mara is keeping something \(lie\): /)
-    expect(writer.user).toMatch(/# Also here \(they may react or say a little\)\n- Tobin\./)
+    expect(writer.user).toMatch(/# Also here \(they may react to what was just said, briefly, but start no topic; [^)]*\)\n- Tobin\./)
+    // The voice card is how they sound, not lines to say (2026-11-24 writer replay).
+    expect(writer.system).toContain('How they sound (never use these lines): ')
+    expect(writer.system).toContain('How they change, only when they feel it now. Angry: ')
+    expect(writer.system).not.toContain('Sample lines: ')
     expect(writer.user).toContain("# What's at stake\nwhether Kit believes there is one book")
     expect(writer.user).toContain('# What the rolls decided (this happens; honor it)\n- Tobin fails. This does not happen: Tobin sees the lie for what it is. Show the attempt not coming off.')
     expect(writer.user).not.toContain('# The scene ends this turn')
@@ -140,6 +144,21 @@ describe('the scene writer’s checks (fixes from the first scored run)', () => 
     expect(narration('Mara: She\'ll wait. "Fine."')).toEqual({ kind: 'narration', text: 'Mara will wait.' })
     expect(narration('Mara: Her coin walks a slow lap. "Go on."')).toEqual({ kind: 'narration', text: "Mara's coin walks a slow lap." })
     expect(narration('Mara: She sets the book down. "Go on."')).toEqual({ kind: 'narration', text: 'Mara sets the book down.' })
+  })
+
+  it('drops a speech tag and a bare pause, names an unnamed subject, and says who speaks in stage direction', () => {
+    const beats = (line: string) => parseReply(line, speakers, { script: true }).beats
+    // From the writer replay (2026-11-24): "<name> he says, mostly to himself.", "From her booth, without turning her head."
+    expect(beats('Tobin: "Running warm," he says, mostly to himself. "It\'ll hold."')).toEqual([
+      { kind: 'dialogue', speaker: 'tobin', text: 'Running warm. It\'ll hold.' }
+    ])
+    expect(beats('Mara: From her booth, without turning her head. "He won\'t."')[0]).toEqual({ kind: 'narration', text: 'Mara speaks from her booth, without turning her head.' })
+    expect(beats('Mara: From the back booth, she lifts her glass an inch. "It grows on you."')[0]).toEqual({ kind: 'narration', text: 'From the back booth, Mara lifts her glass an inch.' })
+    expect(beats('Tobin: "That\'s not a complaint." A beat. "It\'s a warning."')).toEqual([{ kind: 'dialogue', speaker: 'tobin', text: 'That\'s not a complaint. It\'s a warning.' }])
+    expect(beats('NARRATION: A beat.\nNARRATION: The lamp hisses.')).toEqual([{ kind: 'narration', text: 'The lamp hisses.' }])
+    // A clause with someone else in it isn't stage direction, and "says nothing" is something done.
+    expect(beats('Mara: From the yard, a cart rattles past. "Late."')[0]).toEqual({ kind: 'narration', text: 'From the yard, a cart rattles past.' })
+    expect(beats('Mara: "Fine." She says nothing more.')[1]).toEqual({ kind: 'narration', text: 'Mara says nothing more.' })
   })
 
   it('reads a speaker who starts partway through a line, in the script form only', () => {
