@@ -6,7 +6,7 @@ import type { GameState } from '@engine/state'
 import { justSaid, type Gathered, type LiveRecord, type PoolFact, type SecretOption, type TieOption } from './gather'
 import { feltNow, NEW_FACT_WORDS, playerChecks, RawFeelsSchema, validateChecks, validateLeaves, validateWalkOns } from './plan'
 import { sceneFacts } from './facts'
-import { sharedWords } from './phrases'
+import { sharedBeyond, sharedWords } from './phrases'
 import { list, MAX_SPEAKERS, oneOrList, PlannedCheckSchema, presentId, QUOTED_WORDS, text, type BeatPlan, type PlannedCheck, type Read } from './planShape'
 
 /**
@@ -91,6 +91,8 @@ export type RawScenePlan = z.infer<typeof RawScenePlanSchema>
 
 /** A director's detail sharing this many content words with a secret is about the secret, and dropped (*tune*). */
 export const DETAIL_SECRET_WORDS = 3
+/** …of which this many aren't in what the person knows openly (*tune*): a fixer may describe the job on her own card. */
+export const DETAIL_SECRET_BEYOND = 2
 
 /** Words for a moment's line or the stakes before the rest is cut (*tune*): a situation, not a script. */
 export const MOMENT_WORDS = 30
@@ -250,6 +252,8 @@ export function validateScenePlan(content: Pack, state: GameState, raw: RawScene
   const pools: Record<string, PoolFact[]> = {}
   // Concrete details the director wants on hand (task 4; a move's `new` before): short facts in one person's pool,
   // never wording for a line. Not a secret, and within the ruleset's count. Said on screen, they become common ground.
+  // A detail is a secret's when it shares its words beyond what the person knows openly: a fixer's job, on her own
+  // card, was dropped for sharing words with her secret about it (2026-11-25 play), and she offered pay for no job.
   const secretTexts = sceneFacts(content, state).filter((f) => f.kind === 'secret').map((f) => f.text)
   for (const d of raw.details) {
     const id = who(d.who)
@@ -258,7 +262,7 @@ export function validateScenePlan(content: Pack, state: GameState, raw: RawScene
     if (!text) continue
     if (!id || !focus.includes(id)) fix(`dropped the detail for "${d.who}": not in focus`)
     else if (text.split(/\s+/).length > NEW_FACT_WORDS) fix(`dropped ${id}'s detail "${text}": over ${NEW_FACT_WORDS} words`)
-    else if (secretTexts.some((t) => sharedWords(text, t) >= DETAIL_SECRET_WORDS)) fix(`dropped ${id}'s detail "${text}": it says a secret`)
+    else if (secretTexts.some((t) => sharedWords(text, t) >= DETAIL_SECRET_WORDS && sharedBeyond(text, t, (characterById(content, id)?.knowledge ?? []).join(' ')) >= DETAIL_SECRET_BEYOND)) fix(`dropped ${id}'s detail "${text}": it says a secret`)
     else if (n >= r.scene.details) fix(`dropped ${id}'s detail "${text}": over the limit of ${r.scene.details}`)
     else (pools[id] ??= []).push({ id: `detail.${scene.turns.length + 1}.${n + 1}`, text, source: 'plan', unheard: true })
   }

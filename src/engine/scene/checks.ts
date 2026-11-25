@@ -20,6 +20,8 @@ export type ProblemKind =
   | 'invented-name'
   /** A speaker saying what only someone else knows (`scene` pipeline, Milestone 5 task 3). */
   | 'unowned-fact'
+  /** A speaker saying a fact or note in the brief's own words (`scene` pipeline, 2026-11-25). */
+  | 'recited'
 
 export interface Problem {
   kind: ProblemKind

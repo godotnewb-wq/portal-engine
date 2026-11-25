@@ -107,7 +107,7 @@ describe('the scene writer’s brief', () => {
     expect(writer.user).toMatch(/Underneath, Mara is keeping something: [^\n]*\. Mara lies about it if it comes up, and never says the truth of it\./)
     expect(writer.user).toMatch(/# Also here \(they may react to what was just said, briefly, but start no topic; [^)]*\)\n- Tobin\./)
     // The voice card is how they sound, not lines to say (2026-11-24 writer replay).
-    expect(writer.system).toContain('How they sound (never use these lines; nothing in them has been said here, and nobody here has heard it): ')
+    expect(writer.system).toContain('How they sound, not what they talk about (never use these lines; nothing in them has been said here, and nobody here has heard it): ')
     expect(writer.system).toContain('How they change, only when they feel it now. Angry: ')
     expect(writer.system).not.toContain('Sample lines: ')
     expect(writer.user).toContain("# What's at stake\nwhether Kit believes there is one book")

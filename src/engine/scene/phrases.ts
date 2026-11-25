@@ -30,6 +30,17 @@ export const runs = (t: string, n: number, content = OWNED_CONTENT_WORDS): strin
   return w.length < n ? [] : w.slice(0, w.length - n + 1).map((_, i) => w.slice(i, i + n)).filter((r) => r.filter((x) => !FUNCTION_WORDS.has(x)).length >= content).map((r) => r.join(' '))
 }
 
+/**
+ * How many content words `a` shares with `b` that aren't already in `known`: what a text says of `b` beyond what its
+ * owner knows openly. A job a fixer knows is hers to describe, though its words are in her secret (2026-11-25 play).
+ */
+export const sharedBeyond = (a: string, b: string, known: string): number => {
+  const content = (t: string) => new Set(plainWords(t).filter((w) => !FUNCTION_WORDS.has(w)))
+  const theirs = content(b)
+  const open = content(known)
+  return [...content(a)].filter((w) => theirs.has(w) && !open.has(w)).length
+}
+
 /** How many content words two texts share; a short detail sharing several with a secret is about the secret. */
 export const sharedWords = (a: string, b: string): number => {
   const content = (t: string) => new Set(plainWords(t).filter((w) => !FUNCTION_WORDS.has(w)))

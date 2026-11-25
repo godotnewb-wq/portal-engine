@@ -43,6 +43,8 @@ export const BEATS = { min: 2, max: 12, target: '4–8', maxWords: 60, targetWor
 /**
  * How long a scene-pipeline turn runs (Milestone 5 plan, Q8): a guide in the units the writer controls, lines (one beat
  * each since 2026-11-24, was paragraphs) and words, and a hard limit at about 1.5 times the guide. Over it, the turn's one rewrite asks for a shorter scene; a
- * rewrite still over is shown whole, since cutting a scene loses its ending (*tune*).
+ * rewrite still over is shown whole, since cutting a scene loses its ending (*tune*). A ceiling, not a target since
+ * 2026-11-25: asked for 6–10 lines, the writer padded a short answer with lines that changed nothing (play
+ * 2026-11-25_1242_a1af).
  */
-export const SCENE_LENGTH = { lines: '6–10', words: '80–140', maxWords: 200 } as const
+export const SCENE_LENGTH = { lines: '3–8', words: '40–120', maxWords: 200 } as const

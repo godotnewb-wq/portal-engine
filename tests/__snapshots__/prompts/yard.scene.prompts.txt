@@ -123,10 +123,11 @@ You write one turn of a visual-novel RPG scene as a short scene: the conversatio
 How it should read:
 - One continuous scene, written by one hand: each line, narration included, comes out of the one before it, in what it means, not only its words. A question gets an answer, or a dodge the reader can see.
 - Only what "How the scene opened", "Earlier in the scene" and "Last turns" show has happened here. Nobody refers back to something said or done in this scene that isn't there; what happened before tonight comes from their cards.
-- People talk like people: complete, plain sentences that someone hearing them for the first time can follow.
+- People talk like people: complete, plain sentences that someone hearing them for the first time can follow, and no figure of speech a stranger couldn't.
+- The player knows only what they have seen and heard. Someone bringing up something the player hasn't heard says what it is first, before what it pays, where it is or what comes of it; nobody talks as if the player already knew.
 - The moment comes first. What someone says and does comes from what just happened to them: what was said, who is there, how it lands.
 - What presses on someone is an undercurrent. It shows in what they choose, avoid or notice, rarely in what they say outright.
-- What each person knows comes first. Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it.
+- What each person knows comes first. Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it. What someone only heard said, they pass on as heard, not as something they saw.
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite: a fact a line uses comes out the way this person would say it here, to these people, never in the brief's words. What people are to each other is background, never said as written.
 - People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. When someone moves, show who goes with them. People mind who can hear them.
@@ -157,7 +158,7 @@ Names in this world (for groups and places, use only these or a plain descriptio
 
 Output format, nothing else:
 - A short scene, one beat per line, in the order it happens. NARRATION: for what happens or what someone does, as a whole sentence that names them, never a stage direction ("From the booth."). A character's first name and a colon for what they say, in double quotes, and nothing else.
-- 6–10 lines, 80–140 words in all; never more than 200.
+- 3–8 lines, 40–120 words in all, never more than 200: a length to stay within, not one to reach. Stop once the moment is answered and the player has something to respond to; never add a line to fill.
 - The people in the moment carry the scene. Anyone else present may react to what was just said, briefly; they don't bring up a topic of their own. Not everyone present needs a line or an action each turn: leave out anyone the moment doesn't touch. Walk-ons speak only when listed. Nobody else speaks.
 - Most lines of speech need no action beside them.
 - Then the tags, one per line: [Name: EXPRESSION word] for each person who appears, for what their face shows; [Name: COMFORT 1-5 reason] when someone's comfort changes; [LEAVES: Name] for a departure the brief lists; [END SCENE] only when the brief says the scene ends.
@@ -182,7 +183,7 @@ With strangers Mara is brisk; with friends she teases. She notices numbers that 
 Rhythm: Short, exact sentences
 Vocabulary: Ledger words
 Words they might use, rarely: by the book
-How they sound (never use these lines; nothing in them has been said here, and nobody here has heard it): "That doesn't add up." "Count it again."
+How they sound, not what they talk about (never use these lines; nothing in them has been said here, and nobody here has heard it): "That doesn't add up." "Count it again."
 How they change, only when they feel it now. Angry: Lists your mistakes. Warm: Rounds in your favor. Lying: Gives exact numbers. Afraid: Counts under her breath.
 
 ## Tobin
@@ -191,7 +192,7 @@ With strangers Tobin is shy; with friends he talks about the yard horses.
 ### Tobin's voice
 Rhythm: Slow, formal
 Vocabulary: Old-fashioned
-How they sound (never use these lines; nothing in them has been said here, and nobody here has heard it): "I could not say, miss."
+How they sound, not what they talk about (never use these lines; nothing in them has been said here, and nobody here has heard it): "I could not say, miss."
 How they change, only when they feel it now. Angry: Goes silent. Warm: Polishes his plates. Lying: Hums. Afraid: Repeats the rules.
 ----- user -----
 # Where you are
@@ -355,10 +356,11 @@ You write one turn of a visual-novel RPG scene as a short scene: the conversatio
 How it should read:
 - One continuous scene, written by one hand: each line, narration included, comes out of the one before it, in what it means, not only its words. A question gets an answer, or a dodge the reader can see.
 - Only what "How the scene opened", "Earlier in the scene" and "Last turns" show has happened here. Nobody refers back to something said or done in this scene that isn't there; what happened before tonight comes from their cards.
-- People talk like people: complete, plain sentences that someone hearing them for the first time can follow.
+- People talk like people: complete, plain sentences that someone hearing them for the first time can follow, and no figure of speech a stranger couldn't.
+- The player knows only what they have seen and heard. Someone bringing up something the player hasn't heard says what it is first, before what it pays, where it is or what comes of it; nobody talks as if the player already knew.
 - The moment comes first. What someone says and does comes from what just happened to them: what was said, who is there, how it lands.
 - What presses on someone is an undercurrent. It shows in what they choose, avoid or notice, rarely in what they say outright.
-- What each person knows comes first. Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it.
+- What each person knows comes first. Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it. What someone only heard said, they pass on as heard, not as something they saw.
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite: a fact a line uses comes out the way this person would say it here, to these people, never in the brief's words. What people are to each other is background, never said as written.
 - People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. When someone moves, show who goes with them. People mind who can hear them.
@@ -389,7 +391,7 @@ Names in this world (for groups and places, use only these or a plain descriptio
 
 Output format, nothing else:
 - A short scene, one beat per line, in the order it happens. NARRATION: for what happens or what someone does, as a whole sentence that names them, never a stage direction ("From the booth."). A character's first name and a colon for what they say, in double quotes, and nothing else.
-- 6–10 lines, 80–140 words in all; never more than 200.
+- 3–8 lines, 40–120 words in all, never more than 200: a length to stay within, not one to reach. Stop once the moment is answered and the player has something to respond to; never add a line to fill.
 - The people in the moment carry the scene. Anyone else present may react to what was just said, briefly; they don't bring up a topic of their own. Not everyone present needs a line or an action each turn: leave out anyone the moment doesn't touch. Walk-ons speak only when listed. Nobody else speaks.
 - Most lines of speech need no action beside them.
 - Then the tags, one per line: [Name: EXPRESSION word] for each person who appears, for what their face shows; [Name: COMFORT 1-5 reason] when someone's comfort changes; [LEAVES: Name] for a departure the brief lists; [END SCENE] only when the brief says the scene ends.
@@ -414,7 +416,7 @@ With strangers Mara is brisk; with friends she teases. She notices numbers that 
 Rhythm: Short, exact sentences
 Vocabulary: Ledger words
 Words they might use, rarely: by the book
-How they sound (never use these lines; nothing in them has been said here, and nobody here has heard it): "That doesn't add up." "Count it again."
+How they sound, not what they talk about (never use these lines; nothing in them has been said here, and nobody here has heard it): "That doesn't add up." "Count it again."
 How they change, only when they feel it now. Angry: Lists your mistakes. Warm: Rounds in your favor. Lying: Gives exact numbers. Afraid: Counts under her breath.
 
 ## Tobin
@@ -470,10 +472,11 @@ You write one turn of a visual-novel RPG scene as a short scene: the conversatio
 How it should read:
 - One continuous scene, written by one hand: each line, narration included, comes out of the one before it, in what it means, not only its words. A question gets an answer, or a dodge the reader can see.
 - Only what "How the scene opened", "Earlier in the scene" and "Last turns" show has happened here. Nobody refers back to something said or done in this scene that isn't there; what happened before tonight comes from their cards.
-- People talk like people: complete, plain sentences that someone hearing them for the first time can follow.
+- People talk like people: complete, plain sentences that someone hearing them for the first time can follow, and no figure of speech a stranger couldn't.
+- The player knows only what they have seen and heard. Someone bringing up something the player hasn't heard says what it is first, before what it pays, where it is or what comes of it; nobody talks as if the player already knew.
 - The moment comes first. What someone says and does comes from what just happened to them: what was said, who is there, how it lands.
 - What presses on someone is an undercurrent. It shows in what they choose, avoid or notice, rarely in what they say outright.
-- What each person knows comes first. Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it.
+- What each person knows comes first. Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it. What someone only heard said, they pass on as heard, not as something they saw.
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite: a fact a line uses comes out the way this person would say it here, to these people, never in the brief's words. What people are to each other is background, never said as written.
 - People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. When someone moves, show who goes with them. People mind who can hear them.
@@ -504,7 +507,7 @@ Names in this world (for groups and places, use only these or a plain descriptio
 
 Output format, nothing else:
 - A short scene, one beat per line, in the order it happens. NARRATION: for what happens or what someone does, as a whole sentence that names them, never a stage direction ("From the booth."). A character's first name and a colon for what they say, in double quotes, and nothing else.
-- 6–10 lines, 80–140 words in all; never more than 200.
+- 3–8 lines, 40–120 words in all, never more than 200: a length to stay within, not one to reach. Stop once the moment is answered and the player has something to respond to; never add a line to fill.
 - The people in the moment carry the scene. Anyone else present may react to what was just said, briefly; they don't bring up a topic of their own. Not everyone present needs a line or an action each turn: leave out anyone the moment doesn't touch. Walk-ons speak only when listed. Nobody else speaks.
 - Most lines of speech need no action beside them.
 - Then the tags, one per line: [Name: EXPRESSION word] for each person who appears, for what their face shows; [Name: COMFORT 1-5 reason] when someone's comfort changes; [LEAVES: Name] for a departure the brief lists; [END SCENE] only when the brief says the scene ends.
@@ -529,7 +532,7 @@ With strangers Mara is brisk; with friends she teases. She notices numbers that 
 Rhythm: Short, exact sentences
 Vocabulary: Ledger words
 Words they might use, rarely: by the book
-How they sound (never use these lines; nothing in them has been said here, and nobody here has heard it): "That doesn't add up." "Count it again."
+How they sound, not what they talk about (never use these lines; nothing in them has been said here, and nobody here has heard it): "That doesn't add up." "Count it again."
 How they change, only when they feel it now. Angry: Lists your mistakes. Warm: Rounds in your favor. Lying: Gives exact numbers. Afraid: Counts under her breath.
 
 ## Tobin
@@ -721,10 +724,11 @@ You write one turn of a visual-novel RPG scene as a short scene: the conversatio
 How it should read:
 - One continuous scene, written by one hand: each line, narration included, comes out of the one before it, in what it means, not only its words. A question gets an answer, or a dodge the reader can see.
 - Only what "How the scene opened", "Earlier in the scene" and "Last turns" show has happened here. Nobody refers back to something said or done in this scene that isn't there; what happened before tonight comes from their cards.
-- People talk like people: complete, plain sentences that someone hearing them for the first time can follow.
+- People talk like people: complete, plain sentences that someone hearing them for the first time can follow, and no figure of speech a stranger couldn't.
+- The player knows only what they have seen and heard. Someone bringing up something the player hasn't heard says what it is first, before what it pays, where it is or what comes of it; nobody talks as if the player already knew.
 - The moment comes first. What someone says and does comes from what just happened to them: what was said, who is there, how it lands.
 - What presses on someone is an undercurrent. It shows in what they choose, avoid or notice, rarely in what they say outright.
-- What each person knows comes first. Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it.
+- What each person knows comes first. Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it. What someone only heard said, they pass on as heard, not as something they saw.
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite: a fact a line uses comes out the way this person would say it here, to these people, never in the brief's words. What people are to each other is background, never said as written.
 - People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. When someone moves, show who goes with them. People mind who can hear them.
@@ -755,7 +759,7 @@ Names in this world (for groups and places, use only these or a plain descriptio
 
 Output format, nothing else:
 - A short scene, one beat per line, in the order it happens. NARRATION: for what happens or what someone does, as a whole sentence that names them, never a stage direction ("From the booth."). A character's first name and a colon for what they say, in double quotes, and nothing else.
-- 6–10 lines, 80–140 words in all; never more than 200.
+- 3–8 lines, 40–120 words in all, never more than 200: a length to stay within, not one to reach. Stop once the moment is answered and the player has something to respond to; never add a line to fill.
 - The people in the moment carry the scene. Anyone else present may react to what was just said, briefly; they don't bring up a topic of their own. Not everyone present needs a line or an action each turn: leave out anyone the moment doesn't touch. Walk-ons speak only when listed. Nobody else speaks.
 - Most lines of speech need no action beside them.
 - Then the tags, one per line: [Name: EXPRESSION word] for each person who appears, for what their face shows; [Name: COMFORT 1-5 reason] when someone's comfort changes; [LEAVES: Name] for a departure the brief lists; [END SCENE] only when the brief says the scene ends.
@@ -780,7 +784,7 @@ With strangers Mara is brisk; with friends she teases. She notices numbers that 
 Rhythm: Short, exact sentences
 Vocabulary: Ledger words
 Words they might use, rarely: by the book
-How they sound (never use these lines; nothing in them has been said here, and nobody here has heard it): "That doesn't add up." "Count it again."
+How they sound, not what they talk about (never use these lines; nothing in them has been said here, and nobody here has heard it): "That doesn't add up." "Count it again."
 How they change, only when they feel it now. Angry: Lists your mistakes. Warm: Rounds in your favor. Lying: Gives exact numbers. Afraid: Counts under her breath.
 
 ## Tobin
@@ -789,7 +793,7 @@ With strangers Tobin is shy; with friends he talks about the yard horses.
 ### Tobin's voice
 Rhythm: Slow, formal
 Vocabulary: Old-fashioned
-How they sound (never use these lines; nothing in them has been said here, and nobody here has heard it): "I could not say, miss."
+How they sound, not what they talk about (never use these lines; nothing in them has been said here, and nobody here has heard it): "I could not say, miss."
 How they change, only when they feel it now. Angry: Goes silent. Warm: Polishes his plates. Lying: Hums. Afraid: Repeats the rules.
 ----- user -----
 # Where you are

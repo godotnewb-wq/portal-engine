@@ -30,10 +30,11 @@ import { claimLines, knowledgeLines, speakerTies, voiceCard } from './writer'
 export const SCENE_STYLE = `How it should read:
 - One continuous scene, written by one hand: each line, narration included, comes out of the one before it, in what it means, not only its words. A question gets an answer, or a dodge the reader can see.
 - Only what "How the scene opened", "Earlier in the scene" and "Last turns" show has happened here. Nobody refers back to something said or done in this scene that isn't there; what happened before tonight comes from their cards.
-- People talk like people: complete, plain sentences that someone hearing them for the first time can follow.
+- People talk like people: complete, plain sentences that someone hearing them for the first time can follow, and no figure of speech a stranger couldn't.
+- The player knows only what they have seen and heard. Someone bringing up something the player hasn't heard says what it is first, before what it pays, where it is or what comes of it; nobody talks as if the player already knew.
 - The moment comes first. What someone says and does comes from what just happened to them: what was said, who is there, how it lands.
 - What presses on someone is an undercurrent. It shows in what they choose, avoid or notice, rarely in what they say outright.
-- What each person knows comes first. Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it.
+- What each person knows comes first. Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it. What someone only heard said, they pass on as heard, not as something they saw.
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite: a fact a line uses comes out the way this person would say it here, to these people, never in the brief's words. What people are to each other is background, never said as written.
 - People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. When someone moves, show who goes with them. People mind who can hear them.
@@ -58,7 +59,7 @@ Played honestly: NARRATION: Ben watches Ada a moment too long, then looks away. 
 /** The script form (redesign §6.1) and the tag footer (Q7). */
 export const SCENE_FORMAT = `Output format, nothing else:
 - A short scene, one beat per line, in the order it happens. NARRATION: for what happens or what someone does, as a whole sentence that names them, never a stage direction ("From the booth."). A character's first name and a colon for what they say, in double quotes, and nothing else.
-- ${SCENE_LENGTH.lines} lines, ${SCENE_LENGTH.words} words in all; never more than ${SCENE_LENGTH.maxWords}.
+- ${SCENE_LENGTH.lines} lines, ${SCENE_LENGTH.words} words in all, never more than ${SCENE_LENGTH.maxWords}: a length to stay within, not one to reach. Stop once the moment is answered and the player has something to respond to; never add a line to fill.
 - The people in the moment carry the scene. Anyone else present may react to what was just said, briefly; they don't bring up a topic of their own. Not everyone present needs a line or an action each turn: leave out anyone the moment doesn't touch. Walk-ons speak only when listed. Nobody else speaks.
 - Most lines of speech need no action beside them.
 - Then the tags, one per line: [Name: EXPRESSION word] for each person who appears, for what their face shows; [Name: COMFORT 1-5 reason] when someone's comfort changes; [LEAVES: Name] for a departure the brief lists; [END SCENE] only when the brief says the scene ends.
@@ -88,10 +89,11 @@ export function placeDetails(texture: { sights: string[]; sounds: string[]; smel
  * sounds, not lines to say. Read as material, a sample line came back word for word ("Six for the good stuff, and it
  * isn't that good") and a lying shift played when no one was lying (a clean glass wiped). What a sample line says is no
  * more real than its wording: one naming a job's details was taken as said, and someone else repeated them (task 8c
- * bench run, 2026-11-25). The situation writer's card is unchanged.
+ * bench run, 2026-11-25). Nor is their subject: four machine lines out of five made a mechanic talk machines unasked
+ * (play 2026-11-25_1242_a1af). The situation writer's card is unchanged.
  */
 export function sceneVoiceCard(card: string): string {
-  return card.replace(/^Sample lines: /m, "How they sound (never use these lines; nothing in them has been said here, and nobody here has heard it): ").replace(/^When angry: /m, 'How they change, only when they feel it now. Angry: ')
+  return card.replace(/^Sample lines: /m, "How they sound, not what they talk about (never use these lines; nothing in them has been said here, and nobody here has heard it): ").replace(/^When angry: /m, 'How they change, only when they feel it now. Angry: ')
 }
 
 /** A check's result as what happens (Q9: results as events, not an attempt with a label). */
@@ -235,6 +237,40 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
     .join('\n\n')
 
   return { system, user }
+}
+
+/** Words in a row a spoken line may share with a fact or note in the brief before it reads as recited (*tune*). */
+export const RECITED_WORDS = 4
+/** Content words such a run needs, so "on the first of" alone isn't recitation. */
+export const RECITED_CONTENT_WORDS = 2
+
+/**
+ * A fact or a note said in the brief's own words (2026-11-25 play: asked who a fixer was, a bartender gave his card's line
+ * about her tab word for word and a runner her note about the work she'd done for her). The style guide asks for a fact
+ * the way this person would say it here; this sends back a line that carries `RECITED_WORDS` of the brief's words in a
+ * row instead: the facts and details on hand (not secrets, nor what was already said on screen) and every note about
+ * people present. A beat already sent back for saying someone else's is left to that.
+ */
+export function recitedProblems(content: Pack, state: GameState, plan: Pick<BeatPlan, 'scene'>, parsed: ParsedReply, skip: Set<number> = new Set()): Problem[] {
+  const scene = state.scene!
+  const present = presentCast(scene)
+  const material = [
+    ...sceneFacts(content, state).filter((f) => f.kind === 'knows' || f.kind === 'place').map((f) => f.text),
+    ...Object.values(plan.scene?.pools ?? {}).flatMap((p) => p.map((f) => f.text)),
+    ...state.relations.filter((r) => present.includes(r.from) && r.note).map((r) => r.note!),
+    ...Object.entries(state.playerTies).flatMap(([id, t]) => (present.includes(id) && t.note ? [t.note] : []))
+  ]
+  const phrases = [...new Set(material.flatMap((t) => runs(t, RECITED_WORDS, RECITED_CONTENT_WORDS)))]
+  const problems: Problem[] = []
+  parsed.beats.forEach((b, i) => {
+    if (b.kind !== 'dialogue' || skip.has(i + 1)) return
+    const said = ` ${plainWords(b.text).join(' ')} `
+    const hit = phrases.find((r) => said.includes(` ${r} `))
+    if (!hit) return
+    const speaker = firstName(characterById(content, b.speaker)?.name ?? b.speaker)
+    problems.push({ kind: 'recited', beat: i + 1, text: hit, fix: `Beat ${i + 1}: ${speaker} says it in the brief's words ("${hit}"). Say it the way ${speaker} would here, to these people, or leave it out.` })
+  })
+  return problems
 }
 
 /**

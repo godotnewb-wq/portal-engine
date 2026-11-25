@@ -19,7 +19,7 @@ import { DEFAULT_PIPELINE, isPipeline, type Pipeline } from './pipeline'
 import { gatherScene } from './gather'
 import { buildSceneDirectorPrompt } from './sceneDirector'
 import { liveRecords, parseScenePlan, sceneFallback, sceneView, validateScenePlan } from './scenePlan'
-import { buildSceneWriterPrompt, ownedProblems } from './sceneWriter'
+import { buildSceneWriterPrompt, ownedProblems, recitedProblems } from './sceneWriter'
 import { presentCast } from './planShape'
 
 /**
@@ -90,8 +90,12 @@ export function writerChecks(content: Pack, state: GameState, plan: BeatPlan, in
   if (pipeline === 'scene') {
     const recent = recentlyUsed(content, scene, RECENT_USE_TURNS, scene.turns.length)
     // The scene writer: anyone present may speak, length is in words, repeats are sent back from the third (Q10), and someone saying what only
-    // another knows is a problem (redesign §6.4).
-    return (reply) => [...checkReply(reply, plan, speakers, input, content.phrases, { alsoSpeaking: presentCast(scene) }), ...repeatProblems(content, reply, recent, SCENE_REPEAT_REWRITE), ...loreProblems(content, state, reply), ...ownedProblems(content, state, reply)]
+    // another knows is a problem (redesign §6.4), and so is a fact or note said in the brief's own words.
+    return (reply) => {
+      const owned = ownedProblems(content, state, reply)
+      const recited = recitedProblems(content, state, plan, reply, new Set(owned.flatMap((p) => (p.beat ? [p.beat] : []))))
+      return [...checkReply(reply, plan, speakers, input, content.phrases, { alsoSpeaking: presentCast(scene) }), ...repeatProblems(content, reply, recent, SCENE_REPEAT_REWRITE), ...loreProblems(content, state, reply), ...owned, ...recited]
+    }
   }
   const recent = recentlyUsed(content, scene)
   return (reply) => [...checkReply(reply, plan, speakers, input, content.phrases), ...repeatProblems(content, reply, recent), ...loreProblems(content, state, reply)]
