@@ -2,7 +2,7 @@ import type { Beat } from '@engine/state'
 import { parseConsolidation, type RelationshipTrace, type SceneEndTrace, type WitnessReport } from '@engine/relationships'
 import { feelingLabel, type Meters } from '@engine/characters'
 import type { Pack } from '@engine/pack'
-import { lineText, moodOf, planLines, scenePlanLines, type TurnTrace } from '@engine/scene'
+import { lineText, moodOf, planLines, scenePlanLines, type OpeningTrace, type TurnTrace } from '@engine/scene'
 import { callsOf, metricInputOf, nameIn, turnsOf, type BenchRun, type SceneRun, type ScenarioRun } from './run'
 import { comparability } from './inputs'
 import { bookkeepingOf, RECORD_HEADS, recordLines, recordRow, renderTokens } from './records'
@@ -29,7 +29,7 @@ const average = (xs: number[]) => (xs.length === 0 ? 0 : Math.round(xs.reduce((a
 export function stats(run: ScenarioRun) {
   // Turn calls only: summaries and consolidation run between scenes, and the bookkeeper after the turn is shown
   // (milestone 4c), so "Calls" stays the turn's own two or three; its own numbers are in the Bookkeeper section.
-  const turnCalls = callsOf(run).filter((c) => !['relationship', 'memory', 'summary', 'consolidation', 'ties', 'bookkeeper'].includes(c.role))
+  const turnCalls = callsOf(run).filter((c) => !['relationship', 'memory', 'summary', 'consolidation', 'ties', 'bookkeeper', 'opening'].includes(c.role))
   return {
     turns: run.turns.length,
     calls: turnCalls.length,
@@ -124,15 +124,17 @@ function scenarioSection(names: Names, run: ScenarioRun, repeats: boolean, budge
   if (run.tieResults?.length && missedTies(run).length === 0) lines.push(`Expected ties met (${run.tieResults.length}).`, '')
   if (run.error) lines.push(`**Stopped:** ${run.error}`, '')
   if (run.stopped) lines.push(`**Re-played** with \`--fill\` after ${run.stopped.length === 1 ? 'a play that' : `${run.stopped.length} plays that`} stopped: ${run.stopped.map((x) => `\`${x.session}\` (${x.error})`).join('; ')}.`, '')
+  // The scene's opening (Milestone 5 task 8), before its first turn.
+  const openingLines = (o?: OpeningTrace) => (o && o.beats.length > 0 ? ['**Opening:**', '', ...o.beats.map((b) => `*${b.text}*`), ''] : [])
   if (!run.scenes) {
-    lines.push(...turnLines(names, run.location, run.turns, '###', budgets), ...tieLines(names, run.location, run.ties, run.sceneEnd, '###'), ...afterLines(names, run.location, run.sceneEnd, '###'))
+    lines.push(...openingLines(run.opening), ...turnLines(names, run.location, run.turns, '###', budgets), ...tieLines(names, run.location, run.ties, run.sceneEnd, '###'), ...afterLines(names, run.location, run.sceneEnd, '###'))
     return lines.join('\n')
   }
   for (const s of run.scenes) {
     const name = (id: string) => names(s.location, id)
     const when = s.n === 1 ? '' : s.days === 0 ? ', the same evening' : `, ${s.days} day${s.days === 1 ? '' : 's'} later`
     lines.push(`### Scene ${s.n}: \`${s.location}\`${when}`, '', `Present: ${s.cast.map(name).join(', ')}.`, '')
-    lines.push(...nightLines(names, s), ...turnLines(names, s.location, turnsOf(run, s), '####', budgets), ...tieLines(names, s.location, s.ties, s.sceneEnd, '####'), ...afterLines(names, s.location, s.sceneEnd, '####'))
+    lines.push(...nightLines(names, s), ...openingLines(s.opening), ...turnLines(names, s.location, turnsOf(run, s), '####', budgets), ...tieLines(names, s.location, s.ties, s.sceneEnd, '####'), ...afterLines(names, s.location, s.sceneEnd, '####'))
   }
   return lines.join('\n')
 }

@@ -28,7 +28,7 @@ export const replyMeta = (reply: LlmReply): CallMeta | undefined => (typeof repl
  * are a witness's two end-of-scene calls (milestone 4c); `summary` and `ties` are the calls they replaced, kept so logs
  * from before can still be read.
  */
-export type CallRole = 'director' | 'writer' | 'rewrite' | 'bookkeeper' | 'relationship' | 'memory' | 'scorer' | 'consolidation' | 'summary' | 'ties'
+export type CallRole = 'director' | 'writer' | 'rewrite' | 'opening' | 'bookkeeper' | 'relationship' | 'memory' | 'scorer' | 'consolidation' | 'summary' | 'ties'
 
 /** One LLM call as the logs keep it: the full prompt, the raw reply, timing, and what the platform reported. */
 export interface CallTrace {

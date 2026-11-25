@@ -31,11 +31,7 @@ export const OVERUSED_PHRASES = [
   'little did you know',
   'in the dim light',
   'a mix of',
-  'maybe, just maybe',
-  // The writer model's own fidget (2026-11-24 writer replays: a glass or cup turned "a quarter turn" in 3 to 4 of 5
-  // samples, from no card).
-  'quarter turn',
-  'quarter-turn'
+  'maybe, just maybe'
 ]
 
 /**

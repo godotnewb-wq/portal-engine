@@ -184,6 +184,7 @@ const api: RendererApi = {
     return { ok: true, state: outcome.state, beats: outcome.beats, checks: outcome.plan.checks.flatMap((c) => (c.line ? [c.line] : [])), calls: outcome.calls, corrections: outcome.corrections, rewrite: outcome.problems.map((p) => p.fix), details }
   },
   consolidate: async (state) => ({ ok: true, state, merged: 0 }),
+  sceneOpen: async (state) => ({ ok: true, state }),
   sceneTies: async (state) => {
     const { state: next, trace } = await judgeScene(content, state, cannedSummarize())
     const details: SceneEndDetails = { ...(logging && { session: SESSION }), ties: summarized(trace) }

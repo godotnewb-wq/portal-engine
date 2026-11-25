@@ -102,7 +102,8 @@ describe('runBench (acceptance 9: the bench runs its scenarios)', () => {
     const log = readSession(join(out, 'deception-caught-1'))
     expect(log.session).toMatchObject({ kind: 'bench', bench: { scenario: 'deception-caught', repeat: 1, forceNatural: 18 }, endedAt: expect.any(String) })
     expect(log.turns.map((t) => t.turnId)).toEqual(['deception-caught-1', 'deception-caught-2', 'deception-caught-3'])
-    expect(log.scenes.map((s) => s.type)).toEqual(['start', 'ties', 'end'])
+    // The scene opens as in play (Milestone 5 task 8): its opening before its first turn.
+    expect(log.scenes.map((s) => s.type)).toEqual(['start', 'opening', 'ties', 'end'])
     // Each turn's bookkeeper (milestone 4c): a line per turn, its call with the others, read back with the run.
     expect(log.bookkeeping.map((b) => b.turnId)).toEqual(['deception-caught-1', 'deception-caught-2', 'deception-caught-3'])
     expect(log.bookkeeping.every((b) => b.records.source === 'bookkeeper')).toBe(true)
@@ -126,7 +127,9 @@ describe('runScenario', () => {
     return {
       turn: {
         direct: async () => plan,
-        write: async (_p, onDelta) => {
+        write: async (p, onDelta) => {
+          // The scene's opening (Milestone 5 task 8) is written first; it isn't one of the turn's drafts.
+          if (p.user.trim().endsWith('Write the opening.')) return 'NARRATION: Oria sits alone in her booth.'
           writes++
           const reply = `Oria: "A collector, darling."\nVex: "Liar."${writes === 1 ? '\nBrask: "Can we go?"' : ''}`
           onDelta(reply)
@@ -140,10 +143,11 @@ describe('runScenario', () => {
   it('records each call by role, with the prompt and raw reply, and names the rewrite', async () => {
     const run = await runScenario(content, { ...caught, turns: [caught.turns[0]!], summaries: false }, scripted())
     const calls = callsOf(run)
-    expect(calls.map((c) => c.role)).toEqual(['director', 'writer', 'rewrite'])
-    expect(calls[0]!.prompt.user).toMatch(/who's the client/)
-    expect(calls[1]!.reply).toMatch(/Brask: "Can we go\?"/)
-    expect(calls[1]!.firstTextMs).toBeDefined()
+    expect(run.opening?.beats).toEqual([{ kind: 'narration', text: 'Oria sits alone in her booth.' }])
+    expect(calls.map((c) => c.role)).toEqual(['opening', 'director', 'writer', 'rewrite'])
+    expect(calls[1]!.prompt.user).toMatch(/who's the client/)
+    expect(calls[2]!.reply).toMatch(/Brask: "Can we go\?"/)
+    expect(calls[2]!.firstTextMs).toBeDefined()
     expect(run.turns[0]!.findings.map((p) => p.fix)).toEqual(['Beat 3: Brask was not planned to speak. Show them only through a reaction in narration.'])
   })
 

@@ -5,7 +5,7 @@ import { TracedError, type CallTrace, type LlmReply, type Prompt } from '@engine
 import { bookkeepWithin } from '@platform/roles'
 import { consolidate, endScene, judgeScene, nextDay, type ConsolidationTrace, type RelationshipTrace, type SceneEndTrace, type Summarize } from '@engine/relationships'
 import { answerTie, GameStateSchema, type GameState } from '@engine/state'
-import { applyRecords, DEFAULT_PIPELINE, promptSources, runTurn, type BookkeeperTrace, type Pipeline, type TurnLlm, type TurnTrace } from '@engine/scene'
+import { applyRecords, DEFAULT_PIPELINE, establishScene, promptSources, runTurn, type BookkeeperTrace, type OpeningTrace, type Pipeline, type TurnLlm, type TurnTrace } from '@engine/scene'
 import { callTrace, LogSession, promptVersion, readSession, type SessionRecord } from '@platform/logs'
 import type { FlagRecord, ScoreRecord } from '@engine/review'
 import { loreBudgets, type LoreBudgetOverrides, type LoreBudgets } from '@engine/rules'
@@ -31,6 +31,8 @@ export interface SceneRun {
   /** The witnesses' relationship calls and the ties settled from them (milestone 4c), before the memory calls. */
   ties?: RelationshipTrace
   sceneEnd?: SceneEndTrace
+  /** The scene's opening (Milestone 5 task 8), written as in play before its first turn; absent when it carried one. */
+  opening?: OpeningTrace
 }
 
 /**
@@ -60,6 +62,8 @@ export interface ScenarioRun {
   /** A one-scene scenario's relationship calls and its close; a scenario with several keeps each scene's under `scenes`. */
   ties?: RelationshipTrace
   sceneEnd?: SceneEndTrace
+  /** A one-scene scenario's opening (Milestone 5 task 8); with several scenes, each scene's is under `scenes`. */
+  opening?: OpeningTrace
   /** A scenario with several scenes (milestone 4b): each one, in order. Absent for one scene. */
   scenes?: SceneRun[]
   /** The state the run ended on, for tests; not written to the run folder. */
@@ -197,6 +201,16 @@ export async function runScenario(content: Pack, scenario: Scenario, llm: BenchL
       state = { ...state, scene: { ...state.scene!, id: sceneId } }
       run.scenes?.push(part)
       session?.sceneStart({ sceneId, location: scene.location, cast: scene.cast })
+      // Each scene opens as in play (Milestone 5 task 8): its opening written before its first turn. A scenario that
+      // carries history or an opening (one made from a logged turn) opens as it was.
+      where = 'turn'
+      if (state.scene!.turns.length === 0 && !state.scene!.opening) {
+        const opened = await establishScene(played, state, (prompt, onDelta, onRestart) => llm.turn.write(prompt, onDelta, onRestart))
+        state = opened.state
+        if (run.scenes) part.opening = opened.trace
+        else run.opening = opened.trace
+        session?.opening(opened.trace)
+      }
       where = 'turn'
       for (const input of scene.turns) {
         const outcome = await runTurn(played, state, input, llm.turn, () => {}, { ...options, ...(session && { log: session.id }) })
@@ -377,8 +391,8 @@ export function callsOf(run: ScenarioRun): CallTrace[] {
   // Each turn's calls, then its bookkeeper's (milestone 4c).
   const turn = (t: TurnTrace) => [...t.calls, ...(run.bookkeeping?.find((b) => b.turnId === t.turnId)?.calls ?? [])]
   const played = run.scenes
-    ? run.scenes.flatMap((s) => [...s.consolidations.flatMap((c) => c.calls), ...turnsOf(run, s).flatMap(turn), ...(s.ties?.calls ?? []), ...(s.sceneEnd?.calls ?? [])])
-    : [...run.turns.flatMap(turn), ...(run.ties?.calls ?? []), ...(run.sceneEnd?.calls ?? [])]
+    ? run.scenes.flatMap((s) => [...s.consolidations.flatMap((c) => c.calls), ...(s.opening?.calls ?? []), ...turnsOf(run, s).flatMap(turn), ...(s.ties?.calls ?? []), ...(s.sceneEnd?.calls ?? [])])
+    : [...(run.opening?.calls ?? []), ...run.turns.flatMap(turn), ...(run.ties?.calls ?? []), ...(run.sceneEnd?.calls ?? [])]
   return [...played, ...(run.errorCalls ?? [])]
 }
 
@@ -406,6 +420,8 @@ export function readRun(dir: string): BenchRun {
     const calls = (ids: string[]) => ids.flatMap((id) => callTrace(log, id) ?? [])
     const ended = log.scenes.find((s) => s.type === 'end')
     const end = ended?.type === 'end' ? (({ type: _type, ...rest }) => rest)(ended) : undefined
+    const opened = log.scenes.find((s) => s.type === 'opening')
+    const opening = opened?.type === 'opening' ? (({ type: _type, ...rest }) => rest)(opened) : undefined
     const tied = log.scenes.find((s) => s.type === 'ties')
     const ties = tied?.type === 'ties' ? (({ type: _type, ...rest }) => rest)(tied) : undefined
     const failed = log.errors[0]
@@ -425,6 +441,10 @@ export function readRun(dir: string): BenchRun {
           const { type: _type, calls: ids, ...rest } = record
           const scene = scenes.find((s) => s.id === record.sceneId)
           if (scene) scene.ties = { ...rest, calls: calls(ids) }
+        } else if (record.type === 'opening') {
+          const { type: _type, calls: ids, ...rest } = record
+          const scene = scenes.find((s) => s.id === record.sceneId)
+          if (scene) scene.opening = { ...rest, calls: calls(ids) }
         } else {
           const { type: _type, calls: ids, ...rest } = record
           const scene = scenes.find((s) => s.id === record.sceneId)
@@ -444,7 +464,7 @@ export function readRun(dir: string): BenchRun {
       session: entry.session,
       turns: log.turns.map((t) => ({ ...t, calls: calls(t.calls) })),
       ...(log.bookkeeping.length > 0 && { bookkeeping: log.bookkeeping.map(({ calls: ids, ...rest }) => ({ ...rest, calls: calls(ids) })) }),
-      ...(scenes ? { scenes } : { ...(ties && { ties: { ...ties, calls: calls(ties.calls) } }), ...(end && { sceneEnd: { ...end, calls: calls(end.calls) } }) }),
+      ...(scenes ? { scenes } : { ...(opening && { opening: { ...opening, calls: calls(opening.calls) } }), ...(ties && { ties: { ...ties, calls: calls(ties.calls) } }), ...(end && { sceneEnd: { ...end, calls: calls(end.calls) } }) }),
       ...(entry.error && { error: entry.error }),
       ...(entry.stopped && { stopped: entry.stopped }),
       ...(entry.tieResults && { tieResults: entry.tieResults }),

@@ -3,7 +3,7 @@ import { randomBytes } from 'node:crypto'
 import { join } from 'node:path'
 import type { CallTrace } from '@engine/core'
 import type { ConsolidationTrace, SceneEndTrace, RelationshipTrace } from '@engine/relationships'
-import type { BookkeeperTrace, TurnTrace } from '@engine/scene'
+import type { BookkeeperTrace, OpeningTrace, TurnTrace } from '@engine/scene'
 import type { FlagRecord, ScoreRecord } from '@engine/review'
 import { FILES, sessionName, splitPrompt, type BookkeepingRecord, type CallRecord, type ErrorRecord, type PromptRecord, type SceneRecord, type SessionRecord, type TurnRecord } from './records'
 
@@ -72,6 +72,12 @@ export class LogSession {
 
   sceneStart(scene: { sceneId: string; location: string; cast: string[] }, now = new Date()): void {
     this.append(FILES.scenes, { type: 'start', ...scene, at: now.toISOString() } satisfies SceneRecord)
+  }
+
+  /** The scene's opening (Milestone 5 task 8): its narration and calls, after the scene's start. */
+  opening(trace: OpeningTrace): void {
+    const { calls, ...rest } = trace
+    this.append(FILES.scenes, { type: 'opening', ...rest, calls: this.calls(calls) } satisfies SceneRecord)
   }
 
   sceneEnd(trace: SceneEndTrace): void {

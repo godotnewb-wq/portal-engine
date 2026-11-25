@@ -25,6 +25,7 @@ export const IPC = {
   testConnection: 'settings:test',
   sceneTurn: 'scene:turn',
   sceneEvent: 'scene:event',
+  sceneOpen: 'scene:open',
   sceneTies: 'scene:ties',
   sceneEnd: 'scene:end',
   consolidate: 'memories:consolidate',
@@ -86,6 +87,9 @@ export type SceneEvent = TurnEvent | { type: 'catching-up' } | { type: 'caught-u
  * relationship changes applied and any for the player waiting in `scene.pendingTies`.
  */
 /** The scene end's first half; `details` carries its relationship calls and ties for the scene-end view (milestone 4d). */
+/** A scene's opening written onto it (Milestone 5 task 8); on failure the scene goes on without one. */
+export type SceneOpenResponse = { ok: true; state: GameState } | { ok: false; error: string }
+
 export type SceneTiesResponse = { ok: true; state: GameState; details?: SceneEndDetails } | { ok: false; error: string }
 
 export type ConsolidateResponse = { ok: true; state: GameState; merged: number } | { ok: false; error: string }
@@ -119,6 +123,8 @@ export interface RendererApi {
   listModels(request: ListModelsRequest): Promise<ListModelsResponse>
   testConnection(profileId: LlmProfileId): Promise<TestConnectionResult>
   sceneTurn(request: SceneTurnRequest): Promise<SceneTurnResponse>
+  /** Writes the opening of a scene just started: where everyone is, before the player's first input (Milestone 5 task 8). */
+  sceneOpen(state: GameState): Promise<SceneOpenResponse>
   /** The first half of a scene's end (milestone 4c): every witness's relationship call, and the ties settled from them. */
   sceneTies(state: GameState): Promise<SceneTiesResponse>
   /** The second half, after the player's answers: every witness's memory call, in parallel, and the close. */

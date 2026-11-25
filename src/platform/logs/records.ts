@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto'
 import { isConfigured, profileFor, type LlmRole, type Settings } from '@llm'
 import type { CallTrace, Prompt } from '@engine/core'
 import type { ConsolidationTrace, SceneEndTrace, RelationshipTrace } from '@engine/relationships'
-import type { BookkeeperTrace, TurnTrace } from '@engine/scene'
+import type { BookkeeperTrace, OpeningTrace, TurnTrace } from '@engine/scene'
 
 /**
  * The log layout (milestone 2, A2): a folder per session, a file per concern, each file with one writer, joined by
@@ -33,8 +33,10 @@ export interface SessionRecord {
   kind: 'play' | 'bench'
   pack: { id: string; version: string }
   engine: string
-  /** A hash of the prompt templates, style guide, phrase lists and tone (`promptSources`). */
+  /** A hash of the prompt templates, style guide, phrase lists and tone (`promptSources`), for `pipeline`'s prompts. */
   prompts: string
+  /** Which pipeline made the turns, when the session recorded it (play sessions since 2026-11-24). */
+  pipeline?: string
   models: Record<string, RoleModel>
   startedAt: string
   /** Missing when the session didn't close cleanly. */
@@ -69,6 +71,7 @@ export type SceneRecord =
   | ({ type: 'end' } & Omit<SceneEndTrace, 'calls'> & { calls: string[] })
   | ({ type: 'consolidation' } & Omit<ConsolidationTrace, 'calls'> & { calls: string[] })
   | ({ type: 'ties' } & Omit<RelationshipTrace, 'calls'> & { calls: string[] })
+  | ({ type: 'opening' } & Omit<OpeningTrace, 'calls'> & { calls: string[] })
 
 /** `errors.jsonl`: anything that went wrong, with the turn or scene it happened in. */
 export interface ErrorRecord {

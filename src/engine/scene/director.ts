@@ -143,6 +143,8 @@ export function sceneSoFar(content: Pack, state: GameState, lore: TurnLore): { b
     .filter((id) => present.includes(id))
     .map((id) => `${speakerName(content, id)} ${willing.includes(id) ? 'would back the player up.' : "won't lift a finger."}`)
   const before = [
+    // Where everyone was when the scene opened (Milestone 5 task 8), so the plan keeps people where they are.
+    scene.opening && scene.opening.length > 0 && `# How the scene opened\n${scene.opening.map((b) => b.text).join('\n')}`,
     scene.summary && `# Earlier in the scene\n${scene.summary}`,
     recent.length > 0 ? `# Last turns\n${recent.map((t) => turnText(content, player.name, t)).join('\n\n')}` : '# The scene opens now.',
     said.length > 0 ? `# Already said on screen (anyone present can use these)\n${said.map((f) => `- [${f.id}] ${f.text}`).join('\n')}` : '# Nothing has been said on screen yet.',

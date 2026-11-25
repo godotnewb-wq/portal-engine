@@ -7,7 +7,7 @@ import { entryById } from '@engine/codex'
 import { memoryId } from '@engine/memory'
 import type { GameState, Memory, Relation } from '@engine/state'
 import { characterById, type Pack } from '@engine/pack'
-import { createInitialState, dayOf, MemoryLevelSchema, MINUTES_PER_DAY, startScene, stateProblems, tagsToward, TurnSchema } from '@engine/state'
+import { BeatSchema, createInitialState, dayOf, MemoryLevelSchema, MINUTES_PER_DAY, startScene, stateProblems, tagsToward, TurnSchema } from '@engine/state'
 import { applyRecords, MINUTES_PER_TURN, RECENT_TURNS, SUMMARY_CHARS, turnText } from '@engine/scene'
 
 export const ExpectedCheckSchema = z.object({ turn: z.number().int().positive(), who: IdSchema, skill: IdSchema })
@@ -104,6 +104,8 @@ export const ScenarioSchema = z.object({
    * opens on the scene as it stood, so the replayed turn sees the same history.
    */
   history: z.array(TurnSchema).default([]),
+  /** The scene's opening as it was (a logged scene, from to-scenario): carried, not written again (Milestone 5 task 8). */
+  opening: z.array(BeatSchema).optional(),
   turns: z.array(z.string().min(1)).min(1),
   /** Turns of the first scene (1-based) after which the game is saved and reloaded mid-scene (Milestone 5 task 7). */
   reloadAfter: z.array(z.number().int().positive()).default([]),
@@ -333,7 +335,7 @@ export function scenarioState(content: Pack, scenario: Scenario): GameState {
   // A history turn that carries its records (a logged turn, from to-scenario) is recorded as it was in play, so what
   // the player had heard and the details said are the same (2026-11-24: a replayed later turn's writer was told the
   // player had heard nothing). Authored history has no records and goes in as it is.
-  let played_ = { ...state, time: state.time + turns.length * MINUTES_PER_TURN, scene: { ...state.scene!, turns: [] as typeof turns, summary } }
+  let played_ = { ...state, time: state.time + turns.length * MINUTES_PER_TURN, scene: { ...state.scene!, turns: [] as typeof turns, summary, ...(scenario.opening && { opening: scenario.opening }) } }
   for (const t of turns) {
     played_ = { ...played_, scene: { ...played_.scene, turns: [...played_.scene.turns, t] } }
     if (t.records) played_ = applyRecords(played_, t.records) as typeof played_

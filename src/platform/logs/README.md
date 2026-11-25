@@ -8,7 +8,7 @@ Play and bench logs (milestone 2, A2): a folder per session, a file per concern,
   turns.jsonl    the readable part of each turn trace; calls by id
   calls.jsonl    every LLM call: role, model, raw reply, timing, tokens, prompt section ids
   prompts.jsonl  each distinct prompt section once, by hash; nothing cut or summarized
-  scenes.jsonl   scene starts and ends, and memory consolidation runs between scenes
+  scenes.jsonl   scene starts, openings (Milestone 5 task 8) and ends, and memory consolidation runs between scenes
   flags.jsonl    the player's flags (newer replaces older on the same beat)
   scores.jsonl   AI scores, each with its scorer version
   errors.jsonl   failed calls, unreadable replies, caught errors

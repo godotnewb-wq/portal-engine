@@ -13,9 +13,9 @@ export function mockLlm(): BenchLlm {
       direct: async () => '(mock director: no plan)',
       write: async (prompt, onDelta) => {
         // The situation writer's brief lists "- Ada: in this exchange, …" under "# Who speaks"; the scene writer's lists
-        // "- Ada: …" under "# This moment".
-        const section = (heading: string) => prompt.user.split(`# ${heading}\n`)[1]?.split('\n\n')[0] ?? ''
-        const speakers = [...section('Who speaks').matchAll(/^- ([^:\s]+): in this exchange/gm), ...section('This moment').matchAll(/^- ([^:\s]+):/gm)].map((m) => m[1]!)
+        // "- Ada: …" under "# What each person brings (…)". A heading is matched on its start.
+        const section = (heading: string) => prompt.user.split(new RegExp(`^# ${heading}[^\\n]*\\n`, 'm'))[1]?.split('\n\n')[0] ?? ''
+        const speakers = [...section('Who speaks').matchAll(/^- ([^:\s]+): in this exchange/gm), ...section('What each person brings').matchAll(/^- ([^:\s]+):/gm)].map((m) => m[1]!)
         const reply = ['NARRATION: The conduit buzzes overhead.', ...speakers.map((name) => `${name}: "Mock line from ${name}."`)].join('\n')
         onDelta(reply)
         return reply

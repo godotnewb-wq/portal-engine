@@ -16,9 +16,13 @@ export interface ShownBeat {
   of?: number
 }
 
-/** The scene's opening narration: where you are and who is with you. Not stored; it is the same every time. */
+/**
+ * The scene's opening narration: the one written when it opened (Milestone 5 task 8), where everyone is; else, when
+ * none was written, where you are and who is with you, the same every time.
+ */
 export function openingBeats(content: Pack, state: GameState): Beat[] {
   const scene = state.scene!
+  if (scene.opening && scene.opening.length > 0) return scene.opening
   const location = locationById(content, scene.locationId)!
   const names = scene.cast.map((id) => firstName(characterById(content, id)?.name ?? id))
   const company = names.length > 1 ? `${names.slice(0, -1).join(', ')} and ${names.at(-1)}` : names[0]

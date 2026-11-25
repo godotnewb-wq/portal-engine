@@ -57,7 +57,7 @@ Played honestly: NARRATION: Ben watches Ada a moment too long, then looks away. 
 export const SCENE_FORMAT = `Output format, nothing else:
 - A short scene, one beat per line, in the order it happens. NARRATION: for what happens or what someone does, as a whole sentence that names them, never a stage direction ("From the booth."). A character's first name and a colon for what they say, in double quotes, and nothing else.
 - ${SCENE_LENGTH.lines} lines, ${SCENE_LENGTH.words} words in all; never more than ${SCENE_LENGTH.maxWords}.
-- The people in the moment carry the scene. Anyone else present may react to what was just said, briefly; they don't bring up a topic of their own. Walk-ons speak only when listed. Nobody else speaks.
+- The people in the moment carry the scene. Anyone else present may react to what was just said, briefly; they don't bring up a topic of their own. Not everyone present needs a line or an action each turn: leave out anyone the moment doesn't touch. Walk-ons speak only when listed. Nobody else speaks.
 - Most lines of speech need no action beside them.
 - Then the tags, one per line: [Name: EXPRESSION word] for each person who appears, for what their face shows; [Name: COMFORT 1-5 reason] when someone's comfort changes; [LEAVES: Name] for a departure the brief lists; [END SCENE] only when the brief says the scene ends.
 - Never write the player's words, choices, thoughts or actions beyond what their input stated.
@@ -139,12 +139,14 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
   const system = [
     'You write one turn of a visual-novel RPG scene as a short scene: the conversation and what happens, in one continuous piece.',
     SCENE_STYLE,
-    // Shown, not only checked (2026-11-24 writer replays): caught after the draft, "quarter turn" cost a rewrite in a
-    // third of the samples.
+    // Shown, not only checked (2026-11-24 writer replays): a phrase caught only after the draft costs a rewrite.
     `Never write these; a draft that uses one is sent back: ${[...OVERUSED_PHRASES, ...content.phrases].map((x) => `"${x}"`).join(', ')}.`,
     writerStage(content.tone, content.codex).text,
     SCENE_FORMAT,
     `The player is ${state.player.name} (${state.player.pronouns}), addressed as "you".`,
+    // A portrait read as a script is played in every line (2026-11-24 play: a bartender quoting prices nobody asked
+    // for, a mechanic raising machines unprompted); npc design §5 has them as tendencies, not rules.
+    'Each portrait below is how that person tends to be, not a script: show it when the moment calls for it, never in every line.',
     ...cards,
     childGuard(content, state)
   ]
@@ -191,10 +193,9 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
     told.length > 0 ? `# What the player has been told this scene\n${told.map((f) => `- ${f.text}`).join('\n')}` : '# What the player has been told this scene\nNothing yet beyond what they can see.',
     claims.length > 0 && `# Claimed but never confirmed (claims, not facts: anyone may doubt or deny them)\n${claims.join('\n')}`,
     scene.summary && `# Earlier in the scene\n${scene.summary}`,
-    scene.turns.length > 0 && `# Last turns\n${scene.turns.slice(-RECENT_TURNS).map((t) => turnText(content, state.player.name, t)).join('\n\n')}`,
-    `# The player says or does\n${input}`,
-    view.checks.some((c) => c.result) && `# What the rolls decided (this happens; honor it)\n${view.checks.filter((c) => c.result).map((c) => checkEvent(content, c)).join('\n')}`,
-    plan.focus.length > 0 && `# This moment\n${plan.focus.map(momentLine).join('\n')}`,
+    // Material by person, labelled as material: laid out person by person and called "this moment", it was written as
+    // each one's part rather than one exchange (2026-11-24 play: a fact and a want joined into a line that answered nothing).
+    plan.focus.length > 0 && `# What each person brings (draw on it when the conversation reaches it)\n${plan.focus.map(momentLine).join('\n')}`,
     around.length > 0 && `# Also here (they may react to what was just said, briefly, but start no topic; a feeling that shows is in how they react, not something they bring up)\n${around.map((id) => `- ${nameOf(id)}.${feltLine(id, false)}`).join('\n')}`,
     ties.length > 0 && `# How people here stand with each other (background: never said as written)\n${ties.join('\n')}`,
     knowledge.length > 0 && `# Who knows what\n${knowledge.join('\n')}`,
@@ -205,7 +206,13 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
     plan.end_scene && '# The scene ends this turn\nBring it to a close, and add [END SCENE].',
     recent.length > 0 && `# Used already: slang in the last turns, gestures this scene (don't repeat these, or bring back the things in them)\n${recent.join('\n')}`,
     plan.avoid.length > 0 && `# Avoid\n${plan.avoid.join('; ')}`,
-    'Write the scene.'
+    // The thread last, nearest the writing: how the scene opened, the scene so far, what the player just did, and what
+    // the dice made of it.
+    scene.opening && scene.opening.length > 0 && `# How the scene opened\n${scene.opening.map((b) => b.text).join('\n')}`,
+    scene.turns.length > 0 && `# Last turns\n${scene.turns.slice(-RECENT_TURNS).map((t) => turnText(content, state.player.name, t)).join('\n\n')}`,
+    `# The player says or does\n${input}`,
+    view.checks.some((c) => c.result) && `# What the rolls decided (this happens; honor it)\n${view.checks.filter((c) => c.result).map((c) => checkEvent(content, c)).join('\n')}`,
+    'Write the scene: the first line answers what the player just said or did, and every line after it follows from the one before it.'
   ]
     .filter(Boolean)
     .join('\n\n')

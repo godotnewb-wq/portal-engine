@@ -4,7 +4,7 @@ import { join } from 'node:path'
 import type { Pack } from '@engine/pack'
 import { TracedError } from '@engine/core'
 import { consolidate, endScene, judgeScene } from '@engine/relationships'
-import { applyRecords, runTurn } from '@engine/scene'
+import { applyRecords, establishScene, runTurn } from '@engine/scene'
 import { FlagSchema } from '@engine/review'
 import { detailsOf, PlayLogs, roleModels, summarized, type FlagInput } from '@platform/logs'
 import { GameStateSchema, SaveRequestSchema, SlotIdSchema, stateProblems, type GameState } from '@engine/state'
@@ -20,6 +20,7 @@ import {
   type SaveResponse,
   type SceneEndResponse,
   type ConsolidateResponse,
+  type SceneOpenResponse,
   type SceneTiesResponse,
   type SceneEvent,
   type SceneTurnResponse,
@@ -94,7 +95,7 @@ app.whenReady().then(() => {
       return { ok: false, error: listing ? `This pack can't be played: ${listing.problems.join('; ')}` : 'That pack is no longer there.' }
     }
     playing?.logs.end()
-    const logs = new PlayLogs(join(logsRoot(), pack.manifest.id), pack, () => ({ engine: app.getVersion(), models: roleModels(settings.get()) }), () => settings.getLogging())
+    const logs = new PlayLogs(join(logsRoot(), pack.manifest.id), pack, () => ({ engine: app.getVersion(), models: roleModels(settings.get()), pipeline: settings.getPipeline() }), () => settings.getLogging())
     playing = { pack, saves: new SaveStore(savesDir(pack.manifest.id), { id: pack.manifest.id, version: pack.manifest.version }), logs }
     return { ok: true, pack }
   })
@@ -239,6 +240,32 @@ app.whenReady().then(() => {
   // The first half of a scene's end, with the summary model (relationships §3; milestone 4c): every witness's
   // relationship call, and the ties settled from them. A failed call changes nothing for that witness and is logged;
   // the scene still ends.
+  // A scene's opening (Milestone 5 task 8): written with the writer's profile when a scene starts, before the player's
+  // first input. It holds `turning`, so no turn can start on the scene before it has its opening. A failure is logged
+  // and the scene goes on without one.
+  ipcMain.handle(IPC.sceneOpen, async (_event, raw: unknown): Promise<SceneOpenResponse> => {
+    if (turning) return { ok: false, error: 'A turn is still running.' }
+    turning = true
+    try {
+      const { pack, logs } = current()
+      const state = GameStateSchema.parse(raw)
+      const scene = state.scene
+      if (!scene) return { ok: false, error: 'No scene in progress.' }
+      try {
+        const opened = await establishScene(pack, state, turnLlm(settings.get()).write)
+        logs.opening(opened.trace, { location: scene.locationId, cast: scene.cast })
+        return { ok: true, state: opened.state }
+      } catch (error) {
+        logs.error('turn', (error as Error).message, { sceneId: scene.id, ...(error instanceof TracedError && { calls: error.calls }) })
+        throw error
+      }
+    } catch (error) {
+      return { ok: false, error: (error as Error).message }
+    } finally {
+      turning = false
+    }
+  })
+
   ipcMain.handle(IPC.sceneTies, async (event, raw: unknown): Promise<SceneTiesResponse> => {
     if (turning) return { ok: false, error: 'A turn is still running.' }
     turning = true

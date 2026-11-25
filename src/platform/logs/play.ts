@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import type { CallTrace } from '@engine/core'
 import type { Pack } from '@engine/pack'
 import type { ConsolidationTrace, SceneEndTrace, RelationshipTrace } from '@engine/relationships'
-import { promptSources, type BookkeeperTrace, type TurnTrace } from '@engine/scene'
+import { promptSources, type BookkeeperTrace, type OpeningTrace, type Pipeline, type TurnTrace } from '@engine/scene'
 import { currentFlags, FlagSchema, type Flag, type FlagRecord, type ScoreRecord } from '@engine/review'
 import { callTrace, findSessions, readFlags, readSession } from './reader'
 import { promptVersion, type BookkeepingRecord, type CallRecord, type SessionRecord, type TurnRecord } from './records'
@@ -104,7 +104,7 @@ export class PlayLogs {
     /** `userData/logs/<pack-id>`; never inside a pack folder. */
     private readonly root: string,
     private readonly pack: Pack,
-    private readonly info: () => Pick<SessionRecord, 'engine' | 'models'>,
+    private readonly info: () => Pick<SessionRecord, 'engine' | 'models'> & { pipeline?: Pipeline },
     private readonly enabled: () => boolean
   ) {}
 
@@ -121,8 +121,9 @@ export class PlayLogs {
   begin(from: string, now = new Date()): string | null {
     this.end(now)
     if (!this.enabled()) return null
-    const { engine, models } = this.info()
-    this.session = LogSession.open(this.root, { kind: 'play', pack: { id: this.pack.manifest.id, version: this.pack.manifest.version }, engine, prompts: promptVersion(promptSources(this.pack)), models, from }, now)
+    // The prompt version of the pipeline in use: it used to be the default's whatever played (2026-11-24 play logs).
+    const { engine, models, pipeline } = this.info()
+    this.session = LogSession.open(this.root, { kind: 'play', pack: { id: this.pack.manifest.id, version: this.pack.manifest.version }, engine, prompts: promptVersion(promptSources(this.pack, pipeline)), ...(pipeline && { pipeline }), models, from }, now)
     this.scenes.clear()
     return this.session.id
   }
@@ -156,6 +157,17 @@ export class PlayLogs {
 
   sceneEnd(trace: SceneEndTrace): void {
     this.open()?.sceneEnd(trace)
+  }
+
+  /** The scene's opening, after its start record: the scene starts in the logs when it opens, not at its first turn. */
+  opening(trace: OpeningTrace, scene: { location: string; cast: string[] }): void {
+    const log = this.open()
+    if (!log) return
+    if (!this.scenes.has(trace.sceneId)) {
+      this.scenes.add(trace.sceneId)
+      log.sceneStart({ sceneId: trace.sceneId, ...scene }, new Date(trace.at))
+    }
+    log.opening(trace)
   }
 
   /** The relationship calls and the ties settled from them (milestone 4c), in the scenes file before the scene's end. */

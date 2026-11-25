@@ -68,6 +68,9 @@ export function renderTranscript(content: Pack, log: SessionLog, flags: FlagReco
     if (turn.sceneId !== scene) {
       scene = turn.sceneId
       lines.push(`## Scene \`${scene}\`${location ? ` at ${content.locations.find((l) => l.id === location)?.name ?? location}` : ''}`, '')
+      // The scene's opening (Milestone 5 task 8), as the player saw it before their first input.
+      const opening = log.scenes.find((r) => r.type === 'opening' && r.sceneId === scene)
+      if (opening?.type === 'opening' && opening.beats.length > 0) lines.push('**Opening:**', '', ...opening.beats.map((b) => `*${b.text}*`), '')
     }
     const turnFlag = standing.get(flagKey({ turnSession: s.id, turnId: turn.turnId }))
     const score = scores.get(turn.turnId)

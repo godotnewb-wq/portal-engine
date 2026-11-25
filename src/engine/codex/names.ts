@@ -97,7 +97,8 @@ export function candidates(text: string): Candidate[] {
     joins = undefined
   }
   for (const [i, t] of tokens.entries()) {
-    if (/^\p{Lu}/u.test(t) || (run.length > 0 && /^\p{N}+$/u.test(t))) {
+    // The pronoun "I" is capitalized but never part of a name ("the Mill I promised to look at": 2026-11-24 play).
+    if ((/^\p{Lu}/u.test(t) && !PRONOUN_I.test(t)) || (run.length > 0 && /^\p{N}+$/u.test(t))) {
       if (run.length === 0) {
         start = atStart
         joins = owner?.next === i ? owner : undefined
@@ -121,6 +122,9 @@ export function candidates(text: string): Candidate[] {
   flush()
   return out
 }
+
+/** "I", "I'm", "I'll", "I'd", "I've": the pronoun, which English capitalizes. */
+const PRONOUN_I = /^I(?:['’](?:m|ll|d|ve))?$/
 
 /** Edit distance, small strings only. */
 function distance(a: string, b: string): number {

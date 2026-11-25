@@ -13,7 +13,7 @@ import { SceneView } from './ui/SceneView'
 import { Settings } from './ui/Settings'
 import { SummaryView } from './ui/SummaryView'
 
-type Screen = 'picker' | 'title' | 'settings' | 'scene' | 'ending' | 'ties' | 'night' | 'summary' | 'save' | 'load'
+type Screen = 'picker' | 'title' | 'settings' | 'scene' | 'opening' | 'ending' | 'ties' | 'night' | 'summary' | 'save' | 'load'
 
 /**
  * Owns which screen is showing, the chosen pack and the game state; main only runs turns and summaries on it, and
@@ -63,17 +63,25 @@ export function App() {
   /** Play starts: a log session begins, saying what it started from. */
   const play = (from: string) => void window.api.beginLog(from)
 
-  const enterScene = (game: GameState) => {
+  /**
+   * A new scene: started, then its opening written (Milestone 5 task 8), where everyone is before the player says
+   * anything. If the opening fails the scene starts anyway, with the plain opening.
+   */
+  const enterScene = async (game: GameState) => {
     if (!content) return
     const { location, cast } = content.manifest.start
     // A unique scene id, so turn ids never repeat across sessions or loads of the same save.
-    setState(startScene(content, game, location, cast, `scene-${crypto.randomUUID().slice(0, 8)}`))
+    const started = startScene(content, game, location, cast, `scene-${crypto.randomUUID().slice(0, 8)}`)
+    setScreen('opening')
+    const opened = await window.api.sceneOpen(started)
+    if (!opened.ok) console.error('Scene opening failed:', opened.error)
+    setState(opened.ok ? opened.state : started)
     setScreen('scene')
   }
   const newGame = () => {
     if (!content) return
     play('new game')
-    enterScene(createInitialState(content, seedFrom(`${Date.now()}`)))
+    void enterScene(createInitialState(content, seedFrom(`${Date.now()}`)))
   }
 
   const resume = (game: GameState, from = 'save') => {
@@ -106,7 +114,7 @@ export function App() {
     setScreen('night')
     const response = await window.api.consolidate(morning)
     if (!response.ok) console.error('Consolidation failed:', response.error)
-    enterScene(response.ok ? response.state : morning)
+    await enterScene(response.ok ? response.state : morning)
   }
 
   /**
@@ -163,6 +171,13 @@ export function App() {
   if (screen === 'picker' || !content) return <PackPicker onChosen={choose} onSettings={openSettings} />
   if (screen === 'save' || screen === 'load') {
     return <SavesView mode={screen} state={state ?? undefined} onLoaded={(game) => resume(game)} onClose={() => setScreen(from)} />
+  }
+  if (screen === 'opening') {
+    return (
+      <div className="screen title">
+        <p className="tagline">Setting the scene…</p>
+      </div>
+    )
   }
   if (screen === 'night') {
     return (

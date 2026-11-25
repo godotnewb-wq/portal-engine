@@ -5,7 +5,7 @@ import type { Beat } from '@engine/state'
 import { replyText, type Prompt } from '@engine/core'
 import { promptOf, sections, type SessionLog } from '@platform/logs'
 import { scenarioContent, scenarioState } from '../bench/scenario'
-import { namer } from './load'
+import { namer, sceneLocation } from './load'
 import { toScenario } from './scenario'
 
 /**
@@ -153,6 +153,37 @@ export async function replayTurn(content: Pack, log: SessionLog, n: number, writ
     }
   }
   return { ...base, drift, ...(asLogged && { asLogged }), samples: await Promise.all(Array.from({ length: samples }, one)) }
+}
+
+/**
+ * A spread of scene turns from many sessions, flagged or not, for checking that a writing change holds beyond the turns
+ * it was tuned on (decided 2026-11-24, user: prompts must work for any character, place and situation). In a seeded
+ * order, places take turns first, then sessions within a place, so a run set mostly in one place still yields the
+ * others early; a session gives a second turn only once every session has given one.
+ */
+export function sampleTurns(logs: SessionLog[], count: number, seed = 1): Array<{ log: SessionLog; turn: number }> {
+  let state = seed >>> 0 || 1
+  const next = () => ((state = (state * 1664525 + 1013904223) >>> 0) / 2 ** 32)
+  const shuffle = <T>(xs: T[]): T[] => {
+    const out = [...xs]
+    for (let i = out.length - 1; i > 0; i--) {
+      const j = Math.floor(next() * (i + 1))
+      ;[out[i], out[j]] = [out[j]!, out[i]!]
+    }
+    return out
+  }
+  const shuffled = shuffle(logs.map((log) => ({ log, turns: shuffle(log.turns.filter((t) => t.director.plan.scene).map((t) => t.turn)) })).filter((p) => p.turns.length > 0))
+  const placeOf = (p: (typeof shuffled)[number]) => sceneLocation(p.log, p.log.turns.find((t) => t.turn === p.turns[0])!.sceneId) ?? ''
+  const byPlace = new Map<string, typeof shuffled>()
+  for (const p of shuffled) byPlace.set(placeOf(p), [...(byPlace.get(placeOf(p)) ?? []), p])
+  const groups = [...byPlace.values()]
+  const pools: typeof shuffled = []
+  for (let i = 0; pools.length < shuffled.length; i++) for (const g of groups) if (g[i]) pools.push(g[i]!)
+  const picked: Array<{ log: SessionLog; turn: number }> = []
+  for (let round = 0; picked.length < count && pools.some((p) => p.turns.length > round); round++) {
+    for (const p of pools) if (picked.length < count && p.turns[round] !== undefined) picked.push({ log: p.log, turn: p.turns[round]! })
+  }
+  return picked
 }
 
 /** The turns a replay takes from a session when none is named: its scene turns that carry a flag. */

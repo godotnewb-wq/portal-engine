@@ -198,6 +198,12 @@ export const SceneSchema = z.object({
   /** Walk-ons present, by scene card id. */
   walkOns: z.array(IdSchema).default([]),
   turns: z.array(TurnSchema).default([]),
+  /**
+   * The scene's opening (Milestone 5 task 8): narration written when it opened, before the player's first input, of
+   * where everyone is and what they're doing. Both calls read it every turn. Absent when it wasn't written (a call
+   * failed, a bench scenario or a test), and the app then shows its plain opening.
+   */
+  opening: z.array(BeatSchema).optional(),
   /** Running summary of what came before the last few turns. */
   summary: z.string().default(''),
   /** What each character feels as it stands now (milestone 4b): the card's default mood, then the director's `feels`. */

@@ -7,10 +7,11 @@
 //   npm run logs -- blind <session> [--count 10] [--seed 1] [--key key.md]
 //   npm run logs -- to-scenario <session> --turn N [--out file.json]
 //   npm run logs -- show <session> --turn N                     one turn in full, prompts and raw replies
-//   npm run logs -- rewrite <paths…> [--turn N] [--samples 3] [--as-logged] [--label x] [--out file.md] [--config …]
+//   npm run logs -- rewrite <paths…> [--turn N | --sample N [--seed S]] [--samples 3] [--as-logged] [--label x] [--out file.md] [--config …]
 //                                                               a logged scene turn's writer again, on the current
 //                                                               prompts and the logged plan; without --turn, every
-//                                                               flagged scene turn under the paths
+//                                                               flagged scene turn under the paths; --sample N takes N
+//                                                               scene turns spread across the sessions, flagged or not
 //   npm run logs -- score <paths…> [--config bench.config.json] AI-score turns not yet scored by this scorer version
 //   npm run logs -- flag <session> --turn N [--beat n] --rating bad [--reason voice,generic] [--note "…"]
 //                                                               flag a beat or turn of a bench run (play is flagged in the app)
@@ -29,13 +30,13 @@ import { metrics, renderMetrics } from './metrics'
 import { blindTest, renderFlags } from './review'
 import { toScenario } from './scenario'
 import { scoreSession } from './score'
-import { flaggedTurns, renderReplays, replayTurn, type Replay } from './rewrite'
+import { flaggedTurns, renderReplays, replayTurn, sampleTurns, type Replay } from './rewrite'
 import { renderTurn } from './show'
 import { renderTranscript } from './transcript'
 
 const ROOT = resolve(__dirname, '../..')
 const [command, ...args] = process.argv.slice(2)
-const VALUED = new Set(['--out', '--rating', '--reason', '--speaker', '--count', '--seed', '--key', '--turn', '--pack', '--config', '--beat', '--note', '--samples', '--label'])
+const VALUED = new Set(['--out', '--rating', '--reason', '--speaker', '--count', '--seed', '--key', '--turn', '--pack', '--config', '--beat', '--note', '--samples', '--label', '--sample'])
 const option = (name: string) => {
   const at = args.indexOf(name)
   return at >= 0 ? args[at + 1] : undefined
@@ -118,15 +119,16 @@ async function main(): Promise<void> {
       const write = turnLlm(settings).write
       const content = packFor(logs[0]!, option('--pack'))
       const replays: Replay[] = []
-      for (const log of logs) {
-        const flags = flagsFor(log)
-        const turns = option('--turn') ? [turnNumber()] : flaggedTurns(log, flags)
-        for (const n of turns) {
-          console.error(`▸ ${log.session.id} turn ${n}: ${samples} sample${samples === 1 ? '' : 's'}`)
-          replays.push(await replayTurn(content, log, n, write, samples, flags, flag('--as-logged')))
-        }
+      const sampled = option('--sample') ? Number(option('--sample')) : undefined
+      if (sampled !== undefined && (!Number.isInteger(sampled) || sampled < 1)) throw new Error('--sample is a number of turns, 1 or more')
+      const picks = sampled
+        ? sampleTurns(logs, sampled, Number(option('--seed') ?? 1))
+        : logs.flatMap((log) => (option('--turn') ? [turnNumber()] : flaggedTurns(log, flagsFor(log))).map((turn) => ({ log, turn })))
+      for (const { log, turn: n } of picks) {
+        console.error(`▸ ${log.session.id} turn ${n}: ${samples} sample${samples === 1 ? '' : 's'}`)
+        replays.push(await replayTurn(content, log, n, write, samples, flagsFor(log), flag('--as-logged')))
       }
-      if (replays.length === 0) throw new Error('No flagged turns to replay. Name one with --turn N.')
+      if (replays.length === 0) throw new Error('No turns to replay. Name one with --turn N, or take some with --sample N.')
       const label = option('--label')
       const text = renderReplays(content, replays, { ...(label && { label }), model: modelsOf(settings).writer ?? settings.writer.model })
       if (option('--out')) emit(text)

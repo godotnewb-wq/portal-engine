@@ -8,7 +8,7 @@ import type { Prompt } from '@engine/core'
 import { mockLlm, runBench, writeRun } from '../../tools/bench/run'
 import { loadScenarios, scenarioState } from '../../tools/bench/scenario'
 import { toScenario } from '../../tools/logs/scenario'
-import { echoesOf, flaggedTurns, promptDrift, renderReplays, replayTurn, type Write } from '../../tools/logs/rewrite'
+import { echoesOf, flaggedTurns, promptDrift, renderReplays, replayTurn, sampleTurns, type Write } from '../../tools/logs/rewrite'
 
 const scenarios = loadScenarios(join(PACK_DIR, 'bench'))
 let played: SessionLog
@@ -58,6 +58,15 @@ describe('writer replay (Milestone 5 task 8)', () => {
     const scenario = toScenario(log, 2)
     expect(scenario.history[0]!.records?.new).toEqual([{ text: 'The back stair floods first', by: 'vex' }])
     expect(scenarioState(content, scenario).scene!.newFacts.map((f) => f.text)).toContain('The back stair floods first')
+  })
+
+  it('samples scene turns across sessions, one each first, the same for the same seed, and none from another pipeline', () => {
+    const other = { ...played, session: { ...played.session, id: 'other' } }
+    const picks = sampleTurns([played, situation, other], 3, 7)
+    expect(picks.map((p) => p.log.session.id).slice(0, 2).sort()).toEqual([played.session.id, 'other'].sort())
+    expect(picks.every((p) => p.log !== situation)).toBe(true)
+    expect(sampleTurns([played, situation, other], 3, 7).map((p) => [p.log.session.id, p.turn])).toEqual(picks.map((p) => [p.log.session.id, p.turn]))
+    expect(new Set(picks.map((p) => `${p.log.session.id}:${p.turn}`)).size).toBe(3)
   })
 
   it('finds the flagged turns, and leaves a turn from another pipeline out with the reason', async () => {

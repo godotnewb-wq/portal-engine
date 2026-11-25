@@ -15,6 +15,12 @@ const asTurn = (t: TurnRecord, log?: SessionLog): Turn => ({
   ...withRecords(t, log)
 })
 
+/** The scene's opening as logged (Milestone 5 task 8), so a replayed turn reads it as it was played. */
+const openingOf = (log: SessionLog, sceneId: string): Pick<Scenario, 'opening'> => {
+  const record = log.scenes.find((s) => s.type === 'opening' && s.sceneId === sceneId)
+  return record?.type === 'opening' && record.beats.length > 0 ? { opening: record.beats } : {}
+}
+
 const withRecords = (t: TurnRecord, log?: SessionLog): Pick<Turn, 'records'> => {
   const record = log?.bookkeeping.filter((b) => b.turnId === t.turnId).at(-1)
   return record ? { records: record.records } : {}
@@ -49,6 +55,7 @@ export function toScenario(log: SessionLog, n: number, flags = log.flags): Scena
     moods: Object.fromEntries(present.flatMap((c) => (c.feeling ? [[c.id, { shade: c.feeling.shade, family: c.feeling.family, intensity: c.feeling.intensity, ...(c.feeling.text && { text: c.feeling.text }), ...(c.feeling.reason && { reason: c.feeling.reason }) }]] : []))),
     comfort: Object.fromEntries(present.map((c) => [c.id, c.comfort])),
     history: before.map((t) => asTurn(t, log)),
+    ...openingOf(log, turn.sceneId),
     turns: [turn.input],
     summaries: false,
     start: StartSchema.parse({}),

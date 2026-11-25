@@ -44,6 +44,13 @@ describe('setting factions without a name (milestone 3.5, task 4)', () => {
   })
 })
 
+describe('the pronoun I (2026-11-24 play)', () => {
+  it('never joins a name, so a place followed by "I" is still the place', () => {
+    expect(candidates('There is a valve at the Gristworks I promised to look at.').map((c) => c.name)).toEqual(['There', 'Gristworks'])
+    expect(candidates("Ask Mara. I'm late, and I'll be later.").map((c) => c.name)).toEqual(['Ask Mara'])
+  })
+})
+
 describe('possessives in names (milestone 3.5, task 2)', () => {
   const { index } = indexWith(['locations/lower/east-gate/tanners-row.md', "title: Tanners' Row\nlabel: Tanners' Row\nkind: location\nsummary: x"])
 

@@ -103,7 +103,7 @@ describe('the scene writer’s brief', () => {
     // Everyone present is portrayed; the people in the moment get their voice cards.
     expect(writer.system).toMatch(/## Mara\n[\s\S]*### Mara's voice/)
     expect(writer.system).toMatch(/## Tobin\n(?![\s\S]*### Tobin's voice)/)
-    expect(writer.user).toMatch(/# This moment\n- Mara: the question she has no good answer to\. Right now Mara wants to close it down\./)
+    expect(writer.user).toMatch(/# What each person brings \(draw on it when the conversation reaches it\)\n- Mara: the question she has no good answer to\. Right now Mara wants to close it down\./)
     expect(writer.user).toMatch(/Underneath, Mara is keeping something \(lie\): /)
     expect(writer.user).toMatch(/# Also here \(they may react to what was just said, briefly, but start no topic; [^)]*\)\n- Tobin\./)
     // The voice card is how they sound, not lines to say (2026-11-24 writer replay).
