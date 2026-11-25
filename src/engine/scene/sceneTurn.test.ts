@@ -131,6 +131,18 @@ describe('the scene writer’s checks (fixes from the first scored run)', () => 
   const state = yard()
   const speakers = sceneSpeakers(fixture, state)
 
+  it('spells out a contraction or a possessive when an action cut from a line takes the speaker’s name', () => {
+    const narration = (line: string) => parseReply(line, speakers, { script: true }).beats.find((b) => b.kind === 'narration')
+    // From play (2026-11-24): "She's" became "Mara's at the near end", and "He's got" "Tobin's got".
+    expect(narration('Mara: She\'s at the near end with a coin. "He says that to everyone."')).toEqual({ kind: 'narration', text: 'Mara is at the near end with a coin.' })
+    expect(narration('Tobin: He\'s got a washer going in his pocket. "That joint\'s weeping."')).toEqual({ kind: 'narration', text: 'Tobin has got a washer going in his pocket.' })
+    expect(narration('Tobin: He’d been watching the door. "Late."')).toEqual({ kind: 'narration', text: 'Tobin had been watching the door.' })
+    expect(narration('Mara: She\'d rather not. "No."')).toEqual({ kind: 'narration', text: 'Mara would rather not.' })
+    expect(narration('Mara: She\'ll wait. "Fine."')).toEqual({ kind: 'narration', text: 'Mara will wait.' })
+    expect(narration('Mara: Her coin walks a slow lap. "Go on."')).toEqual({ kind: 'narration', text: "Mara's coin walks a slow lap." })
+    expect(narration('Mara: She sets the book down. "Go on."')).toEqual({ kind: 'narration', text: 'Mara sets the book down.' })
+  })
+
   it('reads a speaker who starts partway through a line, in the script form only', () => {
     const line = 'Tobin looks at his boots. Mara: "One book, Kit." She closes it.'
     expect(parseReply(line, speakers, { script: true }).beats).toEqual([

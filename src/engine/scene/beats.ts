@@ -87,6 +87,12 @@ function parseTag(body: string, speakers: Speaker[], tags: Tags, dropped: string
 
 const QUOTED = /(["“])([^"”\n]*)(["”]|$)/g
 const PRONOUN_START = /^(?:He|She)\b/
+/** "She's", "He'd", "She'll": the name can't take the contraction ("Ada's at the bar"), so it is spelled out. */
+const CONTRACTED_START = /^(?:He|She)['’](s|d|ll)\b/i
+/** After "'s" or "'d", these words mean has or had ("she's got", "he'd been"); anything else means is or would. */
+const PERFECT_WORDS = new Set(['got', 'gotten', 'been', 'had', 'done', 'gone', 'seen', 'left', 'taken', 'made', 'put', 'better'])
+/** "Her coin", "His glass" opening an action cut from a line: whose it is gets lost unless the name replaces it. */
+const POSSESSIVE_START = /^(?:His|Her)\b(?!['’])/
 /** An unquoted line that opens like this is about the speaker, not said by them ("Ada: She sets three cups down"). */
 const ACTION_START = /^(?:He|She|They|His|Her|Their)\b/
 /** "she says," between two quoted parts is attribution, not an action worth its own beat. */
@@ -101,7 +107,17 @@ const displayName = (s: Speaker) => s.display ?? s.names[1] ?? s.id
 function withSubject(action: string, s: Speaker): string {
   const name = displayName(s)
   const capital = name.charAt(0).toUpperCase() + name.slice(1)
+  const contracted = action.match(CONTRACTED_START)
+  if (contracted) {
+    const rest = action.slice(contracted[0].length)
+    const next = rest.trim().split(/\s+/)[0]?.toLowerCase().replace(/\W+$/, '') ?? ''
+    const ending = contracted[1]!.toLowerCase()
+    const perfect = PERFECT_WORDS.has(next)
+    const verb = ending === 'll' ? 'will' : ending === 's' ? (perfect ? 'has' : 'is') : perfect ? 'had' : 'would'
+    return `${capital} ${verb}${rest}`
+  }
   if (PRONOUN_START.test(action)) return action.replace(PRONOUN_START, capital)
+  if (POSSESSIVE_START.test(action)) return action.replace(POSSESSIVE_START, `${capital}'s`)
   if (/^\p{Ll}/u.test(action)) return `${capital} ${action}`
   const [first = '', second = ''] = action.split(/\s+/)
   const lower = first.toLowerCase()
