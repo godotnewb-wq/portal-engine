@@ -10,6 +10,22 @@ import { presentCast, type BeatPlan } from './planShape'
 export const MINUTES_PER_TURN = 3
 /** The running summary keeps its most recent part; older detail lives in end-of-scene memories. */
 export const SUMMARY_CHARS = 2000
+/** The part of `SUMMARY_CHARS` kept from the scene's start when the summary runs over (*tune*). */
+export const SUMMARY_START = 0.3
+const GAP = '\n\n[…]\n\n'
+
+/**
+ * A summary within `max` characters that keeps how the scene began as well as its latest part, cutting the middle
+ * (2026-11-25, user: continuity through the whole scene). Cutting from the start lost what was settled early first.
+ * Applied again each turn, the start stays and the cut moves on.
+ */
+export function keepEnds(text: string, max: number): string {
+  if (text.length <= max) return text
+  const head = Math.floor(max * SUMMARY_START)
+  const gapAt = text.indexOf(GAP)
+  const start = (gapAt >= 0 && gapAt <= head ? text.slice(0, gapAt) : text.slice(0, head)).trimEnd()
+  return `${start}${GAP}${text.slice(-(max - start.length - GAP.length)).trimStart()}`
+}
 
 export interface TurnWritten {
   id: string
@@ -212,7 +228,7 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
   // The turn that drops out of the prompts' verbatim window goes into the running summary.
   const turns = [...scene.turns, turn]
   const dropped = turns.length > RECENT_TURNS ? turns[turns.length - RECENT_TURNS - 1] : undefined
-  const summary = dropped ? `${scene.summary}\n\n${turnText(content, state.player.name, dropped)}`.trim().slice(-SUMMARY_CHARS) : scene.summary
+  const summary = dropped ? keepEnds(`${scene.summary}\n\n${turnText(content, state.player.name, dropped)}`.trim(), SUMMARY_CHARS) : scene.summary
 
   // Facts said on screen join the scene's common ground: a fact is introduced the first time, and anyone present can
   // repeat it after. Only moves whose speaker actually had a line count, in case the writer or salvage dropped one.

@@ -16,9 +16,26 @@ describe('a fact or note in the brief’s own words (2026-11-25 play)', () => {
     expect(recited('Dunmar: "Oria Senn. Keeps the standing booth, pays her tab on the first of every month, never late."').map((p) => p.fix)).toEqual([
       expect.stringMatching(/^Beat 1: Dunmar says it in the brief's words \(".+"\)\. Say it the way Dunmar would here, to these people, or leave it out\.$/)
     ])
-    expect(recited('Vex: "She\'s a client. Hired me twice, sealed packets, both paid on time."')).toHaveLength(1)
+    expect(recited('Vex: "I ran sealed packets for her twice. Both paid."')).toHaveLength(1)
+    // Four words in a row aren't enough since the replays of 2026-11-25: a term from someone's world was sent back.
+    expect(recited('Vex: "She\'s a client. Hired me twice, sealed packets, both paid on time."')).toEqual([])
     expect(recited('Dunmar: "Oria. Never once late with her slate, which is more than I can say for some."')).toEqual([])
     expect(recited('NARRATION: Oria pays her tab on the first of every month.')).toEqual([])
+  })
+})
+
+describe('ties in the scene writer’s brief (2026-11-25 audit)', () => {
+  it('gives only what the people in the moment hold, and a tie given as an undercurrent once', async () => {
+    const plan = { focus: ['vex', 'oria-senn'], moments: [{ who: 'vex', lands: 'Oria waves', wants: 'to watch her' }, { who: 'oria-senn', lands: 'they came', wants: 'to pitch the job' }], pressures: [{ who: 'vex', kind: 'tie', with: 'oria-senn' }], stakes: 'the job' }
+    let writer = ''
+    const llm: TurnLlm = { direct: async () => JSON.stringify(plan), write: async (p, onDelta) => ((writer = p.user), onDelta('Oria: "Sit down."'), 'Oria: "Sit down."') }
+    await runTurn(content, bar(), 'Hello.', llm, () => {}, { pipeline: 'scene' })
+    const ties = writer.split('# How people here stand with each other')[1]!.split('\n\n')[0]!
+    expect(ties).toContain('- Oria → Vex:')
+    expect(ties).not.toContain('- Vex → Oria:')
+    expect(ties).not.toMatch(/- (Brask|Dunmar) →/)
+    expect(writer).toMatch(/Underneath, what Oria is to Vex matters here: /)
+    expect(writer).not.toContain("which this brief doesn't give you")
   })
 })
 

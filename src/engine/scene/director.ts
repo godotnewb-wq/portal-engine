@@ -1,6 +1,6 @@
 import { firstName, type Prompt } from '@engine/core'
 import type { Character } from '@engine/characters'
-import type { GameState, Turn } from '@engine/state'
+import type { GameState, Scene, Turn } from '@engine/state'
 import { type Ruleset } from '@engine/rules'
 import { characterById, locationById, type Pack } from '@engine/pack'
 import { recall } from '@engine/memory'
@@ -237,6 +237,19 @@ export function speakerName(content: Pack, id: string): string {
 export function turnText(content: Pack, playerName: string, turn: Turn): string {
   const beats = turn.beats.map((b) => (b.kind === 'narration' ? b.text : `${speakerName(content, b.speaker)}: "${b.text}"`))
   return [`${playerName}: ${turn.player}`, ...beats, ...(turn.interrupted ? [`(${playerName} cuts in here.)`] : [])].join('\n')
+}
+
+/**
+ * Where the scene stands (2026-11-25, user: continuity through the whole scene): what the bookkeeper recorded each turn
+ * changed, in order from the first turn, so what was settled early isn't lost when its turn leaves the last turns and
+ * the summary's middle. Both directors and the scene writer read it. A turn whose records say nothing changed adds
+ * nothing; on a cut turn the records are the beats the player saw.
+ */
+export function whereSceneStands(scene: Scene): string[] {
+  return scene.turns.flatMap((t, i) => {
+    const changed = t.records?.changed?.trim()
+    return changed ? [`- Turn ${i + 1}: ${changed.replace(/\s+/g, ' ')}`] : []
+  })
 }
 
 /**

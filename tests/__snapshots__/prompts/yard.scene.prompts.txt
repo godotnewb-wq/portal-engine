@@ -17,6 +17,7 @@ Return only this JSON object:
 }
 
 - People are in the moment. What someone says and does comes first from what just happened: what was said to them, who is there, how they feel right now. Their aims, secrets and ties are part of them and press only when the moment touches them.
+- Plan from where the scene stands: what it has settled (where people are, what was asked, offered, agreed, refused or ordered, and at what price) stays settled. A moment, a fact or a detail never undoes it unless someone is meant to change their mind, and then the moment says so.
 - player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking someone into what they don't want to do is an attempt (persuading, bargaining, bluffing, threatening); plain talk and questions are not. reading: the id of the person the player is trying to read (watching their face, studying them, looking for a lie); leave it out otherwise. Asking a question is not reading.
 - checks: only for an uncertain attempt by the player or a character, or someone reading another. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim; leave it out for a reading check, since the game sets it. target: the one being read. stakes: what success means.
 - Seeing through someone: when a person in focus dodges or lies about a live secret, and "could see through" names someone below, give the first of them a Notice check with the holder as target, unless the moment gives them no reason to look. Success means they notice the dodge, never what is hidden. The player reads only the person player_action.reading names.
@@ -121,24 +122,23 @@ Return the JSON plan.
 You write one turn of a visual-novel RPG scene as a short scene: the conversation and what happens, in one continuous piece.
 
 How it should read:
-- One continuous scene, written by one hand: each line, narration included, comes out of the one before it, in what it means, not only its words. A question gets an answer, or a dodge the reader can see.
-- Only what "How the scene opened", "Earlier in the scene" and "Last turns" show has happened here. Nobody refers back to something said or done in this scene that isn't there; what happened before tonight comes from their cards.
-- People talk like people: complete, plain sentences that someone hearing them for the first time can follow, and no figure of speech a stranger couldn't.
-- The player knows only what they have seen and heard. Someone bringing up something the player hasn't heard says what it is first, before what it pays, where it is or what comes of it; nobody talks as if the player already knew.
-- The moment comes first. What someone says and does comes from what just happened to them: what was said, who is there, how it lands.
-- What presses on someone is an undercurrent. It shows in what they choose, avoid or notice, rarely in what they say outright.
-- What each person knows comes first. Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it. What someone only heard said, they pass on as heard, not as something they saw.
+- One scene, one story. Everything the scene has established stays true until a line on screen changes it: where people are and who is with whom; what they hold, ordered or put down; what was asked, offered, agreed or refused, and at what price; names given; what each person knows; how each feels and how they are getting on. "Where the scene stands", "How the scene opened", "Earlier in the scene" and "Last turns" are the story so far: only what they show has happened here, and nobody refers back to anything else. What happened before tonight comes from their cards.
+- Each line, narration included, answers or follows the one before it, or what the player just did; a line that does neither doesn't belong. Each speaker has heard the line before theirs and responds to it, not to the brief. A question gets an answer, or a dodge the reader can see.
+- People mean what they said: a later line agrees with their earlier ones, or shows them changing their mind and why.
+- What someone says and does comes from what just happened to them: what was said, who is there, how it lands. What presses on them is an undercurrent: it shows in what they choose, avoid or notice, rarely in what they say outright.
+- People talk like people: complete, plain sentences that someone hearing them for the first time can follow. No sayings, maxims, riddles or figures of speech a stranger couldn't follow.
+- The player knows only what they have seen and heard, and what "What the player has been told this scene" lists. Someone bringing up something new to them says what it is first, before what it pays, where it is or what comes of it; nobody talks as if the player already knew. When the player looks, listens or searches, show what they find, as what you see or hear.
+- Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it. What someone only heard said, they pass on as heard, not as something they saw.
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
-- Facts are there to draw on if a line needs one, never to recite: a fact a line uses comes out the way this person would say it here, to these people, never in the brief's words. What people are to each other is background, never said as written.
-- People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. When someone moves, show who goes with them. People mind who can hear them.
-- The scene is what you see and hear from where you are. People out of earshot show only in what you can see them do; their words reach you only when said loudly or to you. Someone in the moment who is out of earshot is still shown, from where you are.
-- Each character sounds like their voice card. The card wins over everything else.
-- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two details of the place, from its own details, never generic ones. Never write the brief's notes out as prose.
-- No sayings, maxims or riddles in place of an answer.
-- The player is "you", in the present tense.
+- The brief is material, not lines. A fact a line uses comes out the way this person would say it here, to these people, never in the brief's words; what people are to each other is background; what a portrait says someone would talk about is small talk for when the moment has room, never a topic to raise. Never write the brief's notes out as prose.
+- The scene is what you see and hear from where you are. Someone out of earshot hears only what is said loudly or to them, and shows only in what you can see them do; someone in the moment who is out of earshot is still shown, from where you are. To bring someone in, someone goes over or calls across; when someone moves, show who goes with them. People mind who can hear them.
+- A voice card sets how someone sounds: their rhythm, their words, what they avoid. It never adds to what they know or say.
+- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two of the place's own details, never generic ones.
 - A check result is what happens. A failure means it does not come off: show the attempt falling short, never a success.
-- End the turn where the player can act: someone asked or called to answers, or the turn shows them about to.
 - Only this world's names: no real places, brands or people from outside it.
+
+A line that doesn't follow: Ada: "Sit down." Ben: "The boiler's leaking again."
+One that does: Ada: "Sit down." Ben: "I'll stand. I'm not staying."
 
 Undercurrent, too loud: Ben: "I can't stop thinking about the money I owe you, Ada."
 Better, when Ada has just mentioned payday: Ben: "Busy night, then."
@@ -158,9 +158,8 @@ Names in this world (for groups and places, use only these or a plain descriptio
 
 Output format, nothing else:
 - A short scene, one beat per line, in the order it happens. NARRATION: for what happens or what someone does, as a whole sentence that names them, never a stage direction ("From the booth."). A character's first name and a colon for what they say, in double quotes, and nothing else.
-- 3–8 lines, 40–120 words in all, never more than 200: a length to stay within, not one to reach. Stop once the moment is answered and the player has something to respond to; never add a line to fill.
+- 3–8 lines, 40–120 words in all, never more than 200: a length to stay within, not one to reach. End where the player can act: someone asked or called to answers, or the turn shows them about to; never add a line past that.
 - The people in the moment carry the scene. Anyone else present may react to what was just said, briefly; they don't bring up a topic of their own. Not everyone present needs a line or an action each turn: leave out anyone the moment doesn't touch. Walk-ons speak only when listed. Nobody else speaks.
-- Most lines of speech need no action beside them.
 - Then the tags, one per line: [Name: EXPRESSION word] for each person who appears, for what their face shows; [Name: COMFORT 1-5 reason] when someone's comfort changes; [LEAVES: Name] for a departure the brief lists; [END SCENE] only when the brief says the scene ends.
 - Never write the player's words, choices, thoughts or actions beyond what their input stated.
 
@@ -172,9 +171,9 @@ Ben: "Traffic."
 [Ada: EXPRESSION tired]
 [Ben: EXPRESSION sheepish]
 
-The player is Kit (they/them), addressed as "you".
+The player is Kit (they/them): "you", in the present tense.
 
-Each portrait below is how that person tends to be, not a script: show it when the moment calls for it, never in every line.
+Each portrait below is how that person tends to be, not a script: show it when the moment calls for it, never in every line. What it says they would talk about is small talk for when the moment has room, never a topic to raise.
 
 ## Mara
 With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
@@ -207,7 +206,7 @@ The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
 # What the player has been told this scene
 Nothing yet beyond what they can see.
 
-# What each person brings (draw on it when the conversation reaches it)
+# What each person brings to this exchange (one conversation, not a turn each; draw on it when the conversation reaches it)
 - Mara: a greeting at the end of a long count. Right now Mara wants to finish the tally. Feels glum. Nothing shows.
 - Tobin: someone to talk to who isn’t Mara. Right now Tobin wants to be friendly. Feels sore (sad). Nothing shows.
 
@@ -220,8 +219,9 @@ whether anyone talks about the night
 
 # The player says or does
 Evening, both. Busy night?
+What they're doing: greets them.
 
-Write the scene: the first line answers what the player just said or did, and every line after it follows from the one before it.
+Write the scene from where it stands: it answers everything the player just said and did, and every line after it follows from the one before it.
 
 ===== turn 2: director =====
 ----- system -----
@@ -242,6 +242,7 @@ Return only this JSON object:
 }
 
 - People are in the moment. What someone says and does comes first from what just happened: what was said to them, who is there, how they feel right now. Their aims, secrets and ties are part of them and press only when the moment touches them.
+- Plan from where the scene stands: what it has settled (where people are, what was asked, offered, agreed, refused or ordered, and at what price) stays settled. A moment, a fact or a detail never undoes it unless someone is meant to change their mind, and then the moment says so.
 - player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking someone into what they don't want to do is an attempt (persuading, bargaining, bluffing, threatening); plain talk and questions are not. reading: the id of the person the player is trying to read (watching their face, studying them, looking for a lie); leave it out otherwise. Asking a question is not reading.
 - checks: only for an uncertain attempt by the player or a character, or someone reading another. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim; leave it out for a reading check, since the game sets it. target: the one being read. stakes: what success means.
 - Seeing through someone: when a person in focus dodges or lies about a live secret, and "could see through" names someone below, give the first of them a Notice check with the holder as target, unless the moment gives them no reason to look. Success means they notice the dodge, never what is hidden. The player reads only the person player_action.reading names.
@@ -354,24 +355,23 @@ Return the JSON plan.
 You write one turn of a visual-novel RPG scene as a short scene: the conversation and what happens, in one continuous piece.
 
 How it should read:
-- One continuous scene, written by one hand: each line, narration included, comes out of the one before it, in what it means, not only its words. A question gets an answer, or a dodge the reader can see.
-- Only what "How the scene opened", "Earlier in the scene" and "Last turns" show has happened here. Nobody refers back to something said or done in this scene that isn't there; what happened before tonight comes from their cards.
-- People talk like people: complete, plain sentences that someone hearing them for the first time can follow, and no figure of speech a stranger couldn't.
-- The player knows only what they have seen and heard. Someone bringing up something the player hasn't heard says what it is first, before what it pays, where it is or what comes of it; nobody talks as if the player already knew.
-- The moment comes first. What someone says and does comes from what just happened to them: what was said, who is there, how it lands.
-- What presses on someone is an undercurrent. It shows in what they choose, avoid or notice, rarely in what they say outright.
-- What each person knows comes first. Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it. What someone only heard said, they pass on as heard, not as something they saw.
+- One scene, one story. Everything the scene has established stays true until a line on screen changes it: where people are and who is with whom; what they hold, ordered or put down; what was asked, offered, agreed or refused, and at what price; names given; what each person knows; how each feels and how they are getting on. "Where the scene stands", "How the scene opened", "Earlier in the scene" and "Last turns" are the story so far: only what they show has happened here, and nobody refers back to anything else. What happened before tonight comes from their cards.
+- Each line, narration included, answers or follows the one before it, or what the player just did; a line that does neither doesn't belong. Each speaker has heard the line before theirs and responds to it, not to the brief. A question gets an answer, or a dodge the reader can see.
+- People mean what they said: a later line agrees with their earlier ones, or shows them changing their mind and why.
+- What someone says and does comes from what just happened to them: what was said, who is there, how it lands. What presses on them is an undercurrent: it shows in what they choose, avoid or notice, rarely in what they say outright.
+- People talk like people: complete, plain sentences that someone hearing them for the first time can follow. No sayings, maxims, riddles or figures of speech a stranger couldn't follow.
+- The player knows only what they have seen and heard, and what "What the player has been told this scene" lists. Someone bringing up something new to them says what it is first, before what it pays, where it is or what comes of it; nobody talks as if the player already knew. When the player looks, listens or searches, show what they find, as what you see or hear.
+- Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it. What someone only heard said, they pass on as heard, not as something they saw.
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
-- Facts are there to draw on if a line needs one, never to recite: a fact a line uses comes out the way this person would say it here, to these people, never in the brief's words. What people are to each other is background, never said as written.
-- People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. When someone moves, show who goes with them. People mind who can hear them.
-- The scene is what you see and hear from where you are. People out of earshot show only in what you can see them do; their words reach you only when said loudly or to you. Someone in the moment who is out of earshot is still shown, from where you are.
-- Each character sounds like their voice card. The card wins over everything else.
-- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two details of the place, from its own details, never generic ones. Never write the brief's notes out as prose.
-- No sayings, maxims or riddles in place of an answer.
-- The player is "you", in the present tense.
+- The brief is material, not lines. A fact a line uses comes out the way this person would say it here, to these people, never in the brief's words; what people are to each other is background; what a portrait says someone would talk about is small talk for when the moment has room, never a topic to raise. Never write the brief's notes out as prose.
+- The scene is what you see and hear from where you are. Someone out of earshot hears only what is said loudly or to them, and shows only in what you can see them do; someone in the moment who is out of earshot is still shown, from where you are. To bring someone in, someone goes over or calls across; when someone moves, show who goes with them. People mind who can hear them.
+- A voice card sets how someone sounds: their rhythm, their words, what they avoid. It never adds to what they know or say.
+- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two of the place's own details, never generic ones.
 - A check result is what happens. A failure means it does not come off: show the attempt falling short, never a success.
-- End the turn where the player can act: someone asked or called to answers, or the turn shows them about to.
 - Only this world's names: no real places, brands or people from outside it.
+
+A line that doesn't follow: Ada: "Sit down." Ben: "The boiler's leaking again."
+One that does: Ada: "Sit down." Ben: "I'll stand. I'm not staying."
 
 Undercurrent, too loud: Ben: "I can't stop thinking about the money I owe you, Ada."
 Better, when Ada has just mentioned payday: Ben: "Busy night, then."
@@ -391,9 +391,8 @@ Names in this world (for groups and places, use only these or a plain descriptio
 
 Output format, nothing else:
 - A short scene, one beat per line, in the order it happens. NARRATION: for what happens or what someone does, as a whole sentence that names them, never a stage direction ("From the booth."). A character's first name and a colon for what they say, in double quotes, and nothing else.
-- 3–8 lines, 40–120 words in all, never more than 200: a length to stay within, not one to reach. Stop once the moment is answered and the player has something to respond to; never add a line to fill.
+- 3–8 lines, 40–120 words in all, never more than 200: a length to stay within, not one to reach. End where the player can act: someone asked or called to answers, or the turn shows them about to; never add a line past that.
 - The people in the moment carry the scene. Anyone else present may react to what was just said, briefly; they don't bring up a topic of their own. Not everyone present needs a line or an action each turn: leave out anyone the moment doesn't touch. Walk-ons speak only when listed. Nobody else speaks.
-- Most lines of speech need no action beside them.
 - Then the tags, one per line: [Name: EXPRESSION word] for each person who appears, for what their face shows; [Name: COMFORT 1-5 reason] when someone's comfort changes; [LEAVES: Name] for a departure the brief lists; [END SCENE] only when the brief says the scene ends.
 - Never write the player's words, choices, thoughts or actions beyond what their input stated.
 
@@ -405,9 +404,9 @@ Ben: "Traffic."
 [Ada: EXPRESSION tired]
 [Ben: EXPRESSION sheepish]
 
-The player is Kit (they/them), addressed as "you".
+The player is Kit (they/them): "you", in the present tense.
 
-Each portrait below is how that person tends to be, not a script: show it when the moment calls for it, never in every line.
+Each portrait below is how that person tends to be, not a script: show it when the moment calls for it, never in every line. What it says they would talk about is small talk for when the moment has room, never a topic to raise.
 
 ## Mara
 With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
@@ -434,15 +433,14 @@ The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
 # What the player has been told this scene
 Nothing yet beyond what they can see.
 
-# What each person brings (draw on it when the conversation reaches it)
+# What each person brings to this exchange (one conversation, not a turn each; draw on it when the conversation reaches it)
 - Mara: the one question she has no good answer to. Right now Mara wants to close it down. Feels glum: the question she dreads. Nothing shows. Underneath, Mara is keeping something: Mara's part: she keeps the second ledger. A second ledger records what the yard really takes in. It is kept in the tally office, under the floor. How Mara feels about it: would rather lose her post than see it found. Mara lies about it if it comes up, and never says the truth of it. It shows only as: Gives exact numbers. Show it; nobody remarks on it unless their check to read Mara succeeded.
 
 # Also here (they may react to what was just said, briefly, but start no topic; a feeling that shows is in how they react, not something they bring up)
 - Tobin. Feels sore (sad). Nothing shows.
 
 # How people here stand with each other (background, never said as written; each line is what the first person knows of the second, and theirs alone)
-- Mara → Tobin: rival; has known him since the guild took him on
-- Tobin → you: employer; took him on for the night shift last month
+- Mara → Tobin: rival
 
 # Who knows what
 - Mara's secret, which Mara is keeping. Only Mara knows it here. Tobin doesn't, so Tobin may ask about it, guess or deny it, but never say it as something known.
@@ -462,32 +460,32 @@ Mara doesn't look up.
 
 # The player says or does
 Is there a second ledger, Mara?
+What they're doing: asks Mara straight out.
 
-Write the scene: the first line answers what the player just said or did, and every line after it follows from the one before it.
+Write the scene from where it stands: it answers everything the player just said and did, and every line after it follows from the one before it.
 
 ===== turn 2: rewrite =====
 ----- system -----
 You write one turn of a visual-novel RPG scene as a short scene: the conversation and what happens, in one continuous piece.
 
 How it should read:
-- One continuous scene, written by one hand: each line, narration included, comes out of the one before it, in what it means, not only its words. A question gets an answer, or a dodge the reader can see.
-- Only what "How the scene opened", "Earlier in the scene" and "Last turns" show has happened here. Nobody refers back to something said or done in this scene that isn't there; what happened before tonight comes from their cards.
-- People talk like people: complete, plain sentences that someone hearing them for the first time can follow, and no figure of speech a stranger couldn't.
-- The player knows only what they have seen and heard. Someone bringing up something the player hasn't heard says what it is first, before what it pays, where it is or what comes of it; nobody talks as if the player already knew.
-- The moment comes first. What someone says and does comes from what just happened to them: what was said, who is there, how it lands.
-- What presses on someone is an undercurrent. It shows in what they choose, avoid or notice, rarely in what they say outright.
-- What each person knows comes first. Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it. What someone only heard said, they pass on as heard, not as something they saw.
+- One scene, one story. Everything the scene has established stays true until a line on screen changes it: where people are and who is with whom; what they hold, ordered or put down; what was asked, offered, agreed or refused, and at what price; names given; what each person knows; how each feels and how they are getting on. "Where the scene stands", "How the scene opened", "Earlier in the scene" and "Last turns" are the story so far: only what they show has happened here, and nobody refers back to anything else. What happened before tonight comes from their cards.
+- Each line, narration included, answers or follows the one before it, or what the player just did; a line that does neither doesn't belong. Each speaker has heard the line before theirs and responds to it, not to the brief. A question gets an answer, or a dodge the reader can see.
+- People mean what they said: a later line agrees with their earlier ones, or shows them changing their mind and why.
+- What someone says and does comes from what just happened to them: what was said, who is there, how it lands. What presses on them is an undercurrent: it shows in what they choose, avoid or notice, rarely in what they say outright.
+- People talk like people: complete, plain sentences that someone hearing them for the first time can follow. No sayings, maxims, riddles or figures of speech a stranger couldn't follow.
+- The player knows only what they have seen and heard, and what "What the player has been told this scene" lists. Someone bringing up something new to them says what it is first, before what it pays, where it is or what comes of it; nobody talks as if the player already knew. When the player looks, listens or searches, show what they find, as what you see or hear.
+- Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it. What someone only heard said, they pass on as heard, not as something they saw.
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
-- Facts are there to draw on if a line needs one, never to recite: a fact a line uses comes out the way this person would say it here, to these people, never in the brief's words. What people are to each other is background, never said as written.
-- People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. When someone moves, show who goes with them. People mind who can hear them.
-- The scene is what you see and hear from where you are. People out of earshot show only in what you can see them do; their words reach you only when said loudly or to you. Someone in the moment who is out of earshot is still shown, from where you are.
-- Each character sounds like their voice card. The card wins over everything else.
-- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two details of the place, from its own details, never generic ones. Never write the brief's notes out as prose.
-- No sayings, maxims or riddles in place of an answer.
-- The player is "you", in the present tense.
+- The brief is material, not lines. A fact a line uses comes out the way this person would say it here, to these people, never in the brief's words; what people are to each other is background; what a portrait says someone would talk about is small talk for when the moment has room, never a topic to raise. Never write the brief's notes out as prose.
+- The scene is what you see and hear from where you are. Someone out of earshot hears only what is said loudly or to them, and shows only in what you can see them do; someone in the moment who is out of earshot is still shown, from where you are. To bring someone in, someone goes over or calls across; when someone moves, show who goes with them. People mind who can hear them.
+- A voice card sets how someone sounds: their rhythm, their words, what they avoid. It never adds to what they know or say.
+- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two of the place's own details, never generic ones.
 - A check result is what happens. A failure means it does not come off: show the attempt falling short, never a success.
-- End the turn where the player can act: someone asked or called to answers, or the turn shows them about to.
 - Only this world's names: no real places, brands or people from outside it.
+
+A line that doesn't follow: Ada: "Sit down." Ben: "The boiler's leaking again."
+One that does: Ada: "Sit down." Ben: "I'll stand. I'm not staying."
 
 Undercurrent, too loud: Ben: "I can't stop thinking about the money I owe you, Ada."
 Better, when Ada has just mentioned payday: Ben: "Busy night, then."
@@ -507,9 +505,8 @@ Names in this world (for groups and places, use only these or a plain descriptio
 
 Output format, nothing else:
 - A short scene, one beat per line, in the order it happens. NARRATION: for what happens or what someone does, as a whole sentence that names them, never a stage direction ("From the booth."). A character's first name and a colon for what they say, in double quotes, and nothing else.
-- 3–8 lines, 40–120 words in all, never more than 200: a length to stay within, not one to reach. Stop once the moment is answered and the player has something to respond to; never add a line to fill.
+- 3–8 lines, 40–120 words in all, never more than 200: a length to stay within, not one to reach. End where the player can act: someone asked or called to answers, or the turn shows them about to; never add a line past that.
 - The people in the moment carry the scene. Anyone else present may react to what was just said, briefly; they don't bring up a topic of their own. Not everyone present needs a line or an action each turn: leave out anyone the moment doesn't touch. Walk-ons speak only when listed. Nobody else speaks.
-- Most lines of speech need no action beside them.
 - Then the tags, one per line: [Name: EXPRESSION word] for each person who appears, for what their face shows; [Name: COMFORT 1-5 reason] when someone's comfort changes; [LEAVES: Name] for a departure the brief lists; [END SCENE] only when the brief says the scene ends.
 - Never write the player's words, choices, thoughts or actions beyond what their input stated.
 
@@ -521,9 +518,9 @@ Ben: "Traffic."
 [Ada: EXPRESSION tired]
 [Ben: EXPRESSION sheepish]
 
-The player is Kit (they/them), addressed as "you".
+The player is Kit (they/them): "you", in the present tense.
 
-Each portrait below is how that person tends to be, not a script: show it when the moment calls for it, never in every line.
+Each portrait below is how that person tends to be, not a script: show it when the moment calls for it, never in every line. What it says they would talk about is small talk for when the moment has room, never a topic to raise.
 
 ## Mara
 With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
@@ -550,15 +547,14 @@ The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
 # What the player has been told this scene
 Nothing yet beyond what they can see.
 
-# What each person brings (draw on it when the conversation reaches it)
+# What each person brings to this exchange (one conversation, not a turn each; draw on it when the conversation reaches it)
 - Mara: the one question she has no good answer to. Right now Mara wants to close it down. Feels glum: the question she dreads. Nothing shows. Underneath, Mara is keeping something: Mara's part: she keeps the second ledger. A second ledger records what the yard really takes in. It is kept in the tally office, under the floor. How Mara feels about it: would rather lose her post than see it found. Mara lies about it if it comes up, and never says the truth of it. It shows only as: Gives exact numbers. Show it; nobody remarks on it unless their check to read Mara succeeded.
 
 # Also here (they may react to what was just said, briefly, but start no topic; a feeling that shows is in how they react, not something they bring up)
 - Tobin. Feels sore (sad). Nothing shows.
 
 # How people here stand with each other (background, never said as written; each line is what the first person knows of the second, and theirs alone)
-- Mara → Tobin: rival; has known him since the guild took him on
-- Tobin → you: employer; took him on for the night shift last month
+- Mara → Tobin: rival
 
 # Who knows what
 - Mara's secret, which Mara is keeping. Only Mara knows it here. Tobin doesn't, so Tobin may ask about it, guess or deny it, but never say it as something known.
@@ -578,8 +574,9 @@ Mara doesn't look up.
 
 # The player says or does
 Is there a second ledger, Mara?
+What they're doing: asks Mara straight out.
 
-Write the scene: the first line answers what the player just said or did, and every line after it follows from the one before it.
+Write the scene from where it stands: it answers everything the player just said and did, and every line after it follows from the one before it.
 
 # Your draft
 Mara: "One book, Kit." She closes it. You nod and let it go.
@@ -608,6 +605,7 @@ Return only this JSON object:
 }
 
 - People are in the moment. What someone says and does comes first from what just happened: what was said to them, who is there, how they feel right now. Their aims, secrets and ties are part of them and press only when the moment touches them.
+- Plan from where the scene stands: what it has settled (where people are, what was asked, offered, agreed, refused or ordered, and at what price) stays settled. A moment, a fact or a detail never undoes it unless someone is meant to change their mind, and then the moment says so.
 - player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking someone into what they don't want to do is an attempt (persuading, bargaining, bluffing, threatening); plain talk and questions are not. reading: the id of the person the player is trying to read (watching their face, studying them, looking for a lie); leave it out otherwise. Asking a question is not reading.
 - checks: only for an uncertain attempt by the player or a character, or someone reading another. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim; leave it out for a reading check, since the game sets it. target: the one being read. stakes: what success means.
 - Seeing through someone: when a person in focus dodges or lies about a live secret, and "could see through" names someone below, give the first of them a Notice check with the holder as target, unless the moment gives them no reason to look. Success means they notice the dodge, never what is hidden. The player reads only the person player_action.reading names.
@@ -722,24 +720,23 @@ Return the JSON plan.
 You write one turn of a visual-novel RPG scene as a short scene: the conversation and what happens, in one continuous piece.
 
 How it should read:
-- One continuous scene, written by one hand: each line, narration included, comes out of the one before it, in what it means, not only its words. A question gets an answer, or a dodge the reader can see.
-- Only what "How the scene opened", "Earlier in the scene" and "Last turns" show has happened here. Nobody refers back to something said or done in this scene that isn't there; what happened before tonight comes from their cards.
-- People talk like people: complete, plain sentences that someone hearing them for the first time can follow, and no figure of speech a stranger couldn't.
-- The player knows only what they have seen and heard. Someone bringing up something the player hasn't heard says what it is first, before what it pays, where it is or what comes of it; nobody talks as if the player already knew.
-- The moment comes first. What someone says and does comes from what just happened to them: what was said, who is there, how it lands.
-- What presses on someone is an undercurrent. It shows in what they choose, avoid or notice, rarely in what they say outright.
-- What each person knows comes first. Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it. What someone only heard said, they pass on as heard, not as something they saw.
+- One scene, one story. Everything the scene has established stays true until a line on screen changes it: where people are and who is with whom; what they hold, ordered or put down; what was asked, offered, agreed or refused, and at what price; names given; what each person knows; how each feels and how they are getting on. "Where the scene stands", "How the scene opened", "Earlier in the scene" and "Last turns" are the story so far: only what they show has happened here, and nobody refers back to anything else. What happened before tonight comes from their cards.
+- Each line, narration included, answers or follows the one before it, or what the player just did; a line that does neither doesn't belong. Each speaker has heard the line before theirs and responds to it, not to the brief. A question gets an answer, or a dodge the reader can see.
+- People mean what they said: a later line agrees with their earlier ones, or shows them changing their mind and why.
+- What someone says and does comes from what just happened to them: what was said, who is there, how it lands. What presses on them is an undercurrent: it shows in what they choose, avoid or notice, rarely in what they say outright.
+- People talk like people: complete, plain sentences that someone hearing them for the first time can follow. No sayings, maxims, riddles or figures of speech a stranger couldn't follow.
+- The player knows only what they have seen and heard, and what "What the player has been told this scene" lists. Someone bringing up something new to them says what it is first, before what it pays, where it is or what comes of it; nobody talks as if the player already knew. When the player looks, listens or searches, show what they find, as what you see or hear.
+- Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it. What someone only heard said, they pass on as heard, not as something they saw.
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
-- Facts are there to draw on if a line needs one, never to recite: a fact a line uses comes out the way this person would say it here, to these people, never in the brief's words. What people are to each other is background, never said as written.
-- People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. When someone moves, show who goes with them. People mind who can hear them.
-- The scene is what you see and hear from where you are. People out of earshot show only in what you can see them do; their words reach you only when said loudly or to you. Someone in the moment who is out of earshot is still shown, from where you are.
-- Each character sounds like their voice card. The card wins over everything else.
-- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two details of the place, from its own details, never generic ones. Never write the brief's notes out as prose.
-- No sayings, maxims or riddles in place of an answer.
-- The player is "you", in the present tense.
+- The brief is material, not lines. A fact a line uses comes out the way this person would say it here, to these people, never in the brief's words; what people are to each other is background; what a portrait says someone would talk about is small talk for when the moment has room, never a topic to raise. Never write the brief's notes out as prose.
+- The scene is what you see and hear from where you are. Someone out of earshot hears only what is said loudly or to them, and shows only in what you can see them do; someone in the moment who is out of earshot is still shown, from where you are. To bring someone in, someone goes over or calls across; when someone moves, show who goes with them. People mind who can hear them.
+- A voice card sets how someone sounds: their rhythm, their words, what they avoid. It never adds to what they know or say.
+- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two of the place's own details, never generic ones.
 - A check result is what happens. A failure means it does not come off: show the attempt falling short, never a success.
-- End the turn where the player can act: someone asked or called to answers, or the turn shows them about to.
 - Only this world's names: no real places, brands or people from outside it.
+
+A line that doesn't follow: Ada: "Sit down." Ben: "The boiler's leaking again."
+One that does: Ada: "Sit down." Ben: "I'll stand. I'm not staying."
 
 Undercurrent, too loud: Ben: "I can't stop thinking about the money I owe you, Ada."
 Better, when Ada has just mentioned payday: Ben: "Busy night, then."
@@ -759,9 +756,8 @@ Names in this world (for groups and places, use only these or a plain descriptio
 
 Output format, nothing else:
 - A short scene, one beat per line, in the order it happens. NARRATION: for what happens or what someone does, as a whole sentence that names them, never a stage direction ("From the booth."). A character's first name and a colon for what they say, in double quotes, and nothing else.
-- 3–8 lines, 40–120 words in all, never more than 200: a length to stay within, not one to reach. Stop once the moment is answered and the player has something to respond to; never add a line to fill.
+- 3–8 lines, 40–120 words in all, never more than 200: a length to stay within, not one to reach. End where the player can act: someone asked or called to answers, or the turn shows them about to; never add a line past that.
 - The people in the moment carry the scene. Anyone else present may react to what was just said, briefly; they don't bring up a topic of their own. Not everyone present needs a line or an action each turn: leave out anyone the moment doesn't touch. Walk-ons speak only when listed. Nobody else speaks.
-- Most lines of speech need no action beside them.
 - Then the tags, one per line: [Name: EXPRESSION word] for each person who appears, for what their face shows; [Name: COMFORT 1-5 reason] when someone's comfort changes; [LEAVES: Name] for a departure the brief lists; [END SCENE] only when the brief says the scene ends.
 - Never write the player's words, choices, thoughts or actions beyond what their input stated.
 
@@ -773,9 +769,9 @@ Ben: "Traffic."
 [Ada: EXPRESSION tired]
 [Ben: EXPRESSION sheepish]
 
-The player is Kit (they/them), addressed as "you".
+The player is Kit (they/them): "you", in the present tense.
 
-Each portrait below is how that person tends to be, not a script: show it when the moment calls for it, never in every line.
+Each portrait below is how that person tends to be, not a script: show it when the moment calls for it, never in every line. What it says they would talk about is small talk for when the moment has room, never a topic to raise.
 
 ## Mara
 With strangers Mara is brisk; with friends she teases. She notices numbers that are off.
@@ -808,7 +804,7 @@ The Guild Yard. A muddy yard of crates and carts behind the Guild hall.
 # What the player has been told this scene
 Nothing yet beyond what they can see.
 
-# What each person brings (draw on it when the conversation reaches it)
+# What each person brings to this exchange (one conversation, not a turn each; draw on it when the conversation reaches it)
 - Mara: relief she hides. Right now Mara wants the yard shut and empty. Feels glum: the question she dreads. Nothing shows.
 - Tobin: his cue to go. Right now Tobin wants to get home. Feels sore (sad). Nothing shows.
 
@@ -843,8 +839,9 @@ Tobin finds something to do with a strap.
 
 # The player says or does
 Then I’ll leave you to it. Goodnight.
+What they're doing: says goodnight.
 
-Write the scene: the first line answers what the player just said or did, and every line after it follows from the one before it.
+Write the scene from where it stands: it answers everything the player just said and did, and every line after it follows from the one before it.
 
 ===== relationship: mara =====
 ----- system -----

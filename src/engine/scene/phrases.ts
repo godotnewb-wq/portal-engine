@@ -41,6 +41,16 @@ export const sharedBeyond = (a: string, b: string, known: string): number => {
   return [...content(a)].filter((w) => theirs.has(w) && !open.has(w)).length
 }
 
+/**
+ * A clipped phrase that ends on a content word: "picks up her glass without looking at the" reads as "picks up her
+ * glass without looking" (2026-11-25 audit: the writer's "Used already" list ended gestures mid-phrase).
+ */
+export const wholeWords = (phrase: string): string => {
+  const w = phrase.trim().split(/\s+/)
+  while (w.length > 1 && FUNCTION_WORDS.has(w.at(-1)!.toLowerCase().replace(/[^\p{L}']/gu, ''))) w.pop()
+  return w.join(' ').replace(/[,;:]+$/, '')
+}
+
 /** How many content words two texts share; a short detail sharing several with a secret is about the secret. */
 export const sharedWords = (a: string, b: string): number => {
   const content = (t: string) => new Set(plainWords(t).filter((w) => !FUNCTION_WORDS.has(w)))

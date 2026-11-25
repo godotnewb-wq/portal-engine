@@ -98,12 +98,12 @@ describe('the scene writer’s brief', () => {
     const llm = scripted(LEDGER, [SCENE])
     await runTurn(fixture, yard(), 'Is there a second ledger, Mara?', llm, () => {}, { pipeline: 'scene', forceNatural: 2 })
     const writer = llm.prompts[1]!
-    expect(writer.system).toMatch(/One continuous scene, written by one hand/)
+    expect(writer.system).toMatch(/One scene, one story\. Everything the scene has established stays true/)
     expect(writer.system).toMatch(/Then the tags, one per line/)
     // Everyone present is portrayed; the people in the moment get their voice cards.
     expect(writer.system).toMatch(/## Mara\n[\s\S]*### Mara's voice/)
     expect(writer.system).toMatch(/## Tobin\n(?![\s\S]*### Tobin's voice)/)
-    expect(writer.user).toMatch(/# What each person brings \(draw on it when the conversation reaches it\)\n- Mara: the question she has no good answer to\. Right now Mara wants to close it down\./)
+    expect(writer.user).toMatch(/# What each person brings to this exchange \(one conversation, not a turn each; draw on it when the conversation reaches it\)\n- Mara: the question she has no good answer to\. Right now Mara wants to close it down\./)
     expect(writer.user).toMatch(/Underneath, Mara is keeping something: [^\n]*\. Mara lies about it if it comes up, and never says the truth of it\./)
     expect(writer.user).toMatch(/# Also here \(they may react to what was just said, briefly, but start no topic; [^)]*\)\n- Tobin\./)
     // The voice card is how they sound, not lines to say (2026-11-24 writer replay).
@@ -113,6 +113,9 @@ describe('the scene writer’s brief', () => {
     expect(writer.user).toContain("# What's at stake\nwhether Kit believes there is one book")
     expect(writer.user).toContain('# What the rolls decided (this happens; honor it)\n- Tobin fails. This does not happen: Tobin sees the lie for what it is. Show the attempt not coming off.')
     expect(writer.user).not.toContain('# The scene ends this turn')
+    // What the director read the player as doing comes with their words (2026-11-25 play: a look around went unanswered).
+    expect(writer.user).toContain('# The player says or does\nIs there a second ledger, Mara?\nWhat they\'re doing: asks Mara about a second ledger.')
+    expect(writer.user).toMatch(/Write the scene from where it stands: it answers everything the player just said and did/)
   })
 
   it('says when the plan ends the scene', async () => {

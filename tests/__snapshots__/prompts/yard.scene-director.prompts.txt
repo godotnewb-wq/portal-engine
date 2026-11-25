@@ -17,6 +17,7 @@ Return only this JSON object:
 }
 
 - People are in the moment. What someone says and does comes first from what just happened: what was said to them, who is there, how they feel right now. Their aims, secrets and ties are part of them and press only when the moment touches them.
+- Plan from where the scene stands: what it has settled (where people are, what was asked, offered, agreed, refused or ordered, and at what price) stays settled. A moment, a fact or a detail never undoes it unless someone is meant to change their mind, and then the moment says so.
 - player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking someone into what they don't want to do is an attempt (persuading, bargaining, bluffing, threatening); plain talk and questions are not. reading: the id of the person the player is trying to read (watching their face, studying them, looking for a lie); leave it out otherwise. Asking a question is not reading.
 - checks: only for an uncertain attempt by the player or a character, or someone reading another. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim; leave it out for a reading check, since the game sets it. target: the one being read. stakes: what success means.
 - Seeing through someone: when a person in focus dodges or lies about a live secret, and "could see through" names someone below, give the first of them a Notice check with the holder as target, unless the moment gives them no reason to look. Success means they notice the dodge, never what is hidden. The player reads only the person player_action.reading names.
@@ -137,6 +138,7 @@ Return only this JSON object:
 }
 
 - People are in the moment. What someone says and does comes first from what just happened: what was said to them, who is there, how they feel right now. Their aims, secrets and ties are part of them and press only when the moment touches them.
+- Plan from where the scene stands: what it has settled (where people are, what was asked, offered, agreed, refused or ordered, and at what price) stays settled. A moment, a fact or a detail never undoes it unless someone is meant to change their mind, and then the moment says so.
 - player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking someone into what they don't want to do is an attempt (persuading, bargaining, bluffing, threatening); plain talk and questions are not. reading: the id of the person the player is trying to read (watching their face, studying them, looking for a lie); leave it out otherwise. Asking a question is not reading.
 - checks: only for an uncertain attempt by the player or a character, or someone reading another. At most 2. who is "player" or a character id. skill is one of: fight, sneak, notice, talk, bluff. difficulty is one of: routine, tough, grim; leave it out for a reading check, since the game sets it. target: the one being read. stakes: what success means.
 - Seeing through someone: when a person in focus dodges or lies about a live secret, and "could see through" names someone below, give the first of them a Notice check with the holder as target, unless the moment gives them no reason to look. Success means they notice the dodge, never what is hidden. The player reads only the person player_action.reading names.
@@ -234,8 +236,8 @@ mara: 0, tobin: 0
 # Help with the player's checks
 Mara would back the player up.
 
-# Last turn changed
-Kit has noticed Mara guarding the tally book.
+# Where the scene stands (all of it stays true unless someone changes it on screen)
+- Turn 1: Kit has noticed Mara guarding the tally book.
 
 # What could press on each person this turn (at most one each; usually none)
 - Mara Quill [mara]. Aim for tonight (idle): Find out who keeps skimming the tallies. Secret [mara.two-books], touched by "second ledger". Could see through Mara: Tobin [tobin], who knows Mara (has worked under her a year). Ties in play: Tobin [tobin] (rival).

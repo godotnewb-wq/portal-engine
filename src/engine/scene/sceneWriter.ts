@@ -5,7 +5,7 @@ import type { Degree } from '@engine/rules'
 import type { GameState, Scene } from '@engine/state'
 import type { ParsedReply } from './beats'
 import type { Problem } from './checks'
-import { cutIn, RECENT_TURNS, turnText } from './director'
+import { cutIn, RECENT_TURNS, turnText, whereSceneStands } from './director'
 import { canSay, sceneFacts } from './facts'
 import { feelingsNow, feltWords, shown, shownWords } from './feelings'
 import { childGuard } from './guard'
@@ -13,7 +13,7 @@ import { knowersOf } from '@engine/memory'
 import { presentCast, type BeatPlan, type PlannedCheck } from './planShape'
 import { RECENT_USE_TURNS, recentlyUsed } from './repeats'
 import type { Approach, LivePressure } from './scenePlan'
-import { FUNCTION_WORDS, OWNED_PHRASE_WORDS, plainWords, runs } from './phrases'
+import { FUNCTION_WORDS, OWNED_PHRASE_WORDS, plainWords, runs, wholeWords } from './phrases'
 import { OVERUSED_PHRASES, SCENE_LENGTH } from './style'
 import { claimLines, knowledgeLines, speakerTies, voiceCard } from './writer'
 
@@ -28,24 +28,23 @@ import { claimLines, knowledgeLines, speakerTies, voiceCard } from './writer'
 
 /** How the scene should read (redesign §6.3): a few principles and short examples with made-up people, as engine text must. */
 export const SCENE_STYLE = `How it should read:
-- One continuous scene, written by one hand: each line, narration included, comes out of the one before it, in what it means, not only its words. A question gets an answer, or a dodge the reader can see.
-- Only what "How the scene opened", "Earlier in the scene" and "Last turns" show has happened here. Nobody refers back to something said or done in this scene that isn't there; what happened before tonight comes from their cards.
-- People talk like people: complete, plain sentences that someone hearing them for the first time can follow, and no figure of speech a stranger couldn't.
-- The player knows only what they have seen and heard. Someone bringing up something the player hasn't heard says what it is first, before what it pays, where it is or what comes of it; nobody talks as if the player already knew.
-- The moment comes first. What someone says and does comes from what just happened to them: what was said, who is there, how it lands.
-- What presses on someone is an undercurrent. It shows in what they choose, avoid or notice, rarely in what they say outright.
-- What each person knows comes first. Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it. What someone only heard said, they pass on as heard, not as something they saw.
+- One scene, one story. Everything the scene has established stays true until a line on screen changes it: where people are and who is with whom; what they hold, ordered or put down; what was asked, offered, agreed or refused, and at what price; names given; what each person knows; how each feels and how they are getting on. "Where the scene stands", "How the scene opened", "Earlier in the scene" and "Last turns" are the story so far: only what they show has happened here, and nobody refers back to anything else. What happened before tonight comes from their cards.
+- Each line, narration included, answers or follows the one before it, or what the player just did; a line that does neither doesn't belong. Each speaker has heard the line before theirs and responds to it, not to the brief. A question gets an answer, or a dodge the reader can see.
+- People mean what they said: a later line agrees with their earlier ones, or shows them changing their mind and why.
+- What someone says and does comes from what just happened to them: what was said, who is there, how it lands. What presses on them is an undercurrent: it shows in what they choose, avoid or notice, rarely in what they say outright.
+- People talk like people: complete, plain sentences that someone hearing them for the first time can follow. No sayings, maxims, riddles or figures of speech a stranger couldn't follow.
+- The player knows only what they have seen and heard, and what "What the player has been told this scene" lists. Someone bringing up something new to them says what it is first, before what it pays, where it is or what comes of it; nobody talks as if the player already knew. When the player looks, listens or searches, show what they find, as what you see or hear.
+- Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it. What someone only heard said, they pass on as heard, not as something they saw.
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
-- Facts are there to draw on if a line needs one, never to recite: a fact a line uses comes out the way this person would say it here, to these people, never in the brief's words. What people are to each other is background, never said as written.
-- People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. When someone moves, show who goes with them. People mind who can hear them.
-- The scene is what you see and hear from where you are. People out of earshot show only in what you can see them do; their words reach you only when said loudly or to you. Someone in the moment who is out of earshot is still shown, from where you are.
-- Each character sounds like their voice card. The card wins over everything else.
-- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two details of the place, from its own details, never generic ones. Never write the brief's notes out as prose.
-- No sayings, maxims or riddles in place of an answer.
-- The player is "you", in the present tense.
+- The brief is material, not lines. A fact a line uses comes out the way this person would say it here, to these people, never in the brief's words; what people are to each other is background; what a portrait says someone would talk about is small talk for when the moment has room, never a topic to raise. Never write the brief's notes out as prose.
+- The scene is what you see and hear from where you are. Someone out of earshot hears only what is said loudly or to them, and shows only in what you can see them do; someone in the moment who is out of earshot is still shown, from where you are. To bring someone in, someone goes over or calls across; when someone moves, show who goes with them. People mind who can hear them.
+- A voice card sets how someone sounds: their rhythm, their words, what they avoid. It never adds to what they know or say.
+- An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two of the place's own details, never generic ones.
 - A check result is what happens. A failure means it does not come off: show the attempt falling short, never a success.
-- End the turn where the player can act: someone asked or called to answers, or the turn shows them about to.
 - Only this world's names: no real places, brands or people from outside it.
+
+A line that doesn't follow: Ada: "Sit down." Ben: "The boiler's leaking again."
+One that does: Ada: "Sit down." Ben: "I'll stand. I'm not staying."
 
 Undercurrent, too loud: Ben: "I can't stop thinking about the money I owe you, Ada."
 Better, when Ada has just mentioned payday: Ben: "Busy night, then."
@@ -59,9 +58,8 @@ Played honestly: NARRATION: Ben watches Ada a moment too long, then looks away. 
 /** The script form (redesign §6.1) and the tag footer (Q7). */
 export const SCENE_FORMAT = `Output format, nothing else:
 - A short scene, one beat per line, in the order it happens. NARRATION: for what happens or what someone does, as a whole sentence that names them, never a stage direction ("From the booth."). A character's first name and a colon for what they say, in double quotes, and nothing else.
-- ${SCENE_LENGTH.lines} lines, ${SCENE_LENGTH.words} words in all, never more than ${SCENE_LENGTH.maxWords}: a length to stay within, not one to reach. Stop once the moment is answered and the player has something to respond to; never add a line to fill.
+- ${SCENE_LENGTH.lines} lines, ${SCENE_LENGTH.words} words in all, never more than ${SCENE_LENGTH.maxWords}: a length to stay within, not one to reach. End where the player can act: someone asked or called to answers, or the turn shows them about to; never add a line past that.
 - The people in the moment carry the scene. Anyone else present may react to what was just said, briefly; they don't bring up a topic of their own. Not everyone present needs a line or an action each turn: leave out anyone the moment doesn't touch. Walk-ons speak only when listed. Nobody else speaks.
-- Most lines of speech need no action beside them.
 - Then the tags, one per line: [Name: EXPRESSION word] for each person who appears, for what their face shows; [Name: COMFORT 1-5 reason] when someone's comfort changes; [LEAVES: Name] for a departure the brief lists; [END SCENE] only when the brief says the scene ends.
 - Never write the player's words, choices, thoughts or actions beyond what their input stated.
 
@@ -161,10 +159,10 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
     `Never write these; a draft that uses one is sent back: ${[...OVERUSED_PHRASES, ...content.phrases].map((x) => `"${x}"`).join(', ')}.`,
     writerStage(content.tone, content.codex).text,
     SCENE_FORMAT,
-    `The player is ${state.player.name} (${state.player.pronouns}), addressed as "you".`,
+    `The player is ${state.player.name} (${state.player.pronouns}): "you", in the present tense.`,
     // A portrait read as a script is played in every line (2026-11-24 play: a bartender quoting prices nobody asked
     // for, a mechanic raising machines unprompted); npc design §5 has them as tendencies, not rules.
-    'Each portrait below is how that person tends to be, not a script: show it when the moment calls for it, never in every line.',
+    'Each portrait below is how that person tends to be, not a script: show it when the moment calls for it, never in every line. What it says they would talk about is small talk for when the moment has room, never a topic to raise.',
     ...cards,
     childGuard(content, state)
   ]
@@ -198,10 +196,17 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
     ].join('')
   }
   const around = present.filter((id) => !plan.focus.includes(id))
-  const ties = speakerTies(content, state, { ...view, speakers: present.map((id) => ({ id, intent: '' })) })
-  const knowledge = knowledgeLines(content, state, view)
+  // What the people in the moment hold toward the others, notes only between them (2026-11-25 audit: fifteen lines,
+  // both ways round, mostly about people who start no topic, were more wording to recite than help). A tie already
+  // given as someone's undercurrent isn't given twice: said twice, it was said word for word.
+  const undercurrentTies = new Set(plan.pressures.filter((p) => p.kind === 'tie').map((p) => `- ${nameOf(p.who)} → ${p.ref === 'player' ? 'you' : nameOf(p.ref)}:`))
+  const ties = speakerTies(content, state, { ...view, speakers: plan.focus.map((id) => ({ id, intent: '' })) }).filter((l) => ![...undercurrentTies].some((p) => l.startsWith(p)))
+  // A secret the brief doesn't give the writer can't be said by anyone; the line naming it only showed the machinery.
+  const knowledge = knowledgeLines(content, state, view).filter((l) => !l.includes("which this brief doesn't give you"))
   const claims = claimLines(content, state)
-  const recent = Object.entries(used).map(([id, u]) => `- ${nameOf(id)}: ${[...u.slang.map((t) => `"${t}"`), ...u.gestures].join('; ')}`)
+  const recent = Object.entries(used).map(([id, u]) => `- ${nameOf(id)}: ${[...u.slang.map((t) => `"${t}"`), ...u.gestures.map(wholeWords)].join('; ')}`)
+  const stands = whereSceneStands(scene)
+  const doing = plan.player_action?.doing?.trim()
   const details = placeDetails(location.texture, scene)
   const listed = (names: string[]) => (names.length <= 1 ? (names[0] ?? '') : `${names.slice(0, -1).join(', ')} and ${names.at(-1)}`)
 
@@ -210,10 +215,9 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
     details.length > 0 && `# The place's details (use one or two in the narration)\n${details.map((d) => `- ${d}`).join('\n')}`,
     told.length > 0 ? `# What the player has been told this scene\n${told.map((f) => `- ${f.text}`).join('\n')}` : '# What the player has been told this scene\nNothing yet beyond what they can see.',
     claims.length > 0 && `# Claimed but never confirmed (claims, not facts: anyone may doubt or deny them)\n${claims.join('\n')}`,
-    scene.summary && `# Earlier in the scene\n${scene.summary}`,
     // Material by person, labelled as material: laid out person by person and called "this moment", it was written as
     // each one's part rather than one exchange (2026-11-24 play: a fact and a want joined into a line that answered nothing).
-    plan.focus.length > 0 && `# What each person brings (draw on it when the conversation reaches it)\n${plan.focus.map(momentLine).join('\n')}`,
+    plan.focus.length > 0 && `# What each person brings to this exchange (one conversation, not a turn each; draw on it when the conversation reaches it)\n${plan.focus.map(momentLine).join('\n')}`,
     around.length > 0 && `# Also here (they may react to what was just said, briefly, but start no topic; a feeling that shows is in how they react, not something they bring up)\n${around.map((id) => `- ${nameOf(id)}.${feltLine(id, false)}`).join('\n')}`,
     ties.length > 0 && `# How people here stand with each other (background, never said as written; each line is what the first person knows of the second, and theirs alone)\n${ties.join('\n')}`,
     knowledge.length > 0 && `# Who knows what\n${knowledge.join('\n')}`,
@@ -224,14 +228,16 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
     plan.end_scene && '# The scene ends this turn\nBring it to a close, and add [END SCENE].',
     recent.length > 0 && `# Used already: slang in the last turns, gestures this scene (don't repeat these, or bring back the things in them)\n${recent.join('\n')}`,
     plan.avoid.length > 0 && `# Avoid\n${plan.avoid.join('; ')}`,
-    // The thread last, nearest the writing: how the scene opened, the scene so far, what the player just did, and what
-    // the dice made of it.
+    // The thread last, nearest the writing, in the order it happened: how the scene opened, the turns since, where that
+    // left things, the last turns as written, what the player just did, and what the dice made of it.
     scene.opening && scene.opening.length > 0 && `# How the scene opened\n${scene.opening.map((b) => b.text).join('\n')}`,
+    scene.summary && `# Earlier in the scene\n${scene.summary}`,
+    stands.length > 0 && `# Where the scene stands (all of it stays true unless a line changes it)\n${stands.join('\n')}`,
     scene.turns.length > 0 && `# Last turns\n${scene.turns.slice(-RECENT_TURNS).map((t) => turnText(content, state.player.name, t)).join('\n\n')}`,
     cutIn(content, state) && `# Cut in\n${cutIn(content, state)}`,
-    `# The player says or does\n${input}`,
+    `# The player says or does\n${input}${doing ? `\nWhat they're doing: ${clip(doing)}.` : ''}`,
     view.checks.some((c) => c.result) && `# What the rolls decided (this happens; honor it)\n${view.checks.filter((c) => c.result).map((c) => checkEvent(content, c)).join('\n')}`,
-    'Write the scene: the first line answers what the player just said or did, and every line after it follows from the one before it.'
+    'Write the scene from where it stands: it answers everything the player just said and did, and every line after it follows from the one before it.'
   ]
     .filter(Boolean)
     .join('\n\n')
@@ -240,7 +246,7 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
 }
 
 /** Words in a row a spoken line may share with a fact or note in the brief before it reads as recited (*tune*). */
-export const RECITED_WORDS = 4
+export const RECITED_WORDS = 5
 /** Content words such a run needs, so "on the first of" alone isn't recitation. */
 export const RECITED_CONTENT_WORDS = 2
 

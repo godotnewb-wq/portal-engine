@@ -3,7 +3,7 @@ import { firstName, type Prompt } from '@engine/core'
 import { characterById, type Pack } from '@engine/pack'
 import type { GameState } from '@engine/state'
 import type { Briefs } from './brief'
-import { buildBriefs, directorContext, sceneSoFar, shadeNames } from './director'
+import { buildBriefs, directorContext, sceneSoFar, shadeNames, whereSceneStands } from './director'
 import { gatherScene, type Gathered, type PoolFact } from './gather'
 import { turnLore, type TurnLore } from './lore'
 import { MAX_CHECKS, MAX_SPEAKERS, presentCast } from './planShape'
@@ -32,6 +32,7 @@ Return only this JSON object:
 }
 
 - People are in the moment. What someone says and does comes first from what just happened: what was said to them, who is there, how they feel right now. Their aims, secrets and ties are part of them and press only when the moment touches them.
+- Plan from where the scene stands: what it has settled (where people are, what was asked, offered, agreed, refused or ordered, and at what price) stays settled. A moment, a fact or a detail never undoes it unless someone is meant to change their mind, and then the moment says so.
 - player_action: what the player is doing, in plain words. uncertain: true only for an attempt whose outcome is in doubt (persuading, sneaking, climbing, fixing, studying someone closely). Talking someone into what they don't want to do is an attempt (persuading, bargaining, bluffing, threatening); plain talk and questions are not. reading: the id of the person the player is trying to read (watching their face, studying them, looking for a lie); leave it out otherwise. Asking a question is not reading.
 - checks: only for an uncertain attempt by the player or a character, or someone reading another. At most ${MAX_CHECKS}. who is "player" or a character id. skill is one of: ${r.skills.map((x) => x.id).join(', ')}. difficulty is one of: ${r.difficulties.map((d) => d.word).join(', ')}; leave it out for a reading check, since the game sets it. target: the one being read. stakes: what success means.
 - Seeing through someone: when a person in focus dodges or lies about a live secret, and "could see through" names someone below, give the first of them a ${r.skills.find((s) => s.id === r.people.reading.skill)?.name ?? r.people.reading.skill} check with the holder as target, unless the moment gives them no reason to look. Success means they notice the dodge, never what is hidden. The player reads only the person player_action.reading names.
@@ -85,22 +86,18 @@ function poolLines(content: Pack, state: GameState, g: Gathered): string[] {
   return [...own, ...(place.length > 0 ? [`Anyone here (the place's news):\n${place.map(factLine).join('\n')}`] : [])]
 }
 
-/** What the bookkeeper recorded as changed last turn (Q4: the next turn's director reads it, for that turn only). */
-function lastChanged(state: GameState): string | undefined {
-  const changed = state.scene!.turns.at(-1)?.records?.changed?.trim()
-  return changed || undefined
-}
 
 /** The scene director's prompt, from what the game gathered this turn. */
 export function buildSceneDirectorPrompt(content: Pack, state: GameState, input: string, lore: TurnLore = turnLore(content, state, input), briefs: Briefs = buildBriefs(content, state, input, lore), gathered: Gathered = gatherScene(content, state, input, lore, briefs)): Prompt {
   if (!state.scene) throw new Error('No scene in progress')
   const system = [sceneDirectorRules(content.ruleset), ...directorContext(content, state, lore, briefs)].join('\n\n')
   const so = sceneSoFar(content, state, lore)
-  const changed = lastChanged(state)
+  // What each turn changed, all of the scene (Q4 gave the last turn's only; widened 2026-11-25 for continuity).
+  const stands = whereSceneStands(state.scene)
   const pools = poolLines(content, state, gathered)
   const user = [
     ...so.before,
-    changed && `# Last turn changed\n${changed}`,
+    stands.length > 0 && `# Where the scene stands (all of it stays true unless someone changes it on screen)\n${stands.join('\n')}`,
     ...so.after,
     `# What could press on each person this turn (at most one each; usually none)\n${pressureLines(content, state, gathered).join('\n')}`,
     pools.length > 0 ? `# Facts they could draw on (ids for draws_on)\n${pools.join('\n\n')}` : '# Facts they could draw on: none this turn.',
