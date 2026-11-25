@@ -1,6 +1,7 @@
 import { existsSync, readdirSync, readFileSync, statSync } from 'node:fs'
 import { join } from 'node:path'
 import type { CallTrace, Prompt } from '@engine/core'
+import { cutTrace } from '@engine/scene'
 import { FlagRecordSchema, type FlagRecord, type ScoreRecord } from '@engine/review'
 import { FILES, joinSections, type BookkeepingRecord, type CallRecord, type ErrorRecord, type PromptRecord, type SceneRecord, type SessionRecord, type TurnRecord } from './records'
 
@@ -47,13 +48,16 @@ export function readSession(dir: string): SessionLog {
     if (!parsed.success) counter.n++
     return parsed.success ? [parsed.data] : []
   })
+  // A turn the player cut in on (Milestone 5 task 8c) is read as it was shown: the beats after the cut are kept aside.
+  const scenes = lines<SceneRecord>(dir, FILES.scenes, counter)
+  const cuts = new Map(scenes.flatMap((s) => (s.type === 'cut' ? [[s.turnId, s.after] as const] : [])))
   return {
     dir,
     session,
-    turns: lines<TurnRecord>(dir, FILES.turns, counter),
+    turns: lines<TurnRecord>(dir, FILES.turns, counter).map((t) => (cuts.has(t.turnId) ? cutTrace(t, cuts.get(t.turnId)!) : t)),
     calls: new Map(lines<CallRecord>(dir, FILES.calls, counter).map((c) => [c.id, c])),
     prompts: new Map(lines<PromptRecord>(dir, FILES.prompts, counter).map((p) => [p.id, p.text])),
-    scenes: lines<SceneRecord>(dir, FILES.scenes, counter),
+    scenes,
     flags,
     scores: lines<ScoreRecord>(dir, FILES.scores, counter),
     errors: lines<ErrorRecord>(dir, FILES.errors, counter),

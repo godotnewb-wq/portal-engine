@@ -35,6 +35,12 @@ export const checkTies = (state: GameState, expected: ExpectedTie[]): TieResult[
     return { expected: e, held, met: e.has.every((t) => held.includes(t)) && !e.lacks.some((t) => held.includes(t)) }
   })
 
+/**
+ * The player cutting in on a turn (Milestone 5 task 8c): on turn `turn` (1-based, in its scene), after its first
+ * `after` beats, as the app's Cut in does. The rest of the turn never happens. A turn shorter than that is read whole.
+ */
+export const InterruptSchema = z.object({ turn: z.number().int().positive(), after: z.number().int().positive() })
+
 /** Starting moods, overriding the character files: a feeling in the ruleset's words, with words for it or a reason (milestone 4b). */
 const MoodsSchema = z.record(IdSchema, FeelingWordsSchema.extend({ text: z.string().min(1).optional(), reason: z.string().min(1).optional() })).default({})
 const DaysAgoSchema = z.number().int().min(0).default(0)
@@ -74,7 +80,9 @@ export const LaterSceneSchema = z.object({
   comfort: z.record(IdSchema, z.number().int().min(1).max(5)).default({}),
   turns: z.array(z.string().min(1)).min(1),
   /** Turns of this scene (1-based) after which the game is saved and reloaded, as when a player quits mid-scene (task 7). */
-  reloadAfter: z.array(z.number().int().positive()).default([])
+  reloadAfter: z.array(z.number().int().positive()).default([]),
+  /** Turns of this scene (1-based) the player cuts in on, after how many of their beats (Milestone 5 task 8c). */
+  interrupts: z.array(InterruptSchema).default([])
 })
 export type LaterScene = z.infer<typeof LaterSceneSchema>
 
@@ -109,6 +117,8 @@ export const ScenarioSchema = z.object({
   turns: z.array(z.string().min(1)).min(1),
   /** Turns of the first scene (1-based) after which the game is saved and reloaded mid-scene (Milestone 5 task 7). */
   reloadAfter: z.array(z.number().int().positive()).default([]),
+  /** Turns of the first scene the player cuts in on, and after how many beats (Milestone 5 task 8c). */
+  interrupts: z.array(InterruptSchema).default([]),
   /** Named groups to run together, e.g. `core` (Milestone 5 plan, Q15): `npm run bench -- --set core`. */
   sets: z.array(IdSchema).default([]),
   /** A roll the scenario is designed to exercise. Turns are 1-based. */
@@ -156,8 +166,8 @@ export function scenarioFile(path: string): Scenario {
 
 /** Every scene a scenario plays, the first included, in order. */
 export function scenesOf(scenario: Scenario): (LaterScene & { n: number })[] {
-  const { location, cast, walkOns, moods, comfort, turns, reloadAfter } = scenario
-  return [{ n: 1, days: 0, location, cast, ...(walkOns && { walkOns }), moods, comfort, turns, reloadAfter }, ...scenario.later.map((s, i) => ({ ...s, n: i + 2 }))]
+  const { location, cast, walkOns, moods, comfort, turns, reloadAfter, interrupts } = scenario
+  return [{ n: 1, days: 0, location, cast, ...(walkOns && { walkOns }), moods, comfort, turns, reloadAfter, interrupts }, ...scenario.later.map((s, i) => ({ ...s, n: i + 2 }))]
 }
 
 /** A scene's id: the scenario's for the first, so single-scene runs read as before ("deception-caught-2"); "<id>-s2" and on after. */
@@ -173,6 +183,7 @@ export function scenarioProblems(content: Pack, scenario: Scenario): string[] {
     if (!location) problems.push(`unknown location "${scene.location}"${at}`)
     for (const id of [...scene.cast, ...Object.keys(scene.moods), ...Object.keys(scene.comfort)]) if (!isCharacter(id)) problems.push(`unknown character "${id}"`)
     for (const id of scene.walkOns ?? []) if (location && !location.walkOns.some((w) => w.id === id)) problems.push(`unknown walk-on "${id}"${at}`)
+    for (const i of scene.interrupts) if (i.turn > scene.turns.length) problems.push(`a cut-in is outside the scripted turns (turn ${i.turn})${at}`)
     for (const [id, m] of Object.entries(scene.moods)) {
       const problem = feelingProblem(content.ruleset, m)
       if (problem) problems.push(`${id}'s mood${at}: ${problem}`)

@@ -91,6 +91,19 @@ describe('LogSession (milestone 2, A2)', () => {
     expect(read.calls.get(`${turn.trace.turnId}:bookkeeper`)).toMatchObject({ role: 'bookkeeper' })
   })
 
+  it('reads a turn the player cut in on as it was shown, with the cut beats kept aside (Milestone 5 task 8c)', async () => {
+    const log = LogSession.open(root(), info)
+    const turn = await runTurn(fixture, yardScene(), 'Tobin?', llm, () => {}, { log: log.id })
+    log.turn(turn.trace)
+    log.cut({ sceneId: turn.trace.sceneId, turnId: turn.trace.turnId, after: 1, of: 2 })
+    const read = readSession(log.dir).turns[0]!
+    expect(read.beats.map((b) => b.beat)).toEqual(turn.beats.slice(0, 1))
+    expect(read.cut!.map((b) => b.beat)).toEqual(turn.beats.slice(1))
+    expect(read.interrupted).toEqual({ after: 1, of: 2 })
+    // The turns file itself keeps every beat written.
+    expect(readFileSync(join(log.dir, FILES.turns), 'utf8')).toContain('Well?')
+  })
+
   it('never writes an API key: session models carry profile, model and temperature only', () => {
     const settings = SettingsSchema.parse({ writer: { baseUrl: 'https://x.example/v1?key=sk-secret', apiKey: 'sk-secret', model: 'strong' }, director: { baseUrl: 'https://x', apiKey: 'sk-other', model: 'fast' } })
     const models = roleModels(settings)

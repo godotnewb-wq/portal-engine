@@ -10,7 +10,7 @@ import type { BeatPlan } from './planShape'
 import { resolvePlan, type ResolveOptions } from './resolve'
 import { castSnapshot, checkTraces, planItems, shownTraces, type BeatTrace, type TurnTrace } from './trace'
 import { activeSecrets } from './secrets'
-import { acceptTags, applyTurn, showDepartures } from './turn'
+import { acceptTags, applyTurn, showDepartures, type TurnWritten } from './turn'
 import { buildRewritePrompt, buildWriterPrompt, sceneSpeakers } from './writer'
 import { RECENT_USE_TURNS, recentlyUsed, repeatProblems, usageOf } from './repeats'
 import { loreTrace, turnLore } from './lore'
@@ -56,6 +56,11 @@ export interface TurnOutcome {
   fallback: boolean
   /** Everything the turn did, for the logs. */
   trace: TurnTrace
+  /**
+   * The turn as written, before it was applied: with the state the turn started from, what `cutTurn` and `applyTurn`
+   * need to apply it again with only the beats the player saw (Milestone 5 task 8c).
+   */
+  written: TurnWritten
 }
 
 /** The scene writer's repeats of recently used slang and gestures are sent back from this many (Q10; *tune*). */
@@ -188,7 +193,8 @@ export async function runTurn(
     const departures = showDepartures(content, plan, kept.map((i) => parsed.beats[i]!))
     const beats = departures.beats
 
-    const next = applyTurn(content, state, { id: turnId, ...(options.log && { log: options.log }), input, plan, beats, tags: accepted.tags, dice, details: carryDetails(briefs.details, plan), memories: briefs.details.filter((d) => d.kind === 'memory').map((d) => d.id), secrets: activeSecrets(lore.secrets), topics: lore.layers.triggered.entries.map((e) => e.id), ...(plan.scene && { live: liveRecords(plan.scene) }) })
+    const written: TurnWritten = { id: turnId, ...(options.log && { log: options.log }), input, plan, beats, tags: accepted.tags, dice, details: carryDetails(briefs.details, plan), memories: briefs.details.filter((d) => d.kind === 'memory').map((d) => d.id), secrets: activeSecrets(lore.secrets), topics: lore.layers.triggered.entries.map((e) => e.id), ...(plan.scene && { live: liveRecords(plan.scene) }) }
+    const next = applyTurn(content, state, written)
     const rewritten = problems.length > 0
     const salvage = rewritten && remaining.length > 0
     const dropped = salvage ? droppedBeats(remaining).filter((n) => n <= parsed.beats.length) : []
@@ -236,7 +242,7 @@ export async function runTurn(
       },
       calls
     }
-    return { state: next, beats, plan, calls: calls.length, corrections: validated.corrections, problems, remaining, fallback: !directed, trace }
+    return { state: next, beats, plan, calls: calls.length, corrections: validated.corrections, problems, remaining, fallback: !directed, trace, written }
   } catch (error) {
     if (error instanceof TracedError) throw error
     throw new TracedError((error as Error).message, calls)

@@ -1,19 +1,28 @@
 import type { Turn } from '@engine/state'
 import { currentFlags } from '@engine/review'
+import { SHOWN_WHEN_CUT } from '@engine/scene'
 import type { SessionLog, TurnRecord } from '@platform/logs'
 import { StartSchema, type Scenario } from '../bench/scenario'
 import { sceneLocation } from './load'
 
-/** A logged turn as the state keeps it, for a scenario's history, with the bookkeeper's last records for it, if any. */
-const asTurn = (t: TurnRecord, log?: SessionLog): Turn => ({
-  id: t.turnId,
-  player: t.input,
-  beats: t.beats.map((b) => b.beat),
-  checks: t.checks.map((c) => ({ id: c.id, who: c.who, skill: c.skill, difficulty: c.difficulty, stakes: c.stakes, natural: c.natural, total: c.total, dc: c.dc, degree: c.degree, line: c.line })),
-  speakers: t.director.plan.speakers.map((s) => s.id),
-  texture: t.director.plan.texture,
-  ...withRecords(t, log)
-})
+/**
+ * A logged turn as the state keeps it, for a scenario's history, with the bookkeeper's last records for it, if any. A
+ * turn the player cut in on (Milestone 5 task 8c) comes as it was shown, without the checks its cut made void.
+ */
+const asTurn = (t: TurnRecord, log?: SessionLog): Turn => {
+  const records = withRecords(t, log)
+  const stands = (id: string) => (records.records?.checks ?? []).some((c) => c.id === id && (SHOWN_WHEN_CUT as readonly string[]).includes(c.shown ?? ''))
+  return {
+    id: t.turnId,
+    player: t.input,
+    beats: t.beats.map((b) => b.beat),
+    checks: t.checks.filter((c) => !t.interrupted || stands(c.id)).map((c) => ({ id: c.id, who: c.who, skill: c.skill, difficulty: c.difficulty, stakes: c.stakes, natural: c.natural, total: c.total, dc: c.dc, degree: c.degree, line: c.line })),
+    speakers: t.director.plan.speakers.map((s) => s.id),
+    texture: t.director.plan.texture,
+    ...records,
+    ...(t.interrupted && { interrupted: t.interrupted })
+  }
+}
 
 /** The scene's opening as logged (Milestone 5 task 8), so a replayed turn reads it as it was played. */
 const openingOf = (log: SessionLog, sceneId: string): Pick<Scenario, 'opening'> => {
@@ -61,6 +70,7 @@ export function toScenario(log: SessionLog, n: number, flags = log.flags): Scena
     start: StartSchema.parse({}),
     later: [],
     reloadAfter: [],
+    interrupts: [],
     sets: [],
     expectedTies: [],
     answerTies: 'yes'

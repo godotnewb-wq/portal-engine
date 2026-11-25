@@ -15,6 +15,7 @@ const api: RendererApi = {
   listModels: (request) => ipcRenderer.invoke(IPC.listModels, request),
   testConnection: (profileId) => ipcRenderer.invoke(IPC.testConnection, profileId),
   sceneTurn: (request) => ipcRenderer.invoke(IPC.sceneTurn, request),
+  sceneSettle: (turnId) => ipcRenderer.invoke(IPC.sceneSettle, turnId),
   sceneEnd: (state) => ipcRenderer.invoke(IPC.sceneEnd, state),
   consolidate: (state) => ipcRenderer.invoke(IPC.consolidate, state),
   sceneOpen: (state) => ipcRenderer.invoke(IPC.sceneOpen, state),

@@ -147,6 +147,7 @@ export function sceneSoFar(content: Pack, state: GameState, lore: TurnLore): { b
     scene.opening && scene.opening.length > 0 && `# How the scene opened\n${scene.opening.map((b) => b.text).join('\n')}`,
     scene.summary && `# Earlier in the scene\n${scene.summary}`,
     recent.length > 0 ? `# Last turns\n${recent.map((t) => turnText(content, player.name, t)).join('\n\n')}` : '# The scene opens now.',
+    cutIn(content, state) && `# Cut in\n${cutIn(content, state)}`,
     said.length > 0 ? `# Already said on screen (anyone present can use these)\n${said.map((f) => `- [${f.id}] ${f.text}`).join('\n')}` : '# Nothing has been said on screen yet.',
     claims.length > 0 && `# Claimed but never confirmed (claims, not facts: anyone may doubt or deny them)\n${claims.join('\n')}`,
     `# Turns since each last spoke\n${present.map((id) => `${id}: ${quiet[id]}`).join(', ')}`,
@@ -231,8 +232,21 @@ export function speakerName(content: Pack, id: string): string {
 /**
  * A past turn as the prompts show it: what the player said and the beats written. Speech keeps its quotes and the
  * name the writer uses, so it can't be read as narration (session 2026-11-06_1757_9630: walk-ons by id, full names where the writer uses first names).
+ * A turn the player cut in on (Milestone 5 task 8c) ends where they cut in, and says so.
  */
 export function turnText(content: Pack, playerName: string, turn: Turn): string {
   const beats = turn.beats.map((b) => (b.kind === 'narration' ? b.text : `${speakerName(content, b.speaker)}: "${b.text}"`))
-  return [`${playerName}: ${turn.player}`, ...beats].join('\n')
+  return [`${playerName}: ${turn.player}`, ...beats, ...(turn.interrupted ? [`(${playerName} cuts in here.)`] : [])].join('\n')
+}
+
+/**
+ * When the player cut in on the last turn (Milestone 5 task 8c): for the next director and writer, whose line they cut
+ * in after, that nothing after it was said, and that whoever was cut off reacts to it rather than carrying on.
+ */
+export function cutIn(content: Pack, state: GameState): string | undefined {
+  const last = state.scene?.turns.at(-1)
+  if (!last?.interrupted) return undefined
+  const beat = last.beats.at(-1)
+  const after = beat?.kind === 'dialogue' ? `after ${speakerName(content, beat.speaker)}'s line` : 'partway through the last turn'
+  return `${state.player.name} cut in ${after}, before anyone could go on: nothing after it was said. Anyone who had more to say was cut off and reacts to that; nobody carries on as if the rest had been said.`
 }

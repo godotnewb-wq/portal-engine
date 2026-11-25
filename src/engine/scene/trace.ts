@@ -67,6 +67,25 @@ export interface TurnTrace {
   tags: { parsed: Tags; dropped: string[] }
   cost: { calls: number; ms: number; tokens?: { input: number; output: number } }
   calls: CallTrace[]
+  /**
+   * The player cut in after `after` of the `of` beats written (Milestone 5 task 8c): `beats` and `usage` hold only the
+   * beats shown, and `cut` the beats that never happened, kept for debugging. Set by `cutTrace`.
+   */
+  interrupted?: { after: number; of: number }
+  cut?: BeatTrace[]
+}
+
+/**
+ * A turn's trace once the player cut in after `after` beats (Milestone 5 task 8c): the beats shown stay as `beats`, the
+ * rest move to `cut`, and the usage counts (slang, aim words, gestures) keep only the beats shown, so metrics, the
+ * scorer and transcripts read what happened. Works on a trace or its logged record; a cut at or past the end is none.
+ */
+export function cutTrace<T extends Pick<TurnTrace, 'beats' | 'usage' | 'interrupted' | 'cut'>>(trace: T, after: number): T {
+  const of = trace.beats.length
+  if (trace.interrupted || after >= of) return trace
+  const keep = Math.max(1, Math.floor(after))
+  const usage = trace.usage && { slang: trace.usage.slang.filter((u) => u.beat <= keep), aim: trace.usage.aim.filter((u) => u.beat <= keep), gestures: trace.usage.gestures.filter((u) => u.beat <= keep) }
+  return { ...trace, beats: trace.beats.slice(0, keep), cut: trace.beats.slice(keep), interrupted: { after: keep, of }, ...(usage && { usage }) }
 }
 
 /** One character's feeling as it showed in a turn: `Shown` without the writer's sentence for the band. */

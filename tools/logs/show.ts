@@ -22,6 +22,8 @@ export function renderTurn(content: Pack, log: SessionLog, n: number): string {
     '',
     ...beats.map((b) => `${b.index}. ${b.beat.kind === 'dialogue' ? `**${nameOf(b.beat.speaker)}:** ` : ''}${b.beat.text}  \n   <sub>${b.source} line ${b.line}${b.salvaged ? ', salvaged' : ''} · ${b.plan.join(', ')}</sub>`),
     '',
+    // The player cut in (Milestone 5 task 8c): the beats written after the cut, which never happened.
+    ...(turn.interrupted ? [`**Cut in** after beat ${turn.interrupted.after} of ${turn.interrupted.of}; never happened:`, '', ...(turn.cut ?? []).map((b) => `${b.index}. ~~${b.beat.kind === 'dialogue' ? `${nameOf(b.beat.speaker)}: ` : ''}${b.beat.text}~~`), ''] : []),
     '## Trace',
     '',
     fence(JSON.stringify(rest, null, 2))

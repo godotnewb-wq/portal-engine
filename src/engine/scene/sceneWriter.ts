@@ -5,7 +5,7 @@ import type { Degree } from '@engine/rules'
 import type { GameState, Scene } from '@engine/state'
 import type { ParsedReply } from './beats'
 import type { Problem } from './checks'
-import { RECENT_TURNS, turnText } from './director'
+import { cutIn, RECENT_TURNS, turnText } from './director'
 import { canSay, sceneFacts } from './facts'
 import { feelingsNow, feltWords, shown, shownWords } from './feelings'
 import { childGuard } from './guard'
@@ -214,6 +214,7 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
     // the dice made of it.
     scene.opening && scene.opening.length > 0 && `# How the scene opened\n${scene.opening.map((b) => b.text).join('\n')}`,
     scene.turns.length > 0 && `# Last turns\n${scene.turns.slice(-RECENT_TURNS).map((t) => turnText(content, state.player.name, t)).join('\n\n')}`,
+    cutIn(content, state) && `# Cut in\n${cutIn(content, state)}`,
     `# The player says or does\n${input}`,
     view.checks.some((c) => c.result) && `# What the rolls decided (this happens; honor it)\n${view.checks.filter((c) => c.result).map((c) => checkEvent(content, c)).join('\n')}`,
     'Write the scene: the first line answers what the player just said or did, and every line after it follows from the one before it.'

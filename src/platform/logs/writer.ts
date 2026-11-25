@@ -80,6 +80,14 @@ export class LogSession {
     this.append(FILES.scenes, { type: 'opening', ...rest, calls: this.calls(calls) } satisfies SceneRecord)
   }
 
+  /**
+   * The player cut in on a turn (Milestone 5 task 8c). The turn's line in `turns.jsonl` keeps every beat written; this
+   * record says how many were shown, and the reader keeps only those as the turn's beats (`cutTrace`).
+   */
+  cut(cut: { sceneId: string; turnId: string; after: number; of: number }, now = new Date()): void {
+    this.append(FILES.scenes, { type: 'cut', ...cut, at: now.toISOString() } satisfies SceneRecord)
+  }
+
   sceneEnd(trace: SceneEndTrace): void {
     const { calls, ...rest } = trace
     this.append(FILES.scenes, { type: 'end', ...rest, calls: this.calls(calls) } satisfies SceneRecord)

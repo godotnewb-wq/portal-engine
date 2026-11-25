@@ -24,6 +24,7 @@ export const IPC = {
   listModels: 'settings:list-models',
   testConnection: 'settings:test',
   sceneTurn: 'scene:turn',
+  sceneSettle: 'scene:settle',
   sceneEvent: 'scene:event',
   sceneOpen: 'scene:open',
   sceneTies: 'scene:ties',
@@ -55,6 +56,11 @@ export interface TestConnectionResult {
 export interface SceneTurnRequest {
   state: GameState
   input: string
+  /**
+   * The player cut in on the last turn (Milestone 5 task 8c): after how many of its beats. The turn is applied again,
+   * to the state before it, with only those beats, before this one runs. Ignored unless it names the turn just played.
+   */
+  cut?: { turnId: string; after: number }
 }
 
 /** What a turn sends back. The renderer owns game state, so the new state comes back whole. */
@@ -123,6 +129,8 @@ export interface RendererApi {
   listModels(request: ListModelsRequest): Promise<ListModelsResponse>
   testConnection(profileId: LlmProfileId): Promise<TestConnectionResult>
   sceneTurn(request: SceneTurnRequest): Promise<SceneTurnResponse>
+  /** The player has read the last turn to its last beat (Milestone 5 task 8c): its bookkeeper can start. */
+  sceneSettle(turnId: string): Promise<void>
   /** Writes the opening of a scene just started: where everyone is, before the player's first input (Milestone 5 task 8). */
   sceneOpen(state: GameState): Promise<SceneOpenResponse>
   /** The first half of a scene's end (milestone 4c): every witness's relationship call, and the ties settled from them. */

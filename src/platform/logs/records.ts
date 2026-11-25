@@ -72,6 +72,8 @@ export type SceneRecord =
   | ({ type: 'consolidation' } & Omit<ConsolidationTrace, 'calls'> & { calls: string[] })
   | ({ type: 'ties' } & Omit<RelationshipTrace, 'calls'> & { calls: string[] })
   | ({ type: 'opening' } & Omit<OpeningTrace, 'calls'> & { calls: string[] })
+  /** The player cut in on a turn after `after` of its `of` beats (Milestone 5 task 8c); the reader applies it to the turn. */
+  | { type: 'cut'; sceneId: string; turnId: string; at: string; after: number; of: number }
 
 /** `errors.jsonl`: anything that went wrong, with the turn or scene it happened in. */
 export interface ErrorRecord {

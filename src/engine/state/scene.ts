@@ -131,7 +131,12 @@ export const TurnSchema = z.object({
   /** Secrets this turn's records added to the scene's `told`, so newer records can replace them (milestone 4c). */
   toldSecrets: z.array(z.string()).optional(),
   /** Facts this turn's records added to the scene's `told` (the `scene` pipeline's said facts), likewise. */
-  toldFacts: z.array(z.string()).optional()
+  toldFacts: z.array(z.string()).optional(),
+  /**
+   * The player cut in partway through this turn (Milestone 5 task 8c): the first `after` beats were shown and are the
+   * turn's beats; the rest of the `of` the writer wrote never happened. Absent on a turn read to the end.
+   */
+  interrupted: z.object({ after: z.number().int().min(1), of: z.number().int().min(2) }).optional()
 })
 export type Turn = z.infer<typeof TurnSchema>
 

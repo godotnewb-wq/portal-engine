@@ -21,6 +21,7 @@ describe('the shipped scenarios', () => {
     expect(scenarios.map((s) => s.id)).toEqual([
       'check-fails-honored',
       'crowded-quiet-third',
+      'cut-in-crowded',
       'deception-caught',
       'deception-uncaught',
       'forgotten-anniversary',
@@ -425,12 +426,13 @@ describe('expected ties', () => {
 
   it('leave the scenario’s fingerprint as it was: they check the result, they aren’t played', () => {
     const hire = byId('one-job-hire')
-    const { expectedTies: _checked, sets: _sets, reloadAfter: _reload, ...played } = hire
+    const { expectedTies: _checked, sets: _sets, reloadAfter: _reload, interrupts: _cut, ...played } = hire
     // A scenario from before the field fingerprints the same, so runs on either side of it still compare; the same
-    // for `sets` and an empty `reloadAfter` (task 7).
+    // for `sets` and an empty `reloadAfter` (task 7) or `interrupts` (task 8c).
     expect(scenarioFingerprint(hire)).toBe(fingerprint(played))
     expect(scenarioFingerprint({ ...hire, sets: [] })).toBe(scenarioFingerprint(hire))
     expect(scenarioFingerprint({ ...hire, reloadAfter: [2] })).not.toBe(scenarioFingerprint(hire))
+    expect(scenarioFingerprint({ ...hire, interrupts: [{ turn: 1, after: 2 }] })).not.toBe(scenarioFingerprint(hire))
     expect(scenarioFingerprint({ ...hire, expectedTies: [] })).toBe(scenarioFingerprint(hire))
     expect(scenarioFingerprint({ ...hire, turns: ['Something else.'] })).not.toBe(scenarioFingerprint(hire))
   })
@@ -442,10 +444,11 @@ describe('expected ties', () => {
 })
 
 describe('the scenarios of Milestone 5 task 7', () => {
-  it('the core set: ten scenarios, chosen with --set core and any named beside it', () => {
+  it('the core set: eleven scenarios, chosen with --set core and any named beside it', () => {
     expect(pickScenarios(scenarios, [], 'core').map((s) => s.id)).toEqual([
       'check-fails-honored',
       'crowded-quiet-third',
+      'cut-in-crowded',
       'deception-caught',
       'deception-uncaught',
       'mask-strangers-then-trusted',
@@ -455,7 +458,7 @@ describe('the scenarios of Milestone 5 task 7', () => {
       'tie-wedding',
       'tram-small-talk'
     ])
-    expect(pickScenarios(scenarios, ['long-scene'], 'core')).toHaveLength(11)
+    expect(pickScenarios(scenarios, ['long-scene'], 'core')).toHaveLength(12)
     expect(() => pickScenarios(scenarios, [], 'nightly')).toThrow('No scenario is in the set "nightly". Sets: core')
     expect(pickScenarios(scenarios, [])).toHaveLength(scenarios.length)
   })
@@ -469,6 +472,32 @@ describe('the scenarios of Milestone 5 task 7', () => {
     expect(run.turns.map((t) => t.turn)).toEqual([1, 2, 3, 4, 5, 6, 7, 8, 9, 10])
     // The turn after the reload saw the scene as it stood: five turns of history.
     expect(run.turns[5]!.calls[0]!.prompt.user).toContain('Anyone heard anything about the Grid lately?')
+  })
+
+  it('cuts in where a scenario asks (task 8c): the turn keeps the beats shown, the log keeps the rest, and both read back alike', async () => {
+    const [cutIn] = byId('cut-in-crowded')
+    const out = mkdtempSync(join(tmpdir(), 'cut-'))
+    // The mock writer, with more beats than the cut keeps.
+    const mock = mockLlm()
+    const write: BenchLlm['turn']['write'] = async (prompt, onDelta, onRestart) => {
+      const reply = `${await mock.turn.write(prompt, () => {}, onRestart)}\nNARRATION: Someone laughs at the bar.\nNARRATION: The lantern flickers.`
+      onDelta(reply)
+      return reply
+    }
+    const longer: BenchLlm = { ...mock, turn: { ...mock.turn, write } }
+    const bench = await runBench(content, [cutIn!], longer, 'cut', { all: 'mock' }, { out })
+    const run = bench.scenarios[0]!
+    expect(run.error).toBeUndefined()
+    const first = run.turns[0]!
+    expect(first.interrupted).toMatchObject({ after: 2 })
+    expect(first.beats).toHaveLength(2)
+    expect(first.cut!.length).toBe(first.interrupted!.of - 2)
+    expect(run.state!.scene ?? null).toBeNull()
+    // The second turn was told where the player cut in.
+    expect(run.turns[1]!.calls.map((c) => c.prompt.user).join('\n')).toContain('# Cut in')
+    writeRun(out, bench)
+    expect(readRun(out).scenarios[0]!.turns[0]!.beats).toEqual(first.beats)
+    expect(scenarioProblems(content, ScenarioSchema.parse({ ...cutIn, interrupts: [{ turn: 9, after: 1 }] }))).toEqual(['a cut-in is outside the scripted turns (turn 9)'])
   })
 
   it('a failed check, forced, for the player to fail', () => {

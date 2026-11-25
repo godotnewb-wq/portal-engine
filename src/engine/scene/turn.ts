@@ -32,7 +32,12 @@ export interface TurnWritten {
   records?: Bookkeeping
   /** The pressures the `scene` pipeline played live (Milestone 5, task 1), kept on the turn as `live`. */
   live?: { who: string; kind: 'goal' | 'secret' | 'tie'; ref: string }[]
+  /** Set by `cutTurn`: the player cut in after `after` of the `of` beats written (Milestone 5 task 8c). */
+  cut?: { after: number; of: number }
 }
+
+/** What the bookkeeper may say a check's result did in the kept beats of a cut turn for the check to stand (task 8c). */
+export const SHOWN_WHEN_CUT = ['happens', 'at a cost'] as const
 
 export function rolledChecks(plan: BeatPlan): RolledCheck[] {
   return plan.checks.flatMap((c) =>
@@ -102,6 +107,34 @@ export function showDepartures(content: Pack, plan: BeatPlan, beats: Beat[]): { 
 }
 
 /**
+ * A turn the player cut in on after `after` beats (Milestone 5 task 8c; decided 2026-11-24, user: what the player never
+ * saw never happened). Only the beats shown are kept. Someone who appears only in the cut beats drops out of the turn:
+ * no speaking slot, felt mood, pressure, kept secret or live pressure, and their tags are set aside (`acceptTags`). A
+ * departure stands only if the kept beats reach the leaver's last appearance (the game's departure beat comes last, so a
+ * cut before it keeps them), and the scene's end never stands. Checks stay rolled, since the dice are spent; whether
+ * each still counts is decided when the turn is applied, from what the bookkeeper finds in the kept beats
+ * (`applyTurn`). A cut at or past the last beat is no cut.
+ */
+export function cutTurn(content: Pack, written: TurnWritten, after: number): TurnWritten {
+  const of = written.beats.length
+  const keep = Math.max(1, Math.floor(after))
+  if (keep >= of) return written
+  const beats = written.beats.slice(0, keep)
+  const shown = appearing(content, beats)
+  const gone = new Set([...appearing(content, written.beats)].filter((id) => !shown.has(id)))
+  const lastSeen = (id: string) => written.beats.reduce((n, b, i) => (appearing(content, [b]).has(id) ? i + 1 : n), 0)
+  const plan: BeatPlan = {
+    ...written.plan,
+    speakers: written.plan.speakers.filter((s) => !gone.has(s.id)),
+    reactions: written.plan.reactions.filter((r) => !gone.has(r.id)),
+    leaves: written.plan.leaves.filter((id) => lastSeen(id) > 0 && lastSeen(id) <= keep),
+    end_scene: false
+  }
+  const tags = acceptTags(content, plan, written.tags, written.beats, beats).tags
+  return { ...written, plan, beats, tags: { ...tags, ended: false }, ...(written.live && { live: written.live.filter((l) => !gone.has(l.who)) }), cut: { after: keep, of } }
+}
+
+/**
  * Puts a turn's records into the state (milestone 4c): the bookkeeper's, or the plan's until it answers and when it
  * fails. Always the scene's last turn, since the next turn waits for its bookkeeper. Replaces whatever records the turn
  * had: the secrets and said facts it added to `told`, who they came out in front of (`exposed`), the secrets among its topics, and
@@ -136,6 +169,8 @@ export function applyRecords(state: GameState, records: Bookkeeping): GameState 
  * Applies a finished turn to the state. Felt moods come from the plan's `feels`; tags only touch characters who are
  * present; departures and the scene's end come from the plan alone (see `acceptTags` for which tags count). Secrets
  * that came out and new details come from the turn's records (`applyRecords`), the plan's until the bookkeeper answers.
+ * On a cut turn (`cutTurn`) a check counts only if its records say the kept beats show its result
+ * (`SHOWN_WHEN_CUT`); any other is void, as is a read it gave: neither is kept on the turn.
  */
 export function applyTurn(content: Pack, state: GameState, written: TurnWritten): GameState {
   const scene = state.scene
@@ -143,12 +178,18 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
   const present = new Set(presentCast(scene))
   const only = <T>(record: Record<string, T>) => Object.fromEntries(Object.entries(record).filter(([id]) => present.has(id)))
 
+  // Secrets and new details come from the turn's records: the plan's stand in until the bookkeeper answers (milestone 4c).
+  const records = written.records ?? planBookkeeping(content, state, written)
+  const rolled = rolledChecks(written.plan)
+  const stands = (id: string) => records.checks.some((c) => c.id === id && (SHOWN_WHEN_CUT as readonly string[]).includes(c.shown ?? ''))
+  const voided = new Set(written.cut ? rolled.filter((c) => !stands(c.id)).map((c) => c.id) : [])
+  const reads = (written.plan.reads ?? []).filter((r) => !written.plan.checks.some((c) => voided.has(c.id) && c.who === r.by && c.target === r.target))
   const turn: Turn = {
     id: written.id,
     ...(written.log && { log: written.log }),
     player: written.input,
     beats: written.beats,
-    checks: rolledChecks(written.plan),
+    checks: rolled.filter((c) => !voided.has(c.id)),
     speakers: written.plan.speakers.map((s) => s.id),
     texture: written.plan.texture
   }
@@ -156,7 +197,8 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
   if (kept.length > 0) turn.kept = kept
   if (written.live && written.live.length > 0) turn.live = written.live
   if (written.details && written.details.length > 0) turn.details = written.details
-  if (written.plan.reads && written.plan.reads.length > 0) turn.reads = written.plan.reads
+  if (reads.length > 0) turn.reads = reads
+  if (written.cut) turn.interrupted = written.cut
   if (written.memories && written.memories.length > 0) turn.memories = written.memories
   if (written.topics && written.topics.length > 0) turn.topics = [...new Set(written.topics)]
   // What the director says they feel becomes their mood (milestone 4b); anyone it says nothing about keeps theirs.
@@ -193,8 +235,6 @@ export function applyTurn(content: Pack, state: GameState, written: TurnWritten)
   const ORDER = ['kept', 'full', 'keyword', 'context'] as const
   for (const s of [...(written.secrets ?? []), ...kept.map((id) => ({ id, how: 'kept' as const }))].sort((a, b) => ORDER.indexOf(b.how) - ORDER.indexOf(a.how))) secretActivity[s.id] = { at: state.time, how: s.how }
 
-  // Secrets and new details come from the turn's records: the plan's stand in until the bookkeeper answers (milestone 4c).
-  const records = written.records ?? planBookkeeping(content, state, written)
   return applyRecords({
     ...state,
     secretActivity,

@@ -5,7 +5,7 @@ import { TracedError, type CallTrace, type LlmReply, type Prompt } from '@engine
 import { bookkeepWithin } from '@platform/roles'
 import { consolidate, endScene, judgeScene, nextDay, type ConsolidationTrace, type RelationshipTrace, type SceneEndTrace, type Summarize } from '@engine/relationships'
 import { answerTie, GameStateSchema, type GameState } from '@engine/state'
-import { applyRecords, DEFAULT_PIPELINE, establishScene, promptSources, runTurn, type BookkeeperTrace, type OpeningTrace, type Pipeline, type TurnLlm, type TurnTrace } from '@engine/scene'
+import { applyRecords, applyTurn, cutTrace, cutTurn, DEFAULT_PIPELINE, establishScene, promptSources, runTurn, type BookkeeperTrace, type OpeningTrace, type Pipeline, type TurnLlm, type TurnTrace } from '@engine/scene'
 import { callTrace, LogSession, promptVersion, readSession, type SessionRecord } from '@platform/logs'
 import type { FlagRecord, ScoreRecord } from '@engine/review'
 import { loreBudgets, type LoreBudgetOverrides, type LoreBudgets } from '@engine/rules'
@@ -213,18 +213,23 @@ export async function runScenario(content: Pack, scenario: Scenario, llm: BenchL
       }
       where = 'turn'
       for (const input of scene.turns) {
-        const outcome = await runTurn(played, state, input, llm.turn, () => {}, { ...options, ...(session && { log: session.id }) })
-        run.turns.push(outcome.trace)
+        const before: GameState = state
+        const outcome = await runTurn(played, before, input, llm.turn, () => {}, { ...options, ...(session && { log: session.id }) })
         turnInScene++
+        // The player cutting in (Milestone 5 task 8c), as the app does: the turn is applied again to the state before
+        // it with only the beats shown, and its bookkeeper reads those.
+        const at = scene.interrupts.find((i) => i.turn === turnInScene)?.after
+        const written = at !== undefined ? cutTurn(played, outcome.written, at) : outcome.written
+        run.turns.push(written.cut ? cutTrace(outcome.trace, written.cut.after) : outcome.trace)
         session?.turn(outcome.trace)
+        if (written.cut) session?.cut({ sceneId, turnId: written.id, ...written.cut })
         // As the app does, before the next turn: the bookkeeper reads the turn and its records replace the plan's.
         if (llm.bookkeeper) {
-          const last = outcome.state.scene!.turns.at(-1)!
-          const kept = await bookkeepWithin(played, state, { id: last.id, input, beats: last.beats, plan: outcome.plan }, llm.bookkeeper.call, llm.bookkeeper.waitMs)
+          const kept = await bookkeepWithin(played, before, { id: written.id, input, beats: written.beats, plan: written.plan }, llm.bookkeeper.call, llm.bookkeeper.waitMs)
           ;(run.bookkeeping ??= []).push({ ...kept.trace, ...(kept.late && { late: true }) })
           session?.bookkeeping(kept.trace, kept.late)
-          state = applyRecords(outcome.state, kept.records)
-        } else state = outcome.state
+          state = written.cut ? applyTurn(played, before, { ...written, records: kept.records }) : applyRecords(outcome.state, kept.records)
+        } else state = written.cut ? applyTurn(played, before, written) : outcome.state
         if (state.scene?.ended) break
         // A save and reload mid-scene (task 7): the scene in progress has to come back whole.
         if (scene.reloadAfter.includes(turnInScene)) {
@@ -445,6 +450,8 @@ export function readRun(dir: string): BenchRun {
           const { type: _type, calls: ids, ...rest } = record
           const scene = scenes.find((s) => s.id === record.sceneId)
           if (scene) scene.opening = { ...rest, calls: calls(ids) }
+        } else if (record.type === 'cut') {
+          // Already applied to its turn by `readSession` (Milestone 5 task 8c).
         } else {
           const { type: _type, calls: ids, ...rest } = record
           const scene = scenes.find((s) => s.id === record.sceneId)

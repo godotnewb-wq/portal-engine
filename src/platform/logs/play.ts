@@ -170,6 +170,11 @@ export class PlayLogs {
     log.opening(trace)
   }
 
+  /** The player cut in on a logged turn after `after` of its `of` beats (Milestone 5 task 8c). */
+  cut(cut: { sceneId: string; turnId: string; after: number; of: number }): void {
+    this.open()?.cut(cut)
+  }
+
   /** The relationship calls and the ties settled from them (milestone 4c), in the scenes file before the scene's end. */
   ties(trace: RelationshipTrace): void {
     this.open()?.ties(trace)

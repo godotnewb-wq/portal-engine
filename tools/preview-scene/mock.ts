@@ -7,7 +7,7 @@ import type { PackListing } from '@platform/packs'
 import { mockLlm } from '../bench/mock'
 import type { GameState } from '@engine/state'
 import type { RendererApi, SceneEvent } from '@app/ipc'
-import { bookkeep, DEFAULT_PIPELINE, runTurn, type Pipeline, type TurnLlm } from '@engine/scene'
+import { applyTurn, bookkeep, cutTurn, DEFAULT_PIPELINE, runTurn, type Pipeline, type TurnLlm, type TurnWritten } from '@engine/scene'
 import type { CallTrace } from '@engine/core'
 import { endScene, judgeScene } from '@engine/relationships'
 import { currentFlags, type FlagRecord } from '@engine/review'
@@ -153,6 +153,9 @@ function cannedSummarize() {
     : mockLlm().summarize
 }
 
+/** The turn just played, until the next: what cutting in applies again (Milestone 5 task 8c). */
+let pending: { turnId: string; before: GameState; written: TurnWritten } | null = null
+
 const api: RendererApi = {
   getSettings: async () => toView(SettingsSchema.parse({})),
   saveSettings: async () => toView(SettingsSchema.parse({})),
@@ -160,9 +163,15 @@ const api: RendererApi = {
   setLoreBudgets: async (budgets) => (loreBudgets = cleanLoreBudgets(budgets).overrides),
   listModels: async () => ({ models: [] }),
   testConnection: async () => ({ ok: true, detail: 'mock' }),
-  sceneTurn: async ({ state, input }) => {
+  sceneTurn: async ({ state: given, input, cut }) => {
     const llm = content.manifest.id === 'neonpunk-nights' ? scripted : mockLlm().turn
+    // Cutting in (Milestone 5 task 8c), as main does, with the plan's records standing in for the bookkeeper's.
+    const held = pending
+    pending = null
+    const trimmed = held && cut && cut.turnId === held.turnId && given.scene?.turns.at(-1)?.id === held.turnId ? cutTurn(content, held.written, cut.after) : undefined
+    const state = trimmed?.cut ? applyTurn(content, held!.before, trimmed) : given
     const outcome = await runTurn(content, state, input, llm, emit, { loreBudgets, pipeline, ...(logging && { log: SESSION }) })
+    pending = { turnId: outcome.written.id, before: state, written: outcome.written }
     const { calls, ...trace } = outcome.trace
     for (const c of calls) made.set(c.id, c)
     const details: TurnDetails = {
@@ -183,6 +192,7 @@ const api: RendererApi = {
     }
     return { ok: true, state: outcome.state, beats: outcome.beats, checks: outcome.plan.checks.flatMap((c) => (c.line ? [c.line] : [])), calls: outcome.calls, corrections: outcome.corrections, rewrite: outcome.problems.map((p) => p.fix), details }
   },
+  sceneSettle: async () => {},
   consolidate: async (state) => ({ ok: true, state, merged: 0 }),
   sceneOpen: async (state) => ({ ok: true, state }),
   sceneTies: async (state) => {

@@ -199,6 +199,8 @@ function turnSection(names: Names, location: string, turns: TurnTrace[], heading
     const brief = briefLines(t)
     if (brief.length > 0) lines.push('<details><summary>Briefs</summary>', '', ...brief.map((line) => '- ' + line), '', '</details>', '')
     lines.push(...shown(t).map((b, n) => `${n + 1}. ${beatLine(names, location, b)}`), '')
+    // The player cut in (Milestone 5 task 8c): the beats that never happened, struck through.
+    if (t.interrupted) lines.push(`**Cut in** after beat ${t.interrupted.after} of ${t.interrupted.of}; never happened:`, '', ...(t.cut ?? []).map((b, n) => `${t.interrupted!.after + n + 1}. ~~${beatLine(names, location, b.beat)}~~`), '')
     const records = run ? recordLines(name, t, bookkeepingOf(run, t.turnId)) : []
     if (records.length > 0) lines.push('<details><summary>Records</summary>', '', ...records.map((line) => '- ' + line), '', '</details>', '')
     if (fixes(t).length > 0) lines.push(`Rewrite asked to fix: ${fixes(t).map((f) => `"${f}"`).join(' ')}`, '')
