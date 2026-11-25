@@ -6,7 +6,8 @@ import { content, PACK_DIR } from './support'
 import { LogSession, promptOf, readSession, type SessionLog } from '@platform/logs'
 import type { Prompt } from '@engine/core'
 import { mockLlm, runBench, writeRun } from '../../tools/bench/run'
-import { loadScenarios } from '../../tools/bench/scenario'
+import { loadScenarios, scenarioState } from '../../tools/bench/scenario'
+import { toScenario } from '../../tools/logs/scenario'
 import { echoesOf, flaggedTurns, promptDrift, renderReplays, replayTurn, type Write } from '../../tools/logs/rewrite'
 
 const scenarios = loadScenarios(join(PACK_DIR, 'bench'))
@@ -49,6 +50,14 @@ describe('writer replay (Milestone 5 task 8)', () => {
     const call = played.calls.get(played.turns[1]!.writer.callId)!
     expect(seen[0]).toEqual(promptOf(played, call))
     expect(renderReplays(content, [r], { model: 'mock' })).toContain('Prompt: sent as logged.')
+  })
+
+  it('carries an earlier turn’s records, so a later turn knows what the player had heard', () => {
+    const records = { ...played.bookkeeping[0]!.records, new: [{ text: 'The back stair floods first', by: 'vex' }] }
+    const log = { ...played, bookkeeping: [{ ...played.bookkeeping[0]!, turnId: played.turns[0]!.turnId, records }] }
+    const scenario = toScenario(log, 2)
+    expect(scenario.history[0]!.records?.new).toEqual([{ text: 'The back stair floods first', by: 'vex' }])
+    expect(scenarioState(content, scenario).scene!.newFacts.map((f) => f.text)).toContain('The back stair floods first')
   })
 
   it('finds the flagged turns, and leaves a turn from another pipeline out with the reason', async () => {

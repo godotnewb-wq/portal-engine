@@ -8,7 +8,7 @@ import { memoryId } from '@engine/memory'
 import type { GameState, Memory, Relation } from '@engine/state'
 import { characterById, type Pack } from '@engine/pack'
 import { createInitialState, dayOf, MemoryLevelSchema, MINUTES_PER_DAY, startScene, stateProblems, tagsToward, TurnSchema } from '@engine/state'
-import { MINUTES_PER_TURN, RECENT_TURNS, SUMMARY_CHARS, turnText } from '@engine/scene'
+import { applyRecords, MINUTES_PER_TURN, RECENT_TURNS, SUMMARY_CHARS, turnText } from '@engine/scene'
 
 export const ExpectedCheckSchema = z.object({ turn: z.number().int().positive(), who: IdSchema, skill: IdSchema })
 export type ExpectedCheck = z.infer<typeof ExpectedCheckSchema>
@@ -330,5 +330,13 @@ export function scenarioState(content: Pack, scenario: Scenario): GameState {
     .map((t) => turnText(played, state.player.name, t))
     .join('\n\n')
     .slice(-SUMMARY_CHARS)
-  return { ...state, time: state.time + turns.length * MINUTES_PER_TURN, scene: { ...state.scene!, turns, summary } }
+  // A history turn that carries its records (a logged turn, from to-scenario) is recorded as it was in play, so what
+  // the player had heard and the details said are the same (2026-11-24: a replayed later turn's writer was told the
+  // player had heard nothing). Authored history has no records and goes in as it is.
+  let played_ = { ...state, time: state.time + turns.length * MINUTES_PER_TURN, scene: { ...state.scene!, turns: [] as typeof turns, summary } }
+  for (const t of turns) {
+    played_ = { ...played_, scene: { ...played_.scene, turns: [...played_.scene.turns, t] } }
+    if (t.records) played_ = applyRecords(played_, t.records) as typeof played_
+  }
+  return played_
 }

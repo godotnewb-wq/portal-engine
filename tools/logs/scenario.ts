@@ -4,15 +4,21 @@ import type { SessionLog, TurnRecord } from '@platform/logs'
 import { StartSchema, type Scenario } from '../bench/scenario'
 import { sceneLocation } from './load'
 
-/** A logged turn as the state keeps it, for a scenario's history. */
-const asTurn = (t: TurnRecord): Turn => ({
+/** A logged turn as the state keeps it, for a scenario's history, with the bookkeeper's last records for it, if any. */
+const asTurn = (t: TurnRecord, log?: SessionLog): Turn => ({
   id: t.turnId,
   player: t.input,
   beats: t.beats.map((b) => b.beat),
   checks: t.checks.map((c) => ({ id: c.id, who: c.who, skill: c.skill, difficulty: c.difficulty, stakes: c.stakes, natural: c.natural, total: c.total, dc: c.dc, degree: c.degree, line: c.line })),
   speakers: t.director.plan.speakers.map((s) => s.id),
-  texture: t.director.plan.texture
+  texture: t.director.plan.texture,
+  ...withRecords(t, log)
 })
+
+const withRecords = (t: TurnRecord, log?: SessionLog): Pick<Turn, 'records'> => {
+  const record = log?.bookkeeping.filter((b) => b.turnId === t.turnId).at(-1)
+  return record ? { records: record.records } : {}
+}
 
 /**
  * A logged turn as a bench scenario (milestone 2, A4): the scene as it stood (cast, moods, comfort, meters toward
@@ -42,7 +48,7 @@ export function toScenario(log: SessionLog, n: number, flags = log.flags): Scena
     // A turn logged before milestone 4b has only the mood's words, which a scenario can't take; the card's default stands in.
     moods: Object.fromEntries(present.flatMap((c) => (c.feeling ? [[c.id, { shade: c.feeling.shade, family: c.feeling.family, intensity: c.feeling.intensity, ...(c.feeling.text && { text: c.feeling.text }), ...(c.feeling.reason && { reason: c.feeling.reason }) }]] : []))),
     comfort: Object.fromEntries(present.map((c) => [c.id, c.comfort])),
-    history: before.map(asTurn),
+    history: before.map((t) => asTurn(t, log)),
     turns: [turn.input],
     summaries: false,
     start: StartSchema.parse({}),

@@ -34,18 +34,24 @@ export const SCENE_STYLE = `How it should read:
 - What presses on someone is an undercurrent. It shows in what they choose, avoid or notice, rarely in what they say outright.
 - What each person knows comes first. Someone who doesn't know a secret may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it.
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
-- Facts are there to draw on if a line needs one, never to recite. A fact marked new hasn't been said to the player yet: if it's used, say what it is.
+- Facts are there to draw on if a line needs one, never to recite: a fact a line uses comes out the way this person would say it here, to these people, never in the brief's words. What people are to each other is background, never said as written.
+- People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. People mind who can hear them.
 - Each character sounds like their voice card. The card wins over everything else.
 - An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two details of the place, from its own details, never generic ones. Never write the brief's notes out as prose.
 - No sayings, maxims or riddles in place of an answer.
 - The player is "you", in the present tense.
 - A check result is what happens. A failure means it does not come off: show the attempt falling short, never a success.
+- End the turn where the player can act: someone asked or called to answers, or the turn shows them about to.
+- Only this world's names: no real places, brands or people from outside it.
 
 Undercurrent, too loud: Ben: "I can't stop thinking about the money I owe you, Ada."
-Better: Ben: He finds something to do with his cup when Ada mentions payday. "Busy night, then."
+Better, when Ada has just mentioned payday: Ben: "Busy night, then."
+
+A fact recited (the brief says Ada has been late on her rent twice): Ben: "Ada has been late on her rent twice."
+In the moment: Ben: "Ask her what day the rent's due. Go on, ask."
 
 A failed check, played as a success: NARRATION: Ben studies Ada and sees straight through the lie.
-Played honestly: NARRATION: Ben watches Ada a moment too long, then looks back at his cup. Whatever he was looking for, he didn't find it.`
+Played honestly: NARRATION: Ben watches Ada a moment too long, then looks away. Whatever he was looking for, he didn't find it.`
 
 /** The script form (redesign §6.1) and the tag footer (Q7). */
 export const SCENE_FORMAT = `Output format, nothing else:
@@ -187,7 +193,7 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
     view.checks.some((c) => c.result) && `# What the rolls decided (this happens; honor it)\n${view.checks.filter((c) => c.result).map((c) => checkEvent(content, c)).join('\n')}`,
     plan.focus.length > 0 && `# This moment\n${plan.focus.map(momentLine).join('\n')}`,
     around.length > 0 && `# Also here (they may react to what was just said, briefly, but start no topic; a feeling that shows is in how they react, not something they bring up)\n${around.map((id) => `- ${nameOf(id)}.${feltLine(id, false)}`).join('\n')}`,
-    ties.length > 0 && `# How people here stand with each other (facts about them, not how to play them)\n${ties.join('\n')}`,
+    ties.length > 0 && `# How people here stand with each other (background: never said as written)\n${ties.join('\n')}`,
     knowledge.length > 0 && `# Who knows what\n${knowledge.join('\n')}`,
     plan.stakes && `# What's at stake\n${plan.stakes}`,
     plan.leaves.length > 0 && `# Leaving this turn\n${listed(plan.leaves.map(nameOf))} ${plan.leaves.length === 1 ? 'leaves' : 'leave'}. Show them going.`,
