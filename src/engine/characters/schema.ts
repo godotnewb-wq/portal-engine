@@ -20,8 +20,13 @@ export type Meters = z.infer<typeof MetersSchema>
 
 /** How a character talks, kept apart so the writer can be given only this beat's speakers (director writer §7). */
 export const VoiceCardSchema = z.object({
-  /** Sentence length and rhythm, e.g. "clipped; fragments; rarely more than ten words". */
+  /**
+   * How they sound: pace, sentence length, how formal and how warm, e.g. "short and plain; says what she means and
+   * stops". Never a device to perform in each line ("a turn at the end", "often fragments", "a joke for everything"):
+   * the writer performed it in every line, whether or not there was anything to say (writing issue 1, 2026-11-25).
+   */
   rhythm: z.string(),
+  /** The words they reach for (plain, technical, formal, slang), under the same rule as `rhythm`. */
   vocabulary: z.string(),
   slang: z.array(z.string()).default([]),
   /** What they never say, or steer around. */

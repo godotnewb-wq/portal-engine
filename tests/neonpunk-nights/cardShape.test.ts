@@ -45,6 +45,19 @@ describe('a character card keeps its trade to one strand (issue 4)', () => {
     ])
   })
 
+  it('describes how a voice sounds, never a device to perform in each line (writing issue 1)', () => {
+    const c = card('oria-senn')
+    c.voice.rhythm = 'Long, courteous sentences with a turn at the end'
+    c.voice.vocabulary = 'Street-plain, often fragments'
+    expect(cardShapeProblems(c, worldNames(content))).toEqual([
+      expect.stringMatching(/^oria-senn: voice rhythm ".+" asks for a device in each line \("at the end"\)/),
+      expect.stringMatching(/^oria-senn: voice vocabulary ".+" asks for a device in each line \("fragments"\)/)
+    ])
+    c.voice.rhythm = 'Long, courteous, unhurried sentences'
+    c.voice.vocabulary = 'Polished, with business euphemism'
+    expect(cardShapeProblems(c, worldNames(content))).toEqual([])
+  })
+
   it('tells each fact once, in the knowledge or a note', () => {
     const c = card('dunmar')
     c.relations = c.relations.map((r) => (r.to === 'oria-senn' ? { ...r, note: 'her booth, her tab, paid on the first of every month without fail' } : r))

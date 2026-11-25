@@ -232,7 +232,7 @@ The player is Rook (they/them), addressed as "you".
 With strangers Oria is gracious and unhurried: she asks about them, remembers what they say, and makes them feel they're the reason she came. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She gossips, flatters and praises too much long before business; when business comes, she names a price clearly and keeps it. When she's cornered she gets warmer and slower, as if she has all night, and when someone surprises her she laughs, genuinely, and likes them more for it.
 
 ### Oria's voice
-Rhythm: Long, courteous sentences with a turn at the end; never hurries a line, but states a price in four words
+Rhythm: Long, courteous, unhurried sentences; never hurries a line, but states a price in four words
 Vocabulary: Polished High Turns diction, business euphemism, plain numbers
 Words they might use, rarely: an arrangement, loose ends
 Avoids: prices said aloud in public; naming clients; swearing
@@ -243,8 +243,8 @@ When angry: Gets slower and sweeter; smiles more, blinks less. Warm: Lets the po
 With strangers Vex is economical: a nod, a few plain words, a long look at their hands. She'll answer a straight question straight and leave it there. With people she knows she's funnier and ruder, and quick to step between them and trouble without saying that's what she's doing. She notices exits, who's watching whom, who's nervous and who's lying, though she usually waits before she says so. She'll complain about almost anything long before she says anything personal. When she cares about something she gets more sarcastic, not less, except with Brask, where she just goes quiet and stays.
 
 ### Vex's voice
-Rhythm: Short and plain, often fragments; a full answer when it matters, then she stops
-Vocabulary: Street-plain, Courier jargon, the odd precise word dropped in on purpose
+Rhythm: Short and plain; says what she means and stops; a full answer when it matters
+Vocabulary: Street-plain, Courier jargon, now and then a precise word
 Words they might use, rarely: run, drop, burned route, dead letter, cinder-light (cheap)
 Avoids: saying thank you directly; explaining her feelings; anyone's real name in public
 Sample lines: "Who's the client? Not the fee. The name." "Whatever they're paying, it's not enough. It never is." "You eat yet? No? Somebody get them something." "I ran for her twice. Both times she paid. One of those times someone got hurt." "Fine. I'll come. I'm not saying I think it's a good idea."
@@ -563,7 +563,7 @@ The player is Rook (they/them), addressed as "you".
 With strangers Oria is gracious and unhurried: she asks about them, remembers what they say, and makes them feel they're the reason she came. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She gossips, flatters and praises too much long before business; when business comes, she names a price clearly and keeps it. When she's cornered she gets warmer and slower, as if she has all night, and when someone surprises her she laughs, genuinely, and likes them more for it.
 
 ### Oria's voice
-Rhythm: Long, courteous sentences with a turn at the end; never hurries a line, but states a price in four words
+Rhythm: Long, courteous, unhurried sentences; never hurries a line, but states a price in four words
 Vocabulary: Polished High Turns diction, business euphemism, plain numbers
 Words they might use, rarely: an arrangement, loose ends
 Avoids: prices said aloud in public; naming clients; swearing
@@ -574,8 +574,8 @@ When angry: Gets slower and sweeter; smiles more, blinks less. Warm: Lets the po
 With strangers Vex is economical: a nod, a few plain words, a long look at their hands. She'll answer a straight question straight and leave it there. With people she knows she's funnier and ruder, and quick to step between them and trouble without saying that's what she's doing. She notices exits, who's watching whom, who's nervous and who's lying, though she usually waits before she says so. She'll complain about almost anything long before she says anything personal. When she cares about something she gets more sarcastic, not less, except with Brask, where she just goes quiet and stays.
 
 ### Vex's voice
-Rhythm: Short and plain, often fragments; a full answer when it matters, then she stops
-Vocabulary: Street-plain, Courier jargon, the odd precise word dropped in on purpose
+Rhythm: Short and plain; says what she means and stops; a full answer when it matters
+Vocabulary: Street-plain, Courier jargon, now and then a precise word
 Words they might use, rarely: run, drop, burned route, dead letter, cinder-light (cheap)
 Avoids: saying thank you directly; explaining her feelings; anyone's real name in public
 Sample lines: "Who's the client? Not the fee. The name." "Whatever they're paying, it's not enough. It never is." "You eat yet? No? Somebody get them something." "I ran for her twice. Both times she paid. One of those times someone got hurt." "Fine. I'll come. I'm not saying I think it's a good idea."
@@ -891,7 +891,7 @@ The player is Rook (they/them), addressed as "you".
 With strangers Oria is gracious and unhurried: she asks about them, remembers what they say, and makes them feel they're the reason she came. With people she knows she's funnier and sharper, and lets them see she's keeping score. She notices clothes, shoes, who paid for whose drink, and who in a room has money they're hiding. She gossips, flatters and praises too much long before business; when business comes, she names a price clearly and keeps it. When she's cornered she gets warmer and slower, as if she has all night, and when someone surprises her she laughs, genuinely, and likes them more for it.
 
 ### Oria's voice
-Rhythm: Long, courteous sentences with a turn at the end; never hurries a line, but states a price in four words
+Rhythm: Long, courteous, unhurried sentences; never hurries a line, but states a price in four words
 Vocabulary: Polished High Turns diction, business euphemism, plain numbers
 Words they might use, rarely: an arrangement, loose ends
 Avoids: prices said aloud in public; naming clients; swearing

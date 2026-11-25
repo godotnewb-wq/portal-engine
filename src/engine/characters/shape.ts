@@ -14,6 +14,11 @@ export const SAMPLE_FACT_WORDS = 3
 export const SAME_FACT = { words: 3, share: 0.5 } as const
 /** Figures an example line may not carry: a price, a count or a time is tonight's material, not a voice. */
 export const FIGURE = /\b(\d+|two|three|four|five|six|seven|eight|nine|ten|eleven|twelve|fifteen|twenty|thirty|forty|fifty|hundred|thousand|dozen)\b/i
+/**
+ * A voice described as a device to perform in each line rather than how someone sounds (writing issue 1, 2026-11-25):
+ * "a turn at the end", "often fragments", "a joke for everything", "all exclamations", "prices first".
+ */
+export const VOICE_DEVICE = /\bat the end\b|\bfragments?\b|\bfor everything\b|\ball (?:exclamations|questions|jokes|riddles)\b|\btwists?\b|\b(?:riddles?|maxims?|aphorisms?|epigrams?|punchlines?|quips?|one-liners?)\b|\b(?:every|each) (?:line|sentence)\b|\b(?:prices|numbers|names|questions|jokes) first\b|\bquestions that are\b/i
 /** "talk about A, B and C", "talk about A or B": a portrait sentence listing topics (two or more after "talk about"). */
 export const TOPIC_LIST = /\btalk(?:s|ing)?\s+about\b[^.;]*?(?:,|\band\b|\bor\b)/i
 
@@ -33,7 +38,8 @@ const clip = (t: string) => (t.length > 80 ? `${t.slice(0, 77)}…` : t)
  * know, hide or hold toward someone, which the writer then recites; a portrait sentence may not list topics they'd talk about.
  * Since writing issue 2 (2026-11-25) an example line shows the voice only: no name from the world (`names`: people,
  * places, groups), no figure, and no run of `SAMPLE_FACT_WORDS` key words from one of the card's facts; and the card
- * tells each fact once, in its knowledge or in a note, not both (`SAME_FACT`), since a fact said twice was recited. A card with an occupation needs `work`. Each
+ * tells each fact once, in its knowledge or in a note, not both (`SAME_FACT`), since a fact said twice was recited.
+ * Since writing issue 1 the voice's rhythm and vocabulary say how they sound, never a device to perform (`VOICE_DEVICE`). A card with an occupation needs `work`. Each
  * problem names the field, the lines and the words, so a generator can be told what to change.
  */
 export function cardShapeProblems(c: Character, names: readonly string[] = []): string[] {
@@ -60,6 +66,10 @@ export function cardShapeProblems(c: Character, names: readonly string[] = []): 
     field('example lines', 'Show the voice across different situations; at most one about their work.', v.sampleLines.map((t, i) => [`line ${i + 1}`, t] as [string, string]), TRADE_LIMITS.sampleLines)
     const sentences = c.portrait.split(/(?<=[.!?])\s+/).filter((s) => s.trim())
     field('portrait', 'Describe how they are with people; their work in a sentence or two, as dispositions, not examples or topics to raise.', sentences.map((t, i) => [`sentence ${i + 1}`, t] as [string, string]), TRADE_LIMITS.portrait)
+  }
+  for (const field of ['rhythm', 'vocabulary'] as const) {
+    const m = c.voice[field].match(VOICE_DEVICE)
+    if (m) problems.push(`${c.id}: voice ${field} "${clip(c.voice[field])}" asks for a device in each line ("${m[0]}"): say how they sound (pace, length, how formal, how warm), never a device to perform`)
   }
   // A portrait listing what they'd talk about hands the writer topics to raise; each came back near verbatim (2026-11-25).
   c.portrait.split(/(?<=[.!?])\s+/).forEach((t, i) => {

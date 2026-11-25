@@ -9,4 +9,4 @@ Species, factions, skills and meters are the pack's; `engine/pack` checks a char
 **Depends on:** core, rules.
 **Design:** `director writer.md` §7, `npc design.md` §2.
 
-`cardShapeProblems(card, names)` (shape.ts) checks a card's shape for authored and generated cards alike: the trade kept to one strand (`work`, `TRADE_LIMITS`), portraits without topic lists, example lines that show only the voice, and each fact told once. Neonpunk Nights and the fixture pass it in the pack tests; a pack that doesn't loads with warnings.
+`cardShapeProblems(card, names)` (shape.ts) checks a card's shape for authored and generated cards alike: the trade kept to one strand (`work`, `TRADE_LIMITS`), portraits without topic lists, example lines that show only the voice, and each fact told once. The packs in this repository pass it in the pack tests; a pack that doesn't loads with warnings.
