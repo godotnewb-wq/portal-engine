@@ -1,16 +1,28 @@
 {
   "id": "cut-in-crowded",
   "title": "Cutting in on a crowded turn",
-  "watchFor": "Milestone 5 task 8c. The first turn invites a crowded answer: Oria pitching the job, Vex watching her (a reading check, forced high), and Brask on his way out. The player cuts in after its second beat to answer whoever spoke first, so everything after that beat never happened: a read Vex made later in the turn is void, Brask hasn't left unless the kept beats showed him go, and a fact said only in the cut beats is unknown on turn 2. Turn 2 should pick up from the player cutting in: the person cut off reacts to it (stops, bristles, lets it go) and nobody repeats or relies on what was cut. Turn 3 checks Brask is still there if his exit was cut.",
+  "watchFor": "Milestone 5 task 8c. The first turn invites a crowded answer: Oria pitching the job while the player watches her face for the lie (a reading check, forced high) and tells Brask he can go (an exit). The player cuts in after its second beat to answer whoever spoke first, so everything after that beat never happened: a read that landed later in the turn is void, Brask hasn't left unless the kept beats showed him go, and a fact said only in the cut beats is unknown on turn 2. Turn 2 should pick up from the player cutting in: anyone cut off reacts to it (stops, bristles, lets it go) and nobody repeats or relies on what was cut. Turn 3 checks Brask is still there if his exit was cut.",
   "location": "sump-lantern",
-  "cast": ["vex", "brask", "oria-senn", "dunmar"],
+  "cast": [
+    "vex",
+    "brask",
+    "oria-senn",
+    "dunmar"
+  ],
   "seed": 83,
-  "sets": ["core"],
+  "sets": [
+    "core"
+  ],
   "forceNatural": 18,
   "turns": [
-    "Oria, what's the job? Vex, watch her while she tells it. And Brask, you look like you're about to leave.",
+    "Oria, what's the job? I'll be watching your face while you tell it. Brask, go if you need to; we'll catch you up.",
     "Hold on, Oria. Back up a second. Who's paying for this?",
     "Brask, you still with us?"
   ],
-  "interrupts": [{ "turn": 1, "after": 2 }]
+  "interrupts": [
+    {
+      "turn": 1,
+      "after": 2
+    }
+  ]
 }

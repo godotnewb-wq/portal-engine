@@ -12,7 +12,7 @@ import { childGuard } from './guard'
 import { knowersOf } from '@engine/memory'
 import { presentCast, type BeatPlan, type PlannedCheck } from './planShape'
 import { RECENT_USE_TURNS, recentlyUsed } from './repeats'
-import type { LivePressure } from './scenePlan'
+import type { Approach, LivePressure } from './scenePlan'
 import { FUNCTION_WORDS, OWNED_PHRASE_WORDS, plainWords, runs } from './phrases'
 import { OVERUSED_PHRASES, SCENE_LENGTH } from './style'
 import { claimLines, knowledgeLines, speakerTies, voiceCard } from './writer'
@@ -29,6 +29,7 @@ import { claimLines, knowledgeLines, speakerTies, voiceCard } from './writer'
 /** How the scene should read (redesign §6.3): a few principles and short examples with made-up people, as engine text must. */
 export const SCENE_STYLE = `How it should read:
 - One continuous scene, written by one hand: each line, narration included, comes out of the one before it, in what it means, not only its words. A question gets an answer, or a dodge the reader can see.
+- Only what "How the scene opened", "Earlier in the scene" and "Last turns" show has happened here. Nobody refers back to something said or done in this scene that isn't there; what happened before tonight comes from their cards.
 - People talk like people: complete, plain sentences that someone hearing them for the first time can follow.
 - The moment comes first. What someone says and does comes from what just happened to them: what was said, who is there, how it lands.
 - What presses on someone is an undercurrent. It shows in what they choose, avoid or notice, rarely in what they say outright.
@@ -85,11 +86,12 @@ export function placeDetails(texture: { sights: string[]; sounds: string[]; smel
 /**
  * The voice card as the scene writer reads it (2026-11-24 writer replay): sample lines and the shifts are how someone
  * sounds, not lines to say. Read as material, a sample line came back word for word ("Six for the good stuff, and it
- * isn't that good") and a lying shift played when no one was lying (a clean glass wiped). The situation writer's card
- * is unchanged.
+ * isn't that good") and a lying shift played when no one was lying (a clean glass wiped). What a sample line says is no
+ * more real than its wording: one naming a job's details was taken as said, and someone else repeated them (task 8c
+ * bench run, 2026-11-25). The situation writer's card is unchanged.
  */
 export function sceneVoiceCard(card: string): string {
-  return card.replace(/^Sample lines: /m, 'How they sound (never use these lines): ').replace(/^When angry: /m, 'How they change, only when they feel it now. Angry: ')
+  return card.replace(/^Sample lines: /m, "How they sound (never use these lines; nothing in them has been said here, and nobody here has heard it): ").replace(/^When angry: /m, 'How they change, only when they feel it now. Angry: ')
 }
 
 /** A check's result as what happens (Q9: results as events, not an attempt with a label). */
@@ -108,11 +110,21 @@ export function checkEvent(content: Pack, check: PlannedCheck): string {
   return `- ${check.result ? EVENT[check.result.degree](who, you ? 'succeed' : 'succeeds', you ? 'fail' : 'fails', clip(check.stakes)) : clip(check.stakes)}`
 }
 
+/**
+ * How someone keeps a live secret, in words (task 8c bench run, 2026-11-25): given only as "(deflect)", a fixer told to
+ * deflect named part of what she was hiding. Each says what they do instead and that the hidden part stays unsaid.
+ */
+const KEEPING: Record<Approach, (self: string) => string> = {
+  deflect: (s) => `${s} steers away from it and never says it, or any part of it`,
+  'partial truth': (s) => `${s} may say something true near it, but never the hidden part`,
+  lie: (s) => `${s} lies about it if it comes up, and never says the truth of it`
+}
+
 /** A live pressure as undercurrent, in words for the writer (redesign §5: at most one each, framed at its strength). */
 function undercurrent(content: Pack, who: string, p: LivePressure, tell?: string): string {
   const name = (id: string) => (id === 'player' ? 'you' : firstName(characterById(content, id)?.name ?? id))
   const self = name(who)
-  if (p.kind === 'secret') return ` Underneath, ${self} is keeping something (${p.approach ?? 'deflect'}): ${clip(p.text)}.${tell ? ` It shows only as: ${clip(tell)}. Show it; nobody remarks on it unless their check to read ${self} succeeded.` : " It doesn't show."}`
+  if (p.kind === 'secret') return ` Underneath, ${self} is keeping something: ${clip(p.text)}. ${KEEPING[p.approach ?? 'deflect'](self)}.${tell ? ` It shows only as: ${clip(tell)}. Show it; nobody remarks on it unless their check to read ${self} succeeded.` : " It doesn't show."}`
   if (p.kind === 'tie') return ` Underneath, what ${name(p.ref)} ${p.ref === 'player' ? 'are' : 'is'} to ${self} matters here: ${clip(p.text)}.`
   const words = content.ruleset.pressures
   const level = words.indexOf(p.strength ?? '')
