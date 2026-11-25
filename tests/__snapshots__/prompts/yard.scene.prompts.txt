@@ -128,7 +128,7 @@ How it should read:
 - What each person knows comes first. Someone who doesn't know a secret may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it.
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite: a fact a line uses comes out the way this person would say it here, to these people, never in the brief's words. What people are to each other is background, never said as written.
-- People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. People mind who can hear them.
+- People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. When someone moves, show who goes with them. People mind who can hear them.
 - Each character sounds like their voice card. The card wins over everything else.
 - An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two details of the place, from its own details, never generic ones. Never write the brief's notes out as prose.
 - No sayings, maxims or riddles in place of an answer.
@@ -145,6 +145,8 @@ In the moment: Ben: "Ask her what day the rent's due. Go on, ask."
 
 A failed check, played as a success: NARRATION: Ben studies Ada and sees straight through the lie.
 Played honestly: NARRATION: Ben watches Ada a moment too long, then looks away. Whatever he was looking for, he didn't find it.
+
+Never write these; a draft that uses one is sent back: "a smirk played", "smirk plays", "eyes narrowed", "narrows her eyes", "narrows his eyes", "narrows their eyes", "a shiver ran down", "shiver runs down", "breath you didn't know", "let out a breath", "lets out a breath", "the air was thick", "the air is thick", "hung in the air", "hangs in the air", "a testament to", "tapestry of", "barely above a whisper", "eyes sparkling with", "mischievous glint", "glint in her eye", "glint in his eye", "sends a jolt", "electric tension", "for what feels like an eternity", "little did you know", "in the dim light", "a mix of", "maybe, just maybe", "quarter turn", "quarter-turn", "it was a dark and stormy night".
 
 Tone:
 Plain and brisk.
@@ -354,7 +356,7 @@ How it should read:
 - What each person knows comes first. Someone who doesn't know a secret may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it.
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite: a fact a line uses comes out the way this person would say it here, to these people, never in the brief's words. What people are to each other is background, never said as written.
-- People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. People mind who can hear them.
+- People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. When someone moves, show who goes with them. People mind who can hear them.
 - Each character sounds like their voice card. The card wins over everything else.
 - An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two details of the place, from its own details, never generic ones. Never write the brief's notes out as prose.
 - No sayings, maxims or riddles in place of an answer.
@@ -371,6 +373,8 @@ In the moment: Ben: "Ask her what day the rent's due. Go on, ask."
 
 A failed check, played as a success: NARRATION: Ben studies Ada and sees straight through the lie.
 Played honestly: NARRATION: Ben watches Ada a moment too long, then looks away. Whatever he was looking for, he didn't find it.
+
+Never write these; a draft that uses one is sent back: "a smirk played", "smirk plays", "eyes narrowed", "narrows her eyes", "narrows his eyes", "narrows their eyes", "a shiver ran down", "shiver runs down", "breath you didn't know", "let out a breath", "lets out a breath", "the air was thick", "the air is thick", "hung in the air", "hangs in the air", "a testament to", "tapestry of", "barely above a whisper", "eyes sparkling with", "mischievous glint", "glint in her eye", "glint in his eye", "sends a jolt", "electric tension", "for what feels like an eternity", "little did you know", "in the dim light", "a mix of", "maybe, just maybe", "quarter turn", "quarter-turn", "it was a dark and stormy night".
 
 Tone:
 Plain and brisk.
@@ -463,7 +467,7 @@ How it should read:
 - What each person knows comes first. Someone who doesn't know a secret may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it.
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite: a fact a line uses comes out the way this person would say it here, to these people, never in the brief's words. What people are to each other is background, never said as written.
-- People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. People mind who can hear them.
+- People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. When someone moves, show who goes with them. People mind who can hear them.
 - Each character sounds like their voice card. The card wins over everything else.
 - An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two details of the place, from its own details, never generic ones. Never write the brief's notes out as prose.
 - No sayings, maxims or riddles in place of an answer.
@@ -480,6 +484,8 @@ In the moment: Ben: "Ask her what day the rent's due. Go on, ask."
 
 A failed check, played as a success: NARRATION: Ben studies Ada and sees straight through the lie.
 Played honestly: NARRATION: Ben watches Ada a moment too long, then looks away. Whatever he was looking for, he didn't find it.
+
+Never write these; a draft that uses one is sent back: "a smirk played", "smirk plays", "eyes narrowed", "narrows her eyes", "narrows his eyes", "narrows their eyes", "a shiver ran down", "shiver runs down", "breath you didn't know", "let out a breath", "lets out a breath", "the air was thick", "the air is thick", "hung in the air", "hangs in the air", "a testament to", "tapestry of", "barely above a whisper", "eyes sparkling with", "mischievous glint", "glint in her eye", "glint in his eye", "sends a jolt", "electric tension", "for what feels like an eternity", "little did you know", "in the dim light", "a mix of", "maybe, just maybe", "quarter turn", "quarter-turn", "it was a dark and stormy night".
 
 Tone:
 Plain and brisk.
@@ -708,7 +714,7 @@ How it should read:
 - What each person knows comes first. Someone who doesn't know a secret may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it.
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite: a fact a line uses comes out the way this person would say it here, to these people, never in the brief's words. What people are to each other is background, never said as written.
-- People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. People mind who can hear them.
+- People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. When someone moves, show who goes with them. People mind who can hear them.
 - Each character sounds like their voice card. The card wins over everything else.
 - An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two details of the place, from its own details, never generic ones. Never write the brief's notes out as prose.
 - No sayings, maxims or riddles in place of an answer.
@@ -725,6 +731,8 @@ In the moment: Ben: "Ask her what day the rent's due. Go on, ask."
 
 A failed check, played as a success: NARRATION: Ben studies Ada and sees straight through the lie.
 Played honestly: NARRATION: Ben watches Ada a moment too long, then looks away. Whatever he was looking for, he didn't find it.
+
+Never write these; a draft that uses one is sent back: "a smirk played", "smirk plays", "eyes narrowed", "narrows her eyes", "narrows his eyes", "narrows their eyes", "a shiver ran down", "shiver runs down", "breath you didn't know", "let out a breath", "lets out a breath", "the air was thick", "the air is thick", "hung in the air", "hangs in the air", "a testament to", "tapestry of", "barely above a whisper", "eyes sparkling with", "mischievous glint", "glint in her eye", "glint in his eye", "sends a jolt", "electric tension", "for what feels like an eternity", "little did you know", "in the dim light", "a mix of", "maybe, just maybe", "quarter turn", "quarter-turn", "it was a dark and stormy night".
 
 Tone:
 Plain and brisk.

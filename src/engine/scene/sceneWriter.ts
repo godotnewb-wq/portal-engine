@@ -14,7 +14,7 @@ import { presentCast, type BeatPlan, type PlannedCheck } from './planShape'
 import { RECENT_USE_TURNS, recentlyUsed } from './repeats'
 import type { LivePressure } from './scenePlan'
 import { FUNCTION_WORDS, OWNED_PHRASE_WORDS, plainWords, runs } from './phrases'
-import { SCENE_LENGTH } from './style'
+import { OVERUSED_PHRASES, SCENE_LENGTH } from './style'
 import { claimLines, knowledgeLines, speakerTies, voiceCard } from './writer'
 
 /**
@@ -35,7 +35,7 @@ export const SCENE_STYLE = `How it should read:
 - What each person knows comes first. Someone who doesn't know a secret may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it.
 - A feeling shows only as much as the brief says. Name what someone feels only when it shows clearly or someone sees through to it; otherwise show the surface.
 - Facts are there to draw on if a line needs one, never to recite: a fact a line uses comes out the way this person would say it here, to these people, never in the brief's words. What people are to each other is background, never said as written.
-- People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. People mind who can hear them.
+- People stay where the last turns put them. Someone across the room hears only what is said loudly or to them; to bring them in, someone goes over or calls across. When someone moves, show who goes with them. People mind who can hear them.
 - Each character sounds like their voice card. The card wins over everything else.
 - An action only when it matters: a line of speech needs no gesture to carry it, and small business with a prop is filler. Narration only for what happens, and one or two details of the place, from its own details, never generic ones. Never write the brief's notes out as prose.
 - No sayings, maxims or riddles in place of an answer.
@@ -139,6 +139,9 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
   const system = [
     'You write one turn of a visual-novel RPG scene as a short scene: the conversation and what happens, in one continuous piece.',
     SCENE_STYLE,
+    // Shown, not only checked (2026-11-24 writer replays): caught after the draft, "quarter turn" cost a rewrite in a
+    // third of the samples.
+    `Never write these; a draft that uses one is sent back: ${[...OVERUSED_PHRASES, ...content.phrases].map((x) => `"${x}"`).join(', ')}.`,
     writerStage(content.tone, content.codex).text,
     SCENE_FORMAT,
     `The player is ${state.player.name} (${state.player.pronouns}), addressed as "you".`,
