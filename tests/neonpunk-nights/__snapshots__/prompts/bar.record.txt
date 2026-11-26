@@ -1426,8 +1426,16 @@
   },
   "brief": {
     "budget": 500,
-    "used": 328,
+    "used": 245,
     "selected": [
+      {
+        "id": "oria-senn.k3",
+        "owner": "oria-senn",
+        "kind": "knows",
+        "rank": "answer",
+        "trigger": "player's words: pay",
+        "tokens": 23
+      },
       {
         "id": "oria-senn.k1",
         "owner": "oria-senn",
@@ -1453,14 +1461,6 @@
         "tokens": 41
       },
       {
-        "id": "note.vex.oria-senn",
-        "owner": "vex",
-        "kind": "note",
-        "rank": "choice",
-        "trigger": "the pair spoke last turn",
-        "tokens": 30
-      },
-      {
         "id": "note.oria-senn.vex",
         "owner": "oria-senn",
         "kind": "note",
@@ -1469,36 +1469,12 @@
         "tokens": 32
       },
       {
-        "id": "brask.k2",
-        "owner": "brask",
-        "kind": "knows",
+        "id": "note.vex.oria-senn",
+        "owner": "vex",
+        "kind": "note",
         "rank": "choice",
-        "trigger": "carried",
-        "tokens": 41
-      },
-      {
-        "id": "brask.k3",
-        "owner": "brask",
-        "kind": "knows",
-        "rank": "choice",
-        "trigger": "carried",
-        "tokens": 23
-      },
-      {
-        "id": "oria-senn.k3",
-        "owner": "oria-senn",
-        "kind": "knows",
-        "rank": "choice",
-        "trigger": "carried",
-        "tokens": 23
-      },
-      {
-        "id": "oria-senn.k5",
-        "owner": "oria-senn",
-        "kind": "knows",
-        "rank": "choice",
-        "trigger": "carried",
-        "tokens": 19
+        "trigger": "the pair spoke last turn",
+        "tokens": 30
       },
       {
         "id": "tie.brask.dunmar",
@@ -1526,7 +1502,11 @@
       }
     ],
     "cut": [],
-    "dropped": [],
+    "dropped": [
+      "brask.k2",
+      "brask.k3",
+      "oria-senn.k5"
+    ],
     "recurring": {
       "vex": 368,
       "brask": 387,

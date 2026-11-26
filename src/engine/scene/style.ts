@@ -45,6 +45,7 @@ export const BEATS = { min: 2, max: 12, target: '4–8', maxWords: 60, targetWor
  * each since 2026-11-24, was paragraphs) and words, and a hard limit at about 1.5 times the guide. Over it, the turn's one rewrite asks for a shorter scene; a
  * rewrite still over is shown whole, since cutting a scene loses its ending (*tune*). A ceiling, not a target since
  * 2026-11-25: asked for 6–10 lines, the writer padded a short answer with lines that changed nothing (play
- * 2026-11-25_1242_a1af).
+ * 2026-11-25_1242_a1af). No floor since the evening of 2026-11-25 (user): people speak only when they have something to
+ * say, so a turn of one line, or of narration alone, is a turn (`minBeats`).
  */
-export const SCENE_LENGTH = { lines: '3–8', words: '40–120', maxWords: 200 } as const
+export const SCENE_LENGTH = { lines: '1–8', words: 'up to 120', maxWords: 200, minBeats: 1 } as const
