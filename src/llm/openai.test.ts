@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { LlmProfileSchema } from './settings'
-import { chatCompletion, extraParameters, isRefusalResponse, listModels, RefusalError, streamCompletion } from './openai'
+import { chatCompletion, extraParameters, isRefusalResponse, listModels, RefusalError, reportedTokens, streamCompletion } from './openai'
 
 const profile = LlmProfileSchema.parse({ baseUrl: 'http://host/v1/', apiKey: 'sk-1', model: 'test-model', maxTokens: 50, instructions: 'Be brief.' })
 const input = { system: 'You direct scenes.', messages: [{ role: 'user' as const, content: 'Hi' }] }
@@ -113,5 +113,14 @@ describe('response_format', () => {
     }) as typeof fetch
     expect(await chatCompletion(profile, { ...input, json: true }, impl)).toBe('{}')
     expect(bodies.map((b) => 'response_format' in b)).toEqual([true, false])
+  })
+})
+
+describe('reportedTokens (task 8b)', () => {
+  it('reads the cached input each provider reports, and nothing when it reports none', () => {
+    expect(reportedTokens({ prompt_tokens: 900, completion_tokens: 40, prompt_tokens_details: { cached_tokens: 600 } })).toEqual({ input: 900, output: 40, cached: 600 })
+    expect(reportedTokens({ prompt_tokens: 900, completion_tokens: 40, prompt_cache_hit_tokens: 512 })).toEqual({ input: 900, output: 40, cached: 512 })
+    expect(reportedTokens({ prompt_tokens: 900, completion_tokens: 40 })).toEqual({ input: 900, output: 40 })
+    expect(reportedTokens(undefined)).toBeUndefined()
   })
 })

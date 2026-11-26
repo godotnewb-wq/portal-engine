@@ -35,7 +35,7 @@ export function renderTurn(content: Pack, log: SessionLog, n: number): string {
       continue
     }
     const prompt = promptOf(log, call)
-    const meta = call.meta ? ` · ${[call.meta.profile, call.meta.model, call.meta.temperature !== undefined && `t=${call.meta.temperature}`, call.meta.usage && `${call.meta.usage.input ?? '?'}→${call.meta.usage.output ?? '?'} tokens`].filter(Boolean).join(' · ')}` : ''
+    const meta = call.meta ? ` · ${[call.meta.profile, call.meta.model, call.meta.temperature !== undefined && `t=${call.meta.temperature}`, call.meta.usage && `${call.meta.usage.input ?? '?'}→${call.meta.usage.output ?? '?'} tokens${call.meta.usage.cached !== undefined ? ` (${call.meta.usage.cached} cached)` : ''}`].filter(Boolean).join(' · ')}` : ''
     lines.push('', `## ${call.role} \`${id}\``, '', `${call.ms} ms${call.firstTextMs !== undefined ? `, first text ${call.firstTextMs} ms` : ''}${meta}${call.restarted ? ' · restarted on another profile' : ''}${call.meta?.declined ? ` · declined: ${call.meta.declined}` : ''}${call.error ? ` · **error:** ${call.error}` : ''}`, '', '### System', '', fence(prompt.system), '', '### User', '', fence(prompt.user), '', '### Reply', '', fence(call.reply))
   }
   return lines.join('\n')

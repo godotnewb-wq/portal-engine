@@ -60,7 +60,7 @@ Played honestly: NARRATION: Ben watches Ada a moment too long, then looks away. 
 export const SCENE_FORMAT = `Output format, nothing else:
 - A short scene, one beat per line, in the order it happens. NARRATION: for what happens or what someone does, as a whole sentence that names them, never a stage direction ("From the booth."). A character's first name and a colon for what they say, in double quotes, and nothing else.
 - ${SCENE_LENGTH.lines} lines, ${SCENE_LENGTH.words} words in all, never more than ${SCENE_LENGTH.maxWords}: a length to stay within, not one to reach. End where the player can act: someone asked or called to answers, or the turn shows them about to; never add a line past that.
-- The people in the moment carry the scene. Anyone else present may react to what was just said, briefly; they don't bring up a topic of their own, and calling someone over to talk is bringing one up. Not everyone present needs a line or an action each turn: leave out anyone the moment doesn't touch. Walk-ons speak only when listed. Nobody else speaks.
+- The people in the moment carry the scene. Anyone else present isn't part of the conversation: they don't join it or add to it; a look, or a short word when someone speaks to them or about them, is all. Calling someone over to talk is joining it. Not everyone present needs a line or an action each turn: leave out anyone the moment doesn't touch. Walk-ons speak only when listed. Nobody else speaks.
 - Then the tags, one per line: [Name: EXPRESSION word] for each person who appears, for what their face shows; [Name: COMFORT 1-5 reason] when someone's comfort changes; [LEAVES: Name] for a departure the brief lists; [END SCENE] only when the brief says the scene ends.
 - Never write the player's words, choices, thoughts or actions beyond what their input stated.
 
@@ -228,7 +228,7 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
     // Material by person, labelled as material: laid out person by person and called "this moment", it was written as
     // each one's part rather than one exchange (2026-11-24 play: a fact and a want joined into a line that answered nothing).
     plan.focus.length > 0 && `# What each person brings to this exchange (one conversation, not a turn each; draw on it when the conversation reaches it)\n${plan.focus.map(momentLine).join('\n')}`,
-    around.length > 0 && `# Also here (they may react to what was just said, briefly, but start no topic; a feeling that shows is in how they react, not something they bring up)\n${around.map((id) => `- ${nameOf(id)}.${feltLine(id, false)}`).join('\n')}`,
+    around.length > 0 && `# Also here (not in this conversation: a look, or a short word when someone speaks to them or about them, and nothing more; a feeling that shows is in how they react)\n${around.map((id) => `- ${nameOf(id)}.${feltLine(id, false)}`).join('\n')}`,
     ties.length > 0 && `# How people here stand with each other (background, never said as written; each line is what the first person knows of the second, and theirs alone)\n${ties.join('\n')}`,
     knowledge.length > 0 && `# Who knows what\n${knowledge.join('\n')}`,
     plan.stakes && `# What's at stake\n${plan.stakes}`,

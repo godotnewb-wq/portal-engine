@@ -4,6 +4,7 @@
 //   npm run logs -- transcript <session> [--out file.md]       readable transcript, flags and AI scores inline
 //   npm run logs -- flags <paths…> [--rating bad] [--reason voice] [--speaker vex] [--ai]
 //   npm run logs -- stats <paths…>                              the B2 metrics, per session and in total
+//   npm run logs -- tokens <paths…>                             tokens and cache hits by role (task 8b)
 //   npm run logs -- blind <session> [--count 10] [--seed 1] [--key key.md]
 //   npm run logs -- to-scenario <session> --turn N [--out file.json]
 //   npm run logs -- show <session> --turn N                     one turn in full, prompts and raw replies
@@ -25,6 +26,7 @@ import { FlagSchema, RATINGS, type Rating } from '@engine/review'
 import { LogSession } from '@platform/logs'
 import { scorerLlm, turnLlm } from '@platform/roles'
 import { benchSettings, modelsOf } from '../bench/config'
+import { renderTokenRows, tokenRows } from '../bench/records'
 import { flagsFor, metricInput, namer, packFor, sessionsAt } from './load'
 import { metrics, renderMetrics } from './metrics'
 import { blindTest, renderFlags } from './review'
@@ -86,6 +88,14 @@ async function main(): Promise<void> {
       if (logs.length > 1) parts.push('## All sessions', '', renderMetrics(metrics(inputs), nameOf), '')
       logs.forEach((log, i) => parts.push(`## \`${log.session.id}\``, '', renderMetrics(metrics([inputs[i]!]), nameOf), ''))
       emit(parts.join('\n'))
+      return
+    }
+    case 'tokens': {
+      const logs = sessionsAt(paths)
+      const calls = logs.flatMap((log) => [...log.calls.values()])
+      const turns = logs.reduce((n, log) => n + log.turns.length, 0)
+      const ends = logs.reduce((n, log) => n + log.scenes.filter((s) => s.type === 'end').length, 0)
+      emit(['# Tokens by role', '', `${logs.length} session${logs.length === 1 ? '' : 's'}, ${turns} turns, ${ends} scene ends.`, '', renderTokenRows(tokenRows(calls, turns, ends))].join('\n'))
       return
     }
     case 'blind': {

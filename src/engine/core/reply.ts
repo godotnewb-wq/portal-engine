@@ -10,7 +10,7 @@ export interface CallMeta {
   model?: string
   temperature?: number
   /** Tokens, when the provider reports them. */
-  usage?: { input?: number; output?: number }
+  usage?: { input?: number; output?: number; cached?: number }
   /** The endpoint turned down `response_format`, so the call was sent again without it. */
   jsonRetried?: boolean
   /** The first profile declined, and this is why; another profile wrote the reply. */

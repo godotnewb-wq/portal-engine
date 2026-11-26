@@ -16,6 +16,7 @@ npm run logs -- to-scenario <session> --turn N --out turn.json
                                                       a logged turn as a bench scenario; replay it with
                                                       npm run bench -- --scenario turn.json
 npm run logs -- show <session> --turn N               one turn in full: trace, every prompt, every raw reply
+npm run logs -- tokens <paths…>                       tokens and cache hits by role, over every session under the paths (task 8b)
 npm run logs -- rewrite <paths…> [--turn N | --sample N [--seed S]] [--samples 3] [--as-logged] [--label x] [--out r.md]
                                                       a logged scene turn's writer again, on the current prompts
                                                       and the plan as played; without --turn, every flagged scene
@@ -39,3 +40,5 @@ Output goes to stdout unless `--out` names a file; nothing is written into the l
 **to-scenario** carries the scene as it stood: cast, moods (from turns logged since milestone 4b; older turns' mood words can't be carried, so the card's default mood stands in), comfort, meters toward the player, the dice, and the scene's earlier turns. Memories from earlier scenes and relations between characters aren't in the logs, so the replay uses the pack's.
 
 **Metrics** (`metrics.ts`) are shared with the bench's report and `--compare`. Since redesign step 2 they include relevance: speakers per turn, live secret rate, slang and aim line rates (with per-speaker shares), and gestures repeated within a scene (from each turn's `usage`; older logs show a dash).
+
+**tokens** (Milestone 5 task 8b) totals the calls of every session under the paths by role, as the bench report's *Tokens by role* does: calls, input, the input the provider served from its prompt cache, the hit rate, output, and tokens a turn or a scene end. The cache count is what the provider reports (`usage.prompt_tokens_details.cached_tokens`, or DeepSeek's `prompt_cache_hit_tokens`), kept in `calls.jsonl` with the other token counts. A provider that reports none shows "—", not 0%. The hit rate is taken over the calls that reported one. Streamed calls (the writer) carry usage only when the provider sends it in the stream's last chunk.

@@ -98,15 +98,34 @@ export function recordLines(name: Name, t: TurnTrace, b: BookkeepingRun | undefi
   ]
 }
 
-/** The roles a turn's calls play, and those of a scene's end, for tokens by role. */
+/** The roles a turn's calls play, those of a scene's end, and the rest (a scene's opening, consolidation), for tokens by role. */
 const TURN_ROLES = ['director', 'writer', 'rewrite', 'bookkeeper'] as const
 const END_ROLES = ['relationship', 'memory', 'summary', 'ties'] as const
+const OTHER_ROLES = ['opening', 'consolidation'] as const
 
-const tokens = (calls: CallTrace[]) => ({
+/**
+ * Calls and tokens; `cached` is the input served from the provider's cache (task 8b), over the calls that reported it
+ * (`reported`), so a provider that says nothing isn't read as a 0% hit rate.
+ */
+const tokens = (calls: Pick<CallTrace, 'meta'>[]) => ({
   calls: calls.length,
   input: calls.reduce((n, c) => n + (c.meta?.usage?.input ?? 0), 0),
-  output: calls.reduce((n, c) => n + (c.meta?.usage?.output ?? 0), 0)
+  output: calls.reduce((n, c) => n + (c.meta?.usage?.output ?? 0), 0),
+  cached: calls.reduce((n, c) => n + (c.meta?.usage?.cached ?? 0), 0),
+  reported: calls.filter((c) => c.meta?.usage?.cached !== undefined).reduce((n, c) => n + (c.meta?.usage?.input ?? 0), 0)
 })
+
+export interface TokenRow {
+  role: string
+  calls: number
+  input: number
+  output: number
+  cached: number
+  /** Input tokens of the calls that reported a cache count. */
+  reported: number
+  per: number
+  unit: 'turn' | 'scene end' | 'call'
+}
 
 /** Scene ends in these runs: one per scene that closed. */
 const sceneEnds = (runs: ScenarioRun[]) => runs.reduce((n, r) => n + (r.scenes ? r.scenes.filter((s) => s.sceneEnd).length : r.sceneEnd ? 1 : 0), 0)
@@ -116,26 +135,39 @@ const sceneEnds = (runs: ScenarioRun[]) => runs.reduce((n, r) => n + (r.scenes ?
  * calls, per scene end for the end's. Older runs have no bookkeeper and may have the tie check and one summary a
  * witness (`ties`, `summary`). Zeros where the provider reported no usage.
  */
-export function tokensByRole(runs: ScenarioRun[]): { role: string; calls: number; input: number; output: number; per: number; unit: 'turn' | 'scene end' }[] {
-  const calls = runs.flatMap(callsOf)
-  const turns = runs.reduce((n, r) => n + r.turns.length, 0)
-  const ends = sceneEnds(runs)
-  const row = (role: string, unit: 'turn' | 'scene end', count: number) => {
+export function tokensByRole(runs: ScenarioRun[]): TokenRow[] {
+  return tokenRows(runs.flatMap(callsOf), runs.reduce((n, r) => n + r.turns.length, 0), sceneEnds(runs))
+}
+
+/** Tokens by role over any calls (a bench run's, or play sessions' for `npm run logs -- tokens`). */
+export function tokenRows(calls: Pick<CallTrace, 'role' | 'meta'>[], turns: number, ends: number): TokenRow[] {
+  const row = (role: string, unit: TokenRow['unit'], count: number): TokenRow[] => {
     const t = tokens(calls.filter((c) => c.role === role))
     return t.calls > 0 ? [{ role, ...t, per: count > 0 ? Math.round((t.input + t.output) / count) : 0, unit }] : []
   }
-  return [...TURN_ROLES.flatMap((r) => row(r, 'turn', turns)), ...END_ROLES.flatMap((r) => row(r, 'scene end', ends))]
+  return [
+    ...TURN_ROLES.flatMap((r) => row(r, 'turn', turns)),
+    ...END_ROLES.flatMap((r) => row(r, 'scene end', ends)),
+    ...OTHER_ROLES.flatMap((r) => row(r, 'call', calls.filter((c) => c.role === r).length))
+  ]
 }
 
+/** A cache hit share: cached input over the input of the calls that reported one; "—" when none did. */
+const hitRate = (cached: number, reported: number): string => (reported > 0 ? `${Math.round((100 * cached) / reported)}%` : '—')
+
 export function renderTokens(runs: ScenarioRun[]): string {
-  const rows = tokensByRole(runs)
+  return renderTokenRows(tokensByRole(runs))
+}
+
+export function renderTokenRows(rows: TokenRow[]): string {
   if (rows.length === 0) return 'No calls.'
-  const total = (unit: 'turn' | 'scene end') => rows.filter((r) => r.unit === unit).reduce((n, r) => n + r.per, 0)
+  const total = (unit: TokenRow['unit']) => rows.filter((r) => r.unit === unit).reduce((n, r) => n + r.per, 0)
+  const all = rows.reduce((t, r) => ({ cached: t.cached + r.cached, reported: t.reported + r.reported, input: t.input + r.input }), { cached: 0, reported: 0, input: 0 })
   return [
-    '| Role | Calls | Input tokens | Output tokens | Per |',
-    '|---|---|---|---|---|',
-    ...rows.map((r) => `| ${r.role} | ${r.calls} | ${r.input} | ${r.output} | ${r.per} a ${r.unit} |`),
+    '| Role | Calls | Input tokens | Cached input | Cache hits | Output tokens | Per |',
+    '|---|---|---|---|---|---|---|',
+    ...rows.map((r) => `| ${r.role} | ${r.calls} | ${r.input} | ${r.reported > 0 ? r.cached : '—'} | ${hitRate(r.cached, r.reported)} | ${r.output} | ${r.per} a ${r.unit} |`),
     '',
-    `All roles: ${total('turn')} tokens a turn, ${total('scene end')} a scene end.`
+    `All roles: ${total('turn')} tokens a turn, ${total('scene end')} a scene end. Cache hits: ${hitRate(all.cached, all.reported)} of input${all.reported > 0 && all.reported < all.input ? ' (of the calls that reported it)' : ''}${all.reported === 0 ? ' (no provider reported its cache)' : ''}.`
   ].join('\n')
 }

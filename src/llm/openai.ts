@@ -31,18 +31,26 @@ export interface CompletionInput {
 /** What a call reports beyond its text, for the game's logs. */
 export interface CallInfo {
   /** Tokens, when the provider reports them. */
-  usage?: { input?: number; output?: number }
+  usage?: { input?: number; output?: number; cached?: number }
   /** The endpoint turned down `response_format`, so the call was sent again without it. */
   jsonRetried?: boolean
 }
 
-type Usage = { prompt_tokens?: unknown; completion_tokens?: unknown }
-const usageOf = (usage: Usage | undefined): CallInfo['usage'] | undefined => {
+type Usage = { prompt_tokens?: unknown; completion_tokens?: unknown; prompt_tokens_details?: { cached_tokens?: unknown }; prompt_cache_hit_tokens?: unknown }
+/**
+ * Tokens as the provider reports them. `cached`: the input tokens served from the provider's prompt cache (Milestone 5
+ * task 8b), OpenAI-style `prompt_tokens_details.cached_tokens` (NanoGPT) or DeepSeek's `prompt_cache_hit_tokens`;
+ * absent when the provider reports neither, so a provider that doesn't say isn't counted as missing the cache.
+ */
+export const reportedTokens = (usage: Usage | undefined): CallInfo['usage'] | undefined => {
   if (!usage) return undefined
   const n = (x: unknown) => (typeof x === 'number' ? x : undefined)
   const input = n(usage.prompt_tokens)
   const output = n(usage.completion_tokens)
-  return input === undefined && output === undefined ? undefined : { ...(input !== undefined && { input }), ...(output !== undefined && { output }) }
+  const cached = n(usage.prompt_tokens_details?.cached_tokens) ?? n(usage.prompt_cache_hit_tokens)
+  return input === undefined && output === undefined && cached === undefined
+    ? undefined
+    : { ...(input !== undefined && { input }), ...(output !== undefined && { output }), ...(cached !== undefined && { cached }) }
 }
 
 /** A function the model can call mid-reply. Its result goes back to the model, which then answers. */
@@ -234,7 +242,7 @@ export async function chatCompletion(
     }
 
     const data = (await response.json()) as { choices?: { finish_reason?: unknown; native_finish_reason?: unknown; message?: AssistantMessage }[]; usage?: Usage }
-    const usage = usageOf(data.usage)
+    const usage = reportedTokens(data.usage)
     if (usage) input.onInfo?.({ usage })
     const choice = data.choices?.[0]
     const finishes = [choice?.finish_reason, choice?.native_finish_reason].filter((reason): reason is string => typeof reason === 'string').map((reason) => reason.toLowerCase())
@@ -338,7 +346,7 @@ export async function streamCompletion(
         return
       }
       // Some providers send usage in the last chunk without being asked; asking (stream_options) breaks others.
-      const usage = usageOf(chunk.usage ?? undefined)
+      const usage = reportedTokens(chunk.usage ?? undefined)
       if (usage) input.onInfo?.({ usage })
       const choice = chunk.choices?.[0]
       const finish = typeof choice?.finish_reason === 'string' ? choice.finish_reason.toLowerCase() : undefined
