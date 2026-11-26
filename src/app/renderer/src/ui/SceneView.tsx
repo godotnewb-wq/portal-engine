@@ -7,7 +7,7 @@ import { firstName } from '@engine/core'
 import { presentCast } from '@engine/scene'
 import { speciesById } from '@engine/world'
 import { Button } from './Button'
-import { atEnd, awaitingBeat, beatCounter, canAdvance, canGoBack, nameplate, sceneHistory, streamingBeats, type Reading, type ShownBeat } from './reading'
+import { atEnd, awaitingBeat, beatCounter, canAdvance, canGoBack, cutPoint, nameplate, sceneHistory, streamingBeats, type Reading, type ShownBeat } from './reading'
 import { FlagPanel } from './FlagPanel'
 import { SpriteStage } from './SpriteStage'
 import { TurnDetails } from './TurnDetails'
@@ -39,10 +39,12 @@ const keyOf = (turn: Turn, beat?: number) => flagKey({ turnSession: turn.log ?? 
  * beats can be read as they arrive. A click, Space, Enter or → turns to the next beat; ← or the wheel turned up goes
  * back through the scene, which changes nothing.
  *
- * Cutting in (Milestone 5 task 8c): while the last turn has beats the player hasn't reached, Send reads **Cut in**, and
- * sending cuts the turn after the furthest beat they reached; the rest never happens. The box takes typing while a turn
+ * Cutting in (Milestone 5 task 8c): while a beat of the last turn other than its last is on screen, Send reads **Cut in**,
+ * and sending cuts the turn after that beat; the rest never happens. That holds after reading on and coming back
+ * (2026-11-25, user: "it should interject on the beat that is currently on screen"). The box takes typing while a turn
  * is still being written; a line sent then waits until the turn is final, so what the player saw can't change under
- * them. Reading a turn to its last beat settles it, and its bookkeeper starts.
+ * them. Reading a turn to its last beat settles it and its bookkeeper starts; a cut after that runs it again on the
+ * beats kept.
  */
 export function SceneView({ content, state, onState, onEnd, onSave, endError }: Props) {
   const scene = state.scene!
@@ -62,8 +64,6 @@ export function SceneView({ content, state, onState, onEnd, onSave, endError }: 
   const [input, setInput] = useState('')
   // A line sent while the turn was still being written, waiting for it to be final.
   const [queued, setQueued] = useState('')
-  // The furthest beat read, by its place in the scene: where a cut-in cuts.
-  const [furthest, setFurthest] = useState(index)
   const settledTurn = useRef('')
   const [flags, setFlags] = useState<Map<string, FlagRecord>>(new Map())
   const [flagging, setFlagging] = useState<FlagTarget | null>(null)
@@ -86,7 +86,6 @@ export function SceneView({ content, state, onState, onEnd, onSave, endError }: 
           // What was streamed is being replaced: start reading the turn again from its first beat.
           setStreamed('')
           setIndex(turnStart.current)
-          setFurthest(turnStart.current)
           setStatus(event.reason === 'rewrite' ? 'Revising…' : 'Trying the fallback model…')
         }
       }),
@@ -110,15 +109,17 @@ export function SceneView({ content, state, onState, onEnd, onSave, endError }: 
   const next = () => {
     if (canAdvance(reading)) setIndex(index + 1)
   }
-  useEffect(() => setFurthest((f) => Math.max(f, index)), [index])
 
-  // How far into the last turn the player has read; short of its last beat, sending cuts in.
+  // The beat of the last turn on screen, counted from 1 (0 when an earlier turn is on screen); short of the turn's last
+  // beat, sending cuts in after it.
   const lastTurn = scene.turns.at(-1)
   const lastStart = history.length - (lastTurn?.beats.length ?? 0)
-  const reached = lastTurn ? Math.min(lastTurn.beats.length, furthest - lastStart + 1) : 0
-  const canCut = !busy && !!lastTurn && reached >= 1 && reached < lastTurn.beats.length
+  const onScreen = Math.min(index, beats.length - 1)
+  const reached = lastTurn && onScreen >= lastStart ? Math.min(lastTurn.beats.length, onScreen - lastStart + 1) : 0
+  const cutAfter = lastTurn ? cutPoint(onScreen, lastStart, lastTurn.beats.length) : 0
+  const canCut = !busy && cutAfter > 0
 
-  // Read to its last beat, the turn is settled and its bookkeeper starts (task 8c).
+  // Read to its last beat, the turn is settled and its bookkeeper starts (task 8c). Going back and cutting in still works.
   useEffect(() => {
     if (busy || !lastTurn || reached < lastTurn.beats.length || settledTurn.current === lastTurn.id) return
     settledTurn.current = lastTurn.id
@@ -223,7 +224,7 @@ export function SceneView({ content, state, onState, onEnd, onSave, endError }: 
   }
 
   async function send(said: string) {
-    const cut = canCut && lastTurn ? { turnId: lastTurn.id, after: reached } : undefined
+    const cut = canCut && lastTurn ? { turnId: lastTurn.id, after: cutAfter } : undefined
     const shownLength = cut ? lastStart + cut.after : history.length
     setBusy(true)
     setError('')
@@ -241,7 +242,6 @@ export function SceneView({ content, state, onState, onEnd, onSave, endError }: 
     }
     turnStart.current = shownLength
     setIndex(shownLength)
-    setFurthest(shownLength)
     const response = await window.api.sceneTurn({ state, input: said, ...(cut && { cut }) })
     setBusy(false)
     setStreamed('')
@@ -260,7 +260,7 @@ export function SceneView({ content, state, onState, onEnd, onSave, endError }: 
     }
   }
 
-  // A line that waited is sent once the turn is final, cutting in where the player has read to by then.
+  // A line that waited is sent once the turn is final, cutting in after the beat on screen by then.
   useEffect(() => {
     if (busy || !queued) return
     const said = queued

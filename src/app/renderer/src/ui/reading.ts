@@ -81,3 +81,14 @@ export const canGoBack = (r: Reading): boolean => r.index > 0
 /** Waiting for the next beat to stream in. */
 export const awaitingBeat = (r: Reading): boolean => r.streaming && r.index >= r.total - 1
 export const atEnd = (r: Reading): boolean => !r.streaming && r.index >= r.total - 1
+
+/**
+ * Where a cut-in cuts (Milestone 5 task 8c): after the beat on screen, counted from 1 within the last turn, when it is
+ * one of that turn's beats short of its last; else 0, no cut. The beat on screen, not the furthest read: a player who
+ * read on and came back cuts in where they are (2026-11-25, user).
+ */
+export function cutPoint(onScreen: number, lastStart: number, lastLength: number): number {
+  if (lastLength === 0 || onScreen < lastStart) return 0
+  const at = onScreen - lastStart + 1
+  return at >= 1 && at < lastLength ? at : 0
+}

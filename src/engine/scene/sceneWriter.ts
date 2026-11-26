@@ -279,16 +279,16 @@ export function recitedProblems(content: Pack, state: GameState, plan: Pick<Beat
   const present = presentCast(scene)
   const material = [
     ...sceneFacts(content, state).filter((f) => f.kind === 'knows' || f.kind === 'place').map((f) => f.text),
-    ...Object.values(plan.scene?.pools ?? {}).flatMap((p) => p.map((f) => f.text)),
+    // A director's detail is bare data to be said, a label and a value ("the round: three filtered ambers, twelve
+    // cinders"), so saying it isn't reciting it (2026-11-25 play and replay: "Three filtered ambers. Twelve cinders." and
+    // "Eel plate's four" were sent back, and there is no other way to say a price). Card facts on hand still count.
+    ...Object.values(plan.scene?.pools ?? {}).flatMap((p) => p.filter((f) => f.source !== 'plan').map((f) => f.text)),
     ...state.relations.filter((r) => present.includes(r.from) && r.note).map((r) => r.note!),
     ...Object.entries(state.playerTies).flatMap(([id, t]) => (present.includes(id) && t.note ? [t.note] : []))
   ]
   const phrases = [...new Set(material.flatMap((t) => runs(t, RECITED_WORDS, RECITED_CONTENT_WORDS)))]
   const names = nameWords(worldNames(content))
-  // A director's detail is bare data to be said ("eel plate is four"): only its words in a row count, not its key words
-  // (2026-11-25 replay: "Eel plate's four" was sent back, and there is no other way to say a price).
-  const details = new Set(Object.values(plan.scene?.pools ?? {}).flatMap((p) => p.filter((f) => f.source === 'plan').map((f) => f.text)))
-  const keyed = material.filter((t) => !details.has(t)).map((t) => keyWords(t, names))
+  const keyed = material.map((t) => keyWords(t, names))
   const problems: Problem[] = []
   parsed.beats.forEach((b, i) => {
     if (b.kind !== 'dialogue' || skip.has(i + 1)) return

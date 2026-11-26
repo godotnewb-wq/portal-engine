@@ -24,10 +24,12 @@ describe('a fact or note in the brief’s own words (2026-11-25 play)', () => {
     // A term from someone's world, or a place's name, isn't a fact said: "sealed packets" alone, "Pump Station Nine".
     expect(recited('Vex: "She\'s a client. Sealed packets, mostly. She pays."')).toEqual([])
     expect(recited('Vex: "Pump Station Nine. Of course it is."')).toEqual([])
-    // A director's detail is data to be said: a price said plainly isn't recited (2026-11-25 replay).
+    // A director's detail is data to be said: a price said plainly isn't recited (2026-11-25 replay and play).
     const plan = { scene: { pools: { dunmar: [{ id: 'detail.1.1', text: 'eel plate is four', source: 'plan' as const, unheard: true }] } } }
     const state = bar()
     expect(recitedProblems(content, state, plan as never, parseReply('Dunmar: "Eel plate\'s four, if you want it."', sceneSpeakers(content, state), { script: true }))).toEqual([])
+    const round = { scene: { pools: { dunmar: [{ id: 'detail.3.1', text: 'the round: three filtered ambers, twelve cinders', source: 'plan' as const, unheard: true }] } } }
+    expect(recitedProblems(content, state, round as never, parseReply('Dunmar: "Three filtered ambers. Twelve cinders."', sceneSpeakers(content, state), { script: true }))).toEqual([])
     expect(recited('Dunmar: "Oria. Never once late with her slate, which is more than I can say for some."')).toEqual([])
     expect(recited('NARRATION: Oria pays her tab on the first of every month.')).toEqual([])
   })
