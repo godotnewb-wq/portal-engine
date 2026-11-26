@@ -33,6 +33,7 @@ export const SCENE_STYLE = `How it should read:
 - People mean what they said: a later line agrees with their earlier ones, or shows them changing their mind and why.
 - What someone says and does comes from what just happened to them: what was said, who is there, how it lands. What presses on them is an undercurrent: it shows in what they choose, avoid or notice, rarely in what they say outright.
 - People talk like people: complete, plain sentences that someone hearing them for the first time can follow. No sayings, maxims, riddles or figures of speech a stranger couldn't follow. Each line means one plain thing and answers what was just said: no clever twist at the end, no echoing someone's words back for effect. When a short line could be taken several ways (dry, offended, joking), the words or a few words of narration make plain how it's meant.
+- Back and forth, comments and asides are welcome; each line stops once it has said its piece. Every sentence in it adds something: no sentence tacked on that only adds a warning, a reason nobody asked for, a joke on top or the same point again.
 - The player knows only what they have seen and heard, and what "What the player has been told this scene" lists. Someone bringing up something new to them says what it is first, before what it pays, where it is or what comes of it; nobody talks as if the player already knew.
 - Whatever the player does is answered, not only what they say. When they look around, examine someone or something, search, listen, handle something, go somewhere or try something, the narration shows what comes of it from where they are: what they see, hear or find, or what happens, as something you see or hear. A real look or search gets the lines it needs: who is worth noticing and what they are doing, and what stands out, starting with what the scene hasn't shown yet, from the place's details and the people here. Examining someone shows what can be seen of them; what they hide shows only as the brief allows. A check result decides what an uncertain attempt finds. When the player also speaks, both are answered: the action is never dropped for the talk.
 - Each person knows their own card, what they have seen and heard in this scene, and what anyone in their place would know; another person's aims, facts and notes about others are that person's. Someone who doesn't know something may ask about it, guess, suspect or deny it, but never say it as something they know, and the narration never confirms it unless the turn shows it. What someone only heard said, they pass on as heard, not as something they saw.
@@ -47,6 +48,9 @@ export const SCENE_STYLE = `How it should read:
 A line that doesn't follow: Ada: "Sit down." Ben: "The boiler's leaking again."
 One that does: Ada: "Sit down." Ben: "I'll stand. I'm not staying."
 
+A line with a tail: Ada: "The boat's in. Docked at six, and you'll want to mind the ice on the steps."
+Trimmed: Ada: "The boat's in. Docked at six."
+
 Undercurrent, too loud: Ben: "I can't stop thinking about the money I owe you, Ada."
 Better, when Ada has just mentioned payday: Ben: "Busy night, then."
 
@@ -60,7 +64,6 @@ Played honestly: NARRATION: Ben watches Ada a moment too long, then looks away. 
 export const SCENE_FORMAT = `Output format, nothing else:
 - A short scene, one beat per line, in the order it happens. NARRATION: for what happens or what someone does, as a whole sentence that names them, never a stage direction ("From the booth."). A character's first name and a colon for what they say, in double quotes, and nothing else.
 - ${SCENE_LENGTH.lines} lines, ${SCENE_LENGTH.words} words in all, never more than ${SCENE_LENGTH.maxWords}: a length to stay within, not one to reach. End where the player can act: someone asked or called to answers, or the turn shows them about to; never add a line past that.
-- Someone speaks only when they have something to say that matters here: an answer, a question, a choice, something the player needs to know, or a feeling getting the better of them. A remark that only fills the air (a warning about a drip, a comment on the room, a line that repeats what was just said or asked) is left out. Someone in the moment can answer with a look or an action, or by saying nothing, when that is what they'd do. A turn of one or two lines, or of narration alone, is a good turn when that's all the moment holds.
 - The people in the moment carry the scene. Anyone else present isn't part of the conversation: they don't join it or add to it; a look, or a short word when someone speaks to them or about them, is all. Calling someone over to talk is joining it. Not everyone present needs a line or an action each turn: leave out anyone the moment doesn't touch. Walk-ons speak only when listed. Nobody else speaks.
 - Then the tags, one per line: [Name: EXPRESSION word] for each person who appears, for what their face shows; [Name: COMFORT 1-5 reason] when someone's comfort changes; [LEAVES: Name] for a departure the brief lists; [END SCENE] only when the brief says the scene ends.
 - Never write the player's words, choices, thoughts or actions beyond what their input stated.
@@ -228,7 +231,7 @@ export function buildSceneWriterPrompt(content: Pack, state: GameState, view: Be
     claims.length > 0 && `# Claimed but never confirmed (claims, not facts: anyone may doubt or deny them)\n${claims.join('\n')}`,
     // Material by person, labelled as material: laid out person by person and called "this moment", it was written as
     // each one's part rather than one exchange (2026-11-24 play: a fact and a want joined into a line that answered nothing).
-    plan.focus.length > 0 && `# What each person brings to this exchange (one conversation, not a turn each; draw on it when the conversation reaches it; a moment can show without a word)\n${plan.focus.map(momentLine).join('\n')}`,
+    plan.focus.length > 0 && `# What each person brings to this exchange (one conversation, not a turn each; draw on it when the conversation reaches it)\n${plan.focus.map(momentLine).join('\n')}`,
     around.length > 0 && `# Also here (not in this conversation: a look, or a short word when someone speaks to them or about them, and nothing more; a feeling that shows is in how they react)\n${around.map((id) => `- ${nameOf(id)}.${feltLine(id, false)}`).join('\n')}`,
     ties.length > 0 && `# How people here stand with each other (background, never said as written; each line is what the first person knows of the second, and theirs alone)\n${ties.join('\n')}`,
     knowledge.length > 0 && `# Who knows what\n${knowledge.join('\n')}`,
