@@ -72,15 +72,24 @@ const STOP = new Set(
     .split(' ')
 )
 
+/**
+ * Three-letter words that say nothing about a topic. Three-letter words came in on 2026-11-25: "what's the job?" matched
+ * nothing, since only words of four letters counted, so a fixer's job never reached the brief once her example line
+ * stopped carrying it, and the writer made a job up (bench `2026-11-26T00-02-46-run`, three different jobs in three plays).
+ */
+const SHORT_STOP = new Set(
+  "the and you are was for not but his her its our who why how can did had has may now off one out own say see she too two use way yes yet any all get got let lot put saw set sit try ask big bit few new old far ago per via hey him nor nah huh aye i'm i'd i'll we'd he's yep".split(' ')
+)
+
 const stem = (w: string) => w.replace(/'s$/, '').replace(/(?<=.{4})(?:ing|ed|es|s)$/, '')
 
 /**
- * The words of a text that could say what it's about: four letters or more, lower case, roughly stemmed. Names are
+ * The words of a text that could say what it's about: three letters or more, lower case, roughly stemmed. Names are
  * left out (`skip`): a named person is matched as a name, so a name never counts twice.
  */
 export function contentWords(text: string, skip: Set<string> = new Set()): Set<string> {
-  const words = text.toLowerCase().replace(/[’‘]/g, "'").match(/[a-z][a-z'-]{3,}/g) ?? []
-  return new Set(words.map((w) => stem(w.replace(/['-]+$/, ''))).filter((w) => w.length >= 4 && !STOP.has(w) && !skip.has(w)))
+  const words = text.toLowerCase().replace(/[’‘]/g, "'").match(/[a-z][a-z'-]{2,}/g) ?? []
+  return new Set(words.map((w) => stem(w.replace(/['-]+$/, ''))).filter((w) => w.length >= 3 && !STOP.has(w) && !SHORT_STOP.has(w) && !skip.has(w)))
 }
 
 /** Every name word in the pack's cast and the player's, lower case, for `contentWords` to skip. */

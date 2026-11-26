@@ -228,6 +228,8 @@ describe('the writer prompt', () => {
 describe('content words', () => {
   it('leaves out short and stop words and names, and roughly stems', () => {
     expect([...contentWords('Tobin was waiting in the yards after closing', new Set(['tobin']))].sort()).toEqual(['clos', 'wait', 'yard'])
+    // Three-letter words count (2026-11-25 bench: "what's the job?" matched nothing, and the writer made a job up).
+    expect([...contentWords("What's the job, and who's paying the fee?")].sort()).toEqual(['fee', 'job', 'paying'])
   })
 })
 

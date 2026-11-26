@@ -778,8 +778,6 @@ Secret [brask.landlord-offer] (in short): A Grid agent wants to buy his filter d
 Lying tell: Answers too fast and won't meet your eyes
 Relevant now:
 - [brask.k1] He has serviced the Drowned Saints' skim pump in Pump Station Nine's upper gallery for two years; the lower level floods with the tide around midnight
-- [brask.k2] The big wheel-valves can drain the lower level for about twenty minutes, if someone turns them in the right order and the seals hold; he knows the order
-- [brask.k3] The seals on the lower stairs' pumps are overdue, and three are bleeding Aether
 - Not here: Dunmar (client): keeps the bar's ice chiller and pumps running; paid in Tuesdays and the odd favor
 
 ## Oria Senn [id: oria-senn] — major character, light-elf, she/her
@@ -795,11 +793,10 @@ Secret [oria-senn.client-is-grid-corporation]: The 'private client' is the Aethe
 Secret [oria-senn.the-case]: Oria's part: she is fetching the sealed case for the Grid. The sealed case the Grid wants pulled from Pump Station Nine's flooded lower level holds the station's original control core: a pre-Burn rune-key that lets whoever holds it restart the station as its legal owner. The Grid hires the job through fixers and pays far over the going rate to get it before anyone else does. Those who carry the job know what's in the case, not what the Grid means to do with it. How Oria feels about it: doesn't want to know what the Grid wants it for, and suspects anyway. Tell: Steers every question about the case back to the fee. Would reveal when: someone opens the case, or names the control core to her face. Won't tell the player yet.
 Lying tell: Becomes over-formal and calls people 'darling'
 Relevant now:
+- [oria-senn.k3] The client will pay triple the usual rate, and has told her nothing about why
 - [oria-senn.k1] The job: retrieve a sealed case from Pump Station Nine's flooded lower level before a rival crew does
 - [oria-senn.k4] A rival crew has been asking about the same station
 - With Vex: a runner she's hired before who doesn't like her; one job went wrong and Oria didn't ask the questions she should have
-- [oria-senn.k3] The client will pay triple the usual rate, and has told her nothing about why
-- [oria-senn.k5] Vex has run sealed packets for her twice and doesn't like her
 - Not here: Dunmar: keeps her standing booth and her tab; she pays it on the first of every month
 
 ## Kesh [id: kesh] — recurring character, golem, she/her
